@@ -31,6 +31,9 @@ packages = ["src/apiforge"]
 line-length = 100
 target-version = "py312"
 
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = ["typer.Option", "typer.Argument"]
+
 [tool.mypy]
 python_version = "3.12"
 strict = true

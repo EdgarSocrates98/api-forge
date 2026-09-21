@@ -42,6 +42,7 @@ class DispatchContext:
     findings: Path | None = None
     rule_id: str | None = None
     now: str | None = None
+    operation_id: str | None = None  # build endpoint target
 
 
 def _canon_sha(payload: object) -> str:
@@ -256,6 +257,38 @@ _VERBS: tuple[tuple[str, tuple[str, ...], Callable[..., Any]], ...] = (
     ("perf compare", ("baseline", "candidate"), _verb_perf_compare),
 )
 
+
+def _verb_build_endpoint(ctx: DispatchContext) -> dict[str, object]:
+    from apiforge.build.service import build_endpoint
+    from apiforge.policy.loader import load_policy
+
+    assert ctx.contract is not None and ctx.project is not None
+    assert ctx.operation_id is not None
+    return build_endpoint(
+        ctx.contract,
+        ctx.project,
+        ctx.operation_id,
+        policy=load_policy(),
+        promote=None,  # promotion is a human act, never a task step
+    )
+
+
+# Mutation verbs write into the task's sandbox copy only — never the main
+# tree, never a promotion. They refuse under plain dispatch; the task runner
+# is the only caller allowed to lift the gate, and only after the policy
+# engine allows the action (declared class local_reversible).
+_MUTATION_VERBS: dict[str, tuple[tuple[str, ...], Callable[..., Any]]] = {
+    "build endpoint": (
+        ("contract", "project", "operation_id"),
+        _verb_build_endpoint,
+    ),
+}
+
+
+def is_mutation_verb(verb: str) -> bool:
+    head = verb.strip()
+    return any(head == p or head.startswith(p + " ") for p in _MUTATION_VERBS)
+
 _MODEL_REPORTS = {
     "pact": "apiforge.adapters.testreports.extract_pact",
     "schemathesis": "apiforge.adapters.testreports.extract_schemathesis",
@@ -280,6 +313,9 @@ def _match_verb(verb: str) -> tuple[tuple[str, ...], Callable[..., Any], str | N
     """Resolve a playbook verb string to (needs, runner, extra)."""
     head = verb.strip()
     extra: str | None = None
+    for prefix, (needs, runner) in _MUTATION_VERBS.items():
+        if head == prefix or head.startswith(prefix + " "):
+            return needs, runner, "__mutation__"
     for prefix, needs, runner in _VERBS:
         if head == prefix or head.startswith(prefix + " "):
             extra = head[len(prefix):].strip() or None
@@ -289,11 +325,14 @@ def _match_verb(verb: str) -> tuple[tuple[str, ...], Callable[..., Any], str | N
     return (), lambda *a: None, "__unknown__"
 
 
-def dispatch_step(verb: str, ctx: DispatchContext) -> dict[str, object]:
+def dispatch_step(
+    verb: str, ctx: DispatchContext, *, allow_mutation: bool = False
+) -> dict[str, object]:
     """Execute one verb against the context — the unit tasks and playbooks share.
 
     Returns a status entry: ``ran`` (with ``output_sha256``), ``pending``
-    (missing inputs named), ``refused`` (``collect *``), or ``error``.
+    (missing inputs named), ``refused`` (``collect *``, or a mutation verb
+    without ``allow_mutation``), or ``error``.
     """
     needs, runner, extra = _match_verb(verb)
     entry: dict[str, object] = {"verb": verb}
@@ -303,6 +342,12 @@ def dispatch_step(verb: str, ctx: DispatchContext) -> dict[str, object]:
     elif extra == "__unknown__":
         entry["status"] = "pending"
         entry["missing"] = ["dispatchable-verb"]
+    elif extra == "__mutation__" and not allow_mutation:
+        entry["status"] = "refused"
+        entry["reason"] = (
+            "AF-TASK-MUTATION-GATED: mutation verbs run only inside a task, "
+            "after the policy engine allows them"
+        )
     else:
         missing = _need(ctx, *needs)
         if missing:

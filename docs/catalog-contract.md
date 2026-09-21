@@ -365,6 +365,13 @@ breaker. `task accept` requires `accepted_by` distinct from the executor and
 at least one `--evidence`. `brief show` renders the OutcomeBrief — `DONE` is
 refused while gaps, missing acceptance, or open items remain.
 
+Mutation verbs (`build endpoint`) live in a separate dispatch table and are
+refused by ordinary `dispatch_step`; only the task runner may invoke them,
+after `policy.decide("build.endpoint")` returns `allow` and the spec's
+`writable_paths` covers `.apiforge`. `gate.*` task inputs become policy
+decision detail. The generated diff lands in the sandbox — the main tree is
+never touched by a task step; promotion stays a separate human action.
+
 | Code | Meaning |
 |---|---|
 | `AF-TASK-ID` | task id fails `^[a-z0-9][a-z0-9-]{0,63}$` |
@@ -377,6 +384,7 @@ refused while gaps, missing acceptance, or open items remain.
 | `AF-TASK-SEALED` | mutation attempted on a sealed revision |
 | `AF-TASK-REVISION-MISSING` | spec.revision points at a revision file that is absent |
 | `AF-TASK-RECIPE` | `strategy` names no recipe in `rules/recipes.yaml` |
+| `AF-TASK-MUTATION-GATED` | mutation verb outside the task runner, or the task lacks policy `allow` / a `.apiforge` writable scope |
 | `AF-RECIPE-INVALID` | `recipes.yaml` is malformed |
 
 ### Graph (`graph`)

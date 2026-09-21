@@ -33,6 +33,7 @@ class Recipe(StrEnum):
     PLAN_EXECUTE_VERIFY = "plan-execute-verify"
     DIAGNOSE_REPAIR_VERIFY = "diagnose-repair-verify"
     RESEARCH_SYNTHESIZE_VERIFY = "research-synthesize-verify"
+    BUILD_ENDPOINT = "build-endpoint"
 
 
 class TaskState(StrEnum):

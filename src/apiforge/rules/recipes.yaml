@@ -25,3 +25,11 @@ recipes:
     - rules list
     - context funnel
     - report build
+  # Mutation recipe: `build endpoint` writes only into the task's sandbox
+  # copy (.apiforge/sandbox) and never promotes — promotion stays a human
+  # act. The task runner policy-gates the step: the declared class is
+  # local_reversible and writable_paths must cover .apiforge.
+  build-endpoint:
+    - model build
+    - build endpoint
+    - evidence emit

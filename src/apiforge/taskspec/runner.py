@@ -8,7 +8,11 @@ from typing import Any
 
 from apiforge.contracts.base import ContractError
 from apiforge.contracts.task import AcceptanceRecord, TaskSpec, TaskState
-from apiforge.dispatch.runner import DispatchContext, dispatch_step
+from apiforge.dispatch.runner import (
+    DispatchContext,
+    dispatch_step,
+    is_mutation_verb,
+)
 from apiforge.taskspec import store
 from apiforge.taskspec.machine import require_transition
 from apiforge.taskspec.service import _parse_inputs, load_recipes
@@ -19,7 +23,51 @@ def _ctx_for(root: Path, spec: TaskSpec, now: str | None) -> DispatchContext:
     if now is not None:
         fields["now"] = now
     case = fields.pop("case", store.task_dir(root, spec.id))
+    fields.pop("gate_detail", None)  # consumed by the mutation gate, not a ctx field
     return DispatchContext(case=Path(case), **fields)
+
+
+def _mutation_step(
+    verb: str, spec: TaskSpec, ctx: DispatchContext
+) -> dict[str, object]:
+    """Policy-gate a mutation verb, then run it — sandbox-scoped, never promote.
+
+    Two conditions, both named when absent: the policy engine must allow the
+    action (class ``local_reversible``, gate fields from ``gate.*`` inputs),
+    and the task must declare ``writable_paths`` covering the sandbox dir —
+    mutation writes never leave ``.apiforge``.
+    """
+    from apiforge.policy.decide import ActionRequest, decide
+    from apiforge.policy.loader import load_policy
+
+    entry: dict[str, object] = {"verb": verb}
+    gate_detail = _parse_inputs(spec).get("gate_detail") or {}
+    decision = decide(
+        load_policy(),
+        ActionRequest(
+            verb="build.endpoint",
+            autonomy_class="local_reversible",
+            args=(ctx.operation_id or "",),
+            target=str(ctx.project or ""),
+            detail=gate_detail,
+        ),
+    )
+    entry["policy_decision"] = decision.model_dump(mode="json")
+    writable = tuple(spec.writable_paths)
+    if not any(p.startswith(".apiforge") for p in writable):
+        entry["status"] = "refused"
+        entry["reason"] = (
+            "AF-TASK-MUTATION-GATED: writable_paths lacks a .apiforge scope"
+        )
+        return entry
+    if decision.outcome != "allow":
+        entry["status"] = "refused"
+        entry["reason"] = (
+            f"policy {decision.outcome}: "
+            f"{decision.reason_code or ''} {list(decision.missing_requirements)}"
+        )
+        return entry
+    return entry | dispatch_step(verb, ctx, allow_mutation=True)
 
 
 def run_task(
@@ -66,7 +114,10 @@ def run_task(
             if calls >= budgets.max_calls:
                 stop = "max_calls exhausted"
                 break
-            entry = dispatch_step(verb, ctx)
+            if is_mutation_verb(verb):
+                entry = _mutation_step(verb, spec, ctx)
+            else:
+                entry = dispatch_step(verb, ctx)
             entry["round"] = round_no
             all_steps.append(entry)
             calls += 1

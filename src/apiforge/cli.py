@@ -83,6 +83,12 @@ context_app = typer.Typer(
     no_args_is_help=True,
 )
 app.add_typer(context_app)
+report_app = typer.Typer(
+    name="report",
+    help="Release evidence bundle — sign binds hashes; verify names what diverged.",
+    no_args_is_help=True,
+)
+app.add_typer(report_app)
 
 
 @app.callback()
@@ -568,6 +574,87 @@ def economy_report(
         return report(root if root is not None else Path.cwd())
 
     _echo_json(_run(work), detail_level)
+
+
+@report_app.command("build")
+def report_build(
+    case_dir: Path = typer.Option(..., "--case", help="Persisted case directory."),
+    receipt: Path | None = typer.Option(
+        None, "--receipt", help="evidence receipt JSON to pin into the bundle."
+    ),
+    now: str | None = typer.Option(None, "--now", help="Explicit ISO8601 (only clock)."),
+    out: Path | None = typer.Option(None, "--out", help="Write report.json here."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Compose the release evidence bundle for a case."""
+
+    def work() -> dict[str, object]:
+        from apiforge.report.bundle import ReportError, build_report, canonical
+
+        try:
+            report = build_report(case_dir, receipt_path=receipt, now=now)
+        except ReportError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+        if out is not None:
+            out.write_text(canonical(report), encoding="utf-8")
+        return report
+
+    _echo_json(_run(work), detail_level)
+
+
+@report_app.command("sign")
+def report_sign(
+    report: Path = typer.Option(..., "--report", help="report.json to sign."),
+    out: Path | None = typer.Option(None, "--out", help="Write signed report here."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Append the signature block binding body/evidence/catalog hashes."""
+
+    def work() -> dict[str, object]:
+        import json as _json
+
+        from apiforge.report.bundle import canonical
+        from apiforge.report.sign import sign_report
+
+        if not report.is_file():
+            raise AnalysisError("AF-INPUT-NOT-FOUND", str(report))
+        signed = sign_report(_json.loads(report.read_text(encoding="utf-8")))
+        target = out if out is not None else report
+        target.write_text(canonical(signed), encoding="utf-8")
+        return signed
+
+    _echo_json(_run(work), detail_level)
+
+
+@report_app.command("verify")
+def report_verify(
+    report: Path = typer.Option(..., "--report", help="signed report.json."),
+    receipt: Path | None = typer.Option(
+        None, "--receipt", help="receipt file to re-hash for the evidence check."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Name which part diverged: signature_version | body | evidence | catalog."""
+
+    def work() -> dict[str, object]:
+        import json as _json
+
+        from apiforge.report.bundle import ReportError
+        from apiforge.report.sign import verify_report
+
+        if not report.is_file():
+            raise AnalysisError("AF-INPUT-NOT-FOUND", str(report))
+        try:
+            return verify_report(
+                _json.loads(report.read_text(encoding="utf-8")), receipt_path=receipt
+            )
+        except ReportError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    result = _run(work)
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and result.get("ok") is False:
+        raise typer.Exit(code=4)
 
 
 @context_app.command("funnel")

@@ -77,6 +77,9 @@ while refusal codes and `fact_id`s survive.
 | `apiforge model sam --path template.yaml` | Serverless resources; `!Ref`/`!Sub` → `AF-SAM-UNRESOLVED` |
 | `apiforge model pact\|schemathesis\|k6\|coverage --path r.json` | Test-tool reports → `test.*` facts (tools never run) |
 | `apiforge model zap\|semgrep\|trivy\|gitleaks --path r.json` | Security reports → `sec.*` facts (gitleaks never emits secrets) |
+| `apiforge report build --case .apiforge/case --out report.json` | Compose the release evidence bundle |
+| `apiforge report sign --report report.json` | Pin body/evidence/catalog hashes into the signature block |
+| `apiforge report verify --report report.json` | Name the diverged part (body\|evidence\|catalog\|signature_version); exit 4 |
 
 ## Agentic layer
 

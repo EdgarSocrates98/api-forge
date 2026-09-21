@@ -245,7 +245,7 @@ briefs por task, RED→GREEN registrado, ledger SDD, commit atômico.
 | 8 | Segurança: `model zap/semgrep/trivy/gitleaks` report readers (AF-SEC judge rules ficam para evolução) | **entregue** |
 | 9 | Camada agêntica: coordinators/executors em `agents/` + `AGENT_PROTOCOL.md` + `playbook` floor + economy ledger | **entregue** |
 | 9b | MCP server (`apiforge-mcp`, extra `[mcp]`) + `context funnel` medido | **entregue** |
-| 10 | Release evidence bundle completo + gates por kind de evidência + `report sign/verify` | |
+| 10 | Release evidence bundle: `report build/sign/verify` — divergência nomeada por parte | **entregue** |
 | 11+ | AsyncAPI, GraphQL/gRPC, performance avançada (JFR/pprof/Pyroscope), modernização assistida, debate protocol | |
 
 ## 11. Decisões abertas

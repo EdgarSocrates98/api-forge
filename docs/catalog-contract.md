@@ -169,3 +169,18 @@ not feed `judge_api_model` (the contract↔code path).
 | `AF-TEST-REPORT-INVALID` | the report file is not valid JSON |
 | `AF-SEC-REPORT-MISSING` | a zap/semgrep/trivy/gitleaks report file is absent |
 | `AF-SEC-REPORT-INVALID` | the report file is not valid JSON |
+
+## Release evidence bundle
+
+`report build --case <dir>` composes `report.json`: case manifest, receipt
+(optional), catalog/policy digests, finding counts — canonical JSON.
+`report sign` appends a signature block pinning `body_sha256`,
+`evidence_sha256` and `catalog_sha256` at sign time; `report verify`
+recomputes and names each diverged part (`signature_version`, `body`,
+`evidence`, `catalog`), exiting 4. Correspondence, never authorship.
+
+| Code | Meaning |
+|---|---|
+| `AF-REPORT-NO-CASE` | no `case.json` under the given directory |
+| `AF-REPORT-NO-RECEIPT` | the `--receipt` path is absent |
+| `AF-REPORT-UNSIGNED` | `report verify` on a report without a signature block |

@@ -19,6 +19,7 @@ from apiforge.sandbox.diff import SandboxError
 from apiforge.sandbox.service import sandbox_apply, sandbox_clean
 from apiforge.sdd.checks import check as sdd_check
 from apiforge.sdd.checks import status as sdd_status
+from apiforge.sdd.evidence import emit_evidence
 from apiforge.sdd.service import set_phase
 from apiforge.sdd.stamp import stamp
 
@@ -135,6 +136,28 @@ def sdd_set_phase_cmd(
                 strict=strict,
                 override=override,
             ),
+            detail_level,
+        )
+    except ValueError as exc:
+        _fail(exc)
+
+
+@sdd_app.command("evidence")
+def sdd_evidence_cmd(
+    root: Path = typer.Option(..., "--root", help="SDD artifacts root."),
+    feature: str = typer.Option(..., "--feature"),
+    kind: str = typer.Option(..., "--kind", help="Gate evidence kind."),
+    source: Path = typer.Option(..., "--from", help="Artifact the evidence derives from."),
+    now: str = typer.Option(..., "--now", help="Explicit ISO8601 timestamp."),
+    state_dir: Path | None = typer.Option(
+        None, "--state-dir", help="Feature state dir (defaults to .apiforge/sdd/<F>)."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help="Payload level."),
+) -> None:
+    """Write evidence/<kind>.json derived from a real artifact — no overrides."""
+    try:
+        _echo(
+            emit_evidence(root, feature, kind, source, now, state_dir=state_dir),
             detail_level,
         )
     except ValueError as exc:

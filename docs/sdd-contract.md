@@ -63,7 +63,11 @@ Refusals (`refused[]`) block `ok`; named gaps (`unresolved[]`) are reported at
 | `AF-SDD-GAP-FACT-NOT-COLLECTED` | a build claim references evidence not produced |
 | `AF-SDD-GAP-FINDING-NOT-OBSERVED` | a verify result references a finding never observed |
 | `AF-SDD-GATE-BLOCKED` | strict transition refused: gate evidence absent and no override |
+| `AF-SDD-EVIDENCE-KIND` | `sdd evidence --kind` satisfies no gate in `gates.yaml` |
+| `AF-SDD-EVIDENCE-SOURCE` | `sdd evidence --from` names no file |
+| `AF-SDD-EVIDENCE-EXTRACT` | the kind's extractor cannot read the source (e.g. no pytest tally) |
 | `AF-SDD-ARTIFACT-MISSING` | `set-phase` target file absent |
+| `AF-SDD-NOT-FOUND` | `--feature` names no directory under the SDD root |
 | `AF-SDD-FEATURE-UNKNOWN` | `--feature` names a directory that does not exist |
 | `AF-SDD-UNKNOWN-FILE` | a `.md` file whose stem is not a canonical phase |
 | `AF-SDD-PROFILES` | `profiles.yaml` malformed or missing a required profile |

@@ -1,0 +1,57 @@
+# Ordered executor decompositions per coordinator. `apiforge playbook <name>`
+# renders this — it is data, never judgment. Coordinator names must match
+# agents/*.md files; executors must match agents/executors/*.md (gate-checked).
+api-contract-architect:
+  - {executor: af-inventory, verb: "model build", purpose: "load the OpenAPI contract into the API-IR"}
+  - {executor: af-extractor, verb: "diff contract", purpose: "delta against a baseline contract when one exists"}
+  - {executor: af-judge, verb: "rules list --area REST", purpose: "the design rules the contract will be cited against"}
+  - {executor: af-synthesizer, verb: "rules lookup", purpose: "full guidance per rule applied in the recommendation"}
+api-governance-reviewer:
+  - {executor: af-inventory, verb: "discover", purpose: "inventory project files and confirm framework detection"}
+  - {executor: af-extractor, verb: "analyze", purpose: "extract facts + findings into a persisted case"}
+  - {executor: af-judge, verb: "judge", purpose: "classify contract/code divergence by severity and area"}
+  - {executor: af-verifier, verb: "evidence emit", purpose: "receipt over the case artifacts when results ship"}
+  - {executor: af-synthesizer, verb: "next-step", purpose: "route the dominant finding area to a specialist"}
+api-security-reviewer:
+  - {executor: af-inventory, verb: "model api-gateway", purpose: "surface served: dump facts or project discovery"}
+  - {executor: af-extractor, verb: "analyze", purpose: "route facts plus gateway method/auth facts"}
+  - {executor: af-judge, verb: "rules list --area SECURITY", purpose: "OWASP API Top 10 rules to apply"}
+  - {executor: af-judge, verb: "rules list --area GATEWAY", purpose: "edge auth/throttling rules to apply"}
+  - {executor: af-synthesizer, verb: "next-step", purpose: "route; blind spots stay named as unresolved"}
+api-performance-engineer:
+  - {executor: af-inventory, verb: "discover", purpose: "what measurement artifacts exist; baseline first"}
+  - {executor: af-extractor, verb: "analyze", purpose: "route surface the measurements must map to"}
+  - {executor: af-judge, verb: "rules list --area PERF", purpose: "performance rules over the declared surface"}
+  - {executor: af-synthesizer, verb: "economy report", purpose: "session cost in bytes; gains stay hypotheses until measured"}
+api-testing-strategist:
+  - {executor: af-inventory, verb: "model build", purpose: "operations that demand proof"}
+  - {executor: af-extractor, verb: "analyze", purpose: "served routes vs declared operations"}
+  - {executor: af-judge, verb: "rules list --area TESTING", purpose: "test-layer rules to apply per operation"}
+  - {executor: af-synthesizer, verb: "rules lookup", purpose: "coverage-matrix gaps cited per rule"}
+api-reliability-engineer:
+  - {executor: af-inventory, verb: "model api-gateway", purpose: "declared timeouts and limits from the dump"}
+  - {executor: af-extractor, verb: "analyze", purpose: "route surface for the time budget"}
+  - {executor: af-judge, verb: "rules list --area GATEWAY", purpose: "timeout/throttle rules (AF-GW-003 among them)"}
+  - {executor: af-synthesizer, verb: "rules lookup", purpose: "retry/timeout guidance per rule applied"}
+aws-api-infra-reviewer:
+  - {executor: af-inventory, verb: "collect api-gateway", purpose: "the only verb that touches AWS; AF-COLLECT-AWS names the unlock"}
+  - {executor: af-extractor, verb: "model api-gateway", purpose: "offline facts per method/stage/integration"}
+  - {executor: af-judge, verb: "rules list --area GATEWAY", purpose: "AF-GW rules over the dump facts"}
+  - {executor: af-verifier, verb: "evidence emit", purpose: "receipt over the dump + findings for the record"}
+  - {executor: af-synthesizer, verb: "next-step", purpose: "route security vs reliability from the dominant area"}
+api-modernization-specialist:
+  - {executor: af-inventory, verb: "discover", purpose: "source inventory via the matching adapter"}
+  - {executor: af-extractor, verb: "analyze", purpose: "source routes; same for the target when it exists"}
+  - {executor: af-extractor, verb: "diff contract", purpose: "parity proven per operation, never asserted"}
+  - {executor: af-judge, verb: "judge", purpose: "residual divergence per route"}
+  - {executor: af-synthesizer, verb: "next-step", purpose: "Strangler cut order with the evidence that unlocks each"}
+api-observability-engineer:
+  - {executor: af-inventory, verb: "model api-gateway", purpose: "stage logs/tracing/access-log facts"}
+  - {executor: af-extractor, verb: "analyze", purpose: "operations the signal map must cover"}
+  - {executor: af-judge, verb: "rules list --area GATEWAY", purpose: "signal rules (AF-GW-004 among them)"}
+  - {executor: af-synthesizer, verb: "rules lookup", purpose: "instrument recommendation per gap, labeled recommendation"}
+api-dx-docs-reviewer:
+  - {executor: af-inventory, verb: "model build", purpose: "schema projections and declared error shapes"}
+  - {executor: af-extractor, verb: "analyze", purpose: "served routes for the consumer surface"}
+  - {executor: af-judge, verb: "rules list --area REST", purpose: "error-shape and contract-quality rules"}
+  - {executor: af-synthesizer, verb: "rules lookup", purpose: "DX gaps cited per operation"}

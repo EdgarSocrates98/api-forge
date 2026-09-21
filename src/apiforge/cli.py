@@ -382,6 +382,34 @@ def rules_list(
     _echo_json(_run(work), detail_level)
 
 
+@app.command("playbook")
+def playbook_cmd(
+    coordinator: str = typer.Argument(..., help="Coordinator profile name."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Render the declared executor decomposition for a coordinator.
+
+    The floor on every platform — works without dispatch.
+    """
+
+    def work() -> dict[str, object]:
+        from apiforge.rules.catalog import load_playbooks
+
+        playbooks = load_playbooks()
+        steps = playbooks.get(coordinator)
+        if steps is None:
+            raise AnalysisError(
+                "AF-PLAYBOOK-NOT-FOUND",
+                f"no playbook for {coordinator!r}; known: {sorted(playbooks)}",
+            )
+        return {
+            "coordinator": coordinator,
+            "steps": [dict(s, order=i) for i, s in enumerate(steps, 1)],
+        }
+
+    _echo_json(_run(work), detail_level)
+
+
 @rules_app.command("lookup")
 def rules_lookup(
     rule_id: str = typer.Argument(..., help="Rule id, e.g. AF-SEC-001."),

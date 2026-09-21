@@ -153,3 +153,38 @@ def load_areas(path: Path | None = None) -> tuple[str, ...]:
         if isinstance(data, Mapping) and isinstance(data.get("area"), str):
             areas.add(data["area"])
     return tuple(sorted(areas))
+
+
+def load_playbooks() -> dict[str, tuple[dict[str, str], ...]]:
+    """Executor decomposition per coordinator, from package data.
+
+    Each value is the ordered tuple of steps ``{executor, verb, purpose}``.
+    """
+    text = (
+        resources.files("apiforge.rules")
+        .joinpath("playbooks.yaml")
+        .read_text(encoding="utf-8")
+    )
+    try:
+        data: Any = load_yaml_strict(text, source="playbooks.yaml")
+    except StrictLoadError as exc:
+        raise CatalogError("AF-CATALOG-INVALID", str(exc)) from exc
+    if not isinstance(data, Mapping):
+        raise CatalogError("AF-CATALOG-INVALID", "playbooks.yaml is not a mapping")
+    out: dict[str, tuple[dict[str, str], ...]] = {}
+    for name, steps in data.items():
+        if not isinstance(steps, list):
+            raise CatalogError("AF-CATALOG-INVALID", f"playbook {name!r} is not a list")
+        parsed: list[dict[str, str]] = []
+        for step in steps:
+            if not isinstance(step, Mapping) or set(step) != {
+                "executor",
+                "verb",
+                "purpose",
+            }:
+                raise CatalogError(
+                    "AF-CATALOG-INVALID", f"playbook {name!r} has a malformed step"
+                )
+            parsed.append({k: str(step[k]) for k in ("executor", "verb", "purpose")})
+        out[str(name)] = tuple(parsed)
+    return out

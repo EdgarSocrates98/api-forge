@@ -442,3 +442,28 @@ AF-DATA-005 CONFIG, AF-DATA-006 DEBUG, AF-DATA-007 MONITOR, AF-DATA-008 SAVE.
 |---|---|
 | `AF-REDIS-PARSE` | a `.py` file failed `ast.parse` — extraction continues |
 | `AF-REDIS-HEURISTIC-BINDING` | receivers matched by name only — binding unproven |
+
+### Telemetry (`model otel`, `perf compare`)
+
+`model otel --path export.json` reads an OTLP/JSON trace export
+(`resourceSpans[].scopeSpans[].spans[]`) — offline, never a live collector.
+Spans aggregate per operation (`METHOD http.route`, else span name) into
+`perf.otel.operation` facts (count, mean_ms, p95_ms nearest-rank, max_ms)
+plus one `perf.otel.run` fact; the payload also carries `performance_run`
+(the `PerformanceRun` contract). Spans without usable timestamps are counted
+and named; a missing `service.name` leaves the run subject unresolved.
+
+`perf compare --baseline A --candidate B --threshold-pct N [--min-samples M]`
+runs `compare_runs`/`detect_regression` over two PerformanceRun payloads
+(bare contract JSON or a `model otel` payload). Shared operations are
+compared on `mean_ms`/`p95_ms`; regressions name operation, metric, both
+values and `delta_pct`. Operations on only one side are named
+`added`/`removed`; shared operations under `min_samples` are named
+`insufficient_data`, never judged. The threshold is an explicit argument.
+
+| Code | Meaning |
+|---|---|
+| `AF-OTEL-REPORT-INVALID` | export unreadable or missing `resourceSpans` |
+| `AF-OTEL-SPAN-INCOMPLETE` | spans lack usable timestamps — counted, named |
+| `AF-OTEL-SERVICE-UNKNOWN` | no `service.name` resource attribute |
+| `AF-PERF-RUN-INVALID` | compare input is not a PerformanceRun payload |

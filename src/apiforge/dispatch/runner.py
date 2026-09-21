@@ -208,6 +208,22 @@ def _verb_report_build(ctx: DispatchContext) -> dict[str, object]:
     return build_report(ctx.case, receipt_path=None, now=ctx.now)
 
 
+def _verb_perf_compare(ctx: DispatchContext) -> dict[str, object]:
+    from apiforge.contracts.stubs import PerformanceRun
+    from apiforge.perf.compare import compare_runs
+
+    def load_run(path: Path) -> PerformanceRun:
+        doc = json.loads(path.read_text(encoding="utf-8"))
+        if isinstance(doc, dict) and isinstance(doc.get("performance_run"), dict):
+            doc = doc["performance_run"]
+        return PerformanceRun.model_validate(doc)
+
+    assert ctx.baseline is not None and ctx.candidate is not None
+    return compare_runs(load_run(ctx.baseline), load_run(ctx.candidate)).model_dump(
+        mode="json"
+    )
+
+
 # verb prefix -> (required ctx fields, runner). `collect *` is absent on
 # purpose: dispatch never touches AWS.
 _VERBS: tuple[tuple[str, tuple[str, ...], Callable[..., Any]], ...] = (
@@ -236,6 +252,8 @@ _VERBS: tuple[tuple[str, tuple[str, ...], Callable[..., Any]], ...] = (
     ("model graphql", ("input_path",), _model_verb("apiforge.adapters.graphql_.extract.extract_graphql")),
     ("model proto", ("input_path",), _model_verb("apiforge.adapters.protobuf.extract.extract_protobuf")),
     ("model redis", ("input_path",), _model_verb("apiforge.adapters.redis_.extract.extract_redis")),
+    ("model otel", ("input_path",), _model_verb("apiforge.adapters.otel.extract.extract_otel")),
+    ("perf compare", ("baseline", "candidate"), _verb_perf_compare),
 )
 
 _MODEL_REPORTS = {

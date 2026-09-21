@@ -19,6 +19,7 @@ from apiforge.build.service import build_endpoint
 from apiforge.case.service import CaseIntegrityError, CaseStorageError
 from apiforge.collectors.apigateway import collect
 from apiforge.collectors.manifest import CollectError, CollectManifest
+from apiforge.contracts.stubs import PerformanceRun
 from apiforge.core.detail import apply_detail_level
 from apiforge.core.models import Fact, Finding, FindingStatus, Severity
 from apiforge.debate.service import DebateError
@@ -110,6 +111,12 @@ dispatch_app = typer.Typer(
     no_args_is_help=True,
 )
 app.add_typer(dispatch_app)
+perf_app = typer.Typer(
+    name="perf",
+    help="Compose over measured runs — compare, never interpolate.",
+    no_args_is_help=True,
+)
+app.add_typer(perf_app)
 agents_app = typer.Typer(
     name="agents",
     help="Publish coordinator profiles to host-native mirrors.",
@@ -651,6 +658,82 @@ def inventory_redis(
         }
 
     _echo_json(_run(work), detail_level)
+
+
+@model_app.command("otel")
+def inventory_otel(
+    path: Path = typer.Option(
+        ..., "--path", help="OTLP/JSON trace export from an OTel collector."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """OTel export -> perf.otel.* facts + a PerformanceRun — offline."""
+
+    def work() -> dict[str, object]:
+        from apiforge.adapters.otel.extract import extract_otel
+        from apiforge.adapters.otel.run import build_performance_run
+
+        if not path.is_file():
+            raise AnalysisError("AF-INPUT-NOT-FOUND", str(path))
+        inventory = extract_otel(path)
+        return {
+            "diagnostics": [d.model_dump(mode="json") for d in inventory.diagnostics],
+            "facts": [f.model_dump(mode="json") for f in inventory.facts],
+            "framework": inventory.framework,
+            "input_hashes": dict(inventory.input_hashes),
+            "performance_run": build_performance_run(
+                inventory, path.name
+            ).model_dump(mode="json"),
+        }
+
+    _echo_json(_run(work), detail_level)
+
+
+@perf_app.command("compare")
+def perf_compare(
+    baseline: Path = typer.Option(
+        ..., "--baseline", help="PerformanceRun JSON (or `model otel` payload)."
+    ),
+    candidate: Path = typer.Option(
+        ..., "--candidate", help="PerformanceRun JSON (or `model otel` payload)."
+    ),
+    threshold_pct: float = typer.Option(
+        10.0, "--threshold-pct", help="Regression threshold — declared, never assumed."
+    ),
+    min_samples: int = typer.Option(
+        3, "--min-samples", help="Minimum span count per operation to be judged."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """compare_runs / detect_regression over two PerformanceRun payloads."""
+
+    def work() -> object:
+        from apiforge.perf.compare import compare_runs
+
+        base = _load_performance_run(baseline)
+        cand = _load_performance_run(candidate)
+        return compare_runs(
+            base,
+            cand,
+            threshold_pct=threshold_pct,
+            min_samples=min_samples,
+        ).model_dump(mode="json")
+
+    _echo_json(_run(work), detail_level)
+
+
+def _load_performance_run(path: Path) -> PerformanceRun:
+    """Accept a bare PerformanceRun or the `model otel` payload wrapping one."""
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError, UnicodeDecodeError) as exc:
+        raise AnalysisError("AF-PERF-RUN-INVALID", f"{path}: {exc}") from exc
+    if isinstance(payload, dict) and isinstance(payload.get("performance_run"), dict):
+        payload = payload["performance_run"]
+    try:
+        return PerformanceRun.model_validate(payload)
+    except Exception as exc:
+        raise AnalysisError("AF-PERF-RUN-INVALID", f"{path}: {exc}") from exc
 
 
 @plan_app.command("strangler")

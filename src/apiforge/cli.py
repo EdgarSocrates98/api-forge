@@ -863,9 +863,35 @@ def report_build(
     _echo_json(_run(work), detail_level)
 
 
+@report_app.command("keygen")
+def report_keygen(
+    name: str = typer.Option(..., "--name", help="Key name (writes <name>.pem)."),
+    keys_dir: Path = typer.Option(
+        Path(".apiforge/keys"), "--keys-dir", help="Directory holding PEM keys."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Generate an Ed25519 keypair — proves key possession, never identity."""
+
+    def work() -> dict[str, object]:
+        from apiforge.report.bundle import ReportError
+        from apiforge.report.keys import generate_keypair
+
+        try:
+            result: dict[str, object] = dict(generate_keypair(keys_dir, name))
+            return result
+        except ReportError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_json(_run(work), detail_level)
+
+
 @report_app.command("sign")
 def report_sign(
     report: Path = typer.Option(..., "--report", help="report.json to sign."),
+    key: Path | None = typer.Option(
+        None, "--key", help="Ed25519 private PEM — adds cryptographic binding."
+    ),
     out: Path | None = typer.Option(None, "--out", help="Write signed report here."),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
@@ -879,7 +905,11 @@ def report_sign(
 
         if not report.is_file():
             raise AnalysisError("AF-INPUT-NOT-FOUND", str(report))
-        signed = sign_report(_json.loads(report.read_text(encoding="utf-8")))
+        if key is not None and not key.is_file():
+            raise AnalysisError("AF-INPUT-NOT-FOUND", str(key))
+        signed = sign_report(
+            _json.loads(report.read_text(encoding="utf-8")), key_path=key
+        )
         target = out if out is not None else report
         target.write_text(canonical(signed), encoding="utf-8")
         return signed
@@ -893,9 +923,12 @@ def report_verify(
     receipt: Path | None = typer.Option(
         None, "--receipt", help="receipt file to re-hash for the evidence check."
     ),
+    pubkey: Path | None = typer.Option(
+        None, "--pubkey", help="Ed25519 public PEM to verify signature_b64."
+    ),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
-    """Name which part diverged: signature_version | body | evidence | catalog."""
+    """Name which part diverged: signature_version|body|evidence|catalog|signature_crypto."""
 
     def work() -> dict[str, object]:
         import json as _json
@@ -905,9 +938,13 @@ def report_verify(
 
         if not report.is_file():
             raise AnalysisError("AF-INPUT-NOT-FOUND", str(report))
+        if pubkey is not None and not pubkey.is_file():
+            raise AnalysisError("AF-INPUT-NOT-FOUND", str(pubkey))
         try:
             return verify_report(
-                _json.loads(report.read_text(encoding="utf-8")), receipt_path=receipt
+                _json.loads(report.read_text(encoding="utf-8")),
+                receipt_path=receipt,
+                pubkey_path=pubkey,
             )
         except ReportError as exc:
             raise AnalysisError(exc.code, exc.detail) from exc

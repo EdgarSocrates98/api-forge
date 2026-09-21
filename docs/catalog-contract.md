@@ -283,3 +283,20 @@ gate fail on drift.
 | Code | Meaning |
 |---|---|
 | `AF-DISPATCH-NO-PLAYBOOK` | no playbook for the named coordinator |
+
+## Key-bound signing (Ed25519)
+
+`report keygen --name <n>` writes `<n>.pem`/`<n>.pub.pem` under
+`--keys-dir`. `report sign --key <priv.pem>` adds `algorithm: ed25519`,
+`public_key_sha256` (fingerprint of the derived public key) and
+`signature_b64` over the canonical hash-binding block. `report verify
+--pubkey <pub.pem>` verifies cryptographically: `crypto` is
+`valid|invalid|unverified|absent`; divergence names `signature_key`
+(fingerprint mismatch) or `signature_crypto` (bad signature). A valid
+signature proves possession of the private key — never identity.
+`cryptography` is confined to `apiforge/report/` by the release gate.
+
+| Code | Meaning |
+|---|---|
+| `AF-KEY-EXISTS` | key name already present in the keys dir |
+| `AF-KEY-NOT-ED25519` | PEM is not an Ed25519 key |

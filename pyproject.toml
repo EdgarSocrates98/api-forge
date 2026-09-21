@@ -16,6 +16,7 @@ dependencies = [
     "tree-sitter-go>=0.23.4,<0.24",
     "python-hcl2>=4.3,<8",
     "graphql-core>=3.2,<3.3",
+    "cryptography>=43,<47",
 ]
 
 [project.optional-dependencies]

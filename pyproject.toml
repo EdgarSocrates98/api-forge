@@ -1,0 +1,37 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "apiforge"
+version = "0.1.0"
+description = "Deterministic, offline API evolution analysis"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "pydantic>=2.9,<3",
+    "typer>=0.12,<1",
+    "PyYAML>=6.0.2,<7",
+]
+
+[project.optional-dependencies]
+dev = [
+    "mypy>=1.13,<2",
+    "pytest>=8,<9",
+    "ruff>=0.7,<1",
+    "types-PyYAML>=6.0.12,<7",
+]
+
+[project.scripts]
+apiforge = "apiforge.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/apiforge"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["src/apiforge"]

@@ -2,4 +2,83 @@ catalog_version: 1
 schema_version: 1
 area: GATEWAY
 retrieved: 2026-09-21
-rules: []
+rules:
+  - id: AF-GW-001
+    title: "No `authorizationType: NONE` method on production stages"
+    severity: critical
+    rationale: >-
+      API Gateway `NONE` bypasses every authZ check at the edge; a resource
+      method carrying it to prod is callable by the internet — the dump
+      shows it per method, so there is no excuse to miss it.
+    remediation: >-
+      Require `AWS_IAM`, `CUSTOM` (Lambda authorizer) or `COGNITO_USER_POOLS`
+      on every method exposed by production stages; keep `NONE` only for
+      deliberately public resources, documented as such.
+    reference: docs/specs/2026-09-21-api-forge-agentic-platform.md
+  - id: AF-GW-002
+    title: Throttling is configured on every public stage
+    severity: high
+    rationale: >-
+      A stage with default account-level throttling inherits limits sized
+      for the account, not the API — one noisy neighbor or one client loop
+      can exhaust the account's regional budget.
+    remediation: >-
+      Set explicit `throttlingRateLimit`/`throttlingBurstLimit` in
+      `methodSettings` (or usage plans with API keys) sized to the backend's
+      measured capacity, not to a guess.
+    reference: docs/specs/2026-09-21-api-forge-agentic-platform.md
+  - id: AF-GW-003
+    title: Access logging is enabled on every served stage
+    severity: high
+    rationale: >-
+      Without `accessLogSettings` there is no request evidence — incident
+      response, abuse investigation and latency attribution are all blind;
+      enabling it later cannot recover the past.
+    remediation: >-
+      Set `accessLogSettings` (destination + format) per stage; include
+      request id, integration latency, status and caller identity fields.
+    reference: docs/specs/2026-09-21-api-forge-agentic-platform.md
+  - id: AF-GW-004
+    title: Public stages sit behind WAF
+    severity: high
+    rationale: >-
+      Regional API Gateway endpoints associate with AWS WAF; a public stage
+      without a WebACL takes raw internet traffic — injection, scraping and
+      L7 floods reach the integration unfiltered.
+    remediation: >-
+      Associate a WebACL with managed rule groups (+ rate rules) to public
+      stages; log sampled requests to verify the rules fire as intended.
+    reference: docs/specs/2026-09-21-api-forge-agentic-platform.md
+  - id: AF-GW-005
+    title: Cache is opt-in per method with a stated TTL, never ambient
+    severity: medium
+    rationale: >-
+      Enabling the stage cache cluster without per-method opt-in leaves
+      capacity idle; enabling it per method without a TTL policy serves
+      stale data silently — both are configuration smells the dump shows.
+    remediation: >-
+      Enable `cacheClusterEnabled` only when at least one method opts in
+      with an explicit `cacheTtlInSeconds` and cache-key parameters named.
+    reference: docs/specs/2026-09-21-api-forge-agentic-platform.md
+  - id: AF-GW-006
+    title: Stages isolate environments — config drift is named
+    severity: medium
+    rationale: >-
+      `prod` and `dev` diverging on auth, logging or throttling means the
+      environment being tested is not the one serving users; the dump lists
+      per-stage settings side by side precisely to surface that drift.
+    remediation: >-
+      Promote stage configuration through the same IaC path as deployments;
+      diff stage settings across environments and explain every delta.
+    reference: docs/specs/2026-09-21-api-forge-agentic-platform.md
+  - id: AF-GW-007
+    title: "`apiKeyRequired` is a quota tool, not authorization"
+    severity: medium
+    rationale: >-
+      API keys identify clients for usage plans and quotas; treating them
+      as an authorization boundary fails at the first leaked key in a
+      public client — the dump distinguishes the two attrs for a reason.
+    remediation: >-
+      Use `apiKeyRequired` for metering/partner identification only; real
+      authorization comes from IAM, custom authorizers or Cognito scopes.
+    reference: docs/specs/2026-09-21-api-forge-agentic-platform.md

@@ -37,6 +37,12 @@ app = typer.Typer(
     invoke_without_command=True,
 )
 model_app = typer.Typer(help="Build the canonical API-IR.")
+rules_app = typer.Typer(
+    name="rules",
+    help="Read the rule catalog — the knowledge base every finding cites.",
+    no_args_is_help=True,
+)
+app.add_typer(rules_app)
 build_app = typer.Typer(
     name="build",
     help="Generate code skeletons — evaluated in the sandbox, promoted via worktree only.",
@@ -351,3 +357,44 @@ def build_endpoint_cmd(
     promo = report.get("promotion")
     if report.get("refused") or (isinstance(promo, dict) and promo.get("refused")):
         raise typer.Exit(4)
+
+
+@rules_app.command("list")
+def rules_list(
+    area: str | None = typer.Option(None, "--area", help="Filter by catalog area."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """List rule ids, titles and severities by area."""
+
+    def work() -> dict[str, object]:
+        from apiforge.rules.catalog import load_catalog
+
+        catalog = load_catalog()
+        by_area: dict[str, list[dict[str, str]]] = {}
+        for rule_id, meta in sorted(catalog.items()):
+            if area is not None and meta.area.upper() != area.upper():
+                continue
+            by_area.setdefault(meta.area, []).append(
+                {"id": rule_id, "severity": meta.severity.value, "title": meta.title}
+            )
+        return {"areas": by_area, "count": sum(len(v) for v in by_area.values())}
+
+    _echo_json(_run(work), detail_level)
+
+
+@rules_app.command("lookup")
+def rules_lookup(
+    rule_id: str = typer.Argument(..., help="Rule id, e.g. AF-SEC-001."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Print one rule's full guidance."""
+
+    def work() -> dict[str, object]:
+        from apiforge.rules.catalog import load_catalog
+
+        meta = load_catalog().get(rule_id.upper())
+        if meta is None:
+            raise AnalysisError("AF-RULE-NOT-FOUND", f"no rule {rule_id!r} in the catalog")
+        return meta.model_dump(mode="json") | {"id": rule_id.upper()}
+
+    _echo_json(_run(work), detail_level)

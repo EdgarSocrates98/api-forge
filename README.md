@@ -61,6 +61,8 @@ while refusal codes and `fact_id`s survive.
 | `apiforge evidence emit --case .apiforge/case --out receipt.json` | Receipt binding artifact paths to sha256 (proves correspondence, not authorship) |
 | `apiforge evidence verify --receipt receipt.json` | Re-hash every artifact the receipt lists |
 | `apiforge next-step --findings findings.json --phase verify` | Route the dominant finding area to the specialist agent |
+| `apiforge rules list [--area SECURITY]` | List catalog rules — the knowledge base every finding cites |
+| `apiforge rules lookup AF-SEC-001` | Print one rule's rationale/remediation/reference |
 | `apiforge collect api-gateway --api-id X --out dump/` | Fetch API Gateway config into an offline dump (needs `pip install apiforge[aws]`; the only family that touches AWS) |
 | `apiforge model api-gateway --path dump/` | Read the dump into facts — offline, no credentials |
 | `apiforge build endpoint --contract c.yaml --operation-id X --project .` | Synthesize a Spring skeleton, prove it in the sandbox (main tree untouched) |

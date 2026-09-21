@@ -2,4 +2,85 @@ catalog_version: 1
 schema_version: 1
 area: PERF
 retrieved: 2026-09-21
-rules: []
+rules:
+  - id: AF-PERF-001
+    title: Every list response carries a server-side bound
+    severity: high
+    rationale: >-
+      Unbounded collections grow with data, not with design — p99 latency
+      and memory degrade gradually then catastrophically, and the failure
+      arrives long after the code shipped.
+    remediation: >-
+      Cap `limit` server-side with a documented maximum; default to a sane
+      page size; measure page-query cost under production-like cardinality.
+    reference: docs/specs/2026-09-21-api-forge-agentic-platform.md
+  - id: AF-PERF-002
+    title: N+1 is a data-access pattern, not an ORM quirk
+    severity: high
+    rationale: >-
+      Serializing N objects that each fetch their relations turns one
+      request into N+1 queries — latency scales with the caller's data, and
+      the database is billed for the multiplier.
+    remediation: >-
+      Fetch relations in the same or batched queries (join/selectin, dataloader
+      patterns); assert query counts per endpoint in tests, not just results.
+    reference: docs/specs/2026-09-21-api-forge-agentic-platform.md
+  - id: AF-PERF-003
+    title: Conditional requests serve cache before compute
+    severity: medium
+    rationale: >-
+      ETag/Last-Modified with 304 responses skip payload generation and
+      transfer entirely for unchanged resources — free capacity already
+      defined by the protocol.
+    remediation: >-
+      Emit `ETag` on cacheable GETs; honor `If-None-Match` with 304 before
+      rendering; mark non-cacheable responses explicitly (`Cache-Control:
+      no-store`) so intent is auditable.
+    reference: https://www.rfc-editor.org/rfc/rfc9110#name-conditional-requests
+  - id: AF-PERF-004
+    title: Compression is negotiated, not assumed
+    severity: low
+    rationale: >-
+      JSON payloads compress 5-10x; serving them uncompressed burns egress
+      and client latency, while double-compressing already-compressed
+      content wastes CPU.
+    remediation: >-
+      Enable gzip/br content negotiation at the edge; measure per-endpoint
+      savings; skip compression for tiny or binary responses.
+    reference: https://www.rfc-editor.org/rfc/rfc9110#name-content-encoding
+  - id: AF-PERF-005
+    title: Timeouts exist before retries, and retries carry jitter
+    severity: high
+    rationale: >-
+      A retry without a timeout waits forever; retries without jitter
+      synchronize into thundering herds. Order matters: connect/read
+      timeouts first, bounded retries with exponential backoff + jitter
+      second, circuit breaker third.
+    remediation: >-
+      Declare connect and total timeouts per dependency; cap attempts;
+      add full jitter; stop retrying on 4xx and on open breakers.
+    reference: docs/specs/2026-09-21-api-forge-agentic-platform.md
+  - id: AF-PERF-006
+    title: A performance claim requires a measured baseline
+    severity: medium
+    rationale: >-
+      "This is faster" without a baseline measurement is unfalsifiable;
+      optimization work starts by recording current p50/p99, throughput and
+      resource cost — the number the change must beat.
+    remediation: >-
+      Record baseline metrics with the load shape that produced them; rerun
+      the identical shape after the change; report the delta, never the
+      isolated number.
+    reference: docs/specs/2026-09-21-api-forge-agentic-platform.md
+  - id: AF-PERF-007
+    title: Sync work does not block the request path unnecessarily
+    severity: medium
+    rationale: >-
+      Calls that outlive their value inside the request (emails, analytics,
+      third-party writes with no response need) stretch p99 for work the
+      caller never sees.
+    remediation: >-
+      Move fire-and-forget work behind a queue/event; keep in-path only
+      calls whose results shape the response; document which downstream
+      calls are on the critical path.
+    reference: docs/specs/2026-09-21-api-forge-agentic-platform.md

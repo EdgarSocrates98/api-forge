@@ -2,4 +2,89 @@ catalog_version: 1
 schema_version: 1
 area: TESTING
 retrieved: 2026-09-21
-rules: []
+rules:
+  - id: AF-TEST-001
+    title: The contract is executable — provider and consumer sides
+    severity: high
+    rationale: >-
+      An OpenAPI file that nothing verifies drifts silently; contract tests
+      prove the provider serves what it publishes and consumers only use
+      what is published — the two failure modes the judge already detects
+      statically.
+    remediation: >-
+      Run provider-side schema validation on real responses and
+      consumer-driven contract tests (Pact/Schemathesis) in CI; gate merges
+      on divergence findings, not on "docs updated".
+    reference: docs/specs/2026-09-21-api-forge-agentic-platform.md
+  - id: AF-TEST-002
+    title: Fuzz the boundary the contract declares
+    severity: medium
+    rationale: >-
+      Hand-written tests cover the cases the author imagined; property/
+      schema fuzzing (Schemathesis, restler) covers the space the contract
+      admits — malformed types, boundary values, unexpected nulls.
+    remediation: >-
+      Fuzz every operation against its declared schema in CI; treat 5xx on
+      contract-valid input as a defect and on contract-invalid input as a
+      validation gap.
+    reference: https://schemathesis.readthedocs.io/
+  - id: AF-TEST-003
+    title: Happy paths do not prove validation
+    severity: medium
+    rationale: >-
+      Suites that only exercise valid requests cannot catch missing
+      validation — the negative space (missing fields, wrong types, extra
+      properties, oversized strings) is where mass assignment and
+      constraint bugs live.
+    remediation: >-
+      For every operation assert at least one rejected-input case per
+      required property and per bounded constraint; mutation-test the
+      validation layer.
+    reference: docs/specs/2026-09-21-api-forge-agentic-platform.md
+  - id: AF-TEST-004
+    title: Mutation testing grades the suite, not the code
+    severity: low
+    rationale: >-
+      Coverage counts executed lines, not asserted behavior; mutating the
+      code (flip a condition, drop a check) and watching tests still pass
+      proves which assertions are actually load-bearing.
+    remediation: >-
+      Run a mutation tool (mutmut/pitest) on validation and authorization
+      code first; treat surviving auth mutants as critical gaps.
+    reference: https://pitest.org/
+  - id: AF-TEST-005
+    title: Load tests answer questions, not dashboards
+    severity: medium
+    rationale: >-
+      A load run without a stated hypothesis produces numbers nobody can
+      act on; the benchmark discipline is baseline -> hypothesis -> one
+      variable -> measured delta.
+    remediation: >-
+      State the question first (p99 under target RPS, saturation point,
+      error budget burn); change one variable per run; record load shape
+      (ramp, duration, mix) next to results.
+    reference: docs/specs/2026-09-21-api-forge-agentic-platform.md
+  - id: AF-TEST-006
+    title: Failure injection covers the dependencies, not just the code
+    severity: medium
+    rationale: >-
+      Unit-tested services still fail on dependency latency, partial
+      outages and stale caches; chaos/failure-injection exercises the paths
+      that unit tests structurally cannot reach.
+    remediation: >-
+      Inject latency/failure on each dependency in staging; verify timeouts
+      fire before retries amplify; assert degradation is graceful and
+      observable.
+    reference: docs/security/threat-model-mvp.md
+  - id: AF-TEST-007
+    title: Contract-breaking changes are detected before merge
+    severity: high
+    rationale: >-
+      A breaking change discovered by consumers after deploy costs a
+      rollback or a forced migration; diffing baseline vs candidate contract
+      in CI makes the decision explicit and cheap.
+    remediation: >-
+      Run `apiforge diff contract --baseline v1 --candidate v2` (or the
+      equivalent) on every contract change; fail on unclassified breaking
+      changes, require an approved ADR for classified ones.
+    reference: docs/decisions/ADR-002-api-ir-provenance.md

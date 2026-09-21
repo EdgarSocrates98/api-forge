@@ -2,4 +2,83 @@ catalog_version: 1
 schema_version: 1
 area: BREAKING
 retrieved: 2026-09-21
-rules: []
+rules:
+  - id: AF-BREAK-001
+    title: Removing an operation is always breaking
+    severity: critical
+    rationale: >-
+      Clients compiled against a removed path/method fail with 404 at
+      runtime — there is no compatible-deployment story, only coordinated
+      consumer migration.
+    remediation: >-
+      Keep the operation and deprecate it (Deprecation/Sunset headers) until
+      consumer inventory shows zero callers; removing without that evidence
+      is a breaking release.
+    reference: docs/specs/2026-09-21-api-forge-agentic-platform.md
+  - id: AF-BREAK-002
+    title: Type and format changes are breaking
+    severity: high
+    rationale: >-
+      `id: string -> integer` or `total: number -> string` silently breaks
+      deserialization in typed clients and changes comparison semantics in
+      untyped ones — the contract change is mechanical to detect.
+    remediation: >-
+      Add a new field with the new type and deprecate the old one, or cut a
+      new version; never repurpose a field's type within a version.
+    reference: docs/specs/2026-09-21-api-forge-agentic-platform.md
+  - id: AF-BREAK-003
+    title: Tightening requirements is breaking
+    severity: high
+    rationale: >-
+      Making an optional request field required, narrowing an enum, or
+      shrinking a maxLength rejects requests that were valid — the failure
+      is created entirely inside a released version.
+    remediation: >-
+      Only relax constraints within a version; tightening goes through
+      deprecation (accept both, warn) or a new version.
+    reference: docs/specs/2026-09-21-api-forge-agentic-platform.md
+  - id: AF-BREAK-004
+    title: Response additions are safe; response removals are not
+    severity: medium
+    rationale: >-
+      Tolerant readers ignore new fields; removing or renaming a response
+      field breaks clients that bind it — the asymmetry is the whole rule.
+    remediation: >-
+      Evolve responses additively within a version; removals ride the
+      deprecation window, never a minor bump.
+    reference: docs/specs/2026-09-21-api-forge-agentic-platform.md
+  - id: AF-BREAK-005
+    title: Deprecation is dated, announced and measurable
+    severity: medium
+    rationale: >-
+      "Deprecated" without a sunset date and a consumer signal never
+      finishes; RFC 9745 `Deprecation`/`Sunset` headers plus docs let
+      consumers see the deadline and operators see the countdown.
+    remediation: >-
+      Emit `Deprecation: true` and `Sunset: <http-date>` on deprecated
+      operations; announce in release notes; measure remaining traffic
+      before removal.
+    reference: https://www.rfc-editor.org/rfc/rfc9745
+  - id: AF-BREAK-006
+    title: Semantic-version the contract, not the implementation
+    severity: medium
+    rationale: >-
+      Consumers reason about the API surface, not internals — major bumps
+      for breaking changes, minor for additions, patch for clarifications;
+      reusing an implementation version confuses that signal.
+    remediation: >-
+      Version the contract document independently; bump `info.version` per
+      the change class `diff contract` reports.
+    reference: docs/specs/2026-09-21-api-forge-agentic-platform.md
+  - id: AF-BREAK-007
+    title: Enum and constant additions are breaking for closed clients
+    severity: medium
+    rationale: >-
+      Adding a value to an enum breaks clients that switch exhaustively or
+      validate strictly — "additive" is only safe when the contract declares
+      open/extensible semantics.
+    remediation: >-
+      Document enums as extensible (or use `x-extensible-enum`); treat
+      additions to closed enums as breaking; deserializers tolerate unknown
+      values.
+    reference: docs/specs/2026-09-21-api-forge-agentic-platform.md

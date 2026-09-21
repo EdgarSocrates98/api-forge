@@ -2,4 +2,101 @@ catalog_version: 1
 schema_version: 1
 area: SECURITY
 retrieved: 2026-09-21
-rules: []
+rules:
+  - id: AF-SEC-001
+    title: Object-level authorization on every ID-bearing request (BOLA)
+    severity: critical
+    rationale: >-
+      OWASP API1 — Broken Object Level Authorization is the top API breach
+      vector: `GET /orders/{id}` that authenticates the caller but never
+      checks the caller owns `id` leaks any order to anyone.
+    remediation: >-
+      Authorize per object, not per endpoint: scope queries by subject
+      (`WHERE owner = :subject`), deny by default when the object lookup
+      bypasses the owner filter, and test cross-tenant access explicitly.
+    reference: https://owasp.org/API-Security/editions/2023/en/0xa1-broken-object-level-authorization/
+  - id: AF-SEC-002
+    title: Authentication is verified per operation, not per service
+    severity: high
+    rationale: >-
+      OWASP API2 — a service that "sits behind the gateway" still serves
+      internal networks, health probes and misrouted traffic; assuming the
+      edge authenticates everything leaves methods unauthenticated when
+      routing changes.
+    remediation: >-
+      Verify tokens at the resource server as well as the edge; pin issuer,
+      audience, expiry and signature algorithm; reject `alg: none` and
+      algorithm confusion (RS256->HS256).
+    reference: https://owasp.org/API-Security/editions/2023/en/0xa2-broken-authentication/
+  - id: AF-SEC-003
+    title: Response fields are filtered by the caller's authority
+    severity: high
+    rationale: >-
+      OWASP API3 — returning the ORM entity wholesale exposes
+      `internal_notes`/`cost`/`owner_email` to any caller who passes BOLA
+      checks; property-level authorization is a separate question from
+      object-level.
+    remediation: >-
+      Serialize a response DTO per audience, never the domain object;
+      whitelist writable properties on input (mass assignment is the same
+      failure, inbound).
+    reference: https://owasp.org/API-Security/editions/2023/en/0xa3-broken-object-property-level-authorization/
+  - id: AF-SEC-004
+    title: Resource consumption is bounded (rate limits, payload, timeouts)
+    severity: high
+    rationale: >-
+      OWASP API4 — endpoints with no rate limit, unbounded `limit` params,
+      unbounded request bodies or expensive unauthenticated work are a
+      self-serve denial-of-wallet/denial-of-service.
+    remediation: >-
+      Enforce per-subject rate limits, cap pagination `limit`, reject bodies
+      over a declared size, time-bound expensive operations — and state the
+      bounds in the contract.
+    reference: https://owasp.org/API-Security/editions/2023/en/0xa4-unrestricted-resource-consumption/
+  - id: AF-SEC-005
+    title: Function-level authorization on admin and internal paths (BFLA)
+    severity: critical
+    rationale: >-
+      OWASP API5 — `/admin/*`, debug and management endpoints relying on
+      obscurity or client-side hiding are callable by any authenticated
+      (or unauthenticated) user.
+    remediation: >-
+      Put admin functions behind a distinct scope/role checked server-side;
+      keep them out of the public contract or publish them with explicit
+      authorization requirements.
+    reference: https://owasp.org/API-Security/editions/2023/en/0xa5-broken-function-level-authorization/
+  - id: AF-SEC-006
+    title: Server-side fetches are allow-listed (SSRF)
+    severity: high
+    rationale: >-
+      OWASP API7 — any parameter that becomes a URL the server fetches
+      (webhooks, import-by-URL, image fetch) is a path to metadata services
+      (`169.254.169.254`) and internal hosts.
+    remediation: >-
+      Allow-list schemes/hosts, resolve+pin DNS, block link-local and RFC1918
+      ranges for untrusted input, and fetch through an egress policy.
+    reference: https://owasp.org/API-Security/editions/2023/en/0xa7-server-side-request-forgery/
+  - id: AF-SEC-007
+    title: API inventory is managed — no shadow or zombie versions
+    severity: medium
+    rationale: >-
+      OWASP API9 — undocumented versions (`/v1` kept alive "just in case"),
+      staging endpoints reachable publicly and forgotten debug routes form
+      the attack surface nobody is watching.
+    remediation: >-
+      Keep the deployed surface equal to the published contract; retire old
+      versions with a dated sunset; flag deployed-but-undocumented routes
+      (the judge's `code route missing from contract` is the mechanical check).
+    reference: https://owasp.org/API-Security/editions/2023/en/0xa9-improper-inventory-management/
+  - id: AF-SEC-008
+    title: Secrets and identifiers stay out of URLs
+    severity: medium
+    rationale: >-
+      Query strings land in access logs, proxies, browser history and
+      Referer headers; `?token=`/`?api_key=` distributes the credential to
+      every log pipeline downstream.
+    remediation: >-
+      Carry credentials in `Authorization` headers; carry sensitive object
+      ids in the path only when BOLA checks exist; never log query strings
+      containing secrets.
+    reference: docs/security/threat-model-mvp.md

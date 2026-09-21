@@ -2,4 +2,95 @@ catalog_version: 1
 schema_version: 1
 area: REST
 retrieved: 2026-09-21
-rules: []
+rules:
+  - id: AF-REST-001
+    title: Resources are plural nouns, not verbs
+    severity: low
+    rationale: >-
+      `/orders` names the collection the method acts on; `/getOrders` encodes
+      RPC in the URL and makes the uniform interface meaningless — caching,
+      authorization-by-resource and client generation all degrade.
+    remediation: >-
+      Rename action-shaped paths to noun resources; move actions behind a
+      dedicated sub-resource (`/orders/{id}/cancel`) or a custom method only
+      when no CRUD verb fits.
+    reference: https://restfulapi.net/resource-naming/
+  - id: AF-REST-002
+    title: HTTP methods carry their semantics
+    severity: medium
+    rationale: >-
+      GET must be safe, PUT/DELETE idempotent, POST the non-idempotent
+      create/process verb. Clients, caches, gateways and retry layers assume
+      it; a GET that mutates can fire through prefetch alone.
+    remediation: >-
+      Move side effects off GET/HEAD; make repeated PUT/DELETE calls
+      converge to one state; treat POST as the only non-idempotent verb.
+    reference: https://www.rfc-editor.org/rfc/rfc9110#name-methods
+  - id: AF-REST-003
+    title: Status codes describe outcomes, not transport
+    severity: medium
+    rationale: >-
+      200-everything forces clients to parse bodies to learn failure; 201 on
+      create (with `Location`), 204 on bodyless success, 400 vs 422 vs 409
+      distinguish validation from conflict — middleware can then act on
+      status alone.
+    remediation: >-
+      Return the most specific 2xx/4xx/5xx; never embed error codes inside a
+      200 payload; keep 5xx for faults the client cannot fix.
+    reference: https://www.rfc-editor.org/rfc/rfc9110#name-status-codes
+  - id: AF-REST-004
+    title: Collections are paginated by contract
+    severity: high
+    rationale: >-
+      An unbounded list endpoint is a memory/latency cliff decided by data
+      growth, not by design. Pagination is breaking to add later — it must
+      exist in the contract from the first version.
+    remediation: >-
+      Adopt cursor pagination (`cursor`, `limit`, `next`) for growing sets;
+      offset only for bounded admin views; document the page contract.
+    reference: docs/specs/2026-09-21-api-forge-agentic-platform.md
+  - id: AF-REST-005
+    title: Unsafe operations accept idempotency keys
+    severity: medium
+    rationale: >-
+      Clients retry POST on timeouts; without an `Idempotency-Key` the same
+      logical request can create two orders. Stripe-style keys make retries
+      safe by contract.
+    remediation: >-
+      Accept `Idempotency-Key` on POST; persist the key->response mapping
+      with a TTL; replay the stored response on duplicate keys.
+    reference: https://datatracker.ietf.org/doc/draft-ietf-httpapi-idempotency-key-header/
+  - id: AF-REST-006
+    title: Errors follow Problem Details (RFC 9457)
+    severity: low
+    rationale: >-
+      Ad-hoc error shapes (`{"error": "x"}`) cannot be consumed generically;
+      `application/problem+json` gives `type`/`title`/`status`/`detail`/
+      `instance` every client library already understands.
+    remediation: >-
+      Emit problem+json for 4xx/5xx; register `type` URIs for domain errors;
+      keep `detail` free of secrets and stack traces.
+    reference: https://www.rfc-editor.org/rfc/rfc9457
+  - id: AF-REST-007
+    title: Versioning is a declared strategy, not an accident
+    severity: medium
+    rationale: >-
+      Mixing `/v1` prefixes, media-type versions and silent field changes in
+      one API makes the compatibility contract unanswerable — consumers
+      cannot tell what is stable.
+    remediation: >-
+      Pick one strategy (URI prefix recommended for HTTP APIs), apply it
+      uniformly, and record the deprecation policy next to the contract.
+    reference: docs/decisions/ADR-002-api-ir-provenance.md
+  - id: AF-REST-008
+    title: Trailing-slash semantics are significant and consistent
+    severity: low
+    rationale: >-
+      `/orders` and `/orders/` are different resources to routers, caches and
+      the API-IR; silently treating them as equal hides drift between
+      contract and code (AF-CONTRACT/AF-CODE findings already treat them as
+      distinct).
+    remediation: >-
+      Choose one canonical form per resource; redirect the other form rather
+      than serving it; keep contract paths identical to served paths.
+    reference: docs/specs/2026-09-21-api-forge-design.md

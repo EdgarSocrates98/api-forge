@@ -1,0 +1,44 @@
+version: 1
+routes:
+  - phase: contract
+    dominant_area: CONTRACT
+    recommended_agent: api-contract-architect
+    rationale: >-
+      Contract findings while the contract is being written belong to the
+      contract architect, not to a downstream reviewer.
+  - phase: architecture
+    dominant_area: CONTRACT
+    recommended_agent: api-contract-architect
+    rationale: >-
+      Contract shape is the input to architecture decisions; unresolved
+      contract findings must be settled first.
+  - phase: verify
+    dominant_area: CONTRACT
+    recommended_agent: api-governance-reviewer
+    rationale: >-
+      Contract/code divergence surfacing at verify time is the governance
+      question: style, compatibility, and lifecycle policy.
+  - phase: build
+    dominant_area: TESTING
+    recommended_agent: api-testing-strategist
+    rationale: >-
+      Findings about missing or weak tests during build belong to the
+      testing strategist.
+  - phase: verify
+    dominant_area: TESTING
+    recommended_agent: api-testing-strategist
+    rationale: >-
+      Contract and coverage gaps found while verifying are the testing
+      strategist's domain.
+  - phase: secure
+    dominant_area: SECURITY
+    recommended_agent: api-security-reviewer
+    rationale: >-
+      AuthN/Z, OWASP API and exposure findings route to the security
+      reviewer.
+  - phase: benchmark
+    dominant_area: PERF
+    recommended_agent: api-performance-engineer
+    rationale: >-
+      Baseline/hypothesis/benchmark work belongs to the performance
+      engineer.

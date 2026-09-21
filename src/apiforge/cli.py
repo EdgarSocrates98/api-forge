@@ -184,6 +184,30 @@ def model_build(
     _echo_json(_run(work))
 
 
+@app.command("next-step")
+def next_step_cmd(
+    findings: Path = typer.Option(
+        ..., "--findings", help="findings.json produced by analyze or judge."
+    ),
+    phase: str = typer.Option(..., "--phase", help="Canonical SDD phase."),
+) -> None:
+    """Recommend the specialist agent for the dominant finding area."""
+
+    def work() -> object:
+        from apiforge.application.next_step import RoutingError, next_step
+
+        if not findings.is_file():
+            raise AnalysisError("AF-INPUT-NOT-FOUND", str(findings))
+        data = json.loads(findings.read_text(encoding="utf-8"))
+        parsed = tuple(Finding.model_validate(f) for f in data)
+        try:
+            return next_step(parsed, phase)
+        except RoutingError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_json(_run(work))
+
+
 @diff_app.command("contract")
 def diff_contract(
     baseline: Path = typer.Option(..., "--baseline", help="Baseline OpenAPI document."),

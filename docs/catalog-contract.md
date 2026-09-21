@@ -198,3 +198,16 @@ threshold stays catalog data, citable like every other field.
 | `AF-JUDGE-INPUT-AMBIGUOUS` | `--facts` combined with `--contract`/`--project` |
 | `AF-JUDGE-INPUT-MISSING` | neither `--contract`/`--project` nor `--facts` given |
 | `AF-JUDGE-FACTS-INVALID` | the facts payload is not a fact list |
+
+## AsyncAPI
+
+`model asyncapi --path doc.yaml` reads AsyncAPI 2.x/3.x offline.
+2.x `publish`/`subscribe` map to operation `action` `send`/`receive`
+(provider's perspective); 3.x `operations` carry their own action. Every
+`$ref` is a named pointer diagnostic — never dereferenced.
+
+| Code | Meaning |
+|---|---|
+| `AF-ASYNC-INVALID` | malformed YAML or missing `asyncapi` version key |
+| `AF-ASYNC-VERSION` | version is neither 2.x nor 3.x |
+| `AF-ASYNC-UNRESOLVED` | a `$ref` was recorded as a pointer, not followed |

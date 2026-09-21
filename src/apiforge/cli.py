@@ -464,6 +464,11 @@ _REPORT_READERS: tuple[tuple[str, str, str], ...] = (
     ("semgrep", "apiforge.adapters.secreports.extract_semgrep", "Semgrep --json output."),
     ("trivy", "apiforge.adapters.secreports.extract_trivy", "trivy --format json output."),
     ("gitleaks", "apiforge.adapters.secreports.extract_gitleaks", "gitleaks report JSON."),
+    (
+        "asyncapi",
+        "apiforge.adapters.asyncapi.extract.extract_asyncapi",
+        "AsyncAPI 2.x/3.x document.",
+    ),
 )
 
 

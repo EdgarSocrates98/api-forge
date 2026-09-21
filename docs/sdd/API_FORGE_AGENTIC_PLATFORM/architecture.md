@@ -22,7 +22,7 @@ decisions:
     rollback: swap store behind the repository protocol; verbs unchanged
   - id: ed25519-task-seal
     choice: task seals reuse report/keys.py Ed25519 instead of HMAC -- seal covers the exact revision hash; `task seal` is a verb distinct from `task run`
-    rollback: drop seal fields from TaskRevision; acceptance still works via Acceptancerecord
+    rollback: drop seal fields from TaskRevision; acceptance still works via AcceptanceRecord
   - id: cache-by-content
     choice: cache key = sha256(source_bytes)+extractor_version; invalidation is implicit (new content = new key); stale entries are garbage, named by `index status`
     rollback: delete .apiforge/cache/ -- extractors recompute

@@ -6,7 +6,7 @@ profile: critical
 status: ready
 upstream:
   path: architecture.md
-  sha256: "9e64ba437ec6af7d58abec9ed907a6339e971f878ca61df81a0fc810ae44f877"
+  sha256: "282010f89328a79b8ff41cf66770c3da224404d13a0ab5e52010c548a936d4d6"
 tasks:
   - id: A1
     covers: [contracts-v1]

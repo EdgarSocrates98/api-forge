@@ -6,7 +6,7 @@ profile: critical
 status: draft
 upstream:
   path: plan.md
-  sha256: "6ffb3499ebad10b235395c5ee115769ae0a786e2e9282a79188a0eb4e309c572"
+  sha256: "e4316a4be25d51dfb9a2fcde949692115be1786c200eeff96e8e03adac79bcbe"
 tasks: []
 claims: []
 ---

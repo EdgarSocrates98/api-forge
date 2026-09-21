@@ -91,6 +91,8 @@ while refusal codes and `fact_id`s survive.
 | `apiforge graph build --case D --out G` | Canonical provenance graph (nodes.jsonl/edges.jsonl) — same inputs, same bytes |
 | `apiforge graph query|impact|trace|coverage --graph G` | Closed-vocabulary queries; coverage names unverified findings and unimplemented ops |
 | `apiforge graph export --graph G --out D` | Byte-identical copy + digest manifest; `--format neptune` is a named stub |
+| `apiforge index build|status --project P` | Content-hash indexes (files/symbols/routes/facts); status names added/changed/removed |
+| — | `analyze`/`discover` extractors run through `.apiforge/cache/` — hits are recorded in the ledger and named in the payload |
 
 ## Agentic layer
 

@@ -9,9 +9,10 @@ reproducible case. Construction is one-directional: a pre-persistence
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from pathlib import Path
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from apiforge.adapters.fastapi.extractor import extract_fastapi
 from apiforge.adapters.go.extractor import extract_go
@@ -21,7 +22,7 @@ from apiforge.api_ir.builder import build_api_model
 from apiforge.api_ir.models import ApiModel
 from apiforge.case.models import CaseManifest, CasePayload
 from apiforge.case.service import save_case
-from apiforge.core.models import Diagnostic, Fact, Finding
+from apiforge.core.models import Diagnostic, Fact, Finding, JsonValue
 from apiforge.openapi.diff import ContractChange, diff_contracts
 from apiforge.openapi.loader import load_openapi
 from apiforge.rules.judge import judge_api_model
@@ -45,6 +46,7 @@ class AnalysisResult(BaseModel):
     findings: tuple[Finding, ...]
     changes: tuple[ContractChange, ...]
     diagnostics: tuple[Diagnostic, ...]
+    cache: Mapping[str, JsonValue] = Field(default_factory=dict)
 
 
 def _require_file(path: Path, code: str = "AF-INPUT-NOT-FOUND") -> Path:
@@ -106,6 +108,8 @@ def analyze_project(
     baseline: Path | None,
     out_dir: Path,
     framework: str = "auto",
+    cache_dir: Path | None = None,
+    ledger_root: Path | None = None,
 ) -> AnalysisResult:
     """Run the deterministic slice and persist a verified case."""
     contract_path = _require_file(Path(contract))
@@ -121,7 +125,17 @@ def analyze_project(
         )
 
     document = load_openapi(contract_path)
-    inventory: CodeInventory = extractor(project_path)
+    cache_meta: dict[str, JsonValue] = {"enabled": False}
+    inventory: CodeInventory
+    if cache_dir is not None:
+        from apiforge.index.cache import extract_cached
+
+        inventory, meta = extract_cached(
+            project_path, framework, extractor, cache_dir, ledger_root
+        )
+        cache_meta = dict(meta)
+    else:
+        inventory = extractor(project_path)
     model = build_api_model(document, inventory)
     findings = judge_api_model(model)
     changes = diff_contracts(load_openapi(baseline_path), document) if baseline_path else ()
@@ -143,4 +157,5 @@ def analyze_project(
         findings=findings,
         changes=changes,
         diagnostics=model.diagnostics,
+        cache=cache_meta,
     )

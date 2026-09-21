@@ -146,6 +146,12 @@ graph_app = typer.Typer(
     no_args_is_help=True,
 )
 app.add_typer(graph_app)
+index_app = typer.Typer(
+    name="index",
+    help="TokenSave: content-hash cache + local indexes over extractor output.",
+    no_args_is_help=True,
+)
+app.add_typer(index_app)
 
 
 @app.callback()
@@ -236,8 +242,17 @@ def discover(
     def work() -> object:
         if not project.is_dir():
             raise AnalysisError("AF-INPUT-NOT-FOUND", str(project))
-        inventory = extract_fastapi(project)
+        from apiforge.index.cache import extract_cached
+
+        inventory, cache_meta = extract_cached(
+            project,
+            "fastapi",
+            extract_fastapi,
+            Path.cwd() / ".apiforge" / "cache",
+            ledger_root=Path.cwd(),
+        )
         return {
+            "cache": cache_meta,
             "routes": [f.model_dump(mode="json") for f in inventory.facts],
             "diagnostics": [d.model_dump(mode="json") for d in inventory.diagnostics],
             "input_hashes": dict(inventory.input_hashes),
@@ -265,12 +280,21 @@ def analyze(
     """Run the full deterministic slice and persist a case."""
 
     def work() -> AnalysisResult:
-        return analyze_project(contract, project, baseline, out_dir, framework=framework)
+        return analyze_project(
+            contract,
+            project,
+            baseline,
+            out_dir,
+            framework=framework,
+            cache_dir=Path.cwd() / ".apiforge" / "cache",
+            ledger_root=Path.cwd(),
+        )
 
     result = _run(work)
     assert isinstance(result, AnalysisResult)
     _echo_json(
         {
+            "cache": dict(result.cache),
             "case_id": result.manifest.case_id,
             "out_dir": str(out_dir),
             "artifacts": {k: v.path for k, v in result.manifest.artifacts.items()},
@@ -1149,6 +1173,49 @@ def graph_export(
         from apiforge.graph.export import export_graph, export_summary
 
         return _graph_work(lambda: export_summary(export_graph(graph, out, fmt)))
+
+    _echo_json(_run(work), detail_level)
+
+
+@index_app.command("build")
+def index_build(
+    project: Path = typer.Option(..., "--project", help="Project root to index."),
+    root: Path = typer.Option(Path("."), "--root", help="Root holding .apiforge/."),
+    framework: str = typer.Option(
+        "auto", "--framework", help="fastapi|spring|go|auto."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Write files/symbols/routes/facts indexes under .apiforge/index/."""
+
+    def work() -> object:
+        from apiforge.contracts.base import ContractError
+        from apiforge.index.build import build_index
+
+        try:
+            return build_index(project, root, framework=framework)
+        except ContractError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_json(_run(work), detail_level)
+
+
+@index_app.command("status")
+def index_status(
+    project: Path = typer.Option(..., "--project", help="Project root to compare."),
+    root: Path = typer.Option(Path("."), "--root", help="Root holding .apiforge/."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Name added/changed/removed source files against the built index."""
+
+    def work() -> object:
+        from apiforge.contracts.base import ContractError
+        from apiforge.index.build import index_status as status
+
+        try:
+            return status(project, root)
+        except ContractError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
 
     _echo_json(_run(work), detail_level)
 

@@ -6,14 +6,14 @@ profile: critical
 status: draft
 upstream:
   path: build.md
-  sha256: "85bf9f7b8063774b1ef0db2b5118956dbb115c09e14195296200e01107e93093"
+  sha256: "f7efb3edf66e22c64dca848a95d8c2adfccd7a663f177a44e34fb41432aefa48"
 results:
   - gate: "pytest tests/contracts tests/taskspec"
     outcome: pass
     evidence: "36 passed"
   - gate: "pytest -q"
     outcome: pass
-    evidence: "390 passed, 1 skipped (optional mcp extra)"
+    evidence: "413 passed, 1 skipped (optional mcp extra)"
   - gate: "ruff check ."
     outcome: pass
     evidence: "All checks passed"

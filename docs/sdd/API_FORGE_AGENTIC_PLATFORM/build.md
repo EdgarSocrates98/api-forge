@@ -29,6 +29,12 @@ tasks:
   - id: C2
     outcome: done
     evidence: sdd/API_FORGE_AGENTIC_PLATFORM/evidence/C2.txt
+  - id: D1
+    outcome: done
+    evidence: sdd/API_FORGE_AGENTIC_PLATFORM/evidence/D1.txt
+  - id: D2
+    outcome: done
+    evidence: sdd/API_FORGE_AGENTIC_PLATFORM/evidence/D2.txt
 claims:
   - "contract list/show emits JSON schema for every registered v1 contract; unknown names refuse AF-CONTRACTS-UNKNOWN"
   - "task seal binds an Ed25519 signature to the exact revision; amending a sealed task writes a new unsealed revision"
@@ -38,6 +44,8 @@ claims:
   - "graph build emits byte-identical nodes.jsonl/edges.jsonl for identical case inputs"
   - "a tampered node line is refused on load (AF-GRAPH-HASH-MISMATCH)"
   - "graph export --format neptune refuses as a named stub (AF-GRAPH-FORMAT)"
+  - "extractor cache hits return byte-identical inventories and are recorded in the economy ledger"
+  - "index status names added/removed/changed files against files.jsonl"
 ---
 
 # build

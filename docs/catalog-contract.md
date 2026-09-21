@@ -400,3 +400,20 @@ digest manifest; `--format neptune` is a named stub, not a silent no-op.
 | `AF-GRAPH-NODE` | `impact`/`trace` name a node absent from the graph |
 | `AF-GRAPH-INPUT` | a source artifact is unreadable or malformed |
 | `AF-GRAPH-FORMAT` | export format named but not implemented (e.g. `neptune`) |
+
+### Index (`index`)
+
+`index build` writes `.apiforge/index/{files,symbols,routes,facts}.jsonl`
+plus `index.json` — all derived from extractor output, all canonical JSONL.
+`index status` compares the live tree against `files.jsonl` and names
+added/removed/changed. The extractor cache lives at
+`.apiforge/cache/<sha256(extractor_version|framework|source_digest)>.json`;
+a changed file yields a new key (stale entries are unreachable, never
+wrong), a corrupt cache file self-heals as a miss, and every hit is
+recorded in the economy ledger as `cache:extract:<framework>`.
+
+| Code | Meaning |
+|---|---|
+| `AF-INDEX-NOT-FOUND` | `--project` is not a directory |
+| `AF-INDEX-FRAMEWORK` | no extractor registered for the framework |
+| `AF-INDEX-NOT-BUILT` | `index status` without a prior `index build` |

@@ -243,7 +243,8 @@ briefs por task, RED→GREEN registrado, ledger SDD, commit atômico.
 | 6c | Conhecimento do catálogo: 37 regras em 6 áreas + `rules list/lookup` | **entregue** |
 | 7 | Testes: `analyze pact/schemathesis/k6/coverage` + regras AF-TEST | |
 | 8 | Segurança: `analyze zap/semgrep/trivy/gitleaks` + regras AF-SEC/AF-AUTHZ + security-reviewer | |
-| 9 | Camada agêntica: coordinators/executors em `agents/` + `AGENT_PROTOCOL.md` + `playbook` floor + economy ledger — **entregue** (MCP server e context funnel ficam para 9b) | **parcial** |
+| 9 | Camada agêntica: coordinators/executors em `agents/` + `AGENT_PROTOCOL.md` + `playbook` floor + economy ledger | **entregue** |
+| 9b | MCP server (`apiforge-mcp`, extra `[mcp]`) + `context funnel` medido | **entregue** |
 | 10 | Release evidence bundle completo + gates por kind de evidência + `report sign/verify` | |
 | 11+ | AsyncAPI, GraphQL/gRPC, performance avançada (JFR/pprof/Pyroscope), modernização assistida, debate protocol | |
 

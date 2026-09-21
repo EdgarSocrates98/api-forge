@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import NoReturn
 
 import typer
+from typer._click.globals import get_current_context
 
 from apiforge import __version__
 from apiforge.adapters.apigateway.extract import extract_apigateway
@@ -70,6 +71,12 @@ app.add_typer(policy_app, name="policy")
 app.add_typer(sdd_app, name="sdd")
 app.add_typer(sandbox_app, name="sandbox")
 app.add_typer(evidence_app, name="evidence")
+economy_app = typer.Typer(
+    name="economy",
+    help="Measured cost per call — bytes recorded, tokens unresolved without a transcript.",
+    no_args_is_help=True,
+)
+app.add_typer(economy_app)
 
 
 @app.callback()
@@ -100,7 +107,17 @@ def _echo_json(value: object, detail_level: str = "normal") -> None:
     elif hasattr(value, "model_dump"):
         value = value.model_dump(mode="json")
     value = apply_detail_level(value, detail_level)
-    typer.echo(json.dumps(value, sort_keys=True, ensure_ascii=False, indent=2))
+    text = json.dumps(value, sort_keys=True, ensure_ascii=False, indent=2)
+    from apiforge.economy.ledger import record
+
+    ctx = get_current_context(silent=True)
+    record(
+        Path.cwd(),
+        verb=ctx.command_path if ctx is not None else "unknown",
+        detail_level=detail_level,
+        payload_bytes=len(text.encode("utf-8")),
+    )
+    typer.echo(text)
 
 
 def _fail(code: str, detail: str, exit_code: int = 2) -> NoReturn:
@@ -378,6 +395,23 @@ def rules_list(
                 {"id": rule_id, "severity": meta.severity.value, "title": meta.title}
             )
         return {"areas": by_area, "count": sum(len(v) for v in by_area.values())}
+
+    _echo_json(_run(work), detail_level)
+
+
+@economy_app.command("report")
+def economy_report(
+    root: Path | None = typer.Option(
+        None, "--root", help="Directory whose .apiforge/economy.jsonl to aggregate."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Aggregate recorded call sizes; detail_level_effect shows what summary saves."""
+
+    def work() -> dict[str, object]:
+        from apiforge.economy.ledger import report
+
+        return report(root if root is not None else Path.cwd())
 
     _echo_json(_run(work), detail_level)
 

@@ -417,3 +417,28 @@ recorded in the economy ledger as `cache:extract:<framework>`.
 | `AF-INDEX-NOT-FOUND` | `--project` is not a directory |
 | `AF-INDEX-FRAMEWORK` | no extractor registered for the framework |
 | `AF-INDEX-NOT-BUILT` | `index status` without a prior `index build` |
+
+### Data access (`model redis`)
+
+`model redis --path <dir>` scans a project tree offline for Redis/Valkey call
+sites. Python files go through `ast`: a receiver is bound when assigned a
+`redis.Redis`/`valkey.Valkey`/`from_url` constructor (`binding: constructor`)
+or when it uses a conventional name while a redis package is imported
+(`binding: name` — emitted honestly as heuristic). Java (`jedis`,
+`redisTemplate`, `opsFor*()`) and Go (`rdb`, `redisClient`, `valkey`) files
+are pattern-matched only when a client import is present, always with
+`binding: name`. Each call emits `data.redis.command`; mutating commands
+also emit `data.redis.write` with `ttl_seconds` when a literal expiry is
+visible (otherwise absent — AF-DATA-002 fires on absence, never on a guess).
+Aggregation lands in `data_access_ir` (the `DataAccessIR` contract):
+`entities` = distinct literal keys, `access_patterns` = distinct commands,
+`unresolved` = diagnostic codes.
+
+Catalog area `DATA` (8 rules, `check:`-executable): AF-DATA-001 KEYS,
+AF-DATA-002 write-without-TTL, AF-DATA-003 FLUSHALL, AF-DATA-004 FLUSHDB,
+AF-DATA-005 CONFIG, AF-DATA-006 DEBUG, AF-DATA-007 MONITOR, AF-DATA-008 SAVE.
+
+| Code | Meaning |
+|---|---|
+| `AF-REDIS-PARSE` | a `.py` file failed `ast.parse` — extraction continues |
+| `AF-REDIS-HEURISTIC-BINDING` | receivers matched by name only — binding unproven |

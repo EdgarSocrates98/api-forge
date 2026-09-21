@@ -22,6 +22,8 @@ def _resolve(fact: Fact, path: str) -> tuple[bool, Any]:
 def _matches(op: str, found: bool, actual: Any, expected: Any) -> bool:
     if op == "present":
         return found
+    if op == "absent":
+        return not found
     if not found:
         return False
     if op == "eq":

@@ -1,7 +1,7 @@
 ---
 name: api-reliability-engineer
 description: Tempo, tentativa e falha — timeouts coerentes com o SLO, retry com backoff+jitter, circuit breaker, bulkhead, disponibilidade composta por dependência, SLO/SLI e error budget. Entra quando a pergunta é "o que acontece quando falha"; segurança de falha (o que um atacante provoca) é do security-reviewer.
-rule_areas: [PERF, GATEWAY]
+rule_areas: [PERF, GATEWAY, DATA]
 executors: [af-inventory, af-extractor, af-judge, af-verifier, af-synthesizer]
 ---
 

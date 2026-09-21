@@ -42,3 +42,18 @@ routes:
     rationale: >-
       Baseline/hypothesis/benchmark work belongs to the performance
       engineer.
+  - phase: build
+    dominant_area: DATA
+    recommended_agent: api-reliability-engineer
+    rationale: >-
+      Dangerous commands and unbounded writes found in source belong to the
+      reliability engineer — they are failure modes, not style.
+  - phase: verify
+    dominant_area: DATA
+    recommended_agent: api-reliability-engineer
+  - phase: benchmark
+    dominant_area: DATA
+    recommended_agent: api-performance-engineer
+    rationale: >-
+      Data-access findings surfacing under performance work (KEYS, blocking
+      SAVE) route to the performance engineer.

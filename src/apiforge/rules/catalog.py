@@ -31,7 +31,7 @@ _RULE_KEYS = {
 }
 
 _CHECK_KEYS = {"kind", "path", "op", "value"}
-_CHECK_OPS = {"gt", "ge", "lt", "le", "eq", "ne", "present"}
+_CHECK_OPS = {"gt", "ge", "lt", "le", "eq", "ne", "present", "absent"}
 
 
 class RuleCheck(BaseModel):

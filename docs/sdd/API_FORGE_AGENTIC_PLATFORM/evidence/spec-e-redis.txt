@@ -1,0 +1,303 @@
+..................................................                       [100%]
+50 passed in 1.90s
+{
+  "data_access_ir": {
+    "access_patterns": [
+      "config",
+      "debug",
+      "flushall",
+      "flushdb",
+      "get",
+      "keys",
+      "monitor",
+      "save",
+      "set",
+      "setex"
+    ],
+    "attributes": {
+      "command_facts": 14,
+      "heuristic_binding_files": [
+        "OrderCache.java",
+        "session.go"
+      ],
+      "write_facts": 4
+    },
+    "database": "redis",
+    "entities": [
+      "order:*",
+      "session:*"
+    ],
+    "id": "dataaccess:dff8734582c0a693",
+    "produced_by": "apiforge",
+    "provider": "redis|valkey",
+    "unresolved": [
+      "AF-REDIS-HEURISTIC-BINDING"
+    ],
+    "version": 1
+  },
+  "diagnostics": [
+    {
+      "code": "AF-REDIS-HEURISTIC-BINDING",
+      "details": {},
+      "message": "cache.py: receivers matched by name — binding not proven by a constructor",
+      "source": {
+        "column": null,
+        "extractor": "redis",
+        "line": null,
+        "path": "cache.py",
+        "sha256": "394020e19e7c3248d76004b43dd772cdf34bd2cc7eac74f857b5c4413938d989"
+      },
+      "status": "unresolved"
+    },
+    {
+      "code": "AF-REDIS-HEURISTIC-BINDING",
+      "details": {},
+      "message": "OrderCache.java: receivers matched by name — binding not proven",
+      "source": {
+        "column": null,
+        "extractor": "redis",
+        "line": null,
+        "path": "OrderCache.java",
+        "sha256": "7cc67c451915828646eaa87ac77bcfdd5a235b4cba521269bfbb4420c2666e31"
+      },
+      "status": "unresolved"
+    },
+    {
+      "code": "AF-REDIS-HEURISTIC-BINDING",
+      "details": {},
+      "message": "session.go: receivers matched by name — binding not proven",
+      "source": {
+        "column": null,
+        "extractor": "redis",
+        "line": null,
+        "path": "session.go",
+        "sha256": "a79d16ec4ab2820ab4cf9b5ce84a140a48ff6fa40ea2e20f41d45652ae2156d7"
+      },
+      "status": "unresolved"
+    }
+  ],
+  "facts": [
+    {
+      "fact_id": "fact:1caf7f5a2218434f",
+      "kind": "data.redis.command",
+      "source": {
+        "column": null,
+        "extractor": "redis",
+        "line": 14,
+        "path": "OrderCache.java",
+        "sha256": "7cc67c451915828646eaa87ac77bcfdd5a235b4cba521269bfbb4420c2666e31"
+      },
+      "version": 1
+    },
+    {
+      "fact_id": "fact:42358290a19baade",
+      "kind": "data.redis.command",
+      "source": {
+        "column": null,
+        "extractor": "redis",
+        "line": 27,
+        "path": "cache.py",
+        "sha256": "394020e19e7c3248d76004b43dd772cdf34bd2cc7eac74f857b5c4413938d989"
+      },
+      "version": 1
+    },
+    {
+      "fact_id": "fact:4e02f0f718aaee4b",
+      "kind": "data.redis.command",
+      "source": {
+        "column": null,
+        "extractor": "redis",
+        "line": 32,
+        "path": "cache.py",
+        "sha256": "394020e19e7c3248d76004b43dd772cdf34bd2cc7eac74f857b5c4413938d989"
+      },
+      "version": 1
+    },
+    {
+      "fact_id": "fact:535b2ce2e2419618",
+      "kind": "data.redis.command",
+      "source": {
+        "column": null,
+        "extractor": "redis",
+        "line": 42,
+        "path": "cache.py",
+        "sha256": "394020e19e7c3248d76004b43dd772cdf34bd2cc7eac74f857b5c4413938d989"
+      },
+      "version": 1
+    },
+    {
+      "fact_id": "fact:66de585c6839ab2c",
+      "kind": "data.redis.command",
+      "source": {
+        "column": null,
+        "extractor": "redis",
+        "line": 37,
+        "path": "cache.py",
+        "sha256": "394020e19e7c3248d76004b43dd772cdf34bd2cc7eac74f857b5c4413938d989"
+      },
+      "version": 1
+    },
+    {
+      "fact_id": "fact:6a0d9991b2d591e4",
+      "kind": "data.redis.command",
+      "source": {
+        "column": null,
+        "extractor": "redis",
+        "line": 22,
+        "path": "cache.py",
+        "sha256": "394020e19e7c3248d76004b43dd772cdf34bd2cc7eac74f857b5c4413938d989"
+      },
+      "version": 1
+    },
+    {
+      "fact_id": "fact:6a5b46df7af44a33",
+      "kind": "data.redis.command",
+      "source": {
+        "column": null,
+        "extractor": "redis",
+        "line": 17,
+        "path": "cache.py",
+        "sha256": "394020e19e7c3248d76004b43dd772cdf34bd2cc7eac74f857b5c4413938d989"
+      },
+      "version": 1
+    },
+    {
+      "fact_id": "fact:8b15c47eba3dc12d",
+      "kind": "data.redis.command",
+      "source": {
+        "column": null,
+        "extractor": "redis",
+        "line": 7,
+        "path": "cache.py",
+        "sha256": "394020e19e7c3248d76004b43dd772cdf34bd2cc7eac74f857b5c4413938d989"
+      },
+      "version": 1
+    },
+    {
+      "fact_id": "fact:91b158e73f0f2abf",
+      "kind": "data.redis.write",
+      "source": {
+        "column": null,
+        "extractor": "redis",
+        "line": 17,
+        "path": "cache.py",
+        "sha256": "394020e19e7c3248d76004b43dd772cdf34bd2cc7eac74f857b5c4413938d989"
+      },
+      "version": 1
+    },
+    {
+      "fact_id": "fact:968eff490c0f1431",
+      "kind": "data.redis.command",
+      "source": {
+        "column": null,
+        "extractor": "redis",
+        "line": 12,
+        "path": "cache.py",
+        "sha256": "394020e19e7c3248d76004b43dd772cdf34bd2cc7eac74f857b5c4413938d989"
+      },
+      "version": 1
+    },
+    {
+      "fact_id": "fact:9aabed7b159a2d8d",
+      "kind": "data.redis.command",
+      "source": {
+        "column": null,
+        "extractor": "redis",
+        "line": 18,
+        "path": "session.go",
+        "sha256": "a79d16ec4ab2820ab4cf9b5ce84a140a48ff6fa40ea2e20f41d45652ae2156d7"
+      },
+      "version": 1
+    },
+    {
+      "fact_id": "fact:af4e8bf9008f99a2",
+      "kind": "data.redis.write",
+      "source": {
+        "column": null,
+        "extractor": "redis",
+        "line": 14,
+        "path": "OrderCache.java",
+        "sha256": "7cc67c451915828646eaa87ac77bcfdd5a235b4cba521269bfbb4420c2666e31"
+      },
+      "version": 1
+    },
+    {
+      "fact_id": "fact:b1bf6af65a94b905",
+      "kind": "data.redis.write",
+      "source": {
+        "column": null,
+        "extractor": "redis",
+        "line": 12,
+        "path": "cache.py",
+        "sha256": "394020e19e7c3248d76004b43dd772cdf34bd2cc7eac74f857b5c4413938d989"
+      },
+      "version": 1
+    },
+    {
+      "fact_id": "fact:b9760d350faba12d",
+      "kind": "data.redis.write",
+      "source": {
+        "column": null,
+        "extractor": "redis",
+        "line": 18,
+        "path": "session.go",
+        "sha256": "a79d16ec4ab2820ab4cf9b5ce84a140a48ff6fa40ea2e20f41d45652ae2156d7"
+      },
+      "version": 1
+    },
+    {
+      "fact_id": "fact:bc357710c4722695",
+      "kind": "data.redis.command",
+      "source": {
+        "column": null,
+        "extractor": "redis",
+        "line": 47,
+        "path": "cache.py",
+        "sha256": "394020e19e7c3248d76004b43dd772cdf34bd2cc7eac74f857b5c4413938d989"
+      },
+      "version": 1
+    },
+    {
+      "fact_id": "fact:cc7db40f42063afb",
+      "kind": "data.redis.command",
+      "source": {
+        "column": null,
+        "extractor": "redis",
+        "line": 9,
+        "path": "OrderCache.java",
+        "sha256": "7cc67c451915828646eaa87ac77bcfdd5a235b4cba521269bfbb4420c2666e31"
+      },
+      "version": 1
+    },
+    {
+      "fact_id": "fact:e20b77f4d11a2c40",
+      "kind": "data.redis.command",
+      "source": {
+        "column": null,
+        "extractor": "redis",
+        "line": 13,
+        "path": "session.go",
+        "sha256": "a79d16ec4ab2820ab4cf9b5ce84a140a48ff6fa40ea2e20f41d45652ae2156d7"
+      },
+      "version": 1
+    },
+    {
+      "fact_id": "fact:ed3db86f91e3b7ef",
+      "kind": "data.redis.command",
+      "source": {
+        "column": null,
+        "extractor": "redis",
+        "line": 52,
+        "path": "cache.py",
+        "sha256": "394020e19e7c3248d76004b43dd772cdf34bd2cc7eac74f857b5c4413938d989"
+      },
+      "version": 1
+    }
+  ],
+  "framework": "redis",
+  "input_hashes": {
+    "OrderCache.java": "7cc67c451915828646eaa87ac77bcfdd5a235b4cba521269bfbb4420c2666e31",
+    "cache.py": "394020e19e7c3248d76004b43dd772cdf34bd2cc7eac74f857b5c4413938d989",
+    "session.go": "a79d16ec4ab2820ab4cf9b5ce84a140a48ff6fa40ea2e20f41d45652ae2156d7"
+  }
+}

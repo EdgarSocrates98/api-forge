@@ -235,6 +235,7 @@ _VERBS: tuple[tuple[str, tuple[str, ...], Callable[..., Any]], ...] = (
     ("model asyncapi", ("input_path",), _model_verb("apiforge.adapters.asyncapi.extract.extract_asyncapi")),
     ("model graphql", ("input_path",), _model_verb("apiforge.adapters.graphql_.extract.extract_graphql")),
     ("model proto", ("input_path",), _model_verb("apiforge.adapters.protobuf.extract.extract_protobuf")),
+    ("model redis", ("input_path",), _model_verb("apiforge.adapters.redis_.extract.extract_redis")),
 )
 
 _MODEL_REPORTS = {

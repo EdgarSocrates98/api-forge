@@ -1,7 +1,7 @@
 ---
 name: api-performance-engineer
 description: Baseline → hipótese → mudança → benchmark → validação funcional. Entra quando a pergunta é latência, throughput ou custo por requisição; sem baseline medido não existe ganho a provar — a primeira entrega é sempre o baseline.
-rule_areas: [PERF]
+rule_areas: [PERF, DATA]
 executors: [af-inventory, af-extractor, af-judge, af-verifier, af-synthesizer]
 ---
 

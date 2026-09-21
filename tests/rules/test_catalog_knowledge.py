@@ -59,6 +59,15 @@ EXPECTED_RULES = {
     "AF-CODE-001",
     "AF-CODE-002",
     "AF-CODE-003",
+    # data-access rules (Redis/Valkey)
+    "AF-DATA-001",
+    "AF-DATA-002",
+    "AF-DATA-003",
+    "AF-DATA-004",
+    "AF-DATA-005",
+    "AF-DATA-006",
+    "AF-DATA-007",
+    "AF-DATA-008",
 }
 
 
@@ -76,6 +85,7 @@ def test_areas_cover_the_specialist_team() -> None:
     assert set(load_areas()) == {
         "BREAKING",
         "CONTRACT",
+        "DATA",
         "GATEWAY",
         "PERF",
         "REST",
@@ -93,6 +103,7 @@ def test_id_prefix_matches_area() -> None:
         "BREAKING": "AF-BREAK-",
         "GATEWAY": "AF-GW-",
         "CONTRACT": "AF-",
+        "DATA": "AF-DATA-",
     }
     for rule_id, meta in load_catalog().items():
         assert rule_id.startswith(expected[meta.area]), rule_id

@@ -626,6 +626,33 @@ def inventory_proto(
     _echo_json(_run(work), detail_level)
 
 
+@model_app.command("redis")
+def inventory_redis(
+    path: Path = typer.Option(
+        ..., "--path", help="Project directory to scan for Redis/Valkey calls."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Static extraction of Redis/Valkey call sites + DataAccessIR — offline."""
+
+    def work() -> dict[str, object]:
+        from apiforge.adapters.redis_.extract import extract_redis
+        from apiforge.adapters.redis_.ir import build_data_access_ir
+
+        if not path.is_dir():
+            raise AnalysisError("AF-INPUT-NOT-FOUND", str(path))
+        inventory = extract_redis(path)
+        return {
+            "data_access_ir": build_data_access_ir(inventory).model_dump(mode="json"),
+            "diagnostics": [d.model_dump(mode="json") for d in inventory.diagnostics],
+            "facts": [f.model_dump(mode="json") for f in inventory.facts],
+            "framework": inventory.framework,
+            "input_hashes": dict(inventory.input_hashes),
+        }
+
+    _echo_json(_run(work), detail_level)
+
+
 @plan_app.command("strangler")
 def plan_strangler(
     baseline: Path = typer.Option(

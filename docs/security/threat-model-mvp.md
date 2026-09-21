@@ -31,6 +31,7 @@ with their mitigations.
 | Economy ledger forgery | the ledger is append-only local JSONL measuring emitted bytes; `economy report` recomputes aggregates from the file, reports `tokens_unresolved` without a transcript, and never attributes tokens or dollars that were not measured |
 | Secret exfiltration via reports | the gitleaks reader emits rule/file/count only — secret values and match text are never extracted; test asserted |
 | Report forgery | `report verify` re-hashes body/evidence/catalog and names each diverged part; the signature binds hashes, not identity — correspondence, never authorship (ADR-005) |
+| External tool execution | `run tool` executes only the allowlisted binaries (semgrep/trivy/gitleaks/k6) via fixed argv templates — no shell, `shutil.which` resolution, `--timeout` bound; the analyzed code is still never executed (the scanner runs, the target stays data), and `--dry-run` shows the argv beforehand |
 | Fabricated conclusions | `unresolved` diagnostics and findings name the uncertainty; `confirmed` requires evidence fact_ids by construction |
 
 ## Known limitations

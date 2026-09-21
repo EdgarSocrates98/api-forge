@@ -300,3 +300,21 @@ signature proves possession of the private key — never identity.
 |---|---|
 | `AF-KEY-EXISTS` | key name already present in the keys dir |
 | `AF-KEY-NOT-ED25519` | PEM is not an Ed25519 key |
+
+## Executing scanner binaries (`run tool`)
+
+`run tool <semgrep|trivy|gitleaks|k6> --target <path> --out <report>`
+executes the binary from a fixed argv template — resolved by
+`shutil.which`, no shell, bounded by `--timeout` — then reads the produced
+report through the same reader `model <tool>` uses. `--dry-run` prints the
+argv without executing. The analyzed code is still never executed: the
+scanner runs, the target stays data. `zap` is deliberately absent
+(baseline needs a daemon/docker, not a bare binary).
+
+| Code | Meaning |
+|---|---|
+| `AF-RUN-TOOL-UNKNOWN` | tool not in the allowlist |
+| `AF-RUN-TOOL-MISSING` | binary absent from PATH; names the install path |
+| `AF-RUN-CONFIG-MISSING` | semgrep without a local `--config` (`auto` hits the network) |
+| `AF-RUN-TIMEOUT` | the run exceeded `--timeout` |
+| `AF-RUN-NO-REPORT` | the tool exited without writing the report file |

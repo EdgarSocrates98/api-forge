@@ -116,6 +116,12 @@ agents_app = typer.Typer(
     no_args_is_help=True,
 )
 app.add_typer(agents_app)
+run_app = typer.Typer(
+    name="run",
+    help="Execute allowlisted scanner binaries, then read their reports.",
+    no_args_is_help=True,
+)
+app.add_typer(run_app)
 
 
 @app.callback()
@@ -732,6 +738,32 @@ def agents_check(
 
         drift = mirror_drift(Path(root).resolve())
         return {"drift": drift, "ok": not drift}
+
+    _echo_json(_run(work), detail_level)
+
+
+@run_app.command("tool")
+def run_tool_cmd(
+    tool: str = typer.Argument(..., help="Allowlisted tool: semgrep|trivy|gitleaks|k6."),
+    target: Path = typer.Option(..., "--target", help="Path the tool scans."),
+    out: Path = typer.Option(..., "--out", help="Report file the tool writes."),
+    config: str | None = typer.Option(
+        None, "--config", help="Tool config (semgrep requires a local rules path)."
+    ),
+    timeout: int = typer.Option(300, "--timeout", help="Seconds before the run is refused."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Print argv; execute nothing."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Execute a scanner binary (fixed argv, no shell) and read its report."""
+
+    def work() -> dict[str, object]:
+        from apiforge.run_tools import RunError, run_tool
+
+        try:
+            extra = {"config": config} if config else {}
+            return run_tool(tool, target, out, extra, timeout, dry_run=dry_run)
+        except RunError as exc:
+            raise AnalysisError(exc.code, str(exc).split(": ", 1)[-1]) from exc
 
     _echo_json(_run(work), detail_level)
 

@@ -131,3 +131,27 @@ a zero silently reported.
 |---|---|
 | `AF-MCP-UNAVAILABLE` | `mcp` package absent; unlock: `pip install apiforge[mcp]` |
 | `AF-FUNNEL-ARTIFACT-MISSING` | a stage file is absent from the case directory |
+
+## AWS slice 2 — Lambda / Terraform / SAM
+
+`collect lambda` writes `function.json` (Configuration only — the pre-signed
+`Code.Location` is never persisted) plus `policy.json` when a resource
+policy exists; its absence is data, not failure. `model lambda` reads the
+dump offline: env var **names** are extracted, values never read.
+
+`model terraform --path` parses `*.tf` with python-hcl2 — no terraform
+binary, no provider calls. Interpolated values (`${...}`) become
+`AF-TF-UNRESOLVED`, never resolved by inference.
+
+`model sam --path` parses the template with a `SafeLoader` subclass that
+maps intrinsic tags (`!Ref`, `!Sub`, `!GetAtt`) to plain data — never
+objects — and every tagged property becomes `AF-SAM-UNRESOLVED`.
+
+| Code | Meaning |
+|---|---|
+| `AF-LAM-DUMP-MISSING` | `function.json` absent from the dump directory |
+| `AF-LAM-DUMP-INVALID` | a dump file is not valid JSON |
+| `AF-TF-PARSE` | hcl2 could not parse the `.tf` file |
+| `AF-TF-UNRESOLVED` | an attribute is interpolated — named, never inferred |
+| `AF-SAM-INVALID` | the template is malformed or has no `Resources` mapping |
+| `AF-SAM-UNRESOLVED` | a property is an intrinsic tag — named, never resolved |

@@ -321,6 +321,107 @@ def collect_api_gateway(
     )
 
 
+@collect_app.command("lambda")
+def collect_lambda(
+    function_name: str = typer.Option(..., "--function-name", help="Lambda function name."),
+    out_dir: Path = typer.Option(..., "--out", help="Dump directory to write."),
+    now: str | None = typer.Option(
+        None, "--now", help="Explicit ISO8601 collection timestamp (the only clock)."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Fetch one Lambda function's configuration into an offline dump."""
+
+    def work() -> CollectManifest:
+        from apiforge.collectors.lambda_ import collect
+
+        try:
+            return collect(function_name, out_dir, now=now)
+        except CollectError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    manifest = _run(work)
+    assert isinstance(manifest, CollectManifest)
+    _echo_json(
+        {
+            "artifacts": manifest.artifacts,
+            "collected_at": manifest.collected_at,
+            "source": manifest.source,
+            "tool_version": manifest.tool_version,
+        },
+        detail_level,
+    )
+
+
+@model_app.command("lambda")
+def inventory_lambda(
+    path: Path = typer.Option(..., "--path", help="Dump directory from collect lambda."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Read a Lambda dump into facts — offline, no credentials."""
+
+    def work() -> dict[str, object]:
+        from apiforge.adapters.lambda_.extract import extract_lambda
+
+        if not path.is_dir():
+            raise AnalysisError("AF-INPUT-NOT-FOUND", str(path))
+        inventory = extract_lambda(path)
+        return {
+            "diagnostics": [d.model_dump(mode="json") for d in inventory.diagnostics],
+            "facts": [f.model_dump(mode="json") for f in inventory.facts],
+            "framework": inventory.framework,
+            "input_hashes": dict(inventory.input_hashes),
+        }
+
+    _echo_json(_run(work), detail_level)
+
+
+@model_app.command("terraform")
+def inventory_terraform(
+    path: Path = typer.Option(..., "--path", help="Directory of *.tf files."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Extract API Gateway + Lambda resources from HCL — offline, no terraform."""
+
+    def work() -> dict[str, object]:
+        from apiforge.adapters.terraform.extract import extract_terraform
+
+        if not path.is_dir():
+            raise AnalysisError("AF-INPUT-NOT-FOUND", str(path))
+        inventory = extract_terraform(path)
+        return {
+            "diagnostics": [d.model_dump(mode="json") for d in inventory.diagnostics],
+            "facts": [f.model_dump(mode="json") for f in inventory.facts],
+            "framework": inventory.framework,
+            "input_hashes": dict(inventory.input_hashes),
+        }
+
+    _echo_json(_run(work), detail_level)
+
+
+@model_app.command("sam")
+def inventory_sam(
+    path: Path = typer.Option(..., "--path", help="SAM template.yaml."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Extract AWS::Serverless::* resources — intrinsics become named diagnostics."""
+
+    def work() -> dict[str, object]:
+        from apiforge.adapters.sam.extract import extract_sam
+
+        if not path.is_file():
+            raise AnalysisError("AF-INPUT-NOT-FOUND", str(path))
+        inventory = extract_sam(path)
+        return {
+            "diagnostics": [d.model_dump(mode="json") for d in inventory.diagnostics],
+            "facts": [f.model_dump(mode="json") for f in inventory.facts],
+            "framework": inventory.framework,
+            "input_hashes": dict(inventory.input_hashes),
+        }
+
+    _echo_json(_run(work), detail_level)
+
+
 @model_app.command("api-gateway")
 def inventory_api_gateway(
     path: Path = typer.Option(..., "--path", help="Dump directory from collect api-gateway."),

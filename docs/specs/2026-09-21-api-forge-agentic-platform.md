@@ -238,7 +238,7 @@ briefs por task, RED→GREEN registrado, ledger SDD, commit atômico.
 | 3 | Fundação do catálogo: `routing.yaml`, `gates.yaml`, áreas de regras esqueléticas, `next-step`, `detail_level` no core — **+ adapter Spring Boot + lab `orders-spring`** (Java antes de Go, decisão do operador) | **entregue** |
 | 4 | Adapter Go/Chi + lab `orders-go` (ADR tree-sitter já decidido no plano 3) | **entregue** |
 | 5 | ~~Adapter Spring Boot + lab `orders-spring`~~ → absorvido pelo plano 3 | |
-| 6 | AWS: `collect api-gateway` + `model api-gateway` offline — slice 1 entregue (lambda/terraform/sam ficam para slice 2) | **parcial** |
+| 6 | AWS: `collect/model api-gateway` (slice 1) + `collect/model lambda`, `model terraform`, `model sam` (slice 2) | **entregue** |
 | 6b | Builder Java: `build endpoint` (sandbox-first, worktree-gated, receipt) | **entregue** |
 | 6c | Conhecimento do catálogo: 37 regras em 6 áreas + `rules list/lookup` | **entregue** |
 | 7 | Testes: `analyze pact/schemathesis/k6/coverage` + regras AF-TEST | |

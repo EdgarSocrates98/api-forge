@@ -169,6 +169,9 @@ def _check_code_parity(root: Path, failures: list[str]) -> None:
         ("AF-BUILD", "docs/catalog-contract.md"),
         ("AF-PLAYBOOK", "docs/catalog-contract.md"),
         ("AF-MCP", "docs/catalog-contract.md"),
+        ("AF-LAM", "docs/catalog-contract.md"),
+        ("AF-TF", "docs/catalog-contract.md"),
+        ("AF-SAM", "docs/catalog-contract.md"),
         ("AF-FUNNEL", "docs/catalog-contract.md"),
     ):
         doc_path = root / doc
@@ -338,6 +341,11 @@ def _check_lab_and_boundary(root: Path, failures: list[str]) -> None:
             and "apiforge/mcp" not in posix
         ):
             failures.append(f"mcp import outside apiforge/mcp boundary: {source}")
+        if (
+            re.search(r"^\s*(?:import|from)\s+hcl2\b", text, re.MULTILINE)
+            and "adapters/terraform" not in posix
+        ):
+            failures.append(f"hcl2 import outside adapters/terraform: {source}")
 
 
 def _check_threat_model(root: Path, failures: list[str]) -> None:

@@ -1,0 +1,12 @@
+{
+  "FunctionName": "orders-api",
+  "Runtime": "python3.12",
+  "MemorySize": 256,
+  "Timeout": 30,
+  "Handler": "app.handler",
+  "PackageType": "Zip",
+  "Layers": [{"Arn": "arn:aws:lambda:us-east-1:123:layer:x:1"}],
+  "Environment": {"Variables": {"ORDERS_TABLE": "secret-value-not-read", "LOG_LEVEL": "INFO"}},
+  "TracingConfig": {"Mode": "PassThrough"},
+  "ReservedConcurrentExecutions": 10
+}

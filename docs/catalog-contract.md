@@ -211,3 +211,19 @@ threshold stays catalog data, citable like every other field.
 | `AF-ASYNC-INVALID` | malformed YAML or missing `asyncapi` version key |
 | `AF-ASYNC-VERSION` | version is neither 2.x nor 3.x |
 | `AF-ASYNC-UNRESOLVED` | a `$ref` was recorded as a pointer, not followed |
+
+## GraphQL and protobuf
+
+`model graphql --path schema.graphql` parses SDL with graphql-core
+(confined to `adapters/graphql_` by the release gate) — types become
+`graphql.type` facts, root Query/Mutation/Subscription fields become
+`graphql.field` facts carrying args, return type and deprecation.
+`model proto --path dir/` reads `*.proto` with a deterministic
+mini-parser — no protoc; services/rpcs/messages become `proto.*` facts,
+streaming flags are data.
+
+| Code | Meaning |
+|---|---|
+| `AF-GQL-INVALID` | graphql-core could not parse the SDL |
+| `AF-PROTO-PARSE` | unbalanced braces or undecodable .proto file |
+| `AF-PROTO-EMPTY` | no `*.proto` under the given directory |

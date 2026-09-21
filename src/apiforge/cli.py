@@ -469,6 +469,11 @@ _REPORT_READERS: tuple[tuple[str, str, str], ...] = (
         "apiforge.adapters.asyncapi.extract.extract_asyncapi",
         "AsyncAPI 2.x/3.x document.",
     ),
+    (
+        "graphql",
+        "apiforge.adapters.graphql_.extract.extract_graphql",
+        "GraphQL SDL schema file.",
+    ),
 )
 
 
@@ -501,6 +506,29 @@ def _register_report(name: str, import_path: str, help_text: str) -> None:
 
 for _name, _import, _help in _REPORT_READERS:
     _register_report(_name, _import, _help)
+
+
+@model_app.command("proto")
+def inventory_proto(
+    path: Path = typer.Option(..., "--path", help="Directory of *.proto files."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Extract gRPC services/messages from .proto — no protoc, offline."""
+
+    def work() -> dict[str, object]:
+        from apiforge.adapters.protobuf.extract import extract_protobuf
+
+        if not path.is_dir():
+            raise AnalysisError("AF-INPUT-NOT-FOUND", str(path))
+        inventory = extract_protobuf(path)
+        return {
+            "diagnostics": [d.model_dump(mode="json") for d in inventory.diagnostics],
+            "facts": [f.model_dump(mode="json") for f in inventory.facts],
+            "framework": inventory.framework,
+            "input_hashes": dict(inventory.input_hashes),
+        }
+
+    _echo_json(_run(work), detail_level)
 
 
 @model_app.command("api-gateway")

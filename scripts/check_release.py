@@ -351,6 +351,11 @@ def _check_lab_and_boundary(root: Path, failures: list[str]) -> None:
             and "adapters/terraform" not in posix
         ):
             failures.append(f"hcl2 import outside adapters/terraform: {source}")
+        if (
+            re.search(r"^\s*(?:import|from)\s+graphql\b", text, re.MULTILINE)
+            and "adapters/graphql_" not in posix
+        ):
+            failures.append(f"graphql import outside adapters/graphql_: {source}")
 
 
 def _check_threat_model(root: Path, failures: list[str]) -> None:

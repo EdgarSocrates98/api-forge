@@ -98,3 +98,19 @@ It never edits existing files and never writes to the main tree.
 | `AF-BUILD-OP-MISSING` | the requested operationId (or method) is absent from the contract |
 | `AF-BUILD-SCHEMA-MISSING` | a schema node has no bounded Java mapping — refused, never guessed |
 | `AF-BUILD-TARGET-EXISTS` | a generated path already exists — builds never clobber |
+
+## Agentic layer
+
+`apiforge playbook <coordinator>` renders the executor decomposition declared
+in `playbooks.yaml` — the floor on platforms that cannot dispatch subagents.
+Coordinator names equal `agents/*.md` profiles; every `recommended_agent` in
+`routing.yaml` must have both a profile and a playbook (release-gated).
+
+The economy ledger appends `{verb, detail_level, payload_bytes}` per emitted
+payload to `.apiforge/economy.jsonl`; `economy report` aggregates and shows
+`detail_level_effect`. Tokens are `tokens_unresolved` without a provider
+transcript — measured bytes only, never invented numbers.
+
+| Code | Meaning |
+|---|---|
+| `AF-PLAYBOOK-NOT-FOUND` | no playbook for the named coordinator; known names are in the detail |

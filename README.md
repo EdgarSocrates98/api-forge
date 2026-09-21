@@ -67,6 +67,17 @@ while refusal codes and `fact_id`s survive.
 | `apiforge model api-gateway --path dump/` | Read the dump into facts — offline, no credentials |
 | `apiforge build endpoint --contract c.yaml --operation-id X --project .` | Synthesize a Spring skeleton, prove it in the sandbox (main tree untouched) |
 | `apiforge build endpoint ... --into-worktree NAME --approve` | Promote generated files into a policy-gated git worktree |
+| `apiforge playbook api-governance-reviewer` | Render the coordinator's executor decomposition — works without dispatch |
+| `apiforge economy report [--root .]` | Measured call sizes; `detail_level_effect` shows what `summary` saves |
+
+## Agentic layer
+
+Ten coordinator profiles in `agents/*.md` (one per specialty, each declaring
+`rule_areas` and the five executors) plus five executors in
+`agents/executors/*.md` (`af-inventory`, `af-extractor`, `af-judge`,
+`af-verifier`, `af-synthesizer`). `AGENT_PROTOCOL.md` is the operating
+contract every profile points at; `next-step` routes by data, `playbook`
+is the dispatch floor, and `.apiforge/economy.jsonl` measures every call.
 
 ## Exit codes
 

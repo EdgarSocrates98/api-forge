@@ -42,6 +42,7 @@ REQUIRED_DOCS = (
     "docs/decisions/ADR-005-correspondence-not-authorship.md",
     "docs/decisions/ADR-006-tree-sitter-language-adapters.md",
     "docs/catalog-contract.md",
+    "AGENT_PROTOCOL.md",
 )
 
 FORBIDDEN_IMPORT = re.compile(
@@ -84,6 +85,7 @@ THREAT_PHRASES = (
     "frontmatter injection",
     "gate override abuse",
     "worktree index drift",
+    "agent profile drift",
 )
 
 
@@ -165,6 +167,7 @@ def _check_code_parity(root: Path, failures: list[str]) -> None:
         ("AF-COLLECT", "docs/catalog-contract.md"),
         ("AF-GW", "docs/catalog-contract.md"),
         ("AF-BUILD", "docs/catalog-contract.md"),
+        ("AF-PLAYBOOK", "docs/catalog-contract.md"),
     ):
         doc_path = root / doc
         if not doc_path.is_file():
@@ -262,6 +265,60 @@ def _check_routing(root: Path, failures: list[str]) -> None:
             failures.append(f"routing.yaml: unknown area {route.dominant_area!r}")
 
 
+def _check_agents(root: Path, failures: list[str]) -> None:
+    from apiforge.application.next_step import load_routing
+    from apiforge.core.yaml import StrictYamlError, load_yaml_mapping, split_frontmatter
+    from apiforge.rules.catalog import load_areas, load_playbooks
+
+    agents_dir = root / "agents"
+    coordinators = {p.stem for p in agents_dir.glob("*.md")} if agents_dir.is_dir() else set()
+    executors_dir = agents_dir / "executors"
+    executors = (
+        {p.stem for p in executors_dir.glob("*.md")} if executors_dir.is_dir() else set()
+    )
+    for profile in sorted(agents_dir.rglob("*.md")):
+        if "AGENT_PROTOCOL.md" not in profile.read_text(encoding="utf-8"):
+            failures.append(f"{profile}: does not reference AGENT_PROTOCOL.md")
+    try:
+        areas = set(load_areas())
+        for profile in sorted(agents_dir.glob("*.md")):
+            meta, _ = split_frontmatter(profile.read_text(encoding="utf-8"))
+            data = load_yaml_mapping(meta, source=str(profile))
+            if data.get("name") != profile.stem:
+                failures.append(f"{profile.name}: frontmatter name does not match file")
+            for area in data.get("rule_areas") or ():
+                if area not in areas:
+                    failures.append(f"{profile.name}: rule_area {area!r} not in catalog")
+            for executor in data.get("executors") or ():
+                if executor not in executors:
+                    failures.append(f"{profile.name}: unknown executor {executor!r}")
+    except (StrictYamlError, ValueError) as exc:
+        failures.append(f"agent profile frontmatter failed to parse: {exc}")
+    try:
+        routes = load_routing()
+        playbooks = load_playbooks()
+    except Exception as exc:  # noqa: BLE001
+        failures.append(f"routing/playbooks load failed: {exc}")
+        return
+    for route in routes:
+        if route.recommended_agent not in coordinators:
+            failures.append(
+                f"routing agent {route.recommended_agent!r} has no agents/*.md profile"
+            )
+        if route.recommended_agent not in playbooks:
+            failures.append(
+                f"routing agent {route.recommended_agent!r} has no playbook"
+            )
+    for name, steps in playbooks.items():
+        if name not in coordinators:
+            failures.append(f"playbook {name!r} has no agents/*.md profile")
+        for step in steps:
+            if step["executor"] not in executors:
+                failures.append(
+                    f"playbook {name!r}: unknown executor {step['executor']!r}"
+                )
+
+
 def _check_lab_and_boundary(root: Path, failures: list[str]) -> None:
     for name, glob in (("orders-spring", "*.java"), ("orders-go", "*.go")):
         lab = root / "tests" / "labs" / name
@@ -299,6 +356,7 @@ def check_repository(root: Path) -> list[str]:
     _check_templates(root, failures)
     _check_receipt_roundtrip(root, failures)
     _check_routing(root, failures)
+    _check_agents(root, failures)
     _check_lab_and_boundary(root, failures)
     _check_threat_model(root, failures)
     return failures

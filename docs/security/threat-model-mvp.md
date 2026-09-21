@@ -25,6 +25,8 @@ with their mitigations.
 | Malformed Go source (tree-sitter) | identical boundary: no toolchain contact, no code execution; parse errors degrade to `AF-GO-PARSE` and dynamic registrations to `AF-GO-UNRESOLVED-ROUTE` |
 | AWS credential/network abuse | only `collect *` imports boto3 (release-gate enforced); `analyze`/`model` verbs read dumps offline and never see credentials; dumps land under an explicit `--out` dir with `*.json`-only artifact names |
 | Generated-code escape | `build` emits new files only under `com/apiforge/generated/`, refuses existing targets, evaluates via `sandbox_apply` (which itself refuses path escapes), and promotion writes solely inside a policy-gated git worktree |
+| Agent profile drift | coordinator/executor `.md` profiles are prose contracts, not enforcement — the gate re-checks them: frontmatter `name` == filename, `rule_areas` ⊆ catalog, `executors` exist as files, every routing `recommended_agent` has a profile and a playbook, and every profile references `AGENT_PROTOCOL.md` |
+| Economy ledger forgery | the ledger is append-only local JSONL measuring emitted bytes; `economy report` recomputes aggregates from the file, reports `tokens_unresolved` without a transcript, and never attributes tokens or dollars that were not measured |
 | Fabricated conclusions | `unresolved` diagnostics and findings name the uncertainty; `confirmed` requires evidence fact_ids by construction |
 
 ## Known limitations

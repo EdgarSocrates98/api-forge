@@ -1,0 +1,9 @@
+sources:
+  - name: FastAPI documentation
+    url: https://fastapi.tiangolo.com/
+    authority: project-docs
+    verified: "2026-09-21"
+  - name: Pydantic documentation
+    url: https://docs.pydantic.dev/latest/
+    authority: project-docs
+    verified: "2026-09-21"

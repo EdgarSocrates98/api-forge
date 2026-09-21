@@ -526,3 +526,23 @@ ordered `{verb, class}` steps over the same dispatch context.
 | `AF-AUTONOMY-RUNBOOK-UNKNOWN` | no runbook with that name |
 | `AF-AUTONOMY-RUNBOOK-SCHEMA` | runbooks.yaml malformed |
 | `AF-AUTONOMY-DETAIL` | `--detail` pair is not `key=value` |
+
+### Knowledge packs (`knowledge`)
+
+`knowledge/<domain>/` holds data packs: `pack.yaml` (identity, rule areas,
+the catalog rules it backs), `source_authority.yaml` (every normative claim
+cited with authority class and verification date — sources are cited, never
+copied), optional `matrix.yaml` (runtime version guard) and `evals.yaml`
+(declared adversarial probes — the project never calls a model, so evals
+are data for external runners). `knowledge check` validates the schema and
+cross-checks every `rule_id` against the catalog; the release gate runs it.
+
+| Code | Meaning |
+|---|---|
+| `AF-KNOW-ROOT` | `--root` is not a knowledge directory |
+| `AF-KNOW-SCHEMA` | a pack file is missing, malformed or lacks a required field |
+| `AF-KNOW-DOMAIN` | `pack.yaml` domain does not match the directory name |
+| `AF-KNOW-NO-AUTHORITY` | `source_authority.yaml` missing or lists no sources |
+| `AF-KNOW-AUTHORITY` | source authority class outside the closed set |
+| `AF-KNOW-EVAL` | eval `expect.kind` outside rule/fact-kind/refusal |
+| `AF-KNOW-CHECK` | `knowledge check` found cross-catalog problems (exit 4) |

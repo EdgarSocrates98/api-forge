@@ -416,7 +416,26 @@ def check_repository(root: Path) -> list[str]:
     _check_agents(root, failures)
     _check_lab_and_boundary(root, failures)
     _check_threat_model(root, failures)
+    _check_knowledge(root, failures)
     return failures
+
+
+def _check_knowledge(root: Path, failures: list[str]) -> None:
+    """Every knowledge pack must validate; rule ids must exist in the catalog."""
+    know_root = root / "knowledge"
+    if not know_root.is_dir():
+        return
+    from apiforge.knowledge.loader import check_packs
+
+    try:
+        result = check_packs(know_root)
+    except Exception as exc:  # noqa: BLE001
+        failures.append(f"knowledge packs failed to load: {exc}")
+        return
+    for problem in result["problems"]:
+        failures.append(f"knowledge: {problem}")
+    if not result["packs"]:
+        failures.append("knowledge/ exists but contains no packs")
 
 
 def main() -> int:

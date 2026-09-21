@@ -1,0 +1,7 @@
+evals:
+  - id: owasp/e1
+    prompt: "GET /orders/{id} authenticates the caller but never checks ownership - which rule fires?"
+    expect: {kind: rule, id: AF-SEC-001}
+  - id: owasp/e2
+    prompt: "A public demo endpoint must stay unauthenticated - is AF-SEC-002 waived?"
+    expect: {kind: refusal, id: deliberate-public-documented}

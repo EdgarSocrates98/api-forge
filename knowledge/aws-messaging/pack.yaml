@@ -1,0 +1,9 @@
+domain: aws-messaging
+version: 1
+areas: [MESSAGING]
+rule_ids: [AF-MSG-001, AF-MSG-002, AF-MSG-003, AF-MSG-004]
+summary: >-
+  SQS dead-letter queues and redrive, SNS encryption and subscription
+  lifecycle, EventBridge rule/target wiring - the delivery guarantees the
+  MESSAGING rules measure.
+verified: "2026-09-21"

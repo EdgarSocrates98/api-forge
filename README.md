@@ -88,6 +88,7 @@ while refusal codes and `fact_id`s survive.
 | `apiforge debate open|submit|close` | Deterministic debate machine — positions cite `fact:` evidence, quorum of 2 sides |
 | `apiforge plan strangler --project P --contract C` | Per-route cut plan; migrated routes name the parity evidence still due |
 | `apiforge contract list\|show <name>` | Versioned canonical contracts (JSON schema per `<Name>/v1`) |
+| `apiforge knowledge list\|show\|check` | Domain packs — source authority dates, runtime matrices, declared evals; `check` cross-validates rule ids |
 | `apiforge task create|review|seal|run|accept|reject|status` | Sealed, budgeted unit of work; executor never holds the seal key; acceptor != executor |
 | `apiforge brief show --task <id>` | OutcomeBrief — `DONE` is refused while gaps or missing acceptance remain |
 | `apiforge graph build --case D --out G` | Canonical provenance graph (nodes.jsonl/edges.jsonl) — same inputs, same bytes |

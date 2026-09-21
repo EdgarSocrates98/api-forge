@@ -1,0 +1,5 @@
+sources:
+  - name: OWASP API Security Top 10 2023
+    url: https://owasp.org/API-Security/editions/2023/en/0x11-t10/
+    authority: owasp
+    verified: "2026-09-21"

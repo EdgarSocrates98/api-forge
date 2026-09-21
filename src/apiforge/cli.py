@@ -164,6 +164,12 @@ index_app = typer.Typer(
     no_args_is_help=True,
 )
 app.add_typer(index_app)
+knowledge_app = typer.Typer(
+    name="knowledge",
+    help="Domain packs — source authority, runtime matrices, declared evals.",
+    no_args_is_help=True,
+)
+app.add_typer(knowledge_app)
 
 
 @app.callback()
@@ -1843,5 +1849,101 @@ def rules_lookup(
         if meta is None:
             raise AnalysisError("AF-RULE-NOT-FOUND", f"no rule {rule_id!r} in the catalog")
         return meta.model_dump(mode="json") | {"id": rule_id.upper()}
+
+    _echo_json(_run(work), detail_level)
+
+
+@knowledge_app.command("list")
+def knowledge_list(
+    root: Path = typer.Option(
+        Path("knowledge"), "--root", help="Directory of knowledge packs."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """List every pack with its areas, rules and verification date."""
+
+    def work() -> dict[str, object]:
+        from apiforge.contracts.base import ContractError
+        from apiforge.knowledge.loader import load_packs
+
+        try:
+            packs = load_packs(root)
+        except ContractError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+        return {
+            "packs": [
+                {
+                    "areas": list(p.areas),
+                    "domain": p.domain,
+                    "evals": len(p.evals),
+                    "has_matrix": bool(p.matrix),
+                    "rule_ids": list(p.rule_ids),
+                    "sources": len(p.sources),
+                    "verified": p.verified,
+                }
+                for p in packs.values()
+            ],
+            "count": len(packs),
+        }
+
+    _echo_json(_run(work), detail_level)
+
+
+@knowledge_app.command("show")
+def knowledge_show(
+    domain: str = typer.Argument(..., help="Pack directory name, e.g. rest-design."),
+    root: Path = typer.Option(
+        Path("knowledge"), "--root", help="Directory of knowledge packs."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Print one pack: summary, source authority, matrix, declared evals."""
+
+    def work() -> dict[str, object]:
+        from apiforge.contracts.base import ContractError
+        from apiforge.knowledge.loader import load_pack
+
+        try:
+            pack = load_pack(root / domain)
+        except ContractError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+        return {
+            "areas": list(pack.areas),
+            "domain": pack.domain,
+            "evals": list(pack.evals),
+            "matrix": list(pack.matrix),
+            "rule_ids": list(pack.rule_ids),
+            "sources": [s.__dict__ for s in pack.sources],
+            "summary": pack.summary,
+            "verified": pack.verified,
+            "version": pack.version,
+        }
+
+    _echo_json(_run(work), detail_level)
+
+
+@knowledge_app.command("check")
+def knowledge_check(
+    root: Path = typer.Option(
+        Path("knowledge"), "--root", help="Directory of knowledge packs."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Validate every pack; exit 4 when any problem is named."""
+
+    def work() -> dict[str, object]:
+        from apiforge.contracts.base import ContractError
+        from apiforge.knowledge.loader import check_packs
+
+        try:
+            result = check_packs(root)
+        except ContractError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+        if not result["ok"]:
+            raise AnalysisError(
+                "AF-KNOW-CHECK",
+                "pack problems: " + "; ".join(str(p) for p in result["problems"]),
+            )
+        return result
 
     _echo_json(_run(work), detail_level)

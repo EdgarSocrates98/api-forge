@@ -1,0 +1,9 @@
+sources:
+  - name: API Gateway quotas
+    url: https://docs.aws.amazon.com/apigateway/latest/developerguide/limits.html
+    authority: aws-docs
+    verified: "2026-09-21"
+  - name: Choosing between REST and HTTP APIs
+    url: https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-vs-rest.html
+    authority: aws-docs
+    verified: "2026-09-21"

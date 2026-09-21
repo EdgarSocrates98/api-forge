@@ -1,0 +1,8 @@
+domain: redis-valkey
+version: 1
+areas: [DATA]
+rule_ids: [AF-DATA-001, AF-DATA-002, AF-DATA-003, AF-DATA-004, AF-DATA-005, AF-DATA-006, AF-DATA-007, AF-DATA-008]
+summary: >-
+  Command danger classes (KEYS, FLUSHALL, blocking SAVE), TTL policy and
+  keyspace hygiene the data-access adapter measures.
+verified: "2026-09-21"

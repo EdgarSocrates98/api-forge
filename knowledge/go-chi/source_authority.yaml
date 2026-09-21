@@ -1,0 +1,9 @@
+sources:
+  - name: chi documentation
+    url: https://pkg.go.dev/github.com/go-chi/chi/v5
+    authority: project-docs
+    verified: "2026-09-21"
+  - name: net/http package
+    url: https://pkg.go.dev/net/http
+    authority: project-docs
+    verified: "2026-09-21"

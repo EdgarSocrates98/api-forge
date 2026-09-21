@@ -23,12 +23,21 @@ tasks:
   - id: B3
     outcome: done
     evidence: sdd/API_FORGE_AGENTIC_PLATFORM/evidence/B3.txt
+  - id: C1
+    outcome: done
+    evidence: sdd/API_FORGE_AGENTIC_PLATFORM/evidence/C1.txt
+  - id: C2
+    outcome: done
+    evidence: sdd/API_FORGE_AGENTIC_PLATFORM/evidence/C2.txt
 claims:
   - "contract list/show emits JSON schema for every registered v1 contract; unknown names refuse AF-CONTRACTS-UNKNOWN"
   - "task seal binds an Ed25519 signature to the exact revision; amending a sealed task writes a new unsealed revision"
   - "task run executes recipes through dispatch_step inside budgets with a no-progress breaker"
   - "task accept refuses accepted_by == executed_by"
   - "brief show refuses DONE while gaps, missing acceptance, or open items remain"
+  - "graph build emits byte-identical nodes.jsonl/edges.jsonl for identical case inputs"
+  - "a tampered node line is refused on load (AF-GRAPH-HASH-MISMATCH)"
+  - "graph export --format neptune refuses as a named stub (AF-GRAPH-FORMAT)"
 ---
 
 # build

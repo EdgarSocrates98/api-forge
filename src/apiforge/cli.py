@@ -140,6 +140,12 @@ brief_app = typer.Typer(
     no_args_is_help=True,
 )
 app.add_typer(brief_app)
+graph_app = typer.Typer(
+    name="graph",
+    help="Native provenance graph — canonical JSONL store, closed-vocabulary queries.",
+    no_args_is_help=True,
+)
+app.add_typer(graph_app)
 
 
 @app.callback()
@@ -1027,6 +1033,122 @@ def brief_show(
             return brief_payload(_task_root(root), task_id)
         except ContractError as exc:
             raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_json(_run(work), detail_level)
+
+
+def _graph_work(fn: Callable[[], object]) -> object:
+    from apiforge.contracts.base import ContractError
+
+    try:
+        return fn()
+    except ContractError as exc:
+        raise AnalysisError(exc.code, exc.detail) from exc
+
+
+@graph_app.command("build")
+def graph_build(
+    case: Path = typer.Option(..., "--case", help="Case directory with case.json."),
+    out: Path = typer.Option(..., "--out", help="Graph output directory."),
+    tasks_root: Path | None = typer.Option(
+        None, "--tasks-root", help="Root holding .apiforge/tasks for task nodes."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Populate nodes.jsonl/edges.jsonl from case artifacts — deterministic bytes."""
+
+    def work() -> object:
+        from apiforge.graph.build import build_graph
+
+        return _graph_work(lambda: build_graph(case, out, tasks_root))
+
+    _echo_json(_run(work), detail_level)
+
+
+@graph_app.command("query")
+def graph_query(
+    graph: Path = typer.Option(..., "--graph", help="Graph directory (nodes.jsonl)."),
+    kind: str | None = typer.Option(None, "--kind", help="Filter nodes by kind."),
+    edge_kind: str | None = typer.Option(None, "--edge", help="Filter edges by kind."),
+    prop: list[str] = typer.Option(
+        [], "--prop", help="Node prop filter `k=v` (repeatable)."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Filter nodes/edges by closed vocabulary — no free text."""
+
+    def work() -> object:
+        from apiforge.graph.query import query_graph
+
+        return _graph_work(
+            lambda: query_graph(graph, kind=kind, edge_kind=edge_kind, prop=tuple(prop))
+        )
+
+    _echo_json(_run(work), detail_level)
+
+
+@graph_app.command("impact")
+def graph_impact(
+    graph: Path = typer.Option(..., "--graph", help="Graph directory."),
+    node: str = typer.Option(..., "--node", help="Node id whose dependents to list."),
+    max_depth: int = typer.Option(4, "--max-depth"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Reverse traversal: everything that transitively depends on the node."""
+
+    def work() -> object:
+        from apiforge.graph.query import impact
+
+        return _graph_work(lambda: impact(graph, node, max_depth=max_depth))
+
+    _echo_json(_run(work), detail_level)
+
+
+@graph_app.command("trace")
+def graph_trace(
+    graph: Path = typer.Option(..., "--graph", help="Graph directory."),
+    from_id: str = typer.Option(..., "--from", help="Source node id."),
+    to_id: str = typer.Option(..., "--to", help="Target node id."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Shortest directed path between two nodes; absent path is named."""
+
+    def work() -> object:
+        from apiforge.graph.query import trace
+
+        return _graph_work(lambda: trace(graph, from_id, to_id))
+
+    _echo_json(_run(work), detail_level)
+
+
+@graph_app.command("coverage")
+def graph_coverage(
+    graph: Path = typer.Option(..., "--graph", help="Graph directory."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Structural gaps: unverified findings, unimplemented ops, unreferenced facts."""
+
+    def work() -> object:
+        from apiforge.graph.query import coverage
+
+        return _graph_work(lambda: coverage(graph))
+
+    _echo_json(_run(work), detail_level)
+
+
+@graph_app.command("export")
+def graph_export(
+    graph: Path = typer.Option(..., "--graph", help="Graph directory."),
+    out: Path = typer.Option(..., "--out", help="Export directory."),
+    fmt: str = typer.Option("jsonl", "--format", help="jsonl (neptune is a named stub)."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Canonical copy plus export.json digests; `neptune` refuses as a named stub."""
+
+    def work() -> object:
+        from apiforge.graph.export import export_graph, export_summary
+
+        return _graph_work(lambda: export_summary(export_graph(graph, out, fmt)))
 
     _echo_json(_run(work), detail_level)
 

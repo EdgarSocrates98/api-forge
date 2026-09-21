@@ -88,6 +88,9 @@ while refusal codes and `fact_id`s survive.
 | `apiforge contract list\|show <name>` | Versioned canonical contracts (JSON schema per `<Name>/v1`) |
 | `apiforge task create|review|seal|run|accept|reject|status` | Sealed, budgeted unit of work; executor never holds the seal key; acceptor != executor |
 | `apiforge brief show --task <id>` | OutcomeBrief — `DONE` is refused while gaps or missing acceptance remain |
+| `apiforge graph build --case D --out G` | Canonical provenance graph (nodes.jsonl/edges.jsonl) — same inputs, same bytes |
+| `apiforge graph query|impact|trace|coverage --graph G` | Closed-vocabulary queries; coverage names unverified findings and unimplemented ops |
+| `apiforge graph export --graph G --out D` | Byte-identical copy + digest manifest; `--format neptune` is a named stub |
 
 ## Agentic layer
 

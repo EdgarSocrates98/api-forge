@@ -6,7 +6,7 @@ profile: critical
 status: draft
 upstream:
   path: build.md
-  sha256: "fc6d365175fe72f05849b28c65c2a48867d3692e6da2bcd1a6d0717a41ab91d4"
+  sha256: "85bf9f7b8063774b1ef0db2b5118956dbb115c09e14195296200e01107e93093"
 results:
   - gate: "pytest tests/contracts tests/taskspec"
     outcome: pass

@@ -378,3 +378,25 @@ refused while gaps, missing acceptance, or open items remain.
 | `AF-TASK-REVISION-MISSING` | spec.revision points at a revision file that is absent |
 | `AF-TASK-RECIPE` | `strategy` names no recipe in `rules/recipes.yaml` |
 | `AF-RECIPE-INVALID` | `recipes.yaml` is malformed |
+
+### Graph (`graph`)
+
+`graph build` reads a case directory into `nodes.jsonl`/`edges.jsonl` —
+canonical lines sorted by id, each node line carrying a `sha256` over its
+`{id,kind,props}` payload so a tampered line is detected on load. Queries
+are closed-vocabulary (`--kind`, `--edge`, `--prop k=v`); `impact` traverses
+in reverse, `trace` returns the shortest directed path or names the pair
+unreachable, `coverage` names unverified findings / unimplemented
+operations / unreferenced facts. `export` copies canonical bytes plus a
+digest manifest; `--format neptune` is a named stub, not a silent no-op.
+
+| Code | Meaning |
+|---|---|
+| `AF-GRAPH-NOT-FOUND` | no `nodes.jsonl` under the graph directory |
+| `AF-GRAPH-NO-CASE` | `graph build` found no `case.json` under `--case` |
+| `AF-GRAPH-INVALID` | a node/edge line fails the contract schema |
+| `AF-GRAPH-HASH-MISMATCH` | a node line's `sha256` diverges from its payload |
+| `AF-GRAPH-KIND` | query names an unknown node or edge kind |
+| `AF-GRAPH-NODE` | `impact`/`trace` name a node absent from the graph |
+| `AF-GRAPH-INPUT` | a source artifact is unreadable or malformed |
+| `AF-GRAPH-FORMAT` | export format named but not implemented (e.g. `neptune`) |

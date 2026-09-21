@@ -90,6 +90,54 @@ class StampResult(_Frozen):
     changed: bool
 
 
+class SddIssue(_Frozen):
+    """A named refusal or gap — code, location, field, and what unlocks it."""
+
+    code: str
+    feature: str
+    message: str
+    phase: str | None = None
+    field: str | None = None
+    unlock: str | None = None
+
+
+class SddReport(_Frozen):
+    ok: bool
+    root: str
+    features: tuple[str, ...]
+    refused: tuple[SddIssue, ...] = ()
+    unresolved: tuple[SddIssue, ...] = ()
+
+
+class SddStatus(_Frozen):
+    root: str
+    features: Mapping[str, JsonValue] = Field(default_factory=dict)
+
+    @field_validator("features", mode="after")
+    @classmethod
+    def freeze_map(cls, value: object) -> JsonValue:
+        frozen = freeze_json(value)
+        if not isinstance(frozen, Mapping):
+            raise ValueError("features must be a mapping")  # noqa: TRY004
+        return frozen
+
+
+class PhaseChange(_Frozen):
+    feature: str
+    phase: str
+    previous: str | None
+    status: str
+    overrides_applied: tuple[str, ...] = ()
+    changed: bool
+
+
+class Gate(_Frozen):
+    name: str
+    satisfied_by: str
+    produced_by: str
+    guards_phases: tuple[str, ...]
+
+
 def load_profiles() -> Mapping[str, tuple[str, ...]]:
     """Load profile → required phases from package data."""
     text = resources.files("apiforge.sdd").joinpath("profiles.yaml").read_text(encoding="utf-8")
@@ -109,3 +157,28 @@ def load_profiles() -> Mapping[str, tuple[str, ...]]:
     if missing:
         raise SddError("AF-SDD-PROFILES", f"profiles missing: {sorted(missing)}")
     return profiles
+
+
+def load_gates() -> tuple[Gate, ...]:
+    """Load the gate catalog from package data."""
+    text = resources.files("apiforge.sdd").joinpath("gates.yaml").read_text(encoding="utf-8")
+    data = load_yaml_mapping(text, source="apiforge.sdd gates")
+    raw = data.get("gates")
+    if not isinstance(raw, Mapping):
+        raise SddError("AF-SDD-GATES", "gates.yaml missing 'gates' mapping")
+    gates: list[Gate] = []
+    for name, entry in raw.items():
+        if not isinstance(entry, Mapping):
+            raise SddError("AF-SDD-GATES", f"gates.{name} must be a mapping")
+        try:
+            gates.append(
+                Gate(
+                    name=str(name),
+                    satisfied_by=str(entry["satisfied_by"]),
+                    produced_by=str(entry["produced_by"]),
+                    guards_phases=tuple(str(p) for p in entry["guards_phases"]),
+                )
+            )
+        except (KeyError, TypeError) as exc:
+            raise SddError("AF-SDD-GATES", f"gates.{name}: {exc}") from exc
+    return tuple(gates)

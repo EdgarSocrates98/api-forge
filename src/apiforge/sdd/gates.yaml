@@ -1,0 +1,26 @@
+version: 1
+gates:
+  contract-reviewed:
+    satisfied_by: contract.document
+    produced_by: analyze openapi
+    guards_phases: [architecture]
+  plan-complete:
+    satisfied_by: plan.tasks
+    produced_by: sdd plan
+    guards_phases: [build]
+  build-verified:
+    satisfied_by: test.results
+    produced_by: verify run
+    guards_phases: [verify]
+  security-reviewed:
+    satisfied_by: threat.model
+    produced_by: secure review
+    guards_phases: [secure]
+  benchmark-compared:
+    satisfied_by: benchmark.results
+    produced_by: benchmark run
+    guards_phases: [benchmark]
+  release-evidenced:
+    satisfied_by: release.receipt
+    produced_by: evidence emit
+    guards_phases: [ship]

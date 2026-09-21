@@ -89,3 +89,39 @@ def stamp(path: Path, upstream: Path) -> StampResult:
         previous=previous,
         changed=changed,
     )
+
+
+def set_frontmatter_field(path: Path, key: str, value: str) -> str | None:
+    """Set a scalar frontmatter key with the same line-surgery discipline.
+
+    Returns the previous scalar value, or None when the key was absent.
+    Refuses on artifacts without frontmatter.
+    """
+    path = Path(path)
+    text = path.read_text(encoding="utf-8")
+    eol = "\r\n" if "\r\n" in text else "\n"
+    bom = text.startswith(_BOM)
+    lines = text.lstrip(_BOM).split(eol)
+    fences = _fences(lines)
+    if fences is None:
+        raise SddError("AF-SDD-STAMP", f"{path.name}: no frontmatter block")
+    open_i, close_i = fences
+
+    previous: str | None = None
+    replaced = False
+    for index in range(open_i + 1, close_i):
+        line = lines[index]
+        if line.startswith(f"{key}:"):
+            previous = line.split(":", 1)[1].strip().strip('"') or None
+            lines[index] = f"{key}: {value}"
+            replaced = True
+            break
+    if not replaced:
+        lines[close_i:close_i] = [f"{key}: {value}"]
+
+    new_text = eol.join(lines)
+    if bom:
+        new_text = _BOM + new_text
+    if new_text != text:
+        path.write_text(new_text, encoding="utf-8", newline="")
+    return previous

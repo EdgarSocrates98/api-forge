@@ -94,15 +94,16 @@ def _split_method_path(literal: str) -> tuple[str, str]:
     return "any", literal.strip()
 
 
-def _visit(node: Node, prefix: str, scan: FileScan) -> None:
+def _visit(node: Node, prefix: str, scan: FileScan, consumed: set[int]) -> None:
+    if node.id in consumed:
+        return
     if node.type != "call_expression":
         for child in node.children:
-            _visit(child, prefix, scan)
+            _visit(child, prefix, scan, consumed)
         return
     name = _call_name(node)
     args = _args(node)
     line = node.start_point[0] + 1
-    consumed: set[int] = set()
     if name in _VERB_METHODS:
         literal = _literal(args[0]) if args else None
         if literal is None:
@@ -138,14 +139,14 @@ def _visit(node: Node, prefix: str, scan: FileScan) -> None:
         if literal is None or body is None or body.type != "func_literal":
             scan.unresolved.append(("AF-GO-UNRESOLVED-ROUTE", line))
         else:
-            consumed.add(id(body))
-            _visit(body, _join(prefix, literal), scan)
+            args_node = node.child_by_field_name("arguments")
+            if args_node is not None:
+                consumed.add(args_node.id)
+            _visit(body, _join(prefix, literal), scan, consumed)
     elif name in _UNRESOLVABLE:
         scan.unresolved.append(("AF-GO-UNRESOLVED-ROUTE", line))
     for child in node.children:
-        if id(child) in consumed:
-            continue
-        _visit(child, prefix, scan)
+        _visit(child, prefix, scan, consumed)
 
 
 def scan_source(source: str) -> FileScan:
@@ -153,5 +154,5 @@ def scan_source(source: str) -> FileScan:
     scan = FileScan()
     tree = _PARSER.parse(source.encode("utf-8"))
     scan.has_error = tree.root_node.has_error
-    _visit(tree.root_node, "", scan)
+    _visit(tree.root_node, "", scan, set())
     return scan

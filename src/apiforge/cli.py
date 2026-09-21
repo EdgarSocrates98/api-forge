@@ -135,7 +135,7 @@ def analyze(
         None, "--fail-on", help="Exit 4 on confirmed findings at this severity or worse."
     ),
     framework: str = typer.Option(
-        "auto", "--framework", help="fastapi|spring|auto (detected from files)."
+        "auto", "--framework", help="fastapi|spring|go|auto (detected from files)."
     ),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:

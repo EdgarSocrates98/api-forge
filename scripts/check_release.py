@@ -151,6 +151,7 @@ def _check_code_parity(root: Path, failures: list[str]) -> None:
         ("AF-ROUTING", "docs/catalog-contract.md"),
         ("AF-SPRING", "docs/catalog-contract.md"),
         ("AF-DETAIL", "docs/catalog-contract.md"),
+        ("AF-GO", "docs/catalog-contract.md"),
     ):
         doc_path = root / doc
         if not doc_path.is_file():
@@ -249,12 +250,15 @@ def _check_routing(root: Path, failures: list[str]) -> None:
 
 
 def _check_lab_and_boundary(root: Path, failures: list[str]) -> None:
-    lab = root / "tests" / "labs" / "orders-spring"
-    if not lab.is_dir() or not any(lab.rglob("*.java")):
-        failures.append("orders-spring parity lab missing Java sources")
+    for name, glob in (("orders-spring", "*.java"), ("orders-go", "*.go")):
+        lab = root / "tests" / "labs" / name
+        if not lab.is_dir() or not any(lab.rglob(glob)):
+            failures.append(f"{name} parity lab missing {glob} sources")
     for source in sorted((root / "src").rglob("*.py")):
         text = source.read_text(encoding="utf-8")
-        if "tree_sitter" in text and "adapters/spring" not in source.as_posix():
+        if "tree_sitter" in text and not any(
+            f"adapters/{a}" in source.as_posix() for a in ("spring", "go")
+        ):
             failures.append(f"tree_sitter import outside adapters.spring: {source}")
 
 

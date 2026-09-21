@@ -41,6 +41,20 @@ shapes are named diagnostics, never inferred.
 | `AF-SPRING-UNRESOLVED-ROUTE` | annotation argument is not a string literal (constant, SpEL, composed meta-annotation) |
 | `AF-SPRING-PARSE` | tree-sitter reported a parse error; the file is hashed and extraction is partial |
 
+## Go adapter
+
+`extract_go` parses `*.go` with tree-sitter — no `go` toolchain, no module
+resolution, no code execution. Recognized shapes: chi/net-http/gin/echo
+verb calls, `mux.Handle`/`HandleFunc` (Go 1.22 `"METHOD /path"` patterns;
+bare paths record method `any`), `Route`/`Group` scope joins. `Mount`,
+middleware (`Use`, `With`, `Method`) and non-literal paths are named
+diagnostics, never inferred.
+
+| Code | Meaning |
+|---|---|
+| `AF-GO-UNRESOLVED-ROUTE` | route shape could not be resolved statically (non-literal path, `Mount`, middleware) |
+| `AF-GO-PARSE` | tree-sitter reported a parse error; the file is hashed and extraction is partial |
+
 ## Detail level
 
 `--detail-level` projects CLI payloads: `summary` drops verbose text keys

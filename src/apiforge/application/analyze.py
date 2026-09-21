@@ -14,6 +14,7 @@ from pathlib import Path
 from pydantic import BaseModel, ConfigDict
 
 from apiforge.adapters.fastapi.extractor import extract_fastapi
+from apiforge.adapters.go.extractor import extract_go
 from apiforge.adapters.inventory import CodeInventory
 from apiforge.adapters.spring.extractor import extract_spring
 from apiforge.api_ir.builder import build_api_model
@@ -79,22 +80,24 @@ def _contract_facts(model: ApiModel) -> tuple[Fact, ...]:
 _EXTRACTORS = {
     "fastapi": extract_fastapi,
     "spring": extract_spring,
+    "go": extract_go,
 }
 
 
 def _detect_framework(project: Path) -> str:
-    java = sum(1 for _ in project.rglob("*.java"))
-    python = sum(1 for _ in project.rglob("*.py"))
-    if not java and not python:
+    counts = {
+        "spring": sum(1 for _ in project.rglob("*.java")),
+        "fastapi": sum(1 for _ in project.rglob("*.py")),
+        "go": sum(1 for _ in project.rglob("*.go")),
+    }
+    present = {k: v for k, v in counts.items() if v}
+    if not present:
         raise AnalysisError(
             "AF-INPUT-FRAMEWORK-UNKNOWN",
-            f"{project}: no .java or .py files to detect a framework from",
+            f"{project}: no .java, .py or .go files to detect a framework from",
         )
-    if java and not python:
-        return "spring"
-    if python and not java:
-        return "fastapi"
-    return "spring" if java > python else "fastapi"
+    # majority wins; ties break alphabetically for determinism
+    return max(sorted(present), key=present.__getitem__)
 
 
 def analyze_project(

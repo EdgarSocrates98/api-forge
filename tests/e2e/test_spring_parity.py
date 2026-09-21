@@ -34,6 +34,37 @@ def test_spring_and_fastapi_findings_parity(tmp_path: Path) -> None:
     assert any(f.status.value == "unresolved" for f in spring.findings)
 
 
+def test_go_and_fastapi_findings_parity(tmp_path: Path) -> None:
+    fastapi = analyze_project(
+        CONTRACT,
+        Path("tests/fixtures/fastapi_orders"),
+        None,
+        tmp_path / "fastapi",
+        framework="fastapi",
+    )
+    go = analyze_project(
+        CONTRACT,
+        Path("tests/labs/orders-go"),
+        None,
+        tmp_path / "go",
+        framework="go",
+    )
+    assert _verdicts(go) == _verdicts(fastapi)
+    assert any(f.rule_id == "AF-CODE-001" for f in go.findings)
+    assert any(f.status.value == "unresolved" for f in go.findings)
+
+
+def test_auto_detects_go_by_go_files(tmp_path: Path) -> None:
+    result = analyze_project(
+        CONTRACT,
+        Path("tests/labs/orders-go"),
+        None,
+        tmp_path / "auto",
+        framework="auto",
+    )
+    assert result.findings
+
+
 def test_auto_detects_spring_by_java_files(tmp_path: Path) -> None:
     result = analyze_project(
         CONTRACT,

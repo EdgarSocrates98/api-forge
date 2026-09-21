@@ -36,11 +36,14 @@ Individual stages: `apiforge discover --project .`, `apiforge model build
 --contract c.yaml --project .`, `apiforge diff contract --baseline a.yaml
 --candidate b.yaml`, `apiforge judge --contract c.yaml --project .`.
 
-Frameworks: `analyze --framework fastapi|spring|auto` — `auto` counts
-`.java`/`.py` files (none → `AF-INPUT-FRAMEWORK-UNKNOWN`). The Spring adapter
+Frameworks: `analyze --framework fastapi|spring|go|auto` — `auto` counts
+`.java`/`.py`/`.go` files (none → `AF-INPUT-FRAMEWORK-UNKNOWN`). The Spring adapter
 parses `*.java` with tree-sitter (`@RestController`/`@RequestMapping`/
 `@GetMapping`…, `RouterFunctions.route`, JAX-RS); non-literal annotation args
-emit `AF-SPRING-UNRESOLVED-ROUTE`, never inference. Every JSON command accepts
+emit `AF-SPRING-UNRESOLVED-ROUTE`, never inference. The Go adapter covers
+chi (`Route` scopes, verb calls), `net/http` (`Handle`/`HandleFunc` with Go
+1.22 `"METHOD /path"` patterns) and gin/echo verb calls; `Mount`, middleware
+and non-literal paths emit `AF-GO-UNRESOLVED-ROUTE`. Every JSON command accepts
 `--detail-level summary|normal|full`; `summary` drops verbose text fields
 while refusal codes and `fact_id`s survive.
 

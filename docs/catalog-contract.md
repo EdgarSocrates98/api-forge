@@ -227,3 +227,13 @@ streaming flags are data.
 | `AF-GQL-INVALID` | graphql-core could not parse the SDL |
 | `AF-PROTO-PARSE` | unbalanced braces or undecodable .proto file |
 | `AF-PROTO-EMPTY` | no `*.proto` under the given directory |
+
+## Profiler exports
+
+`model jfr|pprof|pyroscope` read profiler exports offline — `jfr print
+--json`, `go tool pprof -top` text, and Pyroscope flamebearer JSON. Entries
+are capped at the top 20; a `truncated` attr names when more existed.
+
+| Code | Meaning |
+|---|---|
+| `AF-PERF-REPORT-INVALID` | the profile export is unreadable or lacks the expected shape |

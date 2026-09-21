@@ -474,6 +474,13 @@ _REPORT_READERS: tuple[tuple[str, str, str], ...] = (
         "apiforge.adapters.graphql_.extract.extract_graphql",
         "GraphQL SDL schema file.",
     ),
+    ("jfr", "apiforge.adapters.perfprofiles.extract_jfr", "jfr print --json output."),
+    ("pprof", "apiforge.adapters.perfprofiles.extract_pprof", "go tool pprof -top text."),
+    (
+        "pyroscope",
+        "apiforge.adapters.perfprofiles.extract_pyroscope",
+        "Pyroscope flamebearer JSON.",
+    ),
 )
 
 

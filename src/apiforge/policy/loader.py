@@ -34,6 +34,8 @@ defaults:
   irreversible: deny
 gates:
   destructive: [exact_target, impact, dry_run_or_reason, rollback, confirmation]
+  sensitive: [evidence, approval]
+  external_mutation: [identity_resolved, impact, rollback]
 rules:
   - name: no-force-push
     match: {verb: "git.push", arg_glob: "--force*"}

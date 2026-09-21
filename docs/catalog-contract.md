@@ -249,3 +249,21 @@ or `stale` (unreachable in baseline); candidate-only routes are `added`.
 | Code | Meaning |
 |---|---|
 | `AF-PLAN-NO-ROUTES` | neither payload carries `code.route` facts |
+
+## Debate protocol
+
+`debate open --case <dir> --question "..." --sides a,b --now ISO` creates
+`debates/<id>.json` in the case. `debate submit` appends a position — every
+position must cite `fact_id` evidence (an opinion without evidence is
+refused). `debate close --referee <name>` resolves with `--decision` or
+records `unresolved` when omitted; closing requires submissions on >= 2
+distinct sides. A closed debate refuses further mutation.
+
+| Code | Meaning |
+|---|---|
+| `AF-DEBATE-NOT-FOUND` | no debate with that id in the case |
+| `AF-DEBATE-SIDES` | fewer than two distinct sides at open |
+| `AF-DEBATE-SIDE` | submission on a side not declared at open |
+| `AF-DEBATE-NO-EVIDENCE` | position without `fact:`-prefixed citations |
+| `AF-DEBATE-NO-QUORUM` | close attempted with < 2 sides having submitted |
+| `AF-DEBATE-CLOSED` | mutation attempted on a resolved/unresolved debate |

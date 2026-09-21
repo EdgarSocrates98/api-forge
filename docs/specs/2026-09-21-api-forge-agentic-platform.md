@@ -246,7 +246,12 @@ briefs por task, RED→GREEN registrado, ledger SDD, commit atômico.
 | 9 | Camada agêntica: coordinators/executors em `agents/` + `AGENT_PROTOCOL.md` + `playbook` floor + economy ledger | **entregue** |
 | 9b | MCP server (`apiforge-mcp`, extra `[mcp]`) + `context funnel` medido | **entregue** |
 | 10 | Release evidence bundle: `report build/sign/verify` — divergência nomeada por parte | **entregue** |
-| 11+ | AsyncAPI, GraphQL/gRPC, performance avançada (JFR/pprof/Pyroscope), modernização assistida, debate protocol | |
+| 11 | AsyncAPI (`model asyncapi`, 2.x/3.x) | **entregue** |
+| 12 | GraphQL (`model graphql`, graphql-core confinado) + gRPC (`model proto`, mini-parser) | **entregue** |
+| 13 | Performance: `model jfr/pprof/pyroscope` → `perf.*` facts | **entregue** |
+| 14 | Modernização assistida: `plan strangler` (cut plan por rota) | **entregue** |
+| 15 | Regras executáveis `check:` no catálogo + `judge --facts` | **entregue** |
+| 16 | Debate protocol: `debate open/submit/close` com quorum + referee | **entregue** |
 
 ## 11. Decisões abertas
 

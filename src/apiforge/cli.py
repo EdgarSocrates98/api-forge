@@ -21,6 +21,7 @@ from apiforge.collectors.apigateway import collect
 from apiforge.collectors.manifest import CollectError, CollectManifest
 from apiforge.core.detail import apply_detail_level
 from apiforge.core.models import Fact, Finding, FindingStatus, Severity
+from apiforge.debate.service import DebateError
 from apiforge.openapi.diff import diff_contracts
 from apiforge.openapi.loader import OpenApiLoadError, load_openapi
 from apiforge.rules.fact_judge import judge_facts
@@ -96,6 +97,12 @@ plan_app = typer.Typer(
     no_args_is_help=True,
 )
 app.add_typer(plan_app)
+debate_app = typer.Typer(
+    name="debate",
+    help="Record specialist disagreement — positions cite fact_ids, a referee closes.",
+    no_args_is_help=True,
+)
+app.add_typer(debate_app)
 
 
 @app.callback()
@@ -161,6 +168,8 @@ def _run(fn: Callable[[], object]) -> object:
         return fn()
     except AnalysisError as exc:
         _fail(exc.code, exc.detail)
+    except DebateError as exc:
+        _fail(exc.code, str(exc).split(": ", 1)[-1])
     except (OpenApiLoadError, CaseStorageError) as exc:
         _fail(exc.code, str(exc).split(": ", 1)[-1])
     except CaseIntegrityError as exc:
@@ -570,6 +579,76 @@ def plan_strangler(
                 "AF-PLAN-NO-ROUTES", "neither payload carries code.route facts"
             )
         return strangler_plan(base, cand)
+
+    _echo_json(_run(work), detail_level)
+
+
+@debate_app.command("open")
+def debate_open(
+    case: Path = typer.Option(..., "--case", help="Case directory."),
+    question: str = typer.Option(..., "--question", help="What is disputed."),
+    sides: str = typer.Option(..., "--sides", help="Comma-separated side names."),
+    now: str = typer.Option(..., "--now", help="ISO8601 timestamp — the only clock."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Open a debate over a question with named sides."""
+
+    def work() -> object:
+        from apiforge.debate.service import open_debate
+
+        parts = tuple(s.strip() for s in sides.split(",") if s.strip())
+        d = open_debate(case, question, parts, now)
+        return {"debate_id": d.debate_id, "status": d.status, "sides": list(d.sides)}
+
+    _echo_json(_run(work), detail_level)
+
+
+@debate_app.command("submit")
+def debate_submit(
+    case: Path = typer.Option(..., "--case", help="Case directory."),
+    debate: str = typer.Option(..., "--debate", help="Debate id."),
+    side: str = typer.Option(..., "--side", help="Which side this position serves."),
+    position: str = typer.Option(..., "--position", help="The position text."),
+    evidence: str = typer.Option(
+        ..., "--evidence", help="Comma-separated fact_id citations."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Append a position — every position must cite fact_id evidence."""
+
+    def work() -> object:
+        from apiforge.debate.service import submit
+
+        ev = tuple(e.strip() for e in evidence.split(",") if e.strip())
+        d = submit(case, debate, side, position, ev)
+        return {"debate_id": d.debate_id, "submissions": len(d.submissions)}
+
+    _echo_json(_run(work), detail_level)
+
+
+@debate_app.command("close")
+def debate_close(
+    case: Path = typer.Option(..., "--case", help="Case directory."),
+    debate: str = typer.Option(..., "--debate", help="Debate id."),
+    referee: str = typer.Option(..., "--referee", help="Who closes the debate."),
+    decision: str | None = typer.Option(
+        None, "--decision", help="The decision; omit to record unresolved."
+    ),
+    now: str = typer.Option(..., "--now", help="ISO8601 timestamp."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Close as resolved (--decision) or unresolved (no --decision)."""
+
+    def work() -> object:
+        from apiforge.debate.service import close
+
+        d = close(case, debate, referee, decision, now)
+        return {
+            "debate_id": d.debate_id,
+            "status": d.status,
+            "decision": d.decision,
+            "referee": d.referee,
+        }
 
     _echo_json(_run(work), detail_level)
 

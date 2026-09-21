@@ -8,7 +8,7 @@
 
 **Tech Stack:** Python 3.12, Pydantic 2, Typer, PyYAML, pytest, Ruff, mypy, Hatchling.
 
-**Spec:** `docs/superpowers/specs/2026-09-21-api-forge-design.md`
+**Spec:** `docs/specs/2026-09-21-api-forge-design.md`
 
 ## Global Constraints
 
@@ -16,6 +16,7 @@
 - Python 3.12 is the minimum and only CI version in this increment.
 - The core must not import an LLM/provider SDK or perform network access.
 - Inputs are read-only; outputs are written only beneath an explicit `--out-dir`, defaulting to `.apiforge/`.
+- `--out-dir` must not contain or be contained by any input path; case writes refuse `..` traversal and symlink escapes.
 - Every fact and finding carries stable IDs and provenance tied to SHA-256 input hashes.
 - Unsupported or ambiguous input produces a named diagnostic, never a fabricated conclusion.
 - JSON output is deterministic: sorted keys, stable list ordering, UTF-8, trailing newline.
@@ -24,7 +25,8 @@
 
 ## Review Focus
 
-- OpenAPI YAML containing aliases or custom tags must be rejected safely, without arbitrary object construction; Task 4 pins this behavior.
+- OpenAPI YAML containing aliases, custom tags or duplicate keys must be rejected safely, without arbitrary object construction; `yaml.safe_load` alone permits aliases and duplicate keys, so Task 4 pins explicit rejection.
+- `/orders` and `/orders/` are different routes; matching preserves the trailing slash. Tasks 5 and 8 pin this behavior.
 - FastAPI routes assembled through `include_router(prefix=...)` must resolve the effective path; Task 5 pins this behavior.
 - Dynamic route declarations that static analysis cannot resolve must emit `unresolved`, not disappear; Task 5 pins this behavior.
 - Duplicate method/path operations across files must remain separate facts and produce a conflict finding; Tasks 5 and 8 pin this behavior.
@@ -36,7 +38,7 @@
 
 This plan is the first independently shippable subproject. Later plans are created only after its interfaces pass review:
 
-1. SDD profiles, policy engine, sandbox/worktree and release evidence.
+1. SDD profiles, policy engine, sandbox/worktree and release evidence — planned in `docs/plans/2026-09-21-api-forge-sdd-policy-sandbox-evidence.md`.
 2. FastAPI build/verify workflow and testing/security adapters.
 3. Spring Boot adapter and JVM toolchain.
 4. Go/Chi adapter and Go toolchain.
@@ -76,7 +78,7 @@ def test_version_is_stable() -> None:
 def test_help_lists_mvp_commands() -> None:
     result = runner.invoke(app, ["--help"])
     assert result.exit_code == 0
-    for command in ("discover", "model", "diff", "judge"):
+    for command in ("discover", "analyze", "model", "diff", "judge"):
         assert command in result.stdout
 ```
 
@@ -95,7 +97,7 @@ Implement `src/apiforge/__init__.py`:
 __version__ = "0.1.0"
 ```
 
-Implement `src/apiforge/cli.py` with a Typer callback for `--version`. Register `discover`, `model`, `diff`, and `judge` as explicit unavailable commands that exit with code 2 and the exact diagnostic `AF-COMMAND-NOT-AVAILABLE: <command>\n`; Task 10 replaces those bounded diagnostics with the complete application services.
+Implement `src/apiforge/cli.py` with a Typer callback for `--version`. Register `discover`, `analyze`, `judge`, and the groups `model build` and `diff contract` — the command surface named in spec §12, which is binding over abbreviated names — as explicit unavailable commands that exit with code 2 and the exact diagnostic `AF-COMMAND-NOT-AVAILABLE: <command>\n`; Task 10 replaces those bounded diagnostics with the complete application services.
 
 - [ ] **Step 4: Install and run quality checks**
 
@@ -185,6 +187,8 @@ class Severity(StrEnum):
 
 `stable_id(prefix, value)` serializes with sorted keys and compact separators, hashes with SHA-256, and returns `<prefix>:<first-16-hex>`.
 
+Frozen models prevent attribute reassignment only. Coerce nested sequences inside `measures`/`attrs` to tuples (or reject mutable values in a field validator) so stored evidence cannot mutate in place — evidence immutability is an invariant, not a courtesy.
+
 - [ ] **Step 4: Run unit and type checks**
 
 Run: `pytest tests/core/test_models.py -v && mypy src/apiforge/core`  
@@ -261,6 +265,7 @@ git commit -m "feat: add deterministic artifact storage"
 - Create: `tests/openapi/test_loader.py`
 - Create: `tests/fixtures/openapi/orders-v1.yaml`
 - Create: `tests/fixtures/openapi/unsafe-tag.yaml`
+- Create: `tests/fixtures/openapi/aliased.yaml`
 
 **Interfaces:**
 - Consumes: `SourceRef`, `Diagnostic`, `sha256_file`.
@@ -299,6 +304,21 @@ def test_rejects_unsupported_openapi_version(tmp_path: Path) -> None:
 def test_safe_loader_rejects_python_tag() -> None:
     with pytest.raises(OpenApiLoadError, match="AF-OPENAPI-INVALID-YAML"):
         load_openapi(FIXTURES / "unsafe-tag.yaml")
+
+
+def test_rejects_yaml_aliases() -> None:
+    with pytest.raises(OpenApiLoadError, match="AF-OPENAPI-INVALID-YAML"):
+        load_openapi(FIXTURES / "aliased.yaml")
+
+
+def test_rejects_duplicate_keys(tmp_path: Path) -> None:
+    path = tmp_path / "dup.yaml"
+    path.write_text(
+        "openapi: 3.1.0\ninfo: {title: x, version: '1'}\npaths: {}\npaths: {}\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(OpenApiLoadError, match="AF-OPENAPI-INVALID-YAML"):
+        load_openapi(path)
 ```
 
 - [ ] **Step 3: Verify failures**
@@ -308,7 +328,7 @@ Expected: FAIL because loader does not exist.
 
 - [ ] **Step 4: Implement safe normalization**
 
-Use `yaml.safe_load`, require a mapping root and exact OpenAPI major/minor `3.1`, reject duplicate `(method, normalized_path)` pairs inside the document, and support only standard HTTP methods. Preserve the raw operation object as JSON-compatible data but sort operations by path then method. Define a typed `OpenApiLoadError(code, message, path)` whose string begins with its code.
+Compose the YAML node tree with a `SafeLoader` subclass that refuses aliases/merge keys, custom tags and duplicate mapping keys — plain `yaml.safe_load` accepts all three silently. Require a mapping root and exact OpenAPI major/minor `3.1`, reject duplicate `(method, normalized_path)` pairs inside the document, and support only standard HTTP methods. Preserve the raw operation object and the raw `components` section as JSON-compatible data (Task 7 resolves local refs against them) but sort operations by path then method. Define a typed `OpenApiLoadError(code, message, path)` whose string begins with its code.
 
 - [ ] **Step 5: Run checks and commit**
 
@@ -372,7 +392,7 @@ Expected: FAIL because extractor is absent.
 
 - [ ] **Step 4: Implement two-pass AST extraction**
 
-Pass one records `FastAPI`/`APIRouter` assignments, literal router prefixes, decorated functions, method, literal path, function name, source line and file hash. Pass two finds literal `include_router` prefixes and applies them. Use only `ast.parse`; never import or execute project code. For unresolved expressions emit `AF-FASTAPI-DYNAMIC-ROUTE`. Include file path and line in route IDs so duplicates remain distinct. Sort facts by path, method, file and line.
+Pass one records `FastAPI`/`APIRouter` assignments, literal router prefixes, decorated functions, method, literal path, function name, source line and file hash. Pass two finds literal `include_router` prefixes and applies them, resolving its argument through intra-project imports so a router defined in `app/routes/orders.py` and included in `app/main.py` binds to the same object. Use only `ast.parse`; never import or execute project code. For unresolved expressions emit `AF-FASTAPI-DYNAMIC-ROUTE`. Include file path and line in route IDs so duplicates remain distinct. Record a hashed source entry for every scanned `*.py` file, including files without routes, so provenance covers the whole project. Path comparison preserves the trailing slash — `/orders` and `/orders/` are distinct routes. Sort facts by path, method, file and line.
 
 - [ ] **Step 5: Run adapter checks and commit**
 
@@ -391,12 +411,17 @@ git commit -m "feat: extract fastapi routes without execution"
 - Create: `src/apiforge/api_ir/builder.py`
 - Create: `src/apiforge/api_ir/__init__.py`
 - Create: `tests/api_ir/test_builder.py`
+- Create: `tests/api_ir/conftest.py`
+- Create: `tests/fixtures/fastapi_flat/app/main.py`
+- Create: `tests/fixtures/fastapi_flat/app/routes/orders.py`
 
 **Interfaces:**
 - Consumes: `OpenApiDocument`, `FastApiInventory`, evidence fact IDs.
 - Produces: `ApiModel`, `ApiOperation`, `Projection`, `build_api_model(contract, inventory) -> ApiModel`.
 
 - [ ] **Step 1: Write failing composition tests**
+
+`conftest.py` builds the `openapi_document`/`fastapi_inventory` pair from `tests/fixtures/fastapi_flat`, a project whose routes resolve to `/orders` with no extra include prefix — the Task 5 fixture resolves under `/v1`, so do not reuse it for matching assertions.
 
 ```python
 def test_operation_keeps_contract_and_code_provenance(openapi_document, fastapi_inventory) -> None:
@@ -446,7 +471,7 @@ git commit -m "feat: compose provenance-backed api ir"
 
 - [ ] **Step 1: Define a breaking fixture and failing tests**
 
-The candidate removes GET `/orders`, removes a `200` response, makes an optional request property required, and adds a new optional response property.
+The candidate removes GET `/orders`, removes a `200` response, makes an optional request property required, and adds a new optional response property. Keep each fixture delta attributable: the baseline carries the superset (both `200` and `201` on POST, an optional-only request property) so each removed or tightened element maps to exactly one change code.
 
 ```python
 def test_classifies_breaking_and_non_breaking_changes() -> None:
@@ -483,7 +508,7 @@ git commit -m "feat: classify bounded openapi breaking changes"
 - Create: `src/apiforge/rules/catalog.py`
 - Create: `src/apiforge/rules/judge.py`
 - Create: `src/apiforge/rules/__init__.py`
-- Create: `rules/catalog/contract.yaml`
+- Create: `src/apiforge/rules/catalog/contract.yaml`
 - Create: `tests/rules/test_judge.py`
 
 **Interfaces:**
@@ -518,7 +543,7 @@ Expected: FAIL because rules are absent.
 
 - [ ] **Step 3: Implement four rules**
 
-Implement `AF-CONTRACT-001` contract operation missing in code, `AF-CODE-001` duplicate code route, `AF-CODE-002` code route missing from contract, and `AF-CODE-003` unresolved dynamic route. YAML stores ID, title, severity, rationale, remediation and reference metadata; Python contains bounded executable predicates. Findings use stable IDs derived from rule ID and evidence IDs. Sort by severity rank, rule ID and finding ID.
+Implement `AF-CONTRACT-001` contract operation missing in code, `AF-CODE-001` duplicate code route, `AF-CODE-002` code route missing from contract, and `AF-CODE-003` unresolved dynamic route. YAML stores ID, title, severity, rationale, remediation and reference metadata; Python contains bounded executable predicates. Ship the catalog as package data inside `apiforge.rules` (Hatchling includes it in the wheel) so the installed CLI works outside the checkout. `AF-CONTRACT-001` reports `confirmed` only when code extraction was complete for the relevant paths; when the inventory carries `AF-FASTAPI-DYNAMIC-ROUTE` or comparable uncertainty, it reports `unresolved` with the blocking diagnostics as evidence — never a fabricated absence. Path comparison preserves the trailing slash. Findings use stable IDs derived from rule ID and evidence IDs. Sort by severity rank, rule ID and finding ID.
 
 - [ ] **Step 4: Run tests and commit**
 
@@ -526,7 +551,7 @@ Run: `pytest tests/rules/test_judge.py -v && pytest tests/core tests/openapi tes
 Expected: PASS.
 
 ```bash
-git add src/apiforge/rules rules/catalog tests/rules
+git add src/apiforge/rules tests/rules
 git commit -m "feat: judge api contract and code divergence"
 ```
 
@@ -560,9 +585,9 @@ def test_case_manifest_links_all_artifacts(tmp_path, analysis_result) -> None:
 Run: `pytest tests/case/test_service.py -v`  
 Expected: FAIL because case service is absent.
 
-- [ ] **Step 3: Implement manifest-first persistence**
+- [ ] **Step 3: Implement manifest-last persistence**
 
-Write `api-ir.json`, `facts.json`, `findings.json`, then `case.json` last. The manifest contains schema version, tool version, input hashes, artifact relative paths/hashes, diagnostics count and finding counts by severity/status. On load, verify every declared artifact hash; raise `CaseIntegrityError("AF-CASE-HASH-MISMATCH", path)` on mismatch.
+Write `api-ir.json`, `facts.json`, `findings.json`, then `case.json` last so a manifest never references an artifact that does not exist yet. When contract changes were computed, persist `changes.json` as an additional declared artifact. The manifest contains schema version, tool version, input hashes, artifact relative paths/hashes, diagnostics count and finding counts by severity/status. On load, verify every declared artifact hash; raise `CaseIntegrityError("AF-CASE-HASH-MISMATCH", path)` on mismatch. Refuse an `out_dir` that escapes the working tree via `..` or a symlink, and refuse to write when `out_dir` contains or is contained by an input path — inputs stay read-only.
 
 - [ ] **Step 4: Run tests and commit**
 
@@ -585,7 +610,7 @@ git commit -m "feat: persist reproducible analysis cases"
 
 **Interfaces:**
 - Consumes: all prior public interfaces.
-- Produces: `analyze_project(contract, project, baseline, out_dir) -> AnalysisResult`; functional `discover`, `model`, `diff`, `judge`, and `analyze` CLI commands.
+- Produces: `analyze_project(contract, project, baseline, out_dir) -> AnalysisResult`; functional `discover`, `analyze`, `judge`, `model build` and `diff contract` CLI commands.
 
 - [ ] **Step 1: Write the failing end-to-end test**
 
@@ -617,7 +642,7 @@ Expected: FAIL because `analyze` is not implemented.
 
 - [ ] **Step 3: Implement application orchestration and CLI**
 
-Define frozen `AnalysisResult` with `manifest: CaseManifest`, `model: ApiModel`, `facts: tuple[Fact, ...]`, `findings: tuple[Finding, ...]`, `changes: tuple[ContractChange, ...]`, and `diagnostics: tuple[Diagnostic, ...]`. `analyze_project` validates paths, loads OpenAPI, extracts FastAPI, builds API-IR, judges findings, optionally diffs a `--baseline` OpenAPI document, persists the case and returns that result. Commands expose individual stages but call the same application services. Success prints a compact JSON summary with artifact paths and counts. Input/validation errors exit 2; integrity/internal analysis errors exit 3; confirmed critical findings exit 4 only when `--fail-on critical` is supplied.
+Define frozen `AnalysisResult` with `manifest: CaseManifest`, `model: ApiModel`, `facts: tuple[Fact, ...]`, `findings: tuple[Finding, ...]`, `changes: tuple[ContractChange, ...]`, and `diagnostics: tuple[Diagnostic, ...]`. `analyze_project` validates paths, loads OpenAPI, extracts FastAPI, builds API-IR, judges findings, optionally diffs a `--baseline` OpenAPI document, persists the case and returns that result. Keep a pre-persistence payload (model, facts, findings, changes, diagnostics) separate from `AnalysisResult`: `save_case` consumes the payload and returns the manifest that completes the result, so construction is one-directional and never circular; when a baseline diff ran, `changes.json` is written as a declared case artifact. Commands expose individual stages but call the same application services. Success prints a compact JSON summary with artifact paths and counts. Input/validation errors exit 2; integrity/internal analysis errors exit 3; confirmed critical findings exit 4 only when `--fail-on critical` is supplied.
 
 - [ ] **Step 4: Run complete verification**
 
@@ -683,6 +708,22 @@ Expected: all PASS.
 git add README.md docs scripts tests/scripts
 git commit -m "docs: define mvp boundaries and release gate"
 ```
+
+## Amendments folded in during execution
+
+Decisions recorded in `.superpowers/sdd/2026-09-21-api-forge-mvp-vertical-slice/progress.md`, now incorporated into the tasks above:
+
+- CLI surface follows spec §12: `discover`, `analyze`, `judge`, `model build`, `diff contract` (Tasks 1, 10). The spec is binding over abbreviated command names.
+- YAML loading rejects aliases, custom tags and duplicate keys explicitly; `yaml.safe_load` alone permits all three (Task 4).
+- `OpenApiDocument` carries the raw `components` section so the Task 7 diff can resolve local refs (Task 4).
+- FastAPI extraction resolves `include_router` arguments through cross-file imports and hashes every scanned file, route-bearing or not (Task 5).
+- Trailing slash is significant in route matching — `/orders` ≠ `/orders/` (Tasks 5, 8).
+- Task 6 composition tests use a dedicated `fastapi_flat` fixture resolving to `/orders`; the Task 5 fixture's effective paths live under `/v1` (Task 6).
+- `AF-CONTRACT-001` yields `unresolved` under extraction uncertainty, never a fabricated confirmed absence (Task 8).
+- The rule catalog ships as package data inside `apiforge.rules`, not as a top-level `rules/` directory, so the installed CLI works outside the checkout (Task 8).
+- Cases persist `changes.json` when a baseline diff ran; the manifest is written last; `out_dir` traversal/symlink escapes and input/output overlap are refused (Tasks 9, 10).
+- `AnalysisResult` is built after `save_case` from a pre-persistence payload — construction is one-directional, never circular (Task 10).
+- Evidence immutability covers nested collections, not just attribute reassignment (Task 2).
 
 ## Final acceptance
 

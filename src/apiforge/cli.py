@@ -14,6 +14,7 @@ from apiforge.adapters.fastapi.extractor import extract_fastapi
 from apiforge.api_ir.builder import build_api_model
 from apiforge.application.analyze import AnalysisError, AnalysisResult, analyze_project
 from apiforge.case.service import CaseIntegrityError, CaseStorageError
+from apiforge.core.detail import apply_detail_level
 from apiforge.core.models import Finding, FindingStatus, Severity
 from apiforge.openapi.diff import diff_contracts
 from apiforge.openapi.loader import OpenApiLoadError, load_openapi
@@ -64,11 +65,19 @@ def main(
         raise typer.Exit()
 
 
-def _echo_json(value: object) -> None:
+_DETAIL_HELP = "Payload level: summary|normal|full."
+
+
+def _detail_option() -> object:
+    return typer.Option("normal", "--detail-level", help=_DETAIL_HELP)
+
+
+def _echo_json(value: object, detail_level: str = "normal") -> None:
     if isinstance(value, list):
         value = [v.model_dump(mode="json") if hasattr(v, "model_dump") else v for v in value]
     elif hasattr(value, "model_dump"):
         value = value.model_dump(mode="json")
+    value = apply_detail_level(value, detail_level)
     typer.echo(json.dumps(value, sort_keys=True, ensure_ascii=False, indent=2))
 
 
@@ -97,6 +106,7 @@ def _confirmed_rank(findings: tuple[Finding, ...]) -> int | None:
 @app.command()
 def discover(
     project: Path = typer.Option(..., "--project", help="FastAPI project root."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
     """Statically inventory FastAPI routes without executing code."""
 
@@ -110,7 +120,7 @@ def discover(
             "input_hashes": dict(inventory.input_hashes),
         }
 
-    _echo_json(_run(work))
+    _echo_json(_run(work), detail_level)
 
 
 @app.command()
@@ -124,6 +134,7 @@ def analyze(
     fail_on: Severity | None = typer.Option(
         None, "--fail-on", help="Exit 4 on confirmed findings at this severity or worse."
     ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
     """Run the full deterministic slice and persist a case."""
 
@@ -141,7 +152,8 @@ def analyze(
             "findings": len(result.findings),
             "changes": len(result.changes),
             "diagnostics": len(result.diagnostics),
-        }
+        },
+        detail_level,
     )
     if fail_on is not None:
         rank = _confirmed_rank(result.findings)
@@ -153,6 +165,7 @@ def analyze(
 def judge(
     contract: Path = typer.Option(..., "--contract", help="OpenAPI 3.1 document."),
     project: Path = typer.Option(..., "--project", help="FastAPI project root."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
     """Judge contract/code divergence and print findings."""
 
@@ -164,13 +177,14 @@ def judge(
         model = build_api_model(load_openapi(contract), extract_fastapi(project))
         return [f.model_dump(mode="json") for f in judge_api_model(model)]
 
-    _echo_json(_run(work))
+    _echo_json(_run(work), detail_level)
 
 
 @model_app.command("build")
 def model_build(
     contract: Path = typer.Option(..., "--contract", help="OpenAPI 3.1 document."),
     project: Path = typer.Option(..., "--project", help="FastAPI project root."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
     """Compose the API-IR and print it."""
 
@@ -181,7 +195,7 @@ def model_build(
             raise AnalysisError("AF-INPUT-NOT-FOUND", str(project))
         return build_api_model(load_openapi(contract), extract_fastapi(project))
 
-    _echo_json(_run(work))
+    _echo_json(_run(work), detail_level)
 
 
 @app.command("next-step")
@@ -190,6 +204,7 @@ def next_step_cmd(
         ..., "--findings", help="findings.json produced by analyze or judge."
     ),
     phase: str = typer.Option(..., "--phase", help="Canonical SDD phase."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
     """Recommend the specialist agent for the dominant finding area."""
 
@@ -205,13 +220,14 @@ def next_step_cmd(
         except RoutingError as exc:
             raise AnalysisError(exc.code, exc.detail) from exc
 
-    _echo_json(_run(work))
+    _echo_json(_run(work), detail_level)
 
 
 @diff_app.command("contract")
 def diff_contract(
     baseline: Path = typer.Option(..., "--baseline", help="Baseline OpenAPI document."),
     candidate: Path = typer.Option(..., "--candidate", help="Candidate OpenAPI document."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
     """Classify bounded breaking changes between two contracts."""
 
@@ -224,4 +240,4 @@ def diff_contract(
             for c in diff_contracts(load_openapi(baseline), load_openapi(candidate))
         ]
 
-    _echo_json(_run(work))
+    _echo_json(_run(work), detail_level)

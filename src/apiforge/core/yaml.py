@@ -63,6 +63,8 @@ def _strict_construct_mapping(
 ) -> dict[Any, Any]:
     mapping: dict[Any, Any] = {}
     for key_node, value_node in node.value:
+        if key_node.tag == "tag:yaml.org,2002:merge":
+            raise StrictLoadError("AF-YAML-MERGE-KEY", "YAML merge keys are not supported")
         key = loader.construct_object(key_node, deep=True)
         try:
             hash(key)

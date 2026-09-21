@@ -422,6 +422,53 @@ def inventory_sam(
     _echo_json(_run(work), detail_level)
 
 
+_REPORT_READERS: tuple[tuple[str, str, str], ...] = (
+    ("pact", "apiforge.adapters.testreports.extract_pact", "Pact contract JSON file."),
+    (
+        "schemathesis",
+        "apiforge.adapters.testreports.extract_schemathesis",
+        "Schemathesis JSON report.",
+    ),
+    ("k6", "apiforge.adapters.testreports.extract_k6", "k6 --summary-export JSON."),
+    ("coverage", "apiforge.adapters.testreports.extract_coverage", "coverage.py JSON report."),
+    ("zap", "apiforge.adapters.secreports.extract_zap", "OWASP ZAP JSON report."),
+    ("semgrep", "apiforge.adapters.secreports.extract_semgrep", "Semgrep --json output."),
+    ("trivy", "apiforge.adapters.secreports.extract_trivy", "trivy --format json output."),
+    ("gitleaks", "apiforge.adapters.secreports.extract_gitleaks", "gitleaks report JSON."),
+)
+
+
+def _register_report(name: str, import_path: str, help_text: str) -> None:
+    """One `model <name>` command per report reader — identical payload shape."""
+
+    def cmd(
+        path: Path = typer.Option(..., "--path", help=help_text),
+        detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+    ) -> None:
+        def work() -> dict[str, object]:
+            import importlib
+
+            if not path.is_file():
+                raise AnalysisError("AF-INPUT-NOT-FOUND", str(path))
+            module, func = import_path.rsplit(".", 1)
+            extract = getattr(importlib.import_module(module), func)
+            inventory = extract(path)
+            return {
+                "diagnostics": [d.model_dump(mode="json") for d in inventory.diagnostics],
+                "facts": [f.model_dump(mode="json") for f in inventory.facts],
+                "framework": inventory.framework,
+                "input_hashes": dict(inventory.input_hashes),
+            }
+
+        _echo_json(_run(work), detail_level)
+
+    model_app.command(name)(cmd)
+
+
+for _name, _import, _help in _REPORT_READERS:
+    _register_report(_name, _import, _help)
+
+
 @model_app.command("api-gateway")
 def inventory_api_gateway(
     path: Path = typer.Option(..., "--path", help="Dump directory from collect api-gateway."),

@@ -1,0 +1,7 @@
+{
+  "totals": {"not_a_server_error": {"total": 120, "ok": 118, "failure": 2},
+             "status_code_conformance": {"total": 120, "ok": 120, "failure": 0},
+             "content_type_conformance": {"total": 120, "ok": 120, "failure": 0},
+             "response_schema_conformance": {"total": 120, "ok": 119, "failure": 1}},
+  "warnings": {"missing_test_data": [], "all_explicit": true}
+}

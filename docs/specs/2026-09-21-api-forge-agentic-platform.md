@@ -241,8 +241,8 @@ briefs por task, RED→GREEN registrado, ledger SDD, commit atômico.
 | 6 | AWS: `collect/model api-gateway` (slice 1) + `collect/model lambda`, `model terraform`, `model sam` (slice 2) | **entregue** |
 | 6b | Builder Java: `build endpoint` (sandbox-first, worktree-gated, receipt) | **entregue** |
 | 6c | Conhecimento do catálogo: 37 regras em 6 áreas + `rules list/lookup` | **entregue** |
-| 7 | Testes: `analyze pact/schemathesis/k6/coverage` + regras AF-TEST | |
-| 8 | Segurança: `analyze zap/semgrep/trivy/gitleaks` + regras AF-SEC/AF-AUTHZ + security-reviewer | |
+| 7 | Testes: `model pact/schemathesis/k6/coverage` report readers | **entregue** |
+| 8 | Segurança: `model zap/semgrep/trivy/gitleaks` report readers (AF-SEC judge rules ficam para evolução) | **entregue** |
 | 9 | Camada agêntica: coordinators/executors em `agents/` + `AGENT_PROTOCOL.md` + `playbook` floor + economy ledger | **entregue** |
 | 9b | MCP server (`apiforge-mcp`, extra `[mcp]`) + `context funnel` medido | **entregue** |
 | 10 | Release evidence bundle completo + gates por kind de evidência + `report sign/verify` | |

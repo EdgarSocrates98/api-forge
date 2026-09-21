@@ -1,0 +1,13 @@
+{
+  "consumer": {"name": "storefront"},
+  "provider": {"name": "orders-api"},
+  "interactions": [
+    {"description": "create order", "providerState": "empty",
+     "request": {"method": "POST", "path": "/orders"},
+     "response": {"status": 201}},
+    {"description": "get order", "providerState": "order exists",
+     "request": {"method": "GET", "path": "/orders/42"},
+     "response": {"status": 200}}
+  ],
+  "metadata": {"pactSpecification": {"version": "3.0.0"}}
+}

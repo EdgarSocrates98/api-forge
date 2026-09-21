@@ -155,3 +155,17 @@ objects — and every tagged property becomes `AF-SAM-UNRESOLVED`.
 | `AF-TF-UNRESOLVED` | an attribute is interpolated — named, never inferred |
 | `AF-SAM-INVALID` | the template is malformed or has no `Resources` mapping |
 | `AF-SAM-UNRESOLVED` | a property is an intrinsic tag — named, never resolved |
+
+## Test and security report readers
+
+`model pact|schemathesis|k6|coverage` and `model zap|semgrep|trivy|gitleaks`
+read the tools' standard report files offline — the tools are never run.
+These facts are evidence for `rules lookup` and the coordinators; they do
+not feed `judge_api_model` (the contract↔code path).
+
+| Code | Meaning |
+|---|---|
+| `AF-TEST-REPORT-MISSING` | a pact/schemathesis/k6/coverage report file is absent |
+| `AF-TEST-REPORT-INVALID` | the report file is not valid JSON |
+| `AF-SEC-REPORT-MISSING` | a zap/semgrep/trivy/gitleaks report file is absent |
+| `AF-SEC-REPORT-INVALID` | the report file is not valid JSON |

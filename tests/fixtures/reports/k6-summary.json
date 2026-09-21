@@ -1,0 +1,9 @@
+{
+  "metrics": {
+    "vus_max": {"value": 50},
+    "iterations": {"count": 12000},
+    "http_req_duration": {"avg": 45.2, "p(95)": 120.5, "p(99)": 310.0},
+    "http_req_failed": {"rate": 0.002},
+    "checks": {"rate": 0.998, "passes": 11976, "fails": 24}
+  }
+}

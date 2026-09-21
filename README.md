@@ -75,6 +75,8 @@ while refusal codes and `fact_id`s survive.
 | `apiforge model lambda --path dump/` | Lambda facts offline — env var names only, values never read |
 | `apiforge model terraform --path infra/` | API Gateway + Lambda resources from HCL; `${...}` → `AF-TF-UNRESOLVED` |
 | `apiforge model sam --path template.yaml` | Serverless resources; `!Ref`/`!Sub` → `AF-SAM-UNRESOLVED` |
+| `apiforge model pact\|schemathesis\|k6\|coverage --path r.json` | Test-tool reports → `test.*` facts (tools never run) |
+| `apiforge model zap\|semgrep\|trivy\|gitleaks --path r.json` | Security reports → `sec.*` facts (gitleaks never emits secrets) |
 
 ## Agentic layer
 

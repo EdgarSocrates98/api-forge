@@ -174,6 +174,7 @@ def _check_code_parity(root: Path, failures: list[str]) -> None:
         ("AF-SAM", "docs/catalog-contract.md"),
         ("AF-TEST", "docs/catalog-contract.md"),
         ("AF-SEC", "docs/catalog-contract.md"),
+        ("AF-JUDGE", "docs/catalog-contract.md"),
         ("AF-REPORT", "docs/catalog-contract.md"),
         ("AF-FUNNEL", "docs/catalog-contract.md"),
     ):

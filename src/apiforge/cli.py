@@ -20,9 +20,10 @@ from apiforge.case.service import CaseIntegrityError, CaseStorageError
 from apiforge.collectors.apigateway import collect
 from apiforge.collectors.manifest import CollectError, CollectManifest
 from apiforge.core.detail import apply_detail_level
-from apiforge.core.models import Finding, FindingStatus, Severity
+from apiforge.core.models import Fact, Finding, FindingStatus, Severity
 from apiforge.openapi.diff import diff_contracts
 from apiforge.openapi.loader import OpenApiLoadError, load_openapi
+from apiforge.rules.fact_judge import judge_facts
 from apiforge.rules.judge import judge_api_model
 
 _SEVERITY_RANK = {
@@ -217,17 +218,39 @@ def analyze(
 
 @app.command()
 def judge(
-    contract: Path = typer.Option(..., "--contract", help="OpenAPI 3.1 document."),
-    project: Path = typer.Option(..., "--project", help="FastAPI project root."),
+    contract: Path | None = typer.Option(
+        None, "--contract", help="OpenAPI 3.1 document."
+    ),
+    project: Path | None = typer.Option(None, "--project", help="FastAPI project root."),
+    facts: Path | None = typer.Option(
+        None, "--facts", help="facts.json emitted by a `model *` verb."
+    ),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
-    """Judge contract/code divergence and print findings."""
+    """Judge contract/code divergence, or catalog checks over report facts."""
 
     def work() -> object:
-        if not contract.is_file():
-            raise AnalysisError("AF-INPUT-NOT-FOUND", str(contract))
-        if not project.is_dir():
-            raise AnalysisError("AF-INPUT-NOT-FOUND", str(project))
+        if facts is not None:
+            if contract is not None or project is not None:
+                raise AnalysisError(
+                    "AF-JUDGE-INPUT-AMBIGUOUS",
+                    "--facts is exclusive with --contract/--project",
+                )
+            if not facts.is_file():
+                raise AnalysisError("AF-INPUT-NOT-FOUND", str(facts))
+            doc = json.loads(facts.read_text(encoding="utf-8"))
+            payload = doc.get("facts", doc) if isinstance(doc, dict) else doc
+            if not isinstance(payload, list):
+                raise AnalysisError("AF-JUDGE-FACTS-INVALID", f"{facts}: not a fact list")
+            parsed = [Fact.model_validate(f) for f in payload]
+            return [f.model_dump(mode="json") for f in judge_facts(parsed)]
+        if contract is None or project is None:
+            raise AnalysisError(
+                "AF-JUDGE-INPUT-MISSING",
+                "judge needs --contract/--project or --facts",
+            )
+        if not contract.is_file() or not project.is_dir():
+            raise AnalysisError("AF-INPUT-NOT-FOUND", f"{contract} or {project}")
         model = build_api_model(load_openapi(contract), extract_fastapi(project))
         return [f.model_dump(mode="json") for f in judge_api_model(model)]
 

@@ -27,7 +27,41 @@ _RULE_KEYS = {
     "remediation",
     "reference",
     "runtime_scope",
+    "check",
 }
+
+_CHECK_KEYS = {"kind", "path", "op", "value"}
+_CHECK_OPS = {"gt", "ge", "lt", "le", "eq", "ne", "present"}
+
+
+class RuleCheck(BaseModel):
+    """Closed executable predicate over a fact kind — thresholds stay data."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    kind: str
+    path: str  # dotted path into measures/attrs
+    op: str
+    value: object = None
+
+
+def _parse_check(raw: object, source: str, rule_id: str) -> RuleCheck | None:
+    if raw is None:
+        return None
+    if not isinstance(raw, Mapping) or not set(raw) <= _CHECK_KEYS:
+        raise CatalogError(
+            "AF-CATALOG-SCHEMA", f"{source}: {rule_id} check must map {_CHECK_KEYS}"
+        )
+    if raw.get("op") not in _CHECK_OPS or not isinstance(raw.get("kind"), str):
+        raise CatalogError(
+            "AF-CATALOG-SCHEMA",
+            f"{source}: {rule_id} check needs kind + op in {sorted(_CHECK_OPS)}",
+        )
+    if not isinstance(raw.get("path"), str):
+        raise CatalogError("AF-CATALOG-SCHEMA", f"{source}: {rule_id} check needs path")
+    return RuleCheck(
+        kind=raw["kind"], path=raw["path"], op=raw["op"], value=raw.get("value")
+    )
 
 
 class CatalogError(ValueError):
@@ -49,6 +83,7 @@ class RuleMeta(BaseModel):
     remediation: str
     reference: str = ""
     runtime_scope: str | None = None
+    check: RuleCheck | None = None
 
 
 def _merge(target: dict[str, RuleMeta], parsed: dict[str, RuleMeta], source: str) -> None:
@@ -86,6 +121,7 @@ def _parse(data: object, source: str) -> dict[str, RuleMeta]:
                 remediation=entry.get("remediation", ""),
                 reference=entry.get("reference", ""),
                 runtime_scope=entry.get("runtime_scope"),
+                check=_parse_check(entry.get("check"), source, str(entry["id"])),
             )
         except Exception as exc:
             raise CatalogError(

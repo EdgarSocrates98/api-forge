@@ -88,3 +88,41 @@ rules:
       equivalent) on every contract change; fail on unclassified breaking
       changes, require an approved ADR for classified ones.
     reference: docs/decisions/ADR-002-api-ir-provenance.md
+  - id: AF-TEST-101
+    title: k6 reports a failing-request rate above 5%
+    severity: high
+    rationale: >-
+      `http_req_failed.rate` counts real 4xx/5xx under load; above 5% the
+      load run is measuring failure, not capacity — capacity numbers from a
+      failing run do not transfer to production.
+    remediation: >-
+      Fix the dominant error before trusting latency percentiles; only then
+      re-run for capacity. If the rate is an intentional negative-test mix,
+      declare it in the run report.
+    reference: https://k6.io/docs/using-k6/metrics/reference/
+    check: {kind: test.k6.summary, path: attrs.failed_rate, op: gt, value: 0.05}
+  - id: AF-TEST-102
+    title: Schemathesis found contract-violating responses
+    severity: high
+    rationale: >-
+      Schemathesis failures are responses the contract does not allow —
+      missing validation, wrong status codes, or schema drift; each is a
+      client-visible defect already proven against the spec.
+    remediation: >-
+      Reproduce the failing check cases; fix the serializer/validator first,
+      then re-run — a clean schemathesis run is the floor for contract
+      conformance.
+    reference: https://schemathesis.readthedocs.io/
+    check: {kind: test.schemathesis.run, path: attrs.failure, op: gt, value: 0}
+  - id: AF-TEST-103
+    title: coverage.py reports below 80% line coverage
+    severity: medium
+    rationale: >-
+      Below ~80% line coverage the untested surface grows faster than
+      confidence; the number is a floor signal, not proof of correctness —
+      but its absence names the blind spot.
+    remediation: >-
+      Cover the missing lines on changed code first; raise the floor
+      gradually rather than chasing a global number.
+    reference: https://coverage.readthedocs.io/
+    check: {kind: test.coverage.py, path: measures.percent_covered, op: lt, value: 80}

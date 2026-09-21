@@ -100,3 +100,52 @@ rules:
       ids in the path only when BOLA checks exist; never log query strings
       containing secrets.
     reference: docs/security/threat-model-mvp.md
+  - id: AF-SEC-101
+    title: gitleaks found committed secrets
+    severity: critical
+    rationale: >-
+      Every gitleaks entry is a credential already in history — it is
+      compromised by definition; the only question is rotation latency, not
+      whether it matters.
+    remediation: >-
+      Revoke and rotate each leaked credential, purge history or accept the
+      residue explicitly; add the repo to the gitleaks baseline so the
+      finding does not regress silently.
+    reference: https://github.com/gitleaks/gitleaks
+    check: {kind: sec.gitleaks.report, path: measures.leaks, op: gt, value: 0}
+  - id: AF-SEC-102
+    title: trivy reports critical findings
+    severity: critical
+    rationale: >-
+      Critical-severity vulnerabilities, misconfigurations or secrets in
+      deployed artifacts are reachable risk, not backlog — the trivy
+      severity is the scanner's own triage, not ours.
+    remediation: >-
+      Patch the critical findings first by target; pin base images and
+      re-scan on every build so the count cannot regress unnoticed.
+    reference: https://aquasecurity.github.io/trivy/
+    check: {kind: sec.trivy.report, path: attrs.by_severity.critical, op: gt, value: 0}
+  - id: AF-SEC-103
+    title: ZAP reports high-risk alerts
+    severity: high
+    rationale: >-
+      ZAP high-risk alerts are actively-exercised findings from a running
+      scan — auth bypasses, injections, exposed content — proven against the
+      live surface rather than inferred from code.
+    remediation: >-
+      Triage each high alert to a fix or a documented false-positive;
+      re-scan the same endpoints and require zero high before release.
+    reference: https://www.zaproxy.org/docs/
+    check: {kind: sec.zap.report, path: attrs.by_risk.high, op: gt, value: 0}
+  - id: AF-SEC-104
+    title: semgrep reports error-severity findings
+    severity: medium
+    rationale: >-
+      Semgrep `ERROR` severity marks findings the rule authors classified
+      as security-relevant — injection sinks, weak crypto, disabled
+      verification — at a higher certainty than warnings.
+    remediation: >-
+      Fix or suppress-with-reason each error-severity finding; keep the
+      suppressed set visible in the report rather than filtered out.
+    reference: https://semgrep.dev/docs/
+    check: {kind: sec.semgrep.report, path: attrs.by_severity.error, op: gt, value: 0}

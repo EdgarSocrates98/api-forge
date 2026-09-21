@@ -89,3 +89,37 @@ def test_judge_lists_findings() -> None:
     assert result.exit_code == 0
     findings = json.loads(result.stdout)
     assert all("rule_id" in f for f in findings)
+
+
+def test_judge_facts_mode(tmp_path: Path) -> None:
+    from apiforge.adapters.secreports import extract_gitleaks
+
+    report = tmp_path / "leaks.json"
+    report.write_text(
+        json.dumps(
+            [{"RuleID": "aws-key", "File": "a.py", "Secret": "AKIA-SECRET-VALUE-999"}]
+        ),
+        encoding="utf-8",
+    )
+    inv = extract_gitleaks(report)
+    facts_file = tmp_path / "facts.json"
+    facts_file.write_text(
+        json.dumps({"facts": [f.model_dump(mode="json") for f in inv.facts]}),
+        encoding="utf-8",
+    )
+    result = runner.invoke(app, ["judge", "--facts", str(facts_file)])
+    assert result.exit_code == 0, result.output
+    findings = json.loads(result.output)
+    assert {f["rule_id"] for f in findings} == {"AF-SEC-101"}
+    assert "AKIA-SECRET-VALUE-999" not in result.output
+
+
+def test_judge_facts_ambiguous_input(tmp_path: Path) -> None:
+    f = tmp_path / "f.json"
+    f.write_text("[]", encoding="utf-8")
+    result = runner.invoke(
+        app,
+        ["judge", "--facts", str(f), "--contract", CONTRACT, "--project", PROJECT],
+    )
+    assert result.exit_code != 0
+    assert "AF-JUDGE-INPUT-AMBIGUOUS" in result.output

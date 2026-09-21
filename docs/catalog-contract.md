@@ -184,3 +184,17 @@ recomputes and names each diverged part (`signature_version`, `body`,
 | `AF-REPORT-NO-CASE` | no `case.json` under the given directory |
 | `AF-REPORT-NO-RECEIPT` | the `--receipt` path is absent |
 | `AF-REPORT-UNSIGNED` | `report verify` on a report without a signature block |
+
+## Executable checks over facts
+
+Rules may carry a closed `check` block (`kind`, dotted `path` into
+`measures`/`attrs`, `op` in `gt|ge|lt|le|eq|ne|present`, `value`) — the
+threshold stays catalog data, citable like every other field.
+`judge --facts <f.json>` applies every check rule to facts emitted by
+`model *`; each match is a `confirmed` finding citing the `fact_id`.
+
+| Code | Meaning |
+|---|---|
+| `AF-JUDGE-INPUT-AMBIGUOUS` | `--facts` combined with `--contract`/`--project` |
+| `AF-JUDGE-INPUT-MISSING` | neither `--contract`/`--project` nor `--facts` given |
+| `AF-JUDGE-FACTS-INVALID` | the facts payload is not a fact list |

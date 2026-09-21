@@ -13,6 +13,8 @@ from typing import Any
 
 LEVELS = ("summary", "normal", "full")
 
+UNKNOWN_LEVEL = "AF-DETAIL-LEVEL"
+
 _DROP_KEYS = frozenset(
     {
         "rationale",
@@ -38,7 +40,7 @@ def _project(value: Any) -> Any:
 def apply_detail_level(payload: Any, level: str) -> Any:
     """Project ``payload`` at ``level``; content-bearing fields never mutate."""
     if level not in LEVELS:
-        raise ValueError(f"AF-DETAIL-LEVEL: unknown level {level!r}")
+        raise ValueError(f"{UNKNOWN_LEVEL}: unknown level {level!r}")
     if level == "summary":
         return _project(payload)
     return payload

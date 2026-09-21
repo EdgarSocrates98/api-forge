@@ -21,6 +21,7 @@ with their mitigations.
 | Frontmatter injection | SDD frontmatter uses the strict YAML loader (no aliases, tags or duplicate keys); `stamp` rewrites only the upstream hash line |
 | Gate override abuse | a strict `set-phase` bypass is never silent: `gate`, `reason` and `actor` are recorded in `gate-overrides.json` under `.apiforge/sdd/<FEATURE>/` |
 | Worktree index drift/confusion | `worktree_list` reconciles `index.json` against `git worktree list --porcelain` and reports drift in both directions instead of hiding it |
+| Malformed Java source (tree-sitter) | the parser never executes code and cannot call the target toolchain; parse errors degrade to `AF-SPRING-PARSE` diagnostics with the file still hashed, and non-literal annotation args become `AF-SPRING-UNRESOLVED-ROUTE` |
 | Fabricated conclusions | `unresolved` diagnostics and findings name the uncertainty; `confirmed` requires evidence fact_ids by construction |
 
 ## Known limitations

@@ -36,6 +36,14 @@ Individual stages: `apiforge discover --project .`, `apiforge model build
 --contract c.yaml --project .`, `apiforge diff contract --baseline a.yaml
 --candidate b.yaml`, `apiforge judge --contract c.yaml --project .`.
 
+Frameworks: `analyze --framework fastapi|spring|auto` — `auto` counts
+`.java`/`.py` files (none → `AF-INPUT-FRAMEWORK-UNKNOWN`). The Spring adapter
+parses `*.java` with tree-sitter (`@RestController`/`@RequestMapping`/
+`@GetMapping`…, `RouterFunctions.route`, JAX-RS); non-literal annotation args
+emit `AF-SPRING-UNRESOLVED-ROUTE`, never inference. Every JSON command accepts
+`--detail-level summary|normal|full`; `summary` drops verbose text fields
+while refusal codes and `fact_id`s survive.
+
 ## Governance
 
 | Command | Purpose |
@@ -49,6 +57,7 @@ Individual stages: `apiforge discover --project .`, `apiforge model build
 | `apiforge sandbox clean --root .` | Remove `.apiforge/sandbox` only |
 | `apiforge evidence emit --case .apiforge/case --out receipt.json` | Receipt binding artifact paths to sha256 (proves correspondence, not authorship) |
 | `apiforge evidence verify --receipt receipt.json` | Re-hash every artifact the receipt lists |
+| `apiforge next-step --findings findings.json --phase verify` | Route the dominant finding area to the specialist agent |
 
 ## Exit codes
 

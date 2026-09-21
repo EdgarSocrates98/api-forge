@@ -40,6 +40,8 @@ REQUIRED_DOCS = (
     "docs/decisions/ADR-003-policy-as-data.md",
     "docs/decisions/ADR-004-hash-cascade.md",
     "docs/decisions/ADR-005-correspondence-not-authorship.md",
+    "docs/decisions/ADR-006-tree-sitter-language-adapters.md",
+    "docs/catalog-contract.md",
 )
 
 FORBIDDEN_IMPORT = re.compile(
@@ -73,6 +75,7 @@ PHASES = (
 )
 
 THREAT_PHRASES = (
+    "tree-sitter",
     "policy tampering",
     "diff path escape",
     "symlinks inside copied trees",
@@ -144,6 +147,10 @@ def _check_code_parity(root: Path, failures: list[str]) -> None:
     for prefix, doc in (
         ("AF-SDD", "docs/sdd-contract.md"),
         ("AF-POLICY", "docs/policy-contract.md"),
+        ("AF-CATALOG", "docs/catalog-contract.md"),
+        ("AF-ROUTING", "docs/catalog-contract.md"),
+        ("AF-SPRING", "docs/catalog-contract.md"),
+        ("AF-DETAIL", "docs/catalog-contract.md"),
     ):
         doc_path = root / doc
         if not doc_path.is_file():
@@ -222,6 +229,35 @@ def _check_receipt_roundtrip(root: Path, failures: list[str]) -> None:
             failures.append(f"receipt round-trip crashed: {exc}")
 
 
+def _check_routing(root: Path, failures: list[str]) -> None:
+    from apiforge.application.next_step import load_routing
+    from apiforge.rules.catalog import load_areas
+    from apiforge.sdd.models import PHASES
+
+    try:
+        routes = load_routing()
+        areas = set(load_areas())
+        phases = set(PHASES)
+    except Exception as exc:  # noqa: BLE001
+        failures.append(f"routing/catalog load failed: {exc}")
+        return
+    for route in routes:
+        if route.phase not in phases:
+            failures.append(f"routing.yaml: unknown phase {route.phase!r}")
+        if route.dominant_area not in areas:
+            failures.append(f"routing.yaml: unknown area {route.dominant_area!r}")
+
+
+def _check_lab_and_boundary(root: Path, failures: list[str]) -> None:
+    lab = root / "tests" / "labs" / "orders-spring"
+    if not lab.is_dir() or not any(lab.rglob("*.java")):
+        failures.append("orders-spring parity lab missing Java sources")
+    for source in sorted((root / "src").rglob("*.py")):
+        text = source.read_text(encoding="utf-8")
+        if "tree_sitter" in text and "adapters/spring" not in source.as_posix():
+            failures.append(f"tree_sitter import outside adapters.spring: {source}")
+
+
 def _check_threat_model(root: Path, failures: list[str]) -> None:
     path = root / "docs" / "security" / "threat-model-mvp.md"
     if not path.is_file():
@@ -244,6 +280,8 @@ def check_repository(root: Path) -> list[str]:
     _check_catalogs(root, failures)
     _check_templates(root, failures)
     _check_receipt_roundtrip(root, failures)
+    _check_routing(root, failures)
+    _check_lab_and_boundary(root, failures)
     _check_threat_model(root, failures)
     return failures
 

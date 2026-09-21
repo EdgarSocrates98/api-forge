@@ -235,10 +235,12 @@ briefs por task, RED→GREEN registrado, ledger SDD, commit atômico.
 |---|---|---|
 | 1 | MVP vertical slice (FastAPI + OpenAPI + diff + judge + case + CLI) | **entregue** |
 | 2 | SDD profiles, policy engine, sandbox/worktree, release evidence | **entregue** |
-| 3 | Fundação do catálogo: `routing.yaml`, `gates.yaml`, áreas de regras esqueléticas, `next-step`, `detail_level` no core — **+ adapter Spring Boot + lab `orders-spring`** (Java antes de Go, decisão do operador) | plano escrito |
-| 4 | Adapter Go/Chi + lab `orders-go` (ADR tree-sitter já decidido no plano 3) | |
+| 3 | Fundação do catálogo: `routing.yaml`, `gates.yaml`, áreas de regras esqueléticas, `next-step`, `detail_level` no core — **+ adapter Spring Boot + lab `orders-spring`** (Java antes de Go, decisão do operador) | **entregue** |
+| 4 | Adapter Go/Chi + lab `orders-go` (ADR tree-sitter já decidido no plano 3) | **entregue** |
 | 5 | ~~Adapter Spring Boot + lab `orders-spring`~~ → absorvido pelo plano 3 | |
-| 6 | AWS: `collect gateway/lambda` + `analyze terraform-api/sam-api/gateway-dump` | |
+| 6 | AWS: `collect api-gateway` + `model api-gateway` offline — slice 1 entregue (lambda/terraform/sam ficam para slice 2) | **parcial** |
+| 6b | Builder Java: `build endpoint` (sandbox-first, worktree-gated, receipt) | **entregue** |
+| 6c | Conhecimento do catálogo: 37 regras em 6 áreas + `rules list/lookup` | **entregue** |
 | 7 | Testes: `analyze pact/schemathesis/k6/coverage` + regras AF-TEST | |
 | 8 | Segurança: `analyze zap/semgrep/trivy/gitleaks` + regras AF-SEC/AF-AUTHZ + security-reviewer | |
 | 9 | Camada agêntica: coordinators/executors em `agents/`, MCP tools com `detail_level`, economy ledger, context funnel | |
@@ -247,8 +249,8 @@ briefs por task, RED→GREEN registrado, ledger SDD, commit atômico.
 
 ## 11. Decisões abertas
 
-1. **tree-sitter** para Java/Go vs parser nativo por subprocesso (ADR a
-   escrever no plano 4; recomendação: tree-sitter).
+1. ~~**tree-sitter** para Java/Go vs parser nativo por subprocesso~~ —
+   **decidido**: tree-sitter (ADR-006); adapters Spring e Go já em produção.
 2. Monorepo único vs pacotes por adapter (`apiforge-spring`,
    `apiforge-go`) — tende a monorepo enquanto o core for estável.
 3. Empacotamento do MCP server: mesmo wheel vs extra `[mcp]`.

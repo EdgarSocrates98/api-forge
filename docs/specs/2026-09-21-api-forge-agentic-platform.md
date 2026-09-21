@@ -235,9 +235,9 @@ briefs por task, RED→GREEN registrado, ledger SDD, commit atômico.
 |---|---|---|
 | 1 | MVP vertical slice (FastAPI + OpenAPI + diff + judge + case + CLI) | **entregue** |
 | 2 | SDD profiles, policy engine, sandbox/worktree, release evidence | plano escrito |
-| 3 | Fundação do catálogo: `routing.yaml`, `gates.yaml`, áreas de regras esqueléticas, `next-step`, `detail_level` no core | |
-| 4 | Adapter Go/Chi (ADR tree-sitter antes) + lab `orders-go` | |
-| 5 | Adapter Spring Boot + lab `orders-spring` | |
+| 3 | Fundação do catálogo: `routing.yaml`, `gates.yaml`, áreas de regras esqueléticas, `next-step`, `detail_level` no core — **+ adapter Spring Boot + lab `orders-spring`** (Java antes de Go, decisão do operador) | plano escrito |
+| 4 | Adapter Go/Chi + lab `orders-go` (ADR tree-sitter já decidido no plano 3) | |
+| 5 | ~~Adapter Spring Boot + lab `orders-spring`~~ → absorvido pelo plano 3 | |
 | 6 | AWS: `collect gateway/lambda` + `analyze terraform-api/sam-api/gateway-dump` | |
 | 7 | Testes: `analyze pact/schemathesis/k6/coverage` + regras AF-TEST | |
 | 8 | Segurança: `analyze zap/semgrep/trivy/gitleaks` + regras AF-SEC/AF-AUTHZ + security-reviewer | |

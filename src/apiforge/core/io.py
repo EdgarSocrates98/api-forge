@@ -23,6 +23,15 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
+def text_sha256(path: Path) -> str:
+    """SHA-256 of a text file with CRLF normalized to LF.
+
+    Text artifacts are hashed on their logical content: a checkout that only
+    differs in line endings produces the same digest.
+    """
+    return hashlib.sha256(Path(path).read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+
+
 def _to_jsonable(value: object) -> object:
     if isinstance(value, BaseModel):
         return value.model_dump(mode="json")

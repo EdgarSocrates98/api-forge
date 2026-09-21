@@ -153,3 +153,37 @@ def load_data_file(path: Path) -> object:
     if target.suffix.lower() == ".json":
         return load_json_strict(text, source=target.name)
     return load_yaml_strict(text, source=target.name)
+
+
+StrictYamlError = StrictLoadError
+"""Plan-facing alias: the strict loader's error type is ``StrictLoadError``."""
+
+
+def load_yaml_mapping(text: str, *, source: str = "<input>") -> dict[Any, Any]:
+    """Parse YAML that must be a mapping — frontmatter, catalogs, policies."""
+    value = load_yaml_strict(text, source=source)
+    if not isinstance(value, dict):
+        raise StrictLoadError("AF-YAML-NOT-MAPPING", f"{source}: document is not a mapping")
+    return value
+
+
+def split_frontmatter(text: str) -> tuple[str | None, str]:
+    """Split a leading ``---`` YAML frontmatter block from the body.
+
+    Returns ``(block, body)`` where ``block`` is the text between the fences
+    (newlines normalized to LF) or ``None`` when the fence never opens or
+    never closes — in which case ``body`` is the unmodified input. A single
+    leading UTF-8 BOM is tolerated.
+    """
+    if text.startswith("﻿"):
+        text = text.removeprefix("﻿")
+    normalized = text.replace("\r\n", "\n")
+    if not normalized.startswith("---\n"):
+        return None, text
+    lines = normalized[4:].split("\n")
+    for index, line in enumerate(lines):
+        if line.rstrip() == "---":
+            block = "\n".join(lines[:index]) + "\n"
+            body = "\n".join(lines[index + 1 :])
+            return block, body
+    return None, text

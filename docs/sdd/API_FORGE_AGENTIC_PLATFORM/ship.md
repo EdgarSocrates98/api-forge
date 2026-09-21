@@ -6,7 +6,7 @@ profile: critical
 status: draft
 upstream:
   path: benchmark.md
-  sha256: "3fbc1c948e344e1c596c7389de6227f68286e867a88a08d91d3a42ed9ccf334a"
+  sha256: "cf7a8ec95b7aee283f0b936d7f12854345172f61a2ad90ab1ebe2210516082d2"
 deviations: []
 evidence: []
 ---

@@ -347,3 +347,34 @@ release gate.
 | Code | Meaning |
 |---|---|
 | `AF-CONTRACTS-UNKNOWN` | contract name not in the registry |
+
+### Tasks (`task`, `brief`)
+
+A task is a sealed, budgeted unit of work under
+`<root>/.apiforge/tasks/<id>/` — `task.yaml`, append-only `revisions/`,
+`history.jsonl`, `runs/`. Lifecycle:
+`draft -> reviewed -> sealed -> ready -> running -> awaiting_supervision ->
+accepted`, with `rejected`, `parked`, `blocked`, `expired` as refusal or
+terminal states. `task review` on a sealed task writes a new unsealed
+revision — amendment always invalidates the prior seal. `task seal` binds an
+Ed25519 signature to the exact revision (key lives outside the task; the
+executor never holds it). `task run` executes the recipe from
+`rules/recipes.yaml` through the same `dispatch_step` unit as playbooks,
+inside `budgets` (max rounds, max calls, deadline) with a no-progress
+breaker. `task accept` requires `accepted_by` distinct from the executor and
+at least one `--evidence`. `brief show` renders the OutcomeBrief — `DONE` is
+refused while gaps, missing acceptance, or open items remain.
+
+| Code | Meaning |
+|---|---|
+| `AF-TASK-ID` | task id fails `^[a-z0-9][a-z0-9-]{0,63}$` |
+| `AF-TASK-EXISTS` | `task create` on an existing id |
+| `AF-TASK-NOT-FOUND` | no task under the root |
+| `AF-TASK-TRANSITION` | state machine refuses the move |
+| `AF-TASK-FIELD` | `task review --set` names an unknown or non-scalar field |
+| `AF-TASK-INPUT` | `--input` is not `field=value` or names an unknown field |
+| `AF-TASK-UNSEALED` | `task ready|run` while the current revision has no seal |
+| `AF-TASK-SEALED` | mutation attempted on a sealed revision |
+| `AF-TASK-REVISION-MISSING` | spec.revision points at a revision file that is absent |
+| `AF-TASK-RECIPE` | `strategy` names no recipe in `rules/recipes.yaml` |
+| `AF-RECIPE-INVALID` | `recipes.yaml` is malformed |

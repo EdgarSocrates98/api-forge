@@ -128,6 +128,18 @@ contract_app = typer.Typer(
     no_args_is_help=True,
 )
 app.add_typer(contract_app)
+task_app = typer.Typer(
+    name="task",
+    help="Sealed, budgeted units of agentic work (TaskSpec).",
+    no_args_is_help=True,
+)
+app.add_typer(task_app)
+brief_app = typer.Typer(
+    name="brief",
+    help="Outcome Briefs — DONE is refused while mandatory gaps exist.",
+    no_args_is_help=True,
+)
+app.add_typer(brief_app)
 
 
 @app.callback()
@@ -801,6 +813,218 @@ def contract_show(
 
         try:
             return contract_schema(name)
+        except ContractError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_json(_run(work), detail_level)
+
+
+def _task_root(root: Path | None) -> Path:
+    return root if root is not None else Path.cwd()
+
+
+@task_app.command("create")
+def task_create(
+    task_id: str = typer.Argument(..., help="Task id (lowercase, digits, hyphens)."),
+    outcome: str = typer.Option(..., "--outcome", help="The single outcome."),
+    spec_file: Path | None = typer.Option(
+        None, "--spec", help="YAML/JSON TaskSpec to load instead of flags."
+    ),
+    input_: list[str] = typer.Option(
+        [], "--input", help="field=path-or-value (project, contract, findings…)"
+    ),
+    writable: list[str] = typer.Option([], "--writable", help="Writable path glob."),
+    strategy: str = typer.Option("direct", "--strategy", help="Recipe name."),
+    risk: str = typer.Option("read_only", "--risk", help="Action class."),
+    root: Path | None = typer.Option(None, "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Create a task in draft; sealed only after review."""
+
+    def work() -> dict[str, object]:
+        from apiforge.contracts.base import ContractError
+        from apiforge.contracts.task import TaskSpec
+        from apiforge.taskspec.service import create_task
+
+        try:
+            if spec_file is not None:
+                import yaml
+
+                data = yaml.safe_load(spec_file.read_text(encoding="utf-8"))
+                data["id"] = task_id
+                spec = TaskSpec.model_validate(data)
+            else:
+                spec = TaskSpec.model_validate(
+                    {
+                        "id": task_id,
+                        "outcome": outcome,
+                        "inputs": tuple(input_),
+                        "writable_paths": tuple(writable),
+                        "strategy": strategy,
+                        "risk": risk,
+                    }
+                )
+            created = create_task(_task_root(root), spec)
+            return created.model_dump(mode="json")
+        except ContractError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_json(_run(work), detail_level)
+
+
+@task_app.command("review")
+def task_review(
+    task_id: str = typer.Argument(...),
+    by: str = typer.Option(..., "--by", help="Reviewer identity."),
+    set_: list[str] = typer.Option([], "--set", help="scalar field=value changes"),
+    root: Path | None = typer.Option(None, "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Mark reviewed — any --set change bumps the revision, voiding seals."""
+
+    def work() -> dict[str, object]:
+        from apiforge.contracts.base import ContractError
+        from apiforge.taskspec.service import review_task
+
+        sets = dict(
+            item.split("=", 1) for item in set_ if "=" in item
+        )
+        try:
+            spec = review_task(_task_root(root), task_id, by, sets)
+            return spec.model_dump(mode="json")
+        except ContractError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_json(_run(work), detail_level)
+
+
+@task_app.command("seal")
+def task_seal(
+    task_id: str = typer.Argument(...),
+    key: Path = typer.Option(..., "--key", help="Ed25519 private PEM."),
+    by: str = typer.Option(..., "--by"),
+    root: Path | None = typer.Option(None, "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Seal the current revision — key possession, never identity."""
+
+    def work() -> dict[str, object]:
+        from apiforge.contracts.base import ContractError
+        from apiforge.taskspec.service import seal_task
+
+        try:
+            spec = seal_task(_task_root(root), task_id, key, by)
+            return spec.model_dump(mode="json")
+        except ContractError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_json(_run(work), detail_level)
+
+
+@task_app.command("run")
+def task_run(
+    task_id: str = typer.Argument(...),
+    by: str = typer.Option(..., "--by", help="Executor identity."),
+    now: str | None = typer.Option(None, "--now", help="ISO8601 (only clock)."),
+    root: Path | None = typer.Option(None, "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Run the recipe within budgets; ends awaiting supervision or named stop."""
+
+    def work() -> dict[str, object]:
+        from apiforge.contracts.base import ContractError
+        from apiforge.taskspec.runner import run_task
+
+        try:
+            return run_task(_task_root(root), task_id, by, now=now)
+        except ContractError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_json(_run(work), detail_level)
+
+
+@task_app.command("accept")
+def task_accept(
+    task_id: str = typer.Argument(...),
+    by: str = typer.Option(..., "--by", help="Acceptor — never the executor."),
+    evidence: list[str] = typer.Option([], "--evidence"),
+    notes: str = typer.Option("", "--notes"),
+    root: Path | None = typer.Option(None, "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Accept a supervised run; the acceptor must differ from the executor."""
+
+    def work() -> dict[str, object]:
+        from apiforge.contracts.base import ContractError
+        from apiforge.taskspec.runner import accept_task
+
+        try:
+            return accept_task(
+                _task_root(root), task_id, by, tuple(evidence), notes
+            )
+        except ContractError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_json(_run(work), detail_level)
+
+
+@task_app.command("reject")
+def task_reject(
+    task_id: str = typer.Argument(...),
+    by: str = typer.Option(..., "--by"),
+    reason: str = typer.Option(..., "--reason"),
+    root: Path | None = typer.Option(None, "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Reject a supervised run back to reviewable state."""
+
+    def work() -> dict[str, object]:
+        from apiforge.contracts.base import ContractError
+        from apiforge.taskspec.runner import reject_task
+
+        try:
+            spec = reject_task(_task_root(root), task_id, by, reason)
+            return spec.model_dump(mode="json")
+        except ContractError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_json(_run(work), detail_level)
+
+
+@task_app.command("status")
+def task_status_cmd(
+    task_id: str = typer.Argument(...),
+    root: Path | None = typer.Option(None, "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Task spec plus its append-only history."""
+
+    def work() -> dict[str, object]:
+        from apiforge.contracts.base import ContractError
+        from apiforge.taskspec.runner import task_status
+
+        try:
+            return task_status(_task_root(root), task_id)
+        except ContractError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_json(_run(work), detail_level)
+
+
+@brief_app.command("show")
+def brief_show(
+    task_id: str = typer.Option(..., "--task", help="Task id to brief."),
+    root: Path | None = typer.Option(None, "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Render the Outcome Brief for a task — DONE is refused, not advised."""
+
+    def work() -> dict[str, object]:
+        from apiforge.brief.render import brief_payload
+        from apiforge.contracts.base import ContractError
+
+        try:
+            return brief_payload(_task_root(root), task_id)
         except ContractError as exc:
             raise AnalysisError(exc.code, exc.detail) from exc
 

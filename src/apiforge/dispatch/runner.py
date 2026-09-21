@@ -123,7 +123,7 @@ def _verb_diff_contract(ctx: DispatchContext) -> list[dict[str, Any]]:
     ]
 
 
-def _verb_rules_list(ctx: DispatchContext, area: str | None) -> dict[str, object]:
+def _verb_rules_list(ctx: DispatchContext, area: str | None = None) -> dict[str, object]:
     from apiforge.rules.catalog import load_catalog
 
     catalog = load_catalog()
@@ -270,6 +270,39 @@ def _match_verb(verb: str) -> tuple[tuple[str, ...], Callable[..., Any], str | N
     return (), lambda *a: None, "__unknown__"
 
 
+def dispatch_step(verb: str, ctx: DispatchContext) -> dict[str, object]:
+    """Execute one verb against the context — the unit tasks and playbooks share.
+
+    Returns a status entry: ``ran`` (with ``output_sha256``), ``pending``
+    (missing inputs named), ``refused`` (``collect *``), or ``error``.
+    """
+    needs, runner, extra = _match_verb(verb)
+    entry: dict[str, object] = {"verb": verb}
+    if extra == "__collect__":
+        entry["status"] = "refused"
+        entry["reason"] = "collect touches AWS — run outside dispatch"
+    elif extra == "__unknown__":
+        entry["status"] = "pending"
+        entry["missing"] = ["dispatchable-verb"]
+    else:
+        missing = _need(ctx, *needs)
+        if missing:
+            entry["status"] = "pending"
+            entry["missing"] = missing
+        else:
+            try:
+                if extra and verb.startswith("rules list"):
+                    output = runner(ctx, extra.removeprefix("--area "))
+                else:
+                    output = runner(ctx)
+                entry["status"] = "ran"
+                entry["output_sha256"] = _canon_sha(output)
+            except Exception as exc:  # noqa: BLE001 - a step failure is data
+                entry["status"] = "error"
+                entry["error"] = str(exc).split("\n")[0]
+    return entry
+
+
 def run_playbook(coordinator: str, ctx: DispatchContext) -> dict[str, object]:
     """Execute a coordinator's playbook; the record lands under case/dispatch."""
     from apiforge.rules.catalog import load_playbooks
@@ -283,35 +316,12 @@ def run_playbook(coordinator: str, ctx: DispatchContext) -> dict[str, object]:
     record_steps: list[dict[str, object]] = []
     for order, step in enumerate(steps, 1):
         verb = str(step.get("verb", ""))
-        needs, runner, extra = _match_verb(verb)
         entry: dict[str, object] = {
             "order": order,
             "executor": step.get("executor"),
-            "verb": verb,
             "purpose": step.get("purpose", ""),
         }
-        if extra == "__collect__":
-            entry["status"] = "refused"
-            entry["reason"] = "collect touches AWS — run outside dispatch"
-        elif extra == "__unknown__":
-            entry["status"] = "pending"
-            entry["missing"] = ["dispatchable-verb"]
-        else:
-            missing = _need(ctx, *needs)
-            if missing:
-                entry["status"] = "pending"
-                entry["missing"] = missing
-            else:
-                try:
-                    if extra and verb.startswith("rules list"):
-                        output = runner(ctx, extra.removeprefix("--area "))
-                    else:
-                        output = runner(ctx)
-                    entry["status"] = "ran"
-                    entry["output_sha256"] = _canon_sha(output)
-                except Exception as exc:  # noqa: BLE001 - a step failure is data
-                    entry["status"] = "error"
-                    entry["error"] = str(exc).split("\n")[0]
+        entry.update(dispatch_step(verb, ctx))
         record_steps.append(entry)
 
     ran = sum(1 for s in record_steps if s["status"] == "ran")

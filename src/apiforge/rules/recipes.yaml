@@ -1,0 +1,27 @@
+version: 1
+# Recipes are data: each maps to an ordered list of dispatchable verbs.
+# A step runs only when the task's inputs bind everything the verb needs;
+# otherwise it stays pending with the missing inputs named.
+recipes:
+  direct:
+    - rules list
+  test-first:
+    - discover
+    - model build
+    - judge
+    - evidence emit
+  plan-execute-verify:
+    - discover
+    - analyze
+    - judge
+    - next-step
+    - evidence emit
+    - report build
+  diagnose-repair-verify:
+    - analyze
+    - judge
+    - next-step
+  research-synthesize-verify:
+    - rules list
+    - context funnel
+    - report build

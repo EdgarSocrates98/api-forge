@@ -6,7 +6,7 @@ profile: critical
 status: draft
 upstream:
   path: secure.md
-  sha256: "316ea4915ce9d64cacf6af61badf81dc32544412267beb2a3de350cbcb9c1685"
+  sha256: "4fe37ba8b309eae46af00bc3da7238fda774d6a023ab46da91ba46c5e26fd330"
 baseline: extractor calls without index/cache (payload_bytes per verb)
 results: []
 ---

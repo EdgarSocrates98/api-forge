@@ -80,6 +80,14 @@ while refusal codes and `fact_id`s survive.
 | `apiforge report build --case .apiforge/case --out report.json` | Compose the release evidence bundle |
 | `apiforge report sign --report report.json` | Pin body/evidence/catalog hashes into the signature block |
 | `apiforge report verify --report report.json` | Name the diverged part (body\|evidence\|catalog\|signature_version); exit 4 |
+| `apiforge report keygen --name k [--keys-dir D]` | Ed25519 keypair; `report sign --key`/`verify --pubkey` prove key possession, never identity |
+| `apiforge dispatch run --coordinator C --case DIR` | Execute the playbook's dispatchable steps; missing inputs land in `pending`, never crash |
+| `apiforge run tool semgrep\|trivy\|gitleaks\|k6 --target T --out R` | Allowlisted scanner execution (fixed argv, no shell, `--dry-run` prints argv) |
+| `apiforge debate open|submit|close` | Deterministic debate machine — positions cite `fact:` evidence, quorum of 2 sides |
+| `apiforge plan strangler --project P --contract C` | Per-route cut plan; migrated routes name the parity evidence still due |
+| `apiforge contract list\|show <name>` | Versioned canonical contracts (JSON schema per `<Name>/v1`) |
+| `apiforge task create|review|seal|run|accept|reject|status` | Sealed, budgeted unit of work; executor never holds the seal key; acceptor != executor |
+| `apiforge brief show --task <id>` | OutcomeBrief — `DONE` is refused while gaps or missing acceptance remain |
 
 ## Agentic layer
 

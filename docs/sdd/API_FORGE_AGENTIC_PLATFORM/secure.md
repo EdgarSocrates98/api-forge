@@ -6,7 +6,7 @@ profile: critical
 status: draft
 upstream:
   path: verify.md
-  sha256: "f9ff9bf671f96dab33729dde882f6d11938ce224d61c446053aae07ac1d3c3ad"
+  sha256: "8fe3f6072bb331107418c34abc585f8dc249394bf65923a53ce8c1e191fe567f"
 threat_model: docs/security/threat-model-mvp.md
 ---
 

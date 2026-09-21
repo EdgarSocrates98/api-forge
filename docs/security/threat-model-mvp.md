@@ -23,6 +23,7 @@ with their mitigations.
 | Worktree index drift/confusion | `worktree_list` reconciles `index.json` against `git worktree list --porcelain` and reports drift in both directions instead of hiding it |
 | Malformed Java source (tree-sitter) | the parser never executes code and cannot call the target toolchain; parse errors degrade to `AF-SPRING-PARSE` diagnostics with the file still hashed, and non-literal annotation args become `AF-SPRING-UNRESOLVED-ROUTE` |
 | Malformed Go source (tree-sitter) | identical boundary: no toolchain contact, no code execution; parse errors degrade to `AF-GO-PARSE` and dynamic registrations to `AF-GO-UNRESOLVED-ROUTE` |
+| AWS credential/network abuse | only `collect *` imports boto3 (release-gate enforced); `analyze`/`model` verbs read dumps offline and never see credentials; dumps land under an explicit `--out` dir with `*.json`-only artifact names |
 | Fabricated conclusions | `unresolved` diagnostics and findings name the uncertainty; `confirmed` requires evidence fact_ids by construction |
 
 ## Known limitations

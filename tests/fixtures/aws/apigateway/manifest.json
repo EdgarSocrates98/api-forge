@@ -1,0 +1,7 @@
+{
+  "artifacts": {},
+  "collected_at": "2026-09-21T00:00:00Z",
+  "meta": {"api_id": "abc123"},
+  "source": "api-gateway",
+  "tool_version": "0.1.0"
+}

@@ -10,10 +10,13 @@ from typing import NoReturn
 import typer
 
 from apiforge import __version__
+from apiforge.adapters.apigateway.extract import extract_apigateway
 from apiforge.adapters.fastapi.extractor import extract_fastapi
 from apiforge.api_ir.builder import build_api_model
 from apiforge.application.analyze import AnalysisError, AnalysisResult, analyze_project
 from apiforge.case.service import CaseIntegrityError, CaseStorageError
+from apiforge.collectors.apigateway import collect
+from apiforge.collectors.manifest import CollectError, CollectManifest
 from apiforge.core.detail import apply_detail_level
 from apiforge.core.models import Finding, FindingStatus, Severity
 from apiforge.openapi.diff import diff_contracts
@@ -33,6 +36,12 @@ app = typer.Typer(
     invoke_without_command=True,
 )
 model_app = typer.Typer(help="Build the canonical API-IR.")
+collect_app = typer.Typer(
+    name="collect",
+    help="Collect AWS artifacts into offline dumps (the only family that touches AWS).",
+    no_args_is_help=True,
+)
+app.add_typer(collect_app)
 diff_app = typer.Typer(help="Diff OpenAPI contracts.")
 app.add_typer(model_app, name="model")
 app.add_typer(diff_app, name="diff")
@@ -242,5 +251,56 @@ def diff_contract(
             c.model_dump(mode="json")
             for c in diff_contracts(load_openapi(baseline), load_openapi(candidate))
         ]
+
+    _echo_json(_run(work), detail_level)
+
+
+@collect_app.command("api-gateway")
+def collect_api_gateway(
+    api_id: str = typer.Option(..., "--api-id", help="REST API id."),
+    out_dir: Path = typer.Option(..., "--out", help="Dump directory to write."),
+    now: str | None = typer.Option(
+        None, "--now", help="Explicit ISO8601 collection timestamp (the only clock)."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Fetch one REST API's configuration into an offline dump."""
+
+    def work() -> CollectManifest:
+        try:
+            return collect(api_id, out_dir, now=now)
+        except CollectError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    manifest = _run(work)
+    assert isinstance(manifest, CollectManifest)
+    _echo_json(
+        {
+            "artifacts": manifest.artifacts,
+            "collected_at": manifest.collected_at,
+            "source": manifest.source,
+            "tool_version": manifest.tool_version,
+        },
+        detail_level,
+    )
+
+
+@model_app.command("api-gateway")
+def inventory_api_gateway(
+    path: Path = typer.Option(..., "--path", help="Dump directory from collect api-gateway."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Read an API Gateway dump into facts — offline, no credentials."""
+
+    def work() -> dict[str, object]:
+        if not path.is_dir():
+            raise AnalysisError("AF-INPUT-NOT-FOUND", str(path))
+        inventory = extract_apigateway(path)
+        return {
+            "diagnostics": [d.model_dump(mode="json") for d in inventory.diagnostics],
+            "facts": [f.model_dump(mode="json") for f in inventory.facts],
+            "framework": inventory.framework,
+            "input_hashes": dict(inventory.input_hashes),
+        }
 
     _echo_json(_run(work), detail_level)

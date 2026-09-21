@@ -64,3 +64,24 @@ today.
 | Code | Meaning |
 |---|---|
 | `AF-DETAIL-LEVEL` | unknown detail level requested |
+
+## AWS collectors
+
+`collect *` is the only verb family that touches AWS; boto3 imports are
+confined to `apiforge.collectors` and enforced by the release gate. Dumps
+are canonical JSON + a `manifest.json` receipt; `--now` is the only clock.
+
+| Code | Meaning |
+|---|---|
+| `AF-COLLECT-AWS` | the AWS call failed; the named operation is in the detail |
+| `AF-COLLECT-PATH` | artifact name refused (not a plain `*.json` basename) |
+
+## API Gateway dump adapter
+
+`model api-gateway --path` reads a collect dump offline. Missing files and
+malformed JSON are named diagnostics, never guesses.
+
+| Code | Meaning |
+|---|---|
+| `AF-GW-DUMP-MISSING` | an expected dump file is absent |
+| `AF-GW-DUMP-INVALID` | a dump file is not valid JSON |

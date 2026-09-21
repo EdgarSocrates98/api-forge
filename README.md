@@ -61,6 +61,8 @@ while refusal codes and `fact_id`s survive.
 | `apiforge evidence emit --case .apiforge/case --out receipt.json` | Receipt binding artifact paths to sha256 (proves correspondence, not authorship) |
 | `apiforge evidence verify --receipt receipt.json` | Re-hash every artifact the receipt lists |
 | `apiforge next-step --findings findings.json --phase verify` | Route the dominant finding area to the specialist agent |
+| `apiforge collect api-gateway --api-id X --out dump/` | Fetch API Gateway config into an offline dump (needs `pip install apiforge[aws]`; the only family that touches AWS) |
+| `apiforge model api-gateway --path dump/` | Read the dump into facts — offline, no credentials |
 
 ## Exit codes
 

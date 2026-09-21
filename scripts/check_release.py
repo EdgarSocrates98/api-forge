@@ -45,8 +45,10 @@ REQUIRED_DOCS = (
 )
 
 FORBIDDEN_IMPORT = re.compile(
-    r"^\s*(?:import|from)\s+(?:openai|anthropic|boto3|litellm)\b", re.MULTILINE
+    r"^\s*(?:import|from)\s+(openai|anthropic|boto3|litellm)\b", re.MULTILINE
 )
+
+_BOTO3_ALLOWED_DIRS = ("collectors",)
 
 CASE_ARTIFACTS = ("api-ir.json", "facts.json", "findings.json", "case.json")
 
@@ -99,8 +101,16 @@ def _check_imports(root: Path, failures: list[str]) -> None:
     for source in sorted((root / "src").rglob("*.py")):
         text = source.read_text(encoding="utf-8")
         match = FORBIDDEN_IMPORT.search(text)
-        if match:
-            failures.append(f"forbidden import in {source}: {match.group(0).strip()}")
+        if not match:
+            continue
+        package = match.group(1)
+        posix = source.as_posix()
+        # boto3 may appear only inside collectors/ and the lazy CLI import site
+        if package == "boto3" and (
+            any(f"/{d}/" in posix for d in _BOTO3_ALLOWED_DIRS) or posix.endswith("/cli.py")
+        ):
+            continue
+        failures.append(f"forbidden import in {source}: {match.group(0).strip()}")
 
 
 def _check_rule_coverage(root: Path, failures: list[str]) -> None:
@@ -152,6 +162,8 @@ def _check_code_parity(root: Path, failures: list[str]) -> None:
         ("AF-SPRING", "docs/catalog-contract.md"),
         ("AF-DETAIL", "docs/catalog-contract.md"),
         ("AF-GO", "docs/catalog-contract.md"),
+        ("AF-COLLECT", "docs/catalog-contract.md"),
+        ("AF-GW", "docs/catalog-contract.md"),
     ):
         doc_path = root / doc
         if not doc_path.is_file():
@@ -256,10 +268,11 @@ def _check_lab_and_boundary(root: Path, failures: list[str]) -> None:
             failures.append(f"{name} parity lab missing {glob} sources")
     for source in sorted((root / "src").rglob("*.py")):
         text = source.read_text(encoding="utf-8")
-        if "tree_sitter" in text and not any(
-            f"adapters/{a}" in source.as_posix() for a in ("spring", "go")
-        ):
-            failures.append(f"tree_sitter import outside adapters.spring: {source}")
+        posix = source.as_posix()
+        if "tree_sitter" in text and not any(f"adapters/{a}" in posix for a in ("spring", "go")):
+            failures.append(f"tree_sitter import outside adapters.spring/go: {source}")
+        if "boto3" in text and "collectors" not in posix and "cli" not in posix:
+            failures.append(f"boto3 import outside collectors/cli boundary: {source}")
 
 
 def _check_threat_model(root: Path, failures: list[str]) -> None:

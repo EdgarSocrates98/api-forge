@@ -237,3 +237,15 @@ are capped at the top 20; a `truncated` attr names when more existed.
 | Code | Meaning |
 |---|---|
 | `AF-PERF-REPORT-INVALID` | the profile export is unreadable or lacks the expected shape |
+
+## Strangler cut plan
+
+`plan strangler --baseline facts_a.json --candidate facts_b.json` compares
+`code.route` facts from two inventories. Baseline routes are `migrated`
+(candidate serves method+path — `cut_requires` names the parity evidence
+still owed: contract diff + consumer confirmation), `missing` (cut blocker),
+or `stale` (unreachable in baseline); candidate-only routes are `added`.
+
+| Code | Meaning |
+|---|---|
+| `AF-PLAN-NO-ROUTES` | neither payload carries `code.route` facts |

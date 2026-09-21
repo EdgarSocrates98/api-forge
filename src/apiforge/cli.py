@@ -90,6 +90,12 @@ report_app = typer.Typer(
     no_args_is_help=True,
 )
 app.add_typer(report_app)
+plan_app = typer.Typer(
+    name="plan",
+    help="Planning verbs — compose over facts other verbs already extracted.",
+    no_args_is_help=True,
+)
+app.add_typer(plan_app)
 
 
 @app.callback()
@@ -136,6 +142,17 @@ def _echo_json(value: object, detail_level: str = "normal") -> None:
 def _fail(code: str, detail: str, exit_code: int = 2) -> NoReturn:
     typer.echo(f"{code}: {detail}", err=True)
     raise typer.Exit(code=exit_code)
+
+
+def _load_facts(path: Path) -> list[Fact]:
+    """Read a facts payload ({"facts": [...]} or a bare list) from disk."""
+    if not path.is_file():
+        raise AnalysisError("AF-INPUT-NOT-FOUND", str(path))
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    payload = doc.get("facts", doc) if isinstance(doc, dict) else doc
+    if not isinstance(payload, list):
+        raise AnalysisError("AF-JUDGE-FACTS-INVALID", f"{path}: not a fact list")
+    return [Fact.model_validate(f) for f in payload]
 
 
 def _run(fn: Callable[[], object]) -> object:
@@ -236,14 +253,7 @@ def judge(
                     "AF-JUDGE-INPUT-AMBIGUOUS",
                     "--facts is exclusive with --contract/--project",
                 )
-            if not facts.is_file():
-                raise AnalysisError("AF-INPUT-NOT-FOUND", str(facts))
-            doc = json.loads(facts.read_text(encoding="utf-8"))
-            payload = doc.get("facts", doc) if isinstance(doc, dict) else doc
-            if not isinstance(payload, list):
-                raise AnalysisError("AF-JUDGE-FACTS-INVALID", f"{facts}: not a fact list")
-            parsed = [Fact.model_validate(f) for f in payload]
-            return [f.model_dump(mode="json") for f in judge_facts(parsed)]
+            return [f.model_dump(mode="json") for f in judge_facts(_load_facts(facts))]
         if contract is None or project is None:
             raise AnalysisError(
                 "AF-JUDGE-INPUT-MISSING",
@@ -534,6 +544,32 @@ def inventory_proto(
             "framework": inventory.framework,
             "input_hashes": dict(inventory.input_hashes),
         }
+
+    _echo_json(_run(work), detail_level)
+
+
+@plan_app.command("strangler")
+def plan_strangler(
+    baseline: Path = typer.Option(
+        ..., "--baseline", help="facts.json from the legacy surface."
+    ),
+    candidate: Path = typer.Option(
+        ..., "--candidate", help="facts.json from the new implementation."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Per-route strangler cut plan over two code inventories."""
+
+    def work() -> object:
+        from apiforge.plan.strangler import strangler_plan
+
+        base = _load_facts(baseline)
+        cand = _load_facts(candidate)
+        if not any(f.kind == "code.route" for f in (*base, *cand)):
+            raise AnalysisError(
+                "AF-PLAN-NO-ROUTES", "neither payload carries code.route facts"
+            )
+        return strangler_plan(base, cand)
 
     _echo_json(_run(work), detail_level)
 

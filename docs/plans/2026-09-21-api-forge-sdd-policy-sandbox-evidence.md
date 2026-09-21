@@ -128,7 +128,11 @@ def test_unknown_top_key_is_named() -> None:
 def test_gate_requirements_are_closed() -> None:
     policy = load_policy(FIXTURES / "full.yaml")
     assert policy.gates["destructive"] == (
-        "exact_target", "impact", "dry_run_or_reason", "rollback", "confirmation"
+        "exact_target",
+        "impact",
+        "dry_run_or_reason",
+        "rollback",
+        "confirmation",
     )
 ```
 
@@ -201,8 +205,10 @@ def test_destructive_lists_missing_requirements() -> None:
 
 
 def test_deny_rule_beats_default_allow() -> None:
-    d = decide(DEFAULT_POLICY, ActionRequest(verb="git.push", autonomy_class="local_reversible",
-                                           args=("--force",)))
+    d = decide(
+        DEFAULT_POLICY,
+        ActionRequest(verb="git.push", autonomy_class="local_reversible", args=("--force",)),
+    )
     assert d.outcome == "deny"
     assert d.rule == "no-force-push"
 ```
@@ -253,7 +259,8 @@ def test_discovers_only_uppercase_feature_dirs() -> None:
 
 
 def test_stamp_writes_only_upstream_line(tmp_path: Path) -> None:
-    upstream = tmp_path / "discover.md"; target = tmp_path / "define.md"
+    upstream = tmp_path / "discover.md"
+    target = tmp_path / "define.md"
     # write both, stamp target, then diff line count and non-upstream bytes
     result = stamp(target, upstream)
     assert result.changed is True
@@ -503,8 +510,9 @@ def test_sdd_check_exit_codes(sdd_root: Path) -> None:
 
 
 def test_policy_check_roundtrip() -> None:
-    result = runner.invoke(app, ["policy", "check", "--verb", "fs.delete",
-                                 "--class", "destructive", "--json"])
+    result = runner.invoke(
+        app, ["policy", "check", "--verb", "fs.delete", "--class", "destructive", "--json"]
+    )
     assert result.exit_code == 0
     assert '"outcome": "gate"' in result.stdout
 ```
@@ -549,7 +557,7 @@ git commit -m "feat: wire sdd policy sandbox and evidence commands"
 
 ```python
 def test_every_refusal_code_is_documented() -> None:
-    codes = collect_codes_via_ast(Path("src/apiforge"))          # literals passed to errors
+    codes = collect_codes_via_ast(Path("src/apiforge"))  # literals passed to errors
     documented = parse_contract_codes(Path("docs/contracts"))
     assert codes <= documented
 

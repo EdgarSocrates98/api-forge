@@ -620,8 +620,10 @@ def test_analyze_command_is_reproducible(tmp_path: Path) -> None:
     second = tmp_path / "second"
     args = [
         "analyze",
-        "--contract", "tests/fixtures/openapi/orders-v1.yaml",
-        "--project", "tests/fixtures/fastapi_orders",
+        "--contract",
+        "tests/fixtures/openapi/orders-v1.yaml",
+        "--project",
+        "tests/fixtures/fastapi_orders",
     ]
     assert runner.invoke(app, [*args, "--out-dir", str(first)]).exit_code == 0
     assert runner.invoke(app, [*args, "--out-dir", str(second)]).exit_code == 0

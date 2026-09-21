@@ -14,6 +14,8 @@ from pathlib import Path
 from pydantic import BaseModel, ConfigDict
 
 from apiforge.adapters.fastapi.extractor import extract_fastapi
+from apiforge.adapters.inventory import CodeInventory
+from apiforge.adapters.spring.extractor import extract_spring
 from apiforge.api_ir.builder import build_api_model
 from apiforge.api_ir.models import ApiModel
 from apiforge.case.models import CaseManifest, CasePayload
@@ -74,19 +76,49 @@ def _contract_facts(model: ApiModel) -> tuple[Fact, ...]:
     return tuple(facts)
 
 
+_EXTRACTORS = {
+    "fastapi": extract_fastapi,
+    "spring": extract_spring,
+}
+
+
+def _detect_framework(project: Path) -> str:
+    java = sum(1 for _ in project.rglob("*.java"))
+    python = sum(1 for _ in project.rglob("*.py"))
+    if not java and not python:
+        raise AnalysisError(
+            "AF-INPUT-FRAMEWORK-UNKNOWN",
+            f"{project}: no .java or .py files to detect a framework from",
+        )
+    if java and not python:
+        return "spring"
+    if python and not java:
+        return "fastapi"
+    return "spring" if java > python else "fastapi"
+
+
 def analyze_project(
     contract: Path,
     project: Path,
     baseline: Path | None,
     out_dir: Path,
+    framework: str = "auto",
 ) -> AnalysisResult:
     """Run the deterministic slice and persist a verified case."""
     contract_path = _require_file(Path(contract))
     project_path = _require_dir(Path(project))
     baseline_path = _require_file(Path(baseline)) if baseline else None
+    if framework == "auto":
+        framework = _detect_framework(project_path)
+    extractor = _EXTRACTORS.get(framework)
+    if extractor is None:
+        raise AnalysisError(
+            "AF-INPUT-FRAMEWORK-UNKNOWN",
+            f"unknown framework {framework!r}; expected one of {sorted(_EXTRACTORS)} or 'auto'",
+        )
 
     document = load_openapi(contract_path)
-    inventory = extract_fastapi(project_path)
+    inventory: CodeInventory = extractor(project_path)
     model = build_api_model(document, inventory)
     findings = judge_api_model(model)
     changes = diff_contracts(load_openapi(baseline_path), document) if baseline_path else ()

@@ -20,6 +20,8 @@ UNCERTAIN_CODES = frozenset(
         "AF-FASTAPI-PARSE",
         "AF-FASTAPI-INCLUDE-CYCLE",
         "AF-FASTAPI-SYMLINK-ESCAPE",
+        "AF-SPRING-UNRESOLVED-ROUTE",
+        "AF-SPRING-PARSE",
     }
 )
 

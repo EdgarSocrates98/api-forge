@@ -134,12 +134,15 @@ def analyze(
     fail_on: Severity | None = typer.Option(
         None, "--fail-on", help="Exit 4 on confirmed findings at this severity or worse."
     ),
+    framework: str = typer.Option(
+        "auto", "--framework", help="fastapi|spring|auto (detected from files)."
+    ),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
     """Run the full deterministic slice and persist a case."""
 
     def work() -> AnalysisResult:
-        return analyze_project(contract, project, baseline, out_dir)
+        return analyze_project(contract, project, baseline, out_dir, framework=framework)
 
     result = _run(work)
     assert isinstance(result, AnalysisResult)

@@ -9,7 +9,7 @@ path/method.
 from __future__ import annotations
 
 import apiforge
-from apiforge.adapters.fastapi.models import FastApiInventory
+from apiforge.adapters.inventory import CodeInventory
 from apiforge.api_ir.models import ApiModel, ApiOperation, Projection
 from apiforge.core.models import Diagnostic
 from apiforge.openapi.models import OpenApiDocument
@@ -29,7 +29,7 @@ def _diagnostic_key(item: Diagnostic) -> tuple[str, str, int, str]:
     )
 
 
-def build_api_model(contract: OpenApiDocument, inventory: FastApiInventory) -> ApiModel:
+def build_api_model(contract: OpenApiDocument, inventory: CodeInventory) -> ApiModel:
     """Merge contract operations and code route facts into one ApiModel."""
     operations: dict[tuple[str, str], dict[str, list[Projection]]] = {}
 

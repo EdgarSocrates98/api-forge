@@ -27,7 +27,55 @@ def test_tools_export_all_expected_verbs() -> None:
         "playbook",
         "economy_report",
         "context_funnel",
+        "graph_query",
+        "graph_impact",
+        "graph_trace",
+        "graph_coverage",
+        "index_status",
+        "task_status",
+        "brief_show",
+        "contract_list",
+        "contract_show",
     }
+
+
+def test_new_read_tools_mirror_cli(tmp_path: Path) -> None:
+    """graph/index/task/brief/contract tools return the CLI-shaped payloads."""
+    from apiforge.application.analyze import analyze_project
+    from apiforge.contracts.task import TaskSpec
+    from apiforge.graph.build import build_graph
+    from apiforge.index.build import build_index
+    from apiforge.taskspec.service import create_task
+
+    case_dir = tmp_path / "case"
+    analyze_project(CONTRACT, PROJECT, None, case_dir)
+    graph_dir = tmp_path / "graph"
+    build_graph(case_dir, graph_dir)
+
+    assert tools.graph_coverage(str(graph_dir))["counts"]["finding"] > 0
+    q = tools.graph_query(str(graph_dir), kind="finding")
+    assert q["node_count"] > 0
+    backed = next(
+        json.loads(line)
+        for line in (graph_dir / "edges.jsonl").read_text().splitlines()
+        if line.strip() and json.loads(line)["kind"] == "backed_by"
+    )
+    tr = tools.graph_trace(str(graph_dir), backed["from_id"], backed["to_id"])
+    assert tr["reachable"] is True
+    im = tools.graph_impact(str(graph_dir), backed["to_id"])
+    assert im["impacted_count"] >= 1
+
+    build_index(PROJECT, tmp_path)
+    st = tools.index_status(str(PROJECT), str(tmp_path))
+    assert st["stale"] is False
+
+    create_task(tmp_path, TaskSpec.model_validate({"id": "mcp-1", "outcome": "x"}))
+    ts = tools.task_status("mcp-1", str(tmp_path))
+    assert ts["task"]["id"] == "mcp-1"
+    br = tools.brief_show("mcp-1", str(tmp_path))
+    assert br["status"] in {"DECIDE", "REVIEW", "BLOCKED", "FAILED", "DONE"}
+    assert "OutcomeBrief/v1" in tools.contract_list()["contracts"]
+    assert tools.contract_show("OutcomeBrief/v1")["title"]
 
 
 def test_rules_lookup_payload_and_economy(tmp_path: Path, monkeypatch) -> None:

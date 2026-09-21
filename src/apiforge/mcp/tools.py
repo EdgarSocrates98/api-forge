@@ -233,6 +233,115 @@ def context_funnel(case_dir: str, detail_level: str = "normal") -> dict[str, Any
     return out
 
 
+def graph_query(
+    graph: str,
+    kind: str | None = None,
+    edge_kind: str | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Filter graph nodes/edges by closed vocabulary — no free text."""
+    from apiforge.graph.query import query_graph
+
+    out: dict[str, Any] = _call(
+        "graph_query",
+        lambda: query_graph(Path(graph), kind=kind, edge_kind=edge_kind),
+        detail_level,
+    )
+    return out
+
+
+def graph_impact(
+    graph: str, node: str, max_depth: int = 4, detail_level: str = "normal"
+) -> dict[str, Any]:
+    """Reverse traversal: everything that transitively depends on the node."""
+    from apiforge.graph.query import impact
+
+    out: dict[str, Any] = _call(
+        "graph_impact",
+        lambda: impact(Path(graph), node, max_depth=max_depth),
+        detail_level,
+    )
+    return out
+
+
+def graph_trace(
+    graph: str, from_id: str, to_id: str, detail_level: str = "normal"
+) -> dict[str, Any]:
+    """Shortest directed path between two nodes; absent path is named."""
+    from apiforge.graph.query import trace
+
+    out: dict[str, Any] = _call(
+        "graph_trace", lambda: trace(Path(graph), from_id, to_id), detail_level
+    )
+    return out
+
+
+def graph_coverage(graph: str, detail_level: str = "normal") -> dict[str, Any]:
+    """Structural gaps: unverified findings, unimplemented ops, unreferenced facts."""
+    from apiforge.graph.query import coverage
+
+    out: dict[str, Any] = _call(
+        "graph_coverage", lambda: coverage(Path(graph)), detail_level
+    )
+    return out
+
+
+def index_status(
+    project: str, root: str = ".", detail_level: str = "normal"
+) -> dict[str, Any]:
+    """Name added/changed/removed source files against the built index."""
+    from apiforge.index.build import index_status as status
+
+    out: dict[str, Any] = _call(
+        "index_status", lambda: status(Path(project), Path(root)), detail_level
+    )
+    return out
+
+
+def task_status(
+    task_id: str, root: str = ".", detail_level: str = "normal"
+) -> dict[str, Any]:
+    """Task spec + append-only history — read-only view of the lifecycle."""
+    from apiforge.taskspec.runner import task_status as status
+
+    out: dict[str, Any] = _call(
+        "task_status", lambda: status(Path(root), task_id), detail_level
+    )
+    return out
+
+
+def brief_show(
+    task_id: str, root: str = ".", detail_level: str = "normal"
+) -> dict[str, Any]:
+    """Outcome Brief for a task — DONE is refused while gaps remain."""
+    from apiforge.brief.render import brief_payload
+
+    out: dict[str, Any] = _call(
+        "brief_show", lambda: brief_payload(Path(root), task_id), detail_level
+    )
+    return out
+
+
+def contract_list(detail_level: str = "normal") -> dict[str, Any]:
+    """List registered canonical contracts."""
+    from apiforge.contracts.registry import contract_names
+
+    out: dict[str, Any] = _call(
+        "contract_list", lambda: {"contracts": contract_names()}, detail_level
+    )
+    return out
+
+
+def contract_show(name: str, detail_level: str = "normal") -> dict[str, Any]:
+    """Emit the JSON schema of one registered contract."""
+    from apiforge.contracts.registry import contract_schema
+
+    out: dict[str, Any] = _call(
+        "contract_show", lambda: contract_schema(name), detail_level
+    )
+    return out
+
+
 TOOLS: tuple[Callable[..., Any], ...] = (
     discover,
     analyze,
@@ -246,4 +355,13 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     playbook,
     economy_report,
     context_funnel,
+    graph_query,
+    graph_impact,
+    graph_trace,
+    graph_coverage,
+    index_status,
+    task_status,
+    brief_show,
+    contract_list,
+    contract_show,
 )

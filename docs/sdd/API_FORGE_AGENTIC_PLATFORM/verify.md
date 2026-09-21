@@ -3,17 +3,17 @@ sdd: 1
 feature: API_FORGE_AGENTIC_PLATFORM
 phase: verify
 profile: critical
-status: draft
+status: done
 upstream:
   path: build.md
-  sha256: "f7efb3edf66e22c64dca848a95d8c2adfccd7a663f177a44e34fb41432aefa48"
+  sha256: "4b2fcd3545c6da11b2eb93fadea7293159d6ec24331b7ca4caab0b6a2b27b939"
 results:
   - gate: "pytest tests/contracts tests/taskspec"
     outcome: pass
     evidence: "36 passed"
   - gate: "pytest -q"
     outcome: pass
-    evidence: "413 passed, 1 skipped (optional mcp extra)"
+    evidence: "417 passed, 1 skipped (optional mcp extra)"
   - gate: "ruff check ."
     outcome: pass
     evidence: "All checks passed"

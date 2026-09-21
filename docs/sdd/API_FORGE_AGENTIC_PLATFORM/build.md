@@ -3,7 +3,7 @@ sdd: 1
 feature: API_FORGE_AGENTIC_PLATFORM
 phase: build
 profile: critical
-status: draft
+status: done
 upstream:
   path: plan.md
   sha256: "e4316a4be25d51dfb9a2fcde949692115be1786c200eeff96e8e03adac79bcbe"
@@ -35,6 +35,12 @@ tasks:
   - id: D2
     outcome: done
     evidence: sdd/API_FORGE_AGENTIC_PLATFORM/evidence/D2.txt
+  - id: E1
+    outcome: done
+    evidence: sdd/API_FORGE_AGENTIC_PLATFORM/evidence/E1.txt
+  - id: F1
+    outcome: done
+    evidence: sdd/API_FORGE_AGENTIC_PLATFORM/evidence/F1.txt
 claims:
   - "contract list/show emits JSON schema for every registered v1 contract; unknown names refuse AF-CONTRACTS-UNKNOWN"
   - "task seal binds an Ed25519 signature to the exact revision; amending a sealed task writes a new unsealed revision"
@@ -46,6 +52,8 @@ claims:
   - "graph export --format neptune refuses as a named stub (AF-GRAPH-FORMAT)"
   - "extractor cache hits return byte-identical inventories and are recorded in the economy ledger"
   - "index status names added/removed/changed files against files.jsonl"
+  - "the vertical slice runs discovery -> api-ir -> finding -> sealed task -> sandbox -> receipt -> brief DONE end to end"
+  - "MCP read tools mirror the CLI payloads for graph/index/task/brief/contract verbs; mutating verbs stay CLI-only"
 ---
 
 # build

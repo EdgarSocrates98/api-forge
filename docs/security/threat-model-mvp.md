@@ -33,6 +33,10 @@ with their mitigations.
 | Report forgery | `report verify` re-hashes body/evidence/catalog and names each diverged part; the signature binds hashes, not identity — correspondence, never authorship (ADR-005) |
 | External tool execution | `run tool` executes only the allowlisted binaries (semgrep/trivy/gitleaks/k6) via fixed argv templates — no shell, `shutil.which` resolution, `--timeout` bound; the analyzed code is still never executed (the scanner runs, the target stays data), and `--dry-run` shows the argv beforehand |
 | Fabricated conclusions | `unresolved` diagnostics and findings name the uncertainty; `confirmed` requires evidence fact_ids by construction |
+| Tampered task spec/history | the Ed25519 seal binds the exact revision bytes — amending a sealed task writes a new unsealed revision, so a stale seal can never ride along; `history.jsonl` is append-only and `task accept` requires `accepted_by != executed_by` plus named evidence |
+| Stale extractor cache poisoning | cache keys are `sha256(extractor_version|framework|source_digest)` — a changed file yields a new key (stale entries are unreachable, never wrong); a corrupt or schema-invalid cache file self-heals as a miss and is rewritten; the extractor stays the source of truth |
+| Graph line tampering | every `nodes.jsonl` line carries a `sha256` over its `{id,kind,props}` payload — load refuses `AF-GRAPH-HASH-MISMATCH`; files are sorted canonically so byte drift is diff-visible |
+| False `DONE` claim | `brief show` derives status from the task state machine — `DONE` exists only after `awaiting_supervision -> accepted` by a distinct actor with evidence; gaps, pending human action and open items are fields, not prose |
 
 ## Known limitations
 

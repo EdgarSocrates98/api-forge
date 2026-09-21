@@ -267,3 +267,19 @@ distinct sides. A closed debate refuses further mutation.
 | `AF-DEBATE-NO-EVIDENCE` | position without `fact:`-prefixed citations |
 | `AF-DEBATE-NO-QUORUM` | close attempted with < 2 sides having submitted |
 | `AF-DEBATE-CLOSED` | mutation attempted on a resolved/unresolved debate |
+
+## Dispatch and agent mirrors
+
+`dispatch run --coordinator <name> --case <dir>` executes each playbook step
+whose verb is dispatchable and whose inputs are in the context; ran steps
+record `output_sha256`, pending steps name their missing inputs, and
+`collect *` is refused inside dispatch (it touches AWS). The run record
+persists under `case/dispatch/`.
+
+`agents sync` regenerates `.agents/agents/` and `.claude/agents/` as
+byte-identical mirrors of `agents/*.md`; `agents check` and the release
+gate fail on drift.
+
+| Code | Meaning |
+|---|---|
+| `AF-DISPATCH-NO-PLAYBOOK` | no playbook for the named coordinator |

@@ -183,6 +183,7 @@ def _check_code_parity(root: Path, failures: list[str]) -> None:
         ("AF-PERF", "docs/catalog-contract.md"),
         ("AF-PLAN", "docs/catalog-contract.md"),
         ("AF-DEBATE", "docs/catalog-contract.md"),
+        ("AF-DISPATCH", "docs/catalog-contract.md"),
     ):
         doc_path = root / doc
         if not doc_path.is_file():
@@ -332,6 +333,11 @@ def _check_agents(root: Path, failures: list[str]) -> None:
                 failures.append(
                     f"playbook {name!r}: unknown executor {step['executor']!r}"
                 )
+    # host-native mirrors must be byte-identical to agents/*.md
+    from apiforge.dispatch.mirrors import mirror_drift
+
+    for path in mirror_drift(root):
+        failures.append(f"agent mirror drift: {path}")
 
 
 def _check_lab_and_boundary(root: Path, failures: list[str]) -> None:

@@ -22,6 +22,7 @@ from apiforge.collectors.manifest import CollectError, CollectManifest
 from apiforge.core.detail import apply_detail_level
 from apiforge.core.models import Fact, Finding, FindingStatus, Severity
 from apiforge.debate.service import DebateError
+from apiforge.dispatch.runner import DispatchError
 from apiforge.openapi.diff import diff_contracts
 from apiforge.openapi.loader import OpenApiLoadError, load_openapi
 from apiforge.rules.fact_judge import judge_facts
@@ -103,6 +104,18 @@ debate_app = typer.Typer(
     no_args_is_help=True,
 )
 app.add_typer(debate_app)
+dispatch_app = typer.Typer(
+    name="dispatch",
+    help="Run deterministic playbook steps; pending steps name their missing inputs.",
+    no_args_is_help=True,
+)
+app.add_typer(dispatch_app)
+agents_app = typer.Typer(
+    name="agents",
+    help="Publish coordinator profiles to host-native mirrors.",
+    no_args_is_help=True,
+)
+app.add_typer(agents_app)
 
 
 @app.callback()
@@ -169,6 +182,8 @@ def _run(fn: Callable[[], object]) -> object:
     except AnalysisError as exc:
         _fail(exc.code, exc.detail)
     except DebateError as exc:
+        _fail(exc.code, str(exc).split(": ", 1)[-1])
+    except DispatchError as exc:
         _fail(exc.code, str(exc).split(": ", 1)[-1])
     except (OpenApiLoadError, CaseStorageError) as exc:
         _fail(exc.code, str(exc).split(": ", 1)[-1])
@@ -649,6 +664,74 @@ def debate_close(
             "decision": d.decision,
             "referee": d.referee,
         }
+
+    _echo_json(_run(work), detail_level)
+
+
+@dispatch_app.command("run")
+def dispatch_run(
+    coordinator: str = typer.Option(..., "--coordinator", help="Coordinator name."),
+    case: Path = typer.Option(..., "--case", help="Case directory."),
+    project: Path | None = typer.Option(None, "--project"),
+    contract: Path | None = typer.Option(None, "--contract"),
+    baseline: Path | None = typer.Option(None, "--baseline"),
+    candidate: Path | None = typer.Option(None, "--candidate"),
+    input_path: Path | None = typer.Option(
+        None, "--input-path", help="Dump/report/template path for model verbs."
+    ),
+    findings: Path | None = typer.Option(None, "--findings"),
+    rule_id: str | None = typer.Option(None, "--rule-id"),
+    now: str | None = typer.Option(None, "--now", help="ISO8601 — the only clock."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Run a coordinator's playbook; pending steps name their missing inputs."""
+
+    def work() -> object:
+        from apiforge.dispatch.runner import DispatchContext, run_playbook
+
+        ctx = DispatchContext(
+            case=case,
+            project=project,
+            contract=contract,
+            baseline=baseline,
+            candidate=candidate,
+            input_path=input_path,
+            findings=findings,
+            rule_id=rule_id,
+            now=now,
+        )
+        return run_playbook(coordinator, ctx)
+
+    _echo_json(_run(work), detail_level)
+
+
+@agents_app.command("sync")
+def agents_sync(
+    root: Path = typer.Option(Path("."), "--root", help="Repository root."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Regenerate `.agents/agents/` + `.claude/agents/` from `agents/*.md`."""
+
+    def work() -> object:
+        from apiforge.dispatch.mirrors import sync_mirrors
+
+        return sync_mirrors(Path(root).resolve())
+
+    _echo_json(_run(work), detail_level)
+
+
+@agents_app.command("check")
+def agents_check(
+    root: Path = typer.Option(Path("."), "--root", help="Repository root."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Report mirror drift — the release gate fails on the same check."""
+
+    def work() -> object:
+        from apiforge.dispatch.mirrors import mirror_drift
+
+        drift = mirror_drift(Path(root).resolve())
+        return {"drift": drift, "ok": not drift}
 
     _echo_json(_run(work), detail_level)
 

@@ -254,6 +254,12 @@ _VERBS: tuple[tuple[str, tuple[str, ...], Callable[..., Any]], ...] = (
     ("model proto", ("input_path",), _model_verb("apiforge.adapters.protobuf.extract.extract_protobuf")),
     ("model redis", ("input_path",), _model_verb("apiforge.adapters.redis_.extract.extract_redis")),
     ("model otel", ("input_path",), _model_verb("apiforge.adapters.otel.extract.extract_otel")),
+    ("model sqs", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_sqs")),
+    ("model sns", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_sns")),
+    ("model eventbridge", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_eventbridge")),
+    ("model iam-role", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_iam_role")),
+    ("model cognito", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_cognito")),
+    ("model waf", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_waf")),
     ("perf compare", ("baseline", "candidate"), _verb_perf_compare),
 )
 
@@ -323,6 +329,15 @@ def _match_verb(verb: str) -> tuple[tuple[str, ...], Callable[..., Any], str | N
     if head.startswith("collect "):
         return (), lambda *a: None, "__collect__"
     return (), lambda *a: None, "__unknown__"
+
+
+def required_fields(verb: str) -> tuple[str, ...]:
+    """Ctx fields a verb needs bound — derived from the dispatch tables,
+    so recipes never duplicate the requirement list."""
+    needs, _, extra = _match_verb(verb)
+    if extra in ("__unknown__", "__collect__"):
+        return ()
+    return needs
 
 
 def dispatch_step(

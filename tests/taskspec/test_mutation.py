@@ -135,3 +135,5 @@ def test_missing_operation_id_is_pending_not_run(tmp_path: Path) -> None:
     step = next(s for s in record["steps"] if s["verb"] == "build endpoint")
     assert step["status"] == "pending"
     assert "operation_id" in step["missing"]
+    # `case` falls back to the task dir; `now` and `operation_id` don't
+    assert record["inputs_missing"] == ["now", "operation_id"]

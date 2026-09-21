@@ -1,7 +1,7 @@
 ---
 name: api-security-reviewer
 description: OWASP API Security Top 10 aplicado à API — BOLA, authN por operação, autorização em nível de propriedade, resource consumption, BFLA, SSRF, inventário exposto. Entra quando a pergunta é "o que pode ser explorado"; configuração de borda AWS (WAF/throttling/stage) é do aws-api-infra-reviewer.
-rule_areas: [SECURITY, GATEWAY]
+rule_areas: [SECURITY, GATEWAY, IDENTITY]
 executors: [af-inventory, af-extractor, af-judge, af-verifier, af-synthesizer]
 ---
 

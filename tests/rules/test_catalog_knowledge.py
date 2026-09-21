@@ -68,6 +68,18 @@ EXPECTED_RULES = {
     "AF-DATA-006",
     "AF-DATA-007",
     "AF-DATA-008",
+    # AWS breadth: messaging + identity dump rules
+    "AF-MSG-001",
+    "AF-MSG-002",
+    "AF-MSG-003",
+    "AF-MSG-004",
+    "AF-IAM-001",
+    "AF-IAM-002",
+    "AF-IAM-003",
+    "AF-IAM-004",
+    "AF-IAM-005",
+    "AF-SEC-105",
+    "AF-SEC-106",
 }
 
 
@@ -87,6 +99,8 @@ def test_areas_cover_the_specialist_team() -> None:
         "CONTRACT",
         "DATA",
         "GATEWAY",
+        "IDENTITY",
+        "MESSAGING",
         "PERF",
         "REST",
         "SECURITY",
@@ -104,6 +118,8 @@ def test_id_prefix_matches_area() -> None:
         "GATEWAY": "AF-GW-",
         "CONTRACT": "AF-",
         "DATA": "AF-DATA-",
+        "MESSAGING": "AF-MSG-",
+        "IDENTITY": "AF-IAM-",
     }
     for rule_id, meta in load_catalog().items():
         assert rule_id.startswith(expected[meta.area]), rule_id

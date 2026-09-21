@@ -10,8 +10,10 @@ from apiforge.contracts.base import ContractError
 from apiforge.contracts.task import AcceptanceRecord, TaskSpec, TaskState
 from apiforge.dispatch.runner import (
     DispatchContext,
+    _need,
     dispatch_step,
     is_mutation_verb,
+    required_fields,
 )
 from apiforge.taskspec import store
 from apiforge.taskspec.machine import require_transition
@@ -103,6 +105,11 @@ def run_task(
         )
 
     ctx = _ctx_for(root, spec, now)
+    inputs_missing = sorted({
+        field
+        for verb in recipe
+        for field in _need(ctx, *required_fields(verb))
+    })
     calls = 0
     all_steps: list[dict[str, object]] = []
     rounds = 0
@@ -143,7 +150,10 @@ def run_task(
         terminal, reason = TaskState.BLOCKED, "steps pending or errored"
     else:
         terminal, reason = TaskState.AWAITING_SUPERVISION, "all steps ran"
-    return _finish(root, spec, actor, terminal, reason, all_steps, rounds=rounds, calls=calls)
+    return _finish(
+        root, spec, actor, terminal, reason, all_steps,
+        rounds=rounds, calls=calls, inputs_missing=inputs_missing,
+    )
 
 
 def _mark_ready(root: Path, spec: TaskSpec) -> TaskSpec:
@@ -172,6 +182,7 @@ def _finish(
     *,
     rounds: int = 0,
     calls: int = 0,
+    inputs_missing: list[str] | None = None,
 ) -> dict[str, object]:
     require_transition(spec.state, terminal)
     spec = spec.model_copy(update={"state": terminal})
@@ -182,6 +193,7 @@ def _finish(
         "executed_by": actor,
         "terminal": terminal.value,
         "reason": reason,
+        "inputs_missing": inputs_missing or [],
         "rounds": rounds,
         "calls": calls,
         "steps": steps,

@@ -149,3 +149,28 @@ rules:
       suppressed set visible in the report rather than filtered out.
     reference: https://semgrep.dev/docs/
     check: {kind: sec.semgrep.report, path: attrs.by_severity.error, op: gt, value: 0}
+  - id: AF-SEC-105
+    title: WebACL default action lets unmatched requests through
+    severity: high
+    rationale: >-
+      `DefaultAction: Allow` means every request no rule blocks reaches
+      the API — the ACL is a deny-list, and anything not enumerated is
+      admitted. The dump declares the action; the rule reads it.
+    remediation: >-
+      Prefer `DefaultAction: Block` with allow-rules for known-good
+      traffic, or keep Allow only when the attached rules are a verified
+      complete deny-list — recorded as a decision, not assumed.
+    reference: https://docs.aws.amazon.com/waf/latest/developerguide/web-acl-default-action.html
+    check: {kind: aws.waf.web_acl, path: measures.default_action, op: eq, value: Allow}
+  - id: AF-SEC-106
+    title: WebACL uses no AWS managed rule groups
+    severity: medium
+    rationale: >-
+      Without a managed rule group the ACL carries only hand-maintained
+      rules — the baseline protections (OWASP core, known bad inputs,
+      IP reputation) are absent unless every one was rewritten by hand.
+    remediation: >-
+      Attach `AWSManagedRulesCommonRuleSet` at minimum, sized in
+      count-then-block order against real traffic before enforcing.
+    reference: https://docs.aws.amazon.com/waf/latest/developerguide/aws-managed-rule-groups.html
+    check: {kind: aws.waf.web_acl, path: measures.has_managed_rules, op: eq, value: false}

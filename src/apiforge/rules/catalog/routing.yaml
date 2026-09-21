@@ -57,3 +57,21 @@ routes:
     rationale: >-
       Data-access findings surfacing under performance work (KEYS, blocking
       SAVE) route to the performance engineer.
+  - phase: build
+    dominant_area: MESSAGING
+    recommended_agent: api-reliability-engineer
+    rationale: >-
+      Missing DLQs, unconfirmed subscriptions and targetless rules are
+      delivery-failure modes — the reliability engineer's domain.
+  - phase: verify
+    dominant_area: MESSAGING
+    recommended_agent: api-reliability-engineer
+    rationale: >-
+      Messaging findings at verify time are delivery guarantees, judged
+      by the reliability engineer.
+  - phase: secure
+    dominant_area: IDENTITY
+    recommended_agent: api-security-reviewer
+    rationale: >-
+      Wildcard policies, session duration and pool posture are identity
+      security — routed to the security reviewer.

@@ -505,6 +505,202 @@ def inventory_lambda(
     _echo_json(_run(work), detail_level)
 
 
+_AWS_DUMP_READERS = {
+    "sqs": "apiforge.adapters.awsdumps.extract_sqs",
+    "sns": "apiforge.adapters.awsdumps.extract_sns",
+    "eventbridge": "apiforge.adapters.awsdumps.extract_eventbridge",
+    "iam-role": "apiforge.adapters.awsdumps.extract_iam_role",
+    "cognito": "apiforge.adapters.awsdumps.extract_cognito",
+    "waf": "apiforge.adapters.awsdumps.extract_waf",
+}
+
+
+def _register_dump_models() -> None:
+    """One `model <svc>` command per collector dump — same closed shape."""
+
+    def make(dotted: str) -> Callable[[Path, str], None]:
+        def cmd(
+            path: Path = typer.Option(
+                ..., "--path", help="Dump directory from `collect`."
+            ),
+            detail_level: str = typer.Option(
+                "normal", "--detail-level", help=_DETAIL_HELP
+            ),
+        ) -> None:
+            def work() -> dict[str, object]:
+                import importlib
+
+                if not path.is_dir():
+                    raise AnalysisError("AF-INPUT-NOT-FOUND", str(path))
+                module, _, func = dotted.rpartition(".")
+                inventory = getattr(importlib.import_module(module), func)(path)
+                return {
+                    "diagnostics": [
+                        d.model_dump(mode="json") for d in inventory.diagnostics
+                    ],
+                    "facts": [f.model_dump(mode="json") for f in inventory.facts],
+                    "framework": inventory.framework,
+                    "input_hashes": dict(inventory.input_hashes),
+                }
+
+            _echo_json(_run(work), detail_level)
+
+        return cmd
+
+    for svc, dotted in _AWS_DUMP_READERS.items():
+        model_app.command(svc)(make(dotted))
+
+
+_register_dump_models()
+
+
+@collect_app.command("sqs")
+def collect_sqs(
+    queue_url: str = typer.Option(..., "--queue-url", help="SQS queue URL."),
+    out_dir: Path = typer.Option(..., "--out", help="Dump directory to write."),
+    now: str | None = typer.Option(
+        None, "--now", help="Explicit ISO8601 collection timestamp (the only clock)."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Fetch one queue's attribute set into an offline dump."""
+
+    def work() -> CollectManifest:
+        from apiforge.collectors.messaging import collect_sqs
+
+        try:
+            return collect_sqs(queue_url, out_dir, now=now)
+        except CollectError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_manifest(_run(work), detail_level)
+
+
+@collect_app.command("sns")
+def collect_sns(
+    topic_arn: str = typer.Option(..., "--topic-arn", help="SNS topic ARN."),
+    out_dir: Path = typer.Option(..., "--out", help="Dump directory to write."),
+    now: str | None = typer.Option(
+        None, "--now", help="Explicit ISO8601 collection timestamp (the only clock)."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Fetch one topic's attributes and subscriptions into an offline dump."""
+
+    def work() -> CollectManifest:
+        from apiforge.collectors.messaging import collect_sns
+
+        try:
+            return collect_sns(topic_arn, out_dir, now=now)
+        except CollectError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_manifest(_run(work), detail_level)
+
+
+@collect_app.command("eventbridge")
+def collect_eventbridge(
+    bus_name: str = typer.Option(..., "--event-bus", help="Event bus name."),
+    out_dir: Path = typer.Option(..., "--out", help="Dump directory to write."),
+    now: str | None = typer.Option(
+        None, "--now", help="Explicit ISO8601 collection timestamp (the only clock)."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Fetch the bus, its rules and their targets into an offline dump."""
+
+    def work() -> CollectManifest:
+        from apiforge.collectors.messaging import collect_eventbridge
+
+        try:
+            return collect_eventbridge(bus_name, out_dir, now=now)
+        except CollectError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_manifest(_run(work), detail_level)
+
+
+@collect_app.command("iam-role")
+def collect_iam_role(
+    role_name: str = typer.Option(..., "--role-name", help="IAM role name."),
+    out_dir: Path = typer.Option(..., "--out", help="Dump directory to write."),
+    now: str | None = typer.Option(
+        None, "--now", help="Explicit ISO8601 collection timestamp (the only clock)."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Fetch one role, its attached policies and inline policy documents."""
+
+    def work() -> CollectManifest:
+        from apiforge.collectors.identity import collect_iam_role
+
+        try:
+            return collect_iam_role(role_name, out_dir, now=now)
+        except CollectError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_manifest(_run(work), detail_level)
+
+
+@collect_app.command("cognito")
+def collect_cognito(
+    user_pool_id: str = typer.Option(..., "--user-pool-id", help="User pool id."),
+    out_dir: Path = typer.Option(..., "--out", help="Dump directory to write."),
+    now: str | None = typer.Option(
+        None, "--now", help="Explicit ISO8601 collection timestamp (the only clock)."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Fetch the user pool and its app clients into an offline dump."""
+
+    def work() -> CollectManifest:
+        from apiforge.collectors.identity import collect_cognito
+
+        try:
+            return collect_cognito(user_pool_id, out_dir, now=now)
+        except CollectError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_manifest(_run(work), detail_level)
+
+
+@collect_app.command("waf")
+def collect_waf(
+    web_acl_id: str = typer.Option(..., "--web-acl-id", help="WebACL id."),
+    web_acl_name: str = typer.Option(..., "--web-acl-name", help="WebACL name."),
+    scope: str = typer.Option("REGIONAL", "--scope", help="REGIONAL or CLOUDFRONT."),
+    out_dir: Path = typer.Option(..., "--out", help="Dump directory to write."),
+    now: str | None = typer.Option(
+        None, "--now", help="Explicit ISO8601 collection timestamp (the only clock)."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Fetch one WebACL's configuration into an offline dump."""
+
+    def work() -> CollectManifest:
+        from apiforge.collectors.identity import collect_waf
+
+        try:
+            return collect_waf(web_acl_id, web_acl_name, scope, out_dir, now=now)
+        except CollectError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_manifest(_run(work), detail_level)
+
+
+def _echo_manifest(manifest: object, detail_level: str) -> None:
+    assert isinstance(manifest, CollectManifest)
+    _echo_json(
+        {
+            "artifacts": manifest.artifacts,
+            "collected_at": manifest.collected_at,
+            "source": manifest.source,
+            "tool_version": manifest.tool_version,
+        },
+        detail_level,
+    )
+
+
 @model_app.command("terraform")
 def inventory_terraform(
     path: Path = typer.Option(..., "--path", help="Directory of *.tf files."),

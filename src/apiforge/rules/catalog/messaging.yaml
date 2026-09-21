@@ -1,0 +1,70 @@
+catalog_version: 1
+schema_version: 1
+area: MESSAGING
+retrieved: 2026-09-21
+rules:
+  - id: AF-MSG-001
+    title: SQS queue declares no dead-letter redrive policy
+    severity: high
+    rationale: >-
+      A queue without `RedrivePolicy` drops poison messages after the
+      receive-count budget — the failed message disappears with the
+      reason it failed. The dump records the attribute's absence, so the
+      rule fires on a measured fact, not a guess.
+    remediation: >-
+      Attach a dead-letter queue with `maxReceiveCount` sized to the
+      consumer's retry budget; alert on `ApproximateNumberOfMessagesVisible`
+      in the DLQ.
+    reference: https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-dead-letter-queues.html
+    check:
+      kind: aws.sqs.queue
+      path: measures.has_redrive
+      op: eq
+      value: false
+  - id: AF-MSG-002
+    title: SNS topic declares no KMS encryption
+    severity: medium
+    rationale: >-
+      `KmsMasterKeyId` absent means the topic relies on the default —
+      messages at rest are not encrypted under a customer-managed key.
+      The attribute is declared in the dump, so absence is measured.
+    remediation: >-
+      Set a customer-managed KMS key on the topic and grant publishers
+      `kms:GenerateDataKey` + `kms:Decrypt` on it.
+    reference: https://docs.aws.amazon.com/sns/latest/dg/sns-server-side-encryption.html
+    check:
+      kind: aws.sns.topic
+      path: measures.has_kms
+      op: eq
+      value: false
+  - id: AF-MSG-003
+    title: SNS subscription stuck in PendingConfirmation
+    severity: medium
+    rationale: >-
+      A subscription ARN containing `PendingConfirmation` never receives
+      messages — the integration is silently dead until confirmed.
+    remediation: >-
+      Confirm the subscription or delete it; alert when a subscription
+      stays pending past the provisioning window.
+    reference: https://docs.aws.amazon.com/sns/latest/dg/sns-message-delivery-retries.html
+    check:
+      kind: aws.sns.subscription
+      path: measures.confirmed
+      op: eq
+      value: false
+  - id: AF-MSG-004
+    title: Enabled EventBridge rule has no targets
+    severity: medium
+    rationale: >-
+      An ENABLED rule with an empty target list matches events and
+      discards them — the wiring exists, the delivery does not.
+    remediation: >-
+      Attach at least one target or disable the rule; a deliberate
+      catch-and-drop belongs in the event pattern, not in an empty
+      target list.
+    reference: https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-rules.html
+    check:
+      kind: aws.eventbridge.rule
+      path: measures.has_targets
+      op: eq
+      value: false

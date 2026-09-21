@@ -75,6 +75,22 @@ are canonical JSON + a `manifest.json` receipt; `--now` is the only clock.
 |---|---|
 | `AF-COLLECT-AWS` | the AWS call failed; the named operation is in the detail |
 | `AF-COLLECT-PATH` | artifact name refused (not a plain `*.json` basename) |
+| `AF-COLLECT-ARG` | a collector argument fails its closed set (e.g. WAF scope) |
+
+Beyond `api-gateway`/`lambda`, collectors exist for `sqs` (queue
+attributes), `sns` (topic + subscriptions), `eventbridge` (bus + rules +
+targets), `iam-role` (role + attached + inline policy documents),
+`cognito` (user pool + app clients) and `waf` (one WebACL). Each writes a
+dump that `model <same-name>` reads offline into `aws.<svc>.*` facts.
+
+| Code | Meaning |
+|---|---|
+| `AF-SQS-DUMP` | `queue.json` missing or invalid |
+| `AF-SNS-DUMP` | `topic.json`/`subscriptions.json` missing or invalid |
+| `AF-EVB-DUMP` | `event-bus.json`/`rules.json`/`targets.json` missing or invalid |
+| `AF-IAM-DUMP` | `role.json`/`attached-policies.json`/`inline-policies.json` missing or invalid |
+| `AF-COG-DUMP` | `user-pool.json`/`clients.json` missing or invalid |
+| `AF-WAF-DUMP` | `web-acl.json` missing or invalid |
 
 ## API Gateway dump adapter
 
@@ -361,7 +377,9 @@ Ed25519 signature to the exact revision (key lives outside the task; the
 executor never holds it). `task run` executes the recipe from
 `rules/recipes.yaml` through the same `dispatch_step` unit as playbooks,
 inside `budgets` (max rounds, max calls, deadline) with a no-progress
-breaker. `task accept` requires `accepted_by` distinct from the executor and
+breaker. The run record carries `inputs_missing` — the union of ctx fields
+the recipe's verbs need, derived from the dispatch tables, named upfront.
+`task accept` requires `accepted_by` distinct from the executor and
 at least one `--evidence`. `brief show` renders the OutcomeBrief — `DONE` is
 refused while gaps, missing acceptance, or open items remain.
 

@@ -72,6 +72,8 @@ while refusal codes and `fact_id`s survive.
 | `apiforge context funnel --case .apiforge/case` | Measured bytes per case stage (api-ir → facts → findings → summary) |
 | `apiforge-mcp` | MCP server for the read/compose verbs (needs `pip install apiforge[mcp]`; every tool takes `detail_level`) |
 | `apiforge collect lambda --function-name X --out dump/` | Fetch Lambda config into a dump (Code.Location never persisted) |
+| `apiforge collect sqs\|sns\|eventbridge\|iam-role\|cognito\|waf ... --out dump/` | Messaging/identity collectors — same offline-dump contract |
+| `apiforge model sqs\|sns\|eventbridge\|iam-role\|cognito\|waf --path dump/` | Dump → `aws.<svc>.*` facts; boolean measures record declared absence |
 | `apiforge model lambda --path dump/` | Lambda facts offline — env var names only, values never read |
 | `apiforge model terraform --path infra/` | API Gateway + Lambda resources from HCL; `${...}` → `AF-TF-UNRESOLVED` |
 | `apiforge model sam --path template.yaml` | Serverless resources; `!Ref`/`!Sub` → `AF-SAM-UNRESOLVED` |

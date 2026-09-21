@@ -85,3 +85,16 @@ malformed JSON are named diagnostics, never guesses.
 |---|---|
 | `AF-GW-DUMP-MISSING` | an expected dump file is absent |
 | `AF-GW-DUMP-INVALID` | a dump file is not valid JSON |
+
+## Builder
+
+`build endpoint` synthesizes Spring skeletons as new-file unified diffs,
+evaluates them in the copy sandbox, and promotes into a git worktree only
+when the `sensitive`-class gates (`evidence`, `approval`) are satisfied.
+It never edits existing files and never writes to the main tree.
+
+| Code | Meaning |
+|---|---|
+| `AF-BUILD-OP-MISSING` | the requested operationId (or method) is absent from the contract |
+| `AF-BUILD-SCHEMA-MISSING` | a schema node has no bounded Java mapping — refused, never guessed |
+| `AF-BUILD-TARGET-EXISTS` | a generated path already exists — builds never clobber |

@@ -14,6 +14,7 @@ from apiforge.adapters.apigateway.extract import extract_apigateway
 from apiforge.adapters.fastapi.extractor import extract_fastapi
 from apiforge.api_ir.builder import build_api_model
 from apiforge.application.analyze import AnalysisError, AnalysisResult, analyze_project
+from apiforge.build.service import build_endpoint
 from apiforge.case.service import CaseIntegrityError, CaseStorageError
 from apiforge.collectors.apigateway import collect
 from apiforge.collectors.manifest import CollectError, CollectManifest
@@ -36,6 +37,12 @@ app = typer.Typer(
     invoke_without_command=True,
 )
 model_app = typer.Typer(help="Build the canonical API-IR.")
+build_app = typer.Typer(
+    name="build",
+    help="Generate code skeletons — evaluated in the sandbox, promoted via worktree only.",
+    no_args_is_help=True,
+)
+app.add_typer(build_app)
 collect_app = typer.Typer(
     name="collect",
     help="Collect AWS artifacts into offline dumps (the only family that touches AWS).",
@@ -304,3 +311,43 @@ def inventory_api_gateway(
         }
 
     _echo_json(_run(work), detail_level)
+
+
+@build_app.command("endpoint")
+def build_endpoint_cmd(
+    contract: Path = typer.Option(..., "--contract", help="OpenAPI 3.1 document."),
+    operation_id: str = typer.Option(..., "--operation-id", help="operationId to build."),
+    project: Path = typer.Option(..., "--project", help="Java project root."),
+    write_diff: Path | None = typer.Option(
+        None, "--write-diff", help="Also write the emitted unified diff to a file."
+    ),
+    into_worktree: str | None = typer.Option(
+        None, "--into-worktree", help="Promote generated files into this git worktree."
+    ),
+    approve: bool = typer.Option(
+        False, "--approve", help="Record approval evidence for the sensitive-class gate."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Synthesize a Spring endpoint skeleton; main tree is never touched."""
+
+    def work() -> dict[str, object]:
+        if not project.is_dir():
+            raise AnalysisError("AF-INPUT-NOT-FOUND", str(project))
+        return build_endpoint(
+            contract, project, operation_id, promote=into_worktree, approve=approve
+        )
+
+    report = _run(work)
+    assert isinstance(report, dict)
+    if write_diff is not None:
+        from apiforge.build.diff import sources_to_diff
+        from apiforge.build.java import operation_to_sources
+        from apiforge.openapi.loader import load_openapi
+
+        sources = operation_to_sources(load_openapi(contract), operation_id)
+        write_diff.write_text(sources_to_diff(sources), encoding="utf-8")
+    _echo_json(report, detail_level)
+    promo = report.get("promotion")
+    if report.get("refused") or (isinstance(promo, dict) and promo.get("refused")):
+        raise typer.Exit(4)

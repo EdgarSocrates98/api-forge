@@ -63,6 +63,8 @@ while refusal codes and `fact_id`s survive.
 | `apiforge next-step --findings findings.json --phase verify` | Route the dominant finding area to the specialist agent |
 | `apiforge collect api-gateway --api-id X --out dump/` | Fetch API Gateway config into an offline dump (needs `pip install apiforge[aws]`; the only family that touches AWS) |
 | `apiforge model api-gateway --path dump/` | Read the dump into facts — offline, no credentials |
+| `apiforge build endpoint --contract c.yaml --operation-id X --project .` | Synthesize a Spring skeleton, prove it in the sandbox (main tree untouched) |
+| `apiforge build endpoint ... --into-worktree NAME --approve` | Promote generated files into a policy-gated git worktree |
 
 ## Exit codes
 

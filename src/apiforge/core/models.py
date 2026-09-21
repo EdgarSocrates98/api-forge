@@ -57,7 +57,7 @@ class FrozenJsonMap(dict[str, JsonValue]):
         raise TypeError("JSON payloads are immutable")
 
 
-def _freeze_json(value: object) -> JsonValue:
+def freeze_json(value: object) -> JsonValue:
     if value is None or isinstance(value, str | bool | int):
         return value
     if isinstance(value, float):
@@ -69,10 +69,10 @@ def _freeze_json(value: object) -> JsonValue:
         for key, item in value.items():
             if not isinstance(key, str):
                 raise ValueError("JSON object keys must be strings")  # noqa: TRY004
-            frozen[key] = _freeze_json(item)
+            frozen[key] = freeze_json(item)
         return FrozenJsonMap(frozen)
     if isinstance(value, list | tuple):
-        return tuple(_freeze_json(item) for item in value)
+        return tuple(freeze_json(item) for item in value)
     raise ValueError(f"value of type {type(value).__name__} is not JSON-compatible")
 
 
@@ -117,7 +117,7 @@ class Fact(_ContractModel):
     @field_validator("measures", "attrs", mode="after")
     @classmethod
     def freeze_payload(cls, value: object) -> JsonValue:
-        frozen = _freeze_json(value)
+        frozen = freeze_json(value)
         if not isinstance(frozen, Mapping):
             raise ValueError("JSON payload must be an object")  # noqa: TRY004
         return frozen
@@ -150,7 +150,7 @@ class Diagnostic(_ContractModel):
     @field_validator("details", mode="after")
     @classmethod
     def freeze_details(cls, value: object) -> JsonValue:
-        frozen = _freeze_json(value)
+        frozen = freeze_json(value)
         if not isinstance(frozen, Mapping):
             raise ValueError("diagnostic details must be a JSON object")  # noqa: TRY004
         return frozen

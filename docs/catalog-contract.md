@@ -114,3 +114,20 @@ transcript — measured bytes only, never invented numbers.
 | Code | Meaning |
 |---|---|
 | `AF-PLAYBOOK-NOT-FOUND` | no playbook for the named coordinator; known names are in the detail |
+
+## MCP server and context funnel
+
+`apiforge-mcp` serves the read/compose verbs over MCP (extra `[mcp]`); each
+tool takes `detail_level` and records `payload_bytes` to the economy ledger
+as `mcp:<verb>` — same payloads as the CLI, same accounting. Mutating verbs
+stay CLI-only until policy-gating through MCP is designed.
+
+`context funnel --case <dir>` measures the funnel in bytes per persisted
+stage (api-ir → facts → findings → summary projection). Reductions are
+ratios of measured bytes; a missing artifact is a named diagnostic, never
+a zero silently reported.
+
+| Code | Meaning |
+|---|---|
+| `AF-MCP-UNAVAILABLE` | `mcp` package absent; unlock: `pip install apiforge[mcp]` |
+| `AF-FUNNEL-ARTIFACT-MISSING` | a stage file is absent from the case directory |

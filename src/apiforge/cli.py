@@ -77,6 +77,12 @@ economy_app = typer.Typer(
     no_args_is_help=True,
 )
 app.add_typer(economy_app)
+context_app = typer.Typer(
+    name="context",
+    help="Measured context accounting — the funnel, in bytes per stage.",
+    no_args_is_help=True,
+)
+app.add_typer(context_app)
 
 
 @app.callback()
@@ -412,6 +418,23 @@ def economy_report(
         from apiforge.economy.ledger import report
 
         return report(root if root is not None else Path.cwd())
+
+    _echo_json(_run(work), detail_level)
+
+
+@context_app.command("funnel")
+def context_funnel(
+    case_dir: Path = typer.Option(
+        ..., "--case", help="Persisted case directory (api-ir/facts/findings)."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Measure what each case stage keeps — bytes, never claims."""
+
+    def work() -> dict[str, object]:
+        from apiforge.application.funnel import measure_funnel
+
+        return measure_funnel(case_dir)
 
     _echo_json(_run(work), detail_level)
 

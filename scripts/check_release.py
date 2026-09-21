@@ -168,6 +168,8 @@ def _check_code_parity(root: Path, failures: list[str]) -> None:
         ("AF-GW", "docs/catalog-contract.md"),
         ("AF-BUILD", "docs/catalog-contract.md"),
         ("AF-PLAYBOOK", "docs/catalog-contract.md"),
+        ("AF-MCP", "docs/catalog-contract.md"),
+        ("AF-FUNNEL", "docs/catalog-contract.md"),
     ):
         doc_path = root / doc
         if not doc_path.is_file():
@@ -331,6 +333,11 @@ def _check_lab_and_boundary(root: Path, failures: list[str]) -> None:
             failures.append(f"tree_sitter import outside adapters.spring/go: {source}")
         if "boto3" in text and "collectors" not in posix and "cli" not in posix:
             failures.append(f"boto3 import outside collectors/cli boundary: {source}")
+        if (
+            re.search(r"^\s*(?:import|from)\s+mcp\b", text, re.MULTILINE)
+            and "apiforge/mcp" not in posix
+        ):
+            failures.append(f"mcp import outside apiforge/mcp boundary: {source}")
 
 
 def _check_threat_model(root: Path, failures: list[str]) -> None:

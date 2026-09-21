@@ -69,6 +69,8 @@ while refusal codes and `fact_id`s survive.
 | `apiforge build endpoint ... --into-worktree NAME --approve` | Promote generated files into a policy-gated git worktree |
 | `apiforge playbook api-governance-reviewer` | Render the coordinator's executor decomposition — works without dispatch |
 | `apiforge economy report [--root .]` | Measured call sizes; `detail_level_effect` shows what `summary` saves |
+| `apiforge context funnel --case .apiforge/case` | Measured bytes per case stage (api-ir → facts → findings → summary) |
+| `apiforge-mcp` | MCP server for the read/compose verbs (needs `pip install apiforge[mcp]`; every tool takes `detail_level`) |
 
 ## Agentic layer
 

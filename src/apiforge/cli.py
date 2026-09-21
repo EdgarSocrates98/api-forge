@@ -857,14 +857,48 @@ def economy_report(
     root: Path | None = typer.Option(
         None, "--root", help="Directory whose .apiforge/economy.jsonl to aggregate."
     ),
+    transcript: Path | None = typer.Option(
+        None, "--transcript", help="Host transcript JSONL; unlocks counted tokens."
+    ),
+    estimate: bool = typer.Option(
+        False, "--estimate", help="Add a labeled chars/4 estimate (never counted)."
+    ),
+    cost_basis: Path | None = typer.Option(
+        None, "--cost-basis", help="YAML model→rates; unlocks dollar cost."
+    ),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
     """Aggregate recorded call sizes; detail_level_effect shows what summary saves."""
 
     def work() -> dict[str, object]:
         from apiforge.economy.ledger import report
+        from apiforge.economy.tokens import (
+            TokenError,
+            cost,
+            estimate_tokens,
+            read_transcript,
+        )
 
-        return report(root if root is not None else Path.cwd())
+        try:
+            payload = report(root if root is not None else Path.cwd())
+            if transcript is not None:
+                counted = read_transcript(transcript)
+                payload["tokens"] = counted
+                payload["tokens_unresolved"] = False
+                if cost_basis is not None:
+                    payload["cost"] = cost(counted, cost_basis)
+            elif cost_basis is not None:
+                raise TokenError(
+                    "AF-ECONOMY-TRANSCRIPT-MISSING",
+                    "--cost-basis needs --transcript — no tokens to price",
+                )
+            if estimate:
+                payload["token_estimate"] = estimate_tokens(
+                    int(payload["payload_bytes"])
+                )
+            return payload
+        except TokenError as exc:
+            raise AnalysisError(exc.code, str(exc).split(": ", 1)[-1]) from exc
 
     _echo_json(_run(work), detail_level)
 

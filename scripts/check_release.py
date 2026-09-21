@@ -186,6 +186,7 @@ def _check_code_parity(root: Path, failures: list[str]) -> None:
         ("AF-DISPATCH", "docs/catalog-contract.md"),
         ("AF-KEY", "docs/catalog-contract.md"),
         ("AF-RUN", "docs/catalog-contract.md"),
+        ("AF-ECONOMY", "docs/catalog-contract.md"),
     ):
         doc_path = root / doc
         if not doc_path.is_file():

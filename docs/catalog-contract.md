@@ -318,3 +318,19 @@ scanner runs, the target stays data. `zap` is deliberately absent
 | `AF-RUN-CONFIG-MISSING` | semgrep without a local `--config` (`auto` hits the network) |
 | `AF-RUN-TIMEOUT` | the run exceeded `--timeout` |
 | `AF-RUN-NO-REPORT` | the tool exited without writing the report file |
+
+## Provider tokens (`economy report`)
+
+Bytes are always counted; tokens are counted only with
+`--transcript <jsonl>` (host transcript — `message.usage` summed per
+`message.model`; unparseable lines are counted in `unparsed_lines`).
+`--estimate` adds `token_estimate` — a labeled `payload_bytes/4` heuristic,
+never presented as counted (`counted: false`). Dollar cost requires
+`--transcript` **and** `--cost-basis <yaml>` (model→`input_per_mtok`/
+`output_per_mtok`); a model outside the basis lands in
+`cost_basis_missing`, never priced by inference.
+
+| Code | Meaning |
+|---|---|
+| `AF-ECONOMY-TRANSCRIPT-MISSING` | no transcript file, or `--cost-basis` without `--transcript` |
+| `AF-ECONOMY-COST-BASIS-MISSING` | basis file absent or not a model→rates mapping |

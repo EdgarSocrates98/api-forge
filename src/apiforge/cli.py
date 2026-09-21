@@ -36,6 +36,18 @@ diff_app = typer.Typer(help="Diff OpenAPI contracts.")
 app.add_typer(model_app, name="model")
 app.add_typer(diff_app, name="diff")
 
+from apiforge.cli_governance import (
+    evidence_app,
+    policy_app,
+    sandbox_app,
+    sdd_app,
+)
+
+app.add_typer(policy_app, name="policy")
+app.add_typer(sdd_app, name="sdd")
+app.add_typer(sandbox_app, name="sandbox")
+app.add_typer(evidence_app, name="evidence")
+
 
 @app.callback()
 def main(

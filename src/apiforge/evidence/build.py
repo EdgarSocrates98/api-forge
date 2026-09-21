@@ -56,9 +56,7 @@ def emit_receipt(case_dir: Path, now: str | None = None) -> Receipt:
                 f"{path}: manifest sha256 {ref.get('sha256')} != file {actual}",
                 field="artifacts",
             )
-        artifacts.append(
-            ReceiptArtifact(path=str(path), sha256=actual, kind=str(kind))
-        )
+        artifacts.append(ReceiptArtifact(path=str(path), sha256=actual, kind=str(kind)))
     inputs = manifest.get("input_hashes", {})
     return Receipt(
         case=str(case_dir),

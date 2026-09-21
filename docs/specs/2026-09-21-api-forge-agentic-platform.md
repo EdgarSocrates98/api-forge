@@ -252,6 +252,10 @@ briefs por task, RED→GREEN registrado, ledger SDD, commit atômico.
 | 14 | Modernização assistida: `plan strangler` (cut plan por rota) | **entregue** |
 | 15 | Regras executáveis `check:` no catálogo + `judge --facts` | **entregue** |
 | 16 | Debate protocol: `debate open/submit/close` com quorum + referee | **entregue** |
+| 17 | Dispatch determinístico: `dispatch run` (playbooks executáveis) + mirrors `.agents/`/`.claude/` com drift check | **entregue** |
+| 18 | Assinatura Ed25519: `report keygen/sign --key/verify --pubkey` — prova posse de chave, nunca identidade | **entregue** |
+| 19 | `run tool`: allowlist semgrep/trivy/gitleaks/k6, argv fixo sem shell, timeout, `--dry-run` | **entregue** |
+| 20 | Tokens: `economy report --transcript` conta por modelo; `--estimate` rotulado; custo só com `--cost-basis` | **entregue** |
 
 ## 11. Decisões abertas
 
@@ -259,8 +263,10 @@ briefs por task, RED→GREEN registrado, ledger SDD, commit atômico.
    **decidido**: tree-sitter (ADR-006); adapters Spring e Go já em produção.
 2. Monorepo único vs pacotes por adapter (`apiforge-spring`,
    `apiforge-go`) — tende a monorepo enquanto o core for estável.
-3. Empacotamento do MCP server: mesmo wheel vs extra `[mcp]`.
+3. ~~Empacotamento do MCP server: mesmo wheel vs extra `[mcp]`~~ —
+   **decidido**: extra `[mcp]` (plano 9b); SDK ausente → `AF-MCP-UNAVAILABLE`.
 4. Licenciamento das fontes normativas nos knowledge packs (citadas, não
    copiadas — `source_authority.yaml` já prevê).
-5. Escopo do protocolo de debate: quorum, árbitro, e quando o resultado é
-   `unresolved` em vez de decisão.
+5. ~~Escopo do protocolo de debate~~ — **decidido** (plano 16): posições
+   exigem `fact:` evidence, quorum ≥2 lados, referee fecha
+   `resolved|unresolved`; debate fechado recusa mutação.

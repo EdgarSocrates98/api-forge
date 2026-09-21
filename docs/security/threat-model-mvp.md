@@ -15,6 +15,12 @@ with their mitigations.
 | Secret leakage | Artifacts contain paths, hashes, and AST-extracted literals only; no environment variables, no file contents beyond parsed route metadata are emitted |
 | Resource exhaustion | YAML event stream rejected construct-by-construct; extraction is a bounded two-pass AST walk; no recursion into unbounded external refs (only `#/components/schemas`, cycle-detected) |
 | Tampered case artifacts | `load_case` re-hashes every declared artifact (`AF-CASE-HASH-MISMATCH`); manifest is written last so it never references a missing artifact |
+| Policy tampering | the policy catalog is closed-schema data (`AF-POLICY-SCHEMA`); every release receipt pins `policy_sha256`, so a tampered catalog no longer matches any prior receipt |
+| Crafted diff path escape | sandbox patch paths are validated against the copied root before any byte is written (`AF-SANDBOX-PATH-OUTSIDE`); binary and mode-only diffs are refused outright |
+| Symlinks inside copied trees | the sandbox inventory skips symlinks and copies with `follow_symlinks=False`, so a patch can never write through a link out of the copy |
+| Frontmatter injection | SDD frontmatter uses the strict YAML loader (no aliases, tags or duplicate keys); `stamp` rewrites only the upstream hash line |
+| Gate override abuse | a strict `set-phase` bypass is never silent: `gate`, `reason` and `actor` are recorded in `gate-overrides.json` under `.apiforge/sdd/<FEATURE>/` |
+| Worktree index drift/confusion | `worktree_list` reconciles `index.json` against `git worktree list --porcelain` and reports drift in both directions instead of hiding it |
 | Fabricated conclusions | `unresolved` diagnostics and findings name the uncertainty; `confirmed` requires evidence fact_ids by construction |
 
 ## Known limitations

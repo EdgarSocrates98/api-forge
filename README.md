@@ -36,13 +36,27 @@ Individual stages: `apiforge discover --project .`, `apiforge model build
 --contract c.yaml --project .`, `apiforge diff contract --baseline a.yaml
 --candidate b.yaml`, `apiforge judge --contract c.yaml --project .`.
 
+## Governance
+
+| Command | Purpose |
+|---|---|
+| `apiforge policy check --verb fs.delete --class destructive` | Evaluate an action against the policy catalog (allow/gate/deny) |
+| `apiforge sdd check --root docs/sdd [--strict]` | Validate phase frontmatter, upstream hash cascade and evidence gates |
+| `apiforge sdd status --root docs/sdd` | Per-feature phase status summary |
+| `apiforge sdd stamp --artifact f/plan.md --upstream f/contract.md` | Write the upstream sha256 into frontmatter (line surgery only) |
+| `apiforge sdd set-phase --root R --feature F --phase P --status S [--strict]` | Transition a phase; gates need evidence or a recorded override |
+| `apiforge sandbox apply --root . --diff change.diff` | Apply a diff to copied before/after trees and report the finding delta |
+| `apiforge sandbox clean --root .` | Remove `.apiforge/sandbox` only |
+| `apiforge evidence emit --case .apiforge/case --out receipt.json` | Receipt binding artifact paths to sha256 (proves correspondence, not authorship) |
+| `apiforge evidence verify --receipt receipt.json` | Re-hash every artifact the receipt lists |
+
 ## Exit codes
 
 | Code | Meaning |
 |---|---|
 | 0 | success |
 | 2 | input/validation refusal (`AF-INPUT-NOT-FOUND`, `AF-OPENAPI-*`, `AF-CASE-*` storage) |
-| 3 | integrity failure (`AF-CASE-HASH-MISMATCH`, ...) |
+| 3 | integrity failure or denied/blocked governance result (`AF-CASE-HASH-MISMATCH`, `AF-POLICY-DENY`, `sdd check` not ok, ...) |
 | 4 | confirmed finding at `--fail-on` severity or worse |
 
 ## Guarantees
@@ -81,5 +95,5 @@ python -c "from apiforge.case.service import load_case; print(load_case('.apifor
 pytest -q
 ruff check . && ruff format --check .
 mypy src/apiforge
-python scripts/check_mvp_release.py
+python scripts/check_release.py
 ```

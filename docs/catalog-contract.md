@@ -334,3 +334,16 @@ never presented as counted (`counted: false`). Dollar cost requires
 |---|---|
 | `AF-ECONOMY-TRANSCRIPT-MISSING` | no transcript file, or `--cost-basis` without `--transcript` |
 | `AF-ECONOMY-COST-BASIS-MISSING` | basis file absent or not a model→rates mapping |
+
+## Canonical contracts (`contract`)
+
+`contract list` enumerates the registered `<Name>/v1` contracts;
+`contract show <name>` emits the JSON schema. Every contract is frozen and
+closed (`extra: forbid`); `version` is a `Literal[1]` — a v2 lands as a
+sibling class, never an in-place change. Docs live in
+`docs/contracts/<Name>-v1.md`, kept in parity with the registry by the
+release gate.
+
+| Code | Meaning |
+|---|---|
+| `AF-CONTRACTS-UNKNOWN` | contract name not in the registry |

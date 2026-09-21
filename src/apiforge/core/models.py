@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Iterable, Mapping
 from enum import StrEnum
 from math import isfinite
-from typing import Annotated, Any, Self
+from typing import Annotated, Any, Literal, Self
 
 from pydantic import (
     BaseModel,
@@ -108,6 +108,7 @@ class SourceRef(_ContractModel):
 
 
 class Fact(_ContractModel):
+    version: Literal[1] = 1
     fact_id: str
     kind: str
     source: SourceRef
@@ -124,6 +125,7 @@ class Fact(_ContractModel):
 
 
 class Finding(_ContractModel):
+    version: Literal[1] = 1
     finding_id: str
     rule_id: str
     status: FindingStatus

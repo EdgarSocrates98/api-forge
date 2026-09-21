@@ -187,6 +187,7 @@ def _check_code_parity(root: Path, failures: list[str]) -> None:
         ("AF-KEY", "docs/catalog-contract.md"),
         ("AF-RUN", "docs/catalog-contract.md"),
         ("AF-ECONOMY", "docs/catalog-contract.md"),
+        ("AF-CONTRACTS", "docs/catalog-contract.md"),
     ):
         doc_path = root / doc
         if not doc_path.is_file():
@@ -199,6 +200,19 @@ def _check_code_parity(root: Path, failures: list[str]) -> None:
             failures.append(f"{code} emitted by source but undocumented in {doc}")
         for code in sorted(documented - emitted):
             failures.append(f"{code} documented in {doc} but never emitted")
+
+
+def _check_contract_docs(root: Path, failures: list[str]) -> None:
+    """Every registered contract has a doc; every doc maps to a contract."""
+    from apiforge.contracts.registry import CONTRACTS
+
+    docs_dir = root / "docs" / "contracts"
+    expected = {name.replace("/", "-") for name in CONTRACTS}
+    found = {p.stem for p in docs_dir.glob("*-v1.md")} if docs_dir.is_dir() else set()
+    for slug in sorted(expected - found):
+        failures.append(f"contract {slug} registered but docs/contracts/{slug}.md missing")
+    for slug in sorted(found - expected):
+        failures.append(f"docs/contracts/{slug}.md documents an unregistered contract")
 
 
 def _check_catalogs(root: Path, failures: list[str]) -> None:
@@ -392,6 +406,7 @@ def check_repository(root: Path) -> list[str]:
     _check_reproducibility(root, failures)
     _check_code_parity(root, failures)
     _check_catalogs(root, failures)
+    _check_contract_docs(root, failures)
     _check_templates(root, failures)
     _check_receipt_roundtrip(root, failures)
     _check_routing(root, failures)

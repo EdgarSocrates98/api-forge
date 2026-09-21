@@ -122,6 +122,12 @@ run_app = typer.Typer(
     no_args_is_help=True,
 )
 app.add_typer(run_app)
+contract_app = typer.Typer(
+    name="contract",
+    help="List and inspect the canonical versioned contracts.",
+    no_args_is_help=True,
+)
+app.add_typer(contract_app)
 
 
 @app.callback()
@@ -764,6 +770,39 @@ def run_tool_cmd(
             return run_tool(tool, target, out, extra, timeout, dry_run=dry_run)
         except RunError as exc:
             raise AnalysisError(exc.code, str(exc).split(": ", 1)[-1]) from exc
+
+    _echo_json(_run(work), detail_level)
+
+
+@contract_app.command("list")
+def contract_list(
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """List the registered canonical contracts."""
+
+    def work() -> dict[str, object]:
+        from apiforge.contracts.registry import contract_names
+
+        return {"contracts": contract_names()}
+
+    _echo_json(_run(work), detail_level)
+
+
+@contract_app.command("show")
+def contract_show(
+    name: str = typer.Argument(..., help="Contract name, e.g. TaskSpec/v1."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Emit the JSON schema of a canonical contract."""
+
+    def work() -> dict[str, object]:
+        from apiforge.contracts.base import ContractError
+        from apiforge.contracts.registry import contract_schema
+
+        try:
+            return contract_schema(name)
+        except ContractError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
 
     _echo_json(_run(work), detail_level)
 

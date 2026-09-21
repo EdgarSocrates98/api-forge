@@ -10,6 +10,7 @@ import typer
 
 from apiforge.adapters.fastapi.extractor import extract_fastapi
 from apiforge.core.detail import apply_detail_level
+from apiforge.dispatch.runner import DispatchContext
 from apiforge.evidence.build import EvidenceError, emit_receipt
 from apiforge.evidence.verify import verify_receipt
 from apiforge.policy.decide import ActionRequest, decide
@@ -25,6 +26,9 @@ policy_app = typer.Typer(help="Evaluate actions against the policy catalog.")
 sdd_app = typer.Typer(help="Spec-driven development artifacts and gates.")
 sandbox_app = typer.Typer(help="Copy-based sandbox evaluation.")
 evidence_app = typer.Typer(help="Release evidence receipts.")
+autonomy_app = typer.Typer(
+    help="Autonomy modes (observe->continuous) and runbooks on the policy engine."
+)
 
 
 def _echo(value: object, detail_level: str = "normal") -> None:
@@ -200,3 +204,214 @@ def evidence_verify_cmd(
     _echo(report, detail_level)
     if not report["ok"]:
         raise typer.Exit(code=3)
+
+
+def _detail_map(pairs: list[str]) -> dict[str, str]:
+    from apiforge.autonomy.modes import AutonomyError
+
+    out: dict[str, str] = {}
+    for pair in pairs:
+        if "=" not in pair:
+            raise AutonomyError("AF-AUTONOMY-DETAIL", f"{pair!r} is not key=value")
+        key, _, value = pair.partition("=")
+        out[key.strip()] = value.strip()
+    return out
+
+
+def _dispatch_ctx(
+    root: Path,
+    case: Path | None,
+    project: Path | None,
+    contract: Path | None,
+    baseline: Path | None,
+    candidate: Path | None,
+    input_path: Path | None,
+    findings: Path | None,
+    now: str | None,
+) -> DispatchContext:
+    return DispatchContext(
+        case=case or (Path(root) / ".apiforge"),
+        project=project,
+        contract=contract,
+        baseline=baseline,
+        candidate=candidate,
+        input_path=input_path,
+        findings=findings,
+        now=now,
+    )
+
+
+_CTX_OPTIONS = {
+    "project": typer.Option(None, "--project"),
+    "contract": typer.Option(None, "--contract"),
+    "baseline": typer.Option(None, "--baseline"),
+    "candidate": typer.Option(None, "--candidate"),
+    "input_path": typer.Option(None, "--input-path"),
+    "findings": typer.Option(None, "--findings"),
+    "case": typer.Option(None, "--case"),
+}
+
+
+@autonomy_app.command("status")
+def autonomy_status(
+    root: Path = typer.Option(Path("."), "--root", help="Workspace root."),
+    detail_level: str = typer.Option("normal", "--detail-level", help="Payload level."),
+) -> None:
+    """Current mode, who set it, and the ledger size."""
+    from apiforge.autonomy.modes import load_mode
+    from apiforge.autonomy.service import read_ledger
+
+    try:
+        state = load_mode(root)
+        entries = read_ledger(root)
+    except Exception as exc:  # noqa: BLE001 - surfaced as data
+        _fail(exc)
+        return
+    _echo(
+        {
+            "mode": state.mode.value,
+            "set_by": state.set_by or None,
+            "set_at": state.set_at,
+            "ledger_entries": len(entries),
+        },
+        detail_level,
+    )
+
+
+@autonomy_app.command("set")
+def autonomy_set(
+    mode: str = typer.Option(..., "--mode", help="observe|supervised|continuous."),
+    by: str = typer.Option(..., "--by", help="Actor making the change."),
+    root: Path = typer.Option(Path("."), "--root", help="Workspace root."),
+    now: str | None = typer.Option(
+        None, "--now", help="Explicit timestamp; the only clock source."
+    ),
+    reason: str = typer.Option("", "--reason"),
+    detail: list[str] = typer.Option(
+        [], "--detail", help="Gate satisfaction as key=value (e.g. approval=op)."
+    ),
+    policy: Path | None = typer.Option(None, "--policy"),
+    detail_level: str = typer.Option("normal", "--detail-level", help="Payload level."),
+) -> None:
+    """Change the autonomy mode — itself a policy-gated action."""
+    from apiforge.autonomy.modes import parse_mode
+    from apiforge.autonomy.service import set_mode
+
+    try:
+        state = set_mode(
+            root,
+            parse_mode(mode),
+            actor=by,
+            now=now,
+            reason=reason,
+            policy=load_policy(policy),
+            detail=_detail_map(detail),
+        )
+    except Exception as exc:  # noqa: BLE001 - surfaced as data
+        _fail(exc)
+        return
+    _echo(state, detail_level)
+
+
+@autonomy_app.command("run")
+def autonomy_run(
+    verb: str = typer.Option(..., "--verb", help="Dispatchable verb."),
+    action_class: str = typer.Option(
+        "read_only", "--action-class", "--class", help="Declared autonomy class."
+    ),
+    args: list[str] = typer.Option([], "--arg"),
+    target: str | None = typer.Option(None, "--target"),
+    detail: list[str] = typer.Option([], "--detail", help="key=value pairs."),
+    root: Path = typer.Option(Path("."), "--root"),
+    project: Path | None = _CTX_OPTIONS["project"],
+    contract: Path | None = _CTX_OPTIONS["contract"],
+    baseline: Path | None = _CTX_OPTIONS["baseline"],
+    candidate: Path | None = _CTX_OPTIONS["candidate"],
+    input_path: Path | None = _CTX_OPTIONS["input_path"],
+    findings: Path | None = _CTX_OPTIONS["findings"],
+    case: Path | None = _CTX_OPTIONS["case"],
+    now: str | None = typer.Option(None, "--now"),
+    actor: str = typer.Option("", "--by"),
+    policy: Path | None = typer.Option(None, "--policy"),
+    detail_level: str = typer.Option("normal", "--detail-level", help="Payload level."),
+) -> None:
+    """Evaluate one action under the current mode; execute only on allow."""
+    from apiforge.autonomy.service import run_action
+
+    try:
+        entry = run_action(
+            root,
+            verb,
+            action_class=action_class,
+            args=tuple(args),
+            target=target,
+            detail=_detail_map(detail),
+            ctx=_dispatch_ctx(
+                root, case, project, contract, baseline, candidate,
+                input_path, findings, now,
+            ),
+            policy=load_policy(policy),
+            actor=actor,
+            now=now,
+        )
+    except Exception as exc:  # noqa: BLE001 - surfaced as data
+        _fail(exc)
+        return
+    _echo(entry, detail_level)
+    if entry.get("outcome") in ("denied", "not_dispatchable"):
+        raise typer.Exit(code=3)
+
+
+@autonomy_app.command("runbook")
+def autonomy_runbook(
+    name: str = typer.Option(..., "--name", help="Runbook in rules/runbooks.yaml."),
+    root: Path = typer.Option(Path("."), "--root"),
+    project: Path | None = _CTX_OPTIONS["project"],
+    contract: Path | None = _CTX_OPTIONS["contract"],
+    baseline: Path | None = _CTX_OPTIONS["baseline"],
+    candidate: Path | None = _CTX_OPTIONS["candidate"],
+    input_path: Path | None = _CTX_OPTIONS["input_path"],
+    findings: Path | None = _CTX_OPTIONS["findings"],
+    case: Path | None = _CTX_OPTIONS["case"],
+    now: str | None = typer.Option(None, "--now"),
+    actor: str = typer.Option("", "--by"),
+    detail: list[str] = typer.Option([], "--detail"),
+    policy: Path | None = typer.Option(None, "--policy"),
+    detail_level: str = typer.Option("normal", "--detail-level", help="Payload level."),
+) -> None:
+    """Run a runbook under the current mode — halting is mode-defined."""
+    from apiforge.autonomy.service import run_runbook
+
+    try:
+        result = run_runbook(
+            root,
+            name,
+            ctx=_dispatch_ctx(
+                root, case, project, contract, baseline, candidate,
+                input_path, findings, now,
+            ),
+            policy=load_policy(policy),
+            detail=_detail_map(detail),
+            actor=actor,
+            now=now,
+        )
+    except Exception as exc:  # noqa: BLE001 - surfaced as data
+        _fail(exc)
+        return
+    _echo(result, detail_level)
+
+
+@autonomy_app.command("ledger")
+def autonomy_ledger(
+    root: Path = typer.Option(Path("."), "--root"),
+    tail: int = typer.Option(0, "--tail", help="Last N entries; 0 = all."),
+    detail_level: str = typer.Option("normal", "--detail-level", help="Payload level."),
+) -> None:
+    """Read the append-only autonomy ledger."""
+    from apiforge.autonomy.service import read_ledger
+
+    entries = read_ledger(root)
+    _echo(
+        {"entries": entries[-tail:] if tail else entries, "count": len(entries)},
+        detail_level,
+    )

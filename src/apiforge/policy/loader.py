@@ -41,6 +41,10 @@ rules:
     match: {verb: "git.push", arg_glob: "--force*"}
     decision: deny
     reason: "rewrites shared history"
+  - name: autonomy-observe-always-allowed
+    match: {verb: "autonomy.set", arg_glob: "observe"}
+    decision: allow
+    reason: "reducing autonomy is always safe"
 """
 
 

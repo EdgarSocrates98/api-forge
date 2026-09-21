@@ -65,6 +65,9 @@ app.add_typer(model_app, name="model")
 app.add_typer(diff_app, name="diff")
 
 from apiforge.cli_governance import (
+    autonomy_app as _governance_autonomy,
+)
+from apiforge.cli_governance import (
     evidence_app,
     policy_app,
     sandbox_app,
@@ -129,6 +132,8 @@ run_app = typer.Typer(
     no_args_is_help=True,
 )
 app.add_typer(run_app)
+autonomy_app = _governance_autonomy
+app.add_typer(autonomy_app, name="autonomy")
 contract_app = typer.Typer(
     name="contract",
     help="List and inspect the canonical versioned contracts.",

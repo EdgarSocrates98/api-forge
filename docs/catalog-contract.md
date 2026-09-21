@@ -467,3 +467,36 @@ values and `delta_pct`. Operations on only one side are named
 | `AF-OTEL-SPAN-INCOMPLETE` | spans lack usable timestamps — counted, named |
 | `AF-OTEL-SERVICE-UNKNOWN` | no `service.name` resource attribute |
 | `AF-PERF-RUN-INVALID` | compare input is not a PerformanceRun payload |
+
+### Autonomy modes (`autonomy`)
+
+Three ordered modes, persisted in `.apiforge/autonomy/mode.json` (absent
+file means `observe` — the safest reading of unknown):
+
+- `observe`: every action is evaluated by the policy engine and recorded;
+  nothing executes.
+- `supervised`: `allow` executes; `gate` is recorded `pending` with its
+  missing requirements named; a runbook halts on the first non-executed
+  step.
+- `continuous`: same per-action semantics; a runbook records the skip and
+  continues past `pending`/`denied` steps.
+
+`autonomy set` is itself a policy action (`autonomy.set`, class
+`sensitive`) — under the default policy, escalation requires the gate's
+requirements in `--detail` (evidence, approval), while the shipped rule
+`autonomy-observe-always-allowed` lets de-escalation to `observe` through.
+Every evaluation appends to `ledger.jsonl` (mode, decision, rule, missing
+requirements, outcome: `observed`/`executed`/`pending`/`denied`/
+`not_dispatchable`/`error`, plus `output_sha256` on `executed`). Only verbs
+in the dispatch table can ever execute — mutation stays outside the
+boundary by construction. Runbooks are data (`rules/runbooks.yaml`):
+ordered `{verb, class}` steps over the same dispatch context.
+
+| Code | Meaning |
+|---|---|
+| `AF-AUTONOMY-MODE-UNKNOWN` | mode string not in observe/supervised/continuous |
+| `AF-AUTONOMY-MODE-CORRUPT` | `mode.json` unreadable or fails schema |
+| `AF-AUTONOMY-SET-REFUSED` | policy refused the mode change; missing requirements named |
+| `AF-AUTONOMY-RUNBOOK-UNKNOWN` | no runbook with that name |
+| `AF-AUTONOMY-RUNBOOK-SCHEMA` | runbooks.yaml malformed |
+| `AF-AUTONOMY-DETAIL` | `--detail` pair is not `key=value` |

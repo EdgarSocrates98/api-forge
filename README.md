@@ -94,6 +94,7 @@ while refusal codes and `fact_id`s survive.
 | `apiforge model redis --path P` | Static Redis/Valkey call-site scan (py/java/go) → `data.redis.*` facts + `data_access_ir`; `binding: name` is named, never proven |
 | `apiforge model otel --path export.json` | OTLP/JSON trace export → `perf.otel.*` facts + `performance_run`; incomplete spans named unresolved |
 | `apiforge perf compare --baseline A --candidate B --threshold-pct N` | `compare_runs`/`detect_regression` over two PerformanceRuns; `added`/`removed`/`insufficient_data` always named |
+| `apiforge autonomy status|set|run|runbook|ledger` | Modes observe→supervised→continuous over the policy engine; `set` is itself policy-gated; every evaluation lands in `ledger.jsonl` |
 | `apiforge index build|status --project P` | Content-hash indexes (files/symbols/routes/facts); status names added/changed/removed |
 | — | `analyze`/`discover` extractors run through `.apiforge/cache/` — hits are recorded in the ledger and named in the payload |
 

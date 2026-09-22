@@ -1401,6 +1401,48 @@ def _register_messaging_models() -> None:
 _register_messaging_models()
 
 
+_ANALYTICAL_READERS = {
+    "opensearch-access": ("apiforge.adapters.analytical.extract_opensearch", "opensearch", "OpenSearch/Elasticsearch"),
+    "redshift-access": ("apiforge.adapters.analytical.extract_redshift", "redshift", "Amazon Redshift"),
+}
+
+
+def _register_analytical_models() -> None:
+    def make(dotted: str, engine: str, help_text: str) -> Callable[..., None]:
+        def cmd(
+            path: Path = typer.Option(..., "--path", help=help_text),
+            detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+        ) -> None:
+            def work() -> dict[str, object]:
+                import importlib
+
+                from apiforge.adapters.analytical import build_analytical_ir
+
+                if not path.is_dir():
+                    raise AnalysisError("AF-INPUT-NOT-FOUND", str(path))
+                module, _, func = dotted.rpartition(".")
+                inventory = getattr(importlib.import_module(module), func)(path)
+                return {
+                    "analytical_access_ir": build_analytical_ir(
+                        inventory, engine=engine
+                    ).model_dump(mode="json"),
+                    "diagnostics": [d.model_dump(mode="json") for d in inventory.diagnostics],
+                    "facts": [f.model_dump(mode="json") for f in inventory.facts],
+                    "framework": inventory.framework,
+                    "input_hashes": dict(inventory.input_hashes),
+                }
+
+            _echo_json(_run(work), detail_level)
+
+        return cmd
+
+    for name, (dotted, engine, help_text) in _ANALYTICAL_READERS.items():
+        model_app.command(name)(make(dotted, engine, help_text))
+
+
+_register_analytical_models()
+
+
 @model_app.command("otel")
 def inventory_otel(
     path: Path = typer.Option(..., "--path", help="OTLP/JSON trace export from an OTel collector."),

@@ -228,6 +228,17 @@ class DataPerformanceProfile(_StubPayload):
     unresolved: tuple[str, ...] = ()
 
 
+class AnalyticalAccessIR(_StubPayload):
+    """Intermediate representation for OpenSearch and Redshift access."""
+
+    engine: Literal["opensearch", "redshift"]
+    provider: str = ""
+    indexes_or_tables: tuple[str, ...] = ()
+    operations: tuple[str, ...] = ()
+    query_signals: tuple[str, ...] = ()
+    risk_findings: tuple[str, ...] = ()
+
+
 class DataAccessReadiness(_StubPayload):
     """Governance preflight for Redis, MongoDB, DynamoDB and Neptune access."""
 

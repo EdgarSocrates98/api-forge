@@ -66,6 +66,7 @@ from apiforge.contracts.observability import (
     VendorIntent,
 )
 from apiforge.contracts.stubs import (
+    CapacityAssessment,
     DataAccessIR,
     PerformanceRun,
     RuntimeMatrix,
@@ -121,6 +122,7 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "GraphExport/v1": GraphExport,
     "TelemetryEvent/v1": TelemetryEvent,
     "PerformanceRun/v1": PerformanceRun,
+    "CapacityAssessment/v1": CapacityAssessment,
     "DataAccessIR/v1": DataAccessIR,
     "RuntimeMatrix/v1": RuntimeMatrix,
     "WorkloadProfile/v1": WorkloadProfile,

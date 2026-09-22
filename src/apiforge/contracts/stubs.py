@@ -133,6 +133,25 @@ class PerformanceRun(_StubPayload):
     slo_p99_ms: float | None = None
 
 
+class CapacityAssessment(_StubPayload):
+    """Capacity gate derived from one measured ``PerformanceRun``.
+
+    ``max_safe_tps`` is a declared planning envelope, not a new measurement:
+    it is computed only when the run passes and a headroom policy is supplied.
+    Missing or invalid evidence remains ``inconclusive``.
+    """
+
+    subject: str = ""
+    source_run_id: str
+    status: Literal["passed", "failed", "inconclusive"]
+    target_tps: float | None = None
+    achieved_tps: float | None = None
+    max_safe_tps: float | None = None
+    headroom_pct: float | None = None
+    blockers: tuple[str, ...] = ()
+    evidence: tuple[str, ...] = ()
+
+
 class WorkloadProfile(_StubPayload):
     """Declared workload shape for architecture comparison.
 

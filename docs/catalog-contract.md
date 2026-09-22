@@ -115,6 +115,26 @@ default.
 | `AF-VPC-DUMP` | `endpoints.json` missing or invalid |
 | `AF-S3-DUMP` | `encryption.json`/`public-access.json`/`versioning.json` missing or invalid |
 
+## Data-access adapters (`model mongo`/`dynamodb-access`/`neptune-access`)
+
+Static call-site extraction over the project tree — Python via `ast`
+(receiver bound by constructor or by name, always declared), Java/Go by
+pattern when the driver package is imported. Composite postures are
+computed from *declared* arguments only: `full_scan` (DynamoDB `scan`
+without Limit/FilterExpression/IndexName), `unfiltered_write`
+(MongoDB `delete_many`/`update_many`/`replace_one` with a visibly empty
+filter), `unbounded`/`unbounded_find` (no `limit=`/`.limit(`/`.range(`/
+`LIMIT` visible). Aggregated into `data_access_ir` per database.
+
+| Code | Meaning |
+|---|---|
+| `AF-MONGO-PARSE` | a `*.py` file fails to parse |
+| `AF-MONGO-HEURISTIC-BINDING` | receivers matched by name, not constructor |
+| `AF-DYNAMO-PARSE` | a `*.py` file fails to parse |
+| `AF-DYNAMO-HEURISTIC-BINDING` | receivers matched by name, not constructor |
+| `AF-NEPTUNE-PARSE` | a `*.py` file fails to parse |
+| `AF-NEPTUNE-HEURISTIC-BINDING` | receivers matched by name, not constructor |
+
 ## API Gateway dump adapter
 
 `model api-gateway --path` reads a collect dump offline. Missing files and

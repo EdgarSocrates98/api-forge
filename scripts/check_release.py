@@ -370,7 +370,11 @@ def _check_lab_and_boundary(root: Path, failures: list[str]) -> None:
         posix = source.as_posix()
         if "tree_sitter" in text and not any(f"adapters/{a}" in posix for a in ("spring", "go")):
             failures.append(f"tree_sitter import outside adapters.spring/go: {source}")
-        if "boto3" in text and "collectors" not in posix and "cli" not in posix:
+        if (
+            re.search(r"^\s*(?:import|from)\s+boto3\b", text, re.MULTILINE)
+            and "collectors" not in posix
+            and "cli" not in posix
+        ):
             failures.append(f"boto3 import outside collectors/cli boundary: {source}")
         if (
             re.search(r"^\s*(?:import|from)\s+mcp\b", text, re.MULTILINE)

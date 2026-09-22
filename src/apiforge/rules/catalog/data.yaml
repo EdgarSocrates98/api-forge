@@ -102,3 +102,77 @@ rules:
       path: measures.command
       op: eq
       value: save
+  - id: AF-DATA-009
+    title: "DynamoDB Scan without limit or filter"
+    severity: high
+    rationale: >
+      Scan reads every item in the table before filtering — RCU cost and
+      latency grow with table size, not with the result set. The call site
+      shows no Limit, FilterExpression or IndexName argument.
+    remediation: "Prefer Query on a key condition; if Scan is required, bound it with Limit and a FilterExpression, and keep it off request paths."
+    reference: "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Scan.html"
+    runtime_scope: "dynamodb"
+    check:
+      kind: data.dynamo.operation
+      path: measures.full_scan
+      op: eq
+      value: true
+  - id: AF-DATA-010
+    title: "DynamoDB Query without a key condition"
+    severity: medium
+    rationale: >
+      Query without KeyConditionExpression degenerates toward a scan over
+      the partition — the declared kwargs carry no key condition.
+    remediation: "Pass KeyConditionExpression with the partition key (and sort key when modeled)."
+    reference: "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Query.html"
+    runtime_scope: "dynamodb"
+    check:
+      kind: data.dynamo.operation
+      path: measures.query_without_key_condition
+      op: eq
+      value: true
+  - id: AF-DATA-011
+    title: "MongoDB find/aggregate without a limit"
+    severity: medium
+    rationale: >
+      An unbounded find or aggregation returns the whole result set into
+      the application — memory and latency scale with the collection.
+      The rule fires only when no limit()/batch_size() bounds the call.
+    remediation: "Pass limit= or chain .limit(n); paginate with a cursor or $skip/$limit in the pipeline."
+    reference: "https://www.mongodb.com/docs/manual/reference/method/cursor.limit/"
+    runtime_scope: "mongodb|documentdb"
+    check:
+      kind: data.mongo.operation
+      path: measures.unbounded_find
+      op: eq
+      value: true
+  - id: AF-DATA-012
+    title: "MongoDB filtered write with an empty filter"
+    severity: critical
+    rationale: >
+      delete_many({}), update_many({}, ...) or an empty Document() filter
+      match every document in the collection — a mass write/delete from
+      application code.
+    remediation: "Require a non-empty filter literal; gate legitimate mass operations behind an operational runbook."
+    reference: "https://www.mongodb.com/docs/manual/reference/method/db.collection.deleteMany/"
+    runtime_scope: "mongodb|documentdb"
+    check:
+      kind: data.mongo.operation
+      path: measures.unfiltered_write
+      op: eq
+      value: true
+  - id: AF-DATA-013
+    title: "Neptune traversal/query without a limit"
+    severity: medium
+    rationale: >
+      g.V()/g.E() with no .limit()/.range() on the chain, or an
+      openCypher/SPARQL string without LIMIT, returns an unbounded graph
+      result — memory cost scales with the graph.
+    remediation: "Bound traversals with .limit(n)/.range(a,b) and add LIMIT to query strings."
+    reference: "https://docs.aws.amazon.com/neptune/latest/userguide/access-graph-gremlin.html"
+    runtime_scope: "neptune"
+    check:
+      kind: data.neptune.query
+      path: measures.unbounded
+      op: eq
+      value: true

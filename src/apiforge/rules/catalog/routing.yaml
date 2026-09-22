@@ -44,13 +44,16 @@ routes:
       engineer.
   - phase: build
     dominant_area: DATA
-    recommended_agent: api-reliability-engineer
+    recommended_agent: api-data-access-architect
     rationale: >-
-      Dangerous commands and unbounded writes found in source belong to the
-      reliability engineer — they are failure modes, not style.
+      Dangerous commands, unbounded reads and unfiltered writes found in
+      source are data-access posture — the data-access architect's domain.
   - phase: verify
     dominant_area: DATA
-    recommended_agent: api-reliability-engineer
+    recommended_agent: api-data-access-architect
+    rationale: >-
+      Data-access findings at verify time are access-pattern questions,
+      judged by the data-access architect.
   - phase: benchmark
     dominant_area: DATA
     recommended_agent: api-performance-engineer

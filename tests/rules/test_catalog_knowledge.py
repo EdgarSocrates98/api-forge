@@ -94,6 +94,12 @@ EXPECTED_RULES = {
     "AF-SEC-109",
     "AF-SEC-110",
     "AF-GW-008",
+    # Data-access rules for MongoDB/DynamoDB/Neptune call sites
+    "AF-DATA-009",
+    "AF-DATA-010",
+    "AF-DATA-011",
+    "AF-DATA-012",
+    "AF-DATA-013",
 }
 
 

@@ -55,3 +55,9 @@ api-dx-docs-reviewer:
   - {executor: af-extractor, verb: "analyze", purpose: "served routes for the consumer surface"}
   - {executor: af-judge, verb: "rules list --area REST", purpose: "error-shape and contract-quality rules"}
   - {executor: af-synthesizer, verb: "rules lookup", purpose: "DX gaps cited per operation"}
+api-data-access-architect:
+  - {executor: af-inventory, verb: "model redis", purpose: "data-access call sites for each declared database"}
+  - {executor: af-extractor, verb: "model mongo", purpose: "mongo/dynamo/neptune facts + DataAccessIR"}
+  - {executor: af-judge, verb: "rules list --area DATA", purpose: "AF-DATA-001..013 over the call-site facts"}
+  - {executor: af-judge, verb: "rules list --area STORAGE", purpose: "AF-STORE-001..005 over datastore dumps"}
+  - {executor: af-synthesizer, verb: "rules lookup", purpose: "access-pattern guidance per rule applied"}

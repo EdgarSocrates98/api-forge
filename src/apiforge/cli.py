@@ -993,6 +993,72 @@ def inventory_redis(
     _echo_json(_run(work), detail_level)
 
 
+_DATA_ACCESS_READERS = {
+    "mongo": (
+        "apiforge.adapters.dbaccess.extract_mongo",
+        "mongodb|documentdb",
+        "mongodb",
+        "Project directory to scan for MongoDB/DocumentDB calls.",
+    ),
+    "dynamodb-access": (
+        "apiforge.adapters.dbaccess.extract_dynamo_access",
+        "dynamodb",
+        "dynamodb",
+        "Project directory to scan for DynamoDB data-plane calls.",
+    ),
+    "neptune-access": (
+        "apiforge.adapters.dbaccess.extract_neptune_access",
+        "neptune",
+        "neptune",
+        "Project directory to scan for Neptune gremlin/cypher/SPARQL calls.",
+    ),
+}
+
+
+def _register_data_access_models() -> None:
+    """`model <db>-access` — source-tree scan + DataAccessIR, offline."""
+
+    def make(dotted: str, provider: str, database: str) -> Callable[..., None]:
+        def cmd(
+            path: Path = typer.Option(..., "--path", help="Project directory."),
+            detail_level: str = typer.Option(
+                "normal", "--detail-level", help=_DETAIL_HELP
+            ),
+        ) -> None:
+            def work() -> dict[str, object]:
+                import importlib
+
+                from apiforge.adapters.redis_.ir import build_data_access_ir
+
+                if not path.is_dir():
+                    raise AnalysisError("AF-INPUT-NOT-FOUND", str(path))
+                module, _, func = dotted.rpartition(".")
+                inventory = getattr(importlib.import_module(module), func)(path)
+                return {
+                    "data_access_ir": build_data_access_ir(
+                        inventory, database=database, provider=provider
+                    ).model_dump(mode="json"),
+                    "diagnostics": [
+                        d.model_dump(mode="json") for d in inventory.diagnostics
+                    ],
+                    "facts": [
+                        f.model_dump(mode="json") for f in inventory.facts
+                    ],
+                    "framework": inventory.framework,
+                    "input_hashes": dict(inventory.input_hashes),
+                }
+
+            _echo_json(_run(work), detail_level)
+
+        return cmd
+
+    for name, (dotted, provider, database, _help) in _DATA_ACCESS_READERS.items():
+        model_app.command(name)(make(dotted, provider, database))
+
+
+_register_data_access_models()
+
+
 @model_app.command("otel")
 def inventory_otel(
     path: Path = typer.Option(

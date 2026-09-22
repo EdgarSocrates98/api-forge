@@ -451,66 +451,126 @@ def model_otel(path: str, detail_level: str = "normal") -> dict[str, Any]:
     return out
 
 
+def _load_run_path(raw: str) -> Any:
+    """PerformanceRun from a JSON file — bare or `performance_run`-wrapped."""
+    from apiforge.application.analyze import AnalysisError
+    from apiforge.contracts.stubs import PerformanceRun
+
+    try:
+        payload = json.loads(Path(raw).read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError, UnicodeDecodeError) as exc:
+        raise AnalysisError("AF-PERF-RUN-INVALID", f"{raw}: {exc}") from exc
+    if isinstance(payload, dict) and isinstance(
+        payload.get("performance_run"), dict
+    ):
+        payload = payload["performance_run"]
+    try:
+        return PerformanceRun.model_validate(payload)
+    except Exception as exc:
+        raise AnalysisError("AF-PERF-RUN-INVALID", f"{raw}: {exc}") from exc
+
+
+def _repeat_runs(directory: str | None) -> tuple[Any, ...]:
+    if not directory:
+        return ()
+    path = Path(directory)
+    if not path.is_dir():
+        from apiforge.application.analyze import AnalysisError
+
+        raise AnalysisError("AF-PERF-RUN-INVALID", f"{directory}: not a directory")
+    return tuple(_load_run_path(str(p)) for p in sorted(path.glob("*.json")))
+
+
 def perf_compare(
     baseline: str,
     candidate: str,
     threshold_pct: float = 10.0,
     min_samples: int = 3,
+    repeat_baseline: str | None = None,
     detail_level: str = "normal",
 ) -> dict[str, Any]:
-    """compare_runs over two PerformanceRun payloads (bare or wrapped)."""
-    from apiforge.application.analyze import AnalysisError
-    from apiforge.contracts.stubs import PerformanceRun
-    from apiforge.perf.compare import compare_runs
+    """compare_runs over two PerformanceRun payloads (bare or wrapped).
 
-    def load_run(raw: str) -> PerformanceRun:
-        try:
-            payload = json.loads(Path(raw).read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError, UnicodeDecodeError) as exc:
-            raise AnalysisError("AF-PERF-RUN-INVALID", f"{raw}: {exc}") from exc
-        if isinstance(payload, dict) and isinstance(
-            payload.get("performance_run"), dict
-        ):
-            payload = payload["performance_run"]
-        try:
-            return PerformanceRun.model_validate(payload)
-        except Exception as exc:
-            raise AnalysisError("AF-PERF-RUN-INVALID", f"{raw}: {exc}") from exc
+    ``repeat_baseline`` is a directory of repeated baseline run JSONs; it
+    measures the noise floor and suppresses deltas inside it.
+    """
+    from apiforge.perf.compare import compare_runs
 
     def work() -> dict[str, Any]:
         return compare_runs(
-            load_run(baseline),
-            load_run(candidate),
+            _load_run_path(baseline),
+            _load_run_path(candidate),
             threshold_pct=threshold_pct,
             min_samples=min_samples,
+            repeat_baselines=_repeat_runs(repeat_baseline),
         ).model_dump(mode="json")
 
     out: dict[str, Any] = _call("perf_compare", work, detail_level)
     return out
 
 
-def perf_verdict(run: str, detail_level: str = "normal") -> dict[str, Any]:
+def perf_verdict(
+    run: str,
+    repeat_baseline: str | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
     """passed / failed / inconclusive over a PerformanceRun payload."""
-    from apiforge.application.analyze import AnalysisError
-    from apiforge.contracts.stubs import PerformanceRun
     from apiforge.perf.verdict import verdict
 
     def work() -> dict[str, Any]:
-        try:
-            payload = json.loads(Path(run).read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError, UnicodeDecodeError) as exc:
-            raise AnalysisError("AF-PERF-RUN-INVALID", f"{run}: {exc}") from exc
-        if isinstance(payload, dict) and isinstance(
-            payload.get("performance_run"), dict
-        ):
-            payload = payload["performance_run"]
-        try:
-            run_obj = PerformanceRun.model_validate(payload)
-        except Exception as exc:
-            raise AnalysisError("AF-PERF-RUN-INVALID", f"{run}: {exc}") from exc
-        return verdict(run_obj).model_dump(mode="json")
+        return verdict(
+            _load_run_path(run),
+            repeat_baselines=_repeat_runs(repeat_baseline),
+        ).model_dump(mode="json")
 
     out: dict[str, Any] = _call("perf_verdict", work, detail_level)
+    return out
+
+
+def perf_memory_search(
+    root: str = ".",
+    subject: str | None = None,
+    tool: str | None = None,
+    since: str | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """search_performance_memory — filters declared fields, never infers."""
+    from apiforge.perf.run_store import search_runs
+
+    def work() -> dict[str, Any]:
+        runs = search_runs(Path(root), subject=subject, tool=tool, since=since)
+        return {"count": len(runs), "runs": runs}
+
+    out: dict[str, Any] = _call("perf_memory_search", work, detail_level)
+    return out
+
+
+def perf_suggest(
+    findings: str,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """suggest_fix — emits an ActionPlan; never applies it."""
+    from apiforge.application.analyze import AnalysisError
+    from apiforge.core.models import Finding
+    from apiforge.perf.suggest import suggest_fix
+
+    def work() -> dict[str, Any]:
+        try:
+            doc = json.loads(Path(findings).read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError, UnicodeDecodeError) as exc:
+            raise AnalysisError(
+                "AF-PERF-SUGGEST-INPUT", f"{findings}: {exc}"
+            ) from exc
+        payload = doc if isinstance(doc, list) else doc.get("findings", [])
+        try:
+            parsed = [Finding.model_validate(f) for f in payload]
+        except Exception as exc:
+            raise AnalysisError(
+                "AF-PERF-SUGGEST-INPUT", f"{findings}: {exc}"
+            ) from exc
+        return suggest_fix(parsed).model_dump(mode="json")
+
+    out: dict[str, Any] = _call("perf_suggest", work, detail_level)
     return out
 
 
@@ -727,6 +787,8 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     model_otel,
     perf_compare,
     perf_verdict,
+    perf_memory_search,
+    perf_suggest,
     autonomy_status,
     knowledge_list,
     knowledge_show,

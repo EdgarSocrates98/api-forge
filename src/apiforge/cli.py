@@ -1171,6 +1171,18 @@ def inventory_otel(
     _echo_json(_run(work), detail_level)
 
 
+def _load_repeat_baselines(directory: Path | None) -> tuple[PerformanceRun, ...]:
+    """Every ``*.json`` in the dir is a repeated baseline run — or named."""
+    if directory is None:
+        return ()
+    if not directory.is_dir():
+        raise AnalysisError("AF-PERF-RUN-INVALID", f"{directory}: not a directory")
+    runs = tuple(
+        _load_performance_run(p) for p in sorted(directory.glob("*.json"))
+    )
+    return runs
+
+
 @perf_app.command("compare")
 def perf_compare(
     baseline: Path = typer.Option(
@@ -1184,6 +1196,11 @@ def perf_compare(
     ),
     min_samples: int = typer.Option(
         3, "--min-samples", help="Minimum span count per operation to be judged."
+    ),
+    repeat_baseline: Path | None = typer.Option(
+        None,
+        "--repeat-baseline",
+        help="Dir of repeated baseline runs — measures the noise floor.",
     ),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
@@ -1199,6 +1216,7 @@ def perf_compare(
             cand,
             threshold_pct=threshold_pct,
             min_samples=min_samples,
+            repeat_baselines=_load_repeat_baselines(repeat_baseline),
         ).model_dump(mode="json")
 
     _echo_json(_run(work), detail_level)
@@ -1209,6 +1227,12 @@ def perf_verdict(
     run: Path = typer.Option(
         ..., "--run", help="PerformanceRun JSON (or `model otel` payload)."
     ),
+    repeat_baseline: Path | None = typer.Option(
+        None,
+        "--repeat-baseline",
+        help="Dir of repeated baseline runs — deltas inside the measured "
+        "noise floor make the verdict inconclusive.",
+    ),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
     """passed / failed / inconclusive over a run — conditions named, never guessed."""
@@ -1216,7 +1240,92 @@ def perf_verdict(
     def work() -> object:
         from apiforge.perf.verdict import verdict
 
-        return verdict(_load_performance_run(run)).model_dump(mode="json")
+        return verdict(
+            _load_performance_run(run),
+            repeat_baselines=_load_repeat_baselines(repeat_baseline),
+        ).model_dump(mode="json")
+
+    _echo_json(_run(work), detail_level)
+
+
+memory_app = typer.Typer(help="Append-only PerformanceRun memory — local store.")
+perf_app.add_typer(memory_app, name="memory")
+
+
+@memory_app.command("add")
+def perf_memory_add(
+    run: Path = typer.Option(..., "--run", help="PerformanceRun JSON to persist."),
+    root: Path = typer.Option(Path("."), "--root", help="Workspace root."),
+    recorded_at: str | None = typer.Option(
+        None, "--recorded-at", help="Explicit timestamp; the only clock source."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Append a run to .apiforge/perf/runs.jsonl — payload hash recorded."""
+
+    def work() -> object:
+        from apiforge.perf.run_store import add_run
+
+        return add_run(root, _load_performance_run(run), recorded_at=recorded_at)
+
+    _echo_json(_run(work), detail_level)
+
+
+@memory_app.command("search")
+def perf_memory_search(
+    subject: str | None = typer.Option(None, "--subject"),
+    tool: str | None = typer.Option(None, "--tool"),
+    since: str | None = typer.Option(
+        None, "--since", help="ISO-8601 lower bound on recorded_at."
+    ),
+    root: Path = typer.Option(Path("."), "--root", help="Workspace root."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """search_performance_memory — filters declared fields, never infers."""
+
+    def work() -> object:
+        from apiforge.perf.run_store import search_runs
+
+        return {
+            "count": len(search_runs(root, subject=subject, tool=tool, since=since)),
+            "runs": search_runs(root, subject=subject, tool=tool, since=since),
+        }
+
+    _echo_json(_run(work), detail_level)
+
+
+@perf_app.command("suggest")
+def perf_suggest(
+    case: Path | None = typer.Option(
+        None, "--case", help="Case dir — reads findings.json inside it."
+    ),
+    findings: Path | None = typer.Option(
+        None, "--findings", help="Findings JSON (list or {findings: []})."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """suggest_fix — emits an ActionPlan; never applies it."""
+
+    def work() -> object:
+        from apiforge.core.models import Finding
+        from apiforge.perf.suggest import suggest_fix
+
+        source = findings or (case / "findings.json" if case else None)
+        if source is None or not Path(source).is_file():
+            raise AnalysisError(
+                "AF-PERF-SUGGEST-INPUT",
+                "pass --case <dir> (reads findings.json) or --findings <file>",
+            )
+        try:
+            doc = json.loads(Path(source).read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError, UnicodeDecodeError) as exc:
+            raise AnalysisError("AF-PERF-SUGGEST-INPUT", f"{source}: {exc}") from exc
+        payload = doc if isinstance(doc, list) else doc.get("findings", [])
+        try:
+            parsed = [Finding.model_validate(f) for f in payload]
+        except Exception as exc:
+            raise AnalysisError("AF-PERF-SUGGEST-INPUT", f"{source}: {exc}") from exc
+        return suggest_fix(parsed).model_dump(mode="json")
 
     _echo_json(_run(work), detail_level)
 
@@ -1897,16 +2006,23 @@ def index_build(
     framework: str = typer.Option(
         "auto", "--framework", help="fastapi|spring|go|auto."
     ),
+    findings: Path | None = typer.Option(
+        None,
+        "--findings",
+        help="Case findings.json feeding the derived findings index.",
+    ),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
-    """Write files/symbols/routes/facts indexes under .apiforge/index/."""
+    """Write the 12 index kinds under .apiforge/index/ (manifest lists all)."""
 
     def work() -> object:
         from apiforge.contracts.base import ContractError
         from apiforge.index.build import build_index
 
         try:
-            return build_index(project, root, framework=framework)
+            return build_index(
+                project, root, framework=framework, findings_path=findings
+            )
         except ContractError as exc:
             raise AnalysisError(exc.code, exc.detail) from exc
 

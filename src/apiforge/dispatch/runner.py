@@ -44,6 +44,7 @@ class DispatchContext:
     now: str | None = None
     operation_id: str | None = None  # build endpoint target
     tool: str | None = None  # perf scenario generator selection
+    repeat_baseline: Path | None = None  # dir of repeated baseline runs
 
 
 def _canon_sha(payload: object) -> str:
@@ -210,31 +211,65 @@ def _verb_report_build(ctx: DispatchContext) -> dict[str, object]:
     return build_report(ctx.case, receipt_path=None, now=ctx.now)
 
 
-def _verb_perf_compare(ctx: DispatchContext) -> dict[str, object]:
+def _load_run_payload(path: Path) -> Any:
     from apiforge.contracts.stubs import PerformanceRun
-    from apiforge.perf.compare import compare_runs
 
-    def load_run(path: Path) -> PerformanceRun:
-        doc = json.loads(path.read_text(encoding="utf-8"))
-        if isinstance(doc, dict) and isinstance(doc.get("performance_run"), dict):
-            doc = doc["performance_run"]
-        return PerformanceRun.model_validate(doc)
+    doc = json.loads(Path(path).read_text(encoding="utf-8"))
+    if isinstance(doc, dict) and isinstance(doc.get("performance_run"), dict):
+        doc = doc["performance_run"]
+    return PerformanceRun.model_validate(doc)
 
-    assert ctx.baseline is not None and ctx.candidate is not None
-    return compare_runs(load_run(ctx.baseline), load_run(ctx.candidate)).model_dump(
-        mode="json"
+
+def _repeat_runs(ctx: DispatchContext) -> tuple[Any, ...]:
+    if ctx.repeat_baseline is None:
+        return ()
+    return tuple(
+        _load_run_payload(p)
+        for p in sorted(Path(ctx.repeat_baseline).glob("*.json"))
     )
 
 
+def _verb_perf_compare(ctx: DispatchContext) -> dict[str, object]:
+    from apiforge.perf.compare import compare_runs
+
+    assert ctx.baseline is not None and ctx.candidate is not None
+    return compare_runs(
+        _load_run_payload(ctx.baseline),
+        _load_run_payload(ctx.candidate),
+        repeat_baselines=_repeat_runs(ctx),
+    ).model_dump(mode="json")
+
+
 def _verb_perf_verdict(ctx: DispatchContext) -> dict[str, object]:
-    from apiforge.contracts.stubs import PerformanceRun
     from apiforge.perf.verdict import verdict
 
     assert ctx.input_path is not None
-    doc = json.loads(ctx.input_path.read_text(encoding="utf-8"))
-    if isinstance(doc, dict) and isinstance(doc.get("performance_run"), dict):
-        doc = doc["performance_run"]
-    return verdict(PerformanceRun.model_validate(doc)).model_dump(mode="json")
+    return verdict(
+        _load_run_payload(ctx.input_path),
+        repeat_baselines=_repeat_runs(ctx),
+    ).model_dump(mode="json")
+
+
+def _verb_perf_memory_search(ctx: DispatchContext) -> dict[str, object]:
+    from apiforge.perf.run_store import search_runs
+
+    # ctx.case defaults to <root>/.apiforge — the memory root is its parent
+    root = ctx.case.parent if ctx.case.name == ".apiforge" else ctx.case
+    return {"runs": search_runs(root)}
+
+
+def _verb_perf_suggest(ctx: DispatchContext) -> dict[str, object]:
+    from apiforge.core.models import Finding
+    from apiforge.perf.suggest import suggest_fix
+
+    assert ctx.findings is not None
+    doc = json.loads(ctx.findings.read_text(encoding="utf-8"))
+    payload = doc if isinstance(doc, list) else doc.get("findings", [])
+    try:
+        parsed = [Finding.model_validate(f) for f in payload]
+    except ValueError as exc:
+        return {"status": "refused", "reason": f"AF-PERF-SUGGEST-INPUT: {exc}"}
+    return suggest_fix(parsed).model_dump(mode="json")
 
 
 def _verb_perf_scenario(ctx: DispatchContext) -> dict[str, object]:
@@ -320,6 +355,8 @@ _VERBS: tuple[tuple[str, tuple[str, ...], Callable[..., Any]], ...] = (
     ("model elasticache", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_elasticache")),
     ("perf compare", ("baseline", "candidate"), _verb_perf_compare),
     ("perf verdict", ("input_path",), _verb_perf_verdict),
+    ("perf memory search", (), _verb_perf_memory_search),
+    ("perf suggest", ("findings",), _verb_perf_suggest),
     ("perf scenario", ("input_path", "tool"), _verb_perf_scenario),
     ("perf chaos", (), _verb_perf_chaos),
     ("plan architecture", ("input_path",), _verb_plan_architecture),

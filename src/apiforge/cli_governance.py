@@ -251,6 +251,7 @@ def _dispatch_ctx(
     input_path: Path | None,
     findings: Path | None,
     now: str | None,
+    repeat_baseline: Path | None = None,
 ) -> DispatchContext:
     return DispatchContext(
         case=case or (Path(root) / ".apiforge"),
@@ -261,6 +262,7 @@ def _dispatch_ctx(
         input_path=input_path,
         findings=findings,
         now=now,
+        repeat_baseline=repeat_baseline,
     )
 
 
@@ -272,6 +274,7 @@ _CTX_OPTIONS = {
     "input_path": typer.Option(None, "--input-path"),
     "findings": typer.Option(None, "--findings"),
     "case": typer.Option(None, "--case"),
+    "repeat_baseline": typer.Option(None, "--repeat-baseline"),
 }
 
 
@@ -329,6 +332,7 @@ def autonomy_set(
             reason=reason,
             policy=load_policy(policy),
             detail=_detail_map(detail),
+            requested=mode,
         )
     except Exception as exc:  # noqa: BLE001 - surfaced as data
         _fail(exc)
@@ -422,6 +426,56 @@ def autonomy_runbook(
         _fail(exc)
         return
     _echo(result, detail_level)
+
+
+@autonomy_app.command("heal")
+def autonomy_heal(
+    root: Path = typer.Option(Path("."), "--root"),
+    findings: Path | None = _CTX_OPTIONS["findings"],
+    action_class: str = typer.Option(
+        "local_reversible", "--action-class", "--class",
+        help="Declared autonomy class for the execute transition.",
+    ),
+    writable_path: list[str] = typer.Option(
+        [], "--writable-path", help="Path the pipeline may snapshot/restore."
+    ),
+    project: Path | None = _CTX_OPTIONS["project"],
+    contract: Path | None = _CTX_OPTIONS["contract"],
+    baseline: Path | None = _CTX_OPTIONS["baseline"],
+    candidate: Path | None = _CTX_OPTIONS["candidate"],
+    input_path: Path | None = _CTX_OPTIONS["input_path"],
+    case: Path | None = _CTX_OPTIONS["case"],
+    now: str | None = typer.Option(None, "--now"),
+    actor: str = typer.Option("", "--by"),
+    detail: list[str] = typer.Option([], "--detail"),
+    policy: Path | None = typer.Option(None, "--policy"),
+    detail_level: str = typer.Option("normal", "--detail-level", help="Payload level."),
+) -> None:
+    """Self-healing pipeline: detect->explain->propose->authorize->execute->
+    verify->compare->accept|rollback. Every transition is policy-decided and
+    ledgered; rollback restores the snapshot of --writable-path files."""
+    from apiforge.autonomy.heal import run_heal
+
+    try:
+        result = run_heal(
+            root,
+            ctx=_dispatch_ctx(
+                root, case, project, contract, baseline, candidate,
+                input_path, findings, now,
+            ),
+            policy=load_policy(policy),
+            detail=_detail_map(detail),
+            action_class=action_class,
+            writable_paths=tuple(writable_path),
+            actor=actor,
+            now=now,
+        )
+    except Exception as exc:  # noqa: BLE001 - surfaced as data
+        _fail(exc)
+        return
+    _echo(result, detail_level)
+    if result.get("resolution") in ("denied", "pending", "halted"):
+        raise typer.Exit(code=3)
 
 
 @autonomy_app.command("ledger")

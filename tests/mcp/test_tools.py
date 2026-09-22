@@ -41,6 +41,8 @@ def test_tools_export_all_expected_verbs() -> None:
         "model_otel",
         "perf_compare",
         "perf_verdict",
+        "perf_memory_search",
+        "perf_suggest",
         "autonomy_status",
         "knowledge_list",
         "knowledge_show",

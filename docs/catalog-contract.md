@@ -15,6 +15,9 @@ requires the cost of the run that never happened.
 | `AF-CATALOG-INVALID` | catalog file fails strict YAML parsing |
 | `AF-CATALOG-AREA-MISSING` | catalog file lacks the required `area` header |
 | `AF-CATALOG-DUPLICATE-RULE` | the same rule id appears in two files |
+| `AF-INPUT-NOT-FOUND` | a declared `--path`/`--project`/`--findings` argument does not exist |
+| `AF-INPUT-FRAMEWORK-UNKNOWN` | `--framework` names an adapter that is not registered |
+| `AF-INPUT-INVALID` | an input argument fails shape validation (e.g. dump dir layout) |
 
 ## Routing
 
@@ -484,8 +487,14 @@ digest manifest; `--format neptune` is a named stub, not a silent no-op.
 
 ### Index (`index`)
 
-`index build` writes `.apiforge/index/{files,symbols,routes,facts}.jsonl`
-plus `index.json` — all derived from extractor output, all canonical JSONL.
+`index build` writes 12 canonical JSONL kinds under `.apiforge/index/` —
+`files`, `symbols`, `routes`, `facts` from the extractor, plus eight kinds
+derived from existing facts only (never new parsers): `schemas`
+(`contract.*`), `dependencies` (`data.*`), `calls` (`resilience.http_call`),
+`tests` (`test.*`), `iac` (`infra.*`), `databases` (`data_access_ir`),
+`findings` (`--findings <case>/findings.json`), `decisions` (the autonomy
+ledger). `index.json` manifests all 12 with counts — empty kinds are
+emitted empty, never skipped.
 `index status` compares the live tree against `files.jsonl` and names
 added/removed/changed. The extractor cache lives at
 `.apiforge/cache/<sha256(extractor_version|framework|source_digest)>.json`;
@@ -498,6 +507,7 @@ recorded in the economy ledger as `cache:extract:<framework>`.
 | `AF-INDEX-NOT-FOUND` | `--project` is not a directory |
 | `AF-INDEX-FRAMEWORK` | no extractor registered for the framework |
 | `AF-INDEX-NOT-BUILT` | `index status` without a prior `index build` |
+| `AF-INDEX-DECISIONS-CORRUPT` | the autonomy ledger line feeding `decisions.jsonl` is malformed |
 
 ### Data access (`model redis`)
 
@@ -561,8 +571,23 @@ values and `delta_pct`. Operations on only one side are named
 | `AF-OTEL-SPAN-INCOMPLETE` | spans lack usable timestamps — counted, named |
 | `AF-OTEL-SERVICE-UNKNOWN` | no `service.name` resource attribute |
 | `AF-PERF-RUN-INVALID` | compare input is not a PerformanceRun payload |
+| `AF-PERF-MEMORY-CORRUPT` | a `runs.jsonl` line is malformed — the store refuses, never skips |
+| `AF-PERF-SUGGEST-INPUT` | `perf suggest` got neither a readable case dir nor a findings file |
 | `AF-SCENARIO-TOOL` | `perf scenario` asked for a generator outside k6/jmeter/locust |
 | `AF-SCENARIO-SCHEMA` | scenario JSON is not an object or has no usable `endpoints` |
+
+`perf memory add` appends a validated `PerformanceRun` to the append-only
+`.apiforge/perf/runs.jsonl` (payload hash recorded; `recorded_at` is an
+explicit argument, never a hidden clock read). `perf memory search` filters
+by declared `subject`/`tool`/`since` and returns zero matches when nothing
+declared matches — fields are never inferred. `perf suggest` composes
+confirmed findings with the catalog's `remediation` text into an
+`ActionPlan` carrying a `proposed_diff` as data; the module has no write
+path — suggesting never mutates the repository. `--repeat-baseline <dir>`
+on `compare`/`verdict` measures the noise floor across repeated runs of the
+same subject (`(max-min)/mean`, needs ≥2 runs — fewer leaves the floor
+`None` and the verdict names it unproven); a delta inside the measured
+floor is suppressed rather than reported as a regression.
 
 ### Autonomy modes (`autonomy`)
 
@@ -588,6 +613,19 @@ in the dispatch table can ever execute — mutation stays outside the
 boundary by construction. Runbooks are data (`rules/runbooks.yaml`):
 ordered `{verb, class}` steps over the same dispatch context.
 
+The v1 vocabulary (`observe`/`recommend`/`sandbox`/`approved`/`continuous`)
+is reconciled by `V1_MODE_MAP` — `recommend`→`observe`,
+`sandbox`/`approved`→`supervised` — because those v1 "modes" are class
+behaviors the policy engine already expresses. `autonomy set recommend`
+resolves through the map and ledgers the requested name (ADR-010).
+
+`autonomy heal` walks the named self-healing pipeline
+`detect→explain→propose→authorize→execute→verify→compare→accept|rollback`. Every stage appends a
+`heal.stage` ledger entry; `authorize` puts the plan's declared class
+through `decide()` and a `deny`/`gate` halts with missing requirements
+named; `execute` only runs dispatchable verbs; rollback restores the
+pre-execute snapshot of every `--writable-path` file and re-hashes it.
+
 | Code | Meaning |
 |---|---|
 | `AF-AUTONOMY-MODE-UNKNOWN` | mode string not in observe/supervised/continuous |
@@ -596,6 +634,8 @@ ordered `{verb, class}` steps over the same dispatch context.
 | `AF-AUTONOMY-RUNBOOK-UNKNOWN` | no runbook with that name |
 | `AF-AUTONOMY-RUNBOOK-SCHEMA` | runbooks.yaml malformed |
 | `AF-AUTONOMY-DETAIL` | `--detail` pair is not `key=value` |
+| `AF-HEAL-NO-FINDINGS` | `autonomy heal` without `--findings` — detect has no signal |
+| `AF-HEAL-FINDINGS-INVALID` | the findings file is unreadable or fails schema |
 
 ### Knowledge packs (`knowledge`)
 
@@ -604,7 +644,11 @@ the catalog rules it backs), `source_authority.yaml` (every normative claim
 cited with authority class and verification date — sources are cited, never
 copied), optional `matrix.yaml` (runtime version guard) and `evals.yaml`
 (declared adversarial probes — the project never calls a model, so evals
-are data for external runners). `knowledge check` validates the schema and
+are data for external runners). Every eval declares a `type` from the
+closed 11-value vocabulary (`unit`, `golden`, `integration`,
+`adversarial`, `holdout`, `regression`, `economy`, `security`,
+`compatibility`, `performance`, `end-to-end`). `knowledge check` validates
+the schema and
 cross-checks every `rule_id` against the catalog; the release gate runs it.
 
 | Code | Meaning |
@@ -615,6 +659,7 @@ cross-checks every `rule_id` against the catalog; the release gate runs it.
 | `AF-KNOW-NO-AUTHORITY` | `source_authority.yaml` missing or lists no sources |
 | `AF-KNOW-AUTHORITY` | source authority class outside the closed set |
 | `AF-KNOW-EVAL` | eval `expect.kind` outside rule/fact-kind/refusal |
+| `AF-KNOW-EVAL-TYPE` | eval `type` outside the closed 11-value vocabulary |
 | `AF-KNOW-CHECK` | `knowledge check` found cross-catalog problems (exit 4) |
 
 ### Resilience (`model resilience`, `perf chaos`)

@@ -39,8 +39,13 @@ def _argv_trivy(target: Path, out: Path, extra: dict[str, str]) -> list[str]:
 
 def _argv_gitleaks(target: Path, out: Path, extra: dict[str, str]) -> list[str]:
     return [
-        "gitleaks", "dir", str(target),
-        "--report-format", "json", "--report-path", str(out),
+        "gitleaks",
+        "dir",
+        str(target),
+        "--report-format",
+        "json",
+        "--report-path",
+        str(out),
     ]
 
 
@@ -156,7 +161,12 @@ TOOL_REGISTRY: dict[str, dict[str, Any]] = {
         "license": "AGPL-3.0",
         "input": "JS test script",
         "output": "--summary-export JSON",
-        "capabilities": ["vu scripting", "thresholds", "rps/iterations metrics", "dropped_iterations signal"],
+        "capabilities": [
+            "vu scripting",
+            "thresholds",
+            "rps/iterations metrics",
+            "dropped_iterations signal",
+        ],
         "limits": ["generator can saturate before the target — watch dropped_iterations"],
         "cost": "oss",
         "needs_network": True,
@@ -398,9 +408,7 @@ def list_tools() -> list[dict[str, Any]]:
     return rows
 
 
-def build_argv(
-    tool: str, target: Path, out: Path, extra: dict[str, str]
-) -> list[str]:
+def build_argv(tool: str, target: Path, out: Path, extra: dict[str, str]) -> list[str]:
     """The fixed argv for a tool — visible via `--dry-run`."""
     spec = TOOLS.get(tool)
     if spec is None:
@@ -472,7 +480,10 @@ def run_tool(
     version: str | None = None
     try:
         vproc = subprocess.run(
-            [binary, "--version"], capture_output=True, text=True, timeout=10,
+            [binary, "--version"],
+            capture_output=True,
+            text=True,
+            timeout=10,
             check=False,
         )
         first = (vproc.stdout or vproc.stderr or "").strip().splitlines()

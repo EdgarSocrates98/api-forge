@@ -23,19 +23,39 @@ from apiforge.core.models import Diagnostic, Fact, FindingStatus, SourceRef
 
 _MONGO_PACKAGES = ("pymongo", "motor", "mongoengine", "beanie")
 _MONGO_OPS = {
-    "find", "find_one", "insert_one", "insert_many", "update_one",
-    "update_many", "delete_one", "delete_many", "replace_one",
-    "aggregate", "count_documents", "distinct", "find_one_and_update",
-    "find_one_and_delete", "bulk_write", "watch",
+    "find",
+    "find_one",
+    "insert_one",
+    "insert_many",
+    "update_one",
+    "update_many",
+    "delete_one",
+    "delete_many",
+    "replace_one",
+    "aggregate",
+    "count_documents",
+    "distinct",
+    "find_one_and_update",
+    "find_one_and_delete",
+    "bulk_write",
+    "watch",
 }
 _MONGO_FILTERED_WRITES = {"delete_many", "update_many", "replace_one"}
 _MONGO_READS = {"find", "aggregate", "distinct", "count_documents"}
 
 _DYNAMO_PACKAGES = ("boto3", "aioboto3")
 _DYNAMO_OPS = {
-    "scan", "query", "get_item", "put_item", "update_item",
-    "delete_item", "batch_get_item", "batch_write_item",
-    "transact_write_items", "transact_get_items", "describe_table",
+    "scan",
+    "query",
+    "get_item",
+    "put_item",
+    "update_item",
+    "delete_item",
+    "batch_get_item",
+    "batch_write_item",
+    "transact_write_items",
+    "transact_get_items",
+    "describe_table",
 }
 
 _NEPTUNE_PACKAGES = ("gremlin_python", "gremlingo", "aioboto3", "boto3")
@@ -63,17 +83,13 @@ def _fact(
     return Fact(
         fact_id=stable_id("fact", {"k": kind, "p": rel, "l": line, **measures}),
         kind=kind,
-        source=SourceRef(
-            path=rel, sha256=digest, line=line, extractor=extractor
-        ),
+        source=SourceRef(path=rel, sha256=digest, line=line, extractor=extractor),
         measures=measures,
         attrs={},
     )
 
 
-def _parse_python(
-    path: Path, rel: str, digest: str, extractor: str
-) -> ast.Module | Diagnostic:
+def _parse_python(path: Path, rel: str, digest: str, extractor: str) -> ast.Module | Diagnostic:
     try:
         return ast.parse(path.read_text(encoding="utf-8"))
     except (SyntaxError, UnicodeDecodeError) as exc:
@@ -145,9 +161,7 @@ def _heuristic_diag(rel: str, digest: str, extractor: str) -> Diagnostic:
     )
 
 
-def _scan_python_mongo(
-    path: Path, rel: str, digest: str
-) -> tuple[list[Fact], list[Diagnostic]]:
+def _scan_python_mongo(path: Path, rel: str, digest: str) -> tuple[list[Fact], list[Diagnostic]]:
     tree = _parse_python(path, rel, digest, "mongo")
     if isinstance(tree, Diagnostic):
         return [], [tree]
@@ -169,9 +183,7 @@ def _scan_python_mongo(
     # to a literal collection name
     names: dict[str, str] = {}
     for node in ast.walk(tree):
-        if isinstance(node, ast.Assign) and not isinstance(
-            node.value, ast.Call
-        ):
+        if isinstance(node, ast.Assign) and not isinstance(node.value, ast.Call):
             lit = _collection_of(node.value)
             if lit:
                 for target in node.targets:
@@ -186,9 +198,7 @@ def _scan_python_mongo(
             continue
         receiver = node.func.value
         collection = (
-            names.get(receiver.id)
-            if isinstance(receiver, ast.Name)
-            else _collection_of(receiver)
+            names.get(receiver.id) if isinstance(receiver, ast.Name) else _collection_of(receiver)
         )
         has_limit = "limit" in _kwarg_names(node) or id(node) in bounded
         measures: dict[str, Any] = {
@@ -201,16 +211,12 @@ def _scan_python_mongo(
             measures["unbounded_find"] = not has_limit
         if op in _MONGO_FILTERED_WRITES:
             measures["unfiltered_write"] = _first_arg_unfiltered(node)
-        facts.append(
-            _fact("data.mongo.operation", rel, digest, node.lineno, "mongo", **measures)
-        )
+        facts.append(_fact("data.mongo.operation", rel, digest, node.lineno, "mongo", **measures))
     diagnostics = [_heuristic_diag(rel, digest, "mongo")] if facts else []
     return facts, diagnostics
 
 
-def _scan_python_dynamo(
-    path: Path, rel: str, digest: str
-) -> tuple[list[Fact], list[Diagnostic]]:
+def _scan_python_dynamo(path: Path, rel: str, digest: str) -> tuple[list[Fact], list[Diagnostic]]:
     tree = _parse_python(path, rel, digest, "dynamo")
     if isinstance(tree, Diagnostic):
         return [], [tree]
@@ -240,16 +246,10 @@ def _scan_python_dynamo(
             "binding": "name",
         }
         if op == "scan":
-            measures["full_scan"] = not (
-                {"Limit", "FilterExpression", "IndexName"} & kwargs
-            )
+            measures["full_scan"] = not ({"Limit", "FilterExpression", "IndexName"} & kwargs)
         if op == "query":
-            measures["query_without_key_condition"] = (
-                "KeyConditionExpression" not in kwargs
-            )
-        facts.append(
-            _fact("data.dynamo.operation", rel, digest, node.lineno, "dynamo", **measures)
-        )
+            measures["query_without_key_condition"] = "KeyConditionExpression" not in kwargs
+        facts.append(_fact("data.dynamo.operation", rel, digest, node.lineno, "dynamo", **measures))
     # resource API: dynamodb.Table("name") binds receivers to a table literal
     for node in ast.walk(tree):
         if (
@@ -275,9 +275,7 @@ def _scan_python_dynamo(
     return facts, diagnostics
 
 
-def _scan_python_neptune(
-    path: Path, rel: str, digest: str
-) -> tuple[list[Fact], list[Diagnostic]]:
+def _scan_python_neptune(path: Path, rel: str, digest: str) -> tuple[list[Fact], list[Diagnostic]]:
     text = path.read_text(encoding="utf-8")
     tree = _parse_python(path, rel, digest, "neptune")
     if isinstance(tree, Diagnostic):
@@ -292,11 +290,7 @@ def _scan_python_neptune(
         method = node.func.attr
         if method in _NEPTUNE_QUERY_METHODS:
             query = next(
-                (
-                    _str_constant(kw.value)
-                    for kw in node.keywords
-                    if _str_constant(kw.value)
-                ),
+                (_str_constant(kw.value) for kw in node.keywords if _str_constant(kw.value)),
                 None,
             )
             facts.append(
@@ -336,14 +330,18 @@ def _scan_python_neptune(
 _JAVA_DB_RE = {
     "mongo": (
         re.compile(r"com\.mongodb|MongoCollection|MongoTemplate"),
-        re.compile(r"\.(find|insertOne|insertMany|updateOne|updateMany|"
-                   r"deleteOne|deleteMany|replaceOne|aggregate|watch)\s*\("),
+        re.compile(
+            r"\.(find|insertOne|insertMany|updateOne|updateMany|"
+            r"deleteOne|deleteMany|replaceOne|aggregate|watch)\s*\("
+        ),
         {"deleteMany", "updateMany", "replaceOne"},
     ),
     "dynamo": (
         re.compile(r"software\.amazon\.awssdk\.services\.dynamodb|DynamoDbClient|DynamoDBMapper"),
-        re.compile(r"\.(scan|query|getItem|putItem|updateItem|deleteItem|"
-                   r"batchGetItem|batchWriteItem|transactWriteItems)\s*\("),
+        re.compile(
+            r"\.(scan|query|getItem|putItem|updateItem|deleteItem|"
+            r"batchGetItem|batchWriteItem|transactWriteItems)\s*\("
+        ),
         set(),
     ),
     "neptune": (
@@ -355,15 +353,19 @@ _JAVA_DB_RE = {
 _GO_DB_RE = {
     "mongo": (
         re.compile(r"go\.mongodb\.org/mongo-driver"),
-        re.compile(r"\.(Find|FindOne|InsertOne|InsertMany|UpdateOne|"
-                   r"UpdateMany|DeleteOne|DeleteMany|Aggregate|Watch)\s*\("),
+        re.compile(
+            r"\.(Find|FindOne|InsertOne|InsertMany|UpdateOne|"
+            r"UpdateMany|DeleteOne|DeleteMany|Aggregate|Watch)\s*\("
+        ),
         {"DeleteMany", "UpdateMany"},
     ),
     "dynamo": (
         re.compile(r"aws-sdk-go.*/service/dynamodb"),
-        re.compile(r"\.(Scan|Query|GetItem|PutItem|UpdateItem|DeleteItem|"
-                   r"BatchGetItem|BatchWriteItem|TransactWriteItems)"
-                   r"(WithContext)?\s*\("),
+        re.compile(
+            r"\.(Scan|Query|GetItem|PutItem|UpdateItem|DeleteItem|"
+            r"BatchGetItem|BatchWriteItem|TransactWriteItems)"
+            r"(WithContext)?\s*\("
+        ),
         set(),
     ),
     "neptune": (
@@ -407,7 +409,7 @@ def _scan_by_pattern(
                     # unfiltered only when the arg list is visibly empty
                     # ( `()` / `{}` / `new Document()` ) — anything else is
                     # a declared filter, never analyzed
-                    after = line[match.end():]
+                    after = line[match.end() :]
                     measures["unfiltered_write"] = bool(
                         re.match(r"\s*\)", after)
                         or re.match(r"\s*\{\s*\}\s*\)", after)
@@ -420,19 +422,22 @@ def _scan_by_pattern(
                 if low == "scan":
                     measures["full_scan"] = not re.search(
                         r"Limit|FilterExpression|IndexName|withLimit|"
-                        r"filterExpression|\.limit\s*\(", line
+                        r"filterExpression|\.limit\s*\(",
+                        line,
                     )
                 if low == "query":
                     measures["query_without_key_condition"] = not re.search(
                         r"KeyConditionExpression|keyConditionExpression|"
-                        r"withKeyConditionExpression", line
+                        r"withKeyConditionExpression",
+                        line,
                     )
             if extractor == "neptune":
                 measures["language"] = "gremlin"
                 measures["unbounded"] = not bool(_LIMIT_RE.search(line))
             facts.append(
                 _fact(
-                    f"data.{extractor}.operation" if extractor != "neptune"
+                    f"data.{extractor}.operation"
+                    if extractor != "neptune"
                     else "data.neptune.query",
                     rel,
                     digest,
@@ -459,9 +464,7 @@ _SCANNERS = {
 def extract_data_access(project_root: Path, database: str) -> CodeInventory:
     """Scan a project tree for data-access call sites — no code executes."""
     if database not in _SCANNERS:
-        raise ValueError(
-            f"database {database!r} not in {sorted(_SCANNERS)}"
-        )
+        raise ValueError(f"database {database!r} not in {sorted(_SCANNERS)}")
     py_scan = _SCANNERS[database][0]
     root = Path(project_root)
     facts: list[Fact] = []

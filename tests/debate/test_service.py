@@ -19,9 +19,7 @@ def _open(case: Path) -> str:
 
 def test_open_persists_debate(tmp_path: Path) -> None:
     did = _open(tmp_path)
-    doc = json.loads(
-        (tmp_path / "debates" / f"{did}.json").read_text(encoding="utf-8")
-    )
+    doc = json.loads((tmp_path / "debates" / f"{did}.json").read_text(encoding="utf-8"))
     assert doc["status"] == "open"
     assert doc["question"] == "sync vs async?"
 

@@ -3,9 +3,7 @@ from pathlib import Path
 from apiforge.verification.holdout import run_holdouts
 
 
-def test_declared_mutations_are_detected(
-    tmp_path: Path, orders_paths: dict[str, Path]
-) -> None:
+def test_declared_mutations_are_detected(tmp_path: Path, orders_paths: dict[str, Path]) -> None:
     records = run_holdouts(
         tmp_path,
         orders_paths["project"],

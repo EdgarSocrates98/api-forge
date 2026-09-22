@@ -30,9 +30,7 @@ def _ctx_for(root: Path, spec: TaskSpec, now: str | None) -> DispatchContext:
     return DispatchContext(case=Path(case), **fields)
 
 
-def _mutation_step(
-    verb: str, spec: TaskSpec, ctx: DispatchContext
-) -> dict[str, object]:
+def _mutation_step(verb: str, spec: TaskSpec, ctx: DispatchContext) -> dict[str, object]:
     """Policy-gate a mutation verb, then run it — sandbox-scoped, never promote.
 
     Two conditions, both named when absent: the policy engine must allow the
@@ -59,9 +57,7 @@ def _mutation_step(
     writable = tuple(spec.writable_paths)
     if not any(p.startswith(".apiforge") for p in writable):
         entry["status"] = "refused"
-        entry["reason"] = (
-            "AF-TASK-MUTATION-GATED: writable_paths lacks a .apiforge scope"
-        )
+        entry["reason"] = "AF-TASK-MUTATION-GATED: writable_paths lacks a .apiforge scope"
         return entry
     if decision.outcome != "allow":
         entry["status"] = "refused"
@@ -110,16 +106,12 @@ def run_task(
 
     recipe = load_recipes().get(spec.strategy.value)
     if recipe is None:
-        raise ContractError(
-            "AF-TASK-RECIPE", f"no recipe {spec.strategy.value!r} in recipes.yaml"
-        )
+        raise ContractError("AF-TASK-RECIPE", f"no recipe {spec.strategy.value!r} in recipes.yaml")
 
     ctx = _ctx_for(root, spec, now)
-    inputs_missing = sorted({
-        field
-        for verb in recipe
-        for field in _need(ctx, *required_fields(verb))
-    })
+    inputs_missing = sorted(
+        {field for verb in recipe for field in _need(ctx, *required_fields(verb))}
+    )
     calls = 0
     all_steps: list[dict[str, object]] = []
     rounds = 0
@@ -161,8 +153,15 @@ def run_task(
     else:
         terminal, reason = TaskState.AWAITING_SUPERVISION, "all steps ran"
     return _finish(
-        root, spec, actor, terminal, reason, all_steps,
-        rounds=rounds, calls=calls, inputs_missing=inputs_missing,
+        root,
+        spec,
+        actor,
+        terminal,
+        reason,
+        all_steps,
+        rounds=rounds,
+        calls=calls,
+        inputs_missing=inputs_missing,
     )
 
 

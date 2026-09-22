@@ -22,9 +22,7 @@ from apiforge.taskspec.service import (
 
 
 def _spec(task_id: str = "t-1", **kw: object) -> TaskSpec:
-    return TaskSpec.model_validate(
-        {"id": task_id, "outcome": "list the rules", **kw}
-    )
+    return TaskSpec.model_validate({"id": task_id, "outcome": "list the rules", **kw})
 
 
 def _keypair(tmp_path: Path) -> Path:
@@ -79,9 +77,7 @@ def test_seal_then_change_invalidates(tmp_path: Path) -> None:
     review_task(tmp_path, "t-1", "bob", {"outcome": "changed"})
     spec = store.load(tmp_path, "t-1")
     assert spec.state is TaskState.REVIEWED and spec.revision == 2
-    rev = json.loads(
-        (store.task_dir(tmp_path, "t-1") / "revisions" / "2.json").read_text()
-    )
+    rev = json.loads((store.task_dir(tmp_path, "t-1") / "revisions" / "2.json").read_text())
     assert rev["seal_signature_b64"] is None
 
 

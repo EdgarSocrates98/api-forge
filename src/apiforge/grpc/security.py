@@ -17,4 +17,6 @@ def inspect_metadata(metadata: dict[str, str]) -> GrpcSecurityReport:
 def authorize_mutation(approved: bool, brokered: bool) -> GrpcSecurityReport:
     if approved and brokered:
         return GrpcSecurityReport(safe=True)
-    return GrpcSecurityReport(safe=False, findings=("external mutation requires approval and broker",))
+    return GrpcSecurityReport(
+        safe=False, findings=("external mutation requires approval and broker",)
+    )

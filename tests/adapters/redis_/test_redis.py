@@ -19,13 +19,19 @@ def _facts() -> tuple:
 
 def test_extracts_commands_across_languages() -> None:
     facts = _facts()
-    commands = {
-        f.measures["command"]
-        for f in facts
-        if f.kind == "data.redis.command"
-    }
-    assert {"get", "set", "setex", "keys", "flushall", "flushdb",
-            "config", "debug", "monitor", "save"} <= commands
+    commands = {f.measures["command"] for f in facts if f.kind == "data.redis.command"}
+    assert {
+        "get",
+        "set",
+        "setex",
+        "keys",
+        "flushall",
+        "flushdb",
+        "config",
+        "debug",
+        "monitor",
+        "save",
+    } <= commands
     langs = {f.source.path.rsplit(".", 1)[-1] for f in facts}
     assert {"py", "go", "java"} <= langs
 
@@ -48,9 +54,7 @@ def test_java_go_bindings_are_name_heuristics() -> None:
 
 def test_ttl_visible_on_setex_absent_on_set() -> None:
     writes = {
-        (f.source.path, f.measures["command"]): f
-        for f in _facts()
-        if f.kind == "data.redis.write"
+        (f.source.path, f.measures["command"]): f for f in _facts() if f.kind == "data.redis.write"
     }
     setex = [f for (p, c), f in writes.items() if c == "setex"]
     plain = [f for (p, c), f in writes.items() if c == "set"]
@@ -73,8 +77,7 @@ def test_write_without_ttl_fires() -> None:
     fired = [f for f in judge_facts(_facts()) if f.rule_id == "AF-DATA-002"]
     assert fired  # set() calls without ttl in py/go/java
     setex_facts = [
-        f for f in _facts()
-        if f.kind == "data.redis.write" and f.measures["command"] == "setex"
+        f for f in _facts() if f.kind == "data.redis.write" and f.measures["command"] == "setex"
     ]
     setex_ids = {f.fact_id for f in setex_facts}
     for finding in fired:
@@ -127,10 +130,19 @@ def test_rule_evidence_cites_fact_ids() -> None:
             assert ev.startswith("fact:"), ev
 
 
-@pytest.mark.parametrize("rule_id", [
-    "AF-DATA-001", "AF-DATA-002", "AF-DATA-003", "AF-DATA-004",
-    "AF-DATA-005", "AF-DATA-006", "AF-DATA-007", "AF-DATA-008",
-])
+@pytest.mark.parametrize(
+    "rule_id",
+    [
+        "AF-DATA-001",
+        "AF-DATA-002",
+        "AF-DATA-003",
+        "AF-DATA-004",
+        "AF-DATA-005",
+        "AF-DATA-006",
+        "AF-DATA-007",
+        "AF-DATA-008",
+    ],
+)
 def test_every_data_rule_fires_on_lab(rule_id: str) -> None:
     fired = {f.rule_id for f in judge_facts(_facts())}
     assert rule_id in fired

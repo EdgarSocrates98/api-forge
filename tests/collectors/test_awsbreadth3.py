@@ -228,13 +228,9 @@ class _MskStub:
         return {
             "ClusterInfo": {
                 "ClusterName": "events",
-                "EncryptionInfo": {
-                    "EncryptionInTransit": {"ClientBroker": "TLS_PLAINTEXT"}
-                },
+                "EncryptionInfo": {"EncryptionInTransit": {"ClientBroker": "TLS_PLAINTEXT"}},
                 "BrokerNodeGroupInfo": {
-                    "ConnectivityInfo": {
-                        "PublicAccess": {"Type": "SERVICE_PROVIDED_EIPS"}
-                    }
+                    "ConnectivityInfo": {"PublicAccess": {"Type": "SERVICE_PROVIDED_EIPS"}}
                 },
                 "LoggingInfo": {"BrokerLogs": {"CloudWatchLogs": {"Enabled": False}}},
             }

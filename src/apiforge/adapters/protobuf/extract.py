@@ -31,7 +31,9 @@ _FIELD = re.compile(r"^\s*(?:repeated\s+|optional\s+)?[\w.]+\s+\w+\s*=\s*\d+")
 _OPTION = re.compile(r"^\s*option\s+")
 
 
-def _fact(kind: str, rel: str, digest: str, measures: dict[str, Any], attrs: dict[str, Any]) -> Fact:
+def _fact(
+    kind: str, rel: str, digest: str, measures: dict[str, Any], attrs: dict[str, Any]
+) -> Fact:
     return Fact(
         fact_id=stable_id("fact", {"kind": kind, "file": rel, **measures}),
         kind=kind,
@@ -106,14 +108,10 @@ def _parse_file(path: Path, rel: str) -> tuple[list[Fact], list[Diagnostic], str
             if stack:
                 stack.pop()
         if braces < 0:
-            diagnostics.append(
-                _diag("AF-PROTO-PARSE", rel, digest, "unbalanced braces", lineno)
-            )
+            diagnostics.append(_diag("AF-PROTO-PARSE", rel, digest, "unbalanced braces", lineno))
             return facts, diagnostics, digest
     if braces != 0 or stack:
-        diagnostics.append(
-            _diag("AF-PROTO-PARSE", rel, digest, "unclosed block at end of file")
-        )
+        diagnostics.append(_diag("AF-PROTO-PARSE", rel, digest, "unclosed block at end of file"))
 
     facts.append(
         _fact(

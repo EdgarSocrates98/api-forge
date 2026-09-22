@@ -58,9 +58,7 @@ class _DynamoStub:
     def describe_continuous_backups(self, **kw):
         return {
             "ContinuousBackupsDescription": {
-                "PointInTimeRecoveryDescription": {
-                    "PointInTimeRecoveryStatus": "DISABLED"
-                }
+                "PointInTimeRecoveryDescription": {"PointInTimeRecoveryStatus": "DISABLED"}
             }
         }
 

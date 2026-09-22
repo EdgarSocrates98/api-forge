@@ -23,9 +23,7 @@ def query_graph(
         try:
             wanted = NodeKind(kind)
         except ValueError as exc:
-            raise ContractError(
-                "AF-GRAPH-KIND", f"unknown node kind {kind!r}"
-            ) from exc
+            raise ContractError("AF-GRAPH-KIND", f"unknown node kind {kind!r}") from exc
         nodes = [n for n in nodes if n.kind is wanted]
     filters = dict(p.split("=", 1) for p in prop)
     for key, value in filters.items():
@@ -34,9 +32,7 @@ def query_graph(
         try:
             wanted_edge = EdgeKind(edge_kind)
         except ValueError as exc:
-            raise ContractError(
-                "AF-GRAPH-KIND", f"unknown edge kind {edge_kind!r}"
-            ) from exc
+            raise ContractError("AF-GRAPH-KIND", f"unknown edge kind {edge_kind!r}") from exc
         edges = [e for e in edges if e.kind is wanted_edge]
     return {
         "nodes": [node_line(n) for n in nodes],
@@ -46,9 +42,7 @@ def query_graph(
     }
 
 
-def _adjacency(
-    edges: list[GraphEdge], reverse: bool
-) -> dict[str, list[tuple[str, str]]]:
+def _adjacency(edges: list[GraphEdge], reverse: bool) -> dict[str, list[tuple[str, str]]]:
     adj: dict[str, list[tuple[str, str]]] = {}
     for e in edges:
         src, dst = (e.to_id, e.from_id) if reverse else (e.from_id, e.to_id)

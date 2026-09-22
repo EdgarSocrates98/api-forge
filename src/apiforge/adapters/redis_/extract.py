@@ -34,20 +34,81 @@ _CONSTRUCTOR_RE = re.compile(
 )
 
 _WRITE_COMMANDS = {
-    "set", "setnx", "getset", "mset", "hset", "hmset", "sadd", "lpush",
-    "rpush", "lset", "zadd", "zincrby", "incr", "incrby", "incrbyfloat",
-    "decr", "decrby", "append", "rename", "restore",
+    "set",
+    "setnx",
+    "getset",
+    "mset",
+    "hset",
+    "hmset",
+    "sadd",
+    "lpush",
+    "rpush",
+    "lset",
+    "zadd",
+    "zincrby",
+    "incr",
+    "incrby",
+    "incrbyfloat",
+    "decr",
+    "decrby",
+    "append",
+    "rename",
+    "restore",
 }
 _TTL_COMMANDS = {"setex", "psetex"}
-_COMMANDS = _WRITE_COMMANDS | _TTL_COMMANDS | {
-    "get", "mget", "getrange", "hget", "hmget", "hgetall", "smembers",
-    "sismember", "zrange", "zscore", "exists", "ttl", "pttl", "scan",
-    "sscan", "hscan", "zscan", "keys", "type", "lrange", "lindex",
-    "expire", "pexpire", "expireat", "persist", "delete", "unlink",
-    "flushall", "flushdb", "config", "debug", "monitor", "shutdown",
-    "save", "bgsave", "pipeline", "multi", "exec", "do", "publish",
-    "subscribe", "xadd", "xread", "lpop", "rpop", "getdel", "getex",
-}
+_COMMANDS = (
+    _WRITE_COMMANDS
+    | _TTL_COMMANDS
+    | {
+        "get",
+        "mget",
+        "getrange",
+        "hget",
+        "hmget",
+        "hgetall",
+        "smembers",
+        "sismember",
+        "zrange",
+        "zscore",
+        "exists",
+        "ttl",
+        "pttl",
+        "scan",
+        "sscan",
+        "hscan",
+        "zscan",
+        "keys",
+        "type",
+        "lrange",
+        "lindex",
+        "expire",
+        "pexpire",
+        "expireat",
+        "persist",
+        "delete",
+        "unlink",
+        "flushall",
+        "flushdb",
+        "config",
+        "debug",
+        "monitor",
+        "shutdown",
+        "save",
+        "bgsave",
+        "pipeline",
+        "multi",
+        "exec",
+        "do",
+        "publish",
+        "subscribe",
+        "xadd",
+        "xread",
+        "lpop",
+        "rpop",
+        "getdel",
+        "getex",
+    }
+)
 
 _COMMAND_ALIASES = {
     "config_set": "config",
@@ -61,9 +122,24 @@ _COMMANDS |= set(_COMMAND_ALIASES)
 
 # First positional is a pattern/cursor/subcommand, not a key — never an entity.
 _NO_KEY_ARG = {
-    "keys", "scan", "sscan", "hscan", "zscan", "flushall", "flushdb",
-    "config", "debug", "monitor", "shutdown", "save", "bgsave",
-    "pipeline", "multi", "exec", "do", "subscribe",
+    "keys",
+    "scan",
+    "sscan",
+    "hscan",
+    "zscan",
+    "flushall",
+    "flushdb",
+    "config",
+    "debug",
+    "monitor",
+    "shutdown",
+    "save",
+    "bgsave",
+    "pipeline",
+    "multi",
+    "exec",
+    "do",
+    "subscribe",
 }
 
 _JAVA_REDIS_RE = re.compile(
@@ -94,9 +170,7 @@ def _fact(
     return Fact(
         fact_id=stable_id("fact", {"k": kind, "p": rel, "l": line, **measures}),
         kind=kind,
-        source=SourceRef(
-            path=rel, sha256=digest, line=line, extractor=extractor
-        ),
+        source=SourceRef(path=rel, sha256=digest, line=line, extractor=extractor),
         measures=measures,
         attrs={},
     )
@@ -196,10 +270,7 @@ def _scan_python(path: Path, rel: str, digest: str) -> tuple[list[Fact], list[Di
             name = _py_call_name(node.value.func)
             ctor = bool(
                 name
-                and (
-                    _CONSTRUCTOR_RE.search(name + "(")
-                    or (imports_redis and name in _BARE_CTORS)
-                )
+                and (_CONSTRUCTOR_RE.search(name + "(") or (imports_redis and name in _BARE_CTORS))
             )
             if ctor:
                 for target in node.targets:
@@ -253,8 +324,15 @@ def _scan_python(path: Path, rel: str, digest: str) -> tuple[list[Fact], list[Di
                 ttl = float(kw.value.value)
         facts.extend(
             _command_facts(
-                rel, digest, node.lineno, "redis", command, key_literal, ttl,
-                binding, key_pattern,
+                rel,
+                digest,
+                node.lineno,
+                "redis",
+                command,
+                key_literal,
+                ttl,
+                binding,
+                key_pattern,
             )
         )
     if heuristic:
@@ -262,10 +340,7 @@ def _scan_python(path: Path, rel: str, digest: str) -> tuple[list[Fact], list[Di
             Diagnostic(
                 code="AF-REDIS-HEURISTIC-BINDING",
                 status=FindingStatus.UNRESOLVED,
-                message=(
-                    f"{rel}: receivers matched by name — binding not proven "
-                    "by a constructor"
-                ),
+                message=(f"{rel}: receivers matched by name — binding not proven by a constructor"),
                 source=SourceRef(path=rel, sha256=digest, extractor="redis"),
             )
         )
@@ -282,9 +357,7 @@ def _scan_java(path: Path, rel: str, digest: str) -> tuple[list[Fact], list[Diag
             command = _COMMAND_ALIASES.get(match.group(1).lower(), match.group(1).lower())
             if command in _COMMANDS:
                 facts.extend(
-                    _command_facts(
-                        rel, digest, index, "redis", command, None, None, "name"
-                    )
+                    _command_facts(rel, digest, index, "redis", command, None, None, "name")
                 )
     if facts:
         return facts, [_heuristic_diag(rel, digest)]
@@ -301,17 +374,13 @@ def _scan_go(path: Path, rel: str, digest: str) -> tuple[list[Fact], list[Diagno
             command = match.group(1).lower()
             if command in _COMMANDS:
                 facts.extend(
-                    _command_facts(
-                        rel, digest, index, "redis", command, None, None, "name"
-                    )
+                    _command_facts(rel, digest, index, "redis", command, None, None, "name")
                 )
         for match in _GO_REDIS_RE.finditer(line):
             command = _COMMAND_ALIASES.get(match.group(1).lower(), match.group(1).lower())
             if command in _COMMANDS:
                 facts.extend(
-                    _command_facts(
-                        rel, digest, index, "redis", command, None, None, "name"
-                    )
+                    _command_facts(rel, digest, index, "redis", command, None, None, "name")
                 )
     if facts:
         return facts, [_heuristic_diag(rel, digest)]

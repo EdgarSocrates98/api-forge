@@ -39,7 +39,7 @@ def test_jmeter_xml() -> None:
     out = generate_scenario("jmeter", SPEC)
     assert "jmeterTestPlan" in out["script"]
     assert 'HTTPSampler.method">POST' in out["script"]
-    assert "ThreadGroup.num_threads\">50" in out["script"]
+    assert 'ThreadGroup.num_threads">50' in out["script"]
 
 
 def test_locust_py() -> None:

@@ -18,4 +18,9 @@ def test_runtime_and_agentic_gates_are_evidence_bound() -> None:
     assert runtime_capabilities(GrpcRuntimePolicy())["health_check"] is True
     assert authorize_mutation(False, False).safe is False
     assert verify_holdout("different", ir).verdict == "REVIEW"
-    assert normalize_otel_records([{"service": "orders", "rpc.method": "GetOrder", "trace_id": "t1"}])[0]["correlation_id"] == "t1"
+    assert (
+        normalize_otel_records([{"service": "orders", "rpc.method": "GetOrder", "trace_id": "t1"}])[
+            0
+        ]["correlation_id"]
+        == "t1"
+    )

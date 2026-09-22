@@ -14,12 +14,25 @@ def test_registry_is_sorted_and_complete() -> None:
     assert names == sorted(names)
     # the prompt's canonical list, plus ActionStep/GraphExport helpers
     expected = {
-        "ArtifactRef/v1", "Fact/v1", "Finding/v1", "Receipt/v1",
-        "Decision/v1", "ActionPlan/v1", "Verification/v1",
-        "TaskSpec/v1", "TaskRevision/v1", "TaskPlan/v1", "TaskHandoff/v1",
-        "AcceptanceRecord/v1", "CapabilityProof/v1", "OutcomeBrief/v1",
-        "GraphNode/v1", "GraphEdge/v1",
-        "TelemetryEvent/v1", "PerformanceRun/v1", "DataAccessIR/v1",
+        "ArtifactRef/v1",
+        "Fact/v1",
+        "Finding/v1",
+        "Receipt/v1",
+        "Decision/v1",
+        "ActionPlan/v1",
+        "Verification/v1",
+        "TaskSpec/v1",
+        "TaskRevision/v1",
+        "TaskPlan/v1",
+        "TaskHandoff/v1",
+        "AcceptanceRecord/v1",
+        "CapabilityProof/v1",
+        "OutcomeBrief/v1",
+        "GraphNode/v1",
+        "GraphEdge/v1",
+        "TelemetryEvent/v1",
+        "PerformanceRun/v1",
+        "DataAccessIR/v1",
         "RuntimeMatrix/v1",
     }
     assert expected <= set(names)

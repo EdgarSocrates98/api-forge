@@ -180,27 +180,43 @@ class ControlPlane:
             raise ContractError("AF-CONTROL-NOT-READY", step_id)
         started = self.start(run_id, step_id)
         step = next(item for item in started.steps if item.step_id == step_id)
-        claimed = step.model_copy(update={
-            "lease_owner": worker_id,
-            "lease_until": lease_until,
-            "heartbeat_at": lease_until,
-        })
-        result = started.model_copy(update={
-            "steps": tuple(claimed if item.step_id == step_id else item for item in started.steps)
-        })
+        claimed = step.model_copy(
+            update={
+                "lease_owner": worker_id,
+                "lease_until": lease_until,
+                "heartbeat_at": lease_until,
+            }
+        )
+        result = started.model_copy(
+            update={
+                "steps": tuple(
+                    claimed if item.step_id == step_id else item for item in started.steps
+                )
+            }
+        )
         self._save(result)
-        self._event(result, "step_claimed", step_id=step_id, worker_id=worker_id, lease_until=lease_until)
+        self._event(
+            result, "step_claimed", step_id=step_id, worker_id=worker_id, lease_until=lease_until
+        )
         return result
 
-    def heartbeat(self, run_id: str, step_id: str, *, worker_id: str, lease_until: str) -> ControlRun:
+    def heartbeat(
+        self, run_id: str, step_id: str, *, worker_id: str, lease_until: str
+    ) -> ControlRun:
         run = self._load(run_id)
         step = next((item for item in run.steps if item.step_id == step_id), None)
         if step is None or step.status != "running" or step.lease_owner != worker_id:
             raise ContractError("AF-CONTROL-LEASE", "worker does not own the running step")
         updated = step.model_copy(update={"lease_until": lease_until, "heartbeat_at": lease_until})
-        result = run.model_copy(update={"steps": tuple(updated if item.step_id == step_id else item for item in run.steps)})
+        result = run.model_copy(
+            update={
+                "steps": tuple(updated if item.step_id == step_id else item for item in run.steps)
+            }
+        )
         self._save(result)
-        self._event(result, "step_heartbeat", step_id=step_id, worker_id=worker_id, lease_until=lease_until)
+        self._event(
+            result, "step_heartbeat", step_id=step_id, worker_id=worker_id, lease_until=lease_until
+        )
         return result
 
     def recover_expired(self, run_id: str, *, now: str) -> ControlRun:
@@ -215,14 +231,23 @@ class ControlPlane:
                 expiry = datetime.fromisoformat(step.lease_until)
                 expired = expiry <= current
             if expired:
-                steps.append(step.model_copy(update={
-                    "status": "pending", "lease_owner": None, "lease_until": None,
-                    "heartbeat_at": None, "error": "AF-CONTROL-LEASE-EXPIRED",
-                }))
+                steps.append(
+                    step.model_copy(
+                        update={
+                            "status": "pending",
+                            "lease_owner": None,
+                            "lease_until": None,
+                            "heartbeat_at": None,
+                            "error": "AF-CONTROL-LEASE-EXPIRED",
+                        }
+                    )
+                )
                 recovered.append(step.step_id)
             else:
                 steps.append(step)
-        result = run.model_copy(update={"status": "running" if recovered else run.status, "steps": tuple(steps)})
+        result = run.model_copy(
+            update={"status": "running" if recovered else run.status, "steps": tuple(steps)}
+        )
         self._save(result)
         if recovered:
             self._event(result, "leases_recovered", step_ids=recovered, now=now)

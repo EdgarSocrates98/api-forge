@@ -56,8 +56,7 @@ def test_missing_resourcespans_is_diagnostic(tmp_path: Path) -> None:
 
 
 def test_missing_service_name_is_unresolved(tmp_path: Path) -> None:
-    doc = {"resourceSpans": [{"resource": {"attributes": []},
-                              "scopeSpans": [{"spans": []}]}]}
+    doc = {"resourceSpans": [{"resource": {"attributes": []}, "scopeSpans": [{"spans": []}]}]}
     path = tmp_path / "nosvc.json"
     path.write_text(__import__("json").dumps(doc), encoding="utf-8")
     inventory = extract_otel(path)

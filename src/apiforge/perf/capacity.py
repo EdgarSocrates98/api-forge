@@ -29,11 +29,7 @@ def assess_capacity(
         for condition in report.conditions
         if condition.status != "met"
     )
-    evidence = tuple(
-        condition.id
-        for condition in report.conditions
-        if condition.status == "met"
-    )
+    evidence = tuple(condition.id for condition in report.conditions if condition.status == "met")
     status = cast(
         Literal["passed", "failed", "inconclusive"],
         report.verdict,

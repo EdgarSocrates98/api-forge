@@ -29,7 +29,10 @@ def assess_export_readiness(
         blockers.append("backend-provider-mismatch")
     else:
         checks.append("backend-provider-match")
-    if credential.provider != binding.provider or credential.reference != binding.credential_reference:
+    if (
+        credential.provider != binding.provider
+        or credential.reference != binding.credential_reference
+    ):
         blockers.append("credential-mismatch")
     elif credential.status != "available":
         blockers.append("credential-unavailable")
@@ -47,7 +50,13 @@ def assess_export_readiness(
     parsed = urlsplit(binding.endpoint)
     host = parsed.hostname.lower() if parsed.hostname else ""
     normalized_hosts = {item.lower().strip() for item in allowed_hosts}
-    if parsed.scheme != "https" or not host or parsed.username or parsed.password or parsed.fragment:
+    if (
+        parsed.scheme != "https"
+        or not host
+        or parsed.username
+        or parsed.password
+        or parsed.fragment
+    ):
         blockers.append("endpoint-must-be-https-and-credential-free")
     elif host not in normalized_hosts:
         blockers.append("endpoint-host-not-allowlisted")
@@ -59,7 +68,9 @@ def assess_export_readiness(
         checks.append("sender-configured")
 
     status = "ready" if not blockers else "blocked"
-    if blockers and all(item in {"sender-not-configured", "approval-required"} for item in blockers):
+    if blockers and all(
+        item in {"sender-not-configured", "approval-required"} for item in blockers
+    ):
         status = "review"
     return ObservabilityExportReadiness(
         provider=binding.provider,

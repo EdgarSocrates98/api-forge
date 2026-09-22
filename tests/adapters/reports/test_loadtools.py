@@ -101,6 +101,4 @@ def test_missing_report_names_blind_spot(tmp_path: Path) -> None:
     ):
         inv = extract(tmp_path / "absent.out")
         assert not inv.facts
-        assert any(
-            d.code == "AF-TEST-REPORT-MISSING" for d in inv.diagnostics
-        ), extract.__name__
+        assert any(d.code == "AF-TEST-REPORT-MISSING" for d in inv.diagnostics), extract.__name__

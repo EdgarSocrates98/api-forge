@@ -58,9 +58,7 @@ def _revision(root: Path, task_id: str, revision: int) -> TaskRevision:
 
 def create_task(root: Path, spec: TaskSpec) -> TaskSpec:
     if spec.state is not TaskState.DRAFT:
-        raise ContractError(
-            "AF-TASK-TRANSITION", "new tasks start in draft"
-        )
+        raise ContractError("AF-TASK-TRANSITION", "new tasks start in draft")
     return store.create(root, spec)
 
 
@@ -98,9 +96,7 @@ def review_task(
             )
         changes[field] = value
     revision = spec.revision + 1
-    updated = spec.model_copy(
-        update={"state": TaskState.REVIEWED, "revision": revision, **changes}
-    )
+    updated = spec.model_copy(update={"state": TaskState.REVIEWED, "revision": revision, **changes})
     changed = tuple(sorted(changes)) or ("approval",)
     store.save_revision(root, updated, changed)
     store.record_event(
@@ -117,9 +113,7 @@ def seal_task(root: Path, task_id: str, key_path: Path, actor: str) -> TaskSpec:
     require_transition(spec.state, TaskState.SEALED)
     revision = _revision(root, task_id, spec.revision)
     if revision.seal_signature_b64 is not None:
-        raise ContractError(
-            "AF-TASK-SEALED", f"revision {revision.revision} is already sealed"
-        )
+        raise ContractError("AF-TASK-SEALED", f"revision {revision.revision} is already sealed")
     from apiforge.report.keys import private_key_fingerprint, sign_payload
 
     block = {
@@ -171,9 +165,7 @@ def _parse_inputs(spec: TaskSpec) -> dict[str, Any]:
     for item in spec.inputs:
         key, sep, value = item.partition("=")
         if not sep:
-            raise ContractError(
-                "AF-TASK-INPUT", f"input {item!r} must be `field=path-or-value`"
-            )
+            raise ContractError("AF-TASK-INPUT", f"input {item!r} must be `field=path-or-value`")
         key = key.strip()
         if key in _CTX_FIELDS:
             ctx[key] = Path(value.strip())
@@ -190,11 +182,7 @@ def load_recipes() -> dict[str, list[str]]:
     """recipe name -> ordered dispatch verbs (package data)."""
     from importlib import resources
 
-    text = (
-        resources.files("apiforge.rules")
-        .joinpath("recipes.yaml")
-        .read_text(encoding="utf-8")
-    )
+    text = resources.files("apiforge.rules").joinpath("recipes.yaml").read_text(encoding="utf-8")
     try:
         data = load_yaml_mapping(text, source="rules/recipes.yaml")
     except (StrictYamlError, ValueError) as exc:

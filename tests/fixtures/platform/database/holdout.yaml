@@ -1,0 +1,4 @@
+vertical: database
+status: unresolved
+case: query_plan_missing
+reason: index and cardinality require database evidence

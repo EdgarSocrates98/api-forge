@@ -39,9 +39,7 @@ def test_parse_error_is_named(tmp_path: Path) -> None:
 
 
 def test_non_api_resources_ignored(tmp_path: Path) -> None:
-    (tmp_path / "x.tf").write_text(
-        'resource "aws_s3_bucket" "b" {\n  bucket = "x"\n}\n'
-    )
+    (tmp_path / "x.tf").write_text('resource "aws_s3_bucket" "b" {\n  bucket = "x"\n}\n')
     inv = extract_terraform(tmp_path)
     assert inv.facts == ()
     assert inv.input_hashes["x.tf"]

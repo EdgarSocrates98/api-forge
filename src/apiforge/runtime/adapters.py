@@ -38,8 +38,7 @@ class AgentResponse(BaseModel):
 class ModelAdapter(Protocol):
     name: str
 
-    async def invoke(self, request: AgentRequest) -> AgentResponse:
-        ...
+    async def invoke(self, request: AgentRequest) -> AgentResponse: ...
 
 
 class FakeModelAdapter:

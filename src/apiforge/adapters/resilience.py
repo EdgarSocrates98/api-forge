@@ -48,10 +48,19 @@ _RETRY = re.compile(
 _IMPORT_LINE = re.compile(r"^\s*(import|from)\s")
 _BACKOFF = re.compile(r"backoff|wait_exponential|ExponentialBackOff|expo\b", re.IGNORECASE)
 _JITTER = re.compile(r"jitter|full_jitter|random", re.IGNORECASE)
-_MUTATING = re.compile(r"\bpost\b|\bput\b|\bdelete\b|\bpatch\b|postForObject|postForEntity|insert|update|write", re.IGNORECASE)
-_CB = re.compile(r"CircuitBreaker|circuit_breaker|pybreaker|gobreaker|resilience4j|Polly|hystrix", re.IGNORECASE)
-_POOL = re.compile(r"pool|Pool|maxPoolSize|pool_maxsize|MaxIdleConns|connection_pool", re.IGNORECASE)
-_POOL_BOUND = re.compile(r"pool_maxsize\s*=|maxPoolSize|MaxIdleConns|Pool\(.*max|max_connections|maxsize", re.IGNORECASE)
+_MUTATING = re.compile(
+    r"\bpost\b|\bput\b|\bdelete\b|\bpatch\b|postForObject|postForEntity|insert|update|write",
+    re.IGNORECASE,
+)
+_CB = re.compile(
+    r"CircuitBreaker|circuit_breaker|pybreaker|gobreaker|resilience4j|Polly|hystrix", re.IGNORECASE
+)
+_POOL = re.compile(
+    r"pool|Pool|maxPoolSize|pool_maxsize|MaxIdleConns|connection_pool", re.IGNORECASE
+)
+_POOL_BOUND = re.compile(
+    r"pool_maxsize\s*=|maxPoolSize|MaxIdleConns|Pool\(.*max|max_connections|maxsize", re.IGNORECASE
+)
 _SHUTDOWN = re.compile(
     r"@PreDestroy|addShutdownHook|signal\.signal|Shutdown\(|graceful|atexit\.register|"
     r"defer\s+\w+\.Close\(\)",
@@ -75,15 +84,11 @@ def _scan_file(path: Path, rel: str, digest: str) -> list[Fact]:
         fid += 1
         facts.append(
             Fact(
-                fact_id=stable_id(
-                    "fact", {"k": kind, "p": rel, "l": line, **measures}
-                ),
+                fact_id=stable_id("fact", {"k": kind, "p": rel, "l": line, **measures}),
                 kind=kind,
                 measures=dict(measures),
                 attrs={},
-                source=SourceRef(
-                    path=rel, sha256=digest, line=line, extractor="resilience"
-                ),
+                source=SourceRef(path=rel, sha256=digest, line=line, extractor="resilience"),
             )
         )
 
@@ -134,15 +139,9 @@ def _summary(facts: list[Fact], all_text: str) -> Fact:
         "idempotency_declared": int(bool(_IDEM.search(all_text))),
         # gaps: absence counts only where dependency surface exists — a file
         # with no calls has no breaker to miss (absence is not a defect there)
-        "circuit_breaker_gap": int(
-            dependency_surface and not _CB.search(all_text)
-        ),
-        "graceful_shutdown_gap": int(
-            dependency_surface and not _SHUTDOWN.search(all_text)
-        ),
-        "idempotency_gap": int(
-            dependency_surface and not _IDEM.search(all_text)
-        ),
+        "circuit_breaker_gap": int(dependency_surface and not _CB.search(all_text)),
+        "graceful_shutdown_gap": int(dependency_surface and not _SHUTDOWN.search(all_text)),
+        "idempotency_gap": int(dependency_surface and not _IDEM.search(all_text)),
     }
     return Fact(
         fact_id=stable_id("fact", {"k": "resilience.summary", **measures}),
@@ -161,9 +160,16 @@ def extract_resilience(project_root: Path) -> CodeInventory:
     input_hashes: dict[str, str] = {}
     all_text_parts: list[str] = []
     for path in sorted(root.rglob("*")):
-        if not path.is_file() or path.is_symlink() or path.suffix not in {
-            ".py", ".java", ".go",
-        }:
+        if (
+            not path.is_file()
+            or path.is_symlink()
+            or path.suffix
+            not in {
+                ".py",
+                ".java",
+                ".go",
+            }
+        ):
             continue
         rel = path.relative_to(root).as_posix()
         digest = _digest(path)

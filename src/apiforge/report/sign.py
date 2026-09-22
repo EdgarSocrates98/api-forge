@@ -81,11 +81,7 @@ def verify_report(
                 diverged.append("signature_key")
                 crypto = "invalid"
             else:
-                signed_block = {
-                    k: v
-                    for k, v in signature.items()
-                    if k not in ("signature_b64",)
-                }
+                signed_block = {k: v for k, v in signature.items() if k not in ("signature_b64",)}
                 if verify_payload(pubkey_path, signed_block, str(signature_b64)):
                     crypto = "valid"
                 else:

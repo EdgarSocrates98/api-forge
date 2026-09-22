@@ -15,6 +15,7 @@ from apiforge.adapters.apigateway.extract import extract_apigateway
 from apiforge.adapters.fastapi.extractor import extract_fastapi
 from apiforge.api_ir.builder import build_api_model
 from apiforge.application.analyze import AnalysisError, AnalysisResult, analyze_project
+from apiforge.application.artifacts import load_findings
 from apiforge.build.service import build_endpoint
 from apiforge.case.service import CaseIntegrityError, CaseStorageError
 from apiforge.collectors.apigateway import collect
@@ -109,6 +110,12 @@ evals_app = typer.Typer(
     no_args_is_help=True,
 )
 app.add_typer(evals_app)
+capabilities_app = typer.Typer(
+    name="capabilities",
+    help="Inspect the evidence-backed public capability matrix.",
+    no_args_is_help=True,
+)
+app.add_typer(capabilities_app)
 contract_intel_app = typer.Typer(
     name="contract-intel",
     help="Unify contract impact analysis and build an offline API Digital Twin.",
@@ -294,6 +301,46 @@ def _run(fn: Callable[[], object]) -> object:
         _fail(exc.code, str(exc).split(": ", 1)[-1])
     except CaseIntegrityError as exc:
         _fail(exc.code, exc.path, exit_code=3)
+    except ContractError as exc:
+        _fail(exc.code, exc.detail)
+    except (OSError, UnicodeDecodeError, TypeError, ValueError, json.JSONDecodeError) as exc:
+        _fail("AF-CLI-INPUT", str(exc))
+    except Exception as exc:  # noqa: BLE001
+        _fail("AF-CLI-INTERNAL", str(exc))
+
+
+@capabilities_app.command("list")
+def capabilities_list(
+    capability_id: str | None = typer.Option(None, "--capability"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """List public capabilities and their explicit support boundaries."""
+    from apiforge.capabilities.registry import load_capabilities
+
+    def work() -> object:
+        records = load_capabilities()
+        selected = tuple(
+            item for item in records if capability_id is None or item.capability_id == capability_id
+        )
+        if capability_id is not None and not selected:
+            raise AnalysisError("AF-CAPABILITY-NOT-FOUND", capability_id)
+        return [item.model_dump(mode="json") for item in selected]
+
+    _echo_json(_run(work), detail_level)
+
+
+@capabilities_app.command("verify")
+def capabilities_verify(
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Verify documentation, limitations and evidence requirements."""
+    from apiforge.capabilities.registry import load_capabilities
+    from apiforge.capabilities.verify import verify_capabilities
+
+    _echo_json(
+        _run(lambda: verify_capabilities(load_capabilities(), root=Path.cwd())),
+        detail_level,
+    )
 
 
 def _confirmed_rank(findings: tuple[Finding, ...]) -> int | None:
@@ -359,12 +406,19 @@ def observability_health(
     try:
         if not source.is_file():
             raise AnalysisError("AF-INPUT-NOT-FOUND", str(source))
-        records = tuple(record for record in normalize_records(read(source), source=source.name) if record.service == service)
+        records = tuple(
+            record
+            for record in normalize_records(read(source), source=source.name)
+            if record.service == service
+        )
         slo_results: tuple[SLOResult, ...] = ()
         if slo:
             definitions = json.loads(slo.read_text(encoding="utf-8"))
             raw_definitions = definitions if isinstance(definitions, list) else [definitions]
-            slo_results = tuple(evaluate_slo(SLODefinition.model_validate(item), records) for item in raw_definitions)
+            slo_results = tuple(
+                evaluate_slo(SLODefinition.model_validate(item), records)
+                for item in raw_definitions
+            )
         result = assess_health(service, records, slo_results)
     except (OSError, TypeError, ValueError, json.JSONDecodeError) as exc:
         raise AnalysisError("AF-OBSERVABILITY-HEALTH-INVALID", str(exc)) from exc
@@ -389,7 +443,9 @@ def observability_read_plan(
             tuple[Literal["traces", "metrics", "logs", "events"], ...],
             tuple(signal) if signal else ("traces", "metrics"),
         )
-        result = build_read_plan(provider, service, start, end, environment=environment, signals=signals)
+        result = build_read_plan(
+            provider, service, start, end, environment=environment, signals=signals
+        )
     except (TypeError, ValueError) as exc:
         raise AnalysisError("AF-OBS-READ-PLAN-INVALID", str(exc)) from exc
     _echo_json(result.model_dump(mode="json"), detail_level)
@@ -398,7 +454,9 @@ def observability_read_plan(
 @observability_app.command("credential-check")
 def observability_credential_check(
     provider: str = typer.Option(..., "--provider"),
-    reference: str = typer.Option(..., "--reference", help="Secret reference name; never a secret value."),
+    reference: str = typer.Option(
+        ..., "--reference", help="Secret reference name; never a secret value."
+    ),
     source: str = typer.Option("external_broker", "--source"),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
@@ -556,8 +614,7 @@ def next_step_cmd(
 
         if not findings.is_file():
             raise AnalysisError("AF-INPUT-NOT-FOUND", str(findings))
-        data = json.loads(findings.read_text(encoding="utf-8"))
-        parsed = tuple(Finding.model_validate(f) for f in data)
+        parsed = load_findings(findings)
         try:
             return next_step(parsed, phase)
         except RoutingError as exc:
@@ -1378,7 +1435,11 @@ _register_streaming_models()
 _MESSAGING_READERS = {
     "sqs-access": ("apiforge.adapters.messaging.extract_sqs", "sqs", "AWS SQS"),
     "sns-access": ("apiforge.adapters.messaging.extract_sns", "sns", "AWS SNS"),
-    "eventbridge-access": ("apiforge.adapters.messaging.extract_eventbridge", "eventbridge", "AWS EventBridge"),
+    "eventbridge-access": (
+        "apiforge.adapters.messaging.extract_eventbridge",
+        "eventbridge",
+        "AWS EventBridge",
+    ),
     "kinesis-access": ("apiforge.adapters.messaging.extract_kinesis", "kinesis", "AWS Kinesis"),
 }
 
@@ -1420,8 +1481,16 @@ _register_messaging_models()
 
 
 _ANALYTICAL_READERS = {
-    "opensearch-access": ("apiforge.adapters.analytical.extract_opensearch", "opensearch", "OpenSearch/Elasticsearch"),
-    "redshift-access": ("apiforge.adapters.analytical.extract_redshift", "redshift", "Amazon Redshift"),
+    "opensearch-access": (
+        "apiforge.adapters.analytical.extract_opensearch",
+        "opensearch",
+        "OpenSearch/Elasticsearch",
+    ),
+    "redshift-access": (
+        "apiforge.adapters.analytical.extract_redshift",
+        "redshift",
+        "Amazon Redshift",
+    ),
 }
 
 
@@ -2907,8 +2976,15 @@ def evals_validate(
         cases = load_cases(path)
         ids = [case.case_id for case in cases]
         duplicate_ids = sorted({item for item in ids if ids.count(item) > 1})
-        invalid = [case.case_id for case in cases if not case.required_evidence or case.mutation == "none"]
-        result = {"ok": not duplicate_ids and not invalid, "cases": len(cases), "duplicate_ids": duplicate_ids, "invalid_cases": invalid}
+        invalid = [
+            case.case_id for case in cases if not case.required_evidence or case.mutation == "none"
+        ]
+        result = {
+            "ok": not duplicate_ids and not invalid,
+            "cases": len(cases),
+            "duplicate_ids": duplicate_ids,
+            "invalid_cases": invalid,
+        }
     except (KeyError, OSError, TypeError, ValueError) as exc:
         raise AnalysisError("AF-EVALS-INVALID", str(exc)) from exc
     _echo_json(result, detail_level)
@@ -2933,8 +3009,12 @@ def contract_intel_impact(
 def contract_intel_twin(
     contract: Path = typer.Option(..., "--contract"),
     protocol: str = typer.Option(..., "--protocol", help="openapi or grpc."),
-    dependency: list[str] = typer.Option([], "--dependency", help="Declared downstream dependency."),
-    scenario: str | None = typer.Option(None, "--scenario", help="Simulate one scenario after planning."),
+    dependency: list[str] = typer.Option(
+        [], "--dependency", help="Declared downstream dependency."
+    ),
+    scenario: str | None = typer.Option(
+        None, "--scenario", help="Simulate one scenario after planning."
+    ),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
     """Create a no-network Digital Twin plan and optionally simulate a scenario."""
@@ -2942,7 +3022,10 @@ def contract_intel_twin(
         plan = build_twin_plan(contract, ContractProtocol(protocol), tuple(dependency))
         result: object = plan.model_dump(mode="json")
         if scenario is not None:
-            result = {"plan": result, "simulation": simulate_twin(plan, scenario).model_dump(mode="json")}
+            result = {
+                "plan": result,
+                "simulation": simulate_twin(plan, scenario).model_dump(mode="json"),
+            }
     except (OSError, ValueError, TypeError) as exc:
         raise AnalysisError("AF-TWIN-INVALID", str(exc)) from exc
     _echo_json(result, detail_level)
@@ -3161,7 +3244,9 @@ def runtime_approve(
 @runtime_app.command("control-create")
 def runtime_control_create(
     task_id: str = typer.Argument(...),
-    step: list[str] = typer.Option(..., "--step", help="Step or step=dependency1,dependency2; repeatable."),
+    step: list[str] = typer.Option(
+        ..., "--step", help="Step or step=dependency1,dependency2; repeatable."
+    ),
     root: Path = typer.Option(Path("."), "--root"),
     max_parallel: int = typer.Option(4, "--max-parallel", min=1),
     max_calls: int = typer.Option(20, "--max-calls", min=1),
@@ -3174,7 +3259,9 @@ def runtime_control_create(
     steps: list[tuple[str, tuple[str, ...]]] = []
     for raw in step:
         name, separator, dependencies = raw.partition("=")
-        steps.append((name, tuple(item for item in dependencies.split(",") if item) if separator else ()))
+        steps.append(
+            (name, tuple(item for item in dependencies.split(",") if item) if separator else ())
+        )
     try:
         result = ControlPlane(root).create(
             task_id,
@@ -3330,7 +3417,9 @@ def grpc_codegen_cmd(
 
     target_languages = cast(tuple[Literal["python", "go", "java"], ...], tuple(language))
     target_tool = cast(Literal["fake", "protoc", "buf"], tool)
-    request = GrpcCodegenRequest(languages=target_languages, output_dir=str(output_dir), tool=target_tool)
+    request = GrpcCodegenRequest(
+        languages=target_languages, output_dir=str(output_dir), tool=target_tool
+    )
     _echo_json(plan_codegen(load_source(source), request), detail_level)
 
 
@@ -3346,7 +3435,9 @@ def grpc_gateway_cmd(
     from apiforge.grpc.gateway import plan_gateway
     from apiforge.grpc.source import load_source
 
-    target_gateways = cast(tuple[Literal["envoy", "grpc_gateway", "grpc_web", "openapi"], ...], tuple(gateway))
+    target_gateways = cast(
+        tuple[Literal["envoy", "grpc_gateway", "grpc_web", "openapi"], ...], tuple(gateway)
+    )
     request = GrpcGatewayRequest(gateways=target_gateways, output_dir=str(output_dir))
     _echo_json(plan_gateway(load_source(source), request), detail_level)
 
@@ -3380,7 +3471,13 @@ def grpc_test_cmd(
 
     candidate = load_source(source)
     compatibility = compare(load_source(baseline), candidate) if baseline else None
-    _echo_json({"tests": ["parse", "compatibility", "streaming", "security"], "verification": verify(candidate, compatibility)}, detail_level)
+    _echo_json(
+        {
+            "tests": ["parse", "compatibility", "streaming", "security"],
+            "verification": verify(candidate, compatibility),
+        },
+        detail_level,
+    )
 
 
 @grpc_app.command("benchmark")
@@ -3392,7 +3489,10 @@ def grpc_benchmark_cmd(
     from apiforge.contracts.grpc import GrpcPerformanceRun
     from apiforge.grpc.performance import evaluate
 
-    _echo_json(evaluate(GrpcPerformanceRun.model_validate(json.loads(run.read_text(encoding="utf-8")))), detail_level)
+    _echo_json(
+        evaluate(GrpcPerformanceRun.model_validate(json.loads(run.read_text(encoding="utf-8")))),
+        detail_level,
+    )
 
 
 @migration_app.command("analyze")

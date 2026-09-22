@@ -18,7 +18,17 @@ def load_descriptor_set(path: Path) -> dict[str, object]:
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, UnicodeDecodeError, json.JSONDecodeError):
-        return {"path": str(path), "sha256": digest, "supported": False, "reason": "binary descriptor requires optional protobuf runtime"}
+        return {
+            "path": str(path),
+            "sha256": digest,
+            "supported": False,
+            "reason": "binary descriptor requires optional protobuf runtime",
+        }
     if not isinstance(payload, dict):
-        return {"path": str(path), "sha256": digest, "supported": False, "reason": "descriptor JSON must be an object"}
+        return {
+            "path": str(path),
+            "sha256": digest,
+            "supported": False,
+            "reason": "descriptor JSON must be an object",
+        }
     return {"path": str(path), "sha256": digest, "supported": True, "descriptor": payload}

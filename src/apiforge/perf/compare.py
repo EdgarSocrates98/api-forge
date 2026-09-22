@@ -77,9 +77,7 @@ def compare_runs(
     if repeat_baselines:
         from apiforge.perf.noise import metric_noise
 
-        floors = {
-            m: metric_noise(list(repeat_baselines), m)["floor"] for m in metrics
-        }
+        floors = {m: metric_noise(list(repeat_baselines), m)["floor"] for m in metrics}
     shared = sorted(set(base_ops) & set(cand_ops))
     regressions: list[Regression] = []
     suppressed: list[NoiseSuppressed] = []

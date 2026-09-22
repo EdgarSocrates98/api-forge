@@ -17,9 +17,7 @@ def everything():
 
 
 def cypher():
-    return client.execute_open_cypher_query(
-        openCypherQuery="MATCH (u:User) RETURN u LIMIT 10"
-    )
+    return client.execute_open_cypher_query(openCypherQuery="MATCH (u:User) RETURN u LIMIT 10")
 
 
 def cypher_unbounded():

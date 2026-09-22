@@ -21,8 +21,9 @@ def test_regression_detected_on_post() -> None:
     reg = {(r.operation, r.metric) for r in report.regressions}
     assert ("POST /orders", "mean_ms") in reg
     assert ("POST /orders", "p95_ms") in reg
-    post = next(r for r in report.regressions if r.operation == "POST /orders"
-                and r.metric == "mean_ms")
+    post = next(
+        r for r in report.regressions if r.operation == "POST /orders" and r.metric == "mean_ms"
+    )
     assert post.delta_pct > 40.0
 
 
@@ -40,21 +41,15 @@ def test_added_and_insufficient_named() -> None:
 
 
 def test_insufficient_samples_named_not_judged() -> None:
-    report = compare_runs(
-        _run("baseline.json"), _run("candidate.json"), min_samples=6
-    )
+    report = compare_runs(_run("baseline.json"), _run("candidate.json"), min_samples=6)
     assert set(report.insufficient_data) == {"GET /orders/{id}", "POST /orders"}
     assert report.regressions == ()
 
 
 def test_threshold_is_declared() -> None:
-    huge = compare_runs(
-        _run("baseline.json"), _run("candidate.json"), threshold_pct=200.0
-    )
+    huge = compare_runs(_run("baseline.json"), _run("candidate.json"), threshold_pct=200.0)
     assert huge.regressions == ()
-    strict = compare_runs(
-        _run("baseline.json"), _run("candidate.json"), threshold_pct=1.0
-    )
+    strict = compare_runs(_run("baseline.json"), _run("candidate.json"), threshold_pct=1.0)
     # POST still fires at a strict threshold; GET did not regress at all
     assert any(r.operation == "POST /orders" for r in strict.regressions)
     assert not any(r.operation == "GET /orders/{id}" for r in strict.regressions)
@@ -62,9 +57,7 @@ def test_threshold_is_declared() -> None:
 
 def test_detect_regression_matches_compare() -> None:
     regs = detect_regression(_run("baseline.json"), _run("candidate.json"))
-    assert regs == compare_runs(
-        _run("baseline.json"), _run("candidate.json")
-    ).regressions
+    assert regs == compare_runs(_run("baseline.json"), _run("candidate.json")).regressions
 
 
 def test_self_compare_no_regressions() -> None:

@@ -21,6 +21,7 @@ from apiforge.core.ids import stable_id
 from apiforge.core.models import JsonValue
 from apiforge.runtime.adapters import AgentRequest, ModelAdapter
 from apiforge.runtime.critic import critic_findings
+from apiforge.runtime.guardrails import validate_agent_payload
 from apiforge.runtime.policy import (
     load_policy,
     requires_critic,
@@ -107,13 +108,15 @@ async def execute_run(
         started_at=timestamp,
     )
     storage.save_run(run)
-    storage.event(TrajectoryEvent(
-        event_id=stable_id("event", {"run": run_id, "event": "created"}),
-        run_id=run_id,
-        event="created",
-        actor="api-agentic-orchestrator",
-        created_at=timestamp,
-    ))
+    storage.event(
+        TrajectoryEvent(
+            event_id=stable_id("event", {"run": run_id, "event": "created"}),
+            run_id=run_id,
+            event="created",
+            actor="api-agentic-orchestrator",
+            created_at=timestamp,
+        )
+    )
     review = build_runtime_review(root, spec)
     findings = review_task_spec(root, spec)
     storage.json("review.json", review.model_dump(mode="json"))
@@ -121,19 +124,30 @@ async def execute_run(
         gaps = tuple(str(item["message"]) for item in findings)
         blocked = any(item.get("severity") == "high" for item in findings)
         final = "BLOCKED" if blocked else "REVIEW"
-        run = run.model_copy(update={
-            "state": AgenticState.BLOCKED if blocked else AgenticState.AWAITING_SUPERVISION,
-            "final_status": final,
-            "gaps": gaps,
-            "finished_at": timestamp,
-        })
+        run = run.model_copy(
+            update={
+                "state": AgenticState.BLOCKED if blocked else AgenticState.AWAITING_SUPERVISION,
+                "final_status": final,
+                "gaps": gaps,
+                "finished_at": timestamp,
+            }
+        )
         storage.save_run(run)
         storage.json("review-findings.json", {"findings": findings})
-        task_store.record_event(root, task_id, {"event": "agentic_review", "run_id": run_id, "findings": findings})
-        return {"run": run.model_dump(mode="json"), "findings": findings, "status": final, "run_dir": str(storage.directory)}
+        task_store.record_event(
+            root, task_id, {"event": "agentic_review", "run_id": run_id, "findings": findings}
+        )
+        return {
+            "run": run.model_dump(mode="json"),
+            "findings": findings,
+            "status": final,
+            "run_dir": str(storage.directory),
+        }
 
     capabilities = select_capabilities(load_capabilities(), risk=spec.risk.value)
-    invocation_ids = tuple(stable_id("inv", {"run": run_id, "capability": item.name}) for item in capabilities)
+    invocation_ids = tuple(
+        stable_id("inv", {"run": run_id, "capability": item.name}) for item in capabilities
+    )
     invocations = tuple(
         AgentInvocation(
             invocation_id=invocation_id,
@@ -146,10 +160,12 @@ async def execute_run(
         )
         for invocation_id, item in zip(invocation_ids, capabilities, strict=True)
     )
-    run = run.model_copy(update={
-        "state": AgenticState.RUNNING,
-        "invocation_ids": invocation_ids,
-    })
+    run = run.model_copy(
+        update={
+            "state": AgenticState.RUNNING,
+            "invocation_ids": invocation_ids,
+        }
+    )
     storage.save_run(run)
 
     async def worker(invocation: AgentInvocation) -> object:
@@ -171,7 +187,9 @@ async def execute_run(
         max_calls=policy.max_calls,
         parallelism=lambda ready, remaining: min(
             policy.max_parallel_agents,
-            max(1, ready // 2) if spec.risk.value in {"sensitive", "external_mutation", "destructive", "irreversible"} else ready,
+            max(1, ready // 2)
+            if spec.risk.value in {"sensitive", "external_mutation", "destructive", "irreversible"}
+            else ready,
         ),
     )
     artifacts: list[AgentArtifact] = []
@@ -181,7 +199,13 @@ async def execute_run(
             errors.append(result.error or "invocation failed")
             continue
         payload = _json_payload(result.response)
-        artifact_id = stable_id("artifact", {"run": run_id, "invocation": result.invocation.invocation_id})
+        guardrail_gaps = validate_agent_payload(payload)
+        if guardrail_gaps:
+            errors.extend(f"{result.invocation.capability}: {gap}" for gap in guardrail_gaps)
+            continue
+        artifact_id = stable_id(
+            "artifact", {"run": run_id, "invocation": result.invocation.invocation_id}
+        )
         artifact = AgentArtifact(
             artifact_id=artifact_id,
             run_id=run_id,
@@ -200,15 +224,27 @@ async def execute_run(
         )
         artifacts.append(artifact)
         storage.artifact(artifact)
-        storage.event(TrajectoryEvent(
-            event_id=stable_id("event", {"run": run_id, "invocation": result.invocation.invocation_id, "event": "checkpoint"}),
-            run_id=run_id,
-            event="invocation_checkpoint",
-            actor="api-agentic-orchestrator",
-            subject=result.invocation.invocation_id,
-            payload={"artifact_id": artifact.artifact_id, "content_sha256": artifact.content_sha256},
-            created_at=timestamp,
-        ))
+        storage.event(
+            TrajectoryEvent(
+                event_id=stable_id(
+                    "event",
+                    {
+                        "run": run_id,
+                        "invocation": result.invocation.invocation_id,
+                        "event": "checkpoint",
+                    },
+                ),
+                run_id=run_id,
+                event="invocation_checkpoint",
+                actor="api-agentic-orchestrator",
+                subject=result.invocation.invocation_id,
+                payload={
+                    "artifact_id": artifact.artifact_id,
+                    "content_sha256": artifact.content_sha256,
+                },
+                created_at=timestamp,
+            )
+        )
 
     all_unresolved = tuple(item for artifact in artifacts for item in artifact.unresolved)
     confidences = [item.confidence for item in artifacts if item.confidence is not None]
@@ -225,34 +261,49 @@ async def execute_run(
     critic_required = requires_critic(policy, spec.risk.value)
     gate_reasons = tuple(sorted(set(reasons + (("critic_findings",) if critic else ()))))
     needs_gate = requires_human_gate(policy, gate_reasons) or (critic_required and bool(critic))
-    final_status = "REVIEW" if errors or room or needs_gate else "BLOCKED" if not artifacts else "REVIEW"
-    run = run.model_copy(update={
-        "state": AgenticState.AWAITING_SUPERVISION if final_status == "REVIEW" else AgenticState.BLOCKED,
-        "artifact_ids": tuple(item.artifact_id for item in artifacts),
-        "gaps": tuple(sorted(set(errors + list(critic) + list(all_unresolved)))),
-        "final_status": final_status,
-        "finished_at": timestamp,
-        "run_digest": content_hash({"run": run_id, "artifacts": [item.model_dump(mode="json") for item in artifacts]}),
-    })
+    final_status = (
+        "REVIEW" if errors or room or needs_gate else "BLOCKED" if not artifacts else "REVIEW"
+    )
+    run = run.model_copy(
+        update={
+            "state": AgenticState.AWAITING_SUPERVISION
+            if final_status == "REVIEW"
+            else AgenticState.BLOCKED,
+            "artifact_ids": tuple(item.artifact_id for item in artifacts),
+            "gaps": tuple(sorted(set(errors + list(critic) + list(all_unresolved)))),
+            "final_status": final_status,
+            "finished_at": timestamp,
+            "run_digest": content_hash(
+                {"run": run_id, "artifacts": [item.model_dump(mode="json") for item in artifacts]}
+            ),
+        }
+    )
     storage.save_run(run)
-    storage.json("summary.json", {
-        "run_id": run_id,
-        "critic_required": critic_required,
-        "critic_findings": critic,
-        "debate_reasons": reasons,
-        "human_gate": needs_gate,
-        "errors": errors,
-    })
+    storage.json(
+        "summary.json",
+        {
+            "run_id": run_id,
+            "critic_required": critic_required,
+            "critic_findings": critic,
+            "debate_reasons": reasons,
+            "human_gate": needs_gate,
+            "errors": errors,
+        },
+    )
     storage.json("replay.json", storage.replay())
     task_store.record_agentic_run(root, run)
-    task_store.record_event(root, task_id, {
-        "event": "agentic_run",
-        "run_id": run_id,
-        "status": final_status,
-        "artifacts": len(artifacts),
-        "critic_required": critic_required,
-        "debate_reasons": reasons,
-    })
+    task_store.record_event(
+        root,
+        task_id,
+        {
+            "event": "agentic_run",
+            "run_id": run_id,
+            "status": final_status,
+            "artifacts": len(artifacts),
+            "critic_required": critic_required,
+            "debate_reasons": reasons,
+        },
+    )
     return {
         "run": run.model_dump(mode="json"),
         "artifacts": [item.model_dump(mode="json") for item in artifacts],

@@ -8,8 +8,24 @@ from apiforge.core.ids import stable_id
 
 _MUTATIONS = {
     "redis": {"set", "setex", "hset", "sadd", "lpush", "rpush", "del", "expire"},
-    "mongo": {"insert", "insert_one", "insert_many", "update", "update_one", "delete", "delete_one"},
-    "dynamo": {"putitem", "updateitem", "deleteitem", "batchwriteitem", "put_item", "update_item", "delete_item"},
+    "mongo": {
+        "insert",
+        "insert_one",
+        "insert_many",
+        "update",
+        "update_one",
+        "delete",
+        "delete_one",
+    },
+    "dynamo": {
+        "putitem",
+        "updateitem",
+        "deleteitem",
+        "batchwriteitem",
+        "put_item",
+        "update_item",
+        "delete_item",
+    },
     "neptune": {"addv", "adde", "drop", "addvertex", "addedge"},
 }
 
@@ -25,10 +41,10 @@ def assess_data_access(
     database = ir.database.lower()
     if database not in _MUTATIONS:
         raise ValueError(f"unsupported database {ir.database!r}")
-    observed = tuple(sorted({pattern.strip().lower() for pattern in ir.access_patterns if pattern.strip()}))
-    mutation_patterns = tuple(
-        pattern for pattern in observed if pattern in _MUTATIONS[database]
+    observed = tuple(
+        sorted({pattern.strip().lower() for pattern in ir.access_patterns if pattern.strip()})
     )
+    mutation_patterns = tuple(pattern for pattern in observed if pattern in _MUTATIONS[database])
     blockers: list[str] = []
     evidence = ["static-ir-only", "network_called:false", "mutation_performed:false"]
     if not credential_configured:
@@ -72,7 +88,11 @@ def build_data_performance_profile(
         for key, value in fact.measures.items():
             if value is True:
                 signals.add(str(key))
-        if database == "redis" and fact.kind == "data.redis.write" and "ttl_seconds" not in fact.measures:
+        if (
+            database == "redis"
+            and fact.kind == "data.redis.write"
+            and "ttl_seconds" not in fact.measures
+        ):
             risks.add("write-without-declared-ttl")
         if database == "dynamo" and fact.kind == "data.dynamo.operation":
             if fact.measures.get("full_scan") is True:
@@ -84,11 +104,17 @@ def build_data_performance_profile(
                 risks.add("unfiltered-write")
             if fact.measures.get("unbounded") is True:
                 risks.add("unbounded-document-query")
-        if database == "neptune" and fact.kind == "data.neptune.query" and fact.measures.get("unbounded") is True:
+        if (
+            database == "neptune"
+            and fact.kind == "data.neptune.query"
+            and fact.measures.get("unbounded") is True
+        ):
             risks.add("unbounded-graph-traversal")
     latency_class = {
-        "redis": "low_latency", "dynamo": "partitioned_scale",
-        "mongo": "document", "neptune": "graph",
+        "redis": "low_latency",
+        "dynamo": "partitioned_scale",
+        "mongo": "document",
+        "neptune": "graph",
     }[database]
     return DataPerformanceProfile(
         id=stable_id("data-profile", {"root": inventory.root, "database": database}),

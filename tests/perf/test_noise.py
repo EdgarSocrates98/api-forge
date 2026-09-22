@@ -55,14 +55,11 @@ def test_metric_noise_pools_operations() -> None:
 def test_at002_delta_within_floor_is_inconclusive(tmp_path: Path) -> None:
     """3 baselines ~±2% variance; candidate +1.5% -> inconclusive naming floor."""
     baselines = tuple(
-        _run("orders", p99, err)
-        for p99, err in ((100.0, 0.010), (102.0, 0.0102), (98.0, 0.0098))
+        _run("orders", p99, err) for p99, err in ((100.0, 0.010), (102.0, 0.0102), (98.0, 0.0098))
     )
     candidate = _run("orders", 101.5, 0.01015)
     report = verdict(candidate, repeat_baselines=baselines)
-    cond = next(
-        c for c in report.conditions if c.id == "distinguishable-from-baseline"
-    )
+    cond = next(c for c in report.conditions if c.id == "distinguishable-from-baseline")
     assert cond.status == "unevaluable"
     assert "floor" in cond.detail
     assert report.verdict == "inconclusive"
@@ -70,22 +67,17 @@ def test_at002_delta_within_floor_is_inconclusive(tmp_path: Path) -> None:
 
 def test_delta_beyond_floor_is_distinguishable() -> None:
     baselines = tuple(
-        _run("orders", p99, err)
-        for p99, err in ((100.0, 0.010), (102.0, 0.0102), (98.0, 0.0098))
+        _run("orders", p99, err) for p99, err in ((100.0, 0.010), (102.0, 0.0102), (98.0, 0.0098))
     )
     candidate = _run("orders", 150.0, 0.010)
     report = verdict(candidate, repeat_baselines=baselines)
-    cond = next(
-        c for c in report.conditions if c.id == "distinguishable-from-baseline"
-    )
+    cond = next(c for c in report.conditions if c.id == "distinguishable-from-baseline")
     assert cond.status == "met"
 
 
 def test_single_baseline_leaves_floor_unproven() -> None:
     report = verdict(_run("orders", 150.0, 0.02), repeat_baselines=(_run("o", 100, 0.01),))
-    cond = next(
-        c for c in report.conditions if c.id == "distinguishable-from-baseline"
-    )
+    cond = next(c for c in report.conditions if c.id == "distinguishable-from-baseline")
     assert cond.status == "unevaluable"
     assert "unproven" in cond.detail
 
@@ -93,12 +85,8 @@ def test_single_baseline_leaves_floor_unproven() -> None:
 def test_compare_suppresses_regression_inside_floor() -> None:
     base_ops = {"GET /a": {"count": 5, "mean_ms": 100.0}}
     cand_ops = {"GET /a": {"count": 5, "mean_ms": 112.0}}
-    baseline = PerformanceRun.model_validate(
-        {"id": "b", "attributes": {"operations": base_ops}}
-    )
-    candidate = PerformanceRun.model_validate(
-        {"id": "c", "attributes": {"operations": cand_ops}}
-    )
+    baseline = PerformanceRun.model_validate({"id": "b", "attributes": {"operations": base_ops}})
+    candidate = PerformanceRun.model_validate({"id": "c", "attributes": {"operations": cand_ops}})
     repeats = tuple(
         PerformanceRun.model_validate(
             {
@@ -109,7 +97,10 @@ def test_compare_suppresses_regression_inside_floor() -> None:
         for i, v in enumerate((90.0, 110.0, 100.0))
     )
     report = compare_runs(
-        baseline, candidate, threshold_pct=10.0, min_samples=3,
+        baseline,
+        candidate,
+        threshold_pct=10.0,
+        min_samples=3,
         repeat_baselines=repeats,
     )
     assert report.regressions == ()

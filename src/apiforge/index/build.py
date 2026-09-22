@@ -66,8 +66,7 @@ def _detect(project: Path) -> str:
 
 def _write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
     text = "".join(
-        json.dumps(r, sort_keys=True, separators=(",", ":"), default=str) + "\n"
-        for r in rows
+        json.dumps(r, sort_keys=True, separators=(",", ":"), default=str) + "\n" for r in rows
     )
     path.write_text(text, encoding="utf-8", newline="")
 
@@ -120,9 +119,7 @@ def _derive_decisions(root: Path) -> list[dict[str, Any]]:
     try:
         entries = read_ledger(Path(root))
     except (json.JSONDecodeError, OSError) as exc:
-        raise ContractError(
-            "AF-INDEX-DECISIONS-CORRUPT", f"{path}: {exc}"
-        ) from exc
+        raise ContractError("AF-INDEX-DECISIONS-CORRUPT", f"{path}: {exc}") from exc
     return [
         {k: e.get(k) for k in ("at", "decision", "event", "outcome", "to", "verb") if k in e}
         for e in entries
@@ -144,9 +141,7 @@ def build_index(
         framework = _detect(project)
     extractor = _extractors().get(framework)
     if extractor is None:
-        raise ContractError(
-            "AF-INDEX-FRAMEWORK", f"no extractor for framework {framework!r}"
-        )
+        raise ContractError("AF-INDEX-FRAMEWORK", f"no extractor for framework {framework!r}")
     if inventory is None:
         inventory = extractor(project)
 
@@ -189,9 +184,7 @@ def build_index(
     routes.sort(key=lambda r: (str(r["method"]), str(r["path"]), str(r["source"])))
     symbols.sort(key=lambda s: (str(s["path"]), s["line"] or 0, str(s["name"])))
     facts.sort(key=lambda f: str(f["fact_id"]))
-    unrouted = sorted(
-        f["path"] for f in files if f["path"] not in routed_files
-    )
+    unrouted = sorted(f["path"] for f in files if f["path"] not in routed_files)
 
     derived = {kind: _derive(inventory, kind) for kind in DERIVED_KINDS}
     derived["findings"] = _derive_findings(findings_path)
@@ -222,8 +215,7 @@ def build_index(
             "files_without_routes": unrouted,
             "note": "index covers extractor-visible symbols only",
             "derivation": {
-                kind: f"fact kinds {list(prefixes)}"
-                for kind, prefixes in DERIVED_KINDS.items()
+                kind: f"fact kinds {list(prefixes)}" for kind, prefixes in DERIVED_KINDS.items()
             }
             | {
                 "findings": "findings_path argument (case findings.json)",
@@ -243,9 +235,7 @@ def index_status(project: Path, root: Path) -> dict[str, Any]:
     manifest_path = out / "index.json"
     files_path = out / "files.jsonl"
     if not manifest_path.is_file() or not files_path.is_file():
-        raise ContractError(
-            "AF-INDEX-NOT-BUILT", f"no index under {out} — run `index build`"
-        )
+        raise ContractError("AF-INDEX-NOT-BUILT", f"no index under {out} — run `index build`")
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     old = {
         r["path"]: r
@@ -259,9 +249,7 @@ def index_status(project: Path, root: Path) -> dict[str, Any]:
     new = {r["path"]: r for r in rows}
     added = sorted(set(new) - set(old))
     removed = sorted(set(old) - set(new))
-    changed = sorted(
-        p for p in set(new) & set(old) if new[p]["sha256"] != old[p]["sha256"]
-    )
+    changed = sorted(p for p in set(new) & set(old) if new[p]["sha256"] != old[p]["sha256"])
     return {
         "index_version": manifest.get("index_version"),
         "source_digest": digest,

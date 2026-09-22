@@ -1,0 +1,4 @@
+vertical: api
+status: unresolved
+case: dynamic_router_binding
+reason: route is not statically resolvable

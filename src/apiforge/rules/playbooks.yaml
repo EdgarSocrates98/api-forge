@@ -190,6 +190,12 @@ api-agentic-observability-engineer:
 api-verification-engineer:
   - {executor: af-verifier, verb: "observability verify", purpose: "challenge receipts and evidence"}
   - {executor: af-synthesizer, verb: "brief show", purpose: "name unresolved proof gaps"}
+api-platform-completion-reviewer:
+  - {executor: af-inventory, verb: "discover", purpose: "inventory the supported static surface"}
+  - {executor: af-extractor, verb: "analyze", purpose: "persist facts, findings and diagnostics"}
+  - {executor: af-verifier, verb: "evidence emit", purpose: "bind artifacts to current hashes"}
+  - {executor: af-verifier, verb: "graph coverage", purpose: "verify provenance and unresolved coverage"}
+  - {executor: af-synthesizer, verb: "brief show", purpose: "report proof, gaps and next action"}
 api-grpc-contract-engineer:
   - {executor: af-inventory, verb: "grpc analyze", purpose: "build canonical gRPC IR"}
   - {executor: af-verifier, verb: "grpc verify", purpose: "preserve source and compatibility evidence"}

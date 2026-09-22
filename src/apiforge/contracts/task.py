@@ -148,10 +148,7 @@ class AcceptanceRecord(VersionedContract):
 
     @model_validator(mode="after")
     def acceptor_is_not_executor(self) -> AcceptanceRecord:
-        if (
-            self.executed_by is not None
-            and self.accepted_by == self.executed_by
-        ):
+        if self.executed_by is not None and self.accepted_by == self.executed_by:
             raise ValueError("acceptance must be separate from the executor")
         return self
 
@@ -199,7 +196,5 @@ class OutcomeBrief(VersionedContract):
             if self.open:
                 missing.append("open must be empty")
             if missing:
-                raise ValueError(
-                    f"DONE refused: {'; '.join(missing)}"
-                )
+                raise ValueError(f"DONE refused: {'; '.join(missing)}")
         return self

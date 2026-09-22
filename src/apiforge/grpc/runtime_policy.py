@@ -24,8 +24,16 @@ def validate_policy(ir: GrpcIR, policy: GrpcRuntimePolicy) -> tuple[str, ...]:
 
 def evaluate_deadline(elapsed_ms: float, policy: GrpcRuntimePolicy) -> dict[str, object]:
     exceeded = elapsed_ms > policy.deadline_ms
-    return {"status": "DEADLINE_EXCEEDED" if exceeded else "OK", "retry_allowed": False if exceeded else policy.max_attempts > 1}
+    return {
+        "status": "DEADLINE_EXCEEDED" if exceeded else "OK",
+        "retry_allowed": False if exceeded else policy.max_attempts > 1,
+    }
 
 
 def runtime_capabilities(policy: GrpcRuntimePolicy) -> dict[str, object]:
-    return {"health_check": policy.health_check, "reflection": policy.reflection, "deadline_ms": policy.deadline_ms, "max_message_bytes": policy.max_message_bytes}
+    return {
+        "health_check": policy.health_check,
+        "reflection": policy.reflection,
+        "deadline_ms": policy.deadline_ms,
+        "max_message_bytes": policy.max_message_bytes,
+    }

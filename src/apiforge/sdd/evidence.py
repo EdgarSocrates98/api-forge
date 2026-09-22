@@ -18,24 +18,18 @@ from typing import Any
 from apiforge.core.yaml import StrictYamlError, load_yaml_mapping, split_frontmatter
 from apiforge.sdd.models import SddError, load_gates
 
-_PYTEST_TAIL = re.compile(
-    r"(\d+)\s+passed|(\d+)\s+failed|(\d+)\s+skipped|(\d+)\s+error"
-)
+_PYTEST_TAIL = re.compile(r"(\d+)\s+passed|(\d+)\s+failed|(\d+)\s+skipped|(\d+)\s+error")
 
 
 def _extract_plan_tasks(text: str) -> dict[str, Any]:
     meta, _ = split_frontmatter(text)
     if meta is None:
-        raise SddError(
-            "AF-SDD-EVIDENCE-EXTRACT", "plan.tasks: source has no frontmatter"
-        )
+        raise SddError("AF-SDD-EVIDENCE-EXTRACT", "plan.tasks: source has no frontmatter")
     data = load_yaml_mapping(meta, source="plan.md frontmatter")
     tasks = data.get("tasks") or []
     return {
         "tasks": [
-            {"id": t.get("id"), "status": t.get("status")}
-            for t in tasks
-            if isinstance(t, dict)
+            {"id": t.get("id"), "status": t.get("status")} for t in tasks if isinstance(t, dict)
         ]
     }
 
@@ -43,9 +37,7 @@ def _extract_plan_tasks(text: str) -> dict[str, Any]:
 def _extract_test_results(text: str) -> dict[str, Any]:
     counts = {"passed": 0, "failed": 0, "skipped": 0, "error": 0}
     for match in _PYTEST_TAIL.finditer(text):
-        for name, group in zip(
-            ("passed", "failed", "skipped", "error"), match.groups()
-        ):
+        for name, group in zip(("passed", "failed", "skipped", "error"), match.groups()):
             if group:
                 counts[name] += int(group)
     if not any(counts.values()):
@@ -93,9 +85,7 @@ def emit_evidence(
     try:
         extracted = extractor(raw.decode("utf-8")) if extractor else {}
     except (StrictYamlError, ValueError) as exc:
-        raise SddError(
-            "AF-SDD-EVIDENCE-EXTRACT", f"{kind}: cannot read source ({exc})"
-        ) from exc
+        raise SddError("AF-SDD-EVIDENCE-EXTRACT", f"{kind}: cannot read source ({exc})") from exc
 
     root = Path(root)
     if not (root / feature).is_dir():
@@ -111,7 +101,5 @@ def emit_evidence(
     }
     out = state_dir / "evidence" / f"{kind}.json"
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(
-        json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
-    )
+    out.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return payload | {"evidence_file": str(out)}

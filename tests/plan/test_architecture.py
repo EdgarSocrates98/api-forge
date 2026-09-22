@@ -11,9 +11,7 @@ def _chosen(out: dict, role: str) -> dict:
 
 
 def _rejected(out: dict, candidate: str) -> dict | None:
-    return next(
-        (r for r in out["rejected"] if r["candidate"] == candidate), None
-    )
+    return next((r for r in out["rejected"] if r["candidate"] == candidate), None)
 
 
 def test_kubernetes_need_picks_eks_and_names_reason() -> None:
@@ -74,9 +72,7 @@ def test_streaming_favors_msk() -> None:
 
 def test_no_datastore_without_data_model() -> None:
     out = recommend(WorkloadProfile(id="w"))
-    rej = next(
-        r for r in out["rejected"] if r["role"] == "data"
-    )
+    rej = next(r for r in out["rejected"] if r["role"] == "data")
     assert rej["candidate"] == "(all)"
     assert "data_model not declared" in rej["reason"]
 
@@ -94,16 +90,12 @@ def test_websocket_needs_streaming_signal() -> None:
 
 
 def test_premises_list_declared_fields_only() -> None:
-    out = recommend(
-        WorkloadProfile(id="w", timing="synchronous", exposure="private")
-    )
+    out = recommend(WorkloadProfile(id="w", timing="synchronous", exposure="private"))
     assert set(out["premises"]) == {"exposure", "timing"}
     assert "cost was never measured" in " ".join(out["risks"])
     assert out["cost_to_validate"]
 
 
 def test_deterministic_output() -> None:
-    profile = WorkloadProfile(id="w", 
-        event_driven=True, data_model="key-value", exposure="public"
-    )
+    profile = WorkloadProfile(id="w", event_driven=True, data_model="key-value", exposure="public")
     assert recommend(profile) == recommend(profile)

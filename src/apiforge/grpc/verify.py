@@ -38,4 +38,9 @@ def verify(
 
 def verify_holdout(expected_digest: str, actual_ir: GrpcIR) -> GrpcVerification:
     detected = actual_ir.source_sha256 != expected_digest
-    return GrpcVerification(verdict="REVIEW" if detected else "DONE", checks=("holdout-digest",), gaps=("holdout mutation detected",) if detected else (), evidence=(f"source:{actual_ir.source_sha256}",))
+    return GrpcVerification(
+        verdict="REVIEW" if detected else "DONE",
+        checks=("holdout-digest",),
+        gaps=("holdout mutation detected",) if detected else (),
+        evidence=(f"source:{actual_ir.source_sha256}",),
+    )

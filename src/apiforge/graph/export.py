@@ -39,7 +39,9 @@ def export_graph(graph_dir: Path, out_dir: Path, fmt: str = "jsonl") -> GraphExp
         edges_sha256=hashlib.sha256((src / EDGES_FILE).read_bytes()).hexdigest()
         if (src / EDGES_FILE).is_file()
         else "0" * 64,
-        node_count=sum(1 for line in nodes.read_text(encoding="utf-8").splitlines() if line.strip()),
+        node_count=sum(
+            1 for line in nodes.read_text(encoding="utf-8").splitlines() if line.strip()
+        ),
         edge_count=sum(
             1
             for line in (src / EDGES_FILE).read_text(encoding="utf-8").splitlines()

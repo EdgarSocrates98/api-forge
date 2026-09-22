@@ -59,9 +59,7 @@ def _write(case_dir: Path, debate: Debate) -> Path:
         "referee": debate.referee,
         "closed_at": debate.closed_at,
     }
-    out.write_text(
-        json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
-    )
+    out.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return out
 
 
@@ -85,20 +83,14 @@ def _load(case_dir: Path, debate_id: str) -> Debate:
 
 def _require_open(debate: Debate) -> None:
     if debate.status != "open":
-        raise DebateError(
-            "AF-DEBATE-CLOSED", f"{debate.debate_id} is {debate.status}"
-        )
+        raise DebateError("AF-DEBATE-CLOSED", f"{debate.debate_id} is {debate.status}")
 
 
 def open_debate(case_dir: Path, question: str, sides: tuple[str, ...], now: str) -> Debate:
     """Open a debate; `now` is the only clock."""
     if len(set(sides)) < _QUORUM_SIDES:
-        raise DebateError(
-            "AF-DEBATE-SIDES", f"debate needs >= {_QUORUM_SIDES} distinct sides"
-        )
-    debate_id = stable_id(
-        "debate", {"question": question, "sides": sorted(sides), "opened": now}
-    )
+        raise DebateError("AF-DEBATE-SIDES", f"debate needs >= {_QUORUM_SIDES} distinct sides")
+    debate_id = stable_id("debate", {"question": question, "sides": sorted(sides), "opened": now})
     debate = Debate(
         debate_id=debate_id,
         question=question,
@@ -120,22 +112,16 @@ def submit(
     debate = _load(case_dir, debate_id)
     _require_open(debate)
     if side not in debate.sides:
-        raise DebateError(
-            "AF-DEBATE-SIDE", f"{side!r} not among sides {sorted(debate.sides)}"
-        )
+        raise DebateError("AF-DEBATE-SIDE", f"{side!r} not among sides {sorted(debate.sides)}")
     if not evidence or not all(e.startswith("fact:") for e in evidence):
-        raise DebateError(
-            "AF-DEBATE-NO-EVIDENCE", "positions must cite fact_id evidence"
-        )
+        raise DebateError("AF-DEBATE-NO-EVIDENCE", "positions must cite fact_id evidence")
     submission = {
         "side": side,
         "position": position,
         "evidence": sorted(set(evidence)),
         "order": len(debate.submissions) + 1,
     }
-    updated = Debate(
-        **{**debate.__dict__, "submissions": (*debate.submissions, submission)}
-    )
+    updated = Debate(**{**debate.__dict__, "submissions": (*debate.submissions, submission)})
     _write(case_dir, updated)
     return updated
 

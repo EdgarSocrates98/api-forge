@@ -66,6 +66,12 @@ from apiforge.contracts.observability import (
     TelemetryRecord,
     VendorIntent,
 )
+from apiforge.contracts.platform import (
+    CapabilityRecord,
+    CapabilityRequest,
+    CapabilityResult,
+    VerticalCoverage,
+)
 from apiforge.contracts.stubs import (
     AgenticQualityAssessment,
     AnalyticalAccessIR,
@@ -161,6 +167,10 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "SignalSummary/v1": SignalSummary,
     "SLOResult/v1": SLOResult,
     "Capability/v1": Capability,
+    "CapabilityRecord/v1": CapabilityRecord,
+    "CapabilityRequest/v1": CapabilityRequest,
+    "CapabilityResult/v1": CapabilityResult,
+    "VerticalCoverage/v1": VerticalCoverage,
     "VendorIntent/v1": VendorIntent,
     "IntentDiff/v1": IntentDiff,
     "OperationReceipt/v1": OperationReceipt,

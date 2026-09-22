@@ -46,7 +46,9 @@ def _load(
         return None
 
 
-def _fact(kind: str, rel: str, digest: str, measures: dict[str, Any], attrs: dict[str, Any]) -> Fact:
+def _fact(
+    kind: str, rel: str, digest: str, measures: dict[str, Any], attrs: dict[str, Any]
+) -> Fact:
     return Fact(
         fact_id=stable_id("fact", {"kind": kind, "file": rel, **measures}),
         kind=kind,

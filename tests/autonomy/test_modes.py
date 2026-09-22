@@ -238,19 +238,29 @@ def test_runbook_continuous_continues_past_pending(tmp_path: Path) -> None:
 
 def test_runbook_unknown_named(tmp_path: Path) -> None:
     with pytest.raises(RunbookError, match="AF-AUTONOMY-RUNBOOK-UNKNOWN"):
-        run_runbook(
-            tmp_path, "nope", ctx=_ctx(tmp_path), policy=DEFAULT_POLICY, detail={}
-        )
+        run_runbook(tmp_path, "nope", ctx=_ctx(tmp_path), policy=DEFAULT_POLICY, detail={})
 
 
 def test_ledger_is_append_only_and_recorded(tmp_path: Path) -> None:
     run_action(
-        tmp_path, "rules list", action_class="read_only", args=(), target=None,
-        detail={}, ctx=_ctx(tmp_path), policy=DEFAULT_POLICY,
+        tmp_path,
+        "rules list",
+        action_class="read_only",
+        args=(),
+        target=None,
+        detail={},
+        ctx=_ctx(tmp_path),
+        policy=DEFAULT_POLICY,
     )
     run_action(
-        tmp_path, "rules list", action_class="read_only", args=(), target=None,
-        detail={}, ctx=_ctx(tmp_path), policy=DEFAULT_POLICY,
+        tmp_path,
+        "rules list",
+        action_class="read_only",
+        args=(),
+        target=None,
+        detail={},
+        ctx=_ctx(tmp_path),
+        policy=DEFAULT_POLICY,
     )
     entries = read_ledger(tmp_path)
     assert len(entries) == 2
@@ -265,9 +275,7 @@ def test_v1_mode_names_resolve_through_map(tmp_path: Path) -> None:
     assert parse_mode("sandbox") is AutonomyMode.SUPERVISED
     assert parse_mode("approved") is AutonomyMode.SUPERVISED
     assert parse_mode("continuous") is AutonomyMode.CONTINUOUS
-    assert set(V1_MODE_MAP) == {
-        "observe", "recommend", "sandbox", "approved", "continuous"
-    }
+    assert set(V1_MODE_MAP) == {"observe", "recommend", "sandbox", "approved", "continuous"}
     _set(tmp_path, "sandbox", evidence="e1", approval="ops")
     assert load_mode(tmp_path).mode is AutonomyMode.SUPERVISED
     entry = read_ledger(tmp_path)[-1]

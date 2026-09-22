@@ -12,7 +12,9 @@ from apiforge.contracts.sandbox import SandboxCommand, SandboxCommandResult
 from apiforge.core.ids import stable_id
 from apiforge.runtime.store import content_hash
 
-_DEFAULT_ALLOWLIST = frozenset({"python", "python.exe", "pytest", "pytest.exe", "java", "java.exe", "go", "go.exe"})
+_DEFAULT_ALLOWLIST = frozenset(
+    {"python", "python.exe", "pytest", "pytest.exe", "java", "java.exe", "go", "go.exe"}
+)
 
 
 def _inside(root: Path, child: Path) -> bool:
@@ -50,26 +52,49 @@ def run_sandbox_command(
     started = time.perf_counter()
     try:
         completed = subprocess.run(
-            list(request.command), cwd=cwd, env=env, capture_output=True,
-            text=True, timeout=request.timeout_seconds, check=False, shell=False,
+            list(request.command),
+            cwd=cwd,
+            env=env,
+            capture_output=True,
+            text=True,
+            timeout=request.timeout_seconds,
+            check=False,
+            shell=False,
         )
     except subprocess.TimeoutExpired as exc:
         elapsed = int((time.perf_counter() - started) * 1000)
         stdout = (exc.stdout or "") if isinstance(exc.stdout, str) else ""
         stderr = (exc.stderr or "") if isinstance(exc.stderr, str) else ""
         return SandboxCommandResult(
-            status="timed_out", command=request.command, cwd=str(cwd),
-            stdout=stdout[-20000:], stderr=stderr[-20000:], duration_ms=elapsed,
+            status="timed_out",
+            command=request.command,
+            cwd=str(cwd),
+            stdout=stdout[-20000:],
+            stderr=stderr[-20000:],
+            duration_ms=elapsed,
             evidence_refs=(f"sandbox:{stable_id('command', request.model_dump(mode='json'))}",),
             limitations=(limitation,),
         )
     elapsed = int((time.perf_counter() - started) * 1000)
     stdout = completed.stdout[-20000:]
     stderr = completed.stderr[-20000:]
-    digest = content_hash({"command": request.command, "cwd": str(cwd), "return_code": completed.returncode, "stdout": stdout, "stderr": stderr})
+    digest = content_hash(
+        {
+            "command": request.command,
+            "cwd": str(cwd),
+            "return_code": completed.returncode,
+            "stdout": stdout,
+            "stderr": stderr,
+        }
+    )
     return SandboxCommandResult(
         status="passed" if completed.returncode == 0 else "failed",
-        command=request.command, cwd=str(cwd), return_code=completed.returncode,
-        stdout=stdout, stderr=stderr, duration_ms=elapsed,
-        evidence_refs=(f"sandbox:{digest}",), limitations=(limitation,),
+        command=request.command,
+        cwd=str(cwd),
+        return_code=completed.returncode,
+        stdout=stdout,
+        stderr=stderr,
+        duration_ms=elapsed,
+        evidence_refs=(f"sandbox:{digest}",),
+        limitations=(limitation,),
     )

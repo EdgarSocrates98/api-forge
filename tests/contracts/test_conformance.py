@@ -65,9 +65,7 @@ def test_receipt_keeps_schema_version() -> None:
 
 
 def test_artifact_ref_roundtrip() -> None:
-    out = _roundtrip(
-        ArtifactRef, {"path": "a.json", "sha256": SHA, "kind": "report"}
-    )
+    out = _roundtrip(ArtifactRef, {"path": "a.json", "sha256": SHA, "kind": "report"})
     assert out["version"] == 1 and out["sha256"] == SHA
 
 
@@ -93,9 +91,7 @@ def test_action_plan_is_never_auto_applied() -> None:
 
 
 def test_verification_unresolved_default() -> None:
-    out = _roundtrip(
-        Verification, {"id": "v1", "subject": "f1", "method": "hash"}
-    )
+    out = _roundtrip(Verification, {"id": "v1", "subject": "f1", "method": "hash"})
     assert out["result"] == "unresolved"
 
 
@@ -204,9 +200,7 @@ def test_outcome_brief_done_refusals() -> None:
             }
         )
     # clean DONE is accepted
-    done = OutcomeBrief.model_validate(
-        {"status": "DONE", "outcome": "o", "proof": ["tests green"]}
-    )
+    done = OutcomeBrief.model_validate({"status": "DONE", "outcome": "o", "proof": ["tests green"]})
     assert done.status.value == "DONE"
     # other statuses tolerate gaps
     blocked = OutcomeBrief.model_validate(
@@ -219,17 +213,13 @@ def test_graph_vocabularies_are_closed() -> None:
     node = GraphNode.model_validate(
         {"id": "n1", "kind": "finding", "props": {"rule": "AF-SEC-101"}}
     )
-    edge = GraphEdge.model_validate(
-        {"from_id": "n1", "to_id": "n2", "kind": "backed_by"}
-    )
+    edge = GraphEdge.model_validate({"from_id": "n1", "to_id": "n2", "kind": "backed_by"})
     assert node.kind.value == "finding"
     assert edge.kind.value == "backed_by"
     with pytest.raises(ValidationError):
         GraphNode.model_validate({"id": "n", "kind": "not-a-kind"})
     with pytest.raises(ValidationError):
-        GraphEdge.model_validate(
-            {"from_id": "a", "to_id": "b", "kind": "invented_edge"}
-        )
+        GraphEdge.model_validate({"from_id": "a", "to_id": "b", "kind": "invented_edge"})
 
 
 def test_stubs_carry_unresolved_surface() -> None:

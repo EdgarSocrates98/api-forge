@@ -25,9 +25,7 @@ def discover(spec: MigrationSpec, matrix_path: Path | None = None) -> DiscoveryR
         raise ContractError("AF-MIGRATION-ADAPTER", f"no adapter for {spec.identity()}")
     observation = adapter.discover(root, spec.source_version, spec.target_version)
     hashes = tuple(
-        (path, _hash(root / path))
-        for path in observation.files
-        if (root / path).is_file()
+        (path, _hash(root / path)) for path in observation.files if (root / path).is_file()
     )
     return DiscoveryResult(
         spec_identity=spec.identity(),

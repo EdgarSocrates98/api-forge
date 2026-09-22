@@ -23,7 +23,10 @@ class RunStore:
     def _write(self, relative: str, payload: object) -> Path:
         path = self.directory / relative
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(payload, sort_keys=True, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        path.write_text(
+            json.dumps(payload, sort_keys=True, indent=2, ensure_ascii=False) + "\n",
+            encoding="utf-8",
+        )
         return path
 
     def save_run(self, run: AgenticRun) -> Path:
@@ -36,7 +39,10 @@ class RunStore:
         return path
 
     def artifact(self, artifact: AgentArtifact) -> Path:
-        return self._write(f"artifacts/{artifact.artifact_id.replace(':', '-')}.json", artifact.model_dump(mode="json"))
+        return self._write(
+            f"artifacts/{artifact.artifact_id.replace(':', '-')}.json",
+            artifact.model_dump(mode="json"),
+        )
 
     def json(self, name: str, payload: object) -> Path:
         return self._write(name, payload)
@@ -56,7 +62,9 @@ class RunStore:
 
 def content_hash(value: object) -> str:
     try:
-        encoded = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+        encoded = json.dumps(
+            value, sort_keys=True, separators=(",", ":"), ensure_ascii=False
+        ).encode("utf-8")
     except (TypeError, ValueError) as exc:
         raise ContractError("AF-RUNTIME-HASH", str(exc)) from exc
     return hashlib.sha256(encoded).hexdigest()

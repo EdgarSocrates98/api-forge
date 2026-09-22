@@ -17,9 +17,7 @@ class GoAdapter:
 
     def discover(self, root: Path, source: str, target: str) -> AdapterObservation:
         files = tuple(
-            str(path.relative_to(root))
-            for path in sorted(root.rglob("go.mod"))
-            if path.is_file()
+            str(path.relative_to(root)) for path in sorted(root.rglob("go.mod")) if path.is_file()
         )
         findings: list[MigrationFinding] = []
         if not files:

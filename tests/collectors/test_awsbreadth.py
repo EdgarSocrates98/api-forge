@@ -86,9 +86,7 @@ class _EventsStub:
 
 class _IamStub:
     def get_role(self, **kw):
-        return {
-            "Role": {"Arn": "arn:aws:iam::1:role/api", "MaxSessionDuration": 43200}
-        }
+        return {"Role": {"Arn": "arn:aws:iam::1:role/api", "MaxSessionDuration": 43200}}
 
     def list_attached_role_policies(self, **kw):
         return {
@@ -101,11 +99,7 @@ class _IamStub:
 
     def get_role_policy(self, **kw):
         return {
-            "PolicyDocument": {
-                "Statement": [
-                    {"Effect": "Allow", "Action": "*", "Resource": ["*"]}
-                ]
-            }
+            "PolicyDocument": {"Statement": [{"Effect": "Allow", "Action": "*", "Resource": ["*"]}]}
         }
 
 

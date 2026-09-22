@@ -24,7 +24,9 @@ _CANDIDATES: dict[str, dict[str, Any]] = {
         "role": "edge",
         "ops": 1,
         "traits": {"protocols": ["https"], "payload_limit_bytes": 10_485_760},
-        "disqualify": {"exposure_private": "REST/HTTP APIs are public edge; use privateLink/internal ALB"},
+        "disqualify": {
+            "exposure_private": "REST/HTTP APIs are public edge; use privateLink/internal ALB"
+        },
     },
     "api-gateway-http": {
         "role": "edge",
@@ -184,9 +186,7 @@ def _score(name: str, profile: WorkloadProfile) -> tuple[int, list[str]]:
     meta = _CANDIDATES[name]
     score, reasons = 0, []
     ops = int(meta["ops"])
-    maturity_penalty = {"low": 2, "medium": 1, "high": 0}.get(
-        profile.team_maturity or "medium", 1
-    )
+    maturity_penalty = {"low": 2, "medium": 1, "high": 0}.get(profile.team_maturity or "medium", 1)
     ops_delta = -ops * maturity_penalty
     if ops_delta:
         score += ops_delta
@@ -304,8 +304,7 @@ def recommend(profile: WorkloadProfile) -> dict[str, Any]:
         "rejected": rejected,
         "premises": premises,
         "trade_offs": [
-            f"{c['candidate']}: {', '.join(c['decided_by']) or 'default ranking'}"
-            for c in chosen
+            f"{c['candidate']}: {', '.join(c['decided_by']) or 'default ranking'}" for c in chosen
         ],
         "risks": [
             "traits are declared service data, not measured — validate against the account's limits",

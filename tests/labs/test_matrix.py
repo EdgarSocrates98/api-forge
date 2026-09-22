@@ -12,15 +12,36 @@ MATRIX = Path(__file__).resolve().parent / "matrix.yaml"
 REPO = Path(__file__).resolve().parents[2]
 
 TECHNOLOGIES = {
-    "fastapi", "spring-boot", "go-chi", "redis", "mongodb", "documentdb",
-    "dynamodb", "neptune", "terraform", "sam", "api-gateway", "lambda",
+    "fastapi",
+    "spring-boot",
+    "go-chi",
+    "redis",
+    "mongodb",
+    "documentdb",
+    "dynamodb",
+    "neptune",
+    "terraform",
+    "sam",
+    "api-gateway",
+    "lambda",
 }
 CASES = {
-    "correct_case", "route_absent", "schema_incompatible", "auth_absent",
-    "pagination_absent", "wrong_index", "hot_partition", "unbounded_query",
-    "timeout_absent", "unsafe_retry", "contract_test_absent",
-    "false_positive_finding", "insufficient_information", "breaking_change",
-    "incomplete_telemetry", "inconclusive_benchmark",
+    "correct_case",
+    "route_absent",
+    "schema_incompatible",
+    "auth_absent",
+    "pagination_absent",
+    "wrong_index",
+    "hot_partition",
+    "unbounded_query",
+    "timeout_absent",
+    "unsafe_retry",
+    "contract_test_absent",
+    "false_positive_finding",
+    "insufficient_information",
+    "breaking_change",
+    "incomplete_telemetry",
+    "inconclusive_benchmark",
 }
 
 

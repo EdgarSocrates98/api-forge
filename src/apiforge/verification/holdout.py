@@ -43,7 +43,11 @@ def run_holdouts(
     for item in _manifest(manifest):
         mutation_id = str(item.get("id", ""))
         expected = str(item.get("expected_detection", ""))
-        if mutation_id not in _REPLACEMENTS or expected not in {"security", "idempotency", "pagination"}:
+        if mutation_id not in _REPLACEMENTS or expected not in {
+            "security",
+            "idempotency",
+            "pagination",
+        }:
             raise ContractError("AF-HOLDOUT-MUTATION", f"unsupported mutation {mutation_id!r}")
         target = str(item.get("target", "app.py"))
         destination = base / mutation_id
@@ -59,12 +63,14 @@ def run_holdouts(
         target_path.write_text(content.replace(old, new, 1), encoding="utf-8")
         checks = verify_project(contract, destination)
         detected = any(check.axis == expected and check.verdict == "fail" for check in checks)
-        records.append(HoldoutRecord(
-            mutation_id=mutation_id,
-            target=target,
-            expected_axis=expected,  # type: ignore[arg-type]
-            detected=detected,
-            evidence=(f"holdout:{mutation_id}",),
-            limitation=None if detected else "mutation did not change the expected proof axis",
-        ))
+        records.append(
+            HoldoutRecord(
+                mutation_id=mutation_id,
+                target=target,
+                expected_axis=expected,  # type: ignore[arg-type]
+                detected=detected,
+                evidence=(f"holdout:{mutation_id}",),
+                limitation=None if detected else "mutation did not change the expected proof axis",
+            )
+        )
     return tuple(records)

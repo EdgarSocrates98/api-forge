@@ -63,13 +63,21 @@ def test_analyze_records_cache_meta(tmp_path: Path) -> None:
     out = tmp_path / "case"
     cache = tmp_path / "cache"
     r1 = analyze_project(
-        FIXTURES / "openapi" / "orders-v1.yaml", PROJECT, None, out,
-        cache_dir=cache, ledger_root=tmp_path,
+        FIXTURES / "openapi" / "orders-v1.yaml",
+        PROJECT,
+        None,
+        out,
+        cache_dir=cache,
+        ledger_root=tmp_path,
     )
     out2 = tmp_path / "case2"
     r2 = analyze_project(
-        FIXTURES / "openapi" / "orders-v1.yaml", PROJECT, None, out2,
-        cache_dir=cache, ledger_root=tmp_path,
+        FIXTURES / "openapi" / "orders-v1.yaml",
+        PROJECT,
+        None,
+        out2,
+        cache_dir=cache,
+        ledger_root=tmp_path,
     )
     assert r1.cache["enabled"] is True and r1.cache["hit"] is False
     assert r2.cache["hit"] is True
@@ -84,18 +92,24 @@ def test_index_build_writes_twelve_files(tmp_path: Path) -> None:
     manifest = build_index(PROJECT, tmp_path)
     index = tmp_path / ".apiforge" / "index"
     assert manifest["kinds"] == [
-        "files", "symbols", "routes", "facts", "schemas", "dependencies",
-        "calls", "tests", "iac", "databases", "findings", "decisions",
+        "files",
+        "symbols",
+        "routes",
+        "facts",
+        "schemas",
+        "dependencies",
+        "calls",
+        "tests",
+        "iac",
+        "databases",
+        "findings",
+        "decisions",
     ]
     for name in manifest["kinds"]:
         assert (index / f"{name}.jsonl").is_file()
     assert manifest["counts"]["routes"] > 0
     assert manifest["unresolved"]["note"]
-    rows = [
-        json.loads(l)
-        for l in (index / "routes.jsonl").read_text().splitlines()
-        if l.strip()
-    ]
+    rows = [json.loads(l) for l in (index / "routes.jsonl").read_text().splitlines() if l.strip()]
     assert all(r["method"] and r["path"] for r in rows)
 
 
@@ -166,16 +180,14 @@ def test_findings_and_decisions_derive(tmp_path: Path) -> None:
 
     append_ledger(tmp_path, {"event": "action", "verb": "judge", "outcome": "executed"})
     manifest = build_index(
-        PROJECT, tmp_path, framework="fastapi",
+        PROJECT,
+        tmp_path,
+        framework="fastapi",
         findings_path=case / "findings.json",
     )
     index = tmp_path / ".apiforge" / "index"
-    findings = [
-        json.loads(l) for l in (index / "findings.jsonl").read_text().splitlines() if l
-    ]
-    decisions = [
-        json.loads(l) for l in (index / "decisions.jsonl").read_text().splitlines() if l
-    ]
+    findings = [json.loads(l) for l in (index / "findings.jsonl").read_text().splitlines() if l]
+    decisions = [json.loads(l) for l in (index / "decisions.jsonl").read_text().splitlines() if l]
     assert findings[0]["finding_id"] == "F-1"
     assert decisions[0]["verb"] == "judge"
     assert manifest["counts"]["findings"] == 1

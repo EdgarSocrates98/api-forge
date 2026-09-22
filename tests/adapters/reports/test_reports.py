@@ -46,7 +46,11 @@ def test_missing_report_is_named_diagnostic(name: str, tmp_path: Path) -> None:
     reader, _, _ = READERS[name]
     inv = reader(tmp_path / "absent.json")
     codes = {d.code for d in inv.diagnostics}
-    expected = "AF-TEST-REPORT-MISSING" if name in {"pact", "schemathesis", "k6", "coverage"} else "AF-SEC-REPORT-MISSING"
+    expected = (
+        "AF-TEST-REPORT-MISSING"
+        if name in {"pact", "schemathesis", "k6", "coverage"}
+        else "AF-SEC-REPORT-MISSING"
+    )
     assert codes == {expected}
     assert inv.facts == ()
 

@@ -7,9 +7,7 @@ from apiforge.verification.service import verify_project, verify_task
 
 def test_project_checks_cover_four_proof_axes(orders_paths: dict[str, Path]) -> None:
     checks = verify_project(orders_paths["contract"], orders_paths["project"])
-    assert {check.axis for check in checks} == {
-        "contract", "security", "idempotency", "pagination"
-    }
+    assert {check.axis for check in checks} == {"contract", "security", "idempotency", "pagination"}
     assert all(check.verdict == "pass" for check in checks)
 
 

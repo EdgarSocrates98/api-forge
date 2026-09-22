@@ -75,9 +75,7 @@ def history(root: Path, task_id: str) -> list[dict[str, object]]:
     if not path.is_file():
         return []
     return [
-        json.loads(line)
-        for line in path.read_text(encoding="utf-8").splitlines()
-        if line.strip()
+        json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()
     ]
 
 
@@ -129,9 +127,7 @@ def record_run(root: Path, task_id: str, run: dict[str, object]) -> Path:
     runs.mkdir(exist_ok=True)
     index = len(list(runs.glob("*.json")))
     path = runs / f"{index}.json"
-    path.write_text(
-        json.dumps(run, sort_keys=True, indent=2), encoding="utf-8"
-    )
+    path.write_text(json.dumps(run, sort_keys=True, indent=2), encoding="utf-8")
     return path
 
 

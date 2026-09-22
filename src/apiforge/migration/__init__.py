@@ -12,6 +12,13 @@ from apiforge.migration.planner import compile_plan
 from apiforge.migration.verifier import verify_report
 
 __all__ = [
-    "DiscoveryResult", "MigrationFinding", "MigrationReport", "MigrationSpec",
-    "compile_plan", "discover", "load_matrix", "resolve_versions", "verify_report",
+    "DiscoveryResult",
+    "MigrationFinding",
+    "MigrationReport",
+    "MigrationSpec",
+    "compile_plan",
+    "discover",
+    "load_matrix",
+    "resolve_versions",
+    "verify_report",
 ]

@@ -130,9 +130,7 @@ def analyze_project(
     if cache_dir is not None:
         from apiforge.index.cache import extract_cached
 
-        inventory, meta = extract_cached(
-            project_path, framework, extractor, cache_dir, ledger_root
-        )
+        inventory, meta = extract_cached(project_path, framework, extractor, cache_dir, ledger_root)
         cache_meta = dict(meta)
     else:
         inventory = extractor(project_path)

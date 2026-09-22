@@ -113,8 +113,7 @@ def test_authorize_gate_halts_and_names_missing(tmp_path: Path) -> None:
     authorize = next(s for s in result["stages"] if s["stage"] == "authorize")
     assert authorize["outcome"] == "gate"
     assert "confirmation" in authorize["missing"]
-    assert not any(s["stage"] == "execute" and s["outcome"] == "ok"
-                   for s in result["stages"])
+    assert not any(s["stage"] == "execute" and s["outcome"] == "ok" for s in result["stages"])
 
 
 def test_local_reversible_executes_then_rolls_back(tmp_path: Path) -> None:

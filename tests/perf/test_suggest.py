@@ -38,9 +38,7 @@ def test_confirmed_findings_become_remediate_steps() -> None:
 
 
 def test_unconfirmed_and_unmapped_findings_named() -> None:
-    plan = suggest_fix(
-        [_finding("AF-PERF-101", status="unresolved"), _finding("AF-UNKNOWN-1")]
-    )
+    plan = suggest_fix([_finding("AF-PERF-101", status="unresolved"), _finding("AF-UNKNOWN-1")])
     assert plan.steps == ()
     assert "AF-UNKNOWN-1" in plan.reason
     assert "unresolved" in plan.reason
@@ -57,14 +55,10 @@ def test_suggest_never_writes(tmp_path: Path) -> None:
     from apiforge.adapters.resilience import extract_resilience
     from apiforge.rules.fact_judge import judge_facts
 
-    before = {
-        p: p.read_bytes() for p in sorted(PROJECT.rglob("*")) if p.is_file()
-    }
+    before = {p: p.read_bytes() for p in sorted(PROJECT.rglob("*")) if p.is_file()}
     inventory = extract_resilience(PROJECT)
     findings = judge_facts(inventory.facts)
     plan = suggest_fix(findings)
     assert json.dumps(plan.model_dump(mode="json"))
-    after = {
-        p: p.read_bytes() for p in sorted(PROJECT.rglob("*")) if p.is_file()
-    }
+    after = {p: p.read_bytes() for p in sorted(PROJECT.rglob("*")) if p.is_file()}
     assert before == after

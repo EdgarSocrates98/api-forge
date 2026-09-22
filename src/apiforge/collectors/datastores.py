@@ -33,9 +33,7 @@ def collect_dynamodb(
     table = _call(client, "describe_table", TableName=table_name)
     name, digest = write_artifact(out_dir, "table.json", table)
     manifest.record(name, digest)
-    backups = _call(
-        client, "describe_continuous_backups", TableName=table_name
-    )
+    backups = _call(client, "describe_continuous_backups", TableName=table_name)
     name, digest = write_artifact(out_dir, "backups.json", backups)
     manifest.record(name, digest)
     manifest.meta["table_name"] = table_name
@@ -57,9 +55,7 @@ def collect_docdb(
     if client is None:
         client = _boto3("docdb")
     manifest = CollectManifest(source="docdb", collected_at=now)
-    clusters = _call(
-        client, "describe_db_clusters", DBClusterIdentifier=cluster_id
-    )
+    clusters = _call(client, "describe_db_clusters", DBClusterIdentifier=cluster_id)
     name, digest = write_artifact(out_dir, "cluster.json", clusters)
     manifest.record(name, digest)
     manifest.meta["cluster_id"] = cluster_id
@@ -81,9 +77,7 @@ def collect_neptune(
     if client is None:
         client = _boto3("neptune")
     manifest = CollectManifest(source="neptune", collected_at=now)
-    clusters = _call(
-        client, "describe_db_clusters", DBClusterIdentifier=cluster_id
-    )
+    clusters = _call(client, "describe_db_clusters", DBClusterIdentifier=cluster_id)
     name, digest = write_artifact(out_dir, "cluster.json", clusters)
     manifest.record(name, digest)
     manifest.meta["cluster_id"] = cluster_id

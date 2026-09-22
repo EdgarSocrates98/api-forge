@@ -49,9 +49,7 @@ def edge_line(edge: GraphEdge) -> dict[str, Any]:
     }
 
 
-def write_graph(
-    out_dir: Path, nodes: list[GraphNode], edges: list[GraphEdge]
-) -> dict[str, Any]:
+def write_graph(out_dir: Path, nodes: list[GraphNode], edges: list[GraphEdge]) -> dict[str, Any]:
     """Write canonical node/edge files; return their digests and counts."""
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
@@ -104,9 +102,7 @@ def read_graph(graph_dir: Path) -> tuple[list[GraphNode], list[GraphEdge]]:
         row = json.loads(raw)
         node = _parse_node(row, nodes_path)
         if node.sha256 != node_sha256(node):
-            raise ContractError(
-                "AF-GRAPH-HASH-MISMATCH", f"node {node.id} sha256 diverges"
-            )
+            raise ContractError("AF-GRAPH-HASH-MISMATCH", f"node {node.id} sha256 diverges")
         nodes.append(node)
     edges: list[GraphEdge] = []
     if edges_path.is_file():

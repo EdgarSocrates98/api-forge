@@ -43,12 +43,16 @@ def _load(
         return json.loads(raw)
     except (ValueError, UnicodeDecodeError) as exc:
         diagnostics.append(
-            _diag("AF-TEST-REPORT-INVALID", f"{rel}: not valid JSON ({exc})", rel, input_hashes[rel])
+            _diag(
+                "AF-TEST-REPORT-INVALID", f"{rel}: not valid JSON ({exc})", rel, input_hashes[rel]
+            )
         )
         return None
 
 
-def _fact(kind: str, rel: str, digest: str, measures: dict[str, Any], attrs: dict[str, Any]) -> Fact:
+def _fact(
+    kind: str, rel: str, digest: str, measures: dict[str, Any], attrs: dict[str, Any]
+) -> Fact:
     return Fact(
         fact_id=stable_id("fact", {"kind": kind, "file": rel, **measures}),
         kind=kind,
@@ -84,19 +88,11 @@ def extract_pact(path: Path) -> CodeInventory:
     if isinstance(doc, dict):
         interactions = doc.get("interactions") or []
         methods = sorted(
-            {
-                str(i.get("request", {}).get("method"))
-                for i in interactions
-                if isinstance(i, dict)
-            }
+            {str(i.get("request", {}).get("method")) for i in interactions if isinstance(i, dict)}
             - {"None"}
         )
         paths = sorted(
-            {
-                str(i.get("request", {}).get("path"))
-                for i in interactions
-                if isinstance(i, dict)
-            }
+            {str(i.get("request", {}).get("path")) for i in interactions if isinstance(i, dict)}
             - {"None"}
         )
         facts.append(
@@ -264,6 +260,7 @@ def extract_locust(path: Path) -> CodeInventory:
         if agg is None and rows:
             agg = rows[-1]  # last row is the aggregate in older exports
         if agg is not None:
+
             def num(key: str) -> float | None:
                 try:
                     return float(agg.get(key) or 0)
@@ -302,13 +299,9 @@ def extract_jmeter(path: Path) -> CodeInventory:
     if text is not None:
         rows = list(csv.DictReader(io.StringIO(text)))
         elapsed = [
-            float(r["elapsed"])
-            for r in rows
-            if r.get("elapsed", "").replace(".", "", 1).isdigit()
+            float(r["elapsed"]) for r in rows if r.get("elapsed", "").replace(".", "", 1).isdigit()
         ]
-        failures = sum(
-            1 for r in rows if (r.get("success") or "").strip() in ("false", "0")
-        )
+        failures = sum(1 for r in rows if (r.get("success") or "").strip() in ("false", "0"))
         if rows:
             facts.append(
                 _fact(
@@ -345,6 +338,7 @@ def extract_gatling(path: Path) -> CodeInventory:
     doc = _load(path, path.name, hashes, diagnostics)
     facts: list[Fact] = []
     if isinstance(doc, dict):
+
         def stat(key: str) -> float | None:
             v = doc.get(key)
             if isinstance(v, dict):

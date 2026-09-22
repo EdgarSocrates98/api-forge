@@ -57,7 +57,9 @@ def _plain_or_unresolved(
 ) -> Any:
     """Return the literal value, or None + a named diagnostic for tagged values."""
     if _is_tag(value):
-        diagnostics.append(_diag(code, f"{where}: intrinsic {value['tag']} not resolved", rel, digest))
+        diagnostics.append(
+            _diag(code, f"{where}: intrinsic {value['tag']} not resolved", rel, digest)
+        )
         return None
     if isinstance(value, (dict, list)):
         return None
@@ -73,9 +75,7 @@ def _api_events(props: dict[str, Any]) -> list[dict[str, Any]]:
         if not isinstance(spec, dict) or spec.get("Type") != "Api":
             continue
         inner = spec.get("Properties") or {}
-        out.append(
-            {"event": str(name), "path": inner.get("Path"), "method": inner.get("Method")}
-        )
+        out.append({"event": str(name), "path": inner.get("Path"), "method": inner.get("Method")})
     return out
 
 
@@ -95,16 +95,20 @@ def extract_sam(template_path: Path) -> CodeInventory:
     except yaml.YAMLError as exc:
         diagnostics.append(_diag("AF-SAM-INVALID", f"{rel}: {exc}", rel, digest))
         return CodeInventory(
-            framework="sam", root=str(template_path.parent),
-            facts=(), diagnostics=tuple(diagnostics), input_hashes=input_hashes,
+            framework="sam",
+            root=str(template_path.parent),
+            facts=(),
+            diagnostics=tuple(diagnostics),
+            input_hashes=input_hashes,
         )
     if not isinstance(doc, dict) or not isinstance(doc.get("Resources"), dict):
-        diagnostics.append(
-            _diag("AF-SAM-INVALID", f"{rel}: no Resources mapping", rel, digest)
-        )
+        diagnostics.append(_diag("AF-SAM-INVALID", f"{rel}: no Resources mapping", rel, digest))
         return CodeInventory(
-            framework="sam", root=str(template_path.parent),
-            facts=(), diagnostics=tuple(diagnostics), input_hashes=input_hashes,
+            framework="sam",
+            root=str(template_path.parent),
+            facts=(),
+            diagnostics=tuple(diagnostics),
+            input_hashes=input_hashes,
         )
 
     for name, resource in sorted(doc["Resources"].items()):
@@ -118,20 +122,37 @@ def extract_sam(template_path: Path) -> CodeInventory:
         if rtype == "AWS::Serverless::Function":
             attrs: dict[str, Any] = {
                 "runtime": _plain_or_unresolved(
-                    props.get("Runtime"), "AF-SAM-UNRESOLVED", f"{where}.Runtime", rel, digest, diagnostics
+                    props.get("Runtime"),
+                    "AF-SAM-UNRESOLVED",
+                    f"{where}.Runtime",
+                    rel,
+                    digest,
+                    diagnostics,
                 ),
                 "memory_mb": _plain_or_unresolved(
-                    props.get("MemorySize"), "AF-SAM-UNRESOLVED", f"{where}.MemorySize", rel, digest, diagnostics
+                    props.get("MemorySize"),
+                    "AF-SAM-UNRESOLVED",
+                    f"{where}.MemorySize",
+                    rel,
+                    digest,
+                    diagnostics,
                 ),
                 "timeout_s": _plain_or_unresolved(
-                    props.get("Timeout"), "AF-SAM-UNRESOLVED", f"{where}.Timeout", rel, digest, diagnostics
+                    props.get("Timeout"),
+                    "AF-SAM-UNRESOLVED",
+                    f"{where}.Timeout",
+                    rel,
+                    digest,
+                    diagnostics,
                 ),
                 "handler": props.get("Handler") if isinstance(props.get("Handler"), str) else None,
                 "api_events": _api_events(props),
             }
             facts.append(
                 Fact(
-                    fact_id=stable_id("fact", {"kind": "sam.function", "file": rel, "resource": name}),
+                    fact_id=stable_id(
+                        "fact", {"kind": "sam.function", "file": rel, "resource": name}
+                    ),
                     kind="sam.function",
                     source=SourceRef(path=rel, sha256=digest, line=None, extractor=_EXTRACTOR),
                     measures={"resource": name},
@@ -148,7 +169,12 @@ def extract_sam(template_path: Path) -> CodeInventory:
                     measures={"resource": name},
                     attrs={
                         "stage_name": _plain_or_unresolved(
-                            props.get("StageName"), "AF-SAM-UNRESOLVED", f"{where}.StageName", rel, digest, diagnostics
+                            props.get("StageName"),
+                            "AF-SAM-UNRESOLVED",
+                            f"{where}.StageName",
+                            rel,
+                            digest,
+                            diagnostics,
                         ),
                         "has_auth": isinstance(auth, dict) and bool(auth),
                         "cors": props.get("Cors") is not None,

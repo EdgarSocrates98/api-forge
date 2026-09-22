@@ -18,9 +18,7 @@ JFR = {
                 "type": "jdk.ExecutionSample",
                 "values": {
                     "stackTrace": {
-                        "frames": [
-                            {"method": {"type": "app.OrderService", "name": "find"}}
-                        ]
+                        "frames": [{"method": {"type": "app.OrderService", "name": "find"}}]
                     }
                 },
             },
@@ -28,9 +26,7 @@ JFR = {
                 "type": "jdk.ExecutionSample",
                 "values": {
                     "stackTrace": {
-                        "frames": [
-                            {"method": {"type": "app.OrderService", "name": "find"}}
-                        ]
+                        "frames": [{"method": {"type": "app.OrderService", "name": "find"}}]
                     }
                 },
             },
@@ -95,9 +91,7 @@ def test_pprof_unrecognized(tmp_path: Path) -> None:
 
 def test_pyroscope_self_and_total(tmp_path: Path) -> None:
     inv = extract_pyroscope(_write(tmp_path, "flame.json", PYRO))
-    entries = {
-        f.measures["function"]: f for f in inv.facts if f.kind == "perf.pyroscope.entry"
-    }
+    entries = {f.measures["function"]: f for f in inv.facts if f.kind == "perf.pyroscope.entry"}
     assert entries["app.orders.list"].attrs["self"] == 500
     assert entries["app.orders.list"].attrs["total"] == 700
     assert entries["runtime.gc"].attrs["self"] == 200

@@ -24,9 +24,7 @@ CACHE_VERSION = "extractor/2"
 
 def _key(project: Path, framework: str) -> str:
     digest, _ = source_digest(project)
-    return hashlib.sha256(
-        f"{CACHE_VERSION}|{framework}|{digest}".encode()
-    ).hexdigest()
+    return hashlib.sha256(f"{CACHE_VERSION}|{framework}|{digest}".encode()).hexdigest()
 
 
 def extract_cached(
@@ -45,9 +43,7 @@ def extract_cached(
     inventory: Any = None
     if path.is_file():
         try:
-            inventory = CodeInventory.model_validate(
-                json.loads(path.read_text(encoding="utf-8"))
-            )
+            inventory = CodeInventory.model_validate(json.loads(path.read_text(encoding="utf-8")))
             hit = True
         except (json.JSONDecodeError, ValidationError, OSError):
             inventory = None

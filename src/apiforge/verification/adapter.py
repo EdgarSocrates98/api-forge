@@ -29,13 +29,19 @@ def verify_adapter_execution(execution: AdapterExecution) -> VerificationCheck:
             gaps=("static or heuristic output is not runtime proof",),
             limitation="requires a live read-only observation or an independent fixture oracle",
         )
-    passed = execution.status == "completed" and bool(execution.evidence_refs) and not execution.unresolved
+    passed = (
+        execution.status == "completed"
+        and bool(execution.evidence_refs)
+        and not execution.unresolved
+    )
     return VerificationCheck(
         check_id="adapter-live-read",
         axis="adapter",
         verdict="pass" if passed else "inconclusive",
         evidence=evidence if passed else (),
-        gaps=() if passed else ("live adapter lacks complete evidence or has unresolved diagnostics",),
+        gaps=()
+        if passed
+        else ("live adapter lacks complete evidence or has unresolved diagnostics",),
     )
 
 

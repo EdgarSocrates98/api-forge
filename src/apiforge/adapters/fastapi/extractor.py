@@ -254,12 +254,36 @@ def extract_fastapi(project_root: Path) -> FastApiInventory:
         )
 
     def visit(key: Key, acc_prefix: str, on_path: frozenset[Key], via: str | None) -> None:
+        if key not in bindings:
+            rel = (via or "<root>").split(":", 1)[0]
+            source_scan = next((item for item in scans.values() if item.rel == rel), None)
+            diagnostics.append(
+                _diag(
+                    "AF-FASTAPI-UNRESOLVED-BINDING",
+                    f"binding {key[0]!r}.{key[1]!r} is not present in the static index",
+                    rel,
+                    source_scan.sha256 if source_scan is not None else "0" * 64,
+                    None,
+                )
+            )
+            return
         visited.add(key)
         binding = bindings[key]
         prefix = acc_prefix + (binding.prefix or "")
         for decl, scan in routes_by.get(key, []):
             emit(key, decl, scan, prefix, True, via)
         for child, edge_prefix, _dynamic, scan, line in edges.get(key, []):
+            if child not in bindings:
+                diagnostics.append(
+                    _diag(
+                        "AF-FASTAPI-UNRESOLVED-BINDING",
+                        f"include_router target {child[0]!r}.{child[1]!r} is not present in the static index",
+                        scan.rel,
+                        scan.sha256,
+                        line,
+                    )
+                )
+                continue
             if child in on_path:
                 diagnostics.append(
                     _diag(
@@ -313,6 +337,9 @@ def extract_fastapi(project_root: Path) -> FastApiInventory:
             "fastapi",
             input_hashes,
             tuple(diagnostics),
-            limitations=("does not import or execute application code", "dynamic routes remain unresolved"),
+            limitations=(
+                "does not import or execute application code",
+                "dynamic routes remain unresolved",
+            ),
         ),
     )

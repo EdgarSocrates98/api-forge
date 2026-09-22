@@ -10,7 +10,9 @@ _SECRET = re.compile(r"(authorization|api[-_]?key|token|password|secret|cookie)"
 _ID = re.compile(r"^[0-9a-f]{8,}$", re.IGNORECASE)
 
 
-def redact_attributes(attributes: Mapping[str, Any], allowed: set[str] | None = None) -> dict[str, Any]:
+def redact_attributes(
+    attributes: Mapping[str, Any], allowed: set[str] | None = None
+) -> dict[str, Any]:
     result: dict[str, Any] = {}
     for key, value in attributes.items():
         if allowed is not None and key not in allowed:

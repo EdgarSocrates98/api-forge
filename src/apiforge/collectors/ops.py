@@ -28,9 +28,7 @@ def collect_stepfunctions(
     if client is None:
         client = _boto3("stepfunctions")
     manifest = CollectManifest(source="stepfunctions", collected_at=now)
-    machine = _call(
-        client, "describe_state_machine", stateMachineArn=state_machine_arn
-    )
+    machine = _call(client, "describe_state_machine", stateMachineArn=state_machine_arn)
     name, digest = write_artifact(out_dir, "state-machine.json", machine)
     manifest.record(name, digest)
     manifest.meta["state_machine_arn"] = state_machine_arn
@@ -203,9 +201,7 @@ def collect_s3(
             if code is None:
                 from apiforge.collectors.manifest import CollectError
 
-                raise CollectError(
-                    "AF-COLLECT-AWS", f"{method} failed: {exc}"
-                ) from exc
+                raise CollectError("AF-COLLECT-AWS", f"{method} failed: {exc}") from exc
             payload = {"absent": code}
         artifact, digest = write_artifact(out_dir, name, payload)
         manifest.record(artifact, digest)

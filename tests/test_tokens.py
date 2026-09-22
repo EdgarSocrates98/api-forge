@@ -18,19 +18,29 @@ from apiforge.economy.tokens import (
 def _transcript(tmp_path: Path) -> Path:
     path = tmp_path / "t.jsonl"
     lines = [
-        {"type": "assistant", "message": {"model": "m-a", "usage": {
-            "input_tokens": 100, "output_tokens": 50,
-            "cache_read_input_tokens": 10}}},
-        {"type": "assistant", "message": {"model": "m-a", "usage": {
-            "input_tokens": 200, "output_tokens": 60}}},
-        {"type": "assistant", "message": {"model": "m-b", "usage": {
-            "input_tokens": 5, "output_tokens": 7}}},
+        {
+            "type": "assistant",
+            "message": {
+                "model": "m-a",
+                "usage": {"input_tokens": 100, "output_tokens": 50, "cache_read_input_tokens": 10},
+            },
+        },
+        {
+            "type": "assistant",
+            "message": {"model": "m-a", "usage": {"input_tokens": 200, "output_tokens": 60}},
+        },
+        {
+            "type": "assistant",
+            "message": {"model": "m-b", "usage": {"input_tokens": 5, "output_tokens": 7}},
+        },
         {"type": "human", "message": {"role": "user"}},
         "not json",
         {"type": "assistant", "message": {"usage": {"input_tokens": 1}}},
     ]
-    path.write_text("\n".join(json.dumps(line) if not isinstance(line, str) else line
-                             for line in lines), encoding="utf-8")
+    path.write_text(
+        "\n".join(json.dumps(line) if not isinstance(line, str) else line for line in lines),
+        encoding="utf-8",
+    )
     return path
 
 
@@ -86,14 +96,13 @@ def test_cli_report_with_transcript(tmp_path: Path) -> None:
     root = tmp_path / "case"
     (root / ".apiforge").mkdir(parents=True)
     (root / ".apiforge" / "economy.jsonl").write_text(
-        json.dumps({"verb": "rules list", "detail_level": "normal",
-                    "payload_bytes": 400}) + "\n",
+        json.dumps({"verb": "rules list", "detail_level": "normal", "payload_bytes": 400}) + "\n",
         encoding="utf-8",
     )
     transcript = _transcript(tmp_path)
     result = runner.invoke(
-        app, ["economy", "report", "--root", str(root),
-              "--transcript", str(transcript), "--estimate"]
+        app,
+        ["economy", "report", "--root", str(root), "--transcript", str(transcript), "--estimate"],
     )
     assert result.exit_code == 0, result.output
     payload = json.loads(result.output)
@@ -108,8 +117,8 @@ def test_cli_cost_basis_without_transcript_refused(tmp_path: Path) -> None:
     from apiforge.cli import app
 
     result = CliRunner().invoke(
-        app, ["economy", "report", "--root", str(tmp_path),
-              "--cost-basis", str(tmp_path / "b.yaml")]
+        app,
+        ["economy", "report", "--root", str(tmp_path), "--cost-basis", str(tmp_path / "b.yaml")],
     )
     assert result.exit_code != 0
     assert "AF-ECONOMY-TRANSCRIPT-MISSING" in result.output

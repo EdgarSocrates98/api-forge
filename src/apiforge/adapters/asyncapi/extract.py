@@ -22,7 +22,9 @@ from apiforge.core.yaml import StrictLoadError, load_yaml_strict
 _EXTRACTOR = "asyncapi-doc"
 
 
-def _fact(kind: str, rel: str, digest: str, measures: dict[str, Any], attrs: dict[str, Any]) -> Fact:
+def _fact(
+    kind: str, rel: str, digest: str, measures: dict[str, Any], attrs: dict[str, Any]
+) -> Fact:
     return Fact(
         fact_id=stable_id("fact", {"kind": kind, "file": rel, **measures}),
         kind=kind,
@@ -187,9 +189,7 @@ def extract_asyncapi(path: Path) -> CodeInventory:
     )
 
 
-def _collect_refs(
-    node: Any, rel: str, digest: str, diagnostics: list[Diagnostic]
-) -> None:
+def _collect_refs(node: Any, rel: str, digest: str, diagnostics: list[Diagnostic]) -> None:
     """Every `$ref` is a named unresolved pointer — recorded, never followed."""
     if isinstance(node, dict):
         if "$ref" in node:

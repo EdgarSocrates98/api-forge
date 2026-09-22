@@ -45,7 +45,9 @@ def verify_report(
         outcome=f"verification of {report.spec_identity}",
         proof=report.evidence if status is BriefStatus.DONE else (),
         gaps=gap_values,
-        human_action=None if status is BriefStatus.DONE else "review migration gaps and provide missing evidence",
+        human_action=None
+        if status is BriefStatus.DONE
+        else "review migration gaps and provide missing evidence",
         open=gap_values,
     )
     return report.model_copy(update={"gaps": gap_values, "outcome": outcome})

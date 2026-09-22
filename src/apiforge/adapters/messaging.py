@@ -18,14 +18,25 @@ _TOKENS = {
     "eventbridge": ("eventbridge", "put_events", "put_rule", "events_client"),
     "kinesis": ("kinesis", "put_record", "get_records", "subscribe_to_shard"),
 }
-_DEST_RE = re.compile(r"(?:QueueUrl|TopicArn|EventBusName|StreamName|queue|topic|stream)\s*[=:,]\s*[\"']([^\"']+)", re.IGNORECASE)
+_DEST_RE = re.compile(
+    r"(?:QueueUrl|TopicArn|EventBusName|StreamName|queue|topic|stream)\s*[=:,]\s*[\"']([^\"']+)",
+    re.IGNORECASE,
+)
 _OPS = {
-    "produce": re.compile(r"\b(send_message|publish|put_events|put_record|put_records|put_record_batch|SendMessage|Publish|PutEvents)\b", re.IGNORECASE),
-    "consume": re.compile(r"\b(receive_message|get_records|SubscribeToShard|ReceiveMessage|GetRecords)\b", re.IGNORECASE),
+    "produce": re.compile(
+        r"\b(send_message|publish|put_events|put_record|put_records|put_record_batch|SendMessage|Publish|PutEvents)\b",
+        re.IGNORECASE,
+    ),
+    "consume": re.compile(
+        r"\b(receive_message|get_records|SubscribeToShard|ReceiveMessage|GetRecords)\b",
+        re.IGNORECASE,
+    ),
     "ack": re.compile(r"\b(delete_message|ack|acknowledge|DeleteMessage)\b", re.IGNORECASE),
     "retry": re.compile(r"\b(retry|redrive|visibility_timeout|backoff|attempts)\b", re.IGNORECASE),
     "dlq": re.compile(r"\b(dlq|dead.?letter|redrive_policy)\b", re.IGNORECASE),
-    "idempotency": re.compile(r"\b(deduplication|message.?dedup|idempotenc|sequence_number)\b", re.IGNORECASE),
+    "idempotency": re.compile(
+        r"\b(deduplication|message.?dedup|idempotenc|sequence_number)\b", re.IGNORECASE
+    ),
 }
 
 
@@ -48,15 +59,26 @@ def extract_messaging(project_root: Path, service: str = "sqs") -> CodeInventory
     input_hashes: dict[str, str] = {}
     tokens = _TOKENS[service]
     for path in sorted(root.rglob("*")):
-        if not path.is_file() or path.is_symlink() or path.suffix.lower() not in {".py", ".java", ".go", ".ts", ".js", ".yaml", ".yml", ".json"}:
+        if (
+            not path.is_file()
+            or path.is_symlink()
+            or path.suffix.lower()
+            not in {".py", ".java", ".go", ".ts", ".js", ".yaml", ".yml", ".json"}
+        ):
             continue
         try:
             text = path.read_text(encoding="utf-8")
         except (OSError, UnicodeDecodeError) as exc:
-            diagnostics.append(Diagnostic(
-                code="AF-MESSAGING-READ", status=FindingStatus.UNRESOLVED,
-                message=f"{path}: {exc}", source=SourceRef(path=str(path.relative_to(root)), sha256="0" * 64, extractor="messaging"),
-            ))
+            diagnostics.append(
+                Diagnostic(
+                    code="AF-MESSAGING-READ",
+                    status=FindingStatus.UNRESOLVED,
+                    message=f"{path}: {exc}",
+                    source=SourceRef(
+                        path=str(path.relative_to(root)), sha256="0" * 64, extractor="messaging"
+                    ),
+                )
+            )
             continue
         if not any(token.lower() in text.lower() for token in tokens):
             continue
@@ -65,35 +87,80 @@ def extract_messaging(project_root: Path, service: str = "sqs") -> CodeInventory
         input_hashes[rel] = digest
         for match in _DEST_RE.finditer(text):
             line = text.count("\n", 0, match.start()) + 1
-            facts.append(_fact("data.messaging.destination", rel, digest, line, service=service, destination=match.group(1)))
+            facts.append(
+                _fact(
+                    "data.messaging.destination",
+                    rel,
+                    digest,
+                    line,
+                    service=service,
+                    destination=match.group(1),
+                )
+            )
         for operation, pattern in _OPS.items():
             found = pattern.search(text)
             if found:
                 line = text.count("\n", 0, found.start()) + 1
-                facts.append(_fact("data.messaging.operation", rel, digest, line, service=service, operation=operation))
-        if not any(fact.source.path == rel and fact.kind == "data.messaging.destination" for fact in facts):
-            diagnostics.append(Diagnostic(
-                code="AF-MESSAGING-DYNAMIC-DESTINATION",
-                status=FindingStatus.UNRESOLVED,
-                message=f"{rel}: messaging usage found without a statically resolvable destination",
-                source=SourceRef(path=rel, sha256=digest, extractor="messaging"),
-            ))
+                facts.append(
+                    _fact(
+                        "data.messaging.operation",
+                        rel,
+                        digest,
+                        line,
+                        service=service,
+                        operation=operation,
+                    )
+                )
+        if not any(
+            fact.source.path == rel and fact.kind == "data.messaging.destination" for fact in facts
+        ):
+            diagnostics.append(
+                Diagnostic(
+                    code="AF-MESSAGING-DYNAMIC-DESTINATION",
+                    status=FindingStatus.UNRESOLVED,
+                    message=f"{rel}: messaging usage found without a statically resolvable destination",
+                    source=SourceRef(path=rel, sha256=digest, extractor="messaging"),
+                )
+            )
     return CodeInventory(
-        framework=f"{service}-messaging", root=str(root),
+        framework=f"{service}-messaging",
+        root=str(root),
         facts=tuple(sorted(facts, key=lambda fact: fact.fact_id)),
-        diagnostics=tuple(diagnostics), input_hashes=input_hashes,
+        diagnostics=tuple(diagnostics),
+        input_hashes=input_hashes,
         execution=static_execution(
             f"messaging.{service}",
             input_hashes,
             tuple(diagnostics),
-            limitations=("does not contact AWS messaging services", "does not prove delivery semantics"),
+            limitations=(
+                "does not contact AWS messaging services",
+                "does not prove delivery semantics",
+            ),
         ),
     )
 
 
-def build_messaging_ir(inventory: CodeInventory, *, service: str, provider: str = "aws") -> MessagingAccessIR:
-    destinations = tuple(sorted({str(f.measures["destination"]) for f in inventory.facts if f.kind == "data.messaging.destination"}))
-    operations = tuple(sorted({str(f.measures["operation"]) for f in inventory.facts if f.kind == "data.messaging.operation"}))
+def build_messaging_ir(
+    inventory: CodeInventory, *, service: str, provider: str = "aws"
+) -> MessagingAccessIR:
+    destinations = tuple(
+        sorted(
+            {
+                str(f.measures["destination"])
+                for f in inventory.facts
+                if f.kind == "data.messaging.destination"
+            }
+        )
+    )
+    operations = tuple(
+        sorted(
+            {
+                str(f.measures["operation"])
+                for f in inventory.facts
+                if f.kind == "data.messaging.operation"
+            }
+        )
+    )
     roles: set[Literal["producer", "consumer", "router"]] = set()
     if "produce" in operations:
         roles.add("producer")
@@ -105,8 +172,11 @@ def build_messaging_ir(inventory: CodeInventory, *, service: str, provider: str 
     return MessagingAccessIR(
         id=stable_id("messaging", {"root": inventory.root, "service": service}),
         service=cast(Literal["sqs", "sns", "eventbridge", "kinesis"], service),
-        provider=provider, destinations=destinations, roles=tuple(sorted(roles)),
-        operations=operations, reliability_signals=reliability,
+        provider=provider,
+        destinations=destinations,
+        roles=tuple(sorted(roles)),
+        operations=operations,
+        reliability_signals=reliability,
         unresolved=tuple(sorted(d.code for d in inventory.diagnostics)),
     )
 

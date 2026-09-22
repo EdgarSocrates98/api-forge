@@ -98,7 +98,11 @@ def build_ir(path: Path, descriptor_sha256: str | None = None) -> GrpcIR:
                 http_method: str | None = None
                 http_path: str | None = None
                 line_offset = service_text.find(line)
-                annotation = _HTTP.search(service_text[line_offset : line_offset + 400]) if line_offset >= 0 else None
+                annotation = (
+                    _HTTP.search(service_text[line_offset : line_offset + 400])
+                    if line_offset >= 0
+                    else None
+                )
                 if annotation:
                     http_method, http_path = annotation.group(1).upper(), annotation.group(2)
                 rpcs.append(

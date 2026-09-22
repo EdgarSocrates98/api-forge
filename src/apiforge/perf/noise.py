@@ -37,15 +37,9 @@ def noise_floor(values: list[float]) -> float | None:
     return (max(values) - min(values)) / abs(mean)
 
 
-def field_noise(
-    runs: list[PerformanceRun], field: str
-) -> dict[str, Any]:
+def field_noise(runs: list[PerformanceRun], field: str) -> dict[str, Any]:
     """Floor over a run-level field across repeated runs."""
-    values = [
-        float(v)
-        for r in runs
-        if isinstance((v := getattr(r, field, None)), (int, float))
-    ]
+    values = [float(v) for r in runs if isinstance((v := getattr(r, field, None)), (int, float))]
     return {"field": field, "floor": noise_floor(values), "n": len(values)}
 
 
@@ -57,9 +51,7 @@ def metric_noise(runs: list[PerformanceRun], metric: str) -> dict[str, Any]:
         if not isinstance(ops, dict):
             continue
         for op in ops.values():
-            if isinstance(op, dict) and isinstance(
-                (v := op.get(metric)), (int, float)
-            ):
+            if isinstance(op, dict) and isinstance((v := op.get(metric)), (int, float)):
                 values.append(float(v))
     return {"metric": metric, "floor": noise_floor(values), "n": len(values)}
 

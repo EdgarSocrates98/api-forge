@@ -94,11 +94,7 @@ def _restore(root: Path, run_id: str, paths: tuple[str, ...]) -> dict[str, str]:
     pre_path = snap_dir / "pre.json"
     import json
 
-    pre = (
-        json.loads(pre_path.read_text(encoding="utf-8"))
-        if pre_path.is_file()
-        else {}
-    )
+    pre = json.loads(pre_path.read_text(encoding="utf-8")) if pre_path.is_file() else {}
     result: dict[str, str] = {}
     for raw in paths:
         target = Path(raw)
@@ -116,9 +112,7 @@ def _restore(root: Path, run_id: str, paths: tuple[str, ...]) -> dict[str, str]:
             # an outside change; restoring is still bounded to declared paths
             pass
         target.write_bytes(snap_bytes)
-        result[raw] = (
-            "restored" if _sha(target) == expected else "restore-failed"
-        )
+        result[raw] = "restored" if _sha(target) == expected else "restore-failed"
     return result
 
 
@@ -292,16 +286,15 @@ def run_heal(
         snap_dir = Path(root) / ".apiforge" / "heal" / run_id
         pre = _snapshot(root, run_id, writable_paths)
         snap_dir.mkdir(parents=True, exist_ok=True)
-        (snap_dir / "pre.json").write_text(
-            json.dumps(pre, sort_keys=True) + "\n", encoding="utf-8"
-        )
+        (snap_dir / "pre.json").write_text(json.dumps(pre, sort_keys=True) + "\n", encoding="utf-8")
         executed: list[dict[str, Any]] = []
         for step in plan.get("steps", ()):
             verb = str(step.get("verb", ""))
             outcome = dispatch_step(verb, ctx)
             executed.append({"verb": verb, "status": outcome["status"]})
-        record("execute", "ok" if executed else "no_dispatchable_steps",
-               steps=executed, snapshot=pre)
+        record(
+            "execute", "ok" if executed else "no_dispatchable_steps", steps=executed, snapshot=pre
+        )
 
     # -- verify -------------------------------------------------------------
     if mode is AutonomyMode.OBSERVE:
@@ -312,15 +305,11 @@ def run_heal(
         verified = False
     else:
         post = _load_findings(ctx.findings)
-        verified = len([f for f in post if f.status.value == "confirmed"]) < len(
-            findings
-        )
+        verified = len([f for f in post if f.status.value == "confirmed"]) < len(findings)
         record(
             "verify",
             "ok" if verified else "unchanged",
-            post_confirmed=len(
-                [f for f in post if f.status.value == "confirmed"]
-            ),
+            post_confirmed=len([f for f in post if f.status.value == "confirmed"]),
         )
 
     # -- compare ------------------------------------------------------------
@@ -332,9 +321,7 @@ def run_heal(
         drift = {
             raw: _sha(Path(raw))
             for raw, before in pre.items()
-            if before != "absent"
-            and Path(raw).is_file()
-            and _sha(Path(raw)) != before
+            if before != "absent" and Path(raw).is_file() and _sha(Path(raw)) != before
         }
         record("compare", "ok", changed_paths=sorted(drift))
 

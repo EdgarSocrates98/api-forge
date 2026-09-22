@@ -14,13 +14,19 @@ from apiforge.observability.slo import evaluate_slo
 from apiforge.observability.snapshot import save_snapshot, snapshot
 
 
-def run_fixture(root: Path, source: Path, service: str | None = None, slo: dict[str, Any] | None = None) -> dict[str, object]:
+def run_fixture(
+    root: Path, source: Path, service: str | None = None, slo: dict[str, Any] | None = None
+) -> dict[str, object]:
     records = normalize_records(read(source), source=source.name)
     if service:
         records = tuple(record for record in records if record.service == service)
     observed = snapshot(records)
     snapshot_path = save_snapshot(root, observed)
-    result: dict[str, object] = {"snapshot": observed.model_dump(mode="json"), "snapshot_path": str(snapshot_path), "signals": [item.model_dump(mode="json") for item in summarize(records)]}
+    result: dict[str, object] = {
+        "snapshot": observed.model_dump(mode="json"),
+        "snapshot_path": str(snapshot_path),
+        "signals": [item.model_dump(mode="json") for item in summarize(records)],
+    }
     if slo:
         definition = SLODefinition.model_validate(slo)
         result["slo"] = evaluate_slo(definition, records).model_dump(mode="json")

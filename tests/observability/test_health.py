@@ -18,7 +18,15 @@ def test_health_correlates_slo_and_performance_failure() -> None:
     result = assess_health(
         "orders",
         (_record(200), _record(500, 900)),
-        (SLOResult(slo_id="availability", status="breached", good_events=1, total_events=2, objective=0.99),),
+        (
+            SLOResult(
+                slo_id="availability",
+                status="breached",
+                good_events=1,
+                total_events=2,
+                objective=0.99,
+            ),
+        ),
         ("FAIL",),
     )
 

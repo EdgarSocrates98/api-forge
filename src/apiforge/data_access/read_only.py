@@ -14,10 +14,25 @@ class DataRequester(Protocol):
     def read(self, request: DataReadRequest) -> Mapping[str, object]: ...
 
 
-_WRITE_WORDS = frozenset({
-    "put", "post", "insert", "update", "delete", "drop", "alter", "publish",
-    "send", "produce", "write", "execute_write", "mutate", "create", "truncate",
-})
+_WRITE_WORDS = frozenset(
+    {
+        "put",
+        "post",
+        "insert",
+        "update",
+        "delete",
+        "drop",
+        "alter",
+        "publish",
+        "send",
+        "produce",
+        "write",
+        "execute_write",
+        "mutate",
+        "create",
+        "truncate",
+    }
+)
 
 
 def _is_mutation(operation: str) -> bool:

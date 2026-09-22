@@ -21,7 +21,9 @@ from apiforge.core.models import Diagnostic, Fact, FindingStatus, SourceRef
 _TOP_N = 20
 
 
-def _fact(kind: str, rel: str, digest: str, measures: dict[str, Any], attrs: dict[str, Any]) -> Fact:
+def _fact(
+    kind: str, rel: str, digest: str, measures: dict[str, Any], attrs: dict[str, Any]
+) -> Fact:
     return Fact(
         fact_id=stable_id("fact", {"kind": kind, "file": rel, **measures}),
         kind=kind,
@@ -137,9 +139,7 @@ def extract_pprof(path: Path) -> CodeInventory:
             flat, _, cum, _, name = m.groups()
             rows.append((name, float(flat), float(cum)))
     if not rows:
-        return _bad(
-            path, "pprof", "AF-PERF-REPORT-INVALID", "no -top rows recognized"
-        )
+        return _bad(path, "pprof", "AF-PERF-REPORT-INVALID", "no -top rows recognized")
     facts = [
         _fact(
             "perf.pprof.top",
@@ -172,9 +172,7 @@ def extract_pyroscope(path: Path) -> CodeInventory:
     names = fb.get("names")
     levels = fb.get("levels")
     if not isinstance(names, list) or not isinstance(levels, list):
-        return _bad(
-            path, "pyroscope", "AF-PERF-REPORT-INVALID", "missing flamebearer levels"
-        )
+        return _bad(path, "pyroscope", "AF-PERF-REPORT-INVALID", "missing flamebearer levels")
     digest = hashlib.sha256(path.read_bytes()).hexdigest()
     self_samples: Counter[str] = Counter()
     total_samples: Counter[str] = Counter()

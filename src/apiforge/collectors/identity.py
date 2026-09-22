@@ -54,9 +54,7 @@ def collect_iam_role(
     name, digest = write_artifact(out_dir, "attached-policies.json", attached)
     manifest.record(name, digest)
 
-    names = _call(client, "list_role_policies", RoleName=role_name).get(
-        "PolicyNames", []
-    )
+    names = _call(client, "list_role_policies", RoleName=role_name).get("PolicyNames", [])
     inline = {
         str(policy): _call(
             client,
@@ -92,9 +90,9 @@ def collect_cognito(
     pool = _call(client, "describe_user_pool", UserPoolId=user_pool_id)
     name, digest = write_artifact(out_dir, "user-pool.json", pool)
     manifest.record(name, digest)
-    clients = _call(
-        client, "list_user_pool_clients", UserPoolId=user_pool_id
-    ).get("UserPoolClients", [])
+    clients = _call(client, "list_user_pool_clients", UserPoolId=user_pool_id).get(
+        "UserPoolClients", []
+    )
     name, digest = write_artifact(out_dir, "clients.json", clients)
     manifest.record(name, digest)
     manifest.meta["user_pool_id"] = user_pool_id
@@ -116,9 +114,7 @@ def collect_waf(
 ) -> CollectManifest:
     """Fetch one WebACL (``scope`` is REGIONAL or CLOUDFRONT)."""
     if scope not in ("REGIONAL", "CLOUDFRONT"):
-        raise CollectError(
-            "AF-COLLECT-ARG", f"scope must be REGIONAL or CLOUDFRONT, got {scope!r}"
-        )
+        raise CollectError("AF-COLLECT-ARG", f"scope must be REGIONAL or CLOUDFRONT, got {scope!r}")
     if client is None:
         client = _boto3("wafv2")
     manifest = CollectManifest(source="waf", collected_at=now)

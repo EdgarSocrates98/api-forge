@@ -45,11 +45,32 @@ _ATTRS = {
     "tf.lambda.permission": ("function_name", "principal", "action", "source_arn"),
     "tf.apigateway.rest_api": ("name", "endpoint_configuration"),
     "tf.apigateway.method": ("http_method", "authorization", "api_key_required", "authorizer_id"),
-    "tf.apigateway.integration": ("http_method", "type", "integration_http_method", "timeout_milliseconds", "uri"),
-    "tf.apigateway.stage": ("stage_name", "access_log_settings", "xray_tracing_enabled", "cache_cluster_enabled"),
+    "tf.apigateway.integration": (
+        "http_method",
+        "type",
+        "integration_http_method",
+        "timeout_milliseconds",
+        "uri",
+    ),
+    "tf.apigateway.stage": (
+        "stage_name",
+        "access_log_settings",
+        "xray_tracing_enabled",
+        "cache_cluster_enabled",
+    ),
     "tf.apigateway.v2_api": ("name", "protocol_type"),
-    "tf.apigateway.v2_route": ("route_key", "authorization_type", "authorizer_id", "api_key_required"),
-    "tf.apigateway.v2_integration": ("integration_type", "integration_method", "integration_uri", "timeout_milliseconds"),
+    "tf.apigateway.v2_route": (
+        "route_key",
+        "authorization_type",
+        "authorizer_id",
+        "api_key_required",
+    ),
+    "tf.apigateway.v2_integration": (
+        "integration_type",
+        "integration_method",
+        "integration_uri",
+        "timeout_milliseconds",
+    ),
     "tf.apigateway.v2_stage": ("name", "auto_deploy", "access_log_settings"),
 }
 
@@ -133,9 +154,7 @@ def extract_terraform(root: Path) -> CodeInventory:
                 Fact(
                     fact_id=stable_id("fact", {"kind": kind, "file": rel, **measures}),
                     kind=kind,
-                    source=SourceRef(
-                        path=rel, sha256=digest, line=None, extractor=_EXTRACTOR
-                    ),
+                    source=SourceRef(path=rel, sha256=digest, line=None, extractor=_EXTRACTOR),
                     measures=measures,
                     attrs=out_attrs,
                 )

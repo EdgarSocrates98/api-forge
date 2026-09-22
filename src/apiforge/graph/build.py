@@ -33,14 +33,30 @@ def build_grpc_graph(ir_path: Path, out_dir: Path) -> GraphExport:
     edges: list[GraphEdge] = []
     for service in ir.services:
         service_id = f"grpc-service:{service.full_name}"
-        nodes.append(_node(service_id, NodeKind.OPERATION, kind_name="service", name=service.full_name))
+        nodes.append(
+            _node(service_id, NodeKind.OPERATION, kind_name="service", name=service.full_name)
+        )
         edges.append(_edge(service_id, source_id, EdgeKind.DESCRIBED_BY))
         for rpc in service.rpcs:
             rpc_id = f"grpc-rpc:{rpc.full_name}"
-            nodes.append(_node(rpc_id, NodeKind.OPERATION, kind_name="rpc", name=rpc.full_name, stream_mode=rpc.stream_mode.value))
+            nodes.append(
+                _node(
+                    rpc_id,
+                    NodeKind.OPERATION,
+                    kind_name="rpc",
+                    name=rpc.full_name,
+                    stream_mode=rpc.stream_mode.value,
+                )
+            )
             edges.append(_edge(rpc_id, service_id, EdgeKind.DERIVED_FROM))
     digests = write_graph(out_dir, nodes, edges)
-    return GraphExport(nodes_sha256=digests["nodes_sha256"], edges_sha256=digests["edges_sha256"], node_count=digests["node_count"], edge_count=digests["edge_count"], built_from=(str(ir_path),))
+    return GraphExport(
+        nodes_sha256=digests["nodes_sha256"],
+        edges_sha256=digests["edges_sha256"],
+        node_count=digests["node_count"],
+        edge_count=digests["edge_count"],
+        built_from=(str(ir_path),),
+    )
 
 
 def _read_json(path: Path) -> Any:
@@ -87,9 +103,7 @@ def _task_nodes(tasks_root: Path) -> list[GraphNode]:
 
     for spec_path in sorted(tasks_dir.glob("*/task.yaml")):
         try:
-            data = load_yaml_mapping(
-                spec_path.read_text(encoding="utf-8"), source=str(spec_path)
-            )
+            data = load_yaml_mapping(spec_path.read_text(encoding="utf-8"), source=str(spec_path))
         except (StrictYamlError, ValueError):
             continue
         task_id = str(data.get("id") or spec_path.parent.name)

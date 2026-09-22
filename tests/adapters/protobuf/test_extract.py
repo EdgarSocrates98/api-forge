@@ -54,9 +54,7 @@ def test_services_rpcs_messages(tmp_path: Path) -> None:
 
 
 def test_unbalanced_braces_is_diagnostic(tmp_path: Path) -> None:
-    (tmp_path / "bad.proto").write_text(
-        "message Broken {\n  string id = 1;\n", encoding="utf-8"
-    )
+    (tmp_path / "bad.proto").write_text("message Broken {\n  string id = 1;\n", encoding="utf-8")
     inv = extract_protobuf(tmp_path)
     assert any(d.code == "AF-PROTO-PARSE" for d in inv.diagnostics)
 

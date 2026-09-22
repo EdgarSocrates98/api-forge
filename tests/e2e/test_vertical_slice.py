@@ -96,9 +96,7 @@ def test_judge_facts_mode(tmp_path: Path) -> None:
 
     report = tmp_path / "leaks.json"
     report.write_text(
-        json.dumps(
-            [{"RuleID": "aws-key", "File": "a.py", "Secret": "AKIA-SECRET-VALUE-999"}]
-        ),
+        json.dumps([{"RuleID": "aws-key", "File": "a.py", "Secret": "AKIA-SECRET-VALUE-999"}]),
         encoding="utf-8",
     )
     inv = extract_gitleaks(report)

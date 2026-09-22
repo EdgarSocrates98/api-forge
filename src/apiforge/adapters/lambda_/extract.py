@@ -41,7 +41,9 @@ def _load(
         return json.loads(raw)
     except (ValueError, UnicodeDecodeError) as exc:
         diagnostics.append(
-            _diag("AF-LAM-DUMP-INVALID", f"{name}: not valid JSON ({exc})", name, input_hashes[name])
+            _diag(
+                "AF-LAM-DUMP-INVALID", f"{name}: not valid JSON ({exc})", name, input_hashes[name]
+            )
         )
         return None
 

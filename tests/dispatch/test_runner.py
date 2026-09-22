@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
@@ -19,9 +20,7 @@ def _ctx(case: Path, **kw: object) -> DispatchContext:
 
 
 def test_governance_playbook_runs_deterministic_steps(tmp_path: Path) -> None:
-    ctx = _ctx(
-        tmp_path, contract=CONTRACT, project=PROJECT, now="2026-09-21T12:00:00Z"
-    )
+    ctx = _ctx(tmp_path, contract=CONTRACT, project=PROJECT, now="2026-09-21T12:00:00Z")
     record = run_playbook("api-governance-reviewer", ctx)
     statuses = {s["verb"].split(" --")[0]: s["status"] for s in record["steps"]}
     assert statuses["discover"] == "ran"
@@ -45,6 +44,30 @@ def test_missing_inputs_become_pending_not_errors(tmp_path: Path) -> None:
     # rules verbs need no inputs — they run even on an empty context
     rules = next(s for s in record["steps"] if s["verb"].startswith("rules list"))
     assert rules["status"] == "ran"
+
+
+def test_dispatch_accepts_official_findings_envelope(tmp_path: Path) -> None:
+    findings = tmp_path / "findings.json"
+    findings.write_text(
+        json.dumps(
+            {
+                "findings": [
+                    {
+                        "finding_id": "finding:dispatch",
+                        "rule_id": "AF-CONTRACT-001",
+                        "title": "contract gap",
+                        "severity": "high",
+                        "status": "confirmed",
+                        "evidence": ["fact:dispatch"],
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    record = run_playbook("api-governance-reviewer", _ctx(tmp_path, findings=findings))
+    next_step = next(step for step in record["steps"] if step["verb"] == "next-step")
+    assert next_step["status"] == "ran"
 
 
 def test_collect_is_never_dispatched(tmp_path: Path) -> None:

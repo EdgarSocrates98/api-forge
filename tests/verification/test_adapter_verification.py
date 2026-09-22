@@ -6,9 +6,7 @@ from apiforge.verification.adapter import verify_adapter_execution, verify_sandb
 
 
 def test_heuristic_adapter_is_not_reported_as_runtime_verified() -> None:
-    check = verify_adapter_execution(
-        AdapterExecution(adapter_id="rds", evidence_level="heuristic")
-    )
+    check = verify_adapter_execution(AdapterExecution(adapter_id="rds", evidence_level="heuristic"))
     assert check.axis == "adapter"
     assert check.verdict == "inconclusive"
 

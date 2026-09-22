@@ -38,7 +38,7 @@ def test_pack_domain_must_match_dir(tmp_path: Path) -> None:
     d = _write_pack(
         tmp_path,
         "real-dir",
-        'domain: other-name\nversion: 1\nareas: []\nrule_ids: []\n',
+        "domain: other-name\nversion: 1\nareas: []\nrule_ids: []\n",
         _GOOD_AUTH,
     )
     with pytest.raises(KnowledgeError, match="AF-KNOW-DOMAIN"):
@@ -49,7 +49,7 @@ def test_missing_authority_is_refused(tmp_path: Path) -> None:
     d = _write_pack(
         tmp_path,
         "no-auth",
-        'domain: no-auth\nversion: 1\nareas: []\nrule_ids: []\n',
+        "domain: no-auth\nversion: 1\nareas: []\nrule_ids: []\n",
         None,
     )
     with pytest.raises(KnowledgeError, match="AF-KNOW-NO-AUTHORITY"):
@@ -60,7 +60,7 @@ def test_unknown_authority_class_refused(tmp_path: Path) -> None:
     d = _write_pack(
         tmp_path,
         "bad-auth",
-        'domain: bad-auth\nversion: 1\nareas: []\nrule_ids: []\n',
+        "domain: bad-auth\nversion: 1\nareas: []\nrule_ids: []\n",
         """sources:
   - name: blog
     url: https://example.com
@@ -76,7 +76,7 @@ def test_unknown_rule_id_named(tmp_path: Path) -> None:
     _write_pack(
         tmp_path,
         "ghost-rule",
-        'domain: ghost-rule\nversion: 1\nareas: [REST]\nrule_ids: [AF-REST-999]\n',
+        "domain: ghost-rule\nversion: 1\nareas: [REST]\nrule_ids: [AF-REST-999]\n",
         _GOOD_AUTH,
     )
     result = check_packs(tmp_path)
@@ -104,15 +104,15 @@ def test_eval_type_outside_closed_set_refused(tmp_path: Path) -> None:
     d = _write_pack(
         tmp_path,
         "bad-eval",
-        'domain: bad-eval\nversion: 1\nareas: []\nrule_ids: []\n',
+        "domain: bad-eval\nversion: 1\nareas: []\nrule_ids: []\n",
         _GOOD_AUTH,
     )
     (d / "evals.yaml").write_text(
-        'evals:\n'
-        '  - id: bad-eval/probe\n'
+        "evals:\n"
+        "  - id: bad-eval/probe\n"
         '    prompt: "x"\n'
-        '    type: vibes\n'
-        '    expect: {kind: rule, id: AF-REST-001}\n',
+        "    type: vibes\n"
+        "    expect: {kind: rule, id: AF-REST-001}\n",
         encoding="utf-8",
     )
     with pytest.raises(KnowledgeError, match="AF-KNOW-EVAL-TYPE"):
@@ -123,15 +123,15 @@ def test_eval_type_required_and_valid(tmp_path: Path) -> None:
     d = _write_pack(
         tmp_path,
         "typed-eval",
-        'domain: typed-eval\nversion: 1\nareas: []\nrule_ids: []\n',
+        "domain: typed-eval\nversion: 1\nareas: []\nrule_ids: []\n",
         _GOOD_AUTH,
     )
     (d / "evals.yaml").write_text(
-        'evals:\n'
-        '  - id: typed-eval/probe\n'
+        "evals:\n"
+        "  - id: typed-eval/probe\n"
         '    prompt: "x"\n'
-        '    type: regression\n'
-        '    expect: {kind: rule, id: AF-REST-001}\n',
+        "    type: regression\n"
+        "    expect: {kind: rule, id: AF-REST-001}\n",
         encoding="utf-8",
     )
     pack = load_pack(d)

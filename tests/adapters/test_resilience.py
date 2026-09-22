@@ -24,15 +24,9 @@ def test_http_call_without_timeout_fires() -> None:
 
 def test_timed_out_call_does_not_fire() -> None:
     # writer.py passes timeout=2.0 — only client.py's bare get fires
-    kinds = {
-        f.kind for f in _facts() if f.kind == "resilience.http_call"
-    }
+    kinds = {f.kind for f in _facts() if f.kind == "resilience.http_call"}
     assert kinds == {"resilience.http_call"}
-    timeouts = [
-        f.measures["has_timeout"]
-        for f in _facts()
-        if f.kind == "resilience.http_call"
-    ]
+    timeouts = [f.measures["has_timeout"] for f in _facts() if f.kind == "resilience.http_call"]
     assert sorted(timeouts) == [False, True]
 
 
@@ -71,8 +65,7 @@ def test_clean_project_emits_no_findings(tmp_path: Path) -> None:
 
 def test_breaker_declared_silences_af_res_005(tmp_path: Path) -> None:
     (tmp_path / "c.py").write_text(
-        "from pybreaker import CircuitBreaker\n"
-        "breaker = CircuitBreaker()\n",
+        "from pybreaker import CircuitBreaker\nbreaker = CircuitBreaker()\n",
         encoding="utf-8",
     )
     inv = extract_resilience(tmp_path)

@@ -47,9 +47,7 @@ def _load(
                 code=code,
                 status=FindingStatus.UNRESOLVED,
                 message=f"{name}: not valid JSON ({exc})",
-                source=SourceRef(
-                    path=rel, sha256=hashes[rel], line=None, extractor="aws-dump"
-                ),
+                source=SourceRef(path=rel, sha256=hashes[rel], line=None, extractor="aws-dump"),
             )
         )
         return None
@@ -65,9 +63,7 @@ def _fact(
     return Fact(
         fact_id=stable_id("fact", {"kind": kind, "file": source_file, **measures}),
         kind=kind,
-        source=SourceRef(
-            path=source_file, sha256=digest, line=None, extractor="aws-dump"
-        ),
+        source=SourceRef(path=source_file, sha256=digest, line=None, extractor="aws-dump"),
         measures=measures,
         attrs=attrs,
     )
@@ -106,12 +102,8 @@ def extract_sqs(dump_dir: Path) -> CodeInventory:
                 hashes["queue.json"],
                 {
                     "queue_arn": attrs.get("QueueArn", ""),
-                    "visibility_timeout": int(
-                        attrs.get("VisibilityTimeout", 0)
-                    ),
-                    "message_retention": int(
-                        attrs.get("MessageRetentionPeriod", 0)
-                    ),
+                    "visibility_timeout": int(attrs.get("VisibilityTimeout", 0)),
+                    "message_retention": int(attrs.get("MessageRetentionPeriod", 0)),
                     "has_redrive": redrive is not None,
                     "has_kms": "KmsMasterKeyId" in attrs,
                     "is_fifo": str(attrs.get("FifoQueue")) == "true",
@@ -158,9 +150,8 @@ def extract_sns(dump_dir: Path) -> CodeInventory:
                     {
                         "protocol": sub.get("Protocol", ""),
                         "endpoint": sub.get("Endpoint", ""),
-                        "confirmed": "PendingConfirmation" not in str(
-                            sub.get("SubscriptionArn", "")
-                        ),
+                        "confirmed": "PendingConfirmation"
+                        not in str(sub.get("SubscriptionArn", "")),
                     },
                     {},
                 )
@@ -230,12 +221,8 @@ def extract_iam_role(dump_dir: Path) -> CodeInventory:
     hashes: dict[str, str] = {}
     facts: list[Fact] = []
     role = _load(dump, "role.json", hashes, diagnostics, "AF-IAM-DUMP")
-    attached = _load(
-        dump, "attached-policies.json", hashes, diagnostics, "AF-IAM-DUMP"
-    )
-    inline = _load(
-        dump, "inline-policies.json", hashes, diagnostics, "AF-IAM-DUMP"
-    )
+    attached = _load(dump, "attached-policies.json", hashes, diagnostics, "AF-IAM-DUMP")
+    inline = _load(dump, "inline-policies.json", hashes, diagnostics, "AF-IAM-DUMP")
     if isinstance(role, dict):
         body = role.get("Role", {})
         facts.append(
@@ -247,9 +234,7 @@ def extract_iam_role(dump_dir: Path) -> CodeInventory:
                     "role_arn": body.get("Arn", ""),
                     "attached_count": len(attached) if isinstance(attached, list) else 0,
                     "inline_count": len(inline) if isinstance(inline, dict) else 0,
-                    "max_session_duration": int(
-                        body.get("MaxSessionDuration", 0)
-                    ),
+                    "max_session_duration": int(body.get("MaxSessionDuration", 0)),
                 },
                 {"assume_policy": body.get("AssumeRolePolicyDocument")},
             )
@@ -291,12 +276,9 @@ def extract_cognito(dump_dir: Path) -> CodeInventory:
                 {
                     "pool_id": body.get("Id", ""),
                     "mfa": body.get("MfaConfiguration", ""),
-                    "deletion_protection": body.get("DeletionProtection", "")
-                    == "ACTIVE",
+                    "deletion_protection": body.get("DeletionProtection", "") == "ACTIVE",
                     "advanced_security": str(
-                        body.get("UserPoolAddOns", {}).get(
-                            "AdvancedSecurityMode", ""
-                        )
+                        body.get("UserPoolAddOns", {}).get("AdvancedSecurityMode", "")
                     ),
                 },
                 {},
@@ -345,9 +327,8 @@ def extract_waf(dump_dir: Path) -> CodeInventory:
                     ),
                     "rules_count": len(rules),
                     "has_managed_rules": any(
-                        "ManagedRuleGroupStatement" in (
-                            r.get("Statement", {}) if isinstance(r, dict) else {}
-                        )
+                        "ManagedRuleGroupStatement"
+                        in (r.get("Statement", {}) if isinstance(r, dict) else {})
                         for r in rules
                     ),
                 },
@@ -381,13 +362,11 @@ def extract_dynamodb(dump_dir: Path) -> CodeInventory:
                 hashes["table.json"],
                 {
                     "table": body.get("TableName", ""),
-                    "billing_mode": body.get(
-                        "BillingModeSummary", {}
-                    ).get("BillingMode", "PROVISIONED"),
-                    "pitr_enabled": pitr == "ENABLED",
-                    "deletion_protection": bool(
-                        body.get("DeletionProtectionEnabled")
+                    "billing_mode": body.get("BillingModeSummary", {}).get(
+                        "BillingMode", "PROVISIONED"
                     ),
+                    "pitr_enabled": pitr == "ENABLED",
+                    "deletion_protection": bool(body.get("DeletionProtectionEnabled")),
                 },
                 {},
             )
@@ -395,9 +374,7 @@ def extract_dynamodb(dump_dir: Path) -> CodeInventory:
     return _inventory("dynamodb", dump, facts, diagnostics, hashes)
 
 
-def _extract_db_cluster(
-    dump_dir: Path, service: str, code: str
-) -> CodeInventory:
+def _extract_db_cluster(dump_dir: Path, service: str, code: str) -> CodeInventory:
     """Shared DocDB/Neptune reader — `engine` in the dump disambiguates."""
     dump = Path(dump_dir)
     diagnostics: list[Diagnostic] = []
@@ -416,12 +393,8 @@ def _extract_db_cluster(
                     {
                         "cluster": cluster.get("DBClusterIdentifier", ""),
                         "engine": cluster.get("Engine", ""),
-                        "storage_encrypted": bool(
-                            cluster.get("StorageEncrypted")
-                        ),
-                        "deletion_protection": bool(
-                            cluster.get("DeletionProtection")
-                        ),
+                        "storage_encrypted": bool(cluster.get("StorageEncrypted")),
+                        "deletion_protection": bool(cluster.get("DeletionProtection")),
                         "multi_az": bool(cluster.get("MultiAZ")),
                     },
                     {},
@@ -501,12 +474,8 @@ def extract_xray(dump_dir: Path) -> CodeInventory:
     diagnostics: list[Diagnostic] = []
     hashes: dict[str, str] = {}
     facts: list[Fact] = []
-    rules = _load(
-        dump, "sampling-rules.json", hashes, diagnostics, "AF-XRAY-DUMP"
-    )
-    enc = _load(
-        dump, "encryption-config.json", hashes, diagnostics, "AF-XRAY-DUMP"
-    )
+    rules = _load(dump, "sampling-rules.json", hashes, diagnostics, "AF-XRAY-DUMP")
+    enc = _load(dump, "encryption-config.json", hashes, diagnostics, "AF-XRAY-DUMP")
     if isinstance(rules, list):
         facts.append(
             _fact(
@@ -563,17 +532,13 @@ def extract_kms(dump_dir: Path) -> CodeInventory:
     return _inventory("kms", dump, facts, diagnostics, hashes)
 
 
-
-
 def extract_secrets(dump_dir: Path) -> CodeInventory:
     """Read a `collect secrets` dump — metadata only, values never present."""
     dump = Path(dump_dir)
     diagnostics: list[Diagnostic] = []
     hashes: dict[str, str] = {}
     facts: list[Fact] = []
-    secret = _load(
-        dump, "secret.json", hashes, diagnostics, "AF-SECRETS-DUMP"
-    )
+    secret = _load(dump, "secret.json", hashes, diagnostics, "AF-SECRETS-DUMP")
     if isinstance(secret, dict):
         facts.append(
             _fact(
@@ -597,9 +562,7 @@ def extract_vpc_endpoints(dump_dir: Path) -> CodeInventory:
     diagnostics: list[Diagnostic] = []
     hashes: dict[str, str] = {}
     facts: list[Fact] = []
-    endpoints = _load(
-        dump, "endpoints.json", hashes, diagnostics, "AF-VPC-DUMP"
-    )
+    endpoints = _load(dump, "endpoints.json", hashes, diagnostics, "AF-VPC-DUMP")
     if isinstance(endpoints, list):
         for ep in endpoints:
             if not isinstance(ep, dict):
@@ -612,9 +575,7 @@ def extract_vpc_endpoints(dump_dir: Path) -> CodeInventory:
             # Gateway endpoints have no private-DNS concept — the measure is
             # emitted only for Interface, where the field is applicable.
             if ep.get("VpcEndpointType") == "Interface":
-                measures["private_dns_enabled"] = bool(
-                    ep.get("PrivateDnsEnabled")
-                )
+                measures["private_dns_enabled"] = bool(ep.get("PrivateDnsEnabled"))
             facts.append(
                 _fact(
                     "aws.vpc.endpoint",
@@ -659,9 +620,7 @@ def extract_s3(dump_dir: Path) -> CodeInventory:
                             "RestrictPublicBuckets",
                         )
                     ),
-                    "versioning": (
-                        vers.get("Status", "") if isinstance(vers, dict) else ""
-                    ),
+                    "versioning": (vers.get("Status", "") if isinstance(vers, dict) else ""),
                 },
                 {
                     "absent_artifacts": [
@@ -710,13 +669,8 @@ def extract_alb(dump_dir: Path) -> CodeInventory:
                     {
                         "scheme": balancer.get("Scheme", ""),
                         "type": balancer.get("Type", ""),
-                        "access_logs_enabled": attr_map.get(
-                            "access_logs.s3.enabled"
-                        )
-                        == "true",
-                        "deletion_protection": attr_map.get(
-                            "deletion_protection.enabled"
-                        )
+                        "access_logs_enabled": attr_map.get("access_logs.s3.enabled") == "true",
+                        "deletion_protection": attr_map.get("deletion_protection.enabled")
                         == "true",
                     },
                     {"dns_name": balancer.get("DNSName", "")},
@@ -738,8 +692,7 @@ def extract_alb(dump_dir: Path) -> CodeInventory:
                         "port": listener.get("Port"),
                         "tls": tls,
                         # composite: plain HTTP only matters on a public LB
-                        "internet_facing_plain_http": internet_facing
-                        and protocol == "HTTP",
+                        "internet_facing_plain_http": internet_facing and protocol == "HTTP",
                     },
                     {"listener_arn": listener.get("ListenerArn", "")},
                 )
@@ -755,9 +708,7 @@ def extract_alb(dump_dir: Path) -> CodeInventory:
                     hashes["target-groups.json"],
                     {
                         "protocol": group.get("Protocol", ""),
-                        "health_check_enabled": bool(
-                            group.get("HealthCheckEnabled", True)
-                        ),
+                        "health_check_enabled": bool(group.get("HealthCheckEnabled", True)),
                         "deregistration_delay_s": None,
                     },
                     {"target_group_arn": group.get("TargetGroupArn", "")},
@@ -801,15 +752,9 @@ def extract_ecs(dump_dir: Path) -> CodeInventory:
                     {
                         "desired_count": svc.get("desiredCount"),
                         "launch_type": svc.get("launchType", ""),
-                        "circuit_breaker_enabled": bool(
-                            breaker.get("enable")
-                        ),
-                        "circuit_breaker_rollback": bool(
-                            breaker.get("rollback")
-                        ),
-                        "minimum_healthy_percent": deploy.get(
-                            "minimumHealthyPercent"
-                        ),
+                        "circuit_breaker_enabled": bool(breaker.get("enable")),
+                        "circuit_breaker_rollback": bool(breaker.get("rollback")),
+                        "minimum_healthy_percent": deploy.get("minimumHealthyPercent"),
                     },
                     {"service_name": svc.get("serviceName", "")},
                 )
@@ -841,12 +786,8 @@ def extract_eks(dump_dir: Path) -> CodeInventory:
                 hashes["cluster.json"],
                 {
                     "version": cluster.get("version", ""),
-                    "public_endpoint": bool(
-                        vpc.get("endpointPublicAccess", True)
-                    ),
-                    "private_endpoint": bool(
-                        vpc.get("endpointPrivateAccess")
-                    ),
+                    "public_endpoint": bool(vpc.get("endpointPublicAccess", True)),
+                    "private_endpoint": bool(vpc.get("endpointPrivateAccess")),
                     "control_plane_logging": bool(enabled_types),
                     "secrets_encrypted": bool(cluster.get("encryptionConfig")),
                 },
@@ -854,8 +795,6 @@ def extract_eks(dump_dir: Path) -> CodeInventory:
             )
         )
     return _inventory("eks", dump, facts, diagnostics, hashes)
-
-
 
 
 def extract_ec2(dump_dir: Path) -> CodeInventory:
@@ -881,10 +820,8 @@ def extract_ec2(dump_dir: Path) -> CodeInventory:
                         {
                             "instance_type": inst.get("InstanceType", ""),
                             "public_ip": bool(inst.get("PublicIpAddress")),
-                            "imdsv2_required": metadata.get("HttpTokens")
-                            == "required",
-                            "monitoring": inst.get("Monitoring", {}).get("State")
-                            == "enabled",
+                            "imdsv2_required": metadata.get("HttpTokens") == "required",
+                            "monitoring": inst.get("Monitoring", {}).get("State") == "enabled",
                         },
                         {"instance_id": inst.get("InstanceId", "")},
                     )
@@ -915,8 +852,7 @@ def extract_msk(dump_dir: Path) -> CodeInventory:
                 "cluster.json",
                 hashes["cluster.json"],
                 {
-                    "plaintext_allowed": client_broker
-                    in ("PLAINTEXT", "TLS_PLAINTEXT"),
+                    "plaintext_allowed": client_broker in ("PLAINTEXT", "TLS_PLAINTEXT"),
                     "public_access": info.get("BrokerNodeGroupInfo", {})
                     .get("ConnectivityInfo", {})
                     .get("PublicAccess", {})
@@ -936,9 +872,7 @@ def extract_elasticache(dump_dir: Path) -> CodeInventory:
     diagnostics: list[Diagnostic] = []
     hashes: dict[str, str] = {}
     facts: list[Fact] = []
-    data = _load(
-        dump, "replication-group.json", hashes, diagnostics, "AF-ECACHE-DUMP"
-    )
+    data = _load(dump, "replication-group.json", hashes, diagnostics, "AF-ECACHE-DUMP")
     if isinstance(data, dict):
         for group in data.get("ReplicationGroups", []):
             if not isinstance(group, dict):
@@ -949,24 +883,13 @@ def extract_elasticache(dump_dir: Path) -> CodeInventory:
                     "replication-group.json",
                     hashes["replication-group.json"],
                     {
-                        "transit_encryption_enabled": bool(
-                            group.get("TransitEncryptionEnabled")
-                        ),
-                        "at_rest_encryption_enabled": bool(
-                            group.get("AtRestEncryptionEnabled")
-                        ),
+                        "transit_encryption_enabled": bool(group.get("TransitEncryptionEnabled")),
+                        "at_rest_encryption_enabled": bool(group.get("AtRestEncryptionEnabled")),
                         "auth_token_enabled": bool(group.get("AuthTokenEnabled")),
-                        "automatic_failover": group.get("AutomaticFailover", "")
-                        == "enabled",
-                        "snapshot_retention_days": group.get(
-                            "SnapshotRetentionLimit"
-                        ),
+                        "automatic_failover": group.get("AutomaticFailover", "") == "enabled",
+                        "snapshot_retention_days": group.get("SnapshotRetentionLimit"),
                     },
-                    {
-                        "replication_group_id": group.get(
-                            "ReplicationGroupId", ""
-                        )
-                    },
+                    {"replication_group_id": group.get("ReplicationGroupId", "")},
                 )
             )
     return _inventory("elasticache", dump, facts, diagnostics, hashes)

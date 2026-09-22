@@ -82,9 +82,7 @@ def _noise_condition(
         mean = sum(values) / len(values)
         delta = abs(float(candidate) - mean) / abs(mean) if mean else float("inf")
         if delta <= floor:
-            within.append(
-                f"{field_name} delta {delta * 100:.2f}% <= floor {floor * 100:.2f}%"
-            )
+            within.append(f"{field_name} delta {delta * 100:.2f}% <= floor {floor * 100:.2f}%")
     if not proven:
         return _cond(
             "distinguishable-from-baseline",
@@ -100,8 +98,7 @@ def _noise_condition(
         return _cond(
             "distinguishable-from-baseline",
             "unevaluable",
-            "every observed delta is inside the measured noise floor: "
-            + "; ".join(within),
+            "every observed delta is inside the measured noise floor: " + "; ".join(within),
         )
     return _cond(
         "distinguishable-from-baseline",
@@ -147,9 +144,7 @@ def _validity_conditions(
     )
     duration, min_duration = run.test_duration_s, run.min_duration_s
     if duration is None:
-        conds.append(
-            _cond("duration-reported", "unevaluable", "test_duration_s absent")
-        )
+        conds.append(_cond("duration-reported", "unevaluable", "test_duration_s absent"))
     elif min_duration is not None and duration < min_duration:
         conds.append(
             _cond(
@@ -159,9 +154,7 @@ def _validity_conditions(
             )
         )
     else:
-        conds.append(
-            _cond("duration-reported", "met", f"test_duration_s={duration}")
-        )
+        conds.append(_cond("duration-reported", "met", f"test_duration_s={duration}"))
     target, achieved = run.target_tps, run.achieved_tps
     if target is None or achieved is None:
         conds.append(
@@ -205,13 +198,13 @@ def _validity_conditions(
             )
         )
     else:
-        conds.append(
-            _cond("generator-not-saturated", "met", "no dropped iterations")
-        )
+        conds.append(_cond("generator-not-saturated", "met", "no dropped iterations"))
     conds.append(
         _cond(
             "downstreams-observed",
-            "met" if run.downstreams_observed else ("unevaluable" if run.downstreams_observed is None else "unmet"),
+            "met"
+            if run.downstreams_observed
+            else ("unevaluable" if run.downstreams_observed is None else "unmet"),
             "downstreams_observed declared"
             if run.downstreams_observed is not None
             else "downstreams_observed absent",
@@ -261,13 +254,9 @@ def _performance_conditions(run: PerformanceRun) -> list[Condition]:
         )
     p99, slo_p99 = run.p99_ms, run.slo_p99_ms
     if p99 is None or slo_p99 is None:
-        conds.append(
-            _cond("p99-within-slo", "unevaluable", "p99_ms or slo_p99_ms absent")
-        )
+        conds.append(_cond("p99-within-slo", "unevaluable", "p99_ms or slo_p99_ms absent"))
     elif p99 <= slo_p99:
-        conds.append(
-            _cond("p99-within-slo", "met", f"p99_ms={p99} <= slo {slo_p99}")
-        )
+        conds.append(_cond("p99-within-slo", "met", f"p99_ms={p99} <= slo {slo_p99}"))
     else:
         conds.append(
             _cond(

@@ -97,20 +97,14 @@ def extract_otel(path: Path) -> CodeInventory:
         return CodeInventory(
             framework="otel",
             root=str(path.parent),
-            diagnostics=(
-                _diag(path, digest, "AF-OTEL-REPORT-INVALID", str(exc)),
-            ),
+            diagnostics=(_diag(path, digest, "AF-OTEL-REPORT-INVALID", str(exc)),),
             input_hashes={path.name: digest},
         )
     if not isinstance(doc, dict) or not isinstance(doc.get("resourceSpans"), list):
         return CodeInventory(
             framework="otel",
             root=str(path.parent),
-            diagnostics=(
-                _diag(
-                    path, digest, "AF-OTEL-REPORT-INVALID", "missing resourceSpans"
-                ),
-            ),
+            diagnostics=(_diag(path, digest, "AF-OTEL-REPORT-INVALID", "missing resourceSpans"),),
             input_hashes={path.name: digest},
         )
     diagnostics: list[Diagnostic] = []
@@ -139,9 +133,7 @@ def extract_otel(path: Path) -> CodeInventory:
                     error_spans += 1
                 t_min = start if t_min is None else min(t_min, start)
                 t_max = end if t_max is None else max(t_max, end)
-                durations.setdefault(_operation(span), []).append(
-                    (end - start) / 1_000_000.0
-                )
+                durations.setdefault(_operation(span), []).append((end - start) / 1_000_000.0)
     if incomplete:
         diagnostics.append(
             _diag(

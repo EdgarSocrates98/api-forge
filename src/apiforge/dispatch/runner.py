@@ -120,9 +120,7 @@ def _verb_diff_contract(ctx: DispatchContext) -> list[dict[str, Any]]:
     assert ctx.baseline is not None and ctx.candidate is not None
     return [
         c.model_dump(mode="json")
-        for c in diff_contracts(
-            load_openapi(ctx.baseline), load_openapi(ctx.candidate)
-        )
+        for c in diff_contracts(load_openapi(ctx.baseline), load_openapi(ctx.candidate))
     ]
 
 
@@ -149,13 +147,11 @@ def _verb_rules_lookup(ctx: DispatchContext) -> dict[str, object]:
 
 
 def _verb_next_step(ctx: DispatchContext) -> dict[str, object]:
+    from apiforge.application.artifacts import load_findings
     from apiforge.application.next_step import next_step
-    from apiforge.core.models import Finding
 
     assert ctx.findings is not None
-    doc = json.loads(ctx.findings.read_text(encoding="utf-8"))
-    payload = doc if isinstance(doc, list) else doc.get("findings", [])
-    parsed = tuple(Finding.model_validate(f) for f in payload)
+    parsed = load_findings(ctx.findings)
     step = next_step(parsed, "verify")
     return step.model_dump(mode="json")
 
@@ -223,10 +219,7 @@ def _load_run_payload(path: Path) -> Any:
 def _repeat_runs(ctx: DispatchContext) -> tuple[Any, ...]:
     if ctx.repeat_baseline is None:
         return ()
-    return tuple(
-        _load_run_payload(p)
-        for p in sorted(Path(ctx.repeat_baseline).glob("*.json"))
-    )
+    return tuple(_load_run_payload(p) for p in sorted(Path(ctx.repeat_baseline).glob("*.json")))
 
 
 def _verb_perf_compare(ctx: DispatchContext) -> dict[str, object]:
@@ -318,41 +311,97 @@ _VERBS: tuple[tuple[str, tuple[str, ...], Callable[..., Any]], ...] = (
         ("input_path",),
         _model_verb("apiforge.adapters.apigateway.extract.extract_apigateway"),
     ),
-    ("model lambda", ("input_path",), _model_verb("apiforge.adapters.lambda_.extract.extract_lambda")),
-    ("model terraform", ("input_path",), _model_verb("apiforge.adapters.terraform.extract.extract_terraform")),
+    (
+        "model lambda",
+        ("input_path",),
+        _model_verb("apiforge.adapters.lambda_.extract.extract_lambda"),
+    ),
+    (
+        "model terraform",
+        ("input_path",),
+        _model_verb("apiforge.adapters.terraform.extract.extract_terraform"),
+    ),
     ("model sam", ("input_path",), _model_verb("apiforge.adapters.sam.extract.extract_sam")),
-    ("model asyncapi", ("input_path",), _model_verb("apiforge.adapters.asyncapi.extract.extract_asyncapi")),
-    ("model graphql", ("input_path",), _model_verb("apiforge.adapters.graphql_.extract.extract_graphql")),
-    ("model proto", ("input_path",), _model_verb("apiforge.adapters.protobuf.extract.extract_protobuf")),
+    (
+        "model asyncapi",
+        ("input_path",),
+        _model_verb("apiforge.adapters.asyncapi.extract.extract_asyncapi"),
+    ),
+    (
+        "model graphql",
+        ("input_path",),
+        _model_verb("apiforge.adapters.graphql_.extract.extract_graphql"),
+    ),
+    (
+        "model proto",
+        ("input_path",),
+        _model_verb("apiforge.adapters.protobuf.extract.extract_protobuf"),
+    ),
     ("model redis", ("input_path",), _model_verb("apiforge.adapters.redis_.extract.extract_redis")),
-    ("model elasticache-access", ("input_path",), _model_verb("apiforge.adapters.redis_.extract.extract_elasticache")),
+    (
+        "model elasticache-access",
+        ("input_path",),
+        _model_verb("apiforge.adapters.redis_.extract.extract_elasticache"),
+    ),
     ("model mongo", ("input_path",), _model_verb("apiforge.adapters.dbaccess.extract_mongo")),
-    ("model dynamodb-access", ("input_path",), _model_verb("apiforge.adapters.dbaccess.extract_dynamo_access")),
-    ("model neptune-access", ("input_path",), _model_verb("apiforge.adapters.dbaccess.extract_neptune_access")),
+    (
+        "model dynamodb-access",
+        ("input_path",),
+        _model_verb("apiforge.adapters.dbaccess.extract_dynamo_access"),
+    ),
+    (
+        "model neptune-access",
+        ("input_path",),
+        _model_verb("apiforge.adapters.dbaccess.extract_neptune_access"),
+    ),
     ("model otel", ("input_path",), _model_verb("apiforge.adapters.otel.extract.extract_otel")),
-    ("model resilience", ("input_path",), _model_verb("apiforge.adapters.resilience.extract_resilience")),
+    (
+        "model resilience",
+        ("input_path",),
+        _model_verb("apiforge.adapters.resilience.extract_resilience"),
+    ),
     ("model sqs", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_sqs")),
     ("model sns", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_sns")),
-    ("model eventbridge", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_eventbridge")),
+    (
+        "model eventbridge",
+        ("input_path",),
+        _model_verb("apiforge.adapters.awsdumps.extract_eventbridge"),
+    ),
     ("model iam-role", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_iam_role")),
     ("model cognito", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_cognito")),
     ("model waf", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_waf")),
     ("model dynamodb", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_dynamodb")),
     ("model docdb", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_docdb")),
     ("model neptune", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_neptune")),
-    ("model stepfunctions", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_stepfunctions")),
-    ("model cloudwatch", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_cloudwatch")),
+    (
+        "model stepfunctions",
+        ("input_path",),
+        _model_verb("apiforge.adapters.awsdumps.extract_stepfunctions"),
+    ),
+    (
+        "model cloudwatch",
+        ("input_path",),
+        _model_verb("apiforge.adapters.awsdumps.extract_cloudwatch"),
+    ),
     ("model xray", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_xray")),
     ("model kms", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_kms")),
     ("model secrets", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_secrets")),
-    ("model vpc-endpoints", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_vpc_endpoints")),
+    (
+        "model vpc-endpoints",
+        ("input_path",),
+        _model_verb("apiforge.adapters.awsdumps.extract_vpc_endpoints"),
+    ),
     ("model s3", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_s3")),
     ("model alb", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_alb")),
     ("model ecs", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_ecs")),
     ("model eks", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_eks")),
     ("model ec2", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_ec2")),
     ("model msk", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_msk")),
-    ("model elasticache", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_elasticache")),
+    (
+        "model elasticache",
+        ("input_path",),
+        _model_verb("apiforge.adapters.awsdumps.extract_elasticache"),
+    ),
     ("perf compare", ("baseline", "candidate"), _verb_perf_compare),
     ("perf verdict", ("input_path",), _verb_perf_verdict),
     ("perf memory search", (), _verb_perf_memory_search),
@@ -394,6 +443,7 @@ def is_mutation_verb(verb: str) -> bool:
     head = verb.strip()
     return any(head == p or head.startswith(p + " ") for p in _MUTATION_VERBS)
 
+
 _MODEL_REPORTS = {
     "pact": "apiforge.adapters.testreports.extract_pact",
     "schemathesis": "apiforge.adapters.testreports.extract_schemathesis",
@@ -409,8 +459,7 @@ _MODEL_REPORTS = {
 }
 
 _VERBS = _VERBS + tuple(
-    (f"model {name}", ("input_path",), _model_verb(path))
-    for name, path in _MODEL_REPORTS.items()
+    (f"model {name}", ("input_path",), _model_verb(path)) for name, path in _MODEL_REPORTS.items()
 )
 
 
@@ -423,7 +472,7 @@ def _match_verb(verb: str) -> tuple[tuple[str, ...], Callable[..., Any], str | N
             return needs, runner, "__mutation__"
     for prefix, needs, runner in _VERBS:
         if head == prefix or head.startswith(prefix + " "):
-            extra = head[len(prefix):].strip() or None
+            extra = head[len(prefix) :].strip() or None
             return needs, runner, extra
     if head.startswith("collect "):
         return (), lambda *a: None, "__collect__"

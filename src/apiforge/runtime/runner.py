@@ -18,14 +18,16 @@ def run_runtime(
     now: str | None = None,
     requested_debate: bool = False,
 ) -> dict[str, object]:
-    return asyncio.run(execute_run(
-        Path(root),
-        task_id,
-        adapter=adapter or FakeModelAdapter(),
-        policy_id=policy_id,
-        now=now,
-        requested_debate=requested_debate,
-    ))
+    return asyncio.run(
+        execute_run(
+            Path(root),
+            task_id,
+            adapter=adapter or FakeModelAdapter(),
+            policy_id=policy_id,
+            now=now,
+            requested_debate=requested_debate,
+        )
+    )
 
 
 def runtime_status(root: Path, task_id: str) -> dict[str, object]:
@@ -53,11 +55,15 @@ def approve_runtime(root: Path, task_id: str, run_id: str, approver: str) -> dic
     return {"approved": True, "path": str(path), **gate}
 
 
-def resume_runtime(root: Path, task_id: str, *, policy_id: str = "local-ci-safe") -> dict[str, object]:
+def resume_runtime(
+    root: Path, task_id: str, *, policy_id: str = "local-ci-safe"
+) -> dict[str, object]:
     """Replay the task through the same bounded supervisor policy."""
     return run_runtime(root, task_id, policy_id=policy_id)
 
 
-def debate_runtime(root: Path, task_id: str, *, policy_id: str = "local-ci-safe") -> dict[str, object]:
+def debate_runtime(
+    root: Path, task_id: str, *, policy_id: str = "local-ci-safe"
+) -> dict[str, object]:
     """Request a human-visible debate room for the next bounded run."""
     return run_runtime(root, task_id, policy_id=policy_id, requested_debate=True)

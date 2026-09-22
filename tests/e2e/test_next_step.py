@@ -29,6 +29,27 @@ def test_next_step_routes_via_cli(tmp_path: Path) -> None:
     assert step["dominant_area"] == "CONTRACT"
 
 
+def test_next_step_accepts_official_findings_envelope(tmp_path: Path) -> None:
+    payload = {
+        "findings": [
+            {
+                "finding_id": "finding:envelope",
+                "rule_id": "AF-CONTRACT-001",
+                "title": "t",
+                "severity": "high",
+                "status": "confirmed",
+                "detail": "d",
+                "evidence": ["fact:x"],
+            }
+        ]
+    }
+    path = tmp_path / "findings.json"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    result = runner.invoke(app, ["next-step", "--findings", str(path), "--phase", "verify"])
+    assert result.exit_code == 0
+    assert json.loads(result.stdout)["recommended_agent"] == "api-governance-reviewer"
+
+
 def test_next_step_no_route_exits_3(tmp_path: Path) -> None:
     findings = [
         {

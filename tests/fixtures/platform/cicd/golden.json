@@ -1,0 +1,5 @@
+{
+  "vertical": "cicd",
+  "state": "heuristic",
+  "expected": ["test step", "verification step"]
+}

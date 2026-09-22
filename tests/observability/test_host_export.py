@@ -33,7 +33,9 @@ def binding(**overrides: object) -> HostExportBinding:
 
 
 def credential() -> CredentialStatus:
-    return CredentialStatus(provider="datadog", reference="broker:dd", status="available", reason="broker")
+    return CredentialStatus(
+        provider="datadog", reference="broker:dd", status="available", reason="broker"
+    )
 
 
 def test_host_export_requires_explicit_approval_and_calls_authenticated_sender() -> None:
@@ -52,7 +54,11 @@ def test_host_export_requires_explicit_approval_and_calls_authenticated_sender()
 
 def test_host_export_blocks_without_approval_or_sender() -> None:
     no_approval = execute_host_export(
-        metrics(), binding(approval_id=None), credential(), {"api.datadoghq.com"}, lambda *_args: None
+        metrics(),
+        binding(approval_id=None),
+        credential(),
+        {"api.datadoghq.com"},
+        lambda *_args: None,
     )
     no_sender = execute_host_export(metrics(), binding(), credential(), {"api.datadoghq.com"})
 
@@ -62,9 +68,15 @@ def test_host_export_blocks_without_approval_or_sender() -> None:
 
 
 def test_host_export_blocks_unavailable_credential_and_untrusted_endpoint() -> None:
-    unavailable = CredentialStatus(provider="datadog", reference="broker:dd", status="unavailable", reason="missing")
-    blocked_credential = execute_host_export(metrics(), binding(), unavailable, {"api.datadoghq.com"}, lambda *_args: None)
-    blocked_host = execute_host_export(metrics(), binding(), credential(), {"evil.example"}, lambda *_args: None)
+    unavailable = CredentialStatus(
+        provider="datadog", reference="broker:dd", status="unavailable", reason="missing"
+    )
+    blocked_credential = execute_host_export(
+        metrics(), binding(), unavailable, {"api.datadoghq.com"}, lambda *_args: None
+    )
+    blocked_host = execute_host_export(
+        metrics(), binding(), credential(), {"evil.example"}, lambda *_args: None
+    )
 
     assert blocked_credential.violations == ("credential-unavailable",)
     assert blocked_host.violations == ("endpoint-host-not-allowlisted",)

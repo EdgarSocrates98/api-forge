@@ -54,7 +54,9 @@ def test_runtime_opens_debate_for_conflicting_recommendations(tmp_path: Path) ->
         }
     )
 
-    result = run_runtime(tmp_path, "evolve-orders-api", adapter=adapter, now="2026-09-22T12:00:00+00:00")
+    result = run_runtime(
+        tmp_path, "evolve-orders-api", adapter=adapter, now="2026-09-22T12:00:00+00:00"
+    )
 
     assert result["debate"]["opened"] is True
     assert "conflicting_evidence" in result["debate"]["reasons"]

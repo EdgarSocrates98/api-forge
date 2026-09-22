@@ -26,15 +26,23 @@ class ApiForgePlatform:
         if extractor is None:
             raise ValueError(f"AF-INPUT-FRAMEWORK-UNKNOWN: {framework}")
         inventory, cache = extract_cached(
-            Path(project), framework, extractor, self.root / ".apiforge" / "cache", ledger_root=self.root
+            Path(project),
+            framework,
+            extractor,
+            self.root / ".apiforge" / "cache",
+            ledger_root=self.root,
         )
         return {
             "cache": cache,
             "framework": inventory.framework,
             "routes": [fact.model_dump(mode="json") for fact in inventory.facts],
-            "diagnostics": [diagnostic.model_dump(mode="json") for diagnostic in inventory.diagnostics],
+            "diagnostics": [
+                diagnostic.model_dump(mode="json") for diagnostic in inventory.diagnostics
+            ],
             "input_hashes": dict(inventory.input_hashes),
-            "execution": inventory.execution.model_dump(mode="json") if inventory.execution else None,
+            "execution": inventory.execution.model_dump(mode="json")
+            if inventory.execution
+            else None,
         }
 
     def analyze(
@@ -47,6 +55,11 @@ class ApiForgePlatform:
         framework: str = "auto",
     ) -> AnalysisResult:
         return analyze_project(
-            contract, project, baseline, out_dir, framework=framework,
-            cache_dir=self.root / ".apiforge" / "cache", ledger_root=self.root,
+            contract,
+            project,
+            baseline,
+            out_dir,
+            framework=framework,
+            cache_dir=self.root / ".apiforge" / "cache",
+            ledger_root=self.root,
         )

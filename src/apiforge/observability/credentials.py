@@ -10,7 +10,9 @@ from apiforge.contracts.observability import (
 )
 
 
-def check_reference(provider: str, reference: str, source: str = "external_broker") -> CredentialStatus:
+def check_reference(
+    provider: str, reference: str, source: str = "external_broker"
+) -> CredentialStatus:
     if provider not in {"otel", "datadog", "dynatrace", "cloudwatch"}:
         raise ValueError(f"AF-OBS-CREDENTIAL-PROVIDER: unsupported provider {provider!r}")
     if not reference.strip():
@@ -27,7 +29,9 @@ def check_reference(provider: str, reference: str, source: str = "external_broke
     )
 
 
-def reference(provider: str, reference_name: str, source: str = "external_broker") -> CredentialReference:
+def reference(
+    provider: str, reference_name: str, source: str = "external_broker"
+) -> CredentialReference:
     if provider not in {"otel", "datadog", "dynatrace", "cloudwatch"}:
         raise ValueError(f"AF-OBS-CREDENTIAL-PROVIDER: unsupported provider {provider!r}")
     if not reference_name.strip():
@@ -39,7 +43,9 @@ def reference(provider: str, reference_name: str, source: str = "external_broker
     )
 
 
-def execute_read_gate(plan: ReadPlan, credential: CredentialStatus, record_count: int = 0) -> ReadReceipt:
+def execute_read_gate(
+    plan: ReadPlan, credential: CredentialStatus, record_count: int = 0
+) -> ReadReceipt:
     """Gate future provider execution; current core only permits fixture evidence."""
     if record_count < 0:
         raise ValueError("AF-OBS-READ-COUNT: record_count must be non-negative")
@@ -64,5 +70,9 @@ def execute_read_gate(plan: ReadPlan, credential: CredentialStatus, record_count
         status="blocked",
         credential_reference=credential.reference,
         record_count=0,
-        evidence=("live adapter not configured", "network_called:false", "mutation_performed:false"),
+        evidence=(
+            "live adapter not configured",
+            "network_called:false",
+            "mutation_performed:false",
+        ),
     )

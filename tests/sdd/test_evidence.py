@@ -18,8 +18,7 @@ def _feature(tmp_path: Path) -> Path:
     feature = root / "GATED"
     feature.mkdir(parents=True)
     (feature / "discover.md").write_text(
-        "---\nsdd: 1\nfeature: GATED\nphase: discover\nprofile: quick\nstatus: ready\n"
-        "---\n# d\n",
+        "---\nsdd: 1\nfeature: GATED\nphase: discover\nprofile: quick\nstatus: ready\n---\n# d\n",
         encoding="utf-8",
     )
     (feature / "verify.md").write_text(
@@ -37,15 +36,24 @@ def test_test_results_evidence_unblocks_gate(tmp_path: Path) -> None:
     pytest_out.write_text("490 passed, 1 skipped in 18.59s\n", encoding="utf-8")
     state = tmp_path / "state"
     payload = emit_evidence(
-        root, "GATED", "test.results", pytest_out,
-        "2026-09-21T00:00:00Z", state_dir=state,
+        root,
+        "GATED",
+        "test.results",
+        pytest_out,
+        "2026-09-21T00:00:00Z",
+        state_dir=state,
     )
     assert payload["extracted"] == {"passed": 490, "failed": 0, "skipped": 1, "error": 0}
     assert Path(payload["evidence_file"]).is_file()
     # the gate now passes without an override
     change = set_phase(
-        root, "GATED", "verify", "ready", strict=True,
-        evidence_dir=state / "evidence", state_dir=state,
+        root,
+        "GATED",
+        "verify",
+        "ready",
+        strict=True,
+        evidence_dir=state / "evidence",
+        state_dir=state,
     )
     assert change.status == "ready" and not change.overrides_applied
 
@@ -59,7 +67,11 @@ def test_plan_tasks_extracts_task_ids(tmp_path: Path) -> None:
         encoding="utf-8",
     )
     payload = emit_evidence(
-        root, "GATED", "plan.tasks", plan, "2026-09-21T00:00:00Z",
+        root,
+        "GATED",
+        "plan.tasks",
+        plan,
+        "2026-09-21T00:00:00Z",
         state_dir=tmp_path / "state",
     )
     assert payload["extracted"]["tasks"] == [
@@ -79,9 +91,7 @@ def test_unknown_kind_refused(tmp_path: Path) -> None:
 def test_unreadable_source_named(tmp_path: Path) -> None:
     root = _feature(tmp_path)
     with pytest.raises(SddError, match="AF-SDD-EVIDENCE-SOURCE"):
-        emit_evidence(
-            root, "GATED", "test.results", tmp_path / "gone.txt", "2026-09-21T00:00:00Z"
-        )
+        emit_evidence(root, "GATED", "test.results", tmp_path / "gone.txt", "2026-09-21T00:00:00Z")
 
 
 def test_test_results_without_tally_refused(tmp_path: Path) -> None:
@@ -90,7 +100,11 @@ def test_test_results_without_tally_refused(tmp_path: Path) -> None:
     src.write_text("no counts here\n", encoding="utf-8")
     with pytest.raises(SddError, match="AF-SDD-EVIDENCE-EXTRACT"):
         emit_evidence(
-            root, "GATED", "test.results", src, "2026-09-21T00:00:00Z",
+            root,
+            "GATED",
+            "test.results",
+            src,
+            "2026-09-21T00:00:00Z",
             state_dir=tmp_path / "state",
         )
 
@@ -105,7 +119,11 @@ def test_test_results_foreign_harness_refused(tmp_path: Path) -> None:
     )
     with pytest.raises(SddError, match="AF-SDD-EVIDENCE-EXTRACT"):
         emit_evidence(
-            root, "GATED", "test.results", src, "2026-09-21T00:00:00Z",
+            root,
+            "GATED",
+            "test.results",
+            src,
+            "2026-09-21T00:00:00Z",
             state_dir=tmp_path / "state",
         )
 
@@ -115,7 +133,11 @@ def test_evidence_records_source_hash(tmp_path: Path) -> None:
     src = tmp_path / "receipt.json"
     src.write_text('{"a": 1}\n', encoding="utf-8")
     payload = emit_evidence(
-        root, "GATED", "release.receipt", src, "2026-09-21T00:00:00Z",
+        root,
+        "GATED",
+        "release.receipt",
+        src,
+        "2026-09-21T00:00:00Z",
         state_dir=tmp_path / "state",
     )
     stored = json.loads(Path(payload["evidence_file"]).read_text())

@@ -28,22 +28,51 @@ TEST_KINDS = (
 )
 
 TestKind = Literal[
-    "smoke", "baseline", "load", "stress", "spike", "soak",
-    "capacity", "failover", "chaos",
+    "smoke",
+    "baseline",
+    "load",
+    "stress",
+    "spike",
+    "soak",
+    "capacity",
+    "failover",
+    "chaos",
 ]
 
 # FASE 6 — the full risk-based test strategy taxonomy. PerformanceRun keeps
 # the 9 perf kinds above; TestRecord spans the whole strategy.
 TEST_TAXONOMY = (
-    "lint", "typecheck", "unit", "component", "integration", "contract",
-    "consumer_contract", "e2e", "property", "fuzz", "mutation", "security",
-    "load", "stress", "spike", "soak", "capacity", "failover", "chaos",
-    "recovery", "cost",
+    "lint",
+    "typecheck",
+    "unit",
+    "component",
+    "integration",
+    "contract",
+    "consumer_contract",
+    "e2e",
+    "property",
+    "fuzz",
+    "mutation",
+    "security",
+    "load",
+    "stress",
+    "spike",
+    "soak",
+    "capacity",
+    "failover",
+    "chaos",
+    "recovery",
+    "cost",
 )
 
 TEST_STATES = (
-    "passed", "failed", "inconclusive", "blocked",
-    "skipped_with_reason", "unsafe_to_run", "not_applicable",
+    "passed",
+    "failed",
+    "inconclusive",
+    "blocked",
+    "skipped_with_reason",
+    "unsafe_to_run",
+    "not_applicable",
 )
 
 
@@ -180,9 +209,7 @@ class WorkloadProfile(_StubPayload):
     needs_os_control: bool | None = None
     needs_kubernetes: bool | None = None
     team_maturity: Literal["low", "medium", "high"] | None = None
-    data_model: (
-        Literal["key-value", "document", "graph", "relational", "cache"] | None
-    ) = None
+    data_model: Literal["key-value", "document", "graph", "relational", "cache"] | None = None
 
 
 class DataAccessIR(_StubPayload):
@@ -302,16 +329,44 @@ class TestRecord(_StubPayload):
     not recorded, never zero.
     """
 
-    kind: Literal[
-        "lint", "typecheck", "unit", "component", "integration",
-        "contract", "consumer_contract", "e2e", "property", "fuzz",
-        "mutation", "security", "load", "stress", "spike", "soak",
-        "capacity", "failover", "chaos", "recovery", "cost",
-    ] | None = None
-    state: Literal[
-        "passed", "failed", "inconclusive", "blocked",
-        "skipped_with_reason", "unsafe_to_run", "not_applicable",
-    ] | None = None
+    kind: (
+        Literal[
+            "lint",
+            "typecheck",
+            "unit",
+            "component",
+            "integration",
+            "contract",
+            "consumer_contract",
+            "e2e",
+            "property",
+            "fuzz",
+            "mutation",
+            "security",
+            "load",
+            "stress",
+            "spike",
+            "soak",
+            "capacity",
+            "failover",
+            "chaos",
+            "recovery",
+            "cost",
+        ]
+        | None
+    ) = None
+    state: (
+        Literal[
+            "passed",
+            "failed",
+            "inconclusive",
+            "blocked",
+            "skipped_with_reason",
+            "unsafe_to_run",
+            "not_applicable",
+        ]
+        | None
+    ) = None
     objective: str | None = None
     scenario: str | None = None
     inputs: tuple[str, ...] = ()

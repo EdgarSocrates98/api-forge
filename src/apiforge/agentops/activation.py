@@ -32,7 +32,12 @@ def build_activation_plan(host: str, root: str) -> ActivationPlan:
     item = parity["hosts"][host]  # type: ignore[index]
     host_data = item if isinstance(item, dict) else {}
     artifacts = {
-        "claude": ("CLAUDE.md", ".claude/skills", ".claude/agents", "vendor/caveman/plugins/caveman"),
+        "claude": (
+            "CLAUDE.md",
+            ".claude/skills",
+            ".claude/agents",
+            "vendor/caveman/plugins/caveman",
+        ),
         "gpt-codex": ("AGENTS.md", ".agents/skills", ".agents/agents", "vendor/caveman/.codex"),
         "devin": ("AGENTS.md", ".devin/skills", "vendor/caveman/skills"),
         "copilot": ("AGENTS.md", ".github/skills", "vendor/caveman/skills"),

@@ -1,0 +1,5 @@
+{
+  "vertical": "cloud",
+  "state": "heuristic",
+  "expected": ["declared service", "unresolved project variable"]
+}

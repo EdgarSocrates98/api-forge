@@ -60,9 +60,7 @@ def collect_sqs(
     if client is None:
         client = _boto3("sqs")
     manifest = CollectManifest(source="sqs", collected_at=now)
-    attrs = _call(
-        client, "get_queue_attributes", QueueUrl=queue_url, AttributeNames=["All"]
-    )
+    attrs = _call(client, "get_queue_attributes", QueueUrl=queue_url, AttributeNames=["All"])
     name, digest = write_artifact(out_dir, "queue.json", attrs)
     manifest.record(name, digest)
     manifest.meta["queue_url"] = queue_url
@@ -123,9 +121,7 @@ def collect_eventbridge(
     bus = _call(client, "describe_event_bus", Name=bus_name)
     name, digest = write_artifact(out_dir, "event-bus.json", bus)
     manifest.record(name, digest)
-    rules = _paginate(
-        client, "list_rules", "Rules", {"EventBusName": bus_name}
-    )
+    rules = _paginate(client, "list_rules", "Rules", {"EventBusName": bus_name})
     name, digest = write_artifact(out_dir, "rules.json", rules)
     manifest.record(name, digest)
     targets = {

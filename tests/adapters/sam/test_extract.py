@@ -14,7 +14,9 @@ def test_function_and_api_facts() -> None:
     fn = next(f for f in inv.facts if f.kind == "sam.function")
     assert fn.attrs["runtime"] == "python3.12"
     assert fn.attrs["memory_mb"] == 256
-    assert fn.attrs["api_events"] == ({"event": "CreateOrder", "path": "/orders", "method": "post"},)
+    assert fn.attrs["api_events"] == (
+        {"event": "CreateOrder", "path": "/orders", "method": "post"},
+    )
     api = next(f for f in inv.facts if f.kind == "sam.api")
     assert api.attrs["stage_name"] == "prod"
     assert api.attrs["has_auth"] is True
@@ -24,10 +26,7 @@ def test_intrinsic_is_unresolved_never_resolved() -> None:
     inv = extract_sam(FIXTURE)
     fn = next(f for f in inv.facts if f.kind == "sam.function")
     assert fn.attrs["timeout_s"] is None  # !Ref not inferred
-    assert any(
-        d.code == "AF-SAM-UNRESOLVED" and "Timeout" in d.message
-        for d in inv.diagnostics
-    )
+    assert any(d.code == "AF-SAM-UNRESOLVED" and "Timeout" in d.message for d in inv.diagnostics)
 
 
 def test_no_resources_is_invalid(tmp_path: Path) -> None:

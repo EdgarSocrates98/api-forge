@@ -24,8 +24,7 @@ def test_mongo_facts_and_rules() -> None:
     ops = [
         f
         for f in inv.facts
-        if f.kind == "data.mongo.operation"
-        and f.source.path == "mongo_repo.py"
+        if f.kind == "data.mongo.operation" and f.source.path == "mongo_repo.py"
     ]
     assert ops
     by_op = {}
@@ -52,24 +51,17 @@ def test_dynamo_facts_and_rules() -> None:
     ops = [
         f
         for f in inv.facts
-        if f.kind == "data.dynamo.operation"
-        and f.source.path == "dynamo_repo.py"
+        if f.kind == "data.dynamo.operation" and f.source.path == "dynamo_repo.py"
     ]
     scans = [f for f in ops if f.measures["operation"] == "scan"]
     assert len(scans) == 2
     full = [f for f in scans if f.measures["full_scan"]]
     assert len(full) == 1
     queries = [f for f in ops if f.measures["operation"] == "query"]
-    assert [q.measures["query_without_key_condition"] for q in queries].count(
-        True
-    ) == 1
+    assert [q.measures["query_without_key_condition"] for q in queries].count(True) == 1
     assert _findings(inv, "AF-DATA-009")
     assert _findings(inv, "AF-DATA-010")
-    tables = {
-        f.measures["entity"]
-        for f in inv.facts
-        if f.kind == "data.dynamo.table_ref"
-    }
+    tables = {f.measures["entity"] for f in inv.facts if f.kind == "data.dynamo.table_ref"}
     assert tables == {"orders"}
 
 
@@ -88,19 +80,14 @@ def test_neptune_facts_and_rules() -> None:
 
 def test_java_pattern_facts() -> None:
     inv = extract_mongo(FIXTURE)
-    java = [
-        f for f in inv.facts if f.source.path.endswith("Store.java")
-    ]
+    java = [f for f in inv.facts if f.source.path.endswith("Store.java")]
     assert java
     assert any(
-        f.measures["operation"] == "deletemany"
-        and f.measures.get("unfiltered_write") is True
+        f.measures["operation"] == "deletemany" and f.measures.get("unfiltered_write") is True
         for f in java
     )
     dinv = extract_dynamo_access(FIXTURE)
-    java_d = [
-        f for f in dinv.facts if f.source.path.endswith("Store.java")
-    ]
+    java_d = [f for f in dinv.facts if f.source.path.endswith("Store.java")]
     scans = [f for f in java_d if f.measures["operation"] == "scan"]
     assert len(scans) == 2
     assert sum(1 for f in scans if f.measures.get("full_scan")) == 1
@@ -113,9 +100,7 @@ def test_ir_aggregates_all_databases() -> None:
         (extract_neptune_access, "neptune"),
     ):
         inv = extract(FIXTURE)
-        ir = build_data_access_ir(
-            inv, database=database, provider=database
-        )
+        ir = build_data_access_ir(inv, database=database, provider=database)
         assert ir.database == database
         assert ir.access_patterns
         assert ir.unresolved  # heuristic binding is named

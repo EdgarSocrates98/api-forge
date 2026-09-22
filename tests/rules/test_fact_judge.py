@@ -37,12 +37,8 @@ def test_k6_clean_run_stays_quiet(tmp_path: Path) -> None:
 
 
 def test_coverage_below_floor_fires(tmp_path: Path) -> None:
-    report = _write(
-        tmp_path / "cov.json", {"totals": {"percent_covered": 61.5}, "files": {}}
-    )
-    assert {f.rule_id for f in judge_facts(extract_coverage(report).facts)} == {
-        "AF-TEST-103"
-    }
+    report = _write(tmp_path / "cov.json", {"totals": {"percent_covered": 61.5}, "files": {}})
+    assert {f.rule_id for f in judge_facts(extract_coverage(report).facts)} == {"AF-TEST-103"}
 
 
 def test_gitleaks_and_trivy_fire(tmp_path: Path) -> None:
@@ -60,9 +56,7 @@ def test_gitleaks_and_trivy_fire(tmp_path: Path) -> None:
     )
     rules = {
         f.rule_id
-        for f in judge_facts(
-            (*extract_gitleaks(leaks).facts, *extract_trivy(trivy).facts)
-        )
+        for f in judge_facts((*extract_gitleaks(leaks).facts, *extract_trivy(trivy).facts))
     }
     assert rules == {"AF-SEC-101", "AF-SEC-102"}
 
@@ -78,6 +72,13 @@ def test_clean_reports_produce_no_findings(tmp_path: Path) -> None:
 def test_check_rules_are_catalog_data() -> None:
     """Every check rule loads; thresholds live in the catalog, not in code."""
     checks = {rid: m.check for rid, m in load_catalog().items() if m.check}
-    assert {"AF-TEST-101", "AF-TEST-102", "AF-TEST-103", "AF-SEC-101",
-            "AF-SEC-102", "AF-SEC-103", "AF-SEC-104"} <= set(checks)
+    assert {
+        "AF-TEST-101",
+        "AF-TEST-102",
+        "AF-TEST-103",
+        "AF-SEC-101",
+        "AF-SEC-102",
+        "AF-SEC-103",
+        "AF-SEC-104",
+    } <= set(checks)
     assert checks["AF-TEST-101"].op == "gt"

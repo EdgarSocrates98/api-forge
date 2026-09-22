@@ -28,6 +28,8 @@ def test_kafka_extracts_topic_group_consumer_and_commit(tmp_path: Path) -> None:
 
 
 def test_msk_uses_same_contract_with_provider_boundary(tmp_path: Path) -> None:
-    ir = build_streaming_ir(extract_msk_access(_project(tmp_path)), broker="msk", provider="aws-msk")
+    ir = build_streaming_ir(
+        extract_msk_access(_project(tmp_path)), broker="msk", provider="aws-msk"
+    )
     assert ir.broker == "msk"
     assert ir.provider == "aws-msk"

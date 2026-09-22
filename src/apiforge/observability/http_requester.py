@@ -37,7 +37,9 @@ class HostHttpRequester:
         parsed = urlsplit(endpoint)
         host = parsed.hostname.lower() if parsed.hostname else ""
         if parsed.scheme != "https" or not host or parsed.username or parsed.password:
-            raise ValueError("AF-OBS-HTTP-ENDPOINT: only credential-free HTTPS endpoints are allowed")
+            raise ValueError(
+                "AF-OBS-HTTP-ENDPOINT: only credential-free HTTPS endpoints are allowed"
+            )
         if parsed.fragment or "{" in endpoint or "}" in endpoint:
             raise ValueError("AF-OBS-HTTP-ENDPOINT: endpoint must be resolved and fragment-free")
         if host not in self.allowed_hosts:

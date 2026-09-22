@@ -49,9 +49,7 @@ def _parse_check(raw: object, source: str, rule_id: str) -> RuleCheck | None:
     if raw is None:
         return None
     if not isinstance(raw, Mapping) or not set(raw) <= _CHECK_KEYS:
-        raise CatalogError(
-            "AF-CATALOG-SCHEMA", f"{source}: {rule_id} check must map {_CHECK_KEYS}"
-        )
+        raise CatalogError("AF-CATALOG-SCHEMA", f"{source}: {rule_id} check must map {_CHECK_KEYS}")
     if raw.get("op") not in _CHECK_OPS or not isinstance(raw.get("kind"), str):
         raise CatalogError(
             "AF-CATALOG-SCHEMA",
@@ -59,9 +57,7 @@ def _parse_check(raw: object, source: str, rule_id: str) -> RuleCheck | None:
         )
     if not isinstance(raw.get("path"), str):
         raise CatalogError("AF-CATALOG-SCHEMA", f"{source}: {rule_id} check needs path")
-    return RuleCheck(
-        kind=raw["kind"], path=raw["path"], op=raw["op"], value=raw.get("value")
-    )
+    return RuleCheck(kind=raw["kind"], path=raw["path"], op=raw["op"], value=raw.get("value"))
 
 
 class CatalogError(ValueError):
@@ -196,11 +192,7 @@ def load_playbooks() -> dict[str, tuple[dict[str, str], ...]]:
 
     Each value is the ordered tuple of steps ``{executor, verb, purpose}``.
     """
-    text = (
-        resources.files("apiforge.rules")
-        .joinpath("playbooks.yaml")
-        .read_text(encoding="utf-8")
-    )
+    text = resources.files("apiforge.rules").joinpath("playbooks.yaml").read_text(encoding="utf-8")
     try:
         data: Any = load_yaml_strict(text, source="playbooks.yaml")
     except StrictLoadError as exc:
@@ -218,9 +210,7 @@ def load_playbooks() -> dict[str, tuple[dict[str, str], ...]]:
                 "verb",
                 "purpose",
             }:
-                raise CatalogError(
-                    "AF-CATALOG-INVALID", f"playbook {name!r} has a malformed step"
-                )
+                raise CatalogError("AF-CATALOG-INVALID", f"playbook {name!r} has a malformed step")
             parsed.append({k: str(step[k]) for k in ("executor", "verb", "purpose")})
         out[str(name)] = tuple(parsed)
     return out

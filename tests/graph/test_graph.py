@@ -97,9 +97,7 @@ def test_coverage_names_gaps(built: tuple[Path, GraphExport]) -> None:
     assert isinstance(report["operations_unimplemented"], list)
 
 
-def test_export_copies_canonical_bytes(
-    built: tuple[Path, GraphExport], tmp_path: Path
-) -> None:
+def test_export_copies_canonical_bytes(built: tuple[Path, GraphExport], tmp_path: Path) -> None:
     out = tmp_path / "export"
     export = export_graph(built[0], out)
     assert export.nodes_sha256 == built[1].nodes_sha256
@@ -107,9 +105,7 @@ def test_export_copies_canonical_bytes(
     assert (out / "export.json").is_file()
 
 
-def test_export_neptune_is_named_stub(
-    built: tuple[Path, GraphExport], tmp_path: Path
-) -> None:
+def test_export_neptune_is_named_stub(built: tuple[Path, GraphExport], tmp_path: Path) -> None:
     with pytest.raises(ContractError, match="AF-GRAPH-FORMAT"):
         export_graph(built[0], tmp_path / "nep", fmt="neptune")
 

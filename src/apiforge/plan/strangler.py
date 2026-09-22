@@ -19,9 +19,7 @@ _CUT_EVIDENCE = (
 )
 
 
-def strangler_plan(
-    baseline: Iterable[Fact], candidate: Iterable[Fact]
-) -> dict[str, object]:
+def strangler_plan(baseline: Iterable[Fact], candidate: Iterable[Fact]) -> dict[str, object]:
     """Compare route surfaces; emit a deterministic per-route cut plan."""
     base_routes = [f for f in baseline if f.kind == "code.route"]
     cand_routes = [f for f in candidate if f.kind == "code.route"]

@@ -26,9 +26,7 @@ class _ElbClient(Protocol):
 
     def describe_target_groups(self, **kwargs: Any) -> dict[str, Any]: ...
 
-    def describe_load_balancer_attributes(
-        self, **kwargs: Any
-    ) -> dict[str, Any]: ...
+    def describe_load_balancer_attributes(self, **kwargs: Any) -> dict[str, Any]: ...
 
 
 def collect_alb(
@@ -44,9 +42,7 @@ def collect_alb(
     lb = _call(client, "describe_load_balancers", LoadBalancerArns=[lb_arn])
     name, digest = write_artifact(out_dir, "load-balancer.json", lb)
     manifest.record(name, digest)
-    listeners = _paginate(
-        client, "describe_listeners", "Listeners", {"LoadBalancerArn": lb_arn}
-    )
+    listeners = _paginate(client, "describe_listeners", "Listeners", {"LoadBalancerArn": lb_arn})
     name, digest = write_artifact(out_dir, "listeners.json", listeners)
     manifest.record(name, digest)
     groups = _paginate(
@@ -57,9 +53,7 @@ def collect_alb(
     )
     name, digest = write_artifact(out_dir, "target-groups.json", groups)
     manifest.record(name, digest)
-    attrs = _call(
-        client, "describe_load_balancer_attributes", LoadBalancerArn=lb_arn
-    )
+    attrs = _call(client, "describe_load_balancer_attributes", LoadBalancerArn=lb_arn)
     name, digest = write_artifact(out_dir, "attributes.json", attrs)
     manifest.record(name, digest)
     manifest.meta["load_balancer_arn"] = lb_arn
@@ -85,9 +79,7 @@ def collect_ecs(
     if client is None:
         client = _boto3("ecs")
     manifest = CollectManifest(source="ecs", collected_at=now)
-    service_arns = _paginate(
-        client, "list_services", "serviceArns", {"cluster": cluster}
-    )
+    service_arns = _paginate(client, "list_services", "serviceArns", {"cluster": cluster})
     services: dict[str, Any] = {"services": [], "failures": []}
     for i in range(0, len(service_arns), 10):
         batch = _call(

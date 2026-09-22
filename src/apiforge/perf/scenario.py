@@ -34,21 +34,12 @@ def _endpoints(scenario: dict[str, Any]) -> list[dict[str, str]]:
 
 def _k6(scenario: dict[str, Any]) -> str:
     base = str(scenario.get("base_url", "__ENV.BASE_URL"))
-    base_expr = (
-        f'"{base}"' if base.startswith("http") else base
-    )
+    base_expr = f'"{base}"' if base.startswith("http") else base
     rps = scenario.get("rps")
     duration = str(scenario.get("duration", "60s"))
     eps = _endpoints(scenario)
-    calls = "\n".join(
-        f'  http.request("{ep["method"]}", `${{base}}{ep["path"]}`);'
-        for ep in eps
-    )
-    rps_line = (
-        f"      rate: {json.dumps(rps)},\n      timeUnit: '1s',\n"
-        if rps
-        else ""
-    )
+    calls = "\n".join(f'  http.request("{ep["method"]}", `${{base}}{ep["path"]}`);' for ep in eps)
+    rps_line = f"      rate: {json.dumps(rps)},\n      timeUnit: '1s',\n" if rps else ""
     preallocated = max(1, int(rps or 10))
     return f"""import http from 'k6/http';
 
@@ -75,8 +66,8 @@ def _locust(scenario: dict[str, Any]) -> str:
     users = int(scenario.get("users") or scenario.get("rps") or 10)
     spawn = int(scenario.get("spawn_rate") or max(1, users // 10))
     methods = "\n\n".join(
-        f'    @task\n'
-        f'    def ep_{i}(self):\n'
+        f"    @task\n"
+        f"    def ep_{i}(self):\n"
         f'        self.client.{ep["method"].lower()}("{ep["path"]}")'
         for i, ep in enumerate(eps)
     )
@@ -96,9 +87,9 @@ def _jmeter(scenario: dict[str, Any]) -> str:
     threads = int(scenario.get("users") or scenario.get("rps") or 10)
     duration = str(scenario.get("duration", "60")).rstrip("s")
     samplers = "\n".join(
-        f"""        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testname="{ep['method']} {ep['path']}">
-          <stringProp name="HTTPSampler.path">{ep['path']}</stringProp>
-          <stringProp name="HTTPSampler.method">{ep['method']}</stringProp>
+        f"""        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testname="{ep["method"]} {ep["path"]}">
+          <stringProp name="HTTPSampler.path">{ep["path"]}</stringProp>
+          <stringProp name="HTTPSampler.method">{ep["method"]}</stringProp>
           <stringProp name="HTTPSampler.domain">${{__P(host,localhost)}}</stringProp>
           <stringProp name="HTTPSampler.protocol">${{__P(scheme,http)}}</stringProp>
         </HTTPSamplerProxy>

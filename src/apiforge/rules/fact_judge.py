@@ -60,9 +60,7 @@ def judge_facts(facts: Iterable[Fact]) -> tuple[Finding, ...]:
                 continue
             findings.append(
                 Finding(
-                    finding_id=stable_id(
-                        "finding", {"rule": meta.rule_id, "fact": fact.fact_id}
-                    ),
+                    finding_id=stable_id("finding", {"rule": meta.rule_id, "fact": fact.fact_id}),
                     rule_id=meta.rule_id,
                     status=FindingStatus.CONFIRMED,
                     severity=meta.severity,

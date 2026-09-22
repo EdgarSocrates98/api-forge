@@ -66,12 +66,14 @@ def verify_project(contract: Path, project: Path) -> tuple[VerificationCheck, ..
     try:
         document: dict[str, Any] = yaml.safe_load(contract_path.read_text(encoding="utf-8"))
     except (OSError, UnicodeDecodeError, yaml.YAMLError) as exc:
-        return (VerificationCheck(
-            check_id="contract-parse",
-            axis="contract",
-            verdict="inconclusive",
-            gaps=(f"contract parse failed: {exc}",),
-        ),)
+        return (
+            VerificationCheck(
+                check_id="contract-parse",
+                axis="contract",
+                verdict="inconclusive",
+                gaps=(f"contract parse failed: {exc}",),
+            ),
+        )
     app = app_path.read_text(encoding="utf-8")
     paths = set(document.get("paths", {})) if isinstance(document, dict) else set()
     checks = (
@@ -151,14 +153,20 @@ def verify_task(
         verified_by=verified_by,
     )
     path = store.task_dir(root, task_id) / "verification.json"
-    path.write_text(json.dumps(record.model_dump(mode="json"), indent=2, sort_keys=True), encoding="utf-8")
-    store.record_event(root, task_id, {
-        "event": "verified",
-        "revision": spec.revision,
-        "run_id": run_id,
-        "verdict": verdict,
-        "verification": str(path),
-    })
+    path.write_text(
+        json.dumps(record.model_dump(mode="json"), indent=2, sort_keys=True), encoding="utf-8"
+    )
+    store.record_event(
+        root,
+        task_id,
+        {
+            "event": "verified",
+            "revision": spec.revision,
+            "run_id": run_id,
+            "verdict": verdict,
+            "verification": str(path),
+        },
+    )
     return record
 
 

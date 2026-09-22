@@ -9,8 +9,22 @@ from pydantic import Field
 from apiforge.contracts.base import VersionedContract
 
 DataProvider = Literal[
-    "rds", "aurora", "redis", "mongo", "documentdb", "dynamodb", "neptune",
-    "kafka", "msk", "kinesis", "sqs", "sns", "eventbridge", "rabbitmq", "nats", "pulsar",
+    "rds",
+    "aurora",
+    "redis",
+    "mongo",
+    "documentdb",
+    "dynamodb",
+    "neptune",
+    "kafka",
+    "msk",
+    "kinesis",
+    "sqs",
+    "sns",
+    "eventbridge",
+    "rabbitmq",
+    "nats",
+    "pulsar",
 ]
 
 

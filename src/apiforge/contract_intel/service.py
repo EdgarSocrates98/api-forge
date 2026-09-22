@@ -34,8 +34,16 @@ def _impact_from_openapi(baseline: Path, candidate: Path) -> ContractImpact:
     old, new = load_openapi(baseline), load_openapi(candidate)
     changes = diff_contracts(old, new)
     breaking = tuple(item for item in changes if item.breaking)
-    review = tuple(item for item in changes if not item.breaking and item.status.value == "unresolved")
-    verdict = ImpactVerdict.BREAKING if breaking else ImpactVerdict.REVIEW if review else ImpactVerdict.COMPATIBLE
+    review = tuple(
+        item for item in changes if not item.breaking and item.status.value == "unresolved"
+    )
+    verdict = (
+        ImpactVerdict.BREAKING
+        if breaking
+        else ImpactVerdict.REVIEW
+        if review
+        else ImpactVerdict.COMPATIBLE
+    )
     refs = tuple(sorted({f"{item.method.upper()} {item.path}" for item in changes if item.method}))
     return ContractImpact(
         protocol=ContractProtocol.OPENAPI,
@@ -55,7 +63,13 @@ def _impact_from_grpc(baseline: Path, candidate: Path) -> ContractImpact:
     report = compare_grpc(old, new)
     breaking = tuple(item for item in report.diagnostics if item.severity.value == "breaking")
     review = tuple(item for item in report.diagnostics if item.severity.value == "review")
-    verdict = ImpactVerdict.BREAKING if report.verdict == "breaking" else ImpactVerdict.REVIEW if report.verdict == "review" else ImpactVerdict.COMPATIBLE
+    verdict = (
+        ImpactVerdict.BREAKING
+        if report.verdict == "breaking"
+        else ImpactVerdict.REVIEW
+        if report.verdict == "review"
+        else ImpactVerdict.COMPATIBLE
+    )
     return ContractImpact(
         protocol=ContractProtocol.GRPC,
         verdict=verdict,
@@ -78,7 +92,9 @@ def analyze_contract(protocol: ContractProtocol, baseline: Path, candidate: Path
     raise ValueError(f"AF-CONTRACT-INTEL-UNSUPPORTED: {protocol.value} requires an adapter")
 
 
-def build_twin_plan(contract: Path, protocol: ContractProtocol, dependencies: tuple[str, ...] = ()) -> TwinPlan:
+def build_twin_plan(
+    contract: Path, protocol: ContractProtocol, dependencies: tuple[str, ...] = ()
+) -> TwinPlan:
     """Build a closed offline scenario plan. It never starts a server or calls the network."""
     if protocol == ContractProtocol.OPENAPI:
         document = load_openapi(contract)
@@ -96,7 +112,11 @@ def build_twin_plan(contract: Path, protocol: ContractProtocol, dependencies: tu
             scenario_id=scenario_id,
             name=name,
             target=target,
-            dependency_failures=("timeout",) if scenario_id == "dependency-timeout" else ("http-5xx",) if scenario_id == "dependency-5xx" else (),
+            dependency_failures=("timeout",)
+            if scenario_id == "dependency-timeout"
+            else ("http-5xx",)
+            if scenario_id == "dependency-5xx"
+            else (),
             status_override=status,
             expected_status=status,
             expected_outcome=outcome,
@@ -127,5 +147,9 @@ def simulate_twin(plan: TwinPlan, scenario_id: str) -> TwinSimulation:
         outcome=scenario.expected_outcome,
         latency_ms=scenario.latency_ms,
         dependency_failures=scenario.dependency_failures,
-        evidence=(f"plan:{plan.contract_path}:{plan.contract_digest}", "mode:offline", "network_called:false"),
+        evidence=(
+            f"plan:{plan.contract_path}:{plan.contract_digest}",
+            "mode:offline",
+            "network_called:false",
+        ),
     )

@@ -31,9 +31,7 @@ def _runs_path(root: Path) -> Path:
 
 
 def _canonical(run: PerformanceRun) -> str:
-    return json.dumps(
-        run.model_dump(mode="json"), sort_keys=True, separators=(",", ":")
-    )
+    return json.dumps(run.model_dump(mode="json"), sort_keys=True, separators=(",", ":"))
 
 
 def _tool_of(run: PerformanceRun) -> str | None:
@@ -44,9 +42,7 @@ def _tool_of(run: PerformanceRun) -> str | None:
     return run.produced_by or None
 
 
-def add_run(
-    root: Path, run: PerformanceRun, *, recorded_at: str | None = None
-) -> dict[str, Any]:
+def add_run(root: Path, run: PerformanceRun, *, recorded_at: str | None = None) -> dict[str, Any]:
     """Append a run to the memory store; returns the stored record's keys."""
     payload = run.model_dump(mode="json")
     digest = hashlib.sha256(_canonical(run).encode()).hexdigest()
@@ -60,9 +56,7 @@ def add_run(
     path = _runs_path(root)
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a", encoding="utf-8") as fh:
-        fh.write(
-            json.dumps(record, sort_keys=True, separators=(",", ":")) + "\n"
-        )
+        fh.write(json.dumps(record, sort_keys=True, separators=(",", ":")) + "\n")
     return {
         "path": str(path),
         "recorded_at": recorded_at,

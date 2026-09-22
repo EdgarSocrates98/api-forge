@@ -28,15 +28,17 @@ def build_plan(spec: TaskSpec) -> TaskPlan:
         raise ContractError("AF-TASK-PLAN-RECIPE", f"no recipe for {spec.strategy.value!r}")
     steps: list[dict[str, JsonValue]] = []
     for index, verb in enumerate(verbs, start=1):
-        steps.append({
-            "id": f"step-{index:02d}",
-            "verb": verb,
-            "inputs": tuple(spec.inputs),
-            "writable_paths": tuple(spec.writable_paths),
-            "expected_artifacts": (f"step-{index:02d}.json",),
-            "proof_axes": _AXES if verb in {"judge", "verify task"} else (),
-            "risk": spec.risk.value,
-        })
+        steps.append(
+            {
+                "id": f"step-{index:02d}",
+                "verb": verb,
+                "inputs": tuple(spec.inputs),
+                "writable_paths": tuple(spec.writable_paths),
+                "expected_artifacts": (f"step-{index:02d}.json",),
+                "proof_axes": _AXES if verb in {"judge", "verify task"} else (),
+                "risk": spec.risk.value,
+            }
+        )
     plan = TaskPlan(
         task_id=spec.id,
         revision=spec.revision,
@@ -51,12 +53,18 @@ def plan_task(root: Path, task_id: str) -> TaskPlan:
     spec = store.load(root, task_id)
     plan = build_plan(spec)
     path = store.task_dir(root, task_id) / "plan.json"
-    path.write_text(json.dumps(plan.model_dump(mode="json"), indent=2, sort_keys=True), encoding="utf-8")
-    store.record_event(root, task_id, {
-        "event": "planned",
-        "revision": spec.revision,
-        "plan_digest": plan.plan_digest,
-    })
+    path.write_text(
+        json.dumps(plan.model_dump(mode="json"), indent=2, sort_keys=True), encoding="utf-8"
+    )
+    store.record_event(
+        root,
+        task_id,
+        {
+            "event": "planned",
+            "revision": spec.revision,
+            "plan_digest": plan.plan_digest,
+        },
+    )
     return plan
 
 

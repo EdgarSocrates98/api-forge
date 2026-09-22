@@ -7,7 +7,9 @@ from apiforge.contracts.task import Recipe, TaskRisk
 from apiforge.taskspec.compiler import compile_intent
 
 
-def test_compile_intent_creates_verified_local_task(orders_paths: dict[str, Path], tmp_path: Path) -> None:
+def test_compile_intent_creates_verified_local_task(
+    orders_paths: dict[str, Path], tmp_path: Path
+) -> None:
     spec = compile_intent(
         "orders-compile",
         "verify orders",
@@ -20,7 +22,9 @@ def test_compile_intent_creates_verified_local_task(orders_paths: dict[str, Path
     assert set(spec.tests) == {"contract", "security", "idempotency", "pagination"}
 
 
-def test_compile_intent_refuses_missing_context(orders_paths: dict[str, Path], tmp_path: Path) -> None:
+def test_compile_intent_refuses_missing_context(
+    orders_paths: dict[str, Path], tmp_path: Path
+) -> None:
     with pytest.raises(ContractError, match="AF-TASK-CONTEXT"):
         compile_intent(
             "orders-missing",

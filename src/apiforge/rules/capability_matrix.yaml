@@ -1,0 +1,173 @@
+capabilities:
+  api.analyze:
+    vertical: api
+    operation: analyze
+    state: supported
+    surfaces: [cli, mcp, ide, ui]
+    evidence: [case_manifest, facts, findings, smoke_test]
+    limitations:
+      - static adapters do not execute application code
+      - dynamic routes remain unresolved
+    prerequisites: [OpenAPI 3.1 contract, supported project adapter]
+    risk: read_only
+    rollback: delete generated local case only
+    verifier: tests/e2e/test_platform_completion.py::test_platform_chain
+    documentation: docs/capabilities/API_FORGE_CAPABILITY_MATRIX.md
+    adapter: local-static
+  api.next-step:
+    vertical: api
+    operation: next-step
+    state: supported
+    surfaces: [cli, mcp, ide, ui]
+    evidence: [findings_json, routing_catalog, routing_test]
+    limitations:
+      - routing requires findings mapped to the catalog
+    prerequisites: [official findings envelope]
+    risk: read_only
+    rollback: no external state
+    verifier: tests/e2e/test_next_step.py
+    documentation: docs/capabilities/API_FORGE_CAPABILITY_MATRIX.md
+    adapter: deterministic-routing
+  api.provenance:
+    vertical: api
+    operation: graph-evidence-brief
+    state: supported
+    surfaces: [cli, mcp, ide, ui]
+    evidence: [case_manifest, artifact_hashes, graph_export, receipt]
+    limitations:
+      - brief acceptance still requires an independent task verification record
+    prerequisites: [integrity-checked case]
+    risk: read_only
+    rollback: preserve previous receipt and graph
+    verifier: tests/e2e/test_platform_completion.py::test_platform_chain
+    documentation: docs/capabilities/API_FORGE_CAPABILITY_MATRIX.md
+    adapter: local-evidence
+  database.inspect:
+    vertical: database
+    operation: inspect-access-patterns
+    state: heuristic
+    surfaces: [cli, mcp, ide, ui]
+    evidence: [source_fixture, access_ir, holdout]
+    limitations:
+      - indexes, cardinality and query plans require database evidence
+    prerequisites: [source code or read-only database report]
+    risk: read_only
+    rollback: no external state
+    verifier: tests/labs/test_platform_verticals.py::test_vertical_coverage
+    documentation: docs/capabilities/API_FORGE_CAPABILITY_MATRIX.md
+    adapter: static-data-access
+  messaging.inspect:
+    vertical: messaging
+    operation: inspect-topology
+    state: heuristic
+    surfaces: [cli, mcp, ide, ui]
+    evidence: [asyncapi_or_source, messaging_ir, holdout]
+    limitations:
+      - lag, backlog and delivery guarantees require broker observations
+    prerequisites: [AsyncAPI, source fixture or read-only broker report]
+    risk: read_only
+    rollback: no external state
+    verifier: tests/labs/test_platform_verticals.py::test_vertical_coverage
+    documentation: docs/capabilities/API_FORGE_CAPABILITY_MATRIX.md
+    adapter: static-messaging
+  cicd.inspect:
+    vertical: cicd
+    operation: inspect-pipeline
+    state: heuristic
+    surfaces: [cli, mcp, ide, ui]
+    evidence: [pipeline_fixture, report_fixture, holdout]
+    limitations:
+      - provider execution status is not inferred from configuration alone
+    prerequisites: [pipeline definition or CI report]
+    risk: read_only
+    rollback: no external state
+    verifier: tests/labs/test_platform_verticals.py::test_vertical_coverage
+    documentation: docs/capabilities/API_FORGE_CAPABILITY_MATRIX.md
+    adapter: static-cicd
+  cloud.inspect:
+    vertical: cloud
+    operation: inspect-infrastructure
+    state: heuristic
+    surfaces: [cli, mcp, ide, ui]
+    evidence: [iac_fixture, posture_dump, holdout]
+    limitations:
+      - variables, remote state and live posture remain unresolved without evidence
+    prerequisites: [Terraform/SAM or read-only posture dump]
+    risk: read_only
+    rollback: no external state
+    verifier: tests/labs/test_platform_verticals.py::test_vertical_coverage
+    documentation: docs/capabilities/API_FORGE_CAPABILITY_MATRIX.md
+    adapter: static-cloud
+  frontend.inspect:
+    vertical: frontend
+    operation: inspect-api-integration
+    state: heuristic
+    surfaces: [cli, mcp, ide, ui]
+    evidence: [package_manifest, source_fixture, holdout]
+    limitations:
+      - browser runtime behavior and accessibility require a frontend test host
+    prerequisites: [front-end project and API contract]
+    risk: read_only
+    rollback: no external state
+    verifier: tests/labs/test_platform_verticals.py::test_vertical_coverage
+    documentation: docs/capabilities/API_FORGE_CAPABILITY_MATRIX.md
+    adapter: static-frontend
+  git.plan:
+    vertical: integration
+    operation: plan-git-change
+    state: unresolved
+    surfaces: [cli, mcp, ide, ui]
+    evidence: [worktree, diff, policy]
+    limitations:
+      - no Git host mutation is enabled by the local core
+    prerequisites: [worktree, policy and rollback plan]
+    risk: local_reversible
+    rollback: restore sandbox or worktree through the host policy
+    verifier: tests/runtime/test_supervisor.py
+    documentation: docs/capabilities/API_FORGE_CAPABILITY_MATRIX.md
+    adapter: integration-gateway
+  external.apply:
+    vertical: integration
+    operation: apply-external-change
+    state: unsupported
+    surfaces: [cli, mcp, ide, ui]
+    evidence: [approval_gate, adapter_receipt, rollback, independent_verification]
+    limitations:
+      - live mutation is not available in the offline core
+    prerequisites: [explicit adapter, policy approval, rollback and receipt]
+    risk: external_mutation
+    rollback: provider-specific rollback is mandatory
+    verifier: tests/runtime/test_supervisor.py
+    documentation: docs/capabilities/API_FORGE_CAPABILITY_MATRIX.md
+    adapter: none
+verticals:
+  - vertical: api
+    fixture: tests/fixtures/platform/api
+    golden: tests/fixtures/platform/api/golden.json
+    holdout: tests/fixtures/platform/api/holdout.yaml
+    verifier: tests/labs/test_platform_verticals.py::test_vertical_coverage
+  - vertical: database
+    fixture: tests/fixtures/platform/database
+    golden: tests/fixtures/platform/database/golden.json
+    holdout: tests/fixtures/platform/database/holdout.yaml
+    verifier: tests/labs/test_platform_verticals.py::test_vertical_coverage
+  - vertical: messaging
+    fixture: tests/fixtures/platform/messaging
+    golden: tests/fixtures/platform/messaging/golden.json
+    holdout: tests/fixtures/platform/messaging/holdout.yaml
+    verifier: tests/labs/test_platform_verticals.py::test_vertical_coverage
+  - vertical: cicd
+    fixture: tests/fixtures/platform/cicd
+    golden: tests/fixtures/platform/cicd/golden.json
+    holdout: tests/fixtures/platform/cicd/holdout.yaml
+    verifier: tests/labs/test_platform_verticals.py::test_vertical_coverage
+  - vertical: cloud
+    fixture: tests/fixtures/platform/cloud
+    golden: tests/fixtures/platform/cloud/golden.json
+    holdout: tests/fixtures/platform/cloud/holdout.yaml
+    verifier: tests/labs/test_platform_verticals.py::test_vertical_coverage
+  - vertical: frontend
+    fixture: tests/fixtures/platform/frontend
+    golden: tests/fixtures/platform/frontend/golden.json
+    holdout: tests/fixtures/platform/frontend/holdout.yaml
+    verifier: tests/labs/test_platform_verticals.py::test_vertical_coverage

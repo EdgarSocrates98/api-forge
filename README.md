@@ -82,6 +82,39 @@ apiforge agentops activation-plan --host copilot
 Activation plans are `plan_only` and approval-gated; they do not alter user
 configuration. See [docs/HOST_PARITY.md](docs/HOST_PARITY.md).
 
+## Platform completion workflow
+
+The platform-completion foundation provides one evidence-backed workflow for
+API, database, messaging, CI/CD, cloud and front-end work. Agents understand
+the declared need and recommend practices or architectures with facts,
+assumptions, alternatives, trade-offs, risks, limitations and a verifier. It
+does not require a guided wizard and does not turn a parser, prompt or fixture
+into runtime proof.
+
+Start with the public capability boundary:
+
+```bash
+apiforge capabilities list
+apiforge capabilities verify
+```
+
+For a real case, use the complete chain:
+
+```text
+analyze -> next-step -> graph -> evidence -> brief
+```
+
+The detailed commands, six vertical proof cells, agent output contract and
+Git/CI/CD/IDE/UI integration limits are documented in
+[docs/guides/API_FORGE_PLATFORM_USAGE.md](docs/guides/API_FORGE_PLATFORM_USAGE.md),
+[docs/capabilities/API_FORGE_CAPABILITY_MATRIX.md](docs/capabilities/API_FORGE_CAPABILITY_MATRIX.md)
+and [docs/architecture/API_FORGE_PLATFORM_COMPLETION.md](docs/architecture/API_FORGE_PLATFORM_COMPLETION.md).
+
+The supported production boundary is explicit: local/static and read-only
+paths are available; provider mutation, live runtime guarantees, deployed IDE
+protocols, deployed UI and production performance claims remain gated until
+their own evidence and verifiers exist.
+
 ## Contract, performance and observability examples
 
 ```bash

@@ -11,8 +11,8 @@ def _write_project(tmp_path: Path) -> Path:
     (tmp_path / "app.py").write_text(
         "import psycopg\n"
         "pool = psycopg.ConnectionPool()\n"
-        "rows = pool.execute(\"SELECT id FROM orders WHERE tenant_id = %s LIMIT 20\")\n"
-        "pool.execute(\"UPDATE orders SET status = %s WHERE id = %s\")\n",
+        'rows = pool.execute("SELECT id FROM orders WHERE tenant_id = %s LIMIT 20")\n'
+        'pool.execute("UPDATE orders SET status = %s WHERE id = %s")\n',
         encoding="utf-8",
     )
     (tmp_path / "mysql.sql").write_text(

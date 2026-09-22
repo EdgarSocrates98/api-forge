@@ -50,7 +50,10 @@ def execute_host_export(
         return blocked("provider-mismatch")
     if binding.backend != binding.provider:
         return blocked("backend-provider-mismatch")
-    if credential.provider != binding.provider or credential.reference != binding.credential_reference:
+    if (
+        credential.provider != binding.provider
+        or credential.reference != binding.credential_reference
+    ):
         return blocked("credential-mismatch")
     if credential.status != "available":
         return blocked("credential-unavailable")
@@ -61,7 +64,13 @@ def execute_host_export(
     parsed = urlsplit(binding.endpoint)
     host = parsed.hostname.lower() if parsed.hostname else ""
     normalized_hosts = {item.lower().strip() for item in allowed_hosts}
-    if parsed.scheme != "https" or not host or parsed.username or parsed.password or parsed.fragment:
+    if (
+        parsed.scheme != "https"
+        or not host
+        or parsed.username
+        or parsed.password
+        or parsed.fragment
+    ):
         return blocked("endpoint-must-be-https-and-credential-free")
     if host not in normalized_hosts:
         return blocked("endpoint-host-not-allowlisted")

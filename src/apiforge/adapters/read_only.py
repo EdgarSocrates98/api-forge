@@ -28,9 +28,7 @@ class FixtureStore:
 
     def scan(self, prefix: str = "") -> tuple[Mapping[str, object], ...]:
         return tuple(
-            dict(value)
-            for key, value in sorted(self._records.items())
-            if key.startswith(prefix)
+            dict(value) for key, value in sorted(self._records.items()) if key.startswith(prefix)
         )
 
 

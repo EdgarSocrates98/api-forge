@@ -14,7 +14,11 @@ _HOST_LAYOUT = {
 
 def audit_host_parity(root: Path) -> dict[str, object]:
     root = Path(root)
-    skills = {path.name for path in (root / ".claude" / "skills").iterdir()} if (root / ".claude" / "skills").is_dir() else set()
+    skills = (
+        {path.name for path in (root / ".claude" / "skills").iterdir()}
+        if (root / ".claude" / "skills").is_dir()
+        else set()
+    )
     hosts: dict[str, object] = {}
     for name, required in _HOST_LAYOUT.items():
         missing = [item for item in required if not (root / item).exists()]

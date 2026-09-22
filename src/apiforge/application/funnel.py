@@ -51,9 +51,7 @@ def measure_funnel(case_dir: Path) -> dict[str, Any]:
         projected = apply_detail_level(findings, "summary")
         size = len(json.dumps(projected, sort_keys=True).encode("utf-8"))
         sizes["findings_summary"] = size
-        stages.append(
-            {"stage": "findings_summary", "file": "findings.json", "bytes": size}
-        )
+        stages.append({"stage": "findings_summary", "file": "findings.json", "bytes": size})
 
     reduction: dict[str, float] = {}
     pairs = (("facts", "findings"), ("findings", "findings_summary"))

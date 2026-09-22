@@ -9,7 +9,9 @@ import yaml
 
 from apiforge.contracts.base import ContractError
 
-_DEFAULT_MATRIX = Path(__file__).resolve().parents[3] / "knowledge" / "runtime-migration" / "matrix.yaml"
+_DEFAULT_MATRIX = (
+    Path(__file__).resolve().parents[3] / "knowledge" / "runtime-migration" / "matrix.yaml"
+)
 
 
 def load_matrix(path: Path | None = None) -> dict[str, Any]:
@@ -23,7 +25,9 @@ def load_matrix(path: Path | None = None) -> dict[str, Any]:
     return document
 
 
-def resolve_versions(ecosystem: str, source: str, target: str, path: Path | None = None) -> dict[str, Any]:
+def resolve_versions(
+    ecosystem: str, source: str, target: str, path: Path | None = None
+) -> dict[str, Any]:
     matrix = load_matrix(path)
     entry = matrix["ecosystems"].get(ecosystem)
     if not isinstance(entry, dict):
@@ -42,7 +46,11 @@ def resolve_versions(ecosystem: str, source: str, target: str, path: Path | None
         "versions": versions,
         "source_index": source_index,
         "target_index": target_index,
-        "direction": "same" if source_index == target_index else "upgrade" if source_index < target_index else "downgrade",
+        "direction": "same"
+        if source_index == target_index
+        else "upgrade"
+        if source_index < target_index
+        else "downgrade",
         "intermediate": versions[lower : upper + 1],
         "metadata": {key: value for key, value in entry.items() if key != "versions"},
     }

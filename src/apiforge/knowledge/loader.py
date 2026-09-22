@@ -96,9 +96,7 @@ def _load_yaml(path: Path, name: str) -> dict[str, Any]:
     if not path.is_file():
         raise _err("AF-KNOW-SCHEMA", f"{name}: file missing in pack")
     try:
-        data = load_yaml_mapping(
-            path.read_text(encoding="utf-8"), source=f"{name}"
-        )
+        data = load_yaml_mapping(path.read_text(encoding="utf-8"), source=f"{name}")
     except (OSError, StrictYamlError, ValueError) as exc:
         raise _err("AF-KNOW-SCHEMA", f"{name}: unreadable YAML ({exc})") from exc
     return _mapping(data, name)

@@ -65,9 +65,7 @@ def _public_pem(public_key: Ed25519PublicKey) -> bytes:
 
 def private_key_fingerprint(private_path: Path) -> str:
     """Fingerprint of the public key derived from a private PEM."""
-    key = serialization.load_pem_private_key(
-        Path(private_path).read_bytes(), password=None
-    )
+    key = serialization.load_pem_private_key(Path(private_path).read_bytes(), password=None)
     if not isinstance(key, Ed25519PrivateKey):
         raise ReportError("AF-KEY-NOT-ED25519", f"{private_path} is not Ed25519")
     return hashlib.sha256(_public_pem(key.public_key())).hexdigest()
@@ -75,18 +73,14 @@ def private_key_fingerprint(private_path: Path) -> str:
 
 def sign_payload(private_path: Path, signature_block: dict[str, Any]) -> str:
     """Ed25519 signature (b64) over the canonical hash-binding block."""
-    key = serialization.load_pem_private_key(
-        Path(private_path).read_bytes(), password=None
-    )
+    key = serialization.load_pem_private_key(Path(private_path).read_bytes(), password=None)
     if not isinstance(key, Ed25519PrivateKey):
         raise ReportError("AF-KEY-NOT-ED25519", f"{private_path} is not Ed25519")
     signed = key.sign(canonical(signature_block).encode("utf-8"))
     return base64.b64encode(signed).decode("ascii")
 
 
-def verify_payload(
-    public_path: Path, signature_block: dict[str, Any], signature_b64: str
-) -> bool:
+def verify_payload(public_path: Path, signature_block: dict[str, Any], signature_b64: str) -> bool:
     """True only when the signature verifies against the public key."""
     try:
         key = serialization.load_pem_public_key(Path(public_path).read_bytes())

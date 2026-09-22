@@ -33,13 +33,9 @@ def build_data_access_ir(
                 patterns.add(str(value))
         if fact.measures.get("binding") == "name":
             heuristic_files.add(fact.source.path)
-    unresolved = tuple(
-        sorted({d.code for d in inventory.diagnostics})
-    )
+    unresolved = tuple(sorted({d.code for d in inventory.diagnostics}))
     return DataAccessIR(
-        id=stable_id(
-            "dataaccess", {"root": inventory.root, "framework": database}
-        ),
+        id=stable_id("dataaccess", {"root": inventory.root, "framework": database}),
         produced_by="apiforge",
         database=database,
         provider=provider,
@@ -47,9 +43,7 @@ def build_data_access_ir(
         access_patterns=tuple(sorted(patterns)),
         unresolved=unresolved,
         attributes={
-            "data_facts": sum(
-                1 for f in inventory.facts if f.kind.startswith("data.")
-            ),
+            "data_facts": sum(1 for f in inventory.facts if f.kind.startswith("data.")),
             "heuristic_binding_files": tuple(sorted(heuristic_files)),
         },
     )

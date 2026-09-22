@@ -51,7 +51,10 @@ class ReadOnlyAdapter:
                 network_called=network_called is True,
                 mutation_performed=False,
                 violations=tuple(str(item) for item in circuit_violations),
-                evidence=(f"circuit_state:{state}", f"network_called:{str(network_called).lower()}"),
+                evidence=(
+                    f"circuit_state:{state}",
+                    f"network_called:{str(network_called).lower()}",
+                ),
             )
         violations = response.get("safety_violations", ())
         if isinstance(violations, (list, tuple)) and violations:
@@ -63,12 +66,20 @@ class ReadOnlyAdapter:
                 network_called=True,
                 mutation_performed=False,
                 violations=tuple(str(item) for item in violations),
-                evidence=("safety-policy-rejected", "network_called:true", "mutation_performed:false"),
+                evidence=(
+                    "safety-policy-rejected",
+                    "network_called:true",
+                    "mutation_performed:false",
+                ),
             )
         records = response.get("records", ())
         count = len(records) if isinstance(records, (list, tuple)) else 0
         attempts = response.get("request_attempts", 1)
-        attempt_evidence = f"request_attempts:{attempts}" if isinstance(attempts, int) else "request_attempts:unknown"
+        attempt_evidence = (
+            f"request_attempts:{attempts}"
+            if isinstance(attempts, int)
+            else "request_attempts:unknown"
+        )
         pages = response.get("page_count", 1)
         page_evidence = f"page_count:{pages}" if isinstance(pages, int) else "page_count:unknown"
         circuit_state = response.get("circuit_state", "unknown")
@@ -80,7 +91,15 @@ class ReadOnlyAdapter:
             record_count=count,
             network_called=True,
             mutation_performed=False,
-            evidence=("transport-injected", "GET", attempt_evidence, page_evidence, circuit_evidence, "read_only:true", "mutation_performed:false"),
+            evidence=(
+                "transport-injected",
+                "GET",
+                attempt_evidence,
+                page_evidence,
+                circuit_evidence,
+                "read_only:true",
+                "mutation_performed:false",
+            ),
         )
 
 

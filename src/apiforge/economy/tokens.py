@@ -88,9 +88,7 @@ def _load_basis(path: Path) -> dict[str, dict[str, float]]:
         raise TokenError("AF-ECONOMY-COST-BASIS-MISSING", f"no cost basis at {path}")
     data = yaml.safe_load(path.read_text(encoding="utf-8"))
     if not isinstance(data, dict):
-        raise TokenError(
-            "AF-ECONOMY-COST-BASIS-MISSING", f"{path} is not a model→rates mapping"
-        )
+        raise TokenError("AF-ECONOMY-COST-BASIS-MISSING", f"{path} is not a model→rates mapping")
     basis: dict[str, dict[str, float]] = {}
     for model, rates in data.items():
         if not isinstance(rates, dict):

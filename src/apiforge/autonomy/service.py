@@ -38,10 +38,7 @@ def append_ledger(root: Path, entry: dict[str, Any]) -> Path:
     path = _ledger_path(root)
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a", encoding="utf-8") as fh:
-        fh.write(
-            json.dumps(entry, sort_keys=True, separators=(",", ":"), default=str)
-            + "\n"
-        )
+        fh.write(json.dumps(entry, sort_keys=True, separators=(",", ":"), default=str) + "\n")
     return path
 
 
@@ -50,9 +47,7 @@ def read_ledger(root: Path) -> list[dict[str, Any]]:
     if not path.is_file():
         return []
     return [
-        json.loads(line)
-        for line in path.read_text(encoding="utf-8").splitlines()
-        if line.strip()
+        json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()
     ]
 
 
@@ -198,11 +193,7 @@ class RunbookError(ValueError):
 def load_runbooks() -> dict[str, dict[str, Any]]:
     from importlib import resources
 
-    text = (
-        resources.files("apiforge.rules")
-        .joinpath("runbooks.yaml")
-        .read_text(encoding="utf-8")
-    )
+    text = resources.files("apiforge.rules").joinpath("runbooks.yaml").read_text(encoding="utf-8")
     try:
         data = load_yaml_mapping(text, source="runbooks.yaml")
     except StrictLoadError as exc:
@@ -212,9 +203,7 @@ def load_runbooks() -> dict[str, dict[str, Any]]:
         raise RunbookError("AF-AUTONOMY-RUNBOOK-SCHEMA", "missing 'runbooks' map")
     for name, spec in runbooks.items():
         if not isinstance(spec, dict) or not isinstance(spec.get("steps"), list):
-            raise RunbookError(
-                "AF-AUTONOMY-RUNBOOK-SCHEMA", f"{name}: missing 'steps' list"
-            )
+            raise RunbookError("AF-AUTONOMY-RUNBOOK-SCHEMA", f"{name}: missing 'steps' list")
     return dict(runbooks)
 
 
@@ -246,8 +235,7 @@ def run_runbook(
     halted = False
     for order, step in enumerate(spec["steps"], 1):
         if halted:
-            steps.append({"order": order, "verb": step.get("verb"),
-                          "outcome": "not_reached"})
+            steps.append({"order": order, "verb": step.get("verb"), "outcome": "not_reached"})
             continue
         verb = str(step.get("verb", ""))
         action_class = str(step.get("class", "read_only"))
@@ -274,9 +262,15 @@ def run_runbook(
         "halted": halted,
         "steps": steps,
     }
-    append_ledger(root, {"event": "runbook", **{k: result[k] for k in
-                                               ("runbook", "mode", "executed", "halted")},
-                         "actor": actor, "at": now})
+    append_ledger(
+        root,
+        {
+            "event": "runbook",
+            **{k: result[k] for k in ("runbook", "mode", "executed", "halted")},
+            "actor": actor,
+            "at": now,
+        },
+    )
     return result
 
 

@@ -23,7 +23,9 @@ _EXTRACTOR = "graphql-sdl"
 _ROOT_TYPES = ("Query", "Mutation", "Subscription")
 
 
-def _fact(kind: str, rel: str, digest: str, measures: dict[str, Any], attrs: dict[str, Any]) -> Fact:
+def _fact(
+    kind: str, rel: str, digest: str, measures: dict[str, Any], attrs: dict[str, Any]
+) -> Fact:
     return Fact(
         fact_id=stable_id("fact", {"kind": kind, "file": rel, **measures}),
         kind=kind,
@@ -54,9 +56,7 @@ def extract_graphql(path: Path) -> CodeInventory:
                 code="AF-GQL-INVALID",
                 status=FindingStatus.UNRESOLVED,
                 message=str(exc).split("\n")[0],
-                source=SourceRef(
-                    path=rel, sha256=hashes[rel], line=None, extractor=_EXTRACTOR
-                ),
+                source=SourceRef(path=rel, sha256=hashes[rel], line=None, extractor=_EXTRACTOR),
             )
         )
         return CodeInventory(
@@ -75,20 +75,11 @@ def extract_graphql(path: Path) -> CodeInventory:
     for name, gql_type in sorted(schema.type_map.items()):
         if name.startswith("__"):
             continue
-        kind = (
-            type(gql_type)
-            .__name__.removeprefix("GraphQL")
-            .removesuffix("Type")
-            .lower()
-        )
+        kind = type(gql_type).__name__.removeprefix("GraphQL").removesuffix("Type").lower()
         fields = getattr(gql_type, "fields", None)
         field_count = len(fields) if fields else 0
         deprecated = (
-            sum(
-                1
-                for f in fields.values()
-                if getattr(f, "deprecation_reason", None) is not None
-            )
+            sum(1 for f in fields.values() if getattr(f, "deprecation_reason", None) is not None)
             if fields
             else 0
         )

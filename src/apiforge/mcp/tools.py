@@ -13,7 +13,6 @@ from pathlib import Path
 from typing import Any, Literal, TypeVar, cast
 
 from apiforge.core.detail import apply_detail_level
-from apiforge.core.models import Finding
 
 T = TypeVar("T")
 
@@ -60,8 +59,11 @@ def analyze(
 
     def work() -> dict[str, Any]:
         result = ApiForgePlatform(Path.cwd()).analyze(
-            Path(contract), Path(project), Path(out_dir),
-            baseline=Path(baseline) if baseline else None, framework=framework,
+            Path(contract),
+            Path(project),
+            Path(out_dir),
+            baseline=Path(baseline) if baseline else None,
+            framework=framework,
         )
         return {
             "case_id": result.manifest.case_id,
@@ -139,15 +141,47 @@ def diff_contract(baseline: str, candidate: str, detail_level: str = "normal") -
 
 def next_step(findings: str, phase: str, detail_level: str = "normal") -> dict[str, Any]:
     """Recommend the specialist agent for the dominant finding area."""
+    from apiforge.application.artifacts import load_findings
     from apiforge.application.next_step import next_step as route
 
     def work() -> Any:
-        data = json.loads(Path(findings).read_text(encoding="utf-8"))
-        parsed = tuple(Finding.model_validate(f) for f in data)
+        parsed = load_findings(Path(findings))
         return route(parsed, phase)
 
     out: dict[str, Any] = _call("next_step", work, detail_level)
     return out
+
+
+def capabilities_list(
+    capability_id: str | None = None,
+    detail_level: str = "normal",
+) -> list[Any]:
+    """List the shared evidence-backed capability records."""
+    from apiforge.capabilities.registry import load_capabilities
+
+    def work() -> list[Any]:
+        records = load_capabilities()
+        selected = [
+            item for item in records if capability_id is None or item.capability_id == capability_id
+        ]
+        return [item.model_dump(mode="json") for item in selected]
+
+    return cast(list[Any], _call("capabilities_list", work, detail_level))
+
+
+def capabilities_verify(detail_level: str = "normal") -> dict[str, Any]:
+    """Verify public capability documentation and proof metadata."""
+    from apiforge.capabilities.registry import load_capabilities
+    from apiforge.capabilities.verify import verify_capabilities
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "capabilities_verify",
+            lambda: verify_capabilities(load_capabilities(), root=Path.cwd()),
+            detail_level,
+        ),
+    )
 
 
 def rules_list(area: str | None = None, detail_level: str = "normal") -> dict[str, Any]:
@@ -925,28 +959,49 @@ def grpc_capabilities(detail_level: str = "normal") -> dict[str, Any]:
     )
 
 
-def grpc_codegen(source: str, languages: tuple[str, ...] = ("python",), output_dir: str = "generated", tool: str = "fake", detail_level: str = "normal") -> dict[str, Any]:
+def grpc_codegen(
+    source: str,
+    languages: tuple[str, ...] = ("python",),
+    output_dir: str = "generated",
+    tool: str = "fake",
+    detail_level: str = "normal",
+) -> dict[str, Any]:
     from apiforge.contracts.grpc import GrpcCodegenRequest
     from apiforge.grpc.codegen import plan_codegen
     from apiforge.grpc.source import load_source
 
     target_languages = cast(tuple[Literal["python", "go", "java"], ...], languages)
     target_tool = cast(Literal["fake", "protoc", "buf"], tool)
-    work = lambda: plan_codegen(load_source(Path(source)), GrpcCodegenRequest(languages=target_languages, output_dir=output_dir, tool=target_tool))
+    work = lambda: plan_codegen(
+        load_source(Path(source)),
+        GrpcCodegenRequest(languages=target_languages, output_dir=output_dir, tool=target_tool),
+    )
     return cast(dict[str, Any], _call("grpc_codegen", work, detail_level))
 
 
-def grpc_gateway(source: str, gateways: tuple[str, ...] = ("openapi",), output_dir: str = "gateway", detail_level: str = "normal") -> dict[str, Any]:
+def grpc_gateway(
+    source: str,
+    gateways: tuple[str, ...] = ("openapi",),
+    output_dir: str = "gateway",
+    detail_level: str = "normal",
+) -> dict[str, Any]:
     from apiforge.contracts.grpc import GrpcGatewayRequest
     from apiforge.grpc.gateway import plan_gateway
     from apiforge.grpc.source import load_source
 
-    target_gateways = cast(tuple[Literal["envoy", "grpc_gateway", "grpc_web", "openapi"], ...], gateways)
-    work = lambda: plan_gateway(load_source(Path(source)), GrpcGatewayRequest(gateways=target_gateways, output_dir=output_dir))
+    target_gateways = cast(
+        tuple[Literal["envoy", "grpc_gateway", "grpc_web", "openapi"], ...], gateways
+    )
+    work = lambda: plan_gateway(
+        load_source(Path(source)),
+        GrpcGatewayRequest(gateways=target_gateways, output_dir=output_dir),
+    )
     return cast(dict[str, Any], _call("grpc_gateway", work, detail_level))
 
 
-def grpc_verify(source: str, baseline: str | None = None, detail_level: str = "normal") -> dict[str, Any]:
+def grpc_verify(
+    source: str, baseline: str | None = None, detail_level: str = "normal"
+) -> dict[str, Any]:
     from apiforge.grpc.compatibility import compare
     from apiforge.grpc.source import load_source
     from apiforge.grpc.verify import verify
@@ -963,7 +1018,12 @@ def grpc_benchmark(run: dict[str, object], detail_level: str = "normal") -> dict
     from apiforge.contracts.grpc import GrpcPerformanceRun
     from apiforge.grpc.performance import evaluate
 
-    return cast(dict[str, Any], _call("grpc_benchmark", lambda: evaluate(GrpcPerformanceRun.model_validate(run)), detail_level))
+    return cast(
+        dict[str, Any],
+        _call(
+            "grpc_benchmark", lambda: evaluate(GrpcPerformanceRun.model_validate(run)), detail_level
+        ),
+    )
 
 
 def migration_analyze(
@@ -1058,6 +1118,8 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     model_api_gateway,
     diff_contract,
     next_step,
+    capabilities_list,
+    capabilities_verify,
     rules_list,
     rules_lookup,
     playbook,
@@ -1103,6 +1165,18 @@ OBSERVABILITY_TOOLS: tuple[Callable[..., Any], ...] = (
     observability_capabilities,
 )
 
-GRPC_TOOLS: tuple[Callable[..., Any], ...] = (grpc_analyze, grpc_diff, grpc_capabilities, grpc_codegen, grpc_gateway, grpc_verify, grpc_benchmark)
+GRPC_TOOLS: tuple[Callable[..., Any], ...] = (
+    grpc_analyze,
+    grpc_diff,
+    grpc_capabilities,
+    grpc_codegen,
+    grpc_gateway,
+    grpc_verify,
+    grpc_benchmark,
+)
 
-MIGRATION_TOOLS: tuple[Callable[..., Any], ...] = (migration_analyze, migration_plan, migration_verify)
+MIGRATION_TOOLS: tuple[Callable[..., Any], ...] = (
+    migration_analyze,
+    migration_plan,
+    migration_verify,
+)

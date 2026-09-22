@@ -70,20 +70,52 @@ def compare(baseline: GrpcIR, candidate: GrpcIR) -> GrpcCompatibilityReport:
     for name, old_service in old_services.items():
         current_service = new_services.get(name)
         if current_service is None:
-            findings.append(GrpcDiagnostic(code="GRPC-SERVICE-REMOVED", severity=GrpcSeverity.BREAKING, message=f"service removed: {name}", path=name))
+            findings.append(
+                GrpcDiagnostic(
+                    code="GRPC-SERVICE-REMOVED",
+                    severity=GrpcSeverity.BREAKING,
+                    message=f"service removed: {name}",
+                    path=name,
+                )
+            )
             continue
         current_rpcs = {rpc.name: rpc for rpc in current_service.rpcs}
         for rpc in old_service.rpcs:
             replacement_rpc = current_rpcs.get(rpc.name)
             if replacement_rpc is None:
-                findings.append(GrpcDiagnostic(code="GRPC-RPC-REMOVED", severity=GrpcSeverity.BREAKING, message=f"rpc removed: {rpc.full_name}", path=rpc.full_name))
-            elif replacement_rpc.stream_mode != rpc.stream_mode or replacement_rpc.request_type != rpc.request_type or replacement_rpc.response_type != rpc.response_type:
-                findings.append(GrpcDiagnostic(code="GRPC-RPC-SIGNATURE-CHANGED", severity=GrpcSeverity.BREAKING, message=f"rpc signature changed: {rpc.full_name}", path=rpc.full_name))
+                findings.append(
+                    GrpcDiagnostic(
+                        code="GRPC-RPC-REMOVED",
+                        severity=GrpcSeverity.BREAKING,
+                        message=f"rpc removed: {rpc.full_name}",
+                        path=rpc.full_name,
+                    )
+                )
+            elif (
+                replacement_rpc.stream_mode != rpc.stream_mode
+                or replacement_rpc.request_type != rpc.request_type
+                or replacement_rpc.response_type != rpc.response_type
+            ):
+                findings.append(
+                    GrpcDiagnostic(
+                        code="GRPC-RPC-SIGNATURE-CHANGED",
+                        severity=GrpcSeverity.BREAKING,
+                        message=f"rpc signature changed: {rpc.full_name}",
+                        path=rpc.full_name,
+                    )
+                )
     for enum_name, old_values in baseline.enum_values.items():
         new_values = set(candidate.enum_values.get(enum_name, ()))
         for value in old_values:
             if value not in new_values:
-                findings.append(GrpcDiagnostic(code="GRPC-ENUM-VALUE-REMOVED", severity=GrpcSeverity.BREAKING, message=f"enum value removed: {enum_name}.{value}", path=enum_name))
+                findings.append(
+                    GrpcDiagnostic(
+                        code="GRPC-ENUM-VALUE-REMOVED",
+                        severity=GrpcSeverity.BREAKING,
+                        message=f"enum value removed: {enum_name}.{value}",
+                        path=enum_name,
+                    )
+                )
     verdict: Literal["compatible", "review", "breaking", "inconclusive"] = (
         "breaking"
         if any(item.severity == GrpcSeverity.BREAKING for item in findings)

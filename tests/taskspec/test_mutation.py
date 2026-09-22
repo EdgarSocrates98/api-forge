@@ -28,9 +28,16 @@ def _project(tmp_path: Path) -> Path:
 
 
 def _sealed_task(tmp_path: Path, **kw: object) -> None:
-    create_task(tmp_path, TaskSpec.model_validate({
-        "id": "t-build", "outcome": "build createOrder", **kw,
-    }))
+    create_task(
+        tmp_path,
+        TaskSpec.model_validate(
+            {
+                "id": "t-build",
+                "outcome": "build createOrder",
+                **kw,
+            }
+        ),
+    )
     review_task(tmp_path, "t-build", "alice")
     seal_task(tmp_path, "t-build", _keypair(tmp_path), "alice")
 
@@ -69,9 +76,7 @@ def test_build_endpoint_recipe_runs_in_sandbox_only(tmp_path: Path) -> None:
             "operation_id=createOrder",
         ),
     )
-    record = run_task(
-        tmp_path, "t-build", "af-extractor", now="2026-09-21T00:00:00Z"
-    )
+    record = run_task(tmp_path, "t-build", "af-extractor", now="2026-09-21T00:00:00Z")
     assert record["terminal"] == "awaiting_supervision", record["steps"]
     build_step = next(s for s in record["steps"] if s["verb"] == "build endpoint")
     assert build_step["status"] == "ran"

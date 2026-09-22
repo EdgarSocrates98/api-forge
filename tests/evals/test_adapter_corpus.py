@@ -13,4 +13,6 @@ def test_adapter_corpus_references_existing_inputs_and_declares_limits() -> None
     for case in cases:
         assert Path(case["input"]).exists()
         assert case["required_evidence"]
-        assert "no-runtime-inference" in case["quality_axes"] or "no-lag-claim" in case["quality_axes"]
+        assert (
+            "no-runtime-inference" in case["quality_axes"] or "no-lag-claim" in case["quality_axes"]
+        )

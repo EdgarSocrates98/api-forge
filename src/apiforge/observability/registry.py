@@ -10,4 +10,7 @@ def vendor_adapters() -> dict[str, VendorAdapter]:
 
 
 def capabilities() -> dict[str, list[dict[str, object]]]:
-    return {name: [item.model_dump(mode="json") for item in adapter.capabilities()] for name, adapter in vendor_adapters().items()}
+    return {
+        name: [item.model_dump(mode="json") for item in adapter.capabilities()]
+        for name, adapter in vendor_adapters().items()
+    }

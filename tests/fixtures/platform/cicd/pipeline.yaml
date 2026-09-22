@@ -1,0 +1,6 @@
+name: platform-check
+steps:
+  - name: test
+    command: pytest
+  - name: verify
+    command: apiforge sdd check --strict

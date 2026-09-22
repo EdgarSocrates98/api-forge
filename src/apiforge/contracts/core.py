@@ -51,6 +51,7 @@ class ActionRisk(StrEnum):
 class ActionStep(VersionedContract):
     verb: str
     args: Mapping[str, JsonValue] = Field(default_factory=dict)
+    proposed_diff: str | None = None
 
     @field_validator("args", mode="after")
     @classmethod
@@ -70,6 +71,7 @@ class ActionPlan(VersionedContract):
     rollback: str = ""
     requires_approval: bool = False
     status: Literal["proposed", "authorized", "executed", "refused"] = "proposed"
+    reason: str = ""
 
 
 class VerificationResult(StrEnum):

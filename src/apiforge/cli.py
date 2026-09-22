@@ -2636,6 +2636,16 @@ def agentops_native(
     _echo_json(native_status(Path.cwd()), detail_level)
 
 
+@agentops_app.command("parity")
+def agentops_parity(
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Audit host discovery and capability parity without invoking a host."""
+    from apiforge.agentops.parity import audit_host_parity
+
+    _echo_json(audit_host_parity(Path.cwd()), detail_level)
+
+
 @agentops_app.command("tools")
 def agentops_tools(
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),

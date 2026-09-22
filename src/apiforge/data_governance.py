@@ -79,6 +79,13 @@ def build_data_performance_profile(
                 risks.add("full-scan")
             if fact.measures.get("query_without_key_condition") is True:
                 risks.add("query-without-key-condition")
+        if database == "mongo" and fact.kind == "data.mongo.operation":
+            if fact.measures.get("unfiltered_write") is True:
+                risks.add("unfiltered-write")
+            if fact.measures.get("unbounded") is True:
+                risks.add("unbounded-document-query")
+        if database == "neptune" and fact.kind == "data.neptune.query" and fact.measures.get("unbounded") is True:
+            risks.add("unbounded-graph-traversal")
     latency_class = {
         "redis": "low_latency", "dynamo": "partitioned_scale",
         "mongo": "document", "neptune": "graph",

@@ -1,9 +1,10 @@
 # API Forge
 
-Deterministic, offline, local-first API engineering. Given an existing FastAPI
-project and an OpenAPI 3.1 contract, API Forge discovers routes, composes a
-provenance-backed API-IR, judges contract/code divergence, classifies bounded
-breaking changes, and persists a byte-reproducible evidence case.
+Deterministic, offline, local-first agentic API engineering. API Forge covers
+discovery, construction, evolution, migration, contracts, gRPC, testing,
+performance, TPS validation, observability, data access and governed agentic
+execution. Given an existing project or contract, it produces provenance-backed
+IR, evidence, plans, verifiable tasks and bounded decisions instead of guesses.
 
 > Resultado correto, verificável e reproduzível por token consumido.
 
@@ -12,6 +13,78 @@ breaking changes, and persists a byte-reproducible evidence case.
 ```bash
 python -m pip install -e '.[dev]'   # Python >=3.12,<3.13
 ```
+
+The repository also carries the native Caveman/Cavekit assets under `vendor/`,
+with pinned provenance and a SHA-256 manifest. RTK project filters live under
+`.rtk/`; the optional RTK binary is not silently installed by API Forge.
+
+```bash
+python scripts/vendor_caveman.py --check
+apiforge agentops native
+```
+
+## Agentic platform
+
+The deterministic supervisor turns intent into sealed `TaskSpec` work, runs
+independent tasks in a sandbox, preserves full artifacts, invokes verification
+and refuses `DONE` when evidence is missing. Debate is triggered by risk,
+divergence, missing proof or explicit human request. The main building blocks
+are:
+
+- `task`, `runtime`, `sandbox`, `verification`, `brief` and `evals`;
+- native provenance graph and measured context/token accounting;
+- contract intelligence for OpenAPI and gRPC;
+- offline Digital Twin scenarios for validation, auth, timeout, 5xx, rate limit,
+  idempotent retry and contract mismatch;
+- declarative performance plans for load, stress, spike, soak and capacity;
+- OTel-first health correlation with SLO, error budget and performance signals;
+- read-only plans for OTel, Datadog, Dynatrace and CloudWatch.
+
+## Host support
+
+The Python core and CLI are shared across Claude Code, GPT/Codex, Devin and
+Copilot. Repository mirrors expose the same skills and agents where each host
+supports them. Host hooks, MCP lifecycle, slash commands and subagent APIs are
+host-specific and are not falsely reported as identical.
+
+```bash
+apiforge agentops parity
+apiforge agentops activation-plan --host claude
+apiforge agentops activation-plan --host gpt-codex
+apiforge agentops activation-plan --host devin
+apiforge agentops activation-plan --host copilot
+```
+
+Activation plans are `plan_only` and approval-gated; they do not alter user
+configuration. See [docs/HOST_PARITY.md](docs/HOST_PARITY.md).
+
+## Contract, performance and observability examples
+
+```bash
+apiforge contract-intel impact \
+  --protocol openapi \
+  --baseline tests/fixtures/openapi/orders-v1.yaml \
+  --candidate tests/fixtures/openapi/orders-v2-breaking.yaml
+
+apiforge contract-intel twin \
+  --protocol openapi \
+  --contract tests/fixtures/openapi/orders-v1.yaml \
+  --scenario dependency-timeout
+
+apiforge perf plan \
+  --subject orders --endpoint 'POST /orders' --target-tps 100
+
+apiforge observability health \
+  --source telemetry.json --service orders
+
+apiforge observability read-plan \
+  --provider dynatrace --service orders \
+  --start 2026-09-22T00:00:00Z --end 2026-09-22T01:00:00Z
+```
+
+These commands are offline by default. Real provider reads, credentials,
+load-generator execution and external mutations remain explicit adapters and
+policy-gated phases.
 
 ## Analyze
 

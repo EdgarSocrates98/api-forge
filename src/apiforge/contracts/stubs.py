@@ -195,6 +195,17 @@ class DataAccessIR(_StubPayload):
     access_patterns: tuple[str, ...] = ()
 
 
+class DataAccessReadiness(_StubPayload):
+    """Governance preflight for Redis, MongoDB, DynamoDB and Neptune access."""
+
+    database: Literal["redis", "mongo", "dynamo", "neptune"]
+    status: Literal["ready", "review", "blocked"]
+    observed_patterns: tuple[str, ...] = ()
+    mutation_patterns: tuple[str, ...] = ()
+    blockers: tuple[str, ...] = ()
+    evidence: tuple[str, ...] = ()
+
+
 class RuntimeMatrix(_StubPayload):
     """Versioned runtime constraints; entries land with each knowledge pack."""
 

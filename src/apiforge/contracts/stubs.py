@@ -8,11 +8,29 @@ performance runs, data access, runtime matrices). Fields only grow.
 from __future__ import annotations
 
 from collections.abc import Mapping
+from typing import Literal
 
 from pydantic import Field, field_validator
 
 from apiforge.contracts.base import VersionedContract
 from apiforge.core.models import JsonValue, freeze_json
+
+TEST_KINDS = (
+    "smoke",
+    "baseline",
+    "load",
+    "stress",
+    "spike",
+    "soak",
+    "capacity",
+    "failover",
+    "chaos",
+)
+
+TestKind = Literal[
+    "smoke", "baseline", "load", "stress", "spike", "soak",
+    "capacity", "failover", "chaos",
+]
 
 
 class _StubPayload(VersionedContract):
@@ -40,11 +58,88 @@ class TelemetryEvent(_StubPayload):
 
 
 class PerformanceRun(_StubPayload):
-    """A measured run; metrics and noise-floor fields land with perf layer."""
+    """A measured load/performance run.
+
+    Every metric is optional: ``None`` is *measured absence* — the run did
+    not report the value — never a zero. ``test_kind`` is a closed
+    vocabulary declared by the run's author, never inferred from the
+    numbers. TPS fields mean *completed business transactions*; the run
+    declares ``tps_completed_transactions`` when its TPS metric provably
+    counts completed transactions rather than raw requests.
+    """
 
     subject: str = ""
     duration_ms: float | None = None
     baseline_ref: str | None = None
+    test_kind: TestKind | None = None
+    # throughput — RPS (requests) and TPS (business transactions) are distinct
+    target_tps: float | None = None
+    achieved_tps: float | None = None
+    successful_tps: float | None = None
+    failed_tps: float | None = None
+    rps_received: float | None = None
+    rps_processed: float | None = None
+    tps_completed_transactions: bool | None = None
+    # latency
+    p50_ms: float | None = None
+    p95_ms: float | None = None
+    p99_ms: float | None = None
+    max_latency_ms: float | None = None
+    # error surface
+    error_rate: float | None = None
+    http_4xx_rate: float | None = None
+    http_5xx_rate: float | None = None
+    http_429_rate: float | None = None
+    timeout_rate: float | None = None
+    duplicates_detected: bool | None = None
+    # resource / downstream observation
+    cpu_percent: float | None = None
+    memory_percent: float | None = None
+    gc_pause_ms: float | None = None
+    connection_pool_usage: float | None = None
+    database_latency_ms: float | None = None
+    cache_hit_rate: float | None = None
+    queue_lag: float | None = None
+    consumer_lag: float | None = None
+    cold_starts: float | None = None
+    cost_per_transaction: float | None = None
+    # run provenance
+    test_duration_s: float | None = None
+    warmup_duration_s: float | None = None
+    min_duration_s: float | None = None
+    ramp_profile: str | None = None
+    payload_profile: str | None = None
+    environment: str | None = None
+    commit_sha: str | None = None
+    infrastructure_revision: str | None = None
+    downstreams_observed: bool | None = None
+    generator_dropped_iterations: int | None = None
+    # declared SLO thresholds the verdict evaluates against
+    slo_error_rate: float | None = None
+    slo_p99_ms: float | None = None
+
+
+class WorkloadProfile(_StubPayload):
+    """Declared workload shape for architecture comparison.
+
+    Every dimension is declared by the plan's author — the profile is a
+    planning artifact, never inferred from telemetry. Absent dimensions
+    stay ``None`` and are named, not defaulted.
+    """
+
+    subject: str = ""
+    timing: Literal["synchronous", "asynchronous"] | None = None
+    arrival: Literal["bursty", "steady"] | None = None
+    state: Literal["stateless", "stateful"] | None = None
+    bound: Literal["cpu", "io"] | None = None
+    latency_sensitive: bool | None = None
+    throughput_sensitive: bool | None = None
+    event_driven: bool | None = None
+    batch: bool | None = None
+    streaming: bool | None = None
+    multi_tenant: bool | None = None
+    scope: Literal["regional", "global"] | None = None
+    exposure: Literal["public", "private"] | None = None
 
 
 class DataAccessIR(_StubPayload):

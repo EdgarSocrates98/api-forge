@@ -101,6 +101,20 @@ rules:
       declare it in the run report.
     reference: https://k6.io/docs/using-k6/metrics/reference/
     check: {kind: test.k6.summary, path: attrs.failed_rate, op: gt, value: 0.05}
+  - id: AF-TEST-104
+    title: k6 dropped iterations — the generator was the bottleneck
+    severity: high
+    rationale: >-
+      `dropped_iterations.count` above zero means the load generator could
+      not keep up with its own schedule — the run measured the generator's
+      ceiling, not the API's. Capacity numbers from a saturated generator
+      are inconclusive by definition.
+    remediation: >-
+      Scale or distribute the generator (more VUs than needed, separate
+      host, k6 cloud/distributed mode) and re-run; a run with dropped
+      iterations can only be inconclusive.
+    reference: https://grafana.com/docs/k6/latest/using-k6/metrics/reference/
+    check: {kind: test.k6.summary, path: measures.dropped_iterations, op: gt, value: 0}
   - id: AF-TEST-102
     title: Schemathesis found contract-violating responses
     severity: high

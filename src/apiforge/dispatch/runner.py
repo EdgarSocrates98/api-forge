@@ -225,6 +225,17 @@ def _verb_perf_compare(ctx: DispatchContext) -> dict[str, object]:
     )
 
 
+def _verb_perf_verdict(ctx: DispatchContext) -> dict[str, object]:
+    from apiforge.contracts.stubs import PerformanceRun
+    from apiforge.perf.verdict import verdict
+
+    assert ctx.input_path is not None
+    doc = json.loads(ctx.input_path.read_text(encoding="utf-8"))
+    if isinstance(doc, dict) and isinstance(doc.get("performance_run"), dict):
+        doc = doc["performance_run"]
+    return verdict(PerformanceRun.model_validate(doc)).model_dump(mode="json")
+
+
 # verb prefix -> (required ctx fields, runner). `collect *` is absent on
 # purpose: dispatch never touches AWS.
 _VERBS: tuple[tuple[str, tuple[str, ...], Callable[..., Any]], ...] = (
@@ -274,6 +285,7 @@ _VERBS: tuple[tuple[str, tuple[str, ...], Callable[..., Any]], ...] = (
     ("model vpc-endpoints", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_vpc_endpoints")),
     ("model s3", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_s3")),
     ("perf compare", ("baseline", "candidate"), _verb_perf_compare),
+    ("perf verdict", ("input_path",), _verb_perf_verdict),
 )
 
 

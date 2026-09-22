@@ -33,6 +33,7 @@ EXPECTED_RULES = {
     "AF-TEST-101",
     "AF-TEST-102",
     "AF-TEST-103",
+    "AF-TEST-104",
     "AF-PERF-001",
     "AF-PERF-002",
     "AF-PERF-003",

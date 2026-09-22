@@ -483,6 +483,31 @@ def perf_compare(
     return out
 
 
+def perf_verdict(run: str, detail_level: str = "normal") -> dict[str, Any]:
+    """passed / failed / inconclusive over a PerformanceRun payload."""
+    from apiforge.application.analyze import AnalysisError
+    from apiforge.contracts.stubs import PerformanceRun
+    from apiforge.perf.verdict import verdict
+
+    def work() -> dict[str, Any]:
+        try:
+            payload = json.loads(Path(run).read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError, UnicodeDecodeError) as exc:
+            raise AnalysisError("AF-PERF-RUN-INVALID", f"{run}: {exc}") from exc
+        if isinstance(payload, dict) and isinstance(
+            payload.get("performance_run"), dict
+        ):
+            payload = payload["performance_run"]
+        try:
+            run_obj = PerformanceRun.model_validate(payload)
+        except Exception as exc:
+            raise AnalysisError("AF-PERF-RUN-INVALID", f"{run}: {exc}") from exc
+        return verdict(run_obj).model_dump(mode="json")
+
+    out: dict[str, Any] = _call("perf_verdict", work, detail_level)
+    return out
+
+
 def autonomy_status(root: str = ".", detail_level: str = "normal") -> dict[str, Any]:
     """Current autonomy mode + append-only ledger — read-only."""
     from apiforge.autonomy.modes import load_mode
@@ -601,6 +626,7 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     model_redis,
     model_otel,
     perf_compare,
+    perf_verdict,
     autonomy_status,
     knowledge_list,
     knowledge_show,

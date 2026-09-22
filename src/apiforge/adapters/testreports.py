@@ -158,14 +158,27 @@ def extract_k6(path: Path) -> CodeInventory:
         duration = metrics.get("http_req_duration") or {}
         failed = metrics.get("http_req_failed") or {}
         checks = metrics.get("checks") or {}
+        reqs = metrics.get("http_reqs") or {}
+        iters = metrics.get("iterations") or {}
+        dropped = metrics.get("dropped_iterations") or {}
         facts.append(
             _fact(
                 "test.k6.summary",
                 path.name,
                 hashes[path.name],
-                {"vus_max": (metrics.get("vus_max") or {}).get("value")},
                 {
-                    "iterations": (metrics.get("iterations") or {}).get("count"),
+                    "vus_max": (metrics.get("vus_max") or {}).get("value"),
+                    # RPS and TPS are distinct measures: http_reqs.rate counts
+                    # requests, iterations.rate counts completed scenario
+                    # iterations — TPS only when the script declares one
+                    # business transaction per iteration (a PerformanceRun
+                    # field, never inferred here).
+                    "rps": reqs.get("rate"),
+                    "iterations_rate": iters.get("rate"),
+                    "dropped_iterations": dropped.get("count"),
+                },
+                {
+                    "iterations": iters.get("count"),
                     "duration_avg_ms": duration.get("avg"),
                     "duration_p95_ms": duration.get("p(95)"),
                     "duration_p99_ms": duration.get("p(99)"),

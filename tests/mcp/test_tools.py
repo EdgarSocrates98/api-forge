@@ -40,6 +40,7 @@ def test_tools_export_all_expected_verbs() -> None:
         "model_redis",
         "model_otel",
         "perf_compare",
+        "perf_verdict",
         "autonomy_status",
         "knowledge_list",
         "knowledge_show",

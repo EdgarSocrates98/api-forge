@@ -1121,6 +1121,23 @@ def perf_compare(
     _echo_json(_run(work), detail_level)
 
 
+@perf_app.command("verdict")
+def perf_verdict(
+    run: Path = typer.Option(
+        ..., "--run", help="PerformanceRun JSON (or `model otel` payload)."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """passed / failed / inconclusive over a run — conditions named, never guessed."""
+
+    def work() -> object:
+        from apiforge.perf.verdict import verdict
+
+        return verdict(_load_performance_run(run)).model_dump(mode="json")
+
+    _echo_json(_run(work), detail_level)
+
+
 def _load_performance_run(path: Path) -> PerformanceRun:
     """Accept a bare PerformanceRun or the `model otel` payload wrapping one."""
     try:

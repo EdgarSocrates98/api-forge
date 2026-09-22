@@ -72,6 +72,22 @@ def test_k6_metrics() -> None:
     fact = inv.facts[0]
     assert fact.attrs["duration_p95_ms"] == 120.5
     assert fact.attrs["failed_rate"] == 0.002
+    # RPS (requests) and TPS candidate (iterations) are distinct measures
+    assert fact.measures["rps"] == 60.0
+    assert fact.measures["iterations_rate"] == 20.0
+    assert fact.measures["dropped_iterations"] == 0
+
+
+def test_k6_dropped_iterations_fire_generator_saturation() -> None:
+    from apiforge.rules.fact_judge import judge_facts
+
+    inv = extract_k6(FIXTURES / "k6-summary.json")
+    fact = inv.facts[0].model_copy(
+        update={"measures": {**inv.facts[0].measures, "dropped_iterations": 40}}
+    )
+    findings = judge_facts([fact])
+    fired = {f.rule_id for f in findings}
+    assert "AF-TEST-104" in fired
 
 
 def test_gitleaks_never_emits_secret() -> None:

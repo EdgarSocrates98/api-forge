@@ -2737,6 +2737,118 @@ def runtime_approve(
     _echo_json(approve_runtime(root, task_id, run_id, approver), detail_level)
 
 
+@runtime_app.command("control-create")
+def runtime_control_create(
+    task_id: str = typer.Argument(...),
+    step: list[str] = typer.Option(..., "--step", help="Step or step=dependency1,dependency2; repeatable."),
+    root: Path = typer.Option(Path("."), "--root"),
+    max_parallel: int = typer.Option(4, "--max-parallel", min=1),
+    max_calls: int = typer.Option(20, "--max-calls", min=1),
+    max_retries: int = typer.Option(2, "--max-retries", min=0),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Create a persistent control-plane run without executing work."""
+    from apiforge.runtime.control import ControlPlane
+
+    steps: list[tuple[str, tuple[str, ...]]] = []
+    for raw in step:
+        name, separator, dependencies = raw.partition("=")
+        steps.append((name, tuple(item for item in dependencies.split(",") if item) if separator else ()))
+    try:
+        result = ControlPlane(root).create(
+            task_id,
+            tuple(steps),
+            max_parallel=max_parallel,
+            max_calls=max_calls,
+            max_retries=max_retries,
+        )
+    except ContractError as exc:
+        _fail(exc.code, exc.detail)
+    else:
+        _echo_json(result, detail_level)
+
+
+@runtime_app.command("control-plan")
+def runtime_control_plan(
+    run_id: str = typer.Argument(...),
+    root: Path = typer.Option(Path("."), "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Show ready steps and dynamic parallel width."""
+    from apiforge.runtime.control import ControlPlane
+
+    _echo_json(ControlPlane(root).plan(run_id), detail_level)
+
+
+@runtime_app.command("control-start")
+def runtime_control_start(
+    run_id: str = typer.Argument(...),
+    step_id: str = typer.Argument(...),
+    root: Path = typer.Option(Path("."), "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Claim one ready step and consume one bounded call."""
+    from apiforge.runtime.control import ControlPlane
+
+    try:
+        result = ControlPlane(root).start(run_id, step_id)
+    except ContractError as exc:
+        _fail(exc.code, exc.detail)
+    else:
+        _echo_json(result, detail_level)
+
+
+@runtime_app.command("control-complete")
+def runtime_control_complete(
+    run_id: str = typer.Argument(...),
+    step_id: str = typer.Argument(...),
+    result_json: str = typer.Option("{}", "--result", help="JSON result payload."),
+    root: Path = typer.Option(Path("."), "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Complete a running step with a content-hashed result."""
+    from apiforge.runtime.control import ControlPlane
+
+    try:
+        result = ControlPlane(root).complete(run_id, step_id, json.loads(result_json))
+    except (ContractError, json.JSONDecodeError) as exc:
+        _fail(getattr(exc, "code", "AF-CONTROL-RESULT"), str(exc))
+    else:
+        _echo_json(result, detail_level)
+
+
+@runtime_app.command("control-cancel")
+def runtime_control_cancel(
+    run_id: str = typer.Argument(...),
+    actor: str = typer.Option(..., "--actor"),
+    root: Path = typer.Option(Path("."), "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Cancel a control-plane run and persist the actor."""
+    from apiforge.runtime.control import ControlPlane
+
+    _echo_json(ControlPlane(root).cancel(run_id, actor), detail_level)
+
+
+@runtime_app.command("control-review")
+def runtime_control_review(
+    run_id: str = typer.Argument(...),
+    reviewer: str = typer.Option(..., "--reviewer"),
+    verdict: Literal["approved", "rejected", "review"] = typer.Option("review", "--verdict"),
+    root: Path = typer.Option(Path("."), "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Close a completed plan through an independent review verdict."""
+    from apiforge.runtime.control import ControlPlane
+
+    try:
+        result = ControlPlane(root).review(run_id, reviewer, verdict)
+    except ContractError as exc:
+        _fail(exc.code, exc.detail)
+    else:
+        _echo_json(result, detail_level)
+
+
 @grpc_app.command("analyze")
 def grpc_analyze_cmd(
     source: Path = typer.Argument(..., help=".proto or descriptor source."),

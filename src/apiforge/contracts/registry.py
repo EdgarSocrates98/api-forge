@@ -81,6 +81,15 @@ from apiforge.contracts.verification import (
 )
 from apiforge.core.models import Fact, Finding
 from apiforge.evidence.models import Receipt
+from apiforge.migration.contracts import (
+    DiscoveryResult,
+    MigrationFinding,
+    MigrationPlan,
+    MigrationReport,
+    MigrationSpec,
+    MigrationTask,
+    RuntimeCapability,
+)
 
 CONTRACTS: dict[str, type[BaseModel]] = {
     "ArtifactRef/v1": ArtifactRef,
@@ -147,6 +156,13 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "GrpcSecurityReport/v1": GrpcSecurityReport,
     "GrpcPlan/v1": GrpcPlan,
     "GrpcVerification/v1": GrpcVerification,
+    "MigrationSpec/v1": MigrationSpec,
+    "RuntimeCapability/v1": RuntimeCapability,
+    "MigrationFinding/v1": MigrationFinding,
+    "DiscoveryResult/v1": DiscoveryResult,
+    "MigrationTask/v1": MigrationTask,
+    "MigrationPlan/v1": MigrationPlan,
+    "MigrationReport/v1": MigrationReport,
 }
 
 

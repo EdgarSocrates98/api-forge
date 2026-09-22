@@ -12,7 +12,7 @@ from typing import Any
 def build_server() -> Any:
     from mcp.server.fastmcp import FastMCP
 
-    from apiforge.mcp.tools import GRPC_TOOLS, OBSERVABILITY_TOOLS, TOOLS
+    from apiforge.mcp.tools import GRPC_TOOLS, MIGRATION_TOOLS, OBSERVABILITY_TOOLS, TOOLS
 
     server = FastMCP(
         "apiforge",
@@ -22,6 +22,6 @@ def build_server() -> Any:
             "fact_id; unresolved counts are always reported."
         ),
     )
-    for tool in TOOLS + OBSERVABILITY_TOOLS + GRPC_TOOLS:
+    for tool in TOOLS + OBSERVABILITY_TOOLS + GRPC_TOOLS + MIGRATION_TOOLS:
         server.add_tool(tool)
     return server

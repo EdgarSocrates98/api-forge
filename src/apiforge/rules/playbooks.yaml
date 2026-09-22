@@ -113,6 +113,15 @@ api-agentic-orchestrator:
   - {executor: af-judge, verb: "task review", purpose: "refuse incomplete scope before fan-out"}
   - {executor: af-verifier, verb: "task verify", purpose: "preserve independent verification as a gate"}
   - {executor: af-synthesizer, verb: "brief show", purpose: "render DONE, REVIEW or BLOCKED without guessing"}
+api-runtime-migration-planner:
+  - {executor: af-inventory, verb: "migration analyze", purpose: "discover runtime and manifests"}
+  - {executor: af-extractor, verb: "migration plan", purpose: "compile a bounded migration DAG"}
+  - {executor: af-judge, verb: "task review", purpose: "validate risks, proofs and rollback"}
+  - {executor: af-synthesizer, verb: "brief show", purpose: "name migration gaps and next steps"}
+api-runtime-migration-verifier:
+  - {executor: af-inventory, verb: "migration analyze", purpose: "re-read migration inputs independently"}
+  - {executor: af-verifier, verb: "task verify", purpose: "challenge evidence and false DONE"}
+  - {executor: af-synthesizer, verb: "brief show", purpose: "render the conservative outcome"}
 api-task-spec-reviewer:
   - {executor: af-inventory, verb: "task status", purpose: "inspect lifecycle, revision and inputs"}
   - {executor: af-judge, verb: "task review", purpose: "check proofs, acceptance and rollback"}

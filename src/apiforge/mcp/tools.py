@@ -974,6 +974,90 @@ def grpc_benchmark(run: dict[str, object], detail_level: str = "normal") -> dict
     return cast(dict[str, Any], _call("grpc_benchmark", lambda: evaluate(GrpcPerformanceRun.model_validate(run)), detail_level))
 
 
+def migration_analyze(
+    project: str,
+    ecosystem: str,
+    source: str,
+    target: str,
+    matrix: str | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Discover runtime migration impact without changing the project."""
+    from apiforge.migration.contracts import Ecosystem, MigrationSpec
+    from apiforge.migration.discovery import discover as run_discovery
+
+    spec = MigrationSpec(
+        project_root=str(Path(project).resolve()),
+        ecosystem=cast(Ecosystem, ecosystem),
+        source_version=source,
+        target_version=target,
+    )
+    return cast(
+        dict[str, Any],
+        _call(
+            "migration_analyze",
+            lambda: run_discovery(spec, Path(matrix) if matrix else None),
+            detail_level,
+        ),
+    )
+
+
+def migration_plan(
+    project: str,
+    ecosystem: str,
+    source: str,
+    target: str,
+    matrix: str | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Build a closed migration TaskSpec and dependency DAG."""
+    from apiforge.migration.contracts import Ecosystem, MigrationSpec
+    from apiforge.migration.discovery import discover as run_discovery
+    from apiforge.migration.planner import compile_plan
+
+    spec = MigrationSpec(
+        project_root=str(Path(project).resolve()),
+        ecosystem=cast(Ecosystem, ecosystem),
+        source_version=source,
+        target_version=target,
+    )
+    return cast(
+        dict[str, Any],
+        _call(
+            "migration_plan",
+            lambda: compile_plan(spec, run_discovery(spec, Path(matrix) if matrix else None)),
+            detail_level,
+        ),
+    )
+
+
+def migration_verify(
+    report: str,
+    evidence_ok: bool = False,
+    verification_ok: bool = False,
+    contract_breaking: bool = False,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Apply conservative status gates to a migration report JSON file."""
+    from apiforge.migration.contracts import MigrationReport
+    from apiforge.migration.verifier import verify_report
+
+    payload = json.loads(Path(report).read_text(encoding="utf-8"))
+    return cast(
+        dict[str, Any],
+        _call(
+            "migration_verify",
+            lambda: verify_report(
+                MigrationReport.model_validate(payload),
+                evidence_ok=evidence_ok,
+                verification_ok=verification_ok,
+                contract_breaking=contract_breaking,
+            ),
+            detail_level,
+        ),
+    )
+
+
 TOOLS: tuple[Callable[..., Any], ...] = (
     discover,
     analyze,
@@ -1028,3 +1112,5 @@ OBSERVABILITY_TOOLS: tuple[Callable[..., Any], ...] = (
 )
 
 GRPC_TOOLS: tuple[Callable[..., Any], ...] = (grpc_analyze, grpc_diff, grpc_capabilities, grpc_codegen, grpc_gateway, grpc_verify, grpc_benchmark)
+
+MIGRATION_TOOLS: tuple[Callable[..., Any], ...] = (migration_analyze, migration_plan, migration_verify)

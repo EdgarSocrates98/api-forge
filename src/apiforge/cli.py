@@ -189,6 +189,12 @@ grpc_app = typer.Typer(
     no_args_is_help=True,
 )
 app.add_typer(grpc_app)
+migration_app = typer.Typer(
+    name="migration",
+    help="Offline-first runtime migration analysis and verification.",
+    no_args_is_help=True,
+)
+app.add_typer(migration_app)
 
 
 @app.callback()
@@ -2773,3 +2779,81 @@ def grpc_benchmark_cmd(
     from apiforge.grpc.performance import evaluate
 
     _echo_json(evaluate(GrpcPerformanceRun.model_validate(json.loads(run.read_text(encoding="utf-8")))), detail_level)
+
+
+@migration_app.command("analyze")
+def migration_analyze_cmd(
+    project: Path = typer.Argument(..., help="Project root to inspect."),
+    ecosystem: str = typer.Option(..., "--ecosystem", help="java, python or go."),
+    source: str = typer.Option(..., "--source"),
+    target: str = typer.Option(..., "--target"),
+    matrix: Path | None = typer.Option(None, "--matrix"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Discover runtime migration impact without changing the project."""
+    from apiforge.migration.contracts import Ecosystem, MigrationSpec
+    from apiforge.migration.discovery import discover
+
+    try:
+        spec = MigrationSpec(
+            project_root=str(project.resolve()),
+            ecosystem=cast(Ecosystem, ecosystem),
+            source_version=source,
+            target_version=target,
+        )
+        result = discover(spec, matrix)
+    except ContractError as exc:
+        _fail(exc.code, exc.detail)
+    _echo_json(result, detail_level)
+
+
+@migration_app.command("plan")
+def migration_plan_cmd(
+    project: Path = typer.Argument(..., help="Project root to inspect."),
+    ecosystem: str = typer.Option(..., "--ecosystem"),
+    source: str = typer.Option(..., "--source"),
+    target: str = typer.Option(..., "--target"),
+    matrix: Path | None = typer.Option(None, "--matrix"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Build a closed migration TaskSpec and dependency DAG."""
+    from apiforge.migration.contracts import Ecosystem, MigrationSpec
+    from apiforge.migration.discovery import discover
+    from apiforge.migration.planner import compile_plan
+
+    try:
+        spec = MigrationSpec(
+            project_root=str(project.resolve()),
+            ecosystem=cast(Ecosystem, ecosystem),
+            source_version=source,
+            target_version=target,
+        )
+        result = compile_plan(spec, discover(spec, matrix))
+    except ContractError as exc:
+        _fail(exc.code, exc.detail)
+    _echo_json(result, detail_level)
+
+
+@migration_app.command("verify")
+def migration_verify_cmd(
+    report: Path = typer.Argument(..., help="MigrationReport JSON."),
+    evidence_ok: bool = typer.Option(False, "--evidence-ok"),
+    verification_ok: bool = typer.Option(False, "--verification-ok"),
+    contract_breaking: bool = typer.Option(False, "--contract-breaking"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Apply conservative status gates to a migration report."""
+    from apiforge.migration.contracts import MigrationReport
+    from apiforge.migration.verifier import verify_report
+
+    try:
+        payload = json.loads(report.read_text(encoding="utf-8"))
+        result = verify_report(
+            MigrationReport.model_validate(payload),
+            evidence_ok=evidence_ok,
+            verification_ok=verification_ok,
+            contract_breaking=contract_breaking,
+        )
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError, ValueError) as exc:
+        _fail("AF-MIGRATION-REPORT", str(exc))
+    _echo_json(result, detail_level)

@@ -145,6 +145,31 @@ class ReadPlan(VersionedContract):
     limitations: tuple[str, ...] = ()
 
 
+class CredentialReference(VersionedContract):
+    provider: ObservabilityProvider
+    reference: str
+    source: Literal["env", "ssm", "secrets_manager", "keychain", "external_broker"]
+    secret_values_never_returned: bool = True
+
+
+class CredentialStatus(VersionedContract):
+    provider: ObservabilityProvider
+    reference: str
+    status: Literal["available", "unavailable", "blocked"]
+    reason: str
+    evidence: tuple[str, ...] = ()
+
+
+class ReadReceipt(VersionedContract):
+    provider: ObservabilityProvider
+    status: Literal["blocked", "fixture_only", "executed"]
+    credential_reference: str | None = None
+    record_count: int = Field(ge=0)
+    network_called: bool = False
+    mutation_performed: bool = False
+    evidence: tuple[str, ...] = ()
+
+
 class ObservabilityFinding(VersionedContract):
     id: str
     severity: Literal["critical", "high", "medium", "low", "info"]

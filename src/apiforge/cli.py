@@ -392,6 +392,23 @@ def observability_read_plan(
     _echo_json(result.model_dump(mode="json"), detail_level)
 
 
+@observability_app.command("credential-check")
+def observability_credential_check(
+    provider: str = typer.Option(..., "--provider"),
+    reference: str = typer.Option(..., "--reference", help="Secret reference name; never a secret value."),
+    source: str = typer.Option("external_broker", "--source"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Validate credential metadata without reading environment or secret stores."""
+    from apiforge.observability.credentials import check_reference
+
+    try:
+        result = check_reference(provider, reference, source)
+    except ValueError as exc:
+        raise AnalysisError("AF-OBS-CREDENTIAL-INVALID", str(exc)) from exc
+    _echo_json(result.model_dump(mode="json"), detail_level)
+
+
 @app.command()
 def discover(
     project: Path = typer.Option(..., "--project", help="FastAPI project root."),

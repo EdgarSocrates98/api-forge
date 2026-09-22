@@ -22,6 +22,10 @@ requires the cost of the run that never happened.
 | `AF-OBS-READ-PLAN-INVALID` | vendor read plan fails provider, window or signal validation |
 | `AF-OBS-READ-PROVIDER` | requested observability provider has no registered read adapter |
 | `AF-OBS-READ-COUNT` | fixture receipt received a negative record count |
+| `AF-OBS-CREDENTIAL-INVALID` | credential metadata reference is invalid |
+| `AF-OBS-CREDENTIAL-PROVIDER` | credential provider is unsupported |
+| `AF-OBS-CREDENTIAL-REFERENCE` | credential reference is empty or invalid |
+| `AF-OBS-CREDENTIAL-SOURCE` | credential source is outside the closed broker vocabulary |
 | `AF-HOST-ACTIVATION-INVALID` | host activation plan input is invalid |
 | `AF-HOST-ACTIVATION-HOST` | requested host has no activation plan |
 

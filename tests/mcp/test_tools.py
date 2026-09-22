@@ -48,6 +48,8 @@ def test_tools_export_all_expected_verbs() -> None:
         "plan_architecture",
         "run_list",
         "perf_scenario",
+        "perf_chaos",
+        "model_resilience",
     }
 
 

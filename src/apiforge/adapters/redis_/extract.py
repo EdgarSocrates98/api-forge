@@ -364,3 +364,11 @@ def extract_redis(project_root: Path) -> CodeInventory:
         diagnostics=tuple(diagnostics),
         input_hashes=input_hashes,
     )
+
+
+def extract_elasticache(project_root: Path) -> CodeInventory:
+    """ElastiCache speaks the Redis protocol — same call-site scan, and the
+    inventory's `framework` records which provider the operator declared.
+    """
+    inventory = extract_redis(project_root)
+    return inventory.model_copy(update={"framework": "elasticache"})

@@ -107,6 +107,8 @@ while refusal codes and `fact_id`s survive.
 | `apiforge perf compare --baseline A --candidate B --threshold-pct N` | `compare_runs`/`detect_regression` over two PerformanceRuns; `added`/`removed`/`insufficient_data` always named |
 | `apiforge perf verdict --run run.json` | `passed`/`failed`/`inconclusive` per run — validity conditions (baseline, generator saturation, TPS = completed transactions) name unevaluable evidence, never guess |
 | `apiforge perf scenario --tool k6\|jmeter\|locust --scenario s.json` | Generate the tool's script for a declared scenario — deterministic template, never executes |
+| `apiforge perf chaos` | List the declared controlled failure-injection scenarios (`CHAOS-001..013`) — injection is never executed |
+| `apiforge model resilience --path <project>` | Static resilience scan (timeouts, retries, pools, breaker/shutdown/idempotency declarations) → `resilience.*` facts; heuristic, blind spots named |
 | `apiforge autonomy status|set|run|runbook|ledger` | Modes observe→supervised→continuous over the policy engine; `set` is itself policy-gated; every evaluation lands in `ledger.jsonl` |
 | `apiforge index build|status --project P` | Content-hash indexes (files/symbols/routes/facts); status names added/changed/removed |
 | — | `analyze`/`discover` extractors run through `.apiforge/cache/` — hits are recorded in the ledger and named in the payload |

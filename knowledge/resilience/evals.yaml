@@ -5,3 +5,21 @@ evals:
   - id: resilience/AF-PERF-007
     prompt: "An artifact shows: sync work does not block the request path unnecessarily. Which rule fires?"
     expect: {kind: rule, id: AF-PERF-007}
+  - id: resilience/timeout-missing
+    prompt: "tests/fixtures/resilience_app: requests.get has no timeout in the call-site window. Which rule fires?"
+    expect: {kind: rule, id: AF-PERF-101}
+  - id: resilience/timeout-present-negative
+    prompt: "tests/fixtures/resilience_app: httpx.post passes timeout=2.0. Does AF-PERF-101 fire on that call site?"
+    expect: {kind: refusal, id: AF-PERF-101}
+  - id: resilience/retry-mutating
+    prompt: "tests/fixtures/resilience_app: a bare @retry wraps an httpx.post. Which mutating-retry rule fires?"
+    expect: {kind: rule, id: AF-PERF-104}
+  - id: resilience/breaker-gap
+    prompt: "tests/fixtures/resilience_app: dependency calls exist and no breaker is declared anywhere. Which summary rule fires?"
+    expect: {kind: rule, id: AF-PERF-105}
+  - id: resilience/no-surface-negative
+    prompt: "A module with no dependency calls declares no circuit breaker. Does AF-PERF-105 fire?"
+    expect: {kind: refusal, id: AF-PERF-105}
+  - id: resilience/summary-fact
+    prompt: "tests/fixtures/resilience_app: which fact kind carries the computed *_gap measures?"
+    expect: {kind: fact-kind, id: resilience.summary}

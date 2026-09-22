@@ -245,6 +245,12 @@ def _verb_perf_scenario(ctx: DispatchContext) -> dict[str, object]:
     return dict(generate_scenario(ctx.tool, spec))
 
 
+def _verb_perf_chaos(_ctx: DispatchContext) -> dict[str, object]:
+    from apiforge.perf.chaos import list_scenarios
+
+    return {"scenarios": list_scenarios()}
+
+
 def _verb_plan_architecture(ctx: DispatchContext) -> dict[str, object]:
     from apiforge.contracts.stubs import WorkloadProfile
     from apiforge.plan.architecture import recommend
@@ -284,10 +290,12 @@ _VERBS: tuple[tuple[str, tuple[str, ...], Callable[..., Any]], ...] = (
     ("model graphql", ("input_path",), _model_verb("apiforge.adapters.graphql_.extract.extract_graphql")),
     ("model proto", ("input_path",), _model_verb("apiforge.adapters.protobuf.extract.extract_protobuf")),
     ("model redis", ("input_path",), _model_verb("apiforge.adapters.redis_.extract.extract_redis")),
+    ("model elasticache-access", ("input_path",), _model_verb("apiforge.adapters.redis_.extract.extract_elasticache")),
     ("model mongo", ("input_path",), _model_verb("apiforge.adapters.dbaccess.extract_mongo")),
     ("model dynamodb-access", ("input_path",), _model_verb("apiforge.adapters.dbaccess.extract_dynamo_access")),
     ("model neptune-access", ("input_path",), _model_verb("apiforge.adapters.dbaccess.extract_neptune_access")),
     ("model otel", ("input_path",), _model_verb("apiforge.adapters.otel.extract.extract_otel")),
+    ("model resilience", ("input_path",), _model_verb("apiforge.adapters.resilience.extract_resilience")),
     ("model sqs", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_sqs")),
     ("model sns", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_sns")),
     ("model eventbridge", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_eventbridge")),
@@ -313,6 +321,7 @@ _VERBS: tuple[tuple[str, tuple[str, ...], Callable[..., Any]], ...] = (
     ("perf compare", ("baseline", "candidate"), _verb_perf_compare),
     ("perf verdict", ("input_path",), _verb_perf_verdict),
     ("perf scenario", ("input_path", "tool"), _verb_perf_scenario),
+    ("perf chaos", (), _verb_perf_chaos),
     ("plan architecture", ("input_path",), _verb_plan_architecture),
 )
 

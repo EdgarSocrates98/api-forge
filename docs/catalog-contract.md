@@ -600,3 +600,27 @@ cross-checks every `rule_id` against the catalog; the release gate runs it.
 | `AF-KNOW-AUTHORITY` | source authority class outside the closed set |
 | `AF-KNOW-EVAL` | eval `expect.kind` outside rule/fact-kind/refusal |
 | `AF-KNOW-CHECK` | `knowledge check` found cross-catalog problems (exit 4) |
+
+### Resilience (`model resilience`, `perf chaos`)
+
+`model resilience --path <project>` is a regex-based static scan of
+`.py`/`.java`/`.go` sources for the statically checkable resilience
+signals: `resilience.http_call` (with `has_timeout`), `resilience.retry`
+(`has_backoff`, `has_jitter`, `mutating_target`), `resilience.pool`
+(`bounded`), and one `resilience.summary` fact per project carrying the
+declared booleans plus computed `*_gap` measures — a gap counts only when
+`dependency_surface` exists, so a file with no dependency calls never
+reads as "missing a circuit breaker". Pattern matches are heuristic: every
+fact carries `heuristic: pattern-match` and the inventory carries the
+`AF-RES-HEURISTIC` diagnostic naming the blind spot. The catalog family
+`AF-PERF-101..008` (area PERF) judges these facts.
+
+`perf chaos` lists the declared controlled failure-injection scenarios
+(`CHAOS-001..013`): each names the fault to inject, the expected signal,
+the blast-radius guard and the evidence a run must produce. Injection is
+never executed by API Forge — the data is for the environment's own chaos
+tooling.
+
+| Code | Meaning |
+|---|---|
+| `AF-RES-HEURISTIC` | diagnostic: resilience signals are pattern-matched; absence of a match is a blind spot, not proof of absence |

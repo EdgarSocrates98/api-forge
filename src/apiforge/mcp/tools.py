@@ -664,6 +664,42 @@ def perf_scenario(
     return out
 
 
+def perf_chaos(detail_level: str = "normal") -> dict[str, Any]:
+    """List the declared controlled failure-injection scenarios (CHAOS-001..013)."""
+    from apiforge.perf.chaos import list_scenarios
+
+    def work() -> dict[str, Any]:
+        return {"scenarios": list_scenarios()}
+
+    out: dict[str, Any] = _call("perf_chaos", work, detail_level)
+    return out
+
+
+def model_resilience(
+    path: str, detail_level: str = "normal"
+) -> dict[str, Any]:
+    """Static resilience scan of a project tree — heuristic, blind spots named."""
+    from apiforge.adapters.resilience import extract_resilience
+    from apiforge.application.analyze import AnalysisError
+
+    def work() -> dict[str, Any]:
+        root = Path(path)
+        if not root.is_dir():
+            raise AnalysisError("AF-INPUT-NOT-FOUND", path)
+        inventory = extract_resilience(root)
+        return {
+            "diagnostics": [
+                d.model_dump(mode="json") for d in inventory.diagnostics
+            ],
+            "facts": [f.model_dump(mode="json") for f in inventory.facts],
+            "framework": inventory.framework,
+            "input_hashes": dict(inventory.input_hashes),
+        }
+
+    out: dict[str, Any] = _call("model_resilience", work, detail_level)
+    return out
+
+
 TOOLS: tuple[Callable[..., Any], ...] = (
     discover,
     analyze,
@@ -698,4 +734,6 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     plan_architecture,
     run_list,
     perf_scenario,
+    perf_chaos,
+    model_resilience,
 )

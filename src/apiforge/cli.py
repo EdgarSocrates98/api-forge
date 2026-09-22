@@ -1017,6 +1017,32 @@ def inventory_proto(
     _echo_json(_run(work), detail_level)
 
 
+@model_app.command("resilience")
+def inventory_resilience(
+    path: Path = typer.Option(
+        ..., "--path", help="Project directory to scan for resilience signals."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Static resilience scan (timeouts, retries, pools, breaker/shutdown/
+    idempotency declarations) — heuristic, blind spots named."""
+
+    def work() -> dict[str, object]:
+        from apiforge.adapters.resilience import extract_resilience
+
+        if not path.is_dir():
+            raise AnalysisError("AF-INPUT-NOT-FOUND", str(path))
+        inventory = extract_resilience(path)
+        return {
+            "diagnostics": [d.model_dump(mode="json") for d in inventory.diagnostics],
+            "facts": [f.model_dump(mode="json") for f in inventory.facts],
+            "framework": inventory.framework,
+            "input_hashes": dict(inventory.input_hashes),
+        }
+
+    _echo_json(_run(work), detail_level)
+
+
 @model_app.command("redis")
 def inventory_redis(
     path: Path = typer.Option(
@@ -1045,6 +1071,12 @@ def inventory_redis(
 
 
 _DATA_ACCESS_READERS = {
+    "elasticache-access": (
+        "apiforge.adapters.redis_.extract.extract_elasticache",
+        "elasticache",
+        "elasticache",
+        "Project directory to scan for Redis-protocol calls on ElastiCache.",
+    ),
     "mongo": (
         "apiforge.adapters.dbaccess.extract_mongo",
         "mongodb|documentdb",
@@ -1211,6 +1243,24 @@ def perf_scenario(
             return generate_scenario(tool, spec)
         except RunError as exc:
             raise AnalysisError(exc.code, str(exc).split(": ", 1)[-1]) from exc
+
+    _echo_json(_run(work), detail_level)
+
+
+@perf_app.command("chaos")
+def perf_chaos(
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """List the declared controlled failure-injection scenarios (CHAOS-001..013).
+
+    Each scenario names the fault, the expected signal, the blast-radius
+    guard and the evidence a run must produce — injection itself is never
+    executed by API Forge."""
+
+    def work() -> object:
+        from apiforge.perf.chaos import list_scenarios
+
+        return {"scenarios": list_scenarios()}
 
     _echo_json(_run(work), detail_level)
 

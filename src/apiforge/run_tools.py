@@ -467,12 +467,26 @@ def run_tool(
             f"{(proc.stderr or '').strip()[:300]}",
         )
     import importlib
+    import platform
+
+    version: str | None = None
+    try:
+        vproc = subprocess.run(
+            [binary, "--version"], capture_output=True, text=True, timeout=10,
+            check=False,
+        )
+        first = (vproc.stdout or vproc.stderr or "").strip().splitlines()
+        version = first[0].strip() if first else None
+    except (OSError, subprocess.TimeoutExpired):
+        version = None  # version unproven — stays null, never guessed
 
     module, func = str(spec["reader"]).rsplit(".", 1)
     extract = getattr(importlib.import_module(module), func)
     inventory = extract(out_path)
     return {
         "tool": tool,
+        "tool_version": version,
+        "environment": f"{platform.system().lower()}/{platform.machine().lower()}",
         "argv": argv,
         "exit_code": proc.returncode,
         "stderr_tail": (proc.stderr or "").strip()[-300:],

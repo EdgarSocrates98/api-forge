@@ -21,6 +21,9 @@ O núcleo já possui:
   exporters (`ObservabilityExportReadiness`), governança de dados
   (`DataAccessReadiness`), segurança/resiliência (`ApiSafetyAssessment`) e
   qualidade/paridade (`AgenticQualityAssessment`), todos com evidência local.
+- especializações de dados e mensageria: RDS/Aurora, PostgreSQL/MySQL,
+  Kafka/MSK, SQS/SNS/EventBridge/Kinesis, Redis/DynamoDB, OpenSearch/Redshift,
+  RabbitMQ/NATS/Pulsar e MongoDB/Neptune.
 
 O estado atual ainda é predominantemente local, offline e com callbacks/adapters
 fake ou host-owned. Isso é intencional: a segurança e a reprodutibilidade vêm
@@ -171,3 +174,19 @@ O fechamento H atualiza esta documentação, executa a suíte completa e consoli
 o release. Depois, o próximo grande ciclo deve ativar adapters reais em
 ambientes aprovados, com runners de carga, schemas de vendor, queries
 read-only, Terraform plan e evals multi-linguagem compiláveis.
+
+## Especialização de dados e mensageria concluída
+
+| Ordem | Área | Entrega |
+|---|---|---|
+| 1 | RDS/Aurora/relacionais | scanner SQL, pool, transação, paginação e collector RDS |
+| 2 | Kafka/MSK | `StreamingAccessIR`, tópicos, grupos, roles e sinais de entrega |
+| 3 | AWS messaging | `MessagingAccessIR` para SQS, SNS, EventBridge e Kinesis |
+| 4 | baixa latência/escala | perfil Redis/Valkey e DynamoDB baseado em facts |
+| 5 | analytics | `AnalyticalAccessIR` para OpenSearch e Redshift |
+| 6 | brokers | RabbitMQ, NATS e Pulsar no IR de streaming |
+| 7 | documento/grafo | perfil MongoDB/DocumentDB e Neptune com boundedness |
+
+Query plans live, consumer lag, throughput, hot keys comprovadas, explain
+plans, cluster health, replay, provisionamento e mutações externas ainda
+dependem de adapters aprovados.

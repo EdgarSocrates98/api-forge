@@ -39,6 +39,11 @@ are:
 - declarative performance plans for load, stress, spike, soak and capacity;
 - OTel-first health correlation with SLO, error budget and performance signals;
 - read-only plans for OTel, Datadog, Dynatrace and CloudWatch.
+- relational access for PostgreSQL, MySQL/MariaDB and RDS/Aurora;
+- streaming IR for Kafka/MSK, Kinesis, RabbitMQ, NATS and Pulsar;
+- messaging IR for SQS, SNS, EventBridge and Kinesis;
+- analytical access for OpenSearch/Elasticsearch and Redshift;
+- advanced observed-risk profiles for Redis, DynamoDB, MongoDB/DocumentDB and Neptune.
 
 The complete gap analysis and sequencing are maintained in
 [docs/API_FORGE_EVOLUTION_MAP.md](docs/API_FORGE_EVOLUTION_MAP.md). It maps the
@@ -109,6 +114,25 @@ They produce versioned `ready`/`passed`, `review`, `blocked` or
 These commands are offline by default. Real provider reads, credentials,
 load-generator execution and external mutations remain explicit adapters and
 policy-gated phases.
+
+Specialized source models are offline and language-neutral:
+
+```bash
+apiforge model rds-access --path .
+apiforge model kafka-access --path .
+apiforge model msk-access --path .
+apiforge model sqs-access --path .
+apiforge model eventbridge-access --path .
+apiforge model rabbitmq-access --path .
+apiforge model nats-access --path .
+apiforge model pulsar-access --path .
+apiforge model opensearch-access --path .
+apiforge model redshift-access --path .
+```
+
+`collect rds` and `collect msk` produce hashed AWS posture dumps. No API Forge
+command starts consumers, publishes messages, executes database queries or
+changes broker/database topology by default.
 
 Observability integrations now have optional OTel, Datadog and Dynatrace payload
 exporters plus host-owned authentication bindings. They remain disabled unless
@@ -239,6 +263,10 @@ is the dispatch floor, and `.apiforge/economy.jsonl` measures every call.
 | F | API security and resilience control gate | complete |
 | G | golden/holdout evaluation and host-parity aggregation | complete |
 | H | product documentation and release consolidation | current |
+
+The specialization sequence is also complete: relational/RDS, Kafka/MSK,
+AWS messaging, Redis/DynamoDB profiles, OpenSearch/Redshift, RabbitMQ/NATS/
+Pulsar and advanced MongoDB/Neptune profiles.
 
 Each phase has an artifact chain under `docs/sdd/`, focused tests and a
 rollback decision. External AWS, datastore, vendor and host mutations remain

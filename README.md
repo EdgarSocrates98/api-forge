@@ -40,6 +40,13 @@ are:
 - OTel-first health correlation with SLO, error budget and performance signals;
 - read-only plans for OTel, Datadog, Dynatrace and CloudWatch.
 
+The complete gap analysis and sequencing are maintained in
+[docs/API_FORGE_EVOLUTION_MAP.md](docs/API_FORGE_EVOLUTION_MAP.md). It maps the
+remaining work across the agentic runtime, contracts, Java/Go/Python evolution,
+performance, observability, AWS, databases, security, evals and host parity.
+The next cycle is selected by dependencies and risk, not by an ad-hoc sequence
+of isolated “next steps”.
+
 ## Host support
 
 The Python core and CLI are shared across Claude Code, GPT/Codex, Devin and
@@ -85,6 +92,11 @@ apiforge observability read-plan \
 These commands are offline by default. Real provider reads, credentials,
 load-generator execution and external mutations remain explicit adapters and
 policy-gated phases.
+
+Observability integrations now have optional OTel, Datadog and Dynatrace payload
+exporters plus host-owned authentication bindings. They remain disabled unless
+an allowlisted HTTPS endpoint, available credential, explicit approval and an
+authenticated host callback are all supplied.
 
 ## Analyze
 

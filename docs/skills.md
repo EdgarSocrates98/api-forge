@@ -40,6 +40,11 @@ O corpo das skills usa Markdown, caminhos relativos e comandos CLI neutros.
 Não use campos exclusivos de Claude, Codex, Devin ou Copilot dentro do caminho
 principal. Extensões específicas devem ficar em diretórios opcionais do host.
 
+O mapa de lacunas, dependências e fases do produto está em
+[docs/API_FORGE_EVOLUTION_MAP.md](API_FORGE_EVOLUTION_MAP.md). Skills novas devem
+ser adicionadas por especialidade e acompanhadas de evals, limites, evidências e
+validação de mirrors; não crie uma skill monolítica para cobrir todas as fases.
+
 ## Validação
 
 Execute:
@@ -49,4 +54,3 @@ python scripts/validate_skills.py
 python scripts/sync_skills.py
 python scripts/validate_skills.py --check-mirrors
 ```
-

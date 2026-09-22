@@ -10,7 +10,7 @@ from __future__ import annotations
 import json
 from collections.abc import Callable
 from pathlib import Path
-from typing import Any, TypeVar
+from typing import Any, TypeVar, cast
 
 from apiforge.core.detail import apply_detail_level
 from apiforge.core.models import Finding
@@ -841,6 +841,61 @@ def model_resilience(
     return out
 
 
+def runtime_run(
+    task_id: str,
+    root: str = ".",
+    policy: str = "local-ci-safe",
+    now: str | None = None,
+    debate: bool = False,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Execute a bounded local runtime run for a TaskSpec."""
+    from apiforge.runtime.runner import run_runtime
+
+    def work() -> dict[str, Any]:
+        return run_runtime(Path(root), task_id, policy_id=policy, now=now, requested_debate=debate)
+
+    return cast(dict[str, Any], _call("runtime_run", work, detail_level))
+
+
+def runtime_status(task_id: str, root: str = ".", detail_level: str = "normal") -> dict[str, Any]:
+    """Read the newest persisted runtime run."""
+    from apiforge.runtime.runner import runtime_status as read_status
+
+    return cast(dict[str, Any], _call("runtime_status", lambda: read_status(Path(root), task_id), detail_level))
+
+
+def runtime_resume(task_id: str, root: str = ".", policy: str = "local-ci-safe", detail_level: str = "normal") -> dict[str, Any]:
+    """Resume a bounded runtime execution."""
+    from apiforge.runtime.runner import resume_runtime
+
+    return cast(dict[str, Any], _call("runtime_resume", lambda: resume_runtime(Path(root), task_id, policy_id=policy), detail_level))
+
+
+def runtime_debate(task_id: str, root: str = ".", policy: str = "local-ci-safe", detail_level: str = "normal") -> dict[str, Any]:
+    """Request a debate room for a bounded runtime execution."""
+    from apiforge.runtime.runner import debate_runtime
+
+    return cast(dict[str, Any], _call("runtime_debate", lambda: debate_runtime(Path(root), task_id, policy_id=policy), detail_level))
+
+
+def runtime_approve(
+    task_id: str,
+    run_id: str,
+    approver: str,
+    root: str = ".",
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Persist a human approval artifact for a runtime run."""
+    from apiforge.runtime.runner import approve_runtime
+
+    return cast(dict[str, Any], _call(
+        "runtime_approve",
+        lambda: approve_runtime(Path(root), task_id, run_id, approver),
+        detail_level,
+    ))
+
+
 TOOLS: tuple[Callable[..., Any], ...] = (
     discover,
     analyze,
@@ -882,4 +937,9 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     perf_scenario,
     perf_chaos,
     model_resilience,
+    runtime_run,
+    runtime_status,
+    runtime_resume,
+    runtime_debate,
+    runtime_approve,
 )

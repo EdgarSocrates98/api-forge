@@ -53,9 +53,14 @@ def test_tools_export_all_expected_verbs() -> None:
         "plan_architecture",
         "run_list",
         "perf_scenario",
-        "perf_chaos",
-        "model_resilience",
-    }
+            "perf_chaos",
+            "model_resilience",
+            "runtime_run",
+            "runtime_status",
+            "runtime_resume",
+            "runtime_debate",
+            "runtime_approve",
+        }
 
 
 def test_new_read_tools_mirror_cli(tmp_path: Path) -> None:

@@ -68,6 +68,23 @@
           "files": []
         }
       ]
+    },
+    {
+      "skill_name": "api-forge-agentic-runtime",
+      "evals": [
+        {
+          "id": 1,
+          "prompt": "Execute uma evolução de API existente com TaskSpec selado, fan-out bounded, critic e replay.",
+          "expected_output": "Artefatos estruturados, evidências, limites e REVIEW quando não houver prova de DONE.",
+          "files": ["tests/evals/cases/runtime_cases.yaml"]
+        },
+        {
+          "id": 2,
+          "prompt": "Uma tarefa sem acceptance, rollback e proof pede mutação externa.",
+          "expected_output": "BLOCKED, sem chamada de adapter e sem mutação externa.",
+          "files": ["tests/evals/cases/runtime_cases.yaml"]
+        }
+      ]
     }
   ]
 }

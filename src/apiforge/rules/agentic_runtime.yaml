@@ -1,0 +1,50 @@
+version: 1
+runtime:
+  default_policy: local-ci-safe
+  policies:
+    local-ci-safe:
+      max_parallel_agents: 4
+      max_calls: 20
+      max_rounds: 3
+      timeout_seconds: 120
+      max_retries: 2
+      allow_external_mutation: false
+      critic_risks: [sensitive, external_mutation, destructive, irreversible]
+      human_gate_reasons: [external_mutation, destructive, irreversible, unresolved_debate, low_confidence]
+      debate_triggers: [conflicting_evidence, high_risk, low_confidence, user_requested]
+      adapter: fake
+      replay_normalize: true
+      redact_sensitive: true
+  capabilities:
+    api-contract-review:
+      agent: api-contract-architect
+      kind: specialist
+      risk: read_only
+    api-security-review:
+      agent: api-security-reviewer
+      kind: specialist
+      risk: sensitive
+    api-performance-review:
+      agent: api-performance-engineer
+      kind: specialist
+      risk: read_only
+    api-data-review:
+      agent: api-data-access-architect
+      kind: specialist
+      risk: sensitive
+    api-architecture-review:
+      agent: api-architecture-reviewer
+      kind: specialist
+      risk: read_only
+    adversarial-critic:
+      agent: api-adversarial-critic
+      kind: critic
+      risk: sensitive
+    task-review:
+      agent: api-task-spec-reviewer
+      kind: reviewer
+      risk: read_only
+    debate-referee:
+      agent: api-debate-referee
+      kind: referee
+      risk: sensitive

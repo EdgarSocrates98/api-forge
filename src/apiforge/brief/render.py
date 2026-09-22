@@ -13,6 +13,7 @@ Status mapping is data, not mood:
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 from apiforge.contracts.base import ContractError
@@ -123,3 +124,19 @@ def brief_payload(root: Path, task_id: str) -> dict[str, object]:
     payload = brief.model_dump(mode="json")
     payload["history_len"] = len(store.history(root, task_id))
     return payload
+
+
+def brief_for_agentic_run(root: Path, task_id: str, run_id: str) -> OutcomeBrief:
+    """Render a bounded runtime result without granting task acceptance."""
+    run_path = store.task_dir(root, task_id) / "runs" / run_id.replace(":", "-") / "run.json"
+    if not run_path.is_file():
+        raise ContractError("AF-RUNTIME-NOT-FOUND", f"no runtime run {run_id!r}")
+    payload = json.loads(run_path.read_text(encoding="utf-8"))
+    spec = store.load(root, task_id)
+    status = str(payload.get("final_status", "REVIEW"))
+    gaps = tuple(str(item) for item in payload.get("gaps", ()))
+    if status == "BLOCKED":
+        return OutcomeBrief(status=BriefStatus.BLOCKED, outcome=spec.outcome, gaps=gaps, subject=run_id)
+    if status == "DONE":
+        return OutcomeBrief(status=BriefStatus.DONE, outcome=spec.outcome, proof=(str(run_path),), subject=run_id)
+    return OutcomeBrief(status=BriefStatus.REVIEW, outcome=spec.outcome, gaps=gaps, proof=(str(run_path),), subject=run_id)

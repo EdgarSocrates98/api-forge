@@ -17,6 +17,7 @@ from pathlib import Path
 
 import yaml
 
+from apiforge.contracts.agentic import AgenticRun
 from apiforge.contracts.base import ContractError
 from apiforge.contracts.task import TaskRevision, TaskSpec
 
@@ -132,3 +133,17 @@ def record_run(root: Path, task_id: str, run: dict[str, object]) -> Path:
         json.dumps(run, sort_keys=True, indent=2), encoding="utf-8"
     )
     return path
+
+
+def record_agentic_run(root: Path, run: AgenticRun) -> Path:
+    """Persist a typed agentic run in the TaskSpec run index."""
+    return record_run(root, run.task_id, run.model_dump(mode="json"))
+
+
+def latest_run(root: Path, task_id: str) -> dict[str, object] | None:
+    """Return the newest indexed run without interpreting its lifecycle."""
+    paths = sorted((task_dir(root, task_id) / "runs").glob("*.json"))
+    if not paths:
+        return None
+    payload = json.loads(paths[-1].read_text(encoding="utf-8"))
+    return payload if isinstance(payload, dict) else None

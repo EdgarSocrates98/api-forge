@@ -461,6 +461,32 @@ never touched by a task step; promotion stays a separate human action.
 | `AF-TASK-REVISION-MISSING` | spec.revision points at a revision file that is absent |
 | `AF-TASK-RECIPE` | `strategy` names no recipe in `rules/recipes.yaml` |
 | `AF-TASK-MUTATION-GATED` | mutation verb outside the task runner, or the task lacks policy `allow` / a `.apiforge` writable scope |
+
+### Agentic runtime
+
+The local runtime is provider-neutral and executes only against a sealed TaskSpec. It persists invocations, artifacts, events and replay material; model output cannot widen scope, approve mutations or bypass verification.
+
+| Code | Meaning |
+|---|---|
+| `AF-RUNTIME-ADAPTER` | adapter failed or returned an adapter-level error |
+| `AF-RUNTIME-POLICY` | requested runtime policy is missing or malformed |
+| `AF-RUNTIME-MUTATION` | external mutation is refused by the local safety policy |
+| `AF-RUNTIME-TOOL` | tool name is not allowlisted for the runtime |
+| `AF-RUNTIME-REGISTRY` | capability registry is missing or malformed |
+| `AF-RUNTIME-TASK-STATE` | TaskSpec is not sealed, ready or running |
+| `AF-RUNTIME-TASK-OUTCOME` | TaskSpec outcome is empty |
+| `AF-RUNTIME-TASK-PROOF` | TaskSpec has no expected proofs |
+| `AF-RUNTIME-TASK-ACCEPTANCE` | TaskSpec has no acceptance criteria |
+| `AF-RUNTIME-TASK-ROLLBACK` | TaskSpec has no rollback statement |
+| `AF-RUNTIME-TASK-INPUT` | declared runtime input is missing |
+| `AF-RUNTIME-TASK-PATHS` | mutating task has no declared writable paths |
+| `AF-RUNTIME-BUDGET` | parallel execution bound is invalid |
+| `AF-RUNTIME-DEPENDENCY` | invocation dependency graph is cyclic or incomplete |
+| `AF-RUNTIME-TIMEOUT` | invocation exceeded its bounded timeout |
+| `AF-RUNTIME-SCHEMA` | adapter output is not a structured object |
+| `AF-RUNTIME-HASH` | runtime artifact hash could not be computed |
+| `AF-RUNTIME-NOT-FOUND` | requested runtime run is not persisted |
+| `AF-BRIEF` | outcome brief rendering failed |
 | `AF-RECIPE-INVALID` | `recipes.yaml` is malformed |
 
 ### Graph (`graph`)

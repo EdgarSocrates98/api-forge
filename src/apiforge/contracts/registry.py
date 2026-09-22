@@ -6,6 +6,16 @@ from typing import Any
 
 from pydantic import BaseModel
 
+from apiforge.contracts.agentic import (
+    AgentArtifact,
+    AgenticPolicy,
+    AgenticRun,
+    AgentInvocation,
+    ApprovalGate,
+    DecisionRecord,
+    HandoffRecord,
+    TrajectoryEvent,
+)
 from apiforge.contracts.base import ContractError
 from apiforge.contracts.core import (
     ActionPlan,
@@ -68,6 +78,15 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "VerificationRecord/v1": VerificationRecord,
     "VerificationCheck/v1": VerificationCheck,
     "HoldoutRecord/v1": HoldoutRecord,
+    "AgenticRun/v1": AgenticRun,
+    "AgenticRuntime/v1": AgenticRun,
+    "AgenticPolicy/v1": AgenticPolicy,
+    "AgentInvocation/v1": AgentInvocation,
+    "AgentArtifact/v1": AgentArtifact,
+    "HandoffRecord/v1": HandoffRecord,
+    "DecisionRecord/v1": DecisionRecord,
+    "ApprovalGate/v1": ApprovalGate,
+    "TrajectoryEvent/v1": TrajectoryEvent,
 }
 
 

@@ -19,6 +19,7 @@ from apiforge.build.service import build_endpoint
 from apiforge.case.service import CaseIntegrityError, CaseStorageError
 from apiforge.collectors.apigateway import collect
 from apiforge.collectors.manifest import CollectError, CollectManifest
+from apiforge.contracts.base import ContractError
 from apiforge.contracts.stubs import PerformanceRun
 from apiforge.core.detail import apply_detail_level
 from apiforge.core.models import Fact, Finding, FindingStatus, Severity
@@ -146,6 +147,12 @@ task_app = typer.Typer(
     no_args_is_help=True,
 )
 app.add_typer(task_app)
+runtime_app = typer.Typer(
+    name="runtime",
+    help="Bounded agentic execution over sealed TaskSpecs; local and CI safe.",
+    no_args_is_help=True,
+)
+app.add_typer(runtime_app)
 brief_app = typer.Typer(
     name="brief",
     help="Outcome Briefs — DONE is refused while mandatory gaps exist.",
@@ -2578,3 +2585,77 @@ def knowledge_check(
         return result
 
     _echo_json(_run(work), detail_level)
+
+
+@runtime_app.command("run")
+def runtime_run(
+    task_id: str = typer.Argument(..., help="TaskSpec id to execute."),
+    root: Path = typer.Option(Path("."), "--root", help="Project root."),
+    policy: str = typer.Option("local-ci-safe", "--policy"),
+    now: str | None = typer.Option(None, "--now", help="Deterministic timestamp for replay."),
+    debate: bool = typer.Option(False, "--debate", help="Request a debate room."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Execute a sealed TaskSpec with the deterministic fake adapter."""
+
+    def work() -> object:
+        from apiforge.runtime.runner import run_runtime
+
+        return run_runtime(root, task_id, policy_id=policy, now=now, requested_debate=debate)
+
+    try:
+        _echo_json(_run(work), detail_level)
+    except ContractError as exc:
+        _fail(exc.code, exc.detail)
+
+
+@runtime_app.command("status")
+def runtime_status_cmd(
+    task_id: str = typer.Argument(...),
+    root: Path = typer.Option(Path("."), "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Show the newest persisted runtime run."""
+    from apiforge.runtime.runner import runtime_status
+
+    _echo_json(runtime_status(root, task_id), detail_level)
+
+
+@runtime_app.command("resume")
+def runtime_resume(
+    task_id: str = typer.Argument(...),
+    root: Path = typer.Option(Path("."), "--root"),
+    policy: str = typer.Option("local-ci-safe", "--policy"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Resume by replaying the TaskSpec through the bounded supervisor."""
+    from apiforge.runtime.runner import resume_runtime
+
+    _echo_json(resume_runtime(root, task_id, policy_id=policy), detail_level)
+
+
+@runtime_app.command("debate")
+def runtime_debate(
+    task_id: str = typer.Argument(...),
+    root: Path = typer.Option(Path("."), "--root"),
+    policy: str = typer.Option("local-ci-safe", "--policy"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Request a debate room before the runtime makes a final decision."""
+    from apiforge.runtime.runner import debate_runtime
+
+    _echo_json(debate_runtime(root, task_id, policy_id=policy), detail_level)
+
+
+@runtime_app.command("approve")
+def runtime_approve(
+    task_id: str = typer.Argument(...),
+    run_id: str = typer.Argument(...),
+    approver: str = typer.Option(..., "--approver"),
+    root: Path = typer.Option(Path("."), "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Record a local human approval artifact for a runtime run."""
+    from apiforge.runtime.runner import approve_runtime
+
+    _echo_json(approve_runtime(root, task_id, run_id, approver), detail_level)

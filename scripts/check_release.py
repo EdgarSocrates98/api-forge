@@ -88,6 +88,15 @@ THREAT_PHRASES = (
     "agent profile drift",
 )
 
+AGENTIC_RUNTIME_FILES = (
+    "src/apiforge/runtime/supervisor.py",
+    "src/apiforge/runtime/adapters.py",
+    "src/apiforge/runtime/policy.py",
+    "src/apiforge/runtime/store.py",
+    "tests/runtime/test_vertical_slice.py",
+    "tests/evals/cases/runtime_cases.yaml",
+)
+
 
 def _check_docs(root: Path, failures: list[str]) -> None:
     for doc in REQUIRED_DOCS:
@@ -199,6 +208,8 @@ def _check_code_parity(root: Path, failures: list[str]) -> None:
         ("AF-ECACHE", "docs/catalog-contract.md"),
         ("AF-HEAL", "docs/catalog-contract.md"),
         ("AF-KNOW", "docs/catalog-contract.md"),
+        ("AF-RUNTIME", "docs/catalog-contract.md"),
+        ("AF-BRIEF", "docs/catalog-contract.md"),
         ("AF-SCENARIO", "docs/catalog-contract.md"),
         ("AF-INDEX", "docs/catalog-contract.md"),
         ("AF-INPUT", "docs/catalog-contract.md"),
@@ -415,6 +426,15 @@ def _check_threat_model(root: Path, failures: list[str]) -> None:
             failures.append(f"threat model missing threat: {phrase}")
 
 
+def _check_agentic_runtime(root: Path, failures: list[str]) -> None:
+    for relative in AGENTIC_RUNTIME_FILES:
+        if not (root / relative).is_file():
+            failures.append(f"agentic runtime file missing: {relative}")
+    rules = root / "src" / "apiforge" / "rules" / "agentic_runtime.yaml"
+    if rules.is_file() and "local-ci-safe" not in rules.read_text(encoding="utf-8"):
+        failures.append("agentic runtime rules missing local-ci-safe policy")
+
+
 def check_repository(root: Path) -> list[str]:
     """Return the list of gate failures; empty means PASS."""
     root = Path(root)
@@ -432,6 +452,7 @@ def check_repository(root: Path) -> list[str]:
     _check_agents(root, failures)
     _check_lab_and_boundary(root, failures)
     _check_threat_model(root, failures)
+    _check_agentic_runtime(root, failures)
     _check_knowledge(root, failures)
     return failures
 

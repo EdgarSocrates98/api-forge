@@ -1,0 +1,7 @@
+responses:
+  api-contract-review:
+    recommendation: preserve-compatible-version
+    confidence: 0.85
+  api-security-review:
+    recommendation: require-authz-evidence
+    confidence: 0.8

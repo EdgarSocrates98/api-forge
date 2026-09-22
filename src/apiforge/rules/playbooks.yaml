@@ -107,3 +107,24 @@ api-operations-engineer:
   - {executor: af-extractor, verb: "model xray", purpose: "tracing posture facts"}
   - {executor: af-judge, verb: "rules list --area OBSERVE", purpose: "observability rules over the posture"}
   - {executor: af-synthesizer, verb: "next-step", purpose: "route; unobserved signals stay named"}
+api-agentic-orchestrator:
+  - {executor: af-inventory, verb: "task status", purpose: "bind the run to the current TaskSpec revision"}
+  - {executor: af-extractor, verb: "task plan", purpose: "reuse the sealed plan and declared proof axes"}
+  - {executor: af-judge, verb: "task review", purpose: "refuse incomplete scope before fan-out"}
+  - {executor: af-verifier, verb: "task verify", purpose: "preserve independent verification as a gate"}
+  - {executor: af-synthesizer, verb: "brief show", purpose: "render DONE, REVIEW or BLOCKED without guessing"}
+api-task-spec-reviewer:
+  - {executor: af-inventory, verb: "task status", purpose: "inspect lifecycle, revision and inputs"}
+  - {executor: af-judge, verb: "task review", purpose: "check proofs, acceptance and rollback"}
+  - {executor: af-verifier, verb: "task verify", purpose: "confirm evidence requirements"}
+  - {executor: af-synthesizer, verb: "brief show", purpose: "name remaining gaps"}
+api-adversarial-critic:
+  - {executor: af-inventory, verb: "task status", purpose: "read the sealed scope and artifacts"}
+  - {executor: af-judge, verb: "rules list --area SECURITY", purpose: "apply security and adversarial rules"}
+  - {executor: af-verifier, verb: "task verify", purpose: "challenge evidence and holdout claims"}
+  - {executor: af-synthesizer, verb: "brief show", purpose: "report unresolved risk"}
+api-debate-referee:
+  - {executor: af-inventory, verb: "debate status", purpose: "collect positions and evidence references"}
+  - {executor: af-judge, verb: "rules list --area CONTRACT", purpose: "evaluate competing contract interpretations"}
+  - {executor: af-verifier, verb: "task verify", purpose: "ensure the decision remains evidence bound"}
+  - {executor: af-synthesizer, verb: "brief show", purpose: "close only when dissent and gaps are explicit"}

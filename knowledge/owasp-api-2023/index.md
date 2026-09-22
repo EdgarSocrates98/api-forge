@@ -9,6 +9,13 @@ Rule areas: SECURITY — rules: 8 — evals: 2
 
 ## Files
 
+- `anti-patterns.md`
+- `concepts.md`
 - `evals.yaml`
+- `index.md`
 - `pack.yaml`
+- `patterns.md`
+- `quick-reference.md`
+- `recipes.md`
 - `source_authority.yaml`
+- `troubleshooting.md`

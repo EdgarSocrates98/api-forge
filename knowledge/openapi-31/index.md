@@ -5,9 +5,17 @@ OpenAPI 3.1 as the canonical API contract: JSON Schema 2020-12 alignment, webhoo
 
 Version: 1 — verified: 2026-09-21
 
-Rule areas: CONTRACT — rules: 1 — evals: 0
+Rule areas: CONTRACT — rules: 1 — evals: 1
 
 ## Files
 
+- `anti-patterns.md`
+- `concepts.md`
+- `evals.yaml`
+- `index.md`
 - `pack.yaml`
+- `patterns.md`
+- `quick-reference.md`
+- `recipes.md`
 - `source_authority.yaml`
+- `troubleshooting.md`

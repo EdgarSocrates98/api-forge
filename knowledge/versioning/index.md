@@ -5,9 +5,17 @@ Versioning as a declared strategy - URI/header/media-type placement and semver a
 
 Version: 1 — verified: 2026-09-21
 
-Rule areas: REST, BREAKING — rules: 2 — evals: 0
+Rule areas: REST, BREAKING — rules: 2 — evals: 2
 
 ## Files
 
+- `anti-patterns.md`
+- `concepts.md`
+- `evals.yaml`
+- `index.md`
 - `pack.yaml`
+- `patterns.md`
+- `quick-reference.md`
+- `recipes.md`
 - `source_authority.yaml`
+- `troubleshooting.md`

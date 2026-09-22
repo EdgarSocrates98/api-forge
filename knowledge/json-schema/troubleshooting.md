@@ -44,6 +44,7 @@ JSON Schema vocabulary used inside OpenAPI 3.1 contracts - types, formats, requi
 | `AF-GRAPH-NOT-FOUND` | no `nodes.jsonl` under the graph directory |
 | `AF-GRAPH-NO-CASE` | `graph build` found no `case.json` under `--case` |
 | `AF-GRAPH-INVALID` | a node/edge line fails the contract schema |
+| `AF-SCENARIO-SCHEMA` | scenario JSON is not an object or has no usable `endpoints` |
 | `AF-AUTONOMY-MODE-CORRUPT` | `mode.json` unreadable or fails schema |
 | `AF-AUTONOMY-RUNBOOK-SCHEMA` | runbooks.yaml malformed |
 | `AF-KNOW-SCHEMA` | a pack file is missing, malformed or lacks a required field |

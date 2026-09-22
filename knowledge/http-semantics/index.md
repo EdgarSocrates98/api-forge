@@ -5,9 +5,17 @@ HTTP method/status/resource semantics per RFC 9110 and caching per RFC 9111 - th
 
 Version: 1 — verified: 2026-09-21
 
-Rule areas: REST — rules: 4 — evals: 0
+Rule areas: REST — rules: 4 — evals: 4
 
 ## Files
 
+- `anti-patterns.md`
+- `concepts.md`
+- `evals.yaml`
+- `index.md`
 - `pack.yaml`
+- `patterns.md`
+- `quick-reference.md`
+- `recipes.md`
 - `source_authority.yaml`
+- `troubleshooting.md`

@@ -5,9 +5,17 @@ Connection pool sizing, timeouts before retries, failover behavior and backpress
 
 Version: 1 — verified: 2026-09-21
 
-Rule areas: DATA, PERF — rules: 1 — evals: 0
+Rule areas: DATA, PERF — rules: 1 — evals: 1
 
 ## Files
 
+- `anti-patterns.md`
+- `concepts.md`
+- `evals.yaml`
+- `index.md`
 - `pack.yaml`
+- `patterns.md`
+- `quick-reference.md`
+- `recipes.md`
 - `source_authority.yaml`
+- `troubleshooting.md`

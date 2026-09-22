@@ -5,5 +5,6 @@ Connection pool sizing, timeouts before retries, failover behavior and backpress
 
 ## Recipes
 
+- `apiforge model resilience --path <dump-or-project>`
 - `apiforge knowledge show database-resilience`
 - `apiforge judge` then filter findings by rules AF-PERF-005

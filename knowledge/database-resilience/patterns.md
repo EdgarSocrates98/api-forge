@@ -5,4 +5,6 @@ Connection pool sizing, timeouts before retries, failover behavior and backpress
 
 ## Extraction patterns
 
-No extractor verb covers this domain yet — the pack is a source index.
+Verbs that produce facts for this domain:
+
+- `model resilience`

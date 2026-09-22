@@ -8,4 +8,5 @@ Cache-aside/read-through/write-through, TTL and invalidation, N+1, bounded reads
 Verbs that produce facts for this domain:
 
 - `model dynamodb-access`
+- `model elasticache-access`
 - `model neptune-access`

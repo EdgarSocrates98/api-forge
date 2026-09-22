@@ -102,6 +102,7 @@ while refusal codes and `fact_id`s survive.
 | `apiforge graph query|impact|trace|coverage --graph G` | Closed-vocabulary queries; coverage names unverified findings and unimplemented ops |
 | `apiforge graph export --graph G --out D` | Byte-identical copy + digest manifest; `--format neptune` is a named stub |
 | `apiforge model redis --path P` | Static Redis/Valkey call-site scan (py/java/go) → `data.redis.*` facts + `data_access_ir`; `binding: name` is named, never proven |
+| `apiforge model elasticache-access --path P` | Same Redis-protocol scan with the inventory declared as ElastiCache — provider named, never inferred |
 | `apiforge model mongo\|dynamodb-access\|neptune-access --path P` | MongoDB/DocDB, DynamoDB and Neptune call-site scans → `data.<db>.*` facts + `data_access_ir`; composite postures (full_scan, unfiltered_write, unbounded) come only from declared arguments |
 | `apiforge model otel --path export.json` | OTLP/JSON trace export → `perf.otel.*` facts + `performance_run`; incomplete spans named unresolved |
 | `apiforge perf compare --baseline A --candidate B --threshold-pct N` | `compare_runs`/`detect_regression` over two PerformanceRuns; `added`/`removed`/`insufficient_data` always named |

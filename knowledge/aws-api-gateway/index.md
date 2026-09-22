@@ -5,10 +5,18 @@ REST vs HTTP API differences that change findings: authorizers, payload format, 
 
 Version: 1 — verified: 2026-09-21
 
-Rule areas: GATEWAY — rules: 7 — evals: 0
+Rule areas: GATEWAY — rules: 7 — evals: 7
 
 ## Files
 
+- `anti-patterns.md`
+- `concepts.md`
+- `evals.yaml`
+- `index.md`
 - `matrix.yaml`
 - `pack.yaml`
+- `patterns.md`
+- `quick-reference.md`
+- `recipes.md`
 - `source_authority.yaml`
+- `troubleshooting.md`

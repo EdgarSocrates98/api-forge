@@ -375,7 +375,10 @@ executes the binary from a fixed argv template — resolved by
 report through the same reader `model <tool>` uses. `--dry-run` prints the
 argv without executing. The analyzed code is still never executed: the
 scanner runs, the target stays data. `zap` is deliberately absent
-(baseline needs a daemon/docker, not a bare binary).
+(baseline needs a daemon/docker, not a bare binary). The result records
+`tool_version` (measured via `<binary> --version`, `null` when the probe
+yields nothing — never guessed) and `environment` (os/arch), plus the
+fixed argv, exit code, report path and input hashes.
 
 | Code | Meaning |
 |---|---|
@@ -520,6 +523,19 @@ AF-DATA-005 CONFIG, AF-DATA-006 DEBUG, AF-DATA-007 MONITOR, AF-DATA-008 SAVE.
 |---|---|
 | `AF-REDIS-PARSE` | a `.py` file failed `ast.parse` — extraction continues |
 | `AF-REDIS-HEURISTIC-BINDING` | receivers matched by name only — binding unproven |
+
+`model elasticache-access --path <dir>` reuses the identical scan —
+ElastiCache speaks the Redis protocol — and rewrites the inventory
+`framework` to `elasticache`; the `DataAccessIR` provider/database fields
+carry the declared provider. The provider is named by the operator's verb
+choice, never inferred from the code.
+
+`model mongo`, `model dynamodb-access` and `model neptune-access` apply the
+same contract to MongoDB/DocumentDB (pymongo/motor + Java/Go driver names),
+DynamoDB (boto3 `Table`/`client` ops) and Neptune (gremlin/SPARQL/openCypher
+strings). Composite postures — `full_scan`, `unfiltered_write`, `unbounded`
+— are computed only from declared arguments, and the AF-DATA-009..013 rules
+judge them.
 
 ### Telemetry (`model otel`, `perf compare`)
 

@@ -5,9 +5,17 @@ SQS dead-letter queues and redrive, SNS encryption and subscription lifecycle, E
 
 Version: 1 — verified: 2026-09-21
 
-Rule areas: MESSAGING — rules: 4 — evals: 0
+Rule areas: MESSAGING — rules: 4 — evals: 4
 
 ## Files
 
+- `anti-patterns.md`
+- `concepts.md`
+- `evals.yaml`
+- `index.md`
 - `pack.yaml`
+- `patterns.md`
+- `quick-reference.md`
+- `recipes.md`
 - `source_authority.yaml`
+- `troubleshooting.md`

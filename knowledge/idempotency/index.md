@@ -5,9 +5,17 @@ Idempotent methods per RFC 9110 and the Idempotency-Key header draft - AF-REST-0
 
 Version: 1 — verified: 2026-09-21
 
-Rule areas: REST — rules: 1 — evals: 0
+Rule areas: REST — rules: 1 — evals: 1
 
 ## Files
 
+- `anti-patterns.md`
+- `concepts.md`
+- `evals.yaml`
+- `index.md`
 - `pack.yaml`
+- `patterns.md`
+- `quick-reference.md`
+- `recipes.md`
 - `source_authority.yaml`
+- `troubleshooting.md`

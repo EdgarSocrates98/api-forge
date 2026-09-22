@@ -5,9 +5,17 @@ IAM least privilege (wildcard grants, session duration) and Cognito pool posture
 
 Version: 1 — verified: 2026-09-21
 
-Rule areas: IDENTITY — rules: 5 — evals: 0
+Rule areas: IDENTITY — rules: 5 — evals: 5
 
 ## Files
 
+- `anti-patterns.md`
+- `concepts.md`
+- `evals.yaml`
+- `index.md`
 - `pack.yaml`
+- `patterns.md`
+- `quick-reference.md`
+- `recipes.md`
 - `source_authority.yaml`
+- `troubleshooting.md`

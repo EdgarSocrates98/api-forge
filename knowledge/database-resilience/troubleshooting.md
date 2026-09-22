@@ -5,4 +5,6 @@ Connection pool sizing, timeouts before retries, failover behavior and backpress
 
 ## Error codes
 
-No domain-specific error codes; generic codes apply.
+| Code | Meaning |
+|---|---|
+| `AF-RES-HEURISTIC` | diagnostic: resilience signals are pattern-matched; absence of a match is a blind spot, not proof of absence |

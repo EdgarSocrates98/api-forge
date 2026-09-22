@@ -6,6 +6,7 @@ Cache-aside/read-through/write-through, TTL and invalidation, N+1, bounded reads
 ## Recipes
 
 - `apiforge model dynamodb-access --path <dump-or-project>`
+- `apiforge model elasticache-access --path <dump-or-project>`
 - `apiforge model neptune-access --path <dump-or-project>`
 - `apiforge knowledge show data-access-patterns`
 - `apiforge judge` then filter findings by rules AF-DATA-001, AF-DATA-002, AF-DATA-003, AF-DATA-004, AF-DATA-005, AF-DATA-006, AF-DATA-007, AF-DATA-008, AF-DATA-009, AF-DATA-010, AF-DATA-011, AF-DATA-012, AF-DATA-013

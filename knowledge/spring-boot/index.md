@@ -5,10 +5,18 @@ Spring MVC conventions the adapter extracts (annotations, validation, Jackson) p
 
 Version: 1 — verified: 2026-09-21
 
-Rule areas: REST, TESTING — rules: 3 — evals: 0
+Rule areas: REST, TESTING — rules: 3 — evals: 3
 
 ## Files
 
+- `anti-patterns.md`
+- `concepts.md`
+- `evals.yaml`
+- `index.md`
 - `matrix.yaml`
 - `pack.yaml`
+- `patterns.md`
+- `quick-reference.md`
+- `recipes.md`
 - `source_authority.yaml`
+- `troubleshooting.md`

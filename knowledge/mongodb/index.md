@@ -9,7 +9,14 @@ Rule areas: DATA — rules: 2 — evals: 4
 
 ## Files
 
+- `anti-patterns.md`
+- `concepts.md`
 - `evals.yaml`
+- `index.md`
 - `matrix.yaml`
 - `pack.yaml`
+- `patterns.md`
+- `quick-reference.md`
+- `recipes.md`
 - `source_authority.yaml`
+- `troubleshooting.md`

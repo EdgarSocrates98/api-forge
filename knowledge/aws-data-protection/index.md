@@ -5,9 +5,17 @@ Data-protection posture measured from dumps: KMS rotation on customer-managed ke
 
 Version: 1 — verified: 2026-09-21
 
-Rule areas: SECURITY, GATEWAY — rules: 5 — evals: 0
+Rule areas: SECURITY, GATEWAY — rules: 5 — evals: 5
 
 ## Files
 
+- `anti-patterns.md`
+- `concepts.md`
+- `evals.yaml`
+- `index.md`
 - `pack.yaml`
+- `patterns.md`
+- `quick-reference.md`
+- `recipes.md`
 - `source_authority.yaml`
+- `troubleshooting.md`

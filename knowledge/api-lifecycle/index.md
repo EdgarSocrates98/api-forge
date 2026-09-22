@@ -5,9 +5,17 @@ Lifecycle from draft to deprecation - contract-first, dated deprecation, measure
 
 Version: 1 — verified: 2026-09-21
 
-Rule areas: CONTRACT, BREAKING — rules: 3 — evals: 0
+Rule areas: CONTRACT, BREAKING — rules: 3 — evals: 3
 
 ## Files
 
+- `anti-patterns.md`
+- `concepts.md`
+- `evals.yaml`
+- `index.md`
 - `pack.yaml`
+- `patterns.md`
+- `quick-reference.md`
+- `recipes.md`
 - `source_authority.yaml`
+- `troubleshooting.md`

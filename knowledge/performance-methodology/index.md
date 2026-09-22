@@ -5,9 +5,17 @@ Baseline-first performance work - measured baseline before claims, thresholds de
 
 Version: 1 — verified: 2026-09-21
 
-Rule areas: PERF — rules: 6 — evals: 0
+Rule areas: PERF — rules: 6 — evals: 6
 
 ## Files
 
+- `anti-patterns.md`
+- `concepts.md`
+- `evals.yaml`
+- `index.md`
 - `pack.yaml`
+- `patterns.md`
+- `quick-reference.md`
+- `recipes.md`
 - `source_authority.yaml`
+- `troubleshooting.md`

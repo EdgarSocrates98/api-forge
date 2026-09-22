@@ -202,6 +202,16 @@ class HostExportBinding(VersionedContract):
     enabled: bool = False
 
 
+class ObservabilityExportReadiness(VersionedContract):
+    """Preflight result for a host-owned authenticated export."""
+
+    provider: Literal["otel", "datadog", "dynatrace"]
+    status: Literal["ready", "review", "blocked"]
+    checks: tuple[str, ...] = ()
+    blockers: tuple[str, ...] = ()
+    network_called: bool = False
+
+
 class CredentialReference(VersionedContract):
     provider: ObservabilityProvider
     reference: str

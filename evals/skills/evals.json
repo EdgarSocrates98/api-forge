@@ -1,0 +1,73 @@
+{
+  "suite": "api-forge-skills-v1",
+  "skills": [
+    {
+      "skill_name": "api-forge-discovery",
+      "evals": [
+        {
+          "id": 1,
+          "prompt": "Analise este projeto FastAPI e o OpenAPI, descubra divergências de rotas e gere o API-IR sem executar o código.",
+          "expected_output": "Inventário determinístico, facts com proveniência, unresolved para dinâmica e API-IR.",
+          "files": []
+        },
+        {
+          "id": 2,
+          "prompt": "O framework não está claro e há rotas montadas dinamicamente. Diga o que pode ser confirmado e o que precisa de evidência.",
+          "expected_output": "Não deve inferir framework ou rotas; deve separar confirmado e unresolved.",
+          "files": []
+        }
+      ]
+    },
+    {
+      "skill_name": "api-forge-performance",
+      "evals": [
+        {
+          "id": 1,
+          "prompt": "Valide se a API suporta 2.000 TPS com p99 abaixo de 300 ms usando k6 e ECS.",
+          "expected_output": "Plano com baseline, calibração do gerador, métricas, critérios e resultado inconclusive quando faltar evidência.",
+          "files": []
+        },
+        {
+          "id": 2,
+          "prompt": "O p95 melhorou, mas o banco saturou e o gerador atingiu CPU máxima. Posso afirmar ganho de performance?",
+          "expected_output": "Não; deve separar mecanismo, runtime certificado e limitações.",
+          "files": []
+        }
+      ]
+    },
+    {
+      "skill_name": "api-forge-architecture",
+      "evals": [
+        {
+          "id": 1,
+          "prompt": "Escolha entre Lambda, ECS Fargate, EKS e EC2 para uma API síncrona com tráfego variável, baixa latência e dependência privada.",
+          "expected_output": "WorkloadProfile, alternativas, trade-offs, riscos e decisão condicionada a evidências.",
+          "files": []
+        },
+        {
+          "id": 2,
+          "prompt": "Proponha uma arquitetura AWS para uma API de pagamentos sem inventar throughput, custo ou disponibilidade.",
+          "expected_output": "Premissas explicitadas, lacunas declaradas e plano de validação antes de números.",
+          "files": []
+        }
+      ]
+    },
+    {
+      "skill_name": "api-forge-data-access",
+      "evals": [
+        {
+          "id": 1,
+          "prompt": "Revise o uso de DynamoDB e determine se a API possui access patterns e índices suficientes.",
+          "expected_output": "DataAccessIR, análise PK/SK/GSI/LSI, consistência, throttling e gaps.",
+          "files": []
+        },
+        {
+          "id": 2,
+          "prompt": "Avalie uma API que usa Redis como cache e lock distribuído.",
+          "expected_output": "Análise de TTL, eviction, stampede, fencing, idempotência e limites.",
+          "files": []
+        }
+      ]
+    }
+  ]
+}

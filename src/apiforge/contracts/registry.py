@@ -67,6 +67,7 @@ from apiforge.contracts.observability import (
     VendorIntent,
 )
 from apiforge.contracts.stubs import (
+    AgenticQualityAssessment,
     ApiSafetyAssessment,
     CapacityAssessment,
     DataAccessIR,
@@ -129,6 +130,7 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "DataAccessIR/v1": DataAccessIR,
     "DataAccessReadiness/v1": DataAccessReadiness,
     "ApiSafetyAssessment/v1": ApiSafetyAssessment,
+    "AgenticQualityAssessment/v1": AgenticQualityAssessment,
     "RuntimeMatrix/v1": RuntimeMatrix,
     "WorkloadProfile/v1": WorkloadProfile,
     "TestRecord/v1": TestRecord,

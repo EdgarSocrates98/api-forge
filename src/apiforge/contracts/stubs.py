@@ -218,6 +218,21 @@ class ApiSafetyAssessment(_StubPayload):
     evidence: tuple[str, ...] = ()
 
 
+class AgenticQualityAssessment(_StubPayload):
+    """Aggregate golden/holdout eval and host-parity readiness."""
+
+    subject: str = ""
+    status: Literal["ready", "review", "blocked"]
+    total_cases: int = Field(ge=0)
+    passed_cases: int = Field(ge=0)
+    review_cases: int = Field(ge=0)
+    blocked_cases: int = Field(ge=0)
+    holdout_covered: int = Field(ge=0)
+    host_gaps: tuple[str, ...] = ()
+    blockers: tuple[str, ...] = ()
+    evidence: tuple[str, ...] = ()
+
+
 class RuntimeMatrix(_StubPayload):
     """Versioned runtime constraints; entries land with each knowledge pack."""
 

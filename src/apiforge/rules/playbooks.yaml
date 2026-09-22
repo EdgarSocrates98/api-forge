@@ -61,6 +61,24 @@ api-data-access-architect:
   - {executor: af-judge, verb: "rules list --area DATA", purpose: "AF-DATA-001..013 over the call-site facts"}
   - {executor: af-judge, verb: "rules list --area STORAGE", purpose: "AF-STORE-001..005 over datastore dumps"}
   - {executor: af-synthesizer, verb: "rules lookup", purpose: "access-pattern guidance per rule applied"}
+api-relational-data-architect:
+  - {executor: af-inventory, verb: "model rds-access", purpose: "extract relational access signals without executing queries"}
+  - {executor: af-extractor, verb: "model postgres-access", purpose: "normalize SQL, pools, transactions and pagination facts"}
+  - {executor: af-judge, verb: "rules list --area DATA", purpose: "data-access rules over observed relational facts"}
+  - {executor: af-verifier, verb: "evidence emit", purpose: "preserve source hashes and unresolved runtime gaps"}
+  - {executor: af-synthesizer, verb: "next-step", purpose: "route benchmark or migration work with evidence limits"}
+api-streaming-platform-architect:
+  - {executor: af-inventory, verb: "model kafka-access", purpose: "extract producers, consumers and destinations without touching brokers"}
+  - {executor: af-extractor, verb: "model msk-access", purpose: "normalize delivery, retry, ordering and group signals"}
+  - {executor: af-judge, verb: "rules list --area MESSAGING", purpose: "messaging rules over the declared async surface"}
+  - {executor: af-verifier, verb: "evidence emit", purpose: "preserve static limits and runtime gaps"}
+  - {executor: af-synthesizer, verb: "next-step", purpose: "route approved lag or throughput experiments"}
+api-analytical-data-architect:
+  - {executor: af-inventory, verb: "model opensearch-access", purpose: "extract search and aggregation access signals"}
+  - {executor: af-extractor, verb: "model redshift-access", purpose: "normalize analytical query and partition signals"}
+  - {executor: af-judge, verb: "rules list --area DATA", purpose: "analytical access rules over observed facts"}
+  - {executor: af-verifier, verb: "evidence emit", purpose: "preserve query source and unresolved runtime metrics"}
+  - {executor: af-synthesizer, verb: "next-step", purpose: "route capacity or indexing experiments without guessing"}
 api-planner:
   - {executor: af-inventory, verb: "discover", purpose: "inventory project + framework before planning"}
   - {executor: af-extractor, verb: "analyze", purpose: "facts + findings that define risk"}

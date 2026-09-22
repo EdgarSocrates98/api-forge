@@ -8,7 +8,7 @@ from pydantic import model_validator
 
 from apiforge.contracts.base import VersionedContract
 
-ProofAxis = Literal["contract", "security", "idempotency", "pagination"]
+ProofAxis = Literal["contract", "security", "idempotency", "pagination", "adapter", "execution"]
 ProofVerdict = Literal["pass", "fail", "inconclusive"]
 
 

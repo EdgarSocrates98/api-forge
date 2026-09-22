@@ -1,0 +1,18 @@
+version: 1
+cases:
+  - id: fastapi-orders-data-surface
+    domain: data-access
+    input: tests/fixtures/fastapi_orders
+    expected: REVIEW
+    adapter: relational
+    required_evidence: [source-hashes, adapter-execution, unresolved]
+    mutation: remove-query-signal
+    quality_axes: [provenance, no-runtime-inference]
+  - id: spring-orders-streaming-surface
+    domain: streaming
+    input: tests/fixtures/spring_orders
+    expected: REVIEW
+    adapter: streaming
+    required_evidence: [source-hashes, adapter-execution, runtime-gap]
+    mutation: remove-topic-signal
+    quality_axes: [provenance, no-lag-claim]

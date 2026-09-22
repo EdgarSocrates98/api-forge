@@ -11,7 +11,7 @@ import re
 from pathlib import Path
 from typing import Any
 
-from apiforge.adapters.inventory import CodeInventory
+from apiforge.adapters.inventory import CodeInventory, static_execution
 from apiforge.core.ids import stable_id
 from apiforge.core.models import Diagnostic, Fact, FindingStatus, SourceRef
 
@@ -90,12 +90,28 @@ def extract_relational(project_root: Path, database: str = "postgres") -> CodeIn
             facts.append(_fact("data.relational.pool", rel, digest, 1, database=database, declared=True))
         if _TX_RE.search(text):
             facts.append(_fact("data.relational.transaction", rel, digest, 1, database=database, declared=True))
+        if path.suffix.lower() != ".sql" and not any(
+            fact.source.path == rel and fact.kind in {"data.relational.query", "data.relational.operation"}
+            for fact in facts
+        ):
+            diagnostics.append(Diagnostic(
+                code="AF-RELATIONAL-DYNAMIC-QUERY",
+                status=FindingStatus.UNRESOLVED,
+                message=f"{rel}: relational client signal found without a statically resolvable query or operation",
+                source=SourceRef(path=rel, sha256=digest, extractor="relational"),
+            ))
     return CodeInventory(
         framework=f"{database}-relational",
         root=str(root),
         facts=tuple(sorted(facts, key=lambda fact: fact.fact_id)),
         diagnostics=tuple(diagnostics),
         input_hashes=input_hashes,
+        execution=static_execution(
+            f"relational.{database}",
+            input_hashes,
+            tuple(diagnostics),
+            limitations=("does not execute SQL", "does not prove query plan or index usage"),
+        ),
     )
 
 
@@ -117,4 +133,10 @@ def extract_rds_access(project_root: Path) -> CodeInventory:
         facts=tuple(sorted((*postgres.facts, *mysql.facts), key=lambda fact: fact.fact_id)),
         diagnostics=postgres.diagnostics + mysql.diagnostics,
         input_hashes={**postgres.input_hashes, **mysql.input_hashes},
+        execution=static_execution(
+            "rds-relational",
+            {**postgres.input_hashes, **mysql.input_hashes},
+            postgres.diagnostics + mysql.diagnostics,
+            limitations=("does not connect to RDS", "does not execute SQL"),
+        ),
     )

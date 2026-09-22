@@ -19,7 +19,7 @@ from pydantic import ValidationError
 from apiforge.adapters.inventory import CodeInventory
 from apiforge.index.treehash import source_digest
 
-CACHE_VERSION = "extractor/1"
+CACHE_VERSION = "extractor/2"
 
 
 def _key(project: Path, framework: str) -> str:

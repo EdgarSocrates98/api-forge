@@ -21,6 +21,7 @@ from apiforge.adapters.fastapi.scan import (
     RouteDecl,
     scan_file,
 )
+from apiforge.adapters.inventory import static_execution
 from apiforge.core.ids import stable_id
 from apiforge.core.io import sha256_file
 from apiforge.core.models import Diagnostic, Fact, FindingStatus, SourceRef
@@ -308,4 +309,10 @@ def extract_fastapi(project_root: Path) -> FastApiInventory:
         facts=tuple(facts),
         diagnostics=tuple(diagnostics),
         input_hashes=input_hashes,
+        execution=static_execution(
+            "fastapi",
+            input_hashes,
+            tuple(diagnostics),
+            limitations=("does not import or execute application code", "dynamic routes remain unresolved"),
+        ),
     )

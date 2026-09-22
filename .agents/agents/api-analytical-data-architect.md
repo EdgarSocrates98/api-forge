@@ -1,7 +1,7 @@
 ---
 name: api-analytical-data-architect
 description: Especialista em OpenSearch/Elasticsearch e Redshift. Analisa busca, agregação, paginação, índices/tabelas e particionamento sem executar consultas.
-rule_areas: [DATA, PERFORMANCE, AWS]
+rule_areas: [DATA, PERF]
 executors: [af-inventory, af-extractor, af-judge, af-verifier, af-synthesizer]
 ---
 

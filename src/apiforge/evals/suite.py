@@ -19,6 +19,7 @@ class EvalCase:
     required_evidence: tuple[str, ...]
     mutation: str
     quality_axes: tuple[str, ...]
+    adapter: str | None = None
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -29,6 +30,7 @@ class EvalCase:
             "required_evidence": list(self.required_evidence),
             "mutation": self.mutation,
             "quality_axes": list(self.quality_axes),
+            "adapter": self.adapter,
         }
 
 
@@ -69,6 +71,7 @@ def load_cases(path: Path) -> tuple[EvalCase, ...]:
                 required_evidence=tuple(str(item) for item in raw.get("required_evidence", ())),
                 mutation=str(raw.get("mutation", "none")),
                 quality_axes=tuple(str(item) for item in raw.get("quality_axes", ())),
+                adapter=str(raw["adapter"]) if raw.get("adapter") is not None else None,
             )
         )
     return tuple(cases)

@@ -7,7 +7,7 @@ import re
 from pathlib import Path
 from typing import Any, Literal, cast
 
-from apiforge.adapters.inventory import CodeInventory
+from apiforge.adapters.inventory import CodeInventory, static_execution
 from apiforge.contracts.stubs import AnalyticalAccessIR
 from apiforge.core.ids import stable_id
 from apiforge.core.models import Diagnostic, Fact, FindingStatus, SourceRef
@@ -62,7 +62,26 @@ def extract_analytical(project_root: Path, engine: str = "opensearch") -> CodeIn
             found = pattern.search(text)
             if found:
                 facts.append(_fact("data.analytical.operation", rel, digest, text.count("\n", 0, found.start()) + 1, engine=engine, operation=operation))
-    return CodeInventory(framework=f"{engine}-analytical", root=str(root), facts=tuple(sorted(facts, key=lambda fact: fact.fact_id)), diagnostics=tuple(diagnostics), input_hashes=input_hashes)
+        if not any(fact.source.path == rel and fact.kind == "data.analytical.name" for fact in facts):
+            diagnostics.append(Diagnostic(
+                code="AF-ANALYTICAL-DYNAMIC-NAME",
+                status=FindingStatus.UNRESOLVED,
+                message=f"{rel}: analytical usage found without a statically resolvable index or table",
+                source=SourceRef(path=rel, sha256=digest, extractor="analytical"),
+            ))
+    return CodeInventory(
+        framework=f"{engine}-analytical",
+        root=str(root),
+        facts=tuple(sorted(facts, key=lambda fact: fact.fact_id)),
+        diagnostics=tuple(diagnostics),
+        input_hashes=input_hashes,
+        execution=static_execution(
+            f"analytical.{engine}",
+            input_hashes,
+            tuple(diagnostics),
+            limitations=("does not execute search or SQL", "does not prove shard or partition health"),
+        ),
+    )
 
 
 def build_analytical_ir(inventory: CodeInventory, *, engine: str, provider: str = "aws") -> AnalyticalAccessIR:

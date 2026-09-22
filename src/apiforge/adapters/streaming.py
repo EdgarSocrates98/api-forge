@@ -7,7 +7,7 @@ import re
 from pathlib import Path
 from typing import Any, Literal, cast
 
-from apiforge.adapters.inventory import CodeInventory
+from apiforge.adapters.inventory import CodeInventory, static_execution
 from apiforge.contracts.stubs import StreamingAccessIR
 from apiforge.core.ids import stable_id
 from apiforge.core.models import Diagnostic, Fact, FindingStatus, SourceRef
@@ -85,12 +85,25 @@ def extract_streaming(project_root: Path, broker: str = "kafka") -> CodeInventor
             if found:
                 line = text.count("\n", 0, found.start()) + 1
                 facts.append(_fact("data.streaming.operation", rel, digest, line, broker=broker, operation=operation))
+        if not any(fact.source.path == rel and fact.kind == "data.streaming.topic" for fact in facts):
+            diagnostics.append(Diagnostic(
+                code="AF-STREAMING-DYNAMIC-DESTINATION",
+                status=FindingStatus.UNRESOLVED,
+                message=f"{rel}: broker usage found without a statically resolvable topic or destination",
+                source=SourceRef(path=rel, sha256=digest, extractor="streaming"),
+            ))
     return CodeInventory(
         framework=f"{broker}-streaming",
         root=str(root),
         facts=tuple(sorted(facts, key=lambda fact: fact.fact_id)),
         diagnostics=tuple(diagnostics),
         input_hashes=input_hashes,
+        execution=static_execution(
+            f"streaming.{broker}",
+            input_hashes,
+            tuple(diagnostics),
+            limitations=("does not connect to broker", "does not measure lag or throughput"),
+        ),
     )
 
 

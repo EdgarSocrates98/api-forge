@@ -52,6 +52,14 @@ performance, observability, AWS, databases, security, evals and host parity.
 The next cycle is selected by dependencies and risk, not by an ad-hoc sequence
 of isolated “next steps”.
 
+The execution sequence and acceptance gates are tracked in
+[docs/roadmaps/API_FORGE_PRIORITY_EXECUTION_ROADMAP.md](docs/roadmaps/API_FORGE_PRIORITY_EXECUTION_ROADMAP.md).
+Adapters now expose an explicit execution envelope (`static`, `fixture`,
+`live_read_only` or `live_mutation`) with evidence level, input hashes,
+limitations and unresolved diagnostics. Static analysis is never reported as
+runtime proof. Local commands run through an allowlisted, shell-free sandbox;
+durable control-plane steps support worker leases, heartbeats and recovery.
+
 The first integrated evolution cycle is complete through Phase G. Runtime,
 migration, capacity, observability, data governance, security and agentic
 quality are now represented by local contracts, focused tests and SDD evidence.

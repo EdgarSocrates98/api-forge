@@ -38,15 +38,10 @@ def _call(verb: str, fn: Callable[[], Any], detail_level: str) -> Any:
 
 def discover(project: str, detail_level: str = "normal") -> dict[str, Any]:
     """Statically inventory framework routes without executing code."""
-    from apiforge.adapters.fastapi.extractor import extract_fastapi
+    from apiforge.application.platform import ApiForgePlatform
 
     def work() -> dict[str, Any]:
-        inventory = extract_fastapi(Path(project))
-        return {
-            "routes": [f.model_dump(mode="json") for f in inventory.facts],
-            "diagnostics": [d.model_dump(mode="json") for d in inventory.diagnostics],
-            "input_hashes": dict(inventory.input_hashes),
-        }
+        return ApiForgePlatform(Path.cwd()).discover(Path(project))
 
     out: dict[str, Any] = _call("discover", work, detail_level)
     return out
@@ -61,15 +56,12 @@ def analyze(
     detail_level: str = "normal",
 ) -> dict[str, Any]:
     """Run the full deterministic slice and persist a case."""
-    from apiforge.application.analyze import analyze_project
+    from apiforge.application.platform import ApiForgePlatform
 
     def work() -> dict[str, Any]:
-        result = analyze_project(
-            Path(contract),
-            Path(project),
-            Path(baseline) if baseline else None,
-            Path(out_dir),
-            framework=framework,
+        result = ApiForgePlatform(Path.cwd()).analyze(
+            Path(contract), Path(project), Path(out_dir),
+            baseline=Path(baseline) if baseline else None, framework=framework,
         )
         return {
             "case_id": result.manifest.case_id,

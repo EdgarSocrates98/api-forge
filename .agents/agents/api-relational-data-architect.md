@@ -1,7 +1,7 @@
 ---
 name: api-relational-data-architect
 description: Especialista em PostgreSQL, MySQL/MariaDB, RDS e Aurora. Analisa SQL, pool, transações, paginação e sinais de risco sem executar queries.
-rule_areas: [DATA, STORAGE, AWS]
+rule_areas: [DATA, STORAGE]
 executors: [af-inventory, af-extractor, af-judge, af-verifier, af-synthesizer]
 ---
 

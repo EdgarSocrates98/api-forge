@@ -7,7 +7,7 @@ import re
 from pathlib import Path
 from typing import Any, Literal, cast
 
-from apiforge.adapters.inventory import CodeInventory
+from apiforge.adapters.inventory import CodeInventory, static_execution
 from apiforge.contracts.stubs import MessagingAccessIR
 from apiforge.core.ids import stable_id
 from apiforge.core.models import Diagnostic, Fact, FindingStatus, SourceRef
@@ -71,10 +71,23 @@ def extract_messaging(project_root: Path, service: str = "sqs") -> CodeInventory
             if found:
                 line = text.count("\n", 0, found.start()) + 1
                 facts.append(_fact("data.messaging.operation", rel, digest, line, service=service, operation=operation))
+        if not any(fact.source.path == rel and fact.kind == "data.messaging.destination" for fact in facts):
+            diagnostics.append(Diagnostic(
+                code="AF-MESSAGING-DYNAMIC-DESTINATION",
+                status=FindingStatus.UNRESOLVED,
+                message=f"{rel}: messaging usage found without a statically resolvable destination",
+                source=SourceRef(path=rel, sha256=digest, extractor="messaging"),
+            ))
     return CodeInventory(
         framework=f"{service}-messaging", root=str(root),
         facts=tuple(sorted(facts, key=lambda fact: fact.fact_id)),
         diagnostics=tuple(diagnostics), input_hashes=input_hashes,
+        execution=static_execution(
+            f"messaging.{service}",
+            input_hashes,
+            tuple(diagnostics),
+            limitations=("does not contact AWS messaging services", "does not prove delivery semantics"),
+        ),
     )
 
 

@@ -18,6 +18,7 @@ requires the cost of the run that never happened.
 | `AF-INPUT-NOT-FOUND` | a declared `--path`/`--project`/`--findings` argument does not exist |
 | `AF-INPUT-FRAMEWORK-UNKNOWN` | `--framework` names an adapter that is not registered |
 | `AF-INPUT-INVALID` | an input argument fails shape validation (e.g. dump dir layout) |
+| `AF-PERF-PLAN-INVALID` | declarative performance plan fails endpoint, threshold or generator validation |
 
 ## Routing
 

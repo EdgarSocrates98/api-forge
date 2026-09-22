@@ -342,6 +342,35 @@ def observability_instrument(
     _echo_json(recommend(language, framework), detail_level)
 
 
+@observability_app.command("health")
+def observability_health(
+    source: Path = typer.Option(..., "--source", help="OTel-compatible JSON fixture."),
+    service: str = typer.Option(..., "--service"),
+    slo: Path | None = typer.Option(None, "--slo", help="SLO JSON definition."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Correlate telemetry and SLO evidence into an incident-ready health view."""
+    from apiforge.contracts.observability import SLODefinition, SLOResult
+    from apiforge.observability.adapters.otel_json import read
+    from apiforge.observability.health import assess_health
+    from apiforge.observability.normalize import normalize_records
+    from apiforge.observability.slo import evaluate_slo
+
+    try:
+        if not source.is_file():
+            raise AnalysisError("AF-INPUT-NOT-FOUND", str(source))
+        records = tuple(record for record in normalize_records(read(source), source=source.name) if record.service == service)
+        slo_results: tuple[SLOResult, ...] = ()
+        if slo:
+            definitions = json.loads(slo.read_text(encoding="utf-8"))
+            raw_definitions = definitions if isinstance(definitions, list) else [definitions]
+            slo_results = tuple(evaluate_slo(SLODefinition.model_validate(item), records) for item in raw_definitions)
+        result = assess_health(service, records, slo_results)
+    except (OSError, TypeError, ValueError, json.JSONDecodeError) as exc:
+        raise AnalysisError("AF-OBSERVABILITY-HEALTH-INVALID", str(exc)) from exc
+    _echo_json(result.model_dump(mode="json"), detail_level)
+
+
 @app.command()
 def discover(
     project: Path = typer.Option(..., "--project", help="FastAPI project root."),

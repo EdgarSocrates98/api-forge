@@ -225,7 +225,9 @@ def _echo_json(value: object, detail_level: str = "normal") -> None:
     elif hasattr(value, "model_dump"):
         value = value.model_dump(mode="json")
     value = apply_detail_level(value, detail_level)
-    text = json.dumps(value, sort_keys=True, ensure_ascii=False, indent=2)
+    # JSON must remain printable on Windows hosts whose stdout is cp1252;
+    # Unicode content stays lossless through JSON escapes.
+    text = json.dumps(value, sort_keys=True, ensure_ascii=True, indent=2)
     from apiforge.economy.ledger import record
 
     ctx = get_current_context(silent=True)
@@ -2442,6 +2444,32 @@ def context_funnel(
         from apiforge.application.funnel import measure_funnel
 
         return measure_funnel(case_dir)
+
+    _echo_json(_run(work), detail_level)
+
+
+@context_app.command("compact")
+def context_compact(
+    input_path: Path = typer.Option(..., "--input", help="UTF-8 command output artifact."),
+    command: str = typer.Option("unknown", "--command", help="Logical command name."),
+    mode: str = typer.Option("full", "--mode", help="Caveman mode: off|lite|full|ultra|wenyan."),
+    max_lines: int | None = typer.Option(None, "--max-lines", min=1),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Compact a command artifact while preserving critical evidence."""
+
+    def work() -> dict[str, object]:
+        from apiforge.agentops.compact import compact_file
+
+        try:
+            return compact_file(
+                input_path,
+                command=command,
+                mode=mode,
+                max_lines=max_lines,
+            ).to_dict()
+        except (FileNotFoundError, ValueError) as exc:
+            raise AnalysisError("AF-COMPACT-INVALID", str(exc)) from exc
 
     _echo_json(_run(work), detail_level)
 

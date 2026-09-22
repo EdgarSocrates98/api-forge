@@ -1,0 +1,6 @@
+apiforge context compact --input README.md --command readme --mode ultra --max-lines 8
+exit_code: 0
+critical_evidence_preserved: true
+original_bytes: 13911
+emitted_bytes: 2468
+omitted_lines: 123

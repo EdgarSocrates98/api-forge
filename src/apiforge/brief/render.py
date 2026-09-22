@@ -18,6 +18,7 @@ from pathlib import Path
 from apiforge.contracts.base import ContractError
 from apiforge.contracts.task import BriefStatus, OutcomeBrief, TaskState
 from apiforge.taskspec import store
+from apiforge.verification.service import load_verification
 
 
 def _acceptance_proof(root: Path, task_id: str) -> tuple[str, ...]:
@@ -35,6 +36,26 @@ def brief_for_task(root: Path, task_id: str) -> OutcomeBrief:
     spec = store.load(root, task_id)
     state = spec.state
     if state is TaskState.ACCEPTED:
+        if spec.strategy.value == "verified-api-slice":
+            try:
+                verification = load_verification(root, task_id)
+            except ContractError:
+                return OutcomeBrief(
+                    status=BriefStatus.REVIEW,
+                    outcome=spec.outcome,
+                    human_action="run independent verification before accepting",
+                    gaps=("verification record is missing",),
+                    subject=task_id,
+                )
+            if verification.verdict != "pass":
+                return OutcomeBrief(
+                    status=BriefStatus.REVIEW,
+                    outcome=spec.outcome,
+                    human_action="resolve verification gaps before accepting",
+                    gaps=verification.gaps or (f"verification: {verification.verdict}",),
+                    proof=verification.evidence,
+                    subject=task_id,
+                )
         return OutcomeBrief(
             status=BriefStatus.DONE,
             outcome=spec.outcome,

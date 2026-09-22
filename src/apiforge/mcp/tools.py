@@ -310,6 +310,87 @@ def task_status(
     return out
 
 
+def task_compile(
+    task_id: str,
+    outcome: str,
+    contract: str,
+    project: str,
+    case: str,
+    root: str = ".",
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Compile a local API intention into a TaskSpec draft."""
+    from apiforge.taskspec.compiler import compile_intent
+    from apiforge.taskspec.service import create_task
+
+    out: dict[str, Any] = _call(
+        "task_compile",
+        lambda: create_task(
+            Path(root),
+            compile_intent(
+                task_id,
+                outcome,
+                contract=Path(contract),
+                project=Path(project),
+                case=Path(case),
+            ),
+        ),
+        detail_level,
+    )
+    return out
+
+
+def task_plan(
+    task_id: str, root: str = ".", detail_level: str = "normal"
+) -> dict[str, Any]:
+    """Persist the closed plan for a sealed task."""
+    from apiforge.taskspec.planner import plan_task
+
+    out: dict[str, Any] = _call(
+        "task_plan", lambda: plan_task(Path(root), task_id), detail_level
+    )
+    return out
+
+
+def task_verify(
+    task_id: str,
+    project: str,
+    contract: str,
+    manifest: str | None = None,
+    root: str = ".",
+    run_id: str = "manual",
+    by: str = "af-verifier",
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Persist an independent VerificationRecord for a task."""
+    from apiforge.taskspec.planner import plan_task
+    from apiforge.verification.holdout import run_holdouts
+    from apiforge.verification.service import verify_task
+
+    def work() -> Any:
+        task_root = Path(root)
+        plan_path = task_root / ".apiforge" / "tasks" / task_id / "plan.json"
+        if not plan_path.is_file():
+            plan_task(task_root, task_id)
+        holdout = (
+            run_holdouts(task_root, Path(project), Path(contract), Path(manifest))
+            if manifest is not None
+            else ()
+        )
+        return verify_task(
+            task_root,
+            task_id,
+            project=Path(project),
+            contract=Path(contract),
+            run_id=run_id,
+            holdout=holdout,
+            verified_by=by,
+        )
+
+    out: dict[str, Any] = _call("task_verify", work, detail_level)
+    return out
+
+
 def brief_show(
     task_id: str, root: str = ".", detail_level: str = "normal"
 ) -> dict[str, Any]:
@@ -779,6 +860,9 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     graph_coverage,
     index_status,
     task_status,
+    task_compile,
+    task_plan,
+    task_verify,
     brief_show,
     contract_list,
     contract_show,

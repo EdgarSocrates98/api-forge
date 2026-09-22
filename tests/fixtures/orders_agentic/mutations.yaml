@@ -1,0 +1,14 @@
+version: 1
+mutations:
+  - id: remove-auth
+    target: app.py
+    operation: remove_auth
+    expected_detection: security
+  - id: remove-idempotency
+    target: app.py
+    operation: remove_idempotency
+    expected_detection: idempotency
+  - id: bypass-cursor
+    target: app.py
+    operation: bypass_cursor
+    expected_detection: pagination

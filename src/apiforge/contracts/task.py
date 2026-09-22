@@ -34,6 +34,7 @@ class Recipe(StrEnum):
     DIAGNOSE_REPAIR_VERIFY = "diagnose-repair-verify"
     RESEARCH_SYNTHESIZE_VERIFY = "research-synthesize-verify"
     BUILD_ENDPOINT = "build-endpoint"
+    VERIFIED_API_SLICE = "verified-api-slice"
 
 
 class TaskState(StrEnum):
@@ -111,6 +112,8 @@ class TaskPlan(VersionedContract):
     revision: int
     recipe: Recipe
     steps: tuple[Mapping[str, JsonValue], ...] = ()
+    plan_digest: Sha256 | None = None
+    proof_axes: tuple[str, ...] = ()
 
     @field_validator("steps", mode="after")
     @classmethod

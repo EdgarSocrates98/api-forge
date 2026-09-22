@@ -33,3 +33,9 @@ recipes:
     - model build
     - build endpoint
     - evidence emit
+  verified-api-slice:
+    - discover
+    - analyze
+    - judge
+    - evidence emit
+    - report build

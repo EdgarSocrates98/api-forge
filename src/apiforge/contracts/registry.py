@@ -32,6 +32,11 @@ from apiforge.contracts.task import (
     TaskRevision,
     TaskSpec,
 )
+from apiforge.contracts.verification import (
+    HoldoutRecord,
+    VerificationCheck,
+    VerificationRecord,
+)
 from apiforge.core.models import Fact, Finding
 from apiforge.evidence.models import Receipt
 
@@ -60,6 +65,9 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "RuntimeMatrix/v1": RuntimeMatrix,
     "WorkloadProfile/v1": WorkloadProfile,
     "TestRecord/v1": TestRecord,
+    "VerificationRecord/v1": VerificationRecord,
+    "VerificationCheck/v1": VerificationCheck,
+    "HoldoutRecord/v1": HoldoutRecord,
 }
 
 

@@ -1863,6 +1863,125 @@ def task_status_cmd(
     _echo_json(_run(work), detail_level)
 
 
+@task_app.command("compile")
+def task_compile(
+    task_id: str = typer.Argument(...),
+    outcome: str = typer.Option(..., "--outcome"),
+    contract: Path = typer.Option(..., "--contract"),
+    project: Path = typer.Option(..., "--project"),
+    case: Path = typer.Option(..., "--case"),
+    root: Path | None = typer.Option(None, "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Compile a local API intention into a verified TaskSpec draft."""
+
+    def work() -> dict[str, object]:
+        from apiforge.contracts.base import ContractError
+        from apiforge.taskspec.compiler import compile_intent
+        from apiforge.taskspec.service import create_task
+
+        try:
+            spec = compile_intent(
+                task_id,
+                outcome,
+                contract=contract,
+                project=project,
+                case=case,
+            )
+            return create_task(_task_root(root), spec).model_dump(mode="json")
+        except ContractError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_json(_run(work), detail_level)
+
+
+@task_app.command("plan")
+def task_plan_cmd(
+    task_id: str = typer.Argument(...),
+    root: Path | None = typer.Option(None, "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Bind a sealed TaskSpec to a closed persisted TaskPlan."""
+
+    def work() -> dict[str, object]:
+        from apiforge.contracts.base import ContractError
+        from apiforge.taskspec.planner import plan_task
+
+        try:
+            return plan_task(_task_root(root), task_id).model_dump(mode="json")
+        except ContractError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_json(_run(work), detail_level)
+
+
+@task_app.command("holdout")
+def task_holdout_cmd(
+    project: Path = typer.Option(..., "--project"),
+    contract: Path = typer.Option(..., "--contract"),
+    manifest: Path = typer.Option(..., "--manifest"),
+    root: Path | None = typer.Option(None, "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Run deterministic local mutations and report whether proofs detect them."""
+
+    def work() -> dict[str, object]:
+        from apiforge.contracts.base import ContractError
+        from apiforge.verification.holdout import run_holdouts
+
+        try:
+            records = run_holdouts(_task_root(root), project, contract, manifest)
+            return {"holdouts": [record.model_dump(mode="json") for record in records]}
+        except ContractError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_json(_run(work), detail_level)
+
+
+@task_app.command("verify")
+def task_verify_cmd(
+    task_id: str = typer.Argument(...),
+    project: Path = typer.Option(..., "--project"),
+    contract: Path = typer.Option(..., "--contract"),
+    manifest: Path | None = typer.Option(None, "--manifest"),
+    run_id: str = typer.Option("manual", "--run-id"),
+    by: str = typer.Option("af-verifier", "--by"),
+    root: Path | None = typer.Option(None, "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Run independent proof checks and persist a VerificationRecord."""
+
+    def work() -> dict[str, object]:
+        from apiforge.contracts.base import ContractError
+        from apiforge.taskspec.planner import plan_task
+        from apiforge.verification.holdout import run_holdouts
+        from apiforge.verification.service import verify_task
+
+        task_root = _task_root(root)
+        try:
+            plan_path = task_root / ".apiforge" / "tasks" / task_id / "plan.json"
+            if not plan_path.is_file():
+                plan_task(task_root, task_id)
+            holdout = (
+                run_holdouts(task_root, project, contract, manifest)
+                if manifest is not None
+                else ()
+            )
+            return verify_task(
+                task_root,
+                task_id,
+                project=project,
+                contract=contract,
+                run_id=run_id,
+                holdout=holdout,
+                verified_by=by,
+            ).model_dump(mode="json")
+        except ContractError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_json(_run(work), detail_level)
+
+
 @brief_app.command("show")
 def brief_show(
     task_id: str = typer.Option(..., "--task", help="Task id to brief."),

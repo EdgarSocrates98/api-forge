@@ -11,5 +11,7 @@ conformance tests.
 | `revision` | integer | yes |
 | `recipe` | Recipe | yes |
 | `steps` | array | no |
+| `plan_digest` | SHA-256 string | no |
+| `proof_axes` | array[string] | no |
 
 The recipe instantiated for a task — ordered verbs with bound inputs.

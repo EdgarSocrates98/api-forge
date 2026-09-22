@@ -9,7 +9,7 @@
 | **Feature** | API_FORGE_AGENTIC_RUNTIME_TASKSPEC_VERIFIER |
 | **Date** | 2026-09-22 |
 | **Author** | define-agent |
-| **Status** | Ready for Design |
+| **Status** | ✅ Shipped |
 | **Clarity Score** | 15/15 |
 
 ---
@@ -232,9 +232,10 @@ O Design deve resolver, sem ampliar o escopo:
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0 | 2026-09-22 | define-agent | Requisitos extraídos e validados de `BRAINSTORM_API_FORGE_AGENTIC_RUNTIME_TASKSPEC_VERIFIER.md`; clarity 15/15 |
+| 1.1 | 2026-09-22 | ship-agent | Shipped and archived |
 
 ---
 
 ## Next Step
 
-**Ready for:** `/design .claude/sdd/features/DEFINE_API_FORGE_AGENTIC_RUNTIME_TASKSPEC_VERIFIER.md`
+**Archived:** `.claude/sdd/archive/API_FORGE_AGENTIC_RUNTIME_TASKSPEC_VERIFIER/`

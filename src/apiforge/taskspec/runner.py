@@ -17,6 +17,7 @@ from apiforge.dispatch.runner import (
 )
 from apiforge.taskspec import store
 from apiforge.taskspec.machine import require_transition
+from apiforge.taskspec.planner import load_plan, plan_task
 from apiforge.taskspec.service import _parse_inputs, load_recipes
 
 
@@ -89,6 +90,15 @@ def run_task(
     if spec.state is TaskState.SEALED:
         # auto-advance through ready, binding the run to the sealed revision
         spec = _mark_ready(root, spec)
+    if spec.strategy.value == "verified-api-slice":
+        try:
+            plan = load_plan(root, task_id)
+            if plan.revision != spec.revision:
+                raise ContractError("AF-TASK-PLAN-STALE", "plan revision differs from task")
+        except ContractError as exc:
+            if exc.code not in {"AF-TASK-PLAN-MISSING", "AF-TASK-PLAN-STALE"}:
+                raise
+            plan_task(root, task_id)
     require_transition(spec.state, TaskState.RUNNING)
     spec = spec.model_copy(update={"state": TaskState.RUNNING})
     store.write_spec(store.task_dir(root, task_id), spec)

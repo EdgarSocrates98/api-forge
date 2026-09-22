@@ -53,6 +53,8 @@ class ReadOnlyAdapter:
             )
         records = response.get("records", ())
         count = len(records) if isinstance(records, (list, tuple)) else 0
+        attempts = response.get("request_attempts", 1)
+        attempt_evidence = f"request_attempts:{attempts}" if isinstance(attempts, int) else "request_attempts:unknown"
         return ReadReceipt(
             provider=plan.provider,
             status="executed",
@@ -60,7 +62,7 @@ class ReadOnlyAdapter:
             record_count=count,
             network_called=True,
             mutation_performed=False,
-            evidence=("transport-injected", "GET", "read_only:true", "mutation_performed:false"),
+            evidence=("transport-injected", "GET", attempt_evidence, "read_only:true", "mutation_performed:false"),
         )
 
 

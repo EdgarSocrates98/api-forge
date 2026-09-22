@@ -1,6 +1,6 @@
 from collections.abc import Mapping
 
-from apiforge.contracts.observability import CredentialStatus, ReadSafetyPolicy
+from apiforge.contracts.observability import CredentialStatus, ReadRetryPolicy, ReadSafetyPolicy
 from apiforge.observability.provider_transport import provider_transport
 from apiforge.observability.read import build_read_plan
 from apiforge.observability.read_adapter import adapter_for
@@ -53,3 +53,33 @@ def test_response_over_budget_is_rejected_after_network_read() -> None:
     assert receipt.status == "blocked"
     assert receipt.network_called is True
     assert receipt.violations == ("max_records_exceeded:2>1",)
+
+
+def test_transient_request_is_retried_with_bounded_backoff() -> None:
+    class FlakyRequester(FakeProviderRequester):
+        failures = 1
+
+        def get(self, endpoint: str, params: Mapping[str, str], credential_reference: str) -> Mapping[str, object]:
+            if self.failures:
+                self.failures -= 1
+                raise TimeoutError("temporary")
+            return super().get(endpoint, params, credential_reference)
+
+    delays: list[float] = []
+    requester = FlakyRequester({"data": [{"id": "trace-1"}]})
+    plan = build_read_plan("datadog", "orders", "start", "end")
+    credential = CredentialStatus(provider="datadog", reference="broker:dd", status="available", reason="resolved")
+    transport = provider_transport(
+        "datadog",
+        credential.reference,
+        requester,
+        retry_policy=ReadRetryPolicy(max_attempts=2, base_backoff_seconds=0.1),
+        sleeper=delays.append,
+    )
+
+    receipt = adapter_for("datadog").execute(plan, credential, transport)
+
+    assert receipt.status == "executed"
+    assert receipt.record_count == 1
+    assert "request_attempts:2" in receipt.evidence
+    assert delays == [0.1]

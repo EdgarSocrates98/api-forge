@@ -150,6 +150,12 @@ class ReadSafetyPolicy(VersionedContract):
     max_response_bytes: int = Field(default=5_000_000, ge=1024, le=100_000_000)
 
 
+class ReadRetryPolicy(VersionedContract):
+    max_attempts: int = Field(default=1, ge=1, le=5)
+    base_backoff_seconds: float = Field(default=0.25, ge=0, le=60)
+    max_backoff_seconds: float = Field(default=5, ge=0, le=300)
+
+
 class CredentialReference(VersionedContract):
     provider: ObservabilityProvider
     reference: str

@@ -896,6 +896,26 @@ def runtime_approve(
     ))
 
 
+def observability_ingest(
+    source: str,
+    service: str | None = None,
+    slo: str | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Normalize an offline telemetry fixture and evaluate optional SLO."""
+    from apiforge.observability.supervisor import run_fixture
+
+    definition = json.loads(Path(slo).read_text(encoding="utf-8")) if slo else None
+    return cast(dict[str, Any], _call("observability_ingest", lambda: run_fixture(Path.cwd(), Path(source), service, definition), detail_level))
+
+
+def observability_capabilities(detail_level: str = "normal") -> dict[str, Any]:
+    """Return vendor capabilities without resolving credentials."""
+    from apiforge.observability.registry import capabilities
+
+    return cast(dict[str, Any], _call("observability_capabilities", capabilities, detail_level))
+
+
 TOOLS: tuple[Callable[..., Any], ...] = (
     discover,
     analyze,
@@ -942,4 +962,9 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     runtime_resume,
     runtime_debate,
     runtime_approve,
+)
+
+OBSERVABILITY_TOOLS: tuple[Callable[..., Any], ...] = (
+    observability_ingest,
+    observability_capabilities,
 )

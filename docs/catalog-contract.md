@@ -711,3 +711,6 @@ tooling.
 | Code | Meaning |
 |---|---|
 | `AF-RES-HEURISTIC` | diagnostic: resilience signals are pattern-matched; absence of a match is a blind spot, not proof of absence |
+# Observability control-plane codes
+
+The observability control plane uses `TelemetryRecord/v1`, `ObservationSnapshot/v1`, `SLODefinition/v1`, `SignalSummary/v1`, `SLOResult/v1`, `Capability/v1`, `VendorIntent/v1`, `IntentDiff/v1`, `OperationReceipt/v1` and `ObservabilityFinding/v1`. Datadog and Dynatrace mutations require a credential broker and approval; the default path is local, CI-safe and read-only.

@@ -1,0 +1,6 @@
+version: 1
+cases:
+  - id: redaction-secret
+    expected: redacted
+  - id: missing-telemetry
+    expected: inconclusive

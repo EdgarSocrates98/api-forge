@@ -177,6 +177,12 @@ knowledge_app = typer.Typer(
     no_args_is_help=True,
 )
 app.add_typer(knowledge_app)
+observability_app = typer.Typer(
+    name="observability",
+    help="Offline-first OTel, Datadog and Dynatrace control plane.",
+    no_args_is_help=True,
+)
+app.add_typer(observability_app)
 
 
 @app.callback()
@@ -255,6 +261,45 @@ def _run(fn: Callable[[], object]) -> object:
 def _confirmed_rank(findings: tuple[Finding, ...]) -> int | None:
     ranks = [_SEVERITY_RANK[f.severity] for f in findings if f.status == FindingStatus.CONFIRMED]
     return min(ranks) if ranks else None
+
+
+@observability_app.command("ingest")
+def observability_ingest(
+    source: Path = typer.Option(..., "--source", help="OTel-compatible JSON fixture."),
+    service: str | None = typer.Option(None, "--service"),
+    slo: Path | None = typer.Option(None, "--slo", help="SLO JSON definition."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Normalize a fixture and compute signals without external access."""
+    from apiforge.observability.supervisor import run_fixture
+
+    def work() -> dict[str, object]:
+        if not source.is_file():
+            raise AnalysisError("AF-INPUT-NOT-FOUND", str(source))
+        definition = json.loads(slo.read_text(encoding="utf-8")) if slo else None
+        return run_fixture(Path.cwd(), source, service=service, slo=definition)
+
+    _echo_json(_run(work), detail_level)
+
+
+@observability_app.command("capabilities")
+def observability_capabilities(detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP)) -> None:
+    """Show provider capabilities without credentials."""
+    from apiforge.observability.registry import capabilities
+
+    _echo_json(capabilities(), detail_level)
+
+
+@observability_app.command("instrument")
+def observability_instrument(
+    language: str = typer.Option(..., "--language"),
+    framework: str | None = typer.Option(None, "--framework"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Recommend OTel instrumentation for Java, Go or Python."""
+    from apiforge.observability.instrumentation import recommend
+
+    _echo_json(recommend(language, framework), detail_level)
 
 
 @app.command()

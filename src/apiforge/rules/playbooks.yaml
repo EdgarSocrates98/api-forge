@@ -128,3 +128,38 @@ api-debate-referee:
   - {executor: af-judge, verb: "rules list --area CONTRACT", purpose: "evaluate competing contract interpretations"}
   - {executor: af-verifier, verb: "task verify", purpose: "ensure the decision remains evidence bound"}
   - {executor: af-synthesizer, verb: "brief show", purpose: "close only when dissent and gaps are explicit"}
+api-observability-control-plane:
+  - {executor: af-inventory, verb: "observability ingest", purpose: "load source telemetry into canonical contracts"}
+  - {executor: af-judge, verb: "observability capabilities", purpose: "inspect vendor and environment support"}
+  - {executor: af-verifier, verb: "observability verify", purpose: "verify receipts and proof axes"}
+  - {executor: af-synthesizer, verb: "brief show", purpose: "render DONE, REVIEW or BLOCKED"}
+api-telemetry-normalization-engineer:
+  - {executor: af-inventory, verb: "observability ingest", purpose: "normalize OTel and runtime records"}
+  - {executor: af-verifier, verb: "observability verify", purpose: "verify provenance and redaction"}
+api-vendor-integration-engineer:
+  - {executor: af-inventory, verb: "observability capabilities", purpose: "load capability matrix"}
+  - {executor: af-verifier, verb: "observability verify", purpose: "verify unsupported fields are explicit"}
+api-datadog-integration-engineer:
+  - {executor: af-inventory, verb: "observability capabilities", purpose: "inspect Datadog projection capabilities"}
+  - {executor: af-verifier, verb: "observability verify", purpose: "verify dry-run boundary"}
+api-dynatrace-integration-engineer:
+  - {executor: af-inventory, verb: "observability capabilities", purpose: "inspect Dynatrace projection capabilities"}
+  - {executor: af-verifier, verb: "observability verify", purpose: "verify dry-run boundary"}
+api-slo-reliability-engineer:
+  - {executor: af-inventory, verb: "observability ingest", purpose: "load evidence for SLO calculation"}
+  - {executor: af-verifier, verb: "observability verify", purpose: "preserve inconclusive state"}
+api-observability-security-engineer:
+  - {executor: af-judge, verb: "observability capabilities", purpose: "review mutation and credential gates"}
+  - {executor: af-verifier, verb: "observability verify", purpose: "verify redaction and safety evidence"}
+api-drift-reconciliation-engineer:
+  - {executor: af-inventory, verb: "observability ingest", purpose: "load observed state"}
+  - {executor: af-verifier, verb: "observability verify", purpose: "verify stable drift semantics"}
+api-instrumentation-engineer:
+  - {executor: af-inventory, verb: "observability instrument", purpose: "recommend OTel artifacts"}
+  - {executor: af-verifier, verb: "observability verify", purpose: "verify framework guidance"}
+api-agentic-observability-engineer:
+  - {executor: af-inventory, verb: "observability ingest", purpose: "bind run to telemetry evidence"}
+  - {executor: af-verifier, verb: "observability verify", purpose: "independent verification before final status"}
+api-verification-engineer:
+  - {executor: af-verifier, verb: "observability verify", purpose: "challenge receipts and evidence"}
+  - {executor: af-synthesizer, verb: "brief show", purpose: "name unresolved proof gaps"}

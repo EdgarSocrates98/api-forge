@@ -25,6 +25,18 @@ from apiforge.contracts.core import (
     Verification,
 )
 from apiforge.contracts.graph import GraphEdge, GraphExport, GraphNode
+from apiforge.contracts.observability import (
+    Capability,
+    IntentDiff,
+    ObservabilityFinding,
+    ObservationSnapshot,
+    OperationReceipt,
+    SignalSummary,
+    SLODefinition,
+    SLOResult,
+    TelemetryRecord,
+    VendorIntent,
+)
 from apiforge.contracts.stubs import (
     DataAccessIR,
     PerformanceRun,
@@ -87,6 +99,16 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "DecisionRecord/v1": DecisionRecord,
     "ApprovalGate/v1": ApprovalGate,
     "TrajectoryEvent/v1": TrajectoryEvent,
+    "TelemetryRecord/v1": TelemetryRecord,
+    "ObservationSnapshot/v1": ObservationSnapshot,
+    "SLODefinition/v1": SLODefinition,
+    "SignalSummary/v1": SignalSummary,
+    "SLOResult/v1": SLOResult,
+    "Capability/v1": Capability,
+    "VendorIntent/v1": VendorIntent,
+    "IntentDiff/v1": IntentDiff,
+    "OperationReceipt/v1": OperationReceipt,
+    "ObservabilityFinding/v1": ObservabilityFinding,
 }
 
 

@@ -2527,6 +2527,30 @@ def agentops_hosts(
     _echo_json(list_hosts(), detail_level)
 
 
+@agentops_app.command("tools")
+def agentops_tools(
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """List typed Tool Adapters and their safety/evidence metadata."""
+    from apiforge.agentops.tools import list_tool_adapters
+
+    _echo_json([item.to_dict() for item in list_tool_adapters()], detail_level)
+
+
+@agentops_app.command("tool")
+def agentops_tool(
+    name: str = typer.Argument(...),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Inspect one Tool Adapter contract."""
+    from apiforge.agentops.tools import get_tool_adapter
+
+    try:
+        _echo_json(get_tool_adapter(name).to_dict(), detail_level)
+    except ValueError as exc:
+        _fail("AF-TOOL-ADAPTER-UNKNOWN", str(exc))
+
+
 @app.command("playbook")
 def playbook_cmd(
     coordinator: str = typer.Argument(..., help="Coordinator profile name."),

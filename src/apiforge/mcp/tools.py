@@ -10,7 +10,7 @@ from __future__ import annotations
 import json
 from collections.abc import Callable
 from pathlib import Path
-from typing import Any, TypeVar, cast
+from typing import Any, Literal, TypeVar, cast
 
 from apiforge.core.detail import apply_detail_level
 from apiforge.core.models import Finding
@@ -21,9 +21,7 @@ T = TypeVar("T")
 def _call(verb: str, fn: Callable[[], Any], detail_level: str) -> Any:
     value = fn()
     if isinstance(value, list):
-        value = [
-            v.model_dump(mode="json") if hasattr(v, "model_dump") else v for v in value
-        ]
+        value = [v.model_dump(mode="json") if hasattr(v, "model_dump") else v for v in value]
     elif hasattr(value, "model_dump"):
         value = value.model_dump(mode="json")
     value = apply_detail_level(value, detail_level)
@@ -132,9 +130,7 @@ def model_api_gateway(path: str, detail_level: str = "normal") -> dict[str, Any]
     return out
 
 
-def diff_contract(
-    baseline: str, candidate: str, detail_level: str = "normal"
-) -> list[Any]:
+def diff_contract(baseline: str, candidate: str, detail_level: str = "normal") -> list[Any]:
     """Classify bounded breaking changes between two contracts."""
     from apiforge.openapi.diff import diff_contracts
     from apiforge.openapi.loader import load_openapi
@@ -229,7 +225,9 @@ def context_funnel(case_dir: str, detail_level: str = "normal") -> dict[str, Any
     """Measure the context funnel of a persisted case — bytes per stage."""
     from apiforge.application.funnel import measure_funnel
 
-    out: dict[str, Any] = _call("context_funnel", lambda: measure_funnel(Path(case_dir)), detail_level)
+    out: dict[str, Any] = _call(
+        "context_funnel", lambda: measure_funnel(Path(case_dir)), detail_level
+    )
     return out
 
 
@@ -280,15 +278,11 @@ def graph_coverage(graph: str, detail_level: str = "normal") -> dict[str, Any]:
     """Structural gaps: unverified findings, unimplemented ops, unreferenced facts."""
     from apiforge.graph.query import coverage
 
-    out: dict[str, Any] = _call(
-        "graph_coverage", lambda: coverage(Path(graph)), detail_level
-    )
+    out: dict[str, Any] = _call("graph_coverage", lambda: coverage(Path(graph)), detail_level)
     return out
 
 
-def index_status(
-    project: str, root: str = ".", detail_level: str = "normal"
-) -> dict[str, Any]:
+def index_status(project: str, root: str = ".", detail_level: str = "normal") -> dict[str, Any]:
     """Name added/changed/removed source files against the built index."""
     from apiforge.index.build import index_status as status
 
@@ -298,15 +292,11 @@ def index_status(
     return out
 
 
-def task_status(
-    task_id: str, root: str = ".", detail_level: str = "normal"
-) -> dict[str, Any]:
+def task_status(task_id: str, root: str = ".", detail_level: str = "normal") -> dict[str, Any]:
     """Task spec + append-only history — read-only view of the lifecycle."""
     from apiforge.taskspec.runner import task_status as status
 
-    out: dict[str, Any] = _call(
-        "task_status", lambda: status(Path(root), task_id), detail_level
-    )
+    out: dict[str, Any] = _call("task_status", lambda: status(Path(root), task_id), detail_level)
     return out
 
 
@@ -340,15 +330,11 @@ def task_compile(
     return out
 
 
-def task_plan(
-    task_id: str, root: str = ".", detail_level: str = "normal"
-) -> dict[str, Any]:
+def task_plan(task_id: str, root: str = ".", detail_level: str = "normal") -> dict[str, Any]:
     """Persist the closed plan for a sealed task."""
     from apiforge.taskspec.planner import plan_task
 
-    out: dict[str, Any] = _call(
-        "task_plan", lambda: plan_task(Path(root), task_id), detail_level
-    )
+    out: dict[str, Any] = _call("task_plan", lambda: plan_task(Path(root), task_id), detail_level)
     return out
 
 
@@ -391,9 +377,7 @@ def task_verify(
     return out
 
 
-def brief_show(
-    task_id: str, root: str = ".", detail_level: str = "normal"
-) -> dict[str, Any]:
+def brief_show(task_id: str, root: str = ".", detail_level: str = "normal") -> dict[str, Any]:
     """Outcome Brief for a task — DONE is refused while gaps remain."""
     from apiforge.brief.render import brief_payload
 
@@ -417,9 +401,7 @@ def contract_show(name: str, detail_level: str = "normal") -> dict[str, Any]:
     """Emit the JSON schema of one registered contract."""
     from apiforge.contracts.registry import contract_schema
 
-    out: dict[str, Any] = _call(
-        "contract_show", lambda: contract_schema(name), detail_level
-    )
+    out: dict[str, Any] = _call("contract_show", lambda: contract_schema(name), detail_level)
     return out
 
 
@@ -449,9 +431,7 @@ _DUMP_READERS: dict[str, str] = {
 }
 
 
-def model_dump(
-    service: str, path: str, detail_level: str = "normal"
-) -> dict[str, Any]:
+def model_dump(service: str, path: str, detail_level: str = "normal") -> dict[str, Any]:
     """Read a `collect <service>` dump into facts — closed service set."""
     from apiforge.application.analyze import AnalysisError
 
@@ -470,9 +450,7 @@ def model_dump(
         module, _, func = dotted.rpartition(".")
         inventory = getattr(importlib.import_module(module), func)(dump)
         return {
-            "diagnostics": [
-                d.model_dump(mode="json") for d in inventory.diagnostics
-            ],
+            "diagnostics": [d.model_dump(mode="json") for d in inventory.diagnostics],
             "facts": [f.model_dump(mode="json") for f in inventory.facts],
             "framework": inventory.framework,
             "input_hashes": dict(inventory.input_hashes),
@@ -490,15 +468,11 @@ def model_redis(path: str, detail_level: str = "normal") -> dict[str, Any]:
     def work() -> dict[str, Any]:
         inventory = extract_redis(Path(path))
         return {
-            "diagnostics": [
-                d.model_dump(mode="json") for d in inventory.diagnostics
-            ],
+            "diagnostics": [d.model_dump(mode="json") for d in inventory.diagnostics],
             "facts": [f.model_dump(mode="json") for f in inventory.facts],
             "framework": inventory.framework,
             "input_hashes": dict(inventory.input_hashes),
-            "data_access_ir": build_data_access_ir(inventory).model_dump(
-                mode="json"
-            ),
+            "data_access_ir": build_data_access_ir(inventory).model_dump(mode="json"),
         }
 
     out: dict[str, Any] = _call("model_redis", work, detail_level)
@@ -517,15 +491,13 @@ def model_otel(path: str, detail_level: str = "normal") -> dict[str, Any]:
             raise AnalysisError("AF-INPUT-NOT-FOUND", str(source))
         inventory = extract_otel(source)
         return {
-            "diagnostics": [
-                d.model_dump(mode="json") for d in inventory.diagnostics
-            ],
+            "diagnostics": [d.model_dump(mode="json") for d in inventory.diagnostics],
             "facts": [f.model_dump(mode="json") for f in inventory.facts],
             "framework": inventory.framework,
             "input_hashes": dict(inventory.input_hashes),
-            "performance_run": build_performance_run(
-                inventory, source.name
-            ).model_dump(mode="json"),
+            "performance_run": build_performance_run(inventory, source.name).model_dump(
+                mode="json"
+            ),
         }
 
     out: dict[str, Any] = _call("model_otel", work, detail_level)
@@ -541,9 +513,7 @@ def _load_run_path(raw: str) -> Any:
         payload = json.loads(Path(raw).read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError, UnicodeDecodeError) as exc:
         raise AnalysisError("AF-PERF-RUN-INVALID", f"{raw}: {exc}") from exc
-    if isinstance(payload, dict) and isinstance(
-        payload.get("performance_run"), dict
-    ):
+    if isinstance(payload, dict) and isinstance(payload.get("performance_run"), dict):
         payload = payload["performance_run"]
     try:
         return PerformanceRun.model_validate(payload)
@@ -639,16 +609,12 @@ def perf_suggest(
         try:
             doc = json.loads(Path(findings).read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError, UnicodeDecodeError) as exc:
-            raise AnalysisError(
-                "AF-PERF-SUGGEST-INPUT", f"{findings}: {exc}"
-            ) from exc
+            raise AnalysisError("AF-PERF-SUGGEST-INPUT", f"{findings}: {exc}") from exc
         payload = doc if isinstance(doc, list) else doc.get("findings", [])
         try:
             parsed = [Finding.model_validate(f) for f in payload]
         except Exception as exc:
-            raise AnalysisError(
-                "AF-PERF-SUGGEST-INPUT", f"{findings}: {exc}"
-            ) from exc
+            raise AnalysisError("AF-PERF-SUGGEST-INPUT", f"{findings}: {exc}") from exc
         return suggest_fix(parsed).model_dump(mode="json")
 
     out: dict[str, Any] = _call("perf_suggest", work, detail_level)
@@ -674,9 +640,7 @@ def autonomy_status(root: str = ".", detail_level: str = "normal") -> dict[str, 
     return out
 
 
-def knowledge_list(
-    root: str = "knowledge", detail_level: str = "normal"
-) -> dict[str, Any]:
+def knowledge_list(root: str = "knowledge", detail_level: str = "normal") -> dict[str, Any]:
     """List every pack with areas, rules and verification date."""
     from apiforge.knowledge.loader import load_packs
 
@@ -726,9 +690,7 @@ def knowledge_show(
     return out
 
 
-def knowledge_check(
-    root: str = "knowledge", detail_level: str = "normal"
-) -> dict[str, Any]:
+def knowledge_check(root: str = "knowledge", detail_level: str = "normal") -> dict[str, Any]:
     """Validate every pack — problems are named, never raised away."""
     from apiforge.application.analyze import AnalysisError
     from apiforge.knowledge.loader import check_packs
@@ -738,8 +700,7 @@ def knowledge_check(
         if not result["ok"]:
             raise AnalysisError(
                 "AF-KNOW-CHECK",
-                "pack problems: "
-                + "; ".join(str(p) for p in result["problems"]),
+                "pack problems: " + "; ".join(str(p) for p in result["problems"]),
             )
         return result
 
@@ -758,9 +719,7 @@ def plan_architecture(profile: str, detail_level: str = "normal") -> dict[str, A
             payload = json.loads(Path(profile).read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError, UnicodeDecodeError) as exc:
             raise AnalysisError("AF-PLAN-PROFILE-INVALID", f"{profile}: {exc}") from exc
-        if isinstance(payload, dict) and isinstance(
-            payload.get("workload_profile"), dict
-        ):
+        if isinstance(payload, dict) and isinstance(payload.get("workload_profile"), dict):
             payload = payload["workload_profile"]
         try:
             wp = WorkloadProfile.model_validate(payload)
@@ -783,9 +742,7 @@ def run_list(detail_level: str = "normal") -> dict[str, Any]:
     return out
 
 
-def perf_scenario(
-    tool: str, scenario: str, detail_level: str = "normal"
-) -> dict[str, Any]:
+def perf_scenario(tool: str, scenario: str, detail_level: str = "normal") -> dict[str, Any]:
     """Generate a k6/JMeter/Locust script for a declared scenario file."""
     from apiforge.application.analyze import AnalysisError
     from apiforge.perf.scenario import generate_scenario
@@ -816,9 +773,7 @@ def perf_chaos(detail_level: str = "normal") -> dict[str, Any]:
     return out
 
 
-def model_resilience(
-    path: str, detail_level: str = "normal"
-) -> dict[str, Any]:
+def model_resilience(path: str, detail_level: str = "normal") -> dict[str, Any]:
     """Static resilience scan of a project tree — heuristic, blind spots named."""
     from apiforge.adapters.resilience import extract_resilience
     from apiforge.application.analyze import AnalysisError
@@ -829,9 +784,7 @@ def model_resilience(
             raise AnalysisError("AF-INPUT-NOT-FOUND", path)
         inventory = extract_resilience(root)
         return {
-            "diagnostics": [
-                d.model_dump(mode="json") for d in inventory.diagnostics
-            ],
+            "diagnostics": [d.model_dump(mode="json") for d in inventory.diagnostics],
             "facts": [f.model_dump(mode="json") for f in inventory.facts],
             "framework": inventory.framework,
             "input_hashes": dict(inventory.input_hashes),
@@ -862,21 +815,42 @@ def runtime_status(task_id: str, root: str = ".", detail_level: str = "normal") 
     """Read the newest persisted runtime run."""
     from apiforge.runtime.runner import runtime_status as read_status
 
-    return cast(dict[str, Any], _call("runtime_status", lambda: read_status(Path(root), task_id), detail_level))
+    return cast(
+        dict[str, Any],
+        _call("runtime_status", lambda: read_status(Path(root), task_id), detail_level),
+    )
 
 
-def runtime_resume(task_id: str, root: str = ".", policy: str = "local-ci-safe", detail_level: str = "normal") -> dict[str, Any]:
+def runtime_resume(
+    task_id: str, root: str = ".", policy: str = "local-ci-safe", detail_level: str = "normal"
+) -> dict[str, Any]:
     """Resume a bounded runtime execution."""
     from apiforge.runtime.runner import resume_runtime
 
-    return cast(dict[str, Any], _call("runtime_resume", lambda: resume_runtime(Path(root), task_id, policy_id=policy), detail_level))
+    return cast(
+        dict[str, Any],
+        _call(
+            "runtime_resume",
+            lambda: resume_runtime(Path(root), task_id, policy_id=policy),
+            detail_level,
+        ),
+    )
 
 
-def runtime_debate(task_id: str, root: str = ".", policy: str = "local-ci-safe", detail_level: str = "normal") -> dict[str, Any]:
+def runtime_debate(
+    task_id: str, root: str = ".", policy: str = "local-ci-safe", detail_level: str = "normal"
+) -> dict[str, Any]:
     """Request a debate room for a bounded runtime execution."""
     from apiforge.runtime.runner import debate_runtime
 
-    return cast(dict[str, Any], _call("runtime_debate", lambda: debate_runtime(Path(root), task_id, policy_id=policy), detail_level))
+    return cast(
+        dict[str, Any],
+        _call(
+            "runtime_debate",
+            lambda: debate_runtime(Path(root), task_id, policy_id=policy),
+            detail_level,
+        ),
+    )
 
 
 def runtime_approve(
@@ -889,11 +863,14 @@ def runtime_approve(
     """Persist a human approval artifact for a runtime run."""
     from apiforge.runtime.runner import approve_runtime
 
-    return cast(dict[str, Any], _call(
-        "runtime_approve",
-        lambda: approve_runtime(Path(root), task_id, run_id, approver),
-        detail_level,
-    ))
+    return cast(
+        dict[str, Any],
+        _call(
+            "runtime_approve",
+            lambda: approve_runtime(Path(root), task_id, run_id, approver),
+            detail_level,
+        ),
+    )
 
 
 def observability_ingest(
@@ -906,7 +883,14 @@ def observability_ingest(
     from apiforge.observability.supervisor import run_fixture
 
     definition = json.loads(Path(slo).read_text(encoding="utf-8")) if slo else None
-    return cast(dict[str, Any], _call("observability_ingest", lambda: run_fixture(Path.cwd(), Path(source), service, definition), detail_level))
+    return cast(
+        dict[str, Any],
+        _call(
+            "observability_ingest",
+            lambda: run_fixture(Path.cwd(), Path(source), service, definition),
+            detail_level,
+        ),
+    )
 
 
 def observability_capabilities(detail_level: str = "normal") -> dict[str, Any]:
@@ -914,6 +898,80 @@ def observability_capabilities(detail_level: str = "normal") -> dict[str, Any]:
     from apiforge.observability.registry import capabilities
 
     return cast(dict[str, Any], _call("observability_capabilities", capabilities, detail_level))
+
+
+def grpc_analyze(source: str, detail_level: str = "normal") -> dict[str, Any]:
+    """Analyze a protobuf source into the canonical gRPC IR."""
+    from apiforge.grpc.source import load_source
+
+    return cast(
+        dict[str, Any], _call("grpc_analyze", lambda: load_source(Path(source)), detail_level)
+    )
+
+
+def grpc_diff(baseline: str, candidate: str, detail_level: str = "normal") -> dict[str, Any]:
+    """Compare two protobuf contracts with deterministic compatibility rules."""
+    from apiforge.grpc.compatibility import compare
+    from apiforge.grpc.source import load_source
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "grpc_diff",
+            lambda: compare(load_source(Path(baseline)), load_source(Path(candidate))),
+            detail_level,
+        ),
+    )
+
+
+def grpc_capabilities(detail_level: str = "normal") -> dict[str, Any]:
+    from apiforge.grpc.capabilities import discover
+
+    return cast(
+        dict[str, Any],
+        _call("grpc_capabilities", lambda: {"capabilities": discover()}, detail_level),
+    )
+
+
+def grpc_codegen(source: str, languages: tuple[str, ...] = ("python",), output_dir: str = "generated", tool: str = "fake", detail_level: str = "normal") -> dict[str, Any]:
+    from apiforge.contracts.grpc import GrpcCodegenRequest
+    from apiforge.grpc.codegen import plan_codegen
+    from apiforge.grpc.source import load_source
+
+    target_languages = cast(tuple[Literal["python", "go", "java"], ...], languages)
+    target_tool = cast(Literal["fake", "protoc", "buf"], tool)
+    work = lambda: plan_codegen(load_source(Path(source)), GrpcCodegenRequest(languages=target_languages, output_dir=output_dir, tool=target_tool))
+    return cast(dict[str, Any], _call("grpc_codegen", work, detail_level))
+
+
+def grpc_gateway(source: str, gateways: tuple[str, ...] = ("openapi",), output_dir: str = "gateway", detail_level: str = "normal") -> dict[str, Any]:
+    from apiforge.contracts.grpc import GrpcGatewayRequest
+    from apiforge.grpc.gateway import plan_gateway
+    from apiforge.grpc.source import load_source
+
+    target_gateways = cast(tuple[Literal["envoy", "grpc_gateway", "grpc_web", "openapi"], ...], gateways)
+    work = lambda: plan_gateway(load_source(Path(source)), GrpcGatewayRequest(gateways=target_gateways, output_dir=output_dir))
+    return cast(dict[str, Any], _call("grpc_gateway", work, detail_level))
+
+
+def grpc_verify(source: str, baseline: str | None = None, detail_level: str = "normal") -> dict[str, Any]:
+    from apiforge.grpc.compatibility import compare
+    from apiforge.grpc.source import load_source
+    from apiforge.grpc.verify import verify
+
+    def work() -> object:
+        candidate = load_source(Path(source))
+        compatibility = compare(load_source(Path(baseline)), candidate) if baseline else None
+        return verify(candidate, compatibility)
+
+    return cast(dict[str, Any], _call("grpc_verify", work, detail_level))
+
+
+def grpc_benchmark(run: dict[str, object], detail_level: str = "normal") -> dict[str, Any]:
+    from apiforge.contracts.grpc import GrpcPerformanceRun
+    from apiforge.grpc.performance import evaluate
+
+    return cast(dict[str, Any], _call("grpc_benchmark", lambda: evaluate(GrpcPerformanceRun.model_validate(run)), detail_level))
 
 
 TOOLS: tuple[Callable[..., Any], ...] = (
@@ -968,3 +1026,5 @@ OBSERVABILITY_TOOLS: tuple[Callable[..., Any], ...] = (
     observability_ingest,
     observability_capabilities,
 )
+
+GRPC_TOOLS: tuple[Callable[..., Any], ...] = (grpc_analyze, grpc_diff, grpc_capabilities, grpc_codegen, grpc_gateway, grpc_verify, grpc_benchmark)

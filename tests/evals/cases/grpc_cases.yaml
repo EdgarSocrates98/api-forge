@@ -1,0 +1,14 @@
+version: 1
+cases:
+  - id: grpc-unary
+    input: orders.proto
+    expected: compatible
+  - id: grpc-breaking-type
+    input: orders-breaking.proto
+    expected: breaking
+  - id: grpc-missing-toolchain
+    input: protoc
+    expected: unsupported
+  - id: grpc-streaming
+    input: orders.proto
+    expected: bounded

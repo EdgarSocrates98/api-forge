@@ -140,3 +140,11 @@ def brief_for_agentic_run(root: Path, task_id: str, run_id: str) -> OutcomeBrief
     if status == "DONE":
         return OutcomeBrief(status=BriefStatus.DONE, outcome=spec.outcome, proof=(str(run_path),), subject=run_id)
     return OutcomeBrief(status=BriefStatus.REVIEW, outcome=spec.outcome, gaps=gaps, proof=(str(run_path),), subject=run_id)
+
+
+def brief_for_grpc_verification(intention: str, verdict: str, evidence: tuple[str, ...], gaps: tuple[str, ...] = ()) -> OutcomeBrief:
+    """Render gRPC verification into the same DONE/REVIEW/BLOCKED vocabulary."""
+    if verdict == "DONE" and not gaps and evidence:
+        return OutcomeBrief(status=BriefStatus.DONE, outcome=intention, proof=evidence, subject="grpc")
+    status = BriefStatus.BLOCKED if verdict == "BLOCKED" else BriefStatus.REVIEW
+    return OutcomeBrief(status=status, outcome=intention, proof=evidence, gaps=gaps or ("gRPC verification requires review",), subject="grpc")

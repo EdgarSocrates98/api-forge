@@ -163,3 +163,36 @@ api-agentic-observability-engineer:
 api-verification-engineer:
   - {executor: af-verifier, verb: "observability verify", purpose: "challenge receipts and evidence"}
   - {executor: af-synthesizer, verb: "brief show", purpose: "name unresolved proof gaps"}
+api-grpc-contract-engineer:
+  - {executor: af-inventory, verb: "grpc analyze", purpose: "build canonical gRPC IR"}
+  - {executor: af-verifier, verb: "grpc verify", purpose: "preserve source and compatibility evidence"}
+api-grpc-parser-engineer:
+  - {executor: af-inventory, verb: "grpc analyze", purpose: "parse source without executing code"}
+  - {executor: af-verifier, verb: "grpc verify", purpose: "name unresolved imports"}
+api-grpc-compatibility-engineer:
+  - {executor: af-inventory, verb: "grpc diff", purpose: "compare protobuf contracts"}
+  - {executor: af-verifier, verb: "grpc verify", purpose: "gate breaking changes"}
+api-grpc-toolchain-engineer:
+  - {executor: af-inventory, verb: "grpc capabilities", purpose: "discover optional toolchains"}
+  - {executor: af-verifier, verb: "grpc verify", purpose: "refuse false toolchain success"}
+api-grpc-codegen-engineer:
+  - {executor: af-inventory, verb: "grpc codegen", purpose: "generate reversible language artifacts"}
+  - {executor: af-verifier, verb: "grpc verify", purpose: "verify artifact evidence"}
+api-grpc-gateway-engineer:
+  - {executor: af-inventory, verb: "grpc capabilities", purpose: "inspect gateway support"}
+  - {executor: af-verifier, verb: "grpc verify", purpose: "verify projection status"}
+api-grpc-runtime-engineer:
+  - {executor: af-inventory, verb: "grpc analyze", purpose: "inspect streaming and runtime surface"}
+  - {executor: af-verifier, verb: "grpc verify", purpose: "gate retry and deadline claims"}
+api-grpc-performance-engineer:
+  - {executor: af-inventory, verb: "grpc analyze", purpose: "bind benchmark to an IR"}
+  - {executor: af-verifier, verb: "grpc verify", purpose: "preserve inconclusive throughput"}
+api-grpc-observability-engineer:
+  - {executor: af-inventory, verb: "grpc analyze", purpose: "map RPC telemetry attributes"}
+  - {executor: af-verifier, verb: "grpc verify", purpose: "verify correlation and provenance"}
+api-grpc-security-engineer:
+  - {executor: af-judge, verb: "grpc analyze", purpose: "review metadata and mutation boundaries"}
+  - {executor: af-verifier, verb: "grpc verify", purpose: "verify redaction and safety"}
+api-grpc-agentic-engineer:
+  - {executor: af-inventory, verb: "grpc analyze", purpose: "bind intention to canonical IR"}
+  - {executor: af-verifier, verb: "grpc verify", purpose: "close only with evidence-backed status"}

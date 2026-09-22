@@ -714,3 +714,7 @@ tooling.
 # Observability control-plane codes
 
 The observability control plane uses `TelemetryRecord/v1`, `ObservationSnapshot/v1`, `SLODefinition/v1`, `SignalSummary/v1`, `SLOResult/v1`, `Capability/v1`, `VendorIntent/v1`, `IntentDiff/v1`, `OperationReceipt/v1` and `ObservabilityFinding/v1`. Datadog and Dynatrace mutations require a credential broker and approval; the default path is local, CI-safe and read-only.
+
+# gRPC control-plane codes
+
+The gRPC control plane uses `GrpcIR/v1`, `GrpcCompatibilityReport/v1`, `GrpcCodegenResult/v1`, `GrpcGatewayProjection/v1`, `GrpcRuntimePolicy/v1`, `GrpcPerformanceReport/v1`, `GrpcSecurityReport/v1`, `GrpcPlan/v1` and `GrpcVerification/v1`. `protoc`, Buf, Envoy and descriptor runtime integrations are capability-gated; absent toolchains produce explicit `unsupported` or `REVIEW`, never inferred success. External mutation remains approval-and-broker gated.

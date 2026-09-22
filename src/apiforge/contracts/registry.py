@@ -25,6 +25,26 @@ from apiforge.contracts.core import (
     Verification,
 )
 from apiforge.contracts.graph import GraphEdge, GraphExport, GraphNode
+from apiforge.contracts.grpc import (
+    GrpcArtifact,
+    GrpcCapability,
+    GrpcCodegenRequest,
+    GrpcCodegenResult,
+    GrpcCompatibilityReport,
+    GrpcDiagnostic,
+    GrpcGatewayProjection,
+    GrpcGatewayRequest,
+    GrpcIR,
+    GrpcMessage,
+    GrpcPerformanceReport,
+    GrpcPerformanceRun,
+    GrpcPlan,
+    GrpcRpc,
+    GrpcRuntimePolicy,
+    GrpcSecurityReport,
+    GrpcService,
+    GrpcVerification,
+)
 from apiforge.contracts.observability import (
     Capability,
     IntentDiff,
@@ -109,6 +129,24 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "IntentDiff/v1": IntentDiff,
     "OperationReceipt/v1": OperationReceipt,
     "ObservabilityFinding/v1": ObservabilityFinding,
+    "GrpcIR/v1": GrpcIR,
+    "GrpcMessage/v1": GrpcMessage,
+    "GrpcRpc/v1": GrpcRpc,
+    "GrpcService/v1": GrpcService,
+    "GrpcDiagnostic/v1": GrpcDiagnostic,
+    "GrpcCompatibilityReport/v1": GrpcCompatibilityReport,
+    "GrpcCapability/v1": GrpcCapability,
+    "GrpcCodegenRequest/v1": GrpcCodegenRequest,
+    "GrpcCodegenResult/v1": GrpcCodegenResult,
+    "GrpcArtifact/v1": GrpcArtifact,
+    "GrpcGatewayRequest/v1": GrpcGatewayRequest,
+    "GrpcGatewayProjection/v1": GrpcGatewayProjection,
+    "GrpcRuntimePolicy/v1": GrpcRuntimePolicy,
+    "GrpcPerformanceRun/v1": GrpcPerformanceRun,
+    "GrpcPerformanceReport/v1": GrpcPerformanceReport,
+    "GrpcSecurityReport/v1": GrpcSecurityReport,
+    "GrpcPlan/v1": GrpcPlan,
+    "GrpcVerification/v1": GrpcVerification,
 }
 
 

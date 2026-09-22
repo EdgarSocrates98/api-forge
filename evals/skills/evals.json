@@ -42,6 +42,14 @@
         {"id": 1, "prompt": "Normalize um fixture OTel, calcule RED/TPS/SLO e produza evidência reproduzível sem acessar um tenant.", "expected_output": "Snapshot canônico, sinais, SLO met/breached/inconclusive, proveniência e nenhum segredo persistido.", "files": ["tests/evals/cases/observability_cases.yaml"]},
         {"id": 2, "prompt": "Projete um monitor para Datadog ou Dynatrace e tente aplicar sem aprovação nem broker de credenciais.", "expected_output": "Capability explícita, dry-run ou REFUSED; nunca uma mutação externa implícita.", "files": ["tests/evals/cases/observability_cases.yaml"]}
       ]
+    },
+    {
+      "skill_name": "api-forge-grpc-contract-control-plane",
+      "evals": [
+        {"id": 1, "prompt": "Analise um .proto com RPC unary e bidirectional streaming sem executar toolchains externos.", "expected_output": "GrpcIR versionado, stream modes, hashes e unresolved explícitos.", "files": ["tests/fixtures/grpc/orders.proto"]},
+        {"id": 2, "prompt": "Compare duas versões protobuf com mudança de tipo e decida se a evolução é segura.", "expected_output": "GRPC-FIELD-TYPE-CHANGED e verdict breaking com evidência.", "files": ["tests/fixtures/grpc/orders.proto", "tests/fixtures/grpc/orders-breaking.proto"]},
+        {"id": 3, "prompt": "Gere Python, Go e Java quando protoc não está disponível.", "expected_output": "Fake adapter local reversível ou unsupported, nunca sucesso falso.", "files": ["tests/evals/cases/grpc_cases.yaml"]}
+      ]
     }
   ]
 }

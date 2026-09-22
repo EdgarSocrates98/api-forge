@@ -23,6 +23,26 @@ from apiforge.contracts.graph import (
 from apiforge.graph.store import node_sha256, write_graph
 
 
+def build_grpc_graph(ir_path: Path, out_dir: Path) -> GraphExport:
+    """Persist source-to-service-to-RPC provenance for a canonical gRPC IR."""
+    from apiforge.contracts.grpc import GrpcIR
+
+    ir = GrpcIR.model_validate(_read_json(Path(ir_path)))
+    source_id = f"grpc-source:{ir.source_sha256[:16]}"
+    nodes = [_node(source_id, NodeKind.CONTRACT, source_path=ir.source_path, package=ir.package)]
+    edges: list[GraphEdge] = []
+    for service in ir.services:
+        service_id = f"grpc-service:{service.full_name}"
+        nodes.append(_node(service_id, NodeKind.OPERATION, kind_name="service", name=service.full_name))
+        edges.append(_edge(service_id, source_id, EdgeKind.DESCRIBED_BY))
+        for rpc in service.rpcs:
+            rpc_id = f"grpc-rpc:{rpc.full_name}"
+            nodes.append(_node(rpc_id, NodeKind.OPERATION, kind_name="rpc", name=rpc.full_name, stream_mode=rpc.stream_mode.value))
+            edges.append(_edge(rpc_id, service_id, EdgeKind.DERIVED_FROM))
+    digests = write_graph(out_dir, nodes, edges)
+    return GraphExport(nodes_sha256=digests["nodes_sha256"], edges_sha256=digests["edges_sha256"], node_count=digests["node_count"], edge_count=digests["edge_count"], built_from=(str(ir_path),))
+
+
 def _read_json(path: Path) -> Any:
     try:
         return json.loads(path.read_text(encoding="utf-8"))

@@ -1,0 +1,11 @@
+version: 1
+policy: strict-evidence
+rules:
+  - id: GRPC-FIELD-REMOVED
+    severity: breaking
+  - id: GRPC-FIELD-TYPE-CHANGED
+    severity: breaking
+  - id: GRPC-FIELD-NUMBER-CHANGED
+    severity: breaking
+  - id: GRPC-RPC-SIGNATURE-CHANGED
+    severity: breaking

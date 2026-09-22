@@ -1,0 +1,5 @@
+{
+  "package": "orders.v1",
+  "messages": [{"name": "OrderRequest"}, {"name": "Order"}],
+  "services": [{"name": "Orders", "rpcs": [{"name": "GetOrder", "request": "OrderRequest", "response": "Order", "http_method": "GET", "http_path": "/v1/orders/{order_id}"}]}]
+}

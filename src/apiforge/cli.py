@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from collections.abc import Callable
 from pathlib import Path
-from typing import NoReturn
+from typing import Literal, NoReturn, cast
 
 import typer
 from typer._click.globals import get_current_context
@@ -183,6 +183,12 @@ observability_app = typer.Typer(
     no_args_is_help=True,
 )
 app.add_typer(observability_app)
+grpc_app = typer.Typer(
+    name="grpc",
+    help="Offline-first gRPC contract control plane.",
+    no_args_is_help=True,
+)
+app.add_typer(grpc_app)
 
 
 @app.callback()
@@ -283,7 +289,9 @@ def observability_ingest(
 
 
 @observability_app.command("capabilities")
-def observability_capabilities(detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP)) -> None:
+def observability_capabilities(
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
     """Show provider capabilities without credentials."""
     from apiforge.observability.registry import capabilities
 
@@ -383,9 +391,7 @@ def analyze(
 
 @app.command()
 def judge(
-    contract: Path | None = typer.Option(
-        None, "--contract", help="OpenAPI 3.1 document."
-    ),
+    contract: Path | None = typer.Option(None, "--contract", help="OpenAPI 3.1 document."),
     project: Path | None = typer.Option(None, "--project", help="FastAPI project root."),
     facts: Path | None = typer.Option(
         None, "--facts", help="facts.json emitted by a `model *` verb."
@@ -594,12 +600,8 @@ def _register_dump_models() -> None:
 
     def make(dotted: str) -> Callable[[Path, str], None]:
         def cmd(
-            path: Path = typer.Option(
-                ..., "--path", help="Dump directory from `collect`."
-            ),
-            detail_level: str = typer.Option(
-                "normal", "--detail-level", help=_DETAIL_HELP
-            ),
+            path: Path = typer.Option(..., "--path", help="Dump directory from `collect`."),
+            detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
         ) -> None:
             def work() -> dict[str, object]:
                 import importlib
@@ -609,9 +611,7 @@ def _register_dump_models() -> None:
                 module, _, func = dotted.rpartition(".")
                 inventory = getattr(importlib.import_module(module), func)(path)
                 return {
-                    "diagnostics": [
-                        d.model_dump(mode="json") for d in inventory.diagnostics
-                    ],
+                    "diagnostics": [d.model_dump(mode="json") for d in inventory.diagnostics],
                     "facts": [f.model_dump(mode="json") for f in inventory.facts],
                     "framework": inventory.framework,
                     "input_hashes": dict(inventory.input_hashes),
@@ -847,17 +847,13 @@ def _register_collect_simple() -> None:
     def make(dotted: str, flag: str, help_text: str) -> Callable[..., None]:
         def cmd(
             identifier: str = typer.Option(..., flag, help=help_text),
-            out_dir: Path = typer.Option(
-                ..., "--out", help="Dump directory to write."
-            ),
+            out_dir: Path = typer.Option(..., "--out", help="Dump directory to write."),
             now: str | None = typer.Option(
                 None,
                 "--now",
                 help="Explicit ISO8601 collection timestamp (the only clock).",
             ),
-            detail_level: str = typer.Option(
-                "normal", "--detail-level", help=_DETAIL_HELP
-            ),
+            detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
         ) -> None:
             def work() -> CollectManifest:
                 import importlib
@@ -880,17 +876,13 @@ def _register_collect_simple() -> None:
 
     @collect_app.command("xray")
     def collect_xray_cmd(
-        out_dir: Path = typer.Option(
-            ..., "--out", help="Dump directory to write."
-        ),
+        out_dir: Path = typer.Option(..., "--out", help="Dump directory to write."),
         now: str | None = typer.Option(
             None,
             "--now",
             help="Explicit ISO8601 collection timestamp (the only clock).",
         ),
-        detail_level: str = typer.Option(
-            "normal", "--detail-level", help=_DETAIL_HELP
-        ),
+        detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
     ) -> None:
         """Fetch X-Ray sampling rules and encryption config."""
 
@@ -1156,9 +1148,7 @@ def _register_data_access_models() -> None:
     def make(dotted: str, provider: str, database: str) -> Callable[..., None]:
         def cmd(
             path: Path = typer.Option(..., "--path", help="Project directory."),
-            detail_level: str = typer.Option(
-                "normal", "--detail-level", help=_DETAIL_HELP
-            ),
+            detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
         ) -> None:
             def work() -> dict[str, object]:
                 import importlib
@@ -1173,12 +1163,8 @@ def _register_data_access_models() -> None:
                     "data_access_ir": build_data_access_ir(
                         inventory, database=database, provider=provider
                     ).model_dump(mode="json"),
-                    "diagnostics": [
-                        d.model_dump(mode="json") for d in inventory.diagnostics
-                    ],
-                    "facts": [
-                        f.model_dump(mode="json") for f in inventory.facts
-                    ],
+                    "diagnostics": [d.model_dump(mode="json") for d in inventory.diagnostics],
+                    "facts": [f.model_dump(mode="json") for f in inventory.facts],
                     "framework": inventory.framework,
                     "input_hashes": dict(inventory.input_hashes),
                 }
@@ -1196,9 +1182,7 @@ _register_data_access_models()
 
 @model_app.command("otel")
 def inventory_otel(
-    path: Path = typer.Option(
-        ..., "--path", help="OTLP/JSON trace export from an OTel collector."
-    ),
+    path: Path = typer.Option(..., "--path", help="OTLP/JSON trace export from an OTel collector."),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
     """OTel export -> perf.otel.* facts + a PerformanceRun — offline."""
@@ -1215,9 +1199,7 @@ def inventory_otel(
             "facts": [f.model_dump(mode="json") for f in inventory.facts],
             "framework": inventory.framework,
             "input_hashes": dict(inventory.input_hashes),
-            "performance_run": build_performance_run(
-                inventory, path.name
-            ).model_dump(mode="json"),
+            "performance_run": build_performance_run(inventory, path.name).model_dump(mode="json"),
         }
 
     _echo_json(_run(work), detail_level)
@@ -1229,9 +1211,7 @@ def _load_repeat_baselines(directory: Path | None) -> tuple[PerformanceRun, ...]
         return ()
     if not directory.is_dir():
         raise AnalysisError("AF-PERF-RUN-INVALID", f"{directory}: not a directory")
-    runs = tuple(
-        _load_performance_run(p) for p in sorted(directory.glob("*.json"))
-    )
+    runs = tuple(_load_performance_run(p) for p in sorted(directory.glob("*.json")))
     return runs
 
 
@@ -1276,9 +1256,7 @@ def perf_compare(
 
 @perf_app.command("verdict")
 def perf_verdict(
-    run: Path = typer.Option(
-        ..., "--run", help="PerformanceRun JSON (or `model otel` payload)."
-    ),
+    run: Path = typer.Option(..., "--run", help="PerformanceRun JSON (or `model otel` payload)."),
     repeat_baseline: Path | None = typer.Option(
         None,
         "--repeat-baseline",
@@ -1327,9 +1305,7 @@ def perf_memory_add(
 def perf_memory_search(
     subject: str | None = typer.Option(None, "--subject"),
     tool: str | None = typer.Option(None, "--tool"),
-    since: str | None = typer.Option(
-        None, "--since", help="ISO-8601 lower bound on recorded_at."
-    ),
+    since: str | None = typer.Option(None, "--since", help="ISO-8601 lower bound on recorded_at."),
     root: Path = typer.Option(Path("."), "--root", help="Workspace root."),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
@@ -1442,9 +1418,7 @@ def _load_performance_run(path: Path) -> PerformanceRun:
 
 @plan_app.command("strangler")
 def plan_strangler(
-    baseline: Path = typer.Option(
-        ..., "--baseline", help="facts.json from the legacy surface."
-    ),
+    baseline: Path = typer.Option(..., "--baseline", help="facts.json from the legacy surface."),
     candidate: Path = typer.Option(
         ..., "--candidate", help="facts.json from the new implementation."
     ),
@@ -1458,9 +1432,7 @@ def plan_strangler(
         base = _load_facts(baseline)
         cand = _load_facts(candidate)
         if not any(f.kind == "code.route" for f in (*base, *cand)):
-            raise AnalysisError(
-                "AF-PLAN-NO-ROUTES", "neither payload carries code.route facts"
-            )
+            raise AnalysisError("AF-PLAN-NO-ROUTES", "neither payload carries code.route facts")
         return strangler_plan(base, cand)
 
     _echo_json(_run(work), detail_level)
@@ -1487,9 +1459,7 @@ def plan_architecture(
             payload = json.loads(profile.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError, UnicodeDecodeError) as exc:
             raise AnalysisError("AF-PLAN-PROFILE-INVALID", f"{profile}: {exc}") from exc
-        if isinstance(payload, dict) and isinstance(
-            payload.get("workload_profile"), dict
-        ):
+        if isinstance(payload, dict) and isinstance(payload.get("workload_profile"), dict):
             payload = payload["workload_profile"]
         try:
             wp = WorkloadProfile.model_validate(payload)
@@ -1526,9 +1496,7 @@ def debate_submit(
     debate: str = typer.Option(..., "--debate", help="Debate id."),
     side: str = typer.Option(..., "--side", help="Which side this position serves."),
     position: str = typer.Option(..., "--position", help="The position text."),
-    evidence: str = typer.Option(
-        ..., "--evidence", help="Comma-separated fact_id citations."
-    ),
+    evidence: str = typer.Option(..., "--evidence", help="Comma-separated fact_id citations."),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
     """Append a position — every position must cite fact_id evidence."""
@@ -1667,9 +1635,7 @@ def run_tool_cmd(
 
         try:
             extra = {"config": config} if config else {}
-            return run_tool(
-                tool, target, out, extra, timeout, dry_run=dry_run, approval=approve
-            )
+            return run_tool(tool, target, out, extra, timeout, dry_run=dry_run, approval=approve)
         except RunError as exc:
             raise AnalysisError(exc.code, str(exc).split(": ", 1)[-1]) from exc
 
@@ -1790,9 +1756,7 @@ def task_review(
         from apiforge.contracts.base import ContractError
         from apiforge.taskspec.service import review_task
 
-        sets = dict(
-            item.split("=", 1) for item in set_ if "=" in item
-        )
+        sets = dict(item.split("=", 1) for item in set_ if "=" in item)
         try:
             spec = review_task(_task_root(root), task_id, by, sets)
             return spec.model_dump(mode="json")
@@ -1863,9 +1827,7 @@ def task_accept(
         from apiforge.taskspec.runner import accept_task
 
         try:
-            return accept_task(
-                _task_root(root), task_id, by, tuple(evidence), notes
-            )
+            return accept_task(_task_root(root), task_id, by, tuple(evidence), notes)
         except ContractError as exc:
             raise AnalysisError(exc.code, exc.detail) from exc
 
@@ -2015,9 +1977,7 @@ def task_verify_cmd(
             if not plan_path.is_file():
                 plan_task(task_root, task_id)
             holdout = (
-                run_holdouts(task_root, project, contract, manifest)
-                if manifest is not None
-                else ()
+                run_holdouts(task_root, project, contract, manifest) if manifest is not None else ()
             )
             return verify_task(
                 task_root,
@@ -2087,9 +2047,7 @@ def graph_query(
     graph: Path = typer.Option(..., "--graph", help="Graph directory (nodes.jsonl)."),
     kind: str | None = typer.Option(None, "--kind", help="Filter nodes by kind."),
     edge_kind: str | None = typer.Option(None, "--edge", help="Filter edges by kind."),
-    prop: list[str] = typer.Option(
-        [], "--prop", help="Node prop filter `k=v` (repeatable)."
-    ),
+    prop: list[str] = typer.Option([], "--prop", help="Node prop filter `k=v` (repeatable)."),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
     """Filter nodes/edges by closed vocabulary — no free text."""
@@ -2174,9 +2132,7 @@ def graph_export(
 def index_build(
     project: Path = typer.Option(..., "--project", help="Project root to index."),
     root: Path = typer.Option(Path("."), "--root", help="Root holding .apiforge/."),
-    framework: str = typer.Option(
-        "auto", "--framework", help="fastapi|spring|go|auto."
-    ),
+    framework: str = typer.Option("auto", "--framework", help="fastapi|spring|go|auto."),
     findings: Path | None = typer.Option(
         None,
         "--findings",
@@ -2191,9 +2147,7 @@ def index_build(
         from apiforge.index.build import build_index
 
         try:
-            return build_index(
-                project, root, framework=framework, findings_path=findings
-            )
+            return build_index(project, root, framework=framework, findings_path=findings)
         except ContractError as exc:
             raise AnalysisError(exc.code, exc.detail) from exc
 
@@ -2345,9 +2299,7 @@ def economy_report(
                     "--cost-basis needs --transcript — no tokens to price",
                 )
             if estimate:
-                payload["token_estimate"] = estimate_tokens(
-                    int(payload["payload_bytes"])
-                )
+                payload["token_estimate"] = estimate_tokens(int(payload["payload_bytes"]))
             return payload
         except TokenError as exc:
             raise AnalysisError(exc.code, str(exc).split(": ", 1)[-1]) from exc
@@ -2425,9 +2377,7 @@ def report_sign(
             raise AnalysisError("AF-INPUT-NOT-FOUND", str(report))
         if key is not None and not key.is_file():
             raise AnalysisError("AF-INPUT-NOT-FOUND", str(key))
-        signed = sign_report(
-            _json.loads(report.read_text(encoding="utf-8")), key_path=key
-        )
+        signed = sign_report(_json.loads(report.read_text(encoding="utf-8")), key_path=key)
         target = out if out is not None else report
         target.write_text(canonical(signed), encoding="utf-8")
         return signed
@@ -2538,9 +2488,7 @@ def rules_lookup(
 
 @knowledge_app.command("list")
 def knowledge_list(
-    root: Path = typer.Option(
-        Path("knowledge"), "--root", help="Directory of knowledge packs."
-    ),
+    root: Path = typer.Option(Path("knowledge"), "--root", help="Directory of knowledge packs."),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
     """List every pack with its areas, rules and verification date."""
@@ -2575,9 +2523,7 @@ def knowledge_list(
 @knowledge_app.command("show")
 def knowledge_show(
     domain: str = typer.Argument(..., help="Pack directory name, e.g. rest-design."),
-    root: Path = typer.Option(
-        Path("knowledge"), "--root", help="Directory of knowledge packs."
-    ),
+    root: Path = typer.Option(Path("knowledge"), "--root", help="Directory of knowledge packs."),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
     """Print one pack: summary, source authority, matrix, declared evals."""
@@ -2607,9 +2553,7 @@ def knowledge_show(
 
 @knowledge_app.command("check")
 def knowledge_check(
-    root: Path = typer.Option(
-        Path("knowledge"), "--root", help="Directory of knowledge packs."
-    ),
+    root: Path = typer.Option(Path("knowledge"), "--root", help="Directory of knowledge packs."),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
     """Validate every pack; exit 4 when any problem is named."""
@@ -2704,3 +2648,128 @@ def runtime_approve(
     from apiforge.runtime.runner import approve_runtime
 
     _echo_json(approve_runtime(root, task_id, run_id, approver), detail_level)
+
+
+@grpc_app.command("analyze")
+def grpc_analyze_cmd(
+    source: Path = typer.Argument(..., help=".proto or descriptor source."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Build the canonical gRPC IR without invoking external toolchains."""
+    from apiforge.grpc.source import load_source
+
+    _echo_json(load_source(source), detail_level)
+
+
+@grpc_app.command("discover")
+def grpc_discover_cmd(
+    source: Path = typer.Argument(..., help=".proto or descriptor source."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Discover a gRPC contract and expose its canonical IR."""
+    from apiforge.grpc.source import load_source
+
+    _echo_json(load_source(source), detail_level)
+
+
+@grpc_app.command("diff")
+def grpc_diff_cmd(
+    baseline: Path = typer.Argument(...),
+    candidate: Path = typer.Argument(...),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Classify protobuf evolution using deterministic compatibility rules."""
+    from apiforge.grpc.compatibility import compare
+    from apiforge.grpc.source import load_source
+
+    _echo_json(compare(load_source(baseline), load_source(candidate)), detail_level)
+
+
+@grpc_app.command("capabilities")
+def grpc_capabilities_cmd(
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Show optional local gRPC toolchain capabilities."""
+    from apiforge.grpc.capabilities import discover
+
+    _echo_json({"capabilities": discover()}, detail_level)
+
+
+@grpc_app.command("codegen")
+def grpc_codegen_cmd(
+    source: Path = typer.Argument(...),
+    language: list[str] = typer.Option(["python"], "--language"),
+    output_dir: Path = typer.Option(Path("generated"), "--output-dir"),
+    tool: str = typer.Option("fake", "--tool"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Generate deterministic local artifacts or report missing toolchains."""
+    from apiforge.contracts.grpc import GrpcCodegenRequest
+    from apiforge.grpc.codegen import plan_codegen
+    from apiforge.grpc.source import load_source
+
+    target_languages = cast(tuple[Literal["python", "go", "java"], ...], tuple(language))
+    target_tool = cast(Literal["fake", "protoc", "buf"], tool)
+    request = GrpcCodegenRequest(languages=target_languages, output_dir=str(output_dir), tool=target_tool)
+    _echo_json(plan_codegen(load_source(source), request), detail_level)
+
+
+@grpc_app.command("gateway")
+def grpc_gateway_cmd(
+    source: Path = typer.Argument(...),
+    gateway: list[str] = typer.Option(["openapi"], "--gateway"),
+    output_dir: Path = typer.Option(Path("gateway"), "--output-dir"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Project the contract to local gateway artifacts."""
+    from apiforge.contracts.grpc import GrpcGatewayRequest
+    from apiforge.grpc.gateway import plan_gateway
+    from apiforge.grpc.source import load_source
+
+    target_gateways = cast(tuple[Literal["envoy", "grpc_gateway", "grpc_web", "openapi"], ...], tuple(gateway))
+    request = GrpcGatewayRequest(gateways=target_gateways, output_dir=str(output_dir))
+    _echo_json(plan_gateway(load_source(source), request), detail_level)
+
+
+@grpc_app.command("verify")
+def grpc_verify_cmd(
+    source: Path = typer.Argument(...),
+    baseline: Path | None = typer.Option(None, "--baseline"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Run independent local verification over a gRPC contract."""
+    from apiforge.grpc.compatibility import compare
+    from apiforge.grpc.source import load_source
+    from apiforge.grpc.verify import verify
+
+    candidate = load_source(source)
+    compatibility = compare(load_source(baseline), candidate) if baseline else None
+    _echo_json(verify(candidate, compatibility), detail_level)
+
+
+@grpc_app.command("test")
+def grpc_test_cmd(
+    source: Path = typer.Argument(...),
+    baseline: Path | None = typer.Option(None, "--baseline"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Run the offline contract test and independent verification gates."""
+    from apiforge.grpc.compatibility import compare
+    from apiforge.grpc.source import load_source
+    from apiforge.grpc.verify import verify
+
+    candidate = load_source(source)
+    compatibility = compare(load_source(baseline), candidate) if baseline else None
+    _echo_json({"tests": ["parse", "compatibility", "streaming", "security"], "verification": verify(candidate, compatibility)}, detail_level)
+
+
+@grpc_app.command("benchmark")
+def grpc_benchmark_cmd(
+    run: Path = typer.Argument(..., help="JSON performance run."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Evaluate RPS/TPS evidence without claiming capacity from invalid runs."""
+    from apiforge.contracts.grpc import GrpcPerformanceRun
+    from apiforge.grpc.performance import evaluate
+
+    _echo_json(evaluate(GrpcPerformanceRun.model_validate(json.loads(run.read_text(encoding="utf-8")))), detail_level)

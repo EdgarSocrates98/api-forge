@@ -3,3 +3,6 @@ routes:
   - phase: observe
     dominant_area: OBSERVE
     recommended_agent: api-observability-control-plane
+  - phase: grpc
+    dominant_area: CONTRACT
+    recommended_agent: api-grpc-contract-engineer

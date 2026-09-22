@@ -1,0 +1,8 @@
+version: 1
+defaults:
+  deadline_ms: 5000
+  max_attempts: 1
+  max_message_bytes: 4194304
+  max_stream_duration_s: 3600
+  health_check: true
+  reflection: false

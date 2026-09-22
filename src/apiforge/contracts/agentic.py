@@ -59,6 +59,17 @@ class AgenticRun(VersionedContract):
     run_digest: Sha256 | None = None
 
 
+class RuntimeReview(VersionedContract):
+    review_id: str
+    task_id: str
+    revision: int
+    reviewer: str
+    status: Literal["approved", "review", "blocked"]
+    finding_codes: tuple[str, ...] = ()
+    finding_messages: tuple[str, ...] = ()
+    content_sha256: Sha256
+
+
 class AgenticPolicy(VersionedContract):
     policy_id: str
     max_parallel_agents: int = Field(default=4, ge=1, le=64)

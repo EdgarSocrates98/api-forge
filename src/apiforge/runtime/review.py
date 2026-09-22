@@ -2,9 +2,14 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 from pathlib import Path
+from typing import Literal, cast
 
+from apiforge.contracts.agentic import RuntimeReview
 from apiforge.contracts.task import TaskSpec, TaskState
+from apiforge.core.ids import stable_id
 
 
 def review_task_spec(root: Path, spec: TaskSpec) -> tuple[dict[str, object], ...]:
@@ -34,3 +39,25 @@ def review_task_spec(root: Path, spec: TaskSpec) -> tuple[dict[str, object], ...
     if spec.risk.value in {"external_mutation", "destructive", "irreversible"} and not spec.writable_paths:
         findings.append({"code": "AF-RUNTIME-TASK-PATHS", "message": "mutating risk has no writable paths", "severity": "high"})
     return tuple(findings)
+
+
+def build_runtime_review(
+    root: Path, spec: TaskSpec, *, reviewer: str = "api-task-spec-reviewer"
+) -> RuntimeReview:
+    findings = review_task_spec(root, spec)
+    blocked = any(item.get("severity") == "high" for item in findings)
+    status = "blocked" if blocked else "review" if findings else "approved"
+    content = spec.model_dump(mode="json")
+    digest = hashlib.sha256(
+        json.dumps(content, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+    return RuntimeReview(
+        review_id=stable_id("runtime-review", {"task": spec.id, "revision": spec.revision, "digest": digest}),
+        task_id=spec.id,
+        revision=spec.revision,
+        reviewer=reviewer,
+        status=cast(Literal["approved", "review", "blocked"], status),
+        finding_codes=tuple(str(item["code"]) for item in findings),
+        finding_messages=tuple(str(item["message"]) for item in findings),
+        content_sha256=digest,
+    )

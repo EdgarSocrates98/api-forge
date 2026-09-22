@@ -28,7 +28,7 @@ from apiforge.runtime.policy import (
     should_open_room,
 )
 from apiforge.runtime.registry import load_capabilities, select_capabilities
-from apiforge.runtime.review import review_task_spec
+from apiforge.runtime.review import build_runtime_review, review_task_spec
 from apiforge.runtime.scheduler import run_bounded
 from apiforge.runtime.store import RunStore, content_hash
 from apiforge.taskspec import store as task_store
@@ -114,7 +114,9 @@ async def execute_run(
         actor="api-agentic-orchestrator",
         created_at=timestamp,
     ))
+    review = build_runtime_review(root, spec)
     findings = review_task_spec(root, spec)
+    storage.json("review.json", review.model_dump(mode="json"))
     if findings:
         gaps = tuple(str(item["message"]) for item in findings)
         blocked = any(item.get("severity") == "high" for item in findings)
@@ -126,7 +128,7 @@ async def execute_run(
             "finished_at": timestamp,
         })
         storage.save_run(run)
-        storage.json("review.json", {"findings": findings})
+        storage.json("review-findings.json", {"findings": findings})
         task_store.record_event(root, task_id, {"event": "agentic_review", "run_id": run_id, "findings": findings})
         return {"run": run.model_dump(mode="json"), "findings": findings, "status": final, "run_dir": str(storage.directory)}
 
@@ -166,6 +168,11 @@ async def execute_run(
         worker,
         limit=policy.max_parallel_agents,
         timeout_seconds=policy.timeout_seconds,
+        max_calls=policy.max_calls,
+        parallelism=lambda ready, remaining: min(
+            policy.max_parallel_agents,
+            max(1, ready // 2) if spec.risk.value in {"sensitive", "external_mutation", "destructive", "irreversible"} else ready,
+        ),
     )
     artifacts: list[AgentArtifact] = []
     errors: list[str] = []
@@ -193,6 +200,15 @@ async def execute_run(
         )
         artifacts.append(artifact)
         storage.artifact(artifact)
+        storage.event(TrajectoryEvent(
+            event_id=stable_id("event", {"run": run_id, "invocation": result.invocation.invocation_id, "event": "checkpoint"}),
+            run_id=run_id,
+            event="invocation_checkpoint",
+            actor="api-agentic-orchestrator",
+            subject=result.invocation.invocation_id,
+            payload={"artifact_id": artifact.artifact_id, "content_sha256": artifact.content_sha256},
+            created_at=timestamp,
+        ))
 
     all_unresolved = tuple(item for artifact in artifacts for item in artifact.unresolved)
     confidences = [item.confidence for item in artifacts if item.confidence is not None]

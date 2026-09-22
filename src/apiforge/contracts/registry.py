@@ -14,6 +14,7 @@ from apiforge.contracts.agentic import (
     ApprovalGate,
     DecisionRecord,
     HandoffRecord,
+    RuntimeReview,
     TrajectoryEvent,
 )
 from apiforge.contracts.base import ContractError
@@ -127,6 +128,7 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "VerificationCheck/v1": VerificationCheck,
     "HoldoutRecord/v1": HoldoutRecord,
     "AgenticRun/v1": AgenticRun,
+    "RuntimeReview/v1": RuntimeReview,
     "AgenticRuntime/v1": AgenticRun,
     "AgenticPolicy/v1": AgenticPolicy,
     "AgentInvocation/v1": AgentInvocation,

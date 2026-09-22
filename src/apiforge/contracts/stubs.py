@@ -206,6 +206,18 @@ class DataAccessReadiness(_StubPayload):
     evidence: tuple[str, ...] = ()
 
 
+class ApiSafetyAssessment(_StubPayload):
+    """Required API security and resilience controls, evaluated explicitly."""
+
+    subject: str = ""
+    status: Literal["ready", "review", "blocked"]
+    required_controls: tuple[str, ...] = ()
+    passed_controls: tuple[str, ...] = ()
+    missing_controls: tuple[str, ...] = ()
+    failed_controls: tuple[str, ...] = ()
+    evidence: tuple[str, ...] = ()
+
+
 class RuntimeMatrix(_StubPayload):
     """Versioned runtime constraints; entries land with each knowledge pack."""
 

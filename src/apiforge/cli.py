@@ -97,6 +97,12 @@ agentops_app = typer.Typer(
     no_args_is_help=True,
 )
 app.add_typer(agentops_app)
+evals_app = typer.Typer(
+    name="evals",
+    help="Declarative local eval matrix, goldens and holdout metadata.",
+    no_args_is_help=True,
+)
+app.add_typer(evals_app)
 report_app = typer.Typer(
     name="report",
     help="Release evidence bundle — sign binds hashes; verify names what diverged.",
@@ -2549,6 +2555,36 @@ def agentops_tool(
         _echo_json(get_tool_adapter(name).to_dict(), detail_level)
     except ValueError as exc:
         _fail("AF-TOOL-ADAPTER-UNKNOWN", str(exc))
+
+
+@evals_app.command("list")
+def evals_list(
+    path: Path = typer.Option(Path("evals/cases/platform.yaml"), "--path"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """List declarative eval cases without executing agents."""
+    from apiforge.evals.suite import list_case_dicts
+
+    _echo_json(list_case_dicts(path), detail_level)
+
+
+@evals_app.command("validate")
+def evals_validate(
+    path: Path = typer.Option(Path("evals/cases/platform.yaml"), "--path"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Validate closed eval vocabulary and mutation/holdout requirements."""
+    from apiforge.evals.suite import load_cases
+
+    try:
+        cases = load_cases(path)
+        ids = [case.case_id for case in cases]
+        duplicate_ids = sorted({item for item in ids if ids.count(item) > 1})
+        invalid = [case.case_id for case in cases if not case.required_evidence or case.mutation == "none"]
+        result = {"ok": not duplicate_ids and not invalid, "cases": len(cases), "duplicate_ids": duplicate_ids, "invalid_cases": invalid}
+    except (KeyError, OSError, TypeError, ValueError) as exc:
+        raise AnalysisError("AF-EVALS-INVALID", str(exc)) from exc
+    _echo_json(result, detail_level)
 
 
 @app.command("playbook")

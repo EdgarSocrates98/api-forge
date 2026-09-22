@@ -1,0 +1,8 @@
+domain: aws-observability
+version: 1
+areas: [OBSERVE]
+rule_ids: [AF-OBS-001, AF-OBS-002, AF-OBS-003]
+summary: >-
+  Alarms that cannot notify (actions disabled or no targets) and
+  orchestrators invisible to tracing - observability gaps measured from
+  cloudwatch/xray/stepfunctions dumps.

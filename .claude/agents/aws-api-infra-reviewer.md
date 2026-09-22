@@ -1,7 +1,7 @@
 ---
 name: aws-api-infra-reviewer
 description: API Gateway como produto — authorizationType, apiKeyRequired, usage plans, throttling por stage e por método, cache, access logs, integrações (timeout 29s, TLS), certificado em custom domain. Entra quando o artefato é um dump de API Gateway ou a pergunta é sobre a borda AWS; a exploração lógica (BOLA) é do security-reviewer.
-rule_areas: [GATEWAY, SECURITY]
+rule_areas: [GATEWAY, SECURITY, STORAGE]
 executors: [af-inventory, af-extractor, af-judge, af-verifier, af-synthesizer]
 ---
 

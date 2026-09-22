@@ -75,3 +75,75 @@ routes:
     rationale: >-
       Wildcard policies, session duration and pool posture are identity
       security — routed to the security reviewer.
+  - phase: build
+    dominant_area: STORAGE
+    recommended_agent: aws-api-infra-reviewer
+    rationale: >-
+      Datastore posture (PITR, encryption, deletion protection) is
+      infrastructure configuration — routed to the AWS infra reviewer.
+  - phase: verify
+    dominant_area: STORAGE
+    recommended_agent: aws-api-infra-reviewer
+    rationale: >-
+      Storage findings at verify time are infra configuration, judged by
+      the AWS infra reviewer.
+  - phase: build
+    dominant_area: OBSERVE
+    recommended_agent: api-observability-engineer
+    rationale: >-
+      Silent alarms and missing tracing are observability gaps — the
+      observability engineer's domain.
+  - phase: verify
+    dominant_area: OBSERVE
+    recommended_agent: api-observability-engineer
+    rationale: >-
+      Observability findings at verify time belong to the observability
+      engineer.
+  - phase: contract
+    dominant_area: REST
+    recommended_agent: api-contract-architect
+    rationale: >-
+      REST surface findings while the contract is being written are design
+      questions — resource naming, methods, status codes.
+  - phase: verify
+    dominant_area: REST
+    recommended_agent: api-governance-reviewer
+    rationale: >-
+      REST style and lifecycle findings at verify time are governance:
+      consistency and compatibility policy.
+  - phase: build
+    dominant_area: REST
+    recommended_agent: api-dx-docs-reviewer
+    rationale: >-
+      REST findings surfacing during build are usability of the published
+      surface — the DX/docs reviewer's domain.
+  - phase: architecture
+    dominant_area: BREAKING
+    recommended_agent: api-modernization-specialist
+    rationale: >-
+      Breaking-change findings at design time are evolution decisions —
+      the modernization specialist owns them.
+  - phase: verify
+    dominant_area: BREAKING
+    recommended_agent: api-governance-reviewer
+    rationale: >-
+      Compatibility findings at verify time are lifecycle policy — the
+      governance reviewer decides accept/version/reject.
+  - phase: build
+    dominant_area: GATEWAY
+    recommended_agent: aws-api-infra-reviewer
+    rationale: >-
+      Gateway findings during build are edge infrastructure posture —
+      the AWS infra reviewer's domain.
+  - phase: verify
+    dominant_area: GATEWAY
+    recommended_agent: aws-api-infra-reviewer
+    rationale: >-
+      Gateway findings at verify time stay infra configuration, judged by
+      the AWS infra reviewer.
+  - phase: secure
+    dominant_area: GATEWAY
+    recommended_agent: api-security-reviewer
+    rationale: >-
+      Gateway findings under the secure phase are edge auth and exposure —
+      the security reviewer's domain.

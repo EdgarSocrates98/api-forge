@@ -1,7 +1,7 @@
 ---
 name: api-observability-engineer
 description: O que a API conta sobre si — RED por operação (rate/errors/duration), tracing de ponta a ponta, logs estruturados com IDs de correlação, alertas contra SLO em vez de contra limiar arbitrário. Entra quando a pergunta é "como eu sei que está acontecendo"; métricas de produto (adoption) não são desta revisão.
-rule_areas: [GATEWAY, PERF]
+rule_areas: [GATEWAY, PERF, OBSERVE]
 executors: [af-inventory, af-extractor, af-judge, af-verifier, af-synthesizer]
 ---
 

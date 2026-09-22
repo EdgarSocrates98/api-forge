@@ -1,0 +1,9 @@
+domain: aws-data-protection
+version: 1
+areas: [SECURITY, GATEWAY]
+rule_ids: [AF-SEC-107, AF-SEC-108, AF-SEC-109, AF-SEC-110, AF-GW-008]
+summary: >-
+  Data-protection posture measured from dumps: KMS rotation on
+  customer-managed keys only, Secrets Manager rotation (metadata, never
+  values), S3 public-access-block and default-encryption posture, and
+  private DNS on interface VPC endpoints.

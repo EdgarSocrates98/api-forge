@@ -95,6 +95,21 @@ def test_test_results_without_tally_refused(tmp_path: Path) -> None:
         )
 
 
+def test_test_results_foreign_harness_refused(tmp_path: Path) -> None:
+    """A different harness's output (JUnit XML) is unresolved, never parsed."""
+    root = _feature(tmp_path)
+    src = tmp_path / "junit.xml"
+    src.write_text(
+        '<testsuite tests="3" failures="1" skipped="0"></testsuite>\n',
+        encoding="utf-8",
+    )
+    with pytest.raises(SddError, match="AF-SDD-EVIDENCE-EXTRACT"):
+        emit_evidence(
+            root, "GATED", "test.results", src, "2026-09-21T00:00:00Z",
+            state_dir=tmp_path / "state",
+        )
+
+
 def test_evidence_records_source_hash(tmp_path: Path) -> None:
     root = _feature(tmp_path)
     src = tmp_path / "receipt.json"

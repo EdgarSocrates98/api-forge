@@ -1,0 +1,64 @@
+catalog_version: 1
+schema_version: 1
+area: STORAGE
+retrieved: 2026-09-21
+rules:
+  - id: AF-STORE-001
+    title: DynamoDB table has point-in-time recovery disabled
+    severity: high
+    rationale: >-
+      `PointInTimeRecoveryStatus` absent from ENABLED means an accidental
+      delete or corrupting write is unrecoverable past the last on-demand
+      backup — the continuous-backups API answers it directly.
+    remediation: >-
+      Enable PITR (`UpdateContinuousBackups`) on tables holding state the
+      business cannot rebuild; 35 days of rollback costs little against a
+      lost table.
+    reference: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/PointInTimeRecovery.html
+    check: {kind: aws.dynamodb.table, path: measures.pitr_enabled, op: eq, value: false}
+  - id: AF-STORE-002
+    title: DynamoDB table has deletion protection off
+    severity: medium
+    rationale: >-
+      `DeletionProtectionEnabled` false leaves the table one API call away
+      from destruction — cheap insurance against the worst typo.
+    remediation: >-
+      Enable deletion protection on tables whose recreation cost exceeds
+      the operational friction of one extra flag.
+    reference: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/WorkingWithTables.Basics.html
+    check: {kind: aws.dynamodb.table, path: measures.deletion_protection, op: eq, value: false}
+  - id: AF-STORE-003
+    title: DocumentDB cluster storage is not encrypted
+    severity: critical
+    rationale: >-
+      `StorageEncrypted: false` on a cluster holding API data means the
+      volume at rest is plaintext-readable by anyone with storage access —
+      the describe call declares it.
+    remediation: >-
+      Encryption is set at cluster creation; migrate via snapshot-restore
+      into an encrypted cluster with a customer-managed KMS key.
+    reference: https://docs.aws.amazon.com/documentdb/latest/developerguide/encryption-at-rest.html
+    check: {kind: aws.docdb.cluster, path: measures.storage_encrypted, op: eq, value: false}
+  - id: AF-STORE-004
+    title: Neptune cluster storage is not encrypted
+    severity: critical
+    rationale: >-
+      Same posture as DocumentDB — `StorageEncrypted: false` is a declared
+      fact about the cluster, not a guess.
+    remediation: >-
+      Recreate the cluster encrypted (snapshot-restore migration path)
+      with a customer-managed key.
+    reference: https://docs.aws.amazon.com/neptune/latest/userguide/encrypt.html
+    check: {kind: aws.neptune.cluster, path: measures.storage_encrypted, op: eq, value: false}
+  - id: AF-STORE-005
+    title: Step Functions state machine has logging OFF
+    severity: medium
+    rationale: >-
+      `loggingConfiguration.level: OFF` means a failed execution leaves no
+      history beyond the console's 90-day event view — the orchestration
+      of an API workflow becomes undebuggable.
+    remediation: >-
+      Set level ERROR or ALL to a CloudWatch log group with a retention
+      sized to the incident-review window.
+    reference: https://docs.aws.amazon.com/step-functions/latest/dg/cw-logs.html
+    check: {kind: aws.sfn.state_machine, path: measures.logging_level, op: eq, value: "OFF"}

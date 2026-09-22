@@ -1,0 +1,39 @@
+catalog_version: 1
+schema_version: 1
+area: OBSERVE
+retrieved: 2026-09-21
+rules:
+  - id: AF-OBS-001
+    title: CloudWatch alarm exists but its actions are disabled
+    severity: medium
+    rationale: >-
+      `ActionsEnabled: false` means the alarm fires into nothing — the
+      metric is watched, the pager is silent. The alarm list declares it.
+    remediation: >-
+      Enable actions or delete the alarm; a disabled alarm is worse than
+      none because it looks like coverage.
+    reference: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/AlarmThatSendsEmail.html
+    check: {kind: aws.cloudwatch.alarm, path: measures.actions_enabled, op: eq, value: false}
+  - id: AF-OBS-002
+    title: CloudWatch alarm declares no action targets
+    severity: high
+    rationale: >-
+      An alarm with an empty `AlarmActions` list transitions states and
+      notifies nobody — same failure as disabled actions, declared
+      directly by the field.
+    remediation: >-
+      Attach an SNS topic or auto-remediation target, or remove the alarm.
+    reference: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/AlarmThatSendsEmail.html
+    check: {kind: aws.cloudwatch.alarm, path: measures.has_actions, op: eq, value: false}
+  - id: AF-OBS-003
+    title: Step Functions state machine has X-Ray tracing disabled
+    severity: low
+    rationale: >-
+      `tracingConfiguration.enabled` false means executions do not appear
+      in X-Ray — cross-service flows through the orchestrator lose their
+      trace segment.
+    remediation: >-
+      Enable tracing on machines orchestrating API flows; the overhead is
+      small against an untraceable orchestration.
+    reference: https://docs.aws.amazon.com/step-functions/latest/dg/concepts-xray-tracing.html
+    check: {kind: aws.sfn.state_machine, path: measures.has_tracing, op: eq, value: false}

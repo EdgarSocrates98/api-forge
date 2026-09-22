@@ -355,3 +355,325 @@ def extract_waf(dump_dir: Path) -> CodeInventory:
             )
         )
     return _inventory("waf", dump, facts, diagnostics, hashes)
+
+
+def extract_dynamodb(dump_dir: Path) -> CodeInventory:
+    """Read a `collect dynamodb` dump — ``aws.dynamodb.table`` fact."""
+    dump = Path(dump_dir)
+    diagnostics: list[Diagnostic] = []
+    hashes: dict[str, str] = {}
+    facts: list[Fact] = []
+    table = _load(dump, "table.json", hashes, diagnostics, "AF-DDB-DUMP")
+    backups = _load(dump, "backups.json", hashes, diagnostics, "AF-DDB-DUMP")
+    if isinstance(table, dict):
+        body = table.get("Table", {})
+        pitr = (
+            backups.get("ContinuousBackupsDescription", {})
+            .get("PointInTimeRecoveryDescription", {})
+            .get("PointInTimeRecoveryStatus", "")
+            if isinstance(backups, dict)
+            else ""
+        )
+        facts.append(
+            _fact(
+                "aws.dynamodb.table",
+                "table.json",
+                hashes["table.json"],
+                {
+                    "table": body.get("TableName", ""),
+                    "billing_mode": body.get(
+                        "BillingModeSummary", {}
+                    ).get("BillingMode", "PROVISIONED"),
+                    "pitr_enabled": pitr == "ENABLED",
+                    "deletion_protection": bool(
+                        body.get("DeletionProtectionEnabled")
+                    ),
+                },
+                {},
+            )
+        )
+    return _inventory("dynamodb", dump, facts, diagnostics, hashes)
+
+
+def _extract_db_cluster(
+    dump_dir: Path, service: str, code: str
+) -> CodeInventory:
+    """Shared DocDB/Neptune reader — `engine` in the dump disambiguates."""
+    dump = Path(dump_dir)
+    diagnostics: list[Diagnostic] = []
+    hashes: dict[str, str] = {}
+    facts: list[Fact] = []
+    data = _load(dump, "cluster.json", hashes, diagnostics, code)
+    if isinstance(data, dict):
+        for cluster in data.get("DBClusters", []):
+            if not isinstance(cluster, dict):
+                continue
+            facts.append(
+                _fact(
+                    f"aws.{service}.cluster",
+                    "cluster.json",
+                    hashes["cluster.json"],
+                    {
+                        "cluster": cluster.get("DBClusterIdentifier", ""),
+                        "engine": cluster.get("Engine", ""),
+                        "storage_encrypted": bool(
+                            cluster.get("StorageEncrypted")
+                        ),
+                        "deletion_protection": bool(
+                            cluster.get("DeletionProtection")
+                        ),
+                        "multi_az": bool(cluster.get("MultiAZ")),
+                    },
+                    {},
+                )
+            )
+    return _inventory(service, dump, facts, diagnostics, hashes)
+
+
+def extract_docdb(dump_dir: Path) -> CodeInventory:
+    """Read a `collect docdb` dump — ``aws.docdb.cluster`` facts."""
+    return _extract_db_cluster(dump_dir, "docdb", "AF-DOCDB-DUMP")
+
+
+def extract_neptune(dump_dir: Path) -> CodeInventory:
+    """Read a `collect neptune` dump — ``aws.neptune.cluster`` facts."""
+    return _extract_db_cluster(dump_dir, "neptune", "AF-NEPTUNE-DUMP")
+
+
+def extract_stepfunctions(dump_dir: Path) -> CodeInventory:
+    """Read a `collect stepfunctions` dump — ``aws.sfn.state_machine`` fact."""
+    dump = Path(dump_dir)
+    diagnostics: list[Diagnostic] = []
+    hashes: dict[str, str] = {}
+    facts: list[Fact] = []
+    data = _load(dump, "state-machine.json", hashes, diagnostics, "AF-SFN-DUMP")
+    if isinstance(data, dict):
+        logging = data.get("loggingConfiguration", {})
+        tracing = data.get("tracingConfiguration", {})
+        facts.append(
+            _fact(
+                "aws.sfn.state_machine",
+                "state-machine.json",
+                hashes["state-machine.json"],
+                {
+                    "name": data.get("name", ""),
+                    "type": data.get("type", "STANDARD"),
+                    "logging_level": logging.get("level", "OFF"),
+                    "has_tracing": bool(tracing.get("enabled")),
+                },
+                {},
+            )
+        )
+    return _inventory("stepfunctions", dump, facts, diagnostics, hashes)
+
+
+def extract_cloudwatch(dump_dir: Path) -> CodeInventory:
+    """Read a `collect cloudwatch` dump — ``aws.cloudwatch.alarm`` facts."""
+    dump = Path(dump_dir)
+    diagnostics: list[Diagnostic] = []
+    hashes: dict[str, str] = {}
+    facts: list[Fact] = []
+    alarms = _load(dump, "alarms.json", hashes, diagnostics, "AF-CW-DUMP")
+    if isinstance(alarms, list):
+        for alarm in alarms:
+            if not isinstance(alarm, dict):
+                continue
+            facts.append(
+                _fact(
+                    "aws.cloudwatch.alarm",
+                    "alarms.json",
+                    hashes["alarms.json"],
+                    {
+                        "alarm": alarm.get("AlarmName", ""),
+                        "state": alarm.get("StateValue", ""),
+                        "actions_enabled": bool(alarm.get("ActionsEnabled")),
+                        "has_actions": bool(alarm.get("AlarmActions")),
+                    },
+                    {},
+                )
+            )
+    return _inventory("cloudwatch", dump, facts, diagnostics, hashes)
+
+
+def extract_xray(dump_dir: Path) -> CodeInventory:
+    """Read a `collect xray` dump — sampling coverage + encryption facts."""
+    dump = Path(dump_dir)
+    diagnostics: list[Diagnostic] = []
+    hashes: dict[str, str] = {}
+    facts: list[Fact] = []
+    rules = _load(
+        dump, "sampling-rules.json", hashes, diagnostics, "AF-XRAY-DUMP"
+    )
+    enc = _load(
+        dump, "encryption-config.json", hashes, diagnostics, "AF-XRAY-DUMP"
+    )
+    if isinstance(rules, list):
+        facts.append(
+            _fact(
+                "aws.xray.sampling",
+                "sampling-rules.json",
+                hashes["sampling-rules.json"],
+                {"rules_count": len(rules)},
+                {},
+            )
+        )
+    if isinstance(enc, dict):
+        facts.append(
+            _fact(
+                "aws.xray.encryption",
+                "encryption-config.json",
+                hashes["encryption-config.json"],
+                {"encryption_type": enc.get("Type", ""), "status": enc.get("Status", "")},
+                {},
+            )
+        )
+    return _inventory("xray", dump, facts, diagnostics, hashes)
+
+
+def extract_kms(dump_dir: Path) -> CodeInventory:
+    """Read a `collect kms` dump — ``aws.kms.key`` fact."""
+    dump = Path(dump_dir)
+    diagnostics: list[Diagnostic] = []
+    hashes: dict[str, str] = {}
+    facts: list[Fact] = []
+    key = _load(dump, "key.json", hashes, diagnostics, "AF-KMS-DUMP")
+    rotation = _load(dump, "rotation.json", hashes, diagnostics, "AF-KMS-DUMP")
+    if isinstance(key, dict):
+        meta = key.get("KeyMetadata", {})
+        rot = rotation.get("KeyRotationEnabled") if isinstance(rotation, dict) else None
+        facts.append(
+            _fact(
+                "aws.kms.key",
+                "key.json",
+                hashes["key.json"],
+                {
+                    "key_id": meta.get("KeyId", ""),
+                    "key_state": meta.get("KeyState", ""),
+                    "key_manager": meta.get("KeyManager", ""),
+                    "rotation_enabled": rot,
+                    # crossed from two declared fields — AWS-managed keys
+                    # cannot rotate, so they never trip this measure
+                    "customer_key_without_rotation": (
+                        meta.get("KeyManager") == "CUSTOMER" and rot is False
+                    ),
+                },
+                {},
+            )
+        )
+    return _inventory("kms", dump, facts, diagnostics, hashes)
+
+
+
+
+def extract_secrets(dump_dir: Path) -> CodeInventory:
+    """Read a `collect secrets` dump — metadata only, values never present."""
+    dump = Path(dump_dir)
+    diagnostics: list[Diagnostic] = []
+    hashes: dict[str, str] = {}
+    facts: list[Fact] = []
+    secret = _load(
+        dump, "secret.json", hashes, diagnostics, "AF-SECRETS-DUMP"
+    )
+    if isinstance(secret, dict):
+        facts.append(
+            _fact(
+                "aws.secrets.secret",
+                "secret.json",
+                hashes["secret.json"],
+                {
+                    "name": secret.get("Name", ""),
+                    "rotation_enabled": bool(secret.get("RotationEnabled")),
+                    "has_kms": "KmsKeyId" in secret,
+                },
+                {},
+            )
+        )
+    return _inventory("secrets", dump, facts, diagnostics, hashes)
+
+
+def extract_vpc_endpoints(dump_dir: Path) -> CodeInventory:
+    """Read a `collect vpc-endpoints` dump — ``aws.vpc.endpoint`` facts."""
+    dump = Path(dump_dir)
+    diagnostics: list[Diagnostic] = []
+    hashes: dict[str, str] = {}
+    facts: list[Fact] = []
+    endpoints = _load(
+        dump, "endpoints.json", hashes, diagnostics, "AF-VPC-DUMP"
+    )
+    if isinstance(endpoints, list):
+        for ep in endpoints:
+            if not isinstance(ep, dict):
+                continue
+            measures: dict[str, Any] = {
+                "endpoint_id": ep.get("VpcEndpointId", ""),
+                "type": ep.get("VpcEndpointType", ""),
+                "service": ep.get("ServiceName", ""),
+            }
+            # Gateway endpoints have no private-DNS concept — the measure is
+            # emitted only for Interface, where the field is applicable.
+            if ep.get("VpcEndpointType") == "Interface":
+                measures["private_dns_enabled"] = bool(
+                    ep.get("PrivateDnsEnabled")
+                )
+            facts.append(
+                _fact(
+                    "aws.vpc.endpoint",
+                    "endpoints.json",
+                    hashes["endpoints.json"],
+                    measures,
+                    {},
+                )
+            )
+    return _inventory("vpc-endpoints", dump, facts, diagnostics, hashes)
+
+
+def extract_s3(dump_dir: Path) -> CodeInventory:
+    """Read a `collect s3` dump — ``aws.s3.bucket`` posture fact."""
+    dump = Path(dump_dir)
+    diagnostics: list[Diagnostic] = []
+    hashes: dict[str, str] = {}
+    facts: list[Fact] = []
+    enc = _load(dump, "encryption.json", hashes, diagnostics, "AF-S3-DUMP")
+    public = _load(dump, "public-access.json", hashes, diagnostics, "AF-S3-DUMP")
+    vers = _load(dump, "versioning.json", hashes, diagnostics, "AF-S3-DUMP")
+    if any(v is not None for v in (enc, public, vers)):
+        pab = (
+            public.get("PublicAccessBlockConfiguration", {})
+            if isinstance(public, dict) and "absent" not in public
+            else {}
+        )
+        facts.append(
+            _fact(
+                "aws.s3.bucket",
+                "encryption.json",
+                hashes.get("encryption.json", ""),
+                {
+                    "has_encryption": isinstance(enc, dict)
+                    and "ServerSideEncryptionConfiguration" in enc,
+                    "public_access_blocked": all(
+                        pab.get(k) is True
+                        for k in (
+                            "BlockPublicAcls",
+                            "IgnorePublicAcls",
+                            "BlockPublicPolicy",
+                            "RestrictPublicBuckets",
+                        )
+                    ),
+                    "versioning": (
+                        vers.get("Status", "") if isinstance(vers, dict) else ""
+                    ),
+                },
+                {
+                    "absent_artifacts": [
+                        n
+                        for n, v in (
+                            ("encryption.json", enc),
+                            ("public-access.json", public),
+                            ("versioning.json", vers),
+                        )
+                        if isinstance(v, dict) and "absent" in v
+                    ]
+                },
+            )
+        )
+    return _inventory("s3", dump, facts, diagnostics, hashes)

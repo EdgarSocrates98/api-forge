@@ -518,6 +518,16 @@ _AWS_DUMP_READERS = {
     "iam-role": "apiforge.adapters.awsdumps.extract_iam_role",
     "cognito": "apiforge.adapters.awsdumps.extract_cognito",
     "waf": "apiforge.adapters.awsdumps.extract_waf",
+    "dynamodb": "apiforge.adapters.awsdumps.extract_dynamodb",
+    "docdb": "apiforge.adapters.awsdumps.extract_docdb",
+    "neptune": "apiforge.adapters.awsdumps.extract_neptune",
+    "stepfunctions": "apiforge.adapters.awsdumps.extract_stepfunctions",
+    "cloudwatch": "apiforge.adapters.awsdumps.extract_cloudwatch",
+    "xray": "apiforge.adapters.awsdumps.extract_xray",
+    "kms": "apiforge.adapters.awsdumps.extract_kms",
+    "secrets": "apiforge.adapters.awsdumps.extract_secrets",
+    "vpc-endpoints": "apiforge.adapters.awsdumps.extract_vpc_endpoints",
+    "s3": "apiforge.adapters.awsdumps.extract_s3",
 }
 
 
@@ -692,6 +702,122 @@ def collect_waf(
             raise AnalysisError(exc.code, exc.detail) from exc
 
     _echo_manifest(_run(work), detail_level)
+
+
+_COLLECT_SIMPLE = {
+    "dynamodb": (
+        "apiforge.collectors.datastores.collect_dynamodb",
+        "--table-name",
+        "DynamoDB table name.",
+    ),
+    "docdb": (
+        "apiforge.collectors.datastores.collect_docdb",
+        "--cluster-id",
+        "DocDB cluster identifier.",
+    ),
+    "neptune": (
+        "apiforge.collectors.datastores.collect_neptune",
+        "--cluster-id",
+        "Neptune cluster identifier.",
+    ),
+    "stepfunctions": (
+        "apiforge.collectors.ops.collect_stepfunctions",
+        "--state-machine-arn",
+        "State machine ARN.",
+    ),
+    "cloudwatch": (
+        "apiforge.collectors.ops.collect_cloudwatch",
+        "--alarm-prefix",
+        "Alarm name prefix.",
+    ),
+    "kms": (
+        "apiforge.collectors.ops.collect_kms",
+        "--key-id",
+        "KMS key id or ARN.",
+    ),
+    "secrets": (
+        "apiforge.collectors.ops.collect_secrets",
+        "--secret-id",
+        "Secret name or ARN — metadata only, value never read.",
+    ),
+    "vpc-endpoints": (
+        "apiforge.collectors.ops.collect_vpc_endpoints",
+        "--vpc-id",
+        "VPC id.",
+    ),
+    "s3": (
+        "apiforge.collectors.ops.collect_s3",
+        "--bucket",
+        "S3 bucket name — posture only, never objects.",
+    ),
+}
+
+
+def _register_collect_simple() -> None:
+    """One `collect <svc>` per single-identifier collector — closed shape."""
+
+    def make(dotted: str, flag: str, help_text: str) -> Callable[..., None]:
+        def cmd(
+            identifier: str = typer.Option(..., flag, help=help_text),
+            out_dir: Path = typer.Option(
+                ..., "--out", help="Dump directory to write."
+            ),
+            now: str | None = typer.Option(
+                None,
+                "--now",
+                help="Explicit ISO8601 collection timestamp (the only clock).",
+            ),
+            detail_level: str = typer.Option(
+                "normal", "--detail-level", help=_DETAIL_HELP
+            ),
+        ) -> None:
+            def work() -> CollectManifest:
+                import importlib
+
+                module, _, func = dotted.rpartition(".")
+                collect_fn = getattr(importlib.import_module(module), func)
+                try:
+                    manifest = collect_fn(identifier, out_dir, now=now)
+                    assert isinstance(manifest, CollectManifest)
+                    return manifest
+                except CollectError as exc:
+                    raise AnalysisError(exc.code, exc.detail) from exc
+
+            _echo_manifest(_run(work), detail_level)
+
+        return cmd
+
+    for svc, (dotted, flag, help_text) in _COLLECT_SIMPLE.items():
+        collect_app.command(svc)(make(dotted, flag, help_text))
+
+    @collect_app.command("xray")
+    def collect_xray_cmd(
+        out_dir: Path = typer.Option(
+            ..., "--out", help="Dump directory to write."
+        ),
+        now: str | None = typer.Option(
+            None,
+            "--now",
+            help="Explicit ISO8601 collection timestamp (the only clock).",
+        ),
+        detail_level: str = typer.Option(
+            "normal", "--detail-level", help=_DETAIL_HELP
+        ),
+    ) -> None:
+        """Fetch X-Ray sampling rules and encryption config."""
+
+        def work() -> CollectManifest:
+            from apiforge.collectors.ops import collect_xray
+
+            try:
+                return collect_xray(out_dir, now=now)
+            except CollectError as exc:
+                raise AnalysisError(exc.code, exc.detail) from exc
+
+        _echo_manifest(_run(work), detail_level)
+
+
+_register_collect_simple()
 
 
 def _echo_manifest(manifest: object, detail_level: str) -> None:

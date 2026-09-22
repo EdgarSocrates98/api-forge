@@ -80,6 +80,20 @@ EXPECTED_RULES = {
     "AF-IAM-005",
     "AF-SEC-105",
     "AF-SEC-106",
+    # AWS breadth batch 2: datastore, observability and edge-posture rules
+    "AF-STORE-001",
+    "AF-STORE-002",
+    "AF-STORE-003",
+    "AF-STORE-004",
+    "AF-STORE-005",
+    "AF-OBS-001",
+    "AF-OBS-002",
+    "AF-OBS-003",
+    "AF-SEC-107",
+    "AF-SEC-108",
+    "AF-SEC-109",
+    "AF-SEC-110",
+    "AF-GW-008",
 }
 
 
@@ -101,9 +115,11 @@ def test_areas_cover_the_specialist_team() -> None:
         "GATEWAY",
         "IDENTITY",
         "MESSAGING",
+        "OBSERVE",
         "PERF",
         "REST",
         "SECURITY",
+        "STORAGE",
         "TESTING",
     }
 
@@ -120,6 +136,8 @@ def test_id_prefix_matches_area() -> None:
         "DATA": "AF-DATA-",
         "MESSAGING": "AF-MSG-",
         "IDENTITY": "AF-IAM-",
+        "OBSERVE": "AF-OBS-",
+        "STORAGE": "AF-STORE-",
     }
     for rule_id, meta in load_catalog().items():
         assert rule_id.startswith(expected[meta.area]), rule_id

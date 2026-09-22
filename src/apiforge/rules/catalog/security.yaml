@@ -174,3 +174,52 @@ rules:
       count-then-block order against real traffic before enforcing.
     reference: https://docs.aws.amazon.com/waf/latest/developerguide/aws-managed-rule-groups.html
     check: {kind: aws.waf.web_acl, path: measures.has_managed_rules, op: eq, value: false}
+  - id: AF-SEC-107
+    title: Customer-managed KMS key has rotation disabled
+    severity: high
+    rationale: >-
+      `KeyManager: CUSTOMER` with `KeyRotationEnabled: false` leaves the
+      same material wrapping data indefinitely — rotation is one flag and
+      the dump declares both fields.
+    remediation: >-
+      Enable automatic rotation (`EnableKeyRotation`) on symmetric CMKs;
+      AWS-managed keys are excluded by construction of the measure.
+    reference: https://docs.aws.amazon.com/kms/latest/developerguide/rotate-keys.html
+    check: {kind: aws.kms.key, path: measures.customer_key_without_rotation, op: eq, value: true}
+  - id: AF-SEC-108
+    title: Secrets Manager secret has rotation disabled
+    severity: medium
+    rationale: >-
+      `RotationEnabled: false` means the credential's lifetime is unbounded
+      — a leak has no expiry. The describe output declares the flag.
+    remediation: >-
+      Attach a rotation Lambda with a window matching the credential's
+      exposure risk, or record why the secret legitimately never rotates.
+    reference: https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_overview.html
+    check: {kind: aws.secrets.secret, path: measures.rotation_enabled, op: eq, value: false}
+  - id: AF-SEC-109
+    title: S3 bucket public access block is incomplete or absent
+    severity: critical
+    rationale: >-
+      All four `PublicAccessBlock` flags must be true to close the public
+      surface; any false or a missing configuration is measured the same —
+      `public_access_blocked` is only true when all four are set.
+    remediation: >-
+      Enable all four public-access-block flags at bucket level (or
+      account level) unless the bucket is deliberately public — recorded
+      as a decision, never assumed.
+    reference: https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-control-block-public-access.html
+    check: {kind: aws.s3.bucket, path: measures.public_access_blocked, op: eq, value: false}
+  - id: AF-SEC-110
+    title: S3 bucket declares no server-side encryption configuration
+    severity: medium
+    rationale: >-
+      A missing `ServerSideEncryptionConfiguration` is recorded as
+      measured absence (the API's named error becomes the artifact);
+      buckets created after Jan-2023 get SSE-S3 by default, but the dump
+      does not prove which default the account applies.
+    remediation: >-
+      Set bucket default encryption explicitly (SSE-KMS for regulated
+      data) so the posture is declared, not defaulted.
+    reference: https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-encryption.html
+    check: {kind: aws.s3.bucket, path: measures.has_encryption, op: eq, value: false}

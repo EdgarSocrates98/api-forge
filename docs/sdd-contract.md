@@ -43,6 +43,12 @@ bypass in `.apiforge/sdd/<FEATURE>/gate-overrides.json`.
 Known evidence kinds: `contract.document`, `plan.tasks`, `test.results`,
 `threat.model`, `benchmark.results`, `release.receipt`.
 
+Extraction is deliberately narrow. `test.results` reads only the pytest
+tally line (`N passed[, N failed][, N skipped][, N error]`) — output from
+another harness (JUnit XML, `go test`, TAP) is *not* parsed and refuses
+with `AF-SDD-EVIDENCE-EXTRACT`. Unsupported formats stay unresolved;
+the extractor never interpolates or invents counts.
+
 ## Refusal and gap codes
 
 Refusals (`refused[]`) block `ok`; named gaps (`unresolved[]`) are reported at

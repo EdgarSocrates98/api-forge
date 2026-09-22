@@ -83,6 +83,19 @@ targets), `iam-role` (role + attached + inline policy documents),
 `cognito` (user pool + app clients) and `waf` (one WebACL). Each writes a
 dump that `model <same-name>` reads offline into `aws.<svc>.*` facts.
 
+Batch 2 adds `dynamodb` (table + continuous-backup/PITR status), `docdb`
+and `neptune` (`rds:DescribeDBClusters` dumps — the `engine` field in the
+dump disambiguates), `stepfunctions` (state-machine description),
+`cloudwatch` (metric alarms by prefix), `xray` (sampling rules +
+encryption config), `kms` (key metadata + rotation status), `secrets`
+(secret *metadata* — `GetSecretValue` is never called), `vpc-endpoints`
+(endpoints of a VPC — `private_dns_enabled` is measured only on
+`Interface` endpoints, where the field exists) and `s3` (bucket posture:
+encryption, public-access block, versioning — objects are never listed).
+A missing S3 configuration is recorded as `{"absent": <aws-error-code>}`
+in the artifact, so the reader sees measured absence, not an inferred
+default.
+
 | Code | Meaning |
 |---|---|
 | `AF-SQS-DUMP` | `queue.json` missing or invalid |
@@ -91,6 +104,16 @@ dump that `model <same-name>` reads offline into `aws.<svc>.*` facts.
 | `AF-IAM-DUMP` | `role.json`/`attached-policies.json`/`inline-policies.json` missing or invalid |
 | `AF-COG-DUMP` | `user-pool.json`/`clients.json` missing or invalid |
 | `AF-WAF-DUMP` | `web-acl.json` missing or invalid |
+| `AF-DDB-DUMP` | `table.json`/`backups.json` missing or invalid |
+| `AF-DOCDB-DUMP` | `cluster.json` missing or invalid |
+| `AF-NEPTUNE-DUMP` | `cluster.json` missing or invalid |
+| `AF-SFN-DUMP` | `state-machine.json` missing or invalid |
+| `AF-CW-DUMP` | `alarms.json` missing or invalid |
+| `AF-XRAY-DUMP` | `sampling-rules.json`/`encryption-config.json` missing or invalid |
+| `AF-KMS-DUMP` | `key.json`/`rotation.json` missing or invalid |
+| `AF-SECRETS-DUMP` | `secret.json` missing or invalid |
+| `AF-VPC-DUMP` | `endpoints.json` missing or invalid |
+| `AF-S3-DUMP` | `encryption.json`/`public-access.json`/`versioning.json` missing or invalid |
 
 ## API Gateway dump adapter
 

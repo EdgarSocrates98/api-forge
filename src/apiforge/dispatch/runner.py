@@ -260,6 +260,16 @@ _VERBS: tuple[tuple[str, tuple[str, ...], Callable[..., Any]], ...] = (
     ("model iam-role", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_iam_role")),
     ("model cognito", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_cognito")),
     ("model waf", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_waf")),
+    ("model dynamodb", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_dynamodb")),
+    ("model docdb", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_docdb")),
+    ("model neptune", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_neptune")),
+    ("model stepfunctions", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_stepfunctions")),
+    ("model cloudwatch", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_cloudwatch")),
+    ("model xray", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_xray")),
+    ("model kms", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_kms")),
+    ("model secrets", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_secrets")),
+    ("model vpc-endpoints", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_vpc_endpoints")),
+    ("model s3", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_s3")),
     ("perf compare", ("baseline", "candidate"), _verb_perf_compare),
 )
 

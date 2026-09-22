@@ -82,3 +82,15 @@ rules:
       Use `apiKeyRequired` for metering/partner identification only; real
       authorization comes from IAM, custom authorizers or Cognito scopes.
     reference: docs/specs/2026-09-21-api-forge-agentic-platform.md
+  - id: AF-GW-008
+    title: Interface VPC endpoint without private DNS
+    severity: medium
+    rationale: >-
+      `PrivateDnsEnabled: false` on an interface endpoint forces callers
+      onto the endpoint-specific DNS name — code written against the
+      public service DNS silently bypasses the private path.
+    remediation: >-
+      Enable private DNS when the endpoint is meant to serve the service's
+      canonical name inside the VPC.
+    reference: https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints.html
+    check: {kind: aws.vpc.endpoint, path: measures.private_dns_enabled, op: eq, value: false}

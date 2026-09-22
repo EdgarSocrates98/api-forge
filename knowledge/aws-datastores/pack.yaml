@@ -1,0 +1,8 @@
+domain: aws-datastores
+version: 1
+areas: [STORAGE]
+rule_ids: [AF-STORE-001, AF-STORE-002, AF-STORE-003, AF-STORE-004, AF-STORE-005]
+summary: >-
+  Posture of the datastores behind an API: DynamoDB PITR and deletion
+  protection, DocDB/Neptune storage encryption, Step Functions logging -
+  each measured from the collect dumps, never inferred.

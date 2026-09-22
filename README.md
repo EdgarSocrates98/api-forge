@@ -93,6 +93,7 @@ while refusal codes and `fact_id`s survive.
 | `apiforge run list` | Tool registry — declared metadata (license, capabilities, modes, evidence producer) plus *measured* install status; import-only tools refuse `run` with `AF-RUN-IMPORT-ONLY` |
 | `apiforge debate open|submit|close` | Deterministic debate machine — positions cite `fact:` evidence, quorum of 2 sides |
 | `apiforge plan strangler --project P --contract C` | Per-route cut plan; migrated routes name the parity evidence still due |
+| `apiforge plan architecture --profile w.json` | Decision engine: ranks AWS primitives per role over a declared `WorkloadProfile`; every rejection names its cause, cost stays `cost_to_validate` |
 | `apiforge contract list\|show <name>` | Versioned canonical contracts (JSON schema per `<Name>/v1`) |
 | `apiforge knowledge list\|show\|check` | Domain packs — source authority dates, runtime matrices, declared evals; `check` cross-validates rule ids |
 | `apiforge task create|review|seal|run|accept|reject|status` | Sealed, budgeted unit of work; executor never holds the seal key; acceptor != executor |

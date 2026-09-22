@@ -236,6 +236,17 @@ def _verb_perf_verdict(ctx: DispatchContext) -> dict[str, object]:
     return verdict(PerformanceRun.model_validate(doc)).model_dump(mode="json")
 
 
+def _verb_plan_architecture(ctx: DispatchContext) -> dict[str, object]:
+    from apiforge.contracts.stubs import WorkloadProfile
+    from apiforge.plan.architecture import recommend
+
+    assert ctx.input_path is not None
+    doc = json.loads(ctx.input_path.read_text(encoding="utf-8"))
+    if isinstance(doc, dict) and isinstance(doc.get("workload_profile"), dict):
+        doc = doc["workload_profile"]
+    return dict(recommend(WorkloadProfile.model_validate(doc)))
+
+
 # verb prefix -> (required ctx fields, runner). `collect *` is absent on
 # purpose: dispatch never touches AWS.
 _VERBS: tuple[tuple[str, tuple[str, ...], Callable[..., Any]], ...] = (
@@ -292,6 +303,7 @@ _VERBS: tuple[tuple[str, tuple[str, ...], Callable[..., Any]], ...] = (
     ("model elasticache", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_elasticache")),
     ("perf compare", ("baseline", "candidate"), _verb_perf_compare),
     ("perf verdict", ("input_path",), _verb_perf_verdict),
+    ("plan architecture", ("input_path",), _verb_plan_architecture),
 )
 
 

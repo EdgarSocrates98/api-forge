@@ -606,6 +606,42 @@ def knowledge_check(
     return out
 
 
+def plan_architecture(profile: str, detail_level: str = "normal") -> dict[str, Any]:
+    """Architecture Decision Engine over a WorkloadProfile payload."""
+    from apiforge.application.analyze import AnalysisError
+    from apiforge.contracts.stubs import WorkloadProfile
+    from apiforge.plan.architecture import recommend
+
+    def work() -> dict[str, Any]:
+        try:
+            payload = json.loads(Path(profile).read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError, UnicodeDecodeError) as exc:
+            raise AnalysisError("AF-PLAN-PROFILE-INVALID", f"{profile}: {exc}") from exc
+        if isinstance(payload, dict) and isinstance(
+            payload.get("workload_profile"), dict
+        ):
+            payload = payload["workload_profile"]
+        try:
+            wp = WorkloadProfile.model_validate(payload)
+        except Exception as exc:
+            raise AnalysisError("AF-PLAN-PROFILE-INVALID", f"{profile}: {exc}") from exc
+        return dict(recommend(wp))
+
+    out: dict[str, Any] = _call("plan_architecture", work, detail_level)
+    return out
+
+
+def run_list(detail_level: str = "normal") -> dict[str, Any]:
+    """Tool registry — declared metadata plus measured install status."""
+    from apiforge.run_tools import list_tools
+
+    def work() -> dict[str, Any]:
+        return {"tools": list_tools()}
+
+    out: dict[str, Any] = _call("run_list", work, detail_level)
+    return out
+
+
 TOOLS: tuple[Callable[..., Any], ...] = (
     discover,
     analyze,
@@ -637,4 +673,6 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     knowledge_list,
     knowledge_show,
     knowledge_check,
+    plan_architecture,
+    run_list,
 )

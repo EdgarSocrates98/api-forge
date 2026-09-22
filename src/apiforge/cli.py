@@ -1229,6 +1229,40 @@ def plan_strangler(
     _echo_json(_run(work), detail_level)
 
 
+@plan_app.command("architecture")
+def plan_architecture(
+    profile: Path = typer.Option(
+        ..., "--profile", help="WorkloadProfile JSON — every field declared."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Architecture Decision Engine — rank AWS primitives per role.
+
+    Eliminates on declared hard constraints, scores survivors on the
+    profile, and emits chosen + rejected-with-reason + change conditions.
+    """
+
+    def work() -> object:
+        from apiforge.contracts.stubs import WorkloadProfile
+        from apiforge.plan.architecture import recommend
+
+        try:
+            payload = json.loads(profile.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError, UnicodeDecodeError) as exc:
+            raise AnalysisError("AF-PLAN-PROFILE-INVALID", f"{profile}: {exc}") from exc
+        if isinstance(payload, dict) and isinstance(
+            payload.get("workload_profile"), dict
+        ):
+            payload = payload["workload_profile"]
+        try:
+            wp = WorkloadProfile.model_validate(payload)
+        except Exception as exc:
+            raise AnalysisError("AF-PLAN-PROFILE-INVALID", f"{profile}: {exc}") from exc
+        return recommend(wp)
+
+    _echo_json(_run(work), detail_level)
+
+
 @debate_app.command("open")
 def debate_open(
     case: Path = typer.Option(..., "--case", help="Case directory."),

@@ -140,6 +140,16 @@ class WorkloadProfile(_StubPayload):
     multi_tenant: bool | None = None
     scope: Literal["regional", "global"] | None = None
     exposure: Literal["public", "private"] | None = None
+    # decision inputs for the architecture engine — all declared, all optional;
+    # absent means the constraint does not participate, never a default
+    max_request_duration_s: float | None = None
+    max_payload_bytes: int | None = None
+    needs_os_control: bool | None = None
+    needs_kubernetes: bool | None = None
+    team_maturity: Literal["low", "medium", "high"] | None = None
+    data_model: (
+        Literal["key-value", "document", "graph", "relational", "cache"] | None
+    ) = None
 
 
 class DataAccessIR(_StubPayload):

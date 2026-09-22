@@ -314,6 +314,7 @@ or `stale` (unreachable in baseline); candidate-only routes are `added`.
 | Code | Meaning |
 |---|---|
 | `AF-PLAN-NO-ROUTES` | neither payload carries `code.route` facts |
+| `AF-PLAN-PROFILE-INVALID` | WorkloadProfile payload unreadable or schema-invalid |
 
 ## Debate protocol
 

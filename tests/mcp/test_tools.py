@@ -45,6 +45,8 @@ def test_tools_export_all_expected_verbs() -> None:
         "knowledge_list",
         "knowledge_show",
         "knowledge_check",
+        "plan_architecture",
+        "run_list",
     }
 
 

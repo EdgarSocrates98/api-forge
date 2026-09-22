@@ -89,3 +89,29 @@ def collect_neptune(
     manifest.meta["cluster_id"] = cluster_id
     manifest.write(out_dir)
     return manifest
+
+
+class _RdsClient(Protocol):
+    def describe_db_instances(self, **kwargs: Any) -> dict[str, Any]: ...
+    def describe_db_clusters(self, **kwargs: Any) -> dict[str, Any]: ...
+
+
+def collect_rds(
+    resource_id: str,
+    out_dir: Path,
+    now: str | None = None,
+    client: _RdsClient | None = None,
+) -> CollectManifest:
+    """Collect RDS/Aurora posture into an offline dump."""
+    if client is None:
+        client = _boto3("rds")
+    manifest = CollectManifest(source="rds", collected_at=now)
+    instances = _call(client, "describe_db_instances", DBInstanceIdentifier=resource_id)
+    name, digest = write_artifact(out_dir, "instances.json", instances)
+    manifest.record(name, digest)
+    clusters = _call(client, "describe_db_clusters", DBClusterIdentifier=resource_id)
+    name, digest = write_artifact(out_dir, "clusters.json", clusters)
+    manifest.record(name, digest)
+    manifest.meta["resource_id"] = resource_id
+    manifest.write(out_dir)
+    return manifest

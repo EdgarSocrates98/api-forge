@@ -865,6 +865,11 @@ def collect_waf(
 
 
 _COLLECT_SIMPLE = {
+    "rds": (
+        "apiforge.collectors.datastores.collect_rds",
+        "--resource-id",
+        "RDS instance or Aurora cluster identifier.",
+    ),
     "dynamodb": (
         "apiforge.collectors.datastores.collect_dynamodb",
         "--table-name",
@@ -1217,6 +1222,24 @@ def inventory_redis(
 
 
 _DATA_ACCESS_READERS = {
+    "rds-access": (
+        "apiforge.adapters.relational.extract_rds_access",
+        "rds",
+        "rds",
+        "Project directory to scan for PostgreSQL/MySQL/Aurora relational access.",
+    ),
+    "postgres-access": (
+        "apiforge.adapters.relational.extract_postgres",
+        "postgres",
+        "postgres",
+        "Project directory to scan for PostgreSQL access.",
+    ),
+    "mysql-access": (
+        "apiforge.adapters.relational.extract_mysql",
+        "mysql",
+        "mysql",
+        "Project directory to scan for MySQL/MariaDB access.",
+    ),
     "elasticache-access": (
         "apiforge.adapters.redis_.extract.extract_elasticache",
         "elasticache",

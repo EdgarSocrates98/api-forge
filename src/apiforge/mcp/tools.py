@@ -342,6 +342,239 @@ def contract_show(name: str, detail_level: str = "normal") -> dict[str, Any]:
     return out
 
 
+_DUMP_READERS: dict[str, str] = {
+    "sqs": "apiforge.adapters.awsdumps.extract_sqs",
+    "sns": "apiforge.adapters.awsdumps.extract_sns",
+    "eventbridge": "apiforge.adapters.awsdumps.extract_eventbridge",
+    "iam-role": "apiforge.adapters.awsdumps.extract_iam_role",
+    "cognito": "apiforge.adapters.awsdumps.extract_cognito",
+    "waf": "apiforge.adapters.awsdumps.extract_waf",
+    "dynamodb": "apiforge.adapters.awsdumps.extract_dynamodb",
+    "docdb": "apiforge.adapters.awsdumps.extract_docdb",
+    "neptune": "apiforge.adapters.awsdumps.extract_neptune",
+    "stepfunctions": "apiforge.adapters.awsdumps.extract_stepfunctions",
+    "cloudwatch": "apiforge.adapters.awsdumps.extract_cloudwatch",
+    "xray": "apiforge.adapters.awsdumps.extract_xray",
+    "kms": "apiforge.adapters.awsdumps.extract_kms",
+    "secrets": "apiforge.adapters.awsdumps.extract_secrets",
+    "vpc-endpoints": "apiforge.adapters.awsdumps.extract_vpc_endpoints",
+    "s3": "apiforge.adapters.awsdumps.extract_s3",
+}
+
+
+def model_dump(
+    service: str, path: str, detail_level: str = "normal"
+) -> dict[str, Any]:
+    """Read a `collect <service>` dump into facts — closed service set."""
+    from apiforge.application.analyze import AnalysisError
+
+    def work() -> dict[str, Any]:
+        import importlib
+
+        dotted = _DUMP_READERS.get(service)
+        if dotted is None:
+            raise AnalysisError(
+                "AF-INPUT-INVALID",
+                f"service {service!r} not in {sorted(_DUMP_READERS)}",
+            )
+        dump = Path(path)
+        if not dump.is_dir():
+            raise AnalysisError("AF-INPUT-NOT-FOUND", str(dump))
+        module, _, func = dotted.rpartition(".")
+        inventory = getattr(importlib.import_module(module), func)(dump)
+        return {
+            "diagnostics": [
+                d.model_dump(mode="json") for d in inventory.diagnostics
+            ],
+            "facts": [f.model_dump(mode="json") for f in inventory.facts],
+            "framework": inventory.framework,
+            "input_hashes": dict(inventory.input_hashes),
+        }
+
+    out: dict[str, Any] = _call("model_dump", work, detail_level)
+    return out
+
+
+def model_redis(path: str, detail_level: str = "normal") -> dict[str, Any]:
+    """Static Redis/Valkey call-site scan -> data.redis.* facts + IR."""
+    from apiforge.adapters.redis_.extract import extract_redis
+    from apiforge.adapters.redis_.ir import build_data_access_ir
+
+    def work() -> dict[str, Any]:
+        inventory = extract_redis(Path(path))
+        return {
+            "diagnostics": [
+                d.model_dump(mode="json") for d in inventory.diagnostics
+            ],
+            "facts": [f.model_dump(mode="json") for f in inventory.facts],
+            "framework": inventory.framework,
+            "input_hashes": dict(inventory.input_hashes),
+            "data_access_ir": build_data_access_ir(inventory).model_dump(
+                mode="json"
+            ),
+        }
+
+    out: dict[str, Any] = _call("model_redis", work, detail_level)
+    return out
+
+
+def model_otel(path: str, detail_level: str = "normal") -> dict[str, Any]:
+    """OTLP/JSON trace export -> perf.otel.* facts + a PerformanceRun."""
+    from apiforge.adapters.otel.extract import extract_otel
+    from apiforge.adapters.otel.run import build_performance_run
+    from apiforge.application.analyze import AnalysisError
+
+    def work() -> dict[str, Any]:
+        source = Path(path)
+        if not source.is_file():
+            raise AnalysisError("AF-INPUT-NOT-FOUND", str(source))
+        inventory = extract_otel(source)
+        return {
+            "diagnostics": [
+                d.model_dump(mode="json") for d in inventory.diagnostics
+            ],
+            "facts": [f.model_dump(mode="json") for f in inventory.facts],
+            "framework": inventory.framework,
+            "input_hashes": dict(inventory.input_hashes),
+            "performance_run": build_performance_run(
+                inventory, source.name
+            ).model_dump(mode="json"),
+        }
+
+    out: dict[str, Any] = _call("model_otel", work, detail_level)
+    return out
+
+
+def perf_compare(
+    baseline: str,
+    candidate: str,
+    threshold_pct: float = 10.0,
+    min_samples: int = 3,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """compare_runs over two PerformanceRun payloads (bare or wrapped)."""
+    from apiforge.application.analyze import AnalysisError
+    from apiforge.contracts.stubs import PerformanceRun
+    from apiforge.perf.compare import compare_runs
+
+    def load_run(raw: str) -> PerformanceRun:
+        try:
+            payload = json.loads(Path(raw).read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError, UnicodeDecodeError) as exc:
+            raise AnalysisError("AF-PERF-RUN-INVALID", f"{raw}: {exc}") from exc
+        if isinstance(payload, dict) and isinstance(
+            payload.get("performance_run"), dict
+        ):
+            payload = payload["performance_run"]
+        try:
+            return PerformanceRun.model_validate(payload)
+        except Exception as exc:
+            raise AnalysisError("AF-PERF-RUN-INVALID", f"{raw}: {exc}") from exc
+
+    def work() -> dict[str, Any]:
+        return compare_runs(
+            load_run(baseline),
+            load_run(candidate),
+            threshold_pct=threshold_pct,
+            min_samples=min_samples,
+        ).model_dump(mode="json")
+
+    out: dict[str, Any] = _call("perf_compare", work, detail_level)
+    return out
+
+
+def autonomy_status(root: str = ".", detail_level: str = "normal") -> dict[str, Any]:
+    """Current autonomy mode + append-only ledger — read-only."""
+    from apiforge.autonomy.modes import load_mode
+    from apiforge.autonomy.service import read_ledger
+
+    def work() -> dict[str, Any]:
+        state = load_mode(Path(root))
+        return {
+            "mode": state.mode.value,
+            "set_by": state.set_by,
+            "set_at": state.set_at,
+            "reason": state.reason,
+            "ledger": read_ledger(Path(root)),
+        }
+
+    out: dict[str, Any] = _call("autonomy_status", work, detail_level)
+    return out
+
+
+def knowledge_list(
+    root: str = "knowledge", detail_level: str = "normal"
+) -> dict[str, Any]:
+    """List every pack with areas, rules and verification date."""
+    from apiforge.knowledge.loader import load_packs
+
+    def work() -> dict[str, Any]:
+        packs = load_packs(Path(root))
+        return {
+            "packs": [
+                {
+                    "areas": list(p.areas),
+                    "domain": p.domain,
+                    "evals": len(p.evals),
+                    "has_matrix": bool(p.matrix),
+                    "rule_ids": list(p.rule_ids),
+                    "sources": len(p.sources),
+                    "verified": p.verified,
+                }
+                for p in packs.values()
+            ],
+            "count": len(packs),
+        }
+
+    out: dict[str, Any] = _call("knowledge_list", work, detail_level)
+    return out
+
+
+def knowledge_show(
+    domain: str, root: str = "knowledge", detail_level: str = "normal"
+) -> dict[str, Any]:
+    """One pack: summary, source authority, matrix, declared evals."""
+    from apiforge.knowledge.loader import load_pack
+
+    def work() -> dict[str, Any]:
+        pack = load_pack(Path(root) / domain)
+        return {
+            "areas": list(pack.areas),
+            "domain": pack.domain,
+            "evals": list(pack.evals),
+            "matrix": list(pack.matrix),
+            "rule_ids": list(pack.rule_ids),
+            "sources": [s.__dict__ for s in pack.sources],
+            "summary": pack.summary,
+            "verified": pack.verified,
+            "version": pack.version,
+        }
+
+    out: dict[str, Any] = _call("knowledge_show", work, detail_level)
+    return out
+
+
+def knowledge_check(
+    root: str = "knowledge", detail_level: str = "normal"
+) -> dict[str, Any]:
+    """Validate every pack — problems are named, never raised away."""
+    from apiforge.application.analyze import AnalysisError
+    from apiforge.knowledge.loader import check_packs
+
+    def work() -> dict[str, Any]:
+        result = check_packs(Path(root))
+        if not result["ok"]:
+            raise AnalysisError(
+                "AF-KNOW-CHECK",
+                "pack problems: "
+                + "; ".join(str(p) for p in result["problems"]),
+            )
+        return result
+
+    out: dict[str, Any] = _call("knowledge_check", work, detail_level)
+    return out
+
+
 TOOLS: tuple[Callable[..., Any], ...] = (
     discover,
     analyze,
@@ -364,4 +597,12 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     brief_show,
     contract_list,
     contract_show,
+    model_dump,
+    model_redis,
+    model_otel,
+    perf_compare,
+    autonomy_status,
+    knowledge_list,
+    knowledge_show,
+    knowledge_check,
 )

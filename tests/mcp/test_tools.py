@@ -36,6 +36,14 @@ def test_tools_export_all_expected_verbs() -> None:
         "brief_show",
         "contract_list",
         "contract_show",
+        "model_dump",
+        "model_redis",
+        "model_otel",
+        "perf_compare",
+        "autonomy_status",
+        "knowledge_list",
+        "knowledge_show",
+        "knowledge_check",
     }
 
 

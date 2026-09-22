@@ -195,6 +195,18 @@ class DataAccessIR(_StubPayload):
     access_patterns: tuple[str, ...] = ()
 
 
+class StreamingAccessIR(_StubPayload):
+    """Intermediate representation for Kafka/MSK and streaming clients."""
+
+    broker: Literal["kafka", "msk", "kinesis"]
+    provider: str = ""
+    topics: tuple[str, ...] = ()
+    consumer_groups: tuple[str, ...] = ()
+    roles: tuple[Literal["producer", "consumer", "admin"], ...] = ()
+    operations: tuple[str, ...] = ()
+    delivery_signals: tuple[str, ...] = ()
+
+
 class DataAccessReadiness(_StubPayload):
     """Governance preflight for Redis, MongoDB, DynamoDB and Neptune access."""
 

@@ -1305,6 +1305,58 @@ def _register_data_access_models() -> None:
 _register_data_access_models()
 
 
+_STREAMING_READERS = {
+    "kafka-access": (
+        "apiforge.adapters.streaming.extract_kafka",
+        "kafka",
+        "kafka|msk",
+        "Project directory to scan for Kafka producer/consumer access.",
+    ),
+    "msk-access": (
+        "apiforge.adapters.streaming.extract_msk_access",
+        "msk",
+        "aws-msk",
+        "Project directory to scan for Kafka access declared for Amazon MSK.",
+    ),
+}
+
+
+def _register_streaming_models() -> None:
+    def make(dotted: str, broker: str, provider: str, help_text: str) -> Callable[..., None]:
+        def cmd(
+            path: Path = typer.Option(..., "--path", help=help_text),
+            detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+        ) -> None:
+            def work() -> dict[str, object]:
+                import importlib
+
+                from apiforge.adapters.streaming import build_streaming_ir
+
+                if not path.is_dir():
+                    raise AnalysisError("AF-INPUT-NOT-FOUND", str(path))
+                module, _, func = dotted.rpartition(".")
+                inventory = getattr(importlib.import_module(module), func)(path)
+                return {
+                    "streaming_access_ir": build_streaming_ir(
+                        inventory, broker=broker, provider=provider
+                    ).model_dump(mode="json"),
+                    "diagnostics": [d.model_dump(mode="json") for d in inventory.diagnostics],
+                    "facts": [f.model_dump(mode="json") for f in inventory.facts],
+                    "framework": inventory.framework,
+                    "input_hashes": dict(inventory.input_hashes),
+                }
+
+            _echo_json(_run(work), detail_level)
+
+        return cmd
+
+    for name, (dotted, broker, provider, help_text) in _STREAMING_READERS.items():
+        model_app.command(name)(make(dotted, broker, provider, help_text))
+
+
+_register_streaming_models()
+
+
 @model_app.command("otel")
 def inventory_otel(
     path: Path = typer.Option(..., "--path", help="OTLP/JSON trace export from an OTel collector."),

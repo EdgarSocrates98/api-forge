@@ -1318,6 +1318,24 @@ _STREAMING_READERS = {
         "aws-msk",
         "Project directory to scan for Kafka access declared for Amazon MSK.",
     ),
+    "rabbitmq-access": (
+        "apiforge.adapters.streaming.extract_rabbitmq",
+        "rabbitmq",
+        "rabbitmq",
+        "Project directory to scan for RabbitMQ access.",
+    ),
+    "nats-access": (
+        "apiforge.adapters.streaming.extract_nats",
+        "nats",
+        "nats",
+        "Project directory to scan for NATS access.",
+    ),
+    "pulsar-access": (
+        "apiforge.adapters.streaming.extract_pulsar",
+        "pulsar",
+        "pulsar",
+        "Project directory to scan for Apache Pulsar access.",
+    ),
 }
 
 

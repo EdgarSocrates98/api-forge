@@ -198,7 +198,7 @@ class DataAccessIR(_StubPayload):
 class StreamingAccessIR(_StubPayload):
     """Intermediate representation for Kafka/MSK and streaming clients."""
 
-    broker: Literal["kafka", "msk", "kinesis"]
+    broker: Literal["kafka", "msk", "kinesis", "rabbitmq", "nats", "pulsar"]
     provider: str = ""
     topics: tuple[str, ...] = ()
     consumer_groups: tuple[str, ...] = ()

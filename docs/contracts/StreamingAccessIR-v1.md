@@ -8,7 +8,7 @@ health or delivery guarantees without evidence.
 |---|---|---|
 | `version` | integer | no |
 | `id` | string | yes |
-| `broker` | `kafka\|msk\|kinesis` | yes |
+| `broker` | `kafka\|msk\|kinesis\|rabbitmq\|nats\|pulsar` | yes |
 | `provider` | string | no |
 | `topics` | array | no |
 | `consumer_groups` | array | no |

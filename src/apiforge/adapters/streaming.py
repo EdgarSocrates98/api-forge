@@ -16,6 +16,14 @@ _KAFKA_TOKENS = (
     "kafka-python", "confluent_kafka", "org.apache.kafka", "sarama",
     "segmentio/kafka-go", "kafkaTemplate", "KafkaProducer", "KafkaConsumer",
 )
+_BROKER_TOKENS = {
+    "kafka": _KAFKA_TOKENS,
+    "msk": _KAFKA_TOKENS,
+    "kinesis": ("kinesis", "put_record", "get_records"),
+    "rabbitmq": ("pika", "rabbitmq", "basic_publish", "basic_consume", "amqp"),
+    "nats": ("nats", "nats.go", "subscribe", "publish"),
+    "pulsar": ("pulsar", "pulsar-client", "createProducer", "createConsumer"),
+}
 _TOPIC_RE = re.compile(r"(?:topic|TOPIC|subscribe|publish|send|Produce|NewReader)\s*\(?\s*[=:]?\s*[\"']([^\"']+)", re.IGNORECASE)
 _GROUP_RE = re.compile(r"(?:group\.id|group_id|groupId|GroupID|group)\s*[=:,]\s*[\"']([^\"']+)", re.IGNORECASE)
 _OPS = {
@@ -41,7 +49,7 @@ def _fact(kind: str, rel: str, digest: str, line: int, **measures: Any) -> Fact:
 def extract_streaming(project_root: Path, broker: str = "kafka") -> CodeInventory:
     """Extract declared streaming signals; no broker connection is opened."""
 
-    if broker not in {"kafka", "msk", "kinesis"}:
+    if broker not in _BROKER_TOKENS:
         raise ValueError(f"unsupported streaming broker {broker!r}")
     root = Path(project_root)
     facts: list[Fact] = []
@@ -61,7 +69,7 @@ def extract_streaming(project_root: Path, broker: str = "kafka") -> CodeInventor
             ))
             continue
         lowered = text.lower()
-        if broker in {"kafka", "msk"} and not any(token.lower() in lowered for token in _KAFKA_TOKENS):
+        if not any(token.lower() in lowered for token in _BROKER_TOKENS[broker]):
             continue
         rel = path.relative_to(root).as_posix()
         digest = hashlib.sha256(path.read_bytes()).hexdigest()
@@ -98,8 +106,20 @@ def extract_kinesis(project_root: Path) -> CodeInventory:
     return extract_streaming(project_root, "kinesis")
 
 
+def extract_rabbitmq(project_root: Path) -> CodeInventory:
+    return extract_streaming(project_root, "rabbitmq")
+
+
+def extract_nats(project_root: Path) -> CodeInventory:
+    return extract_streaming(project_root, "nats")
+
+
+def extract_pulsar(project_root: Path) -> CodeInventory:
+    return extract_streaming(project_root, "pulsar")
+
+
 def build_streaming_ir(inventory: CodeInventory, *, broker: str = "kafka", provider: str = "kafka|msk") -> StreamingAccessIR:
-    broker_name = cast(Literal["kafka", "msk", "kinesis"], broker)
+    broker_name = cast(Literal["kafka", "msk", "kinesis", "rabbitmq", "nats", "pulsar"], broker)
     topics = tuple(sorted({str(f.measures["topic"]) for f in inventory.facts if f.kind == "data.streaming.topic"}))
     groups = tuple(sorted({str(f.measures["group"]) for f in inventory.facts if f.kind == "data.streaming.consumer_group"}))
     operations = tuple(sorted({str(f.measures["operation"]) for f in inventory.facts if f.kind == "data.streaming.operation"}))

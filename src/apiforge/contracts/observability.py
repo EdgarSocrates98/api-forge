@@ -181,6 +181,15 @@ class CircuitBreakerMetrics(VersionedContract):
     alerts: tuple[str, ...] = ()
 
 
+class CircuitMetricsExportReceipt(VersionedContract):
+    provider: ObservabilityProvider
+    backend: Literal["otel", "datadog", "dynatrace"]
+    status: Literal["disabled", "prepared", "sent", "failed"]
+    metric_count: int = Field(ge=0)
+    network_called: bool = False
+    evidence: tuple[str, ...] = ()
+
+
 class CredentialReference(VersionedContract):
     provider: ObservabilityProvider
     reference: str

@@ -1416,6 +1416,37 @@ def perf_scenario(
     _echo_json(_run(work), detail_level)
 
 
+@perf_app.command("plan")
+def perf_plan(
+    subject: str = typer.Option(..., "--subject"),
+    endpoint: list[str] = typer.Option(..., "--endpoint"),
+    target_tps: float = typer.Option(..., "--target-tps", min=0.0001),
+    test_kind: str = typer.Option("load", "--test-kind"),
+    duration_s: int = typer.Option(60, "--duration-s", min=1),
+    max_p99_ms: float = typer.Option(500, "--max-p99-ms", min=0.001),
+    max_error_rate: float = typer.Option(0.01, "--max-error-rate", min=0, max=1),
+    generator: str = typer.Option("k6", "--generator"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Create a declarative load plan; generation never executes a tool."""
+    from apiforge.perf_control import build_plan
+
+    try:
+        result = build_plan(
+            subject,
+            tuple(endpoint),
+            target_tps=target_tps,
+            test_kind=test_kind,
+            duration_s=duration_s,
+            max_p99_ms=max_p99_ms,
+            max_error_rate=max_error_rate,
+            generator=generator,
+        )
+    except (TypeError, ValueError) as exc:
+        raise AnalysisError("AF-PERF-PLAN-INVALID", str(exc)) from exc
+    _echo_json(result.model_dump(mode="json"), detail_level)
+
+
 @perf_app.command("chaos")
 def perf_chaos(
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),

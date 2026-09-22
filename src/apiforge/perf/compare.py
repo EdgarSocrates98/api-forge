@@ -28,6 +28,15 @@ class Regression(BaseModel):
     delta_pct: float
 
 
+class NoiseSuppressed(BaseModel):
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    operation: str
+    metric: str
+    delta_pct: float
+    floor_pct: float
+
+
 class ComparisonReport(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
@@ -36,6 +45,7 @@ class ComparisonReport(BaseModel):
     threshold_pct: float
     min_samples: int
     regressions: tuple[Regression, ...] = ()
+    below_noise_floor: tuple[NoiseSuppressed, ...] = ()
     added: tuple[str, ...] = ()
     removed: tuple[str, ...] = ()
     insufficient_data: tuple[str, ...] = ()
@@ -60,10 +70,19 @@ def compare_runs(
     threshold_pct: float = 10.0,
     min_samples: int = 3,
     metrics: tuple[str, ...] = ("mean_ms", "p95_ms"),
+    repeat_baselines: tuple[PerformanceRun, ...] = (),
 ) -> ComparisonReport:
     base_ops, cand_ops = _ops(baseline), _ops(candidate)
+    floors: dict[str, float | None] = {}
+    if repeat_baselines:
+        from apiforge.perf.noise import metric_noise
+
+        floors = {
+            m: metric_noise(list(repeat_baselines), m)["floor"] for m in metrics
+        }
     shared = sorted(set(base_ops) & set(cand_ops))
     regressions: list[Regression] = []
+    suppressed: list[NoiseSuppressed] = []
     insufficient: list[str] = []
     compared = 0
     for op in shared:
@@ -79,22 +98,35 @@ def compare_runs(
             if not isinstance(b_v, (int, float)) or not isinstance(c_v, (int, float)):
                 continue
             delta = _delta_pct(float(b_v), float(c_v))
-            if delta is not None and delta > threshold_pct:
-                regressions.append(
-                    Regression(
+            if delta is None or delta <= threshold_pct:
+                continue
+            floor = floors.get(metric)
+            if floor is not None and delta <= floor * 100.0:
+                suppressed.append(
+                    NoiseSuppressed(
                         operation=op,
                         metric=metric,
-                        baseline_ms=float(b_v),
-                        candidate_ms=float(c_v),
                         delta_pct=delta,
+                        floor_pct=floor * 100.0,
                     )
                 )
+                continue
+            regressions.append(
+                Regression(
+                    operation=op,
+                    metric=metric,
+                    baseline_ms=float(b_v),
+                    candidate_ms=float(c_v),
+                    delta_pct=delta,
+                )
+            )
     return ComparisonReport(
         baseline_ref=baseline.id,
         candidate_ref=candidate.id,
         threshold_pct=threshold_pct,
         min_samples=min_samples,
         regressions=tuple(regressions),
+        below_noise_floor=tuple(suppressed),
         added=tuple(sorted(set(cand_ops) - set(base_ops))),
         removed=tuple(sorted(set(base_ops) - set(cand_ops))),
         insufficient_data=tuple(insufficient),

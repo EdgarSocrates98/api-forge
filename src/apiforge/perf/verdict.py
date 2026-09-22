@@ -48,9 +48,78 @@ def _present(value: Any) -> bool:
     return value is not None
 
 
-def _validity_conditions(run: PerformanceRun) -> list[Condition]:
+def _noise_condition(
+    run: PerformanceRun, repeat_baselines: tuple[PerformanceRun, ...]
+) -> Condition | None:
+    """Is the candidate distinguishable from repeated-baseline noise?
+
+    Only evaluated when repeated baseline runs are supplied. Every shared
+    run-level field must differ from the baseline mean by more than its
+    measured floor for the run to be distinguishable; otherwise the
+    difference may be environment noise and the verdict must not pretend
+    otherwise.
+    """
+    from apiforge.perf.noise import RUN_FIELDS, field_noise
+
+    if not repeat_baselines:
+        return None
+    within: list[str] = []
+    proven = False
+    for field_name in RUN_FIELDS:
+        candidate = getattr(run, field_name, None)
+        if not isinstance(candidate, (int, float)):
+            continue
+        info = field_noise(list(repeat_baselines), field_name)
+        floor = info["floor"]
+        if floor is None or info["n"] < 2:
+            continue
+        proven = True
+        values = [
+            float(v)
+            for r in repeat_baselines
+            if isinstance((v := getattr(r, field_name, None)), (int, float))
+        ]
+        mean = sum(values) / len(values)
+        delta = abs(float(candidate) - mean) / abs(mean) if mean else float("inf")
+        if delta <= floor:
+            within.append(
+                f"{field_name} delta {delta * 100:.2f}% <= floor {floor * 100:.2f}%"
+            )
+    if not proven:
+        return _cond(
+            "distinguishable-from-baseline",
+            "unevaluable",
+            "noise floor unproven — no field with >=2 repeated observations",
+        )
+    if within and len(within) == sum(
+        1
+        for f in RUN_FIELDS
+        if isinstance(getattr(run, f, None), (int, float))
+        and field_noise(list(repeat_baselines), f)["n"] >= 2
+    ):
+        return _cond(
+            "distinguishable-from-baseline",
+            "unevaluable",
+            "every observed delta is inside the measured noise floor: "
+            + "; ".join(within),
+        )
+    return _cond(
+        "distinguishable-from-baseline",
+        "met",
+        "at least one delta exceeds the measured noise floor"
+        + (f"; within-floor: {'; '.join(within)}" if within else ""),
+    )
+
+
+def _validity_conditions(
+    run: PerformanceRun,
+    repeat_baselines: tuple[PerformanceRun, ...] = (),
+) -> list[Condition]:
     """Conditions whose absence or failure makes the run inconclusive."""
     conds: list[Condition] = []
+    noise = _noise_condition(run, repeat_baselines)
+    if noise is not None:
+        conds.append(noise)
 
     conds.append(
         _cond(
@@ -221,9 +290,12 @@ def _performance_conditions(run: PerformanceRun) -> list[Condition]:
     return conds
 
 
-def verdict(run: PerformanceRun) -> VerdictReport:
+def verdict(
+    run: PerformanceRun,
+    repeat_baselines: tuple[PerformanceRun, ...] = (),
+) -> VerdictReport:
     """Evaluate a run: passed / failed / inconclusive, conditions named."""
-    validity = _validity_conditions(run)
+    validity = _validity_conditions(run, repeat_baselines)
     perf = _performance_conditions(run)
     all_conds = validity + perf
     if any(c.status != "met" for c in validity):

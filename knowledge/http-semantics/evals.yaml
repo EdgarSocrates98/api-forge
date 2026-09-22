@@ -1,13 +1,17 @@
 evals:
   - id: http-semantics/AF-REST-001
     prompt: "An artifact shows: resources are plural nouns, not verbs. Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-REST-001}
   - id: http-semantics/AF-REST-002
     prompt: "An artifact shows: http methods carry their semantics. Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-REST-002}
   - id: http-semantics/AF-REST-003
     prompt: "An artifact shows: status codes describe outcomes, not transport. Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-REST-003}
   - id: http-semantics/AF-REST-008
     prompt: "An artifact shows: trailing-slash semantics are significant and consistent. Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-REST-008}

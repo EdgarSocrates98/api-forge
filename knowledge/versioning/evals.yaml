@@ -1,7 +1,9 @@
 evals:
   - id: versioning/AF-REST-007
     prompt: "An artifact shows: versioning is a declared strategy, not an accident. Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-REST-007}
   - id: versioning/AF-BREAK-006
     prompt: "An artifact shows: semantic-version the contract, not the implementation. Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-BREAK-006}

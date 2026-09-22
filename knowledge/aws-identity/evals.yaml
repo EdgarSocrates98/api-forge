@@ -1,16 +1,21 @@
 evals:
   - id: aws-identity/AF-IAM-001
     prompt: "An artifact shows: inline role policy grants wildcard actions. Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-IAM-001}
   - id: aws-identity/AF-IAM-002
     prompt: "An artifact shows: inline role policy grants wildcard resources. Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-IAM-002}
   - id: aws-identity/AF-IAM-003
     prompt: "An artifact shows: role session duration exceeds 12 hours. Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-IAM-003}
   - id: aws-identity/AF-IAM-004
     prompt: "An artifact shows: cognito user pool has mfa off. Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-IAM-004}
   - id: aws-identity/AF-IAM-005
     prompt: "An artifact shows: cognito user pool has deletion protection inactive. Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-IAM-005}

@@ -1,19 +1,25 @@
 evals:
   - id: performance-methodology/AF-PERF-001
     prompt: "An artifact shows: every list response carries a server-side bound. Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-PERF-001}
   - id: performance-methodology/AF-PERF-003
     prompt: "An artifact shows: conditional requests serve cache before compute. Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-PERF-003}
   - id: performance-methodology/AF-PERF-004
     prompt: "An artifact shows: compression is negotiated, not assumed. Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-PERF-004}
   - id: performance-methodology/AF-PERF-005
     prompt: "An artifact shows: timeouts exist before retries, and retries carry jitter. Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-PERF-005}
   - id: performance-methodology/AF-PERF-006
     prompt: "An artifact shows: a performance claim requires a measured baseline. Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-PERF-006}
   - id: performance-methodology/AF-PERF-007
     prompt: "An artifact shows: sync work does not block the request path unnecessarily. Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-PERF-007}

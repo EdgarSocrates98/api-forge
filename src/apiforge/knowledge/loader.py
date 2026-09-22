@@ -30,6 +30,23 @@ _AUTHORITIES = frozenset(
     }
 )
 _EVAL_KINDS = frozenset({"rule", "fact-kind", "refusal"})
+
+# The v1 eval vocabulary — closed; anything outside is a named refusal.
+EVAL_TYPES = frozenset(
+    {
+        "unit",
+        "golden",
+        "integration",
+        "adversarial",
+        "holdout",
+        "regression",
+        "economy",
+        "security",
+        "compatibility",
+        "performance",
+        "end-to-end",
+    }
+)
 _DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
@@ -149,6 +166,12 @@ def _evals(path: Path) -> tuple[dict[str, Any], ...]:
         m = _mapping(e, f"evals[{i}]")
         _require(m, "id", f"evals[{i}]")
         _require(m, "prompt", f"evals[{i}]")
+        etype = str(_require(m, "type", f"evals[{i}]"))
+        if etype not in EVAL_TYPES:
+            raise _err(
+                "AF-KNOW-EVAL-TYPE",
+                f"evals[{i}].type {etype!r} not in {sorted(EVAL_TYPES)}",
+            )
         expect = _mapping(_require(m, "expect", f"evals[{i}]"), f"evals[{i}].expect")
         kind = str(_require(expect, "kind", f"evals[{i}].expect"))
         if kind not in _EVAL_KINDS:

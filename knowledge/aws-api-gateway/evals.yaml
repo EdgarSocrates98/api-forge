@@ -1,22 +1,29 @@
 evals:
   - id: aws-api-gateway/AF-GW-001
     prompt: "An artifact shows: no `authorizationtype: none` method on production stages. Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-GW-001}
   - id: aws-api-gateway/AF-GW-002
     prompt: "An artifact shows: throttling is configured on every public stage. Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-GW-002}
   - id: aws-api-gateway/AF-GW-003
     prompt: "An artifact shows: access logging is enabled on every served stage. Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-GW-003}
   - id: aws-api-gateway/AF-GW-004
     prompt: "An artifact shows: public stages sit behind waf. Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-GW-004}
   - id: aws-api-gateway/AF-GW-005
     prompt: "An artifact shows: cache is opt-in per method with a stated ttl, never ambient. Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-GW-005}
   - id: aws-api-gateway/AF-GW-006
     prompt: "An artifact shows: stages isolate environments — config drift is named. Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-GW-006}
   - id: aws-api-gateway/AF-GW-007
     prompt: "An artifact shows: `apikeyrequired` is a quota tool, not authorization. Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-GW-007}

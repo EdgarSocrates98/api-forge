@@ -1,13 +1,17 @@
 evals:
   - id: mongo/e1
     prompt: "mongo_repo.py calls find with no limit() or batch_size - which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-DATA-011}
   - id: mongo/e2
     prompt: "A delete_many({}) call site with an empty filter literal - which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-DATA-012}
   - id: mongo/e3
     prompt: "mongo_repo.py also has a find chained with .limit(50) - does AF-DATA-011 fire on that call site?"
+    type: golden
     expect: {kind: fact-kind, id: data.mongo.operation}
   - id: mongo/e4
     prompt: "A collection receiver bound as orders = db['orders'] - is the entity proven or heuristic?"
+    type: adversarial
     expect: {kind: refusal, id: AF-MONGO-HEURISTIC-BINDING}

@@ -1,10 +1,13 @@
 evals:
   - id: dap/e1
     prompt: "cache.py issues SET with no EX/PX - which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-DATA-002}
   - id: dap/e2
     prompt: "A hot loop issuing one find per id inside a request handler - which finding family covers it?"
+    type: golden
     expect: {kind: rule, id: AF-PERF-002}
   - id: dap/e3
     prompt: "Receiver bound only by variable name, not constructor - proven or heuristic?"
+    type: adversarial
     expect: {kind: refusal, id: AF-REDIS-HEURISTIC-BINDING}

@@ -1,10 +1,13 @@
 evals:
   - id: spring-boot/AF-CODE-001
     prompt: "An artifact shows: duplicate code route. Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-CODE-001}
   - id: spring-boot/AF-CODE-002
     prompt: "An artifact shows: code route missing from contract. Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-CODE-002}
   - id: spring-boot/AF-CODE-003
     prompt: "An artifact shows: route could not be resolved statically. Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-CODE-003}

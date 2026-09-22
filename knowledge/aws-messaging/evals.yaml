@@ -1,13 +1,17 @@
 evals:
   - id: aws-messaging/AF-MSG-001
     prompt: "An artifact shows: sqs queue declares no dead-letter redrive policy. Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-MSG-001}
   - id: aws-messaging/AF-MSG-002
     prompt: "An artifact shows: sns topic declares no kms encryption. Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-MSG-002}
   - id: aws-messaging/AF-MSG-003
     prompt: "An artifact shows: sns subscription stuck in pendingconfirmation. Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-MSG-003}
   - id: aws-messaging/AF-MSG-004
     prompt: "An artifact shows: enabled eventbridge rule has no targets. Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-MSG-004}

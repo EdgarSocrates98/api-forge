@@ -97,3 +97,57 @@ def test_every_pack_source_has_a_date() -> None:
         assert pack.sources, pack.domain
         for source in pack.sources:
             assert source.verified and source.authority
+
+
+def test_eval_type_outside_closed_set_refused(tmp_path: Path) -> None:
+    """AT-006: an eval with type 'vibes' is refused with AF-KNOW-EVAL-TYPE."""
+    d = _write_pack(
+        tmp_path,
+        "bad-eval",
+        'domain: bad-eval\nversion: 1\nareas: []\nrule_ids: []\n',
+        _GOOD_AUTH,
+    )
+    (d / "evals.yaml").write_text(
+        'evals:\n'
+        '  - id: bad-eval/probe\n'
+        '    prompt: "x"\n'
+        '    type: vibes\n'
+        '    expect: {kind: rule, id: AF-REST-001}\n',
+        encoding="utf-8",
+    )
+    with pytest.raises(KnowledgeError, match="AF-KNOW-EVAL-TYPE"):
+        load_pack(d)
+
+
+def test_eval_type_required_and_valid(tmp_path: Path) -> None:
+    d = _write_pack(
+        tmp_path,
+        "typed-eval",
+        'domain: typed-eval\nversion: 1\nareas: []\nrule_ids: []\n',
+        _GOOD_AUTH,
+    )
+    (d / "evals.yaml").write_text(
+        'evals:\n'
+        '  - id: typed-eval/probe\n'
+        '    prompt: "x"\n'
+        '    type: regression\n'
+        '    expect: {kind: rule, id: AF-REST-001}\n',
+        encoding="utf-8",
+    )
+    pack = load_pack(d)
+    assert pack.evals[0]["type"] == "regression"
+    # missing type is also a refusal
+    (d / "evals.yaml").write_text(
+        'evals:\n  - id: p\n    prompt: "x"\n    expect: {kind: rule, id: AF-REST-001}\n',
+        encoding="utf-8",
+    )
+    with pytest.raises(KnowledgeError, match="AF-KNOW-SCHEMA"):
+        load_pack(d)
+
+
+def test_shipped_eval_types_all_in_closed_set() -> None:
+    from apiforge.knowledge.loader import EVAL_TYPES
+
+    for pack in load_packs(ROOT).values():
+        for e in pack.evals:
+            assert e["type"] in EVAL_TYPES, (pack.domain, e["id"])

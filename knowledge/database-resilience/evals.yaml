@@ -1,4 +1,5 @@
 evals:
   - id: database-resilience/AF-PERF-005
     prompt: "An artifact shows: timeouts exist before retries, and retries carry jitter. Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-PERF-005}

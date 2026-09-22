@@ -1,7 +1,9 @@
 evals:
   - id: docdb/e1
     prompt: "DocumentDB collections are accessed through the pymongo API - does an unbounded find fire the same rule as MongoDB?"
+    type: golden
     expect: {kind: rule, id: AF-DATA-011}
   - id: docdb/e2
     prompt: "A collect docdb dump where StorageEncrypted is false - which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-STORE-003}

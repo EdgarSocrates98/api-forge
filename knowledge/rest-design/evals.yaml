@@ -1,25 +1,33 @@
 evals:
   - id: rest-design/AF-REST-001
     prompt: "An artifact shows: resources are plural nouns, not verbs. Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-REST-001}
   - id: rest-design/AF-REST-002
     prompt: "An artifact shows: http methods carry their semantics. Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-REST-002}
   - id: rest-design/AF-REST-003
     prompt: "An artifact shows: status codes describe outcomes, not transport. Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-REST-003}
   - id: rest-design/AF-REST-004
     prompt: "An artifact shows: collections are paginated by contract. Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-REST-004}
   - id: rest-design/AF-REST-005
     prompt: "An artifact shows: unsafe operations accept idempotency keys. Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-REST-005}
   - id: rest-design/AF-REST-006
     prompt: "An artifact shows: errors follow problem details (rfc 9457). Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-REST-006}
   - id: rest-design/AF-REST-007
     prompt: "An artifact shows: versioning is a declared strategy, not an accident. Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-REST-007}
   - id: rest-design/AF-REST-008
     prompt: "An artifact shows: trailing-slash semantics are significant and consistent. Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-REST-008}

@@ -1,13 +1,17 @@
 evals:
   - id: contract-testing/AF-TEST-001
     prompt: "An artifact shows: the contract is executable — provider and consumer sides. Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-TEST-001}
   - id: contract-testing/AF-TEST-002
     prompt: "An artifact shows: fuzz the boundary the contract declares. Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-TEST-002}
   - id: contract-testing/AF-TEST-007
     prompt: "An artifact shows: contract-breaking changes are detected before merge. Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-TEST-007}
   - id: contract-testing/AF-TEST-102
     prompt: "An artifact shows: schemathesis found contract-violating responses. Which rule fires?"
+    type: golden
     expect: {kind: rule, id: AF-TEST-102}

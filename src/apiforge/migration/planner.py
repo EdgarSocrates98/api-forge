@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+from typing import Literal, cast
+
 from apiforge.contracts.task import Budgets, Recipe, TaskRisk, TaskSize, TaskSpec
 from apiforge.core.ids import stable_id
 from apiforge.migration.contracts import (
     DiscoveryResult,
     MigrationPlan,
+    MigrationReadiness,
     MigrationSpec,
     MigrationTask,
 )
@@ -63,10 +66,23 @@ def compile_plan(spec: MigrationSpec, discovery: DiscoveryResult) -> MigrationPl
         acceptance_criteria=("no critical unresolved finding", "verifier accepts evidence"),
         capability_covered="runtime-migration-control-plane",
     )
+    from apiforge.migration.matrix import resolve_versions
+
+    matrix = resolve_versions(spec.ecosystem, spec.source_version, spec.target_version)
+    missing = tuple(sorted(cap.name for cap in discovery.capabilities if not cap.available))
+    blocking = tuple(sorted(f.rule_id for f in discovery.findings if f.blocking))
+    status = "blocked" if missing or blocking else "review" if discovery.findings else "ready"
     return MigrationPlan(
         spec_identity=spec.identity(),
         task=task,
         tasks=tasks,
         findings=discovery.findings,
         capabilities=discovery.capabilities,
+        readiness=MigrationReadiness(
+            status=cast(Literal["ready", "review", "blocked"], status),
+            direction=matrix["direction"],
+            intermediate_versions=tuple(matrix["intermediate"]),
+            missing_capabilities=missing,
+            blocking_findings=blocking,
+        ),
     )

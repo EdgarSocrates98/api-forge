@@ -14,6 +14,8 @@ def test_plan_has_dependency_dag_and_conservative_status() -> None:
     plan = compile_plan(spec, discovery)
     report = verify_report(MigrationReport(spec_identity=spec.identity(), discovery=discovery, plan=plan))
     assert plan.task.strategy.value == "plan-execute-verify"
+    assert plan.readiness is not None
+    assert plan.readiness.direction == "upgrade"
     assert report.outcome is not None
     assert report.outcome.status is BriefStatus.REVIEW
 

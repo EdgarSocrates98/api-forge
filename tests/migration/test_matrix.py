@@ -16,3 +16,8 @@ def test_resolves_non_adjacent_python_versions() -> None:
 def test_rejects_unknown_go_version() -> None:
     with pytest.raises(ContractError, match="unsupported go versions"):
         resolve_versions("go", "1.17", "1.24", MATRIX)
+
+
+def test_resolve_versions_names_direction() -> None:
+    assert resolve_versions("java", "11", "21", MATRIX)["direction"] == "upgrade"
+    assert resolve_versions("python", "3.11", "3.8", MATRIX)["direction"] == "downgrade"

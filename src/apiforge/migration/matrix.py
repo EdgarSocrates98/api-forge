@@ -42,6 +42,7 @@ def resolve_versions(ecosystem: str, source: str, target: str, path: Path | None
         "versions": versions,
         "source_index": source_index,
         "target_index": target_index,
+        "direction": "same" if source_index == target_index else "upgrade" if source_index < target_index else "downgrade",
         "intermediate": versions[lower : upper + 1],
         "metadata": {key: value for key, value in entry.items() if key != "versions"},
     }

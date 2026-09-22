@@ -47,6 +47,14 @@ class RuntimeCapability(VersionedContract):
     limitation: str | None = None
 
 
+class MigrationReadiness(VersionedContract):
+    status: Literal["ready", "review", "blocked"]
+    direction: Literal["upgrade", "downgrade", "same"]
+    intermediate_versions: tuple[str, ...] = ()
+    missing_capabilities: tuple[str, ...] = ()
+    blocking_findings: tuple[str, ...] = ()
+
+
 class MigrationFinding(VersionedContract):
     rule_id: str
     severity: Severity
@@ -82,6 +90,7 @@ class MigrationPlan(VersionedContract):
     tasks: tuple[MigrationTask, ...] = ()
     findings: tuple[MigrationFinding, ...] = ()
     capabilities: tuple[RuntimeCapability, ...] = ()
+    readiness: MigrationReadiness | None = None
 
 
 class MigrationReport(VersionedContract):

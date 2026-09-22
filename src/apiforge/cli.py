@@ -19,6 +19,12 @@ from apiforge.build.service import build_endpoint
 from apiforge.case.service import CaseIntegrityError, CaseStorageError
 from apiforge.collectors.apigateway import collect
 from apiforge.collectors.manifest import CollectError, CollectManifest
+from apiforge.contract_intel import (
+    ContractProtocol,
+    analyze_contract,
+    build_twin_plan,
+    simulate_twin,
+)
 from apiforge.contracts.base import ContractError
 from apiforge.contracts.stubs import PerformanceRun
 from apiforge.core.detail import apply_detail_level
@@ -103,6 +109,12 @@ evals_app = typer.Typer(
     no_args_is_help=True,
 )
 app.add_typer(evals_app)
+contract_intel_app = typer.Typer(
+    name="contract-intel",
+    help="Unify contract impact analysis and build an offline API Digital Twin.",
+    no_args_is_help=True,
+)
+app.add_typer(contract_intel_app)
 report_app = typer.Typer(
     name="report",
     help="Release evidence bundle — sign binds hashes; verify names what diverged.",
@@ -2584,6 +2596,40 @@ def evals_validate(
         result = {"ok": not duplicate_ids and not invalid, "cases": len(cases), "duplicate_ids": duplicate_ids, "invalid_cases": invalid}
     except (KeyError, OSError, TypeError, ValueError) as exc:
         raise AnalysisError("AF-EVALS-INVALID", str(exc)) from exc
+    _echo_json(result, detail_level)
+
+
+@contract_intel_app.command("impact")
+def contract_intel_impact(
+    protocol: str = typer.Option(..., "--protocol", help="openapi or grpc."),
+    baseline: Path = typer.Option(..., "--baseline"),
+    candidate: Path = typer.Option(..., "--candidate"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Classify compatibility and expose affected contract references."""
+    try:
+        result = analyze_contract(ContractProtocol(protocol), baseline, candidate)
+    except (OSError, ValueError, TypeError) as exc:
+        raise AnalysisError("AF-CONTRACT-INTEL-INVALID", str(exc)) from exc
+    _echo_json(result.model_dump(mode="json"), detail_level)
+
+
+@contract_intel_app.command("twin")
+def contract_intel_twin(
+    contract: Path = typer.Option(..., "--contract"),
+    protocol: str = typer.Option(..., "--protocol", help="openapi or grpc."),
+    dependency: list[str] = typer.Option([], "--dependency", help="Declared downstream dependency."),
+    scenario: str | None = typer.Option(None, "--scenario", help="Simulate one scenario after planning."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Create a no-network Digital Twin plan and optionally simulate a scenario."""
+    try:
+        plan = build_twin_plan(contract, ContractProtocol(protocol), tuple(dependency))
+        result: object = plan.model_dump(mode="json")
+        if scenario is not None:
+            result = {"plan": result, "simulation": simulate_twin(plan, scenario).model_dump(mode="json")}
+    except (OSError, ValueError, TypeError) as exc:
+        raise AnalysisError("AF-TWIN-INVALID", str(exc)) from exc
     _echo_json(result, detail_level)
 
 

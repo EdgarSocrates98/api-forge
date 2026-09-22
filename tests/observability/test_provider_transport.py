@@ -14,7 +14,7 @@ class FakeProviderRequester:
     def get(self, endpoint: str, params: Mapping[str, str], credential_reference: str) -> Mapping[str, object]:
         self.references.append(credential_reference)
         assert endpoint.startswith("https://")
-        assert params["service"] == "orders"
+        assert any(value == "orders" or "service:orders" in value for value in params.values())
         return self.payload
 
 

@@ -6,6 +6,7 @@ from collections.abc import Mapping
 from typing import Protocol
 
 from apiforge.contracts.observability import CredentialStatus, ReadPlan, ReadReceipt
+from apiforge.observability.query import build_provider_params
 
 
 class ReadTransport(Protocol):
@@ -36,13 +37,7 @@ class ReadOnlyAdapter:
             )
         response = transport.get(
             plan.endpoint,
-            {
-                "service": plan.query.service,
-                "environment": plan.query.environment,
-                "start": plan.query.start,
-                "end": plan.query.end,
-                "signals": ",".join(plan.query.signals),
-            },
+            build_provider_params(plan),
         )
         violations = response.get("safety_violations", ())
         if isinstance(violations, (list, tuple)) and violations:

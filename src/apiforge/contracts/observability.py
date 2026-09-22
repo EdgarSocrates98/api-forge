@@ -148,6 +148,7 @@ class ReadPlan(VersionedContract):
 class ReadSafetyPolicy(VersionedContract):
     max_records: int = Field(default=1000, ge=1, le=100_000)
     max_response_bytes: int = Field(default=5_000_000, ge=1024, le=100_000_000)
+    max_pages: int = Field(default=10, ge=1, le=1000)
 
 
 class ReadRetryPolicy(VersionedContract):

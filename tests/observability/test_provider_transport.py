@@ -83,3 +83,41 @@ def test_transient_request_is_retried_with_bounded_backoff() -> None:
     assert receipt.record_count == 1
     assert "request_attempts:2" in receipt.evidence
     assert delays == [0.1]
+
+
+def test_pagination_is_bounded_and_accumulated() -> None:
+    class PagedRequester:
+        def get(self, endpoint: str, params: Mapping[str, str], credential_reference: str) -> Mapping[str, object]:
+            if params.get("page_token") == "after-1":
+                return {"data": [{"id": "trace-2"}]}
+            return {"data": [{"id": "trace-1"}], "meta": {"page": {"after": "after-1"}}}
+
+    plan = build_read_plan("datadog", "orders", "start", "end")
+    credential = CredentialStatus(provider="datadog", reference="broker:dd", status="available", reason="resolved")
+    transport = provider_transport(
+        "datadog", credential.reference, PagedRequester(), ReadSafetyPolicy(max_pages=2)
+    )
+
+    receipt = adapter_for("datadog").execute(plan, credential, transport)
+
+    assert receipt.status == "executed"
+    assert receipt.record_count == 2
+    assert "page_count:2" in receipt.evidence
+
+
+def test_pagination_limit_blocks_unfinished_page_chain() -> None:
+    class EndlessRequester:
+        def get(self, endpoint: str, params: Mapping[str, str], credential_reference: str) -> Mapping[str, object]:
+            token = params.get("page_token", "next")
+            return {"data": [{"id": token}], "meta": {"page": {"after": token + "-next"}}}
+
+    plan = build_read_plan("datadog", "orders", "start", "end")
+    credential = CredentialStatus(provider="datadog", reference="broker:dd", status="available", reason="resolved")
+    transport = provider_transport(
+        "datadog", credential.reference, EndlessRequester(), ReadSafetyPolicy(max_pages=1)
+    )
+
+    receipt = adapter_for("datadog").execute(plan, credential, transport)
+
+    assert receipt.status == "blocked"
+    assert receipt.violations == ("max_pages_exceeded:1",)

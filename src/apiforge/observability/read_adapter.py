@@ -39,6 +39,20 @@ class ReadOnlyAdapter:
             plan.endpoint,
             build_provider_params(plan),
         )
+        circuit_violations = response.get("circuit_violations", ())
+        if isinstance(circuit_violations, (list, tuple)) and circuit_violations:
+            network_called = response.get("network_called", False)
+            state = response.get("circuit_state", "unknown")
+            return ReadReceipt(
+                provider=plan.provider,
+                status="blocked",
+                credential_reference=credential.reference,
+                record_count=0,
+                network_called=network_called is True,
+                mutation_performed=False,
+                violations=tuple(str(item) for item in circuit_violations),
+                evidence=(f"circuit_state:{state}", f"network_called:{str(network_called).lower()}"),
+            )
         violations = response.get("safety_violations", ())
         if isinstance(violations, (list, tuple)) and violations:
             return ReadReceipt(
@@ -57,6 +71,8 @@ class ReadOnlyAdapter:
         attempt_evidence = f"request_attempts:{attempts}" if isinstance(attempts, int) else "request_attempts:unknown"
         pages = response.get("page_count", 1)
         page_evidence = f"page_count:{pages}" if isinstance(pages, int) else "page_count:unknown"
+        circuit_state = response.get("circuit_state", "unknown")
+        circuit_evidence = f"circuit_state:{circuit_state}"
         return ReadReceipt(
             provider=plan.provider,
             status="executed",
@@ -64,7 +80,7 @@ class ReadOnlyAdapter:
             record_count=count,
             network_called=True,
             mutation_performed=False,
-            evidence=("transport-injected", "GET", attempt_evidence, page_evidence, "read_only:true", "mutation_performed:false"),
+            evidence=("transport-injected", "GET", attempt_evidence, page_evidence, circuit_evidence, "read_only:true", "mutation_performed:false"),
         )
 
 

@@ -157,6 +157,11 @@ class ReadRetryPolicy(VersionedContract):
     max_backoff_seconds: float = Field(default=5, ge=0, le=300)
 
 
+class CircuitBreakerPolicy(VersionedContract):
+    failure_threshold: int = Field(default=3, ge=1, le=100)
+    recovery_timeout_seconds: float = Field(default=30, ge=0.1, le=86_400)
+
+
 class CredentialReference(VersionedContract):
     provider: ObservabilityProvider
     reference: str

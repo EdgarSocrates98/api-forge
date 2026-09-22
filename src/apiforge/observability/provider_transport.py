@@ -3,10 +3,15 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping
-from time import sleep
+from time import monotonic, sleep
 from typing import Protocol, cast
 
-from apiforge.contracts.observability import ReadRetryPolicy, ReadSafetyPolicy
+from apiforge.contracts.observability import (
+    CircuitBreakerPolicy,
+    ReadRetryPolicy,
+    ReadSafetyPolicy,
+)
+from apiforge.observability.circuit_breaker import CircuitBreaker
 from apiforge.observability.read_safety import evaluate_response
 
 
@@ -60,6 +65,8 @@ class ProviderReadTransport:
         policy: ReadSafetyPolicy | None = None,
         retry_policy: ReadRetryPolicy | None = None,
         sleeper: Callable[[float], None] = sleep,
+        circuit_policy: CircuitBreakerPolicy | None = None,
+        clock: Callable[[], float] = monotonic,
     ) -> None:
         if provider not in {"otel", "datadog", "dynatrace", "cloudwatch"}:
             raise ValueError(f"AF-OBS-ADAPTER-PROVIDER: unsupported provider {provider!r}")
@@ -69,8 +76,20 @@ class ProviderReadTransport:
         self.policy = policy or ReadSafetyPolicy()
         self.retry_policy = retry_policy or ReadRetryPolicy()
         self.sleeper = sleeper
+        selected_circuit = circuit_policy or CircuitBreakerPolicy()
+        self.circuit = CircuitBreaker(
+            selected_circuit.failure_threshold, selected_circuit.recovery_timeout_seconds
+        )
+        self.clock = clock
 
     def get(self, endpoint: str, params: Mapping[str, str]) -> Mapping[str, object]:
+        if not self.circuit.before_call(self.clock()):
+            return {
+                "records": (),
+                "network_called": False,
+                "circuit_state": self.circuit.state,
+                "circuit_violations": ("circuit_open",),
+            }
         attempts = 0
         page_count = 0
         next_token: str | None = None
@@ -90,7 +109,15 @@ class ProviderReadTransport:
                     break
                 except (ConnectionError, TimeoutError, OSError):
                     if attempt >= self.retry_policy.max_attempts:
-                        raise
+                        self.circuit.record_failure(self.clock())
+                        return {
+                            "records": (),
+                            "request_attempts": attempts,
+                            "page_count": page_count,
+                            "network_called": True,
+                            "circuit_state": self.circuit.state,
+                            "circuit_violations": ("provider_transient_failure",),
+                        }
                     delay = min(
                         self.retry_policy.base_backoff_seconds * (2 ** (attempt - 1)),
                         self.retry_policy.max_backoff_seconds,
@@ -111,6 +138,7 @@ class ProviderReadTransport:
             violations = (f"max_pages_exceeded:{self.policy.max_pages}",)
         normalized = {"records": all_records}
         if violations:
+            self.circuit.record_success()
             return {
                 "records": (),
                 "request_attempts": attempts,
@@ -121,6 +149,8 @@ class ProviderReadTransport:
             }
         normalized["request_attempts"] = attempts
         normalized["page_count"] = page_count
+        self.circuit.record_success()
+        normalized["circuit_state"] = self.circuit.state
         return normalized
 
 
@@ -131,7 +161,16 @@ def provider_transport(
     policy: ReadSafetyPolicy | None = None,
     retry_policy: ReadRetryPolicy | None = None,
     sleeper: Callable[[float], None] = sleep,
+    circuit_policy: CircuitBreakerPolicy | None = None,
+    clock: Callable[[], float] = monotonic,
 ) -> ProviderReadTransport:
     return ProviderReadTransport(
-        provider, credential_reference, requester, policy, retry_policy, sleeper
+        provider,
+        credential_reference,
+        requester,
+        policy,
+        retry_policy,
+        sleeper,
+        circuit_policy,
+        clock,
     )

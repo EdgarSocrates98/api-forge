@@ -1,6 +1,11 @@
 from collections.abc import Mapping
 
-from apiforge.contracts.observability import CredentialStatus, ReadRetryPolicy, ReadSafetyPolicy
+from apiforge.contracts.observability import (
+    CircuitBreakerPolicy,
+    CredentialStatus,
+    ReadRetryPolicy,
+    ReadSafetyPolicy,
+)
 from apiforge.observability.provider_transport import provider_transport
 from apiforge.observability.read import build_read_plan
 from apiforge.observability.read_adapter import adapter_for
@@ -121,3 +126,41 @@ def test_pagination_limit_blocks_unfinished_page_chain() -> None:
 
     assert receipt.status == "blocked"
     assert receipt.violations == ("max_pages_exceeded:1",)
+
+
+def test_circuit_breaker_transitions_open_half_open_and_closed() -> None:
+    class FlakyRequester:
+        def __init__(self) -> None:
+            self.calls = 0
+
+        def get(self, endpoint: str, params: Mapping[str, str], credential_reference: str) -> Mapping[str, object]:
+            self.calls += 1
+            if self.calls < 3:
+                raise TimeoutError("provider down")
+            return {"data": [{"id": "trace-1"}]}
+
+    now = [0.0]
+    requester = FlakyRequester()
+    plan = build_read_plan("datadog", "orders", "start", "end")
+    credential = CredentialStatus(provider="datadog", reference="broker:dd", status="available", reason="resolved")
+    transport = provider_transport(
+        "datadog",
+        credential.reference,
+        requester,
+        retry_policy=ReadRetryPolicy(max_attempts=1),
+        circuit_policy=CircuitBreakerPolicy(failure_threshold=2, recovery_timeout_seconds=10),
+        clock=lambda: now[0],
+    )
+
+    first = adapter_for("datadog").execute(plan, credential, transport)
+    second = adapter_for("datadog").execute(plan, credential, transport)
+    blocked = adapter_for("datadog").execute(plan, credential, transport)
+    now[0] = 11.0
+    probe = adapter_for("datadog").execute(plan, credential, transport)
+
+    assert first.violations == ("provider_transient_failure",)
+    assert second.violations == ("provider_transient_failure",)
+    assert blocked.violations == ("circuit_open",)
+    assert blocked.network_called is False
+    assert "circuit_state:closed" in probe.evidence
+    assert probe.status == "executed"

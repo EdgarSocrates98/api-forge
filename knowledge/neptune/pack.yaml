@@ -1,0 +1,9 @@
+domain: neptune
+version: 1
+areas: [DATA, STORAGE]
+rule_ids:
+  - AF-DATA-013
+  - AF-STORE-004
+summary: >-
+  Neptune gremlin/openCypher/SPARQL access - bounded traversals only - plus cluster encryption posture from dumps.
+verified: "2026-09-21"

@@ -1,0 +1,8 @@
+domain: idempotency
+version: 1
+areas: [REST]
+rule_ids:
+  - AF-REST-005
+summary: >-
+  Idempotent methods per RFC 9110 and the Idempotency-Key header draft - AF-REST-005 measures unsafe operations without a key.
+verified: "2026-09-21"

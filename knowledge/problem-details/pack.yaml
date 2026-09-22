@@ -1,0 +1,8 @@
+domain: problem-details
+version: 1
+areas: [REST]
+rule_ids:
+  - AF-REST-006
+summary: >-
+  RFC 9457 application/problem+json - the error shape AF-REST-006 measures on error responses.
+verified: "2026-09-21"

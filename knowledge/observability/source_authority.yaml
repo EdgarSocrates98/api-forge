@@ -1,0 +1,9 @@
+sources:
+  - name: "OpenTelemetry documentation"
+    url: https://opentelemetry.io/docs/
+    authority: vendor-docs
+    verified: "2026-09-21"
+  - name: "CloudWatch alarms"
+    url: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/AlarmThatSendsEmail.html
+    authority: aws-docs
+    verified: "2026-09-21"

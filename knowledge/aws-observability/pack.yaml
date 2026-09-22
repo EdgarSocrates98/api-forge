@@ -6,3 +6,4 @@ summary: >-
   Alarms that cannot notify (actions disabled or no targets) and
   orchestrators invisible to tracing - observability gaps measured from
   cloudwatch/xray/stepfunctions dumps.
+verified: "2026-09-21"

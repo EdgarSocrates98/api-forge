@@ -1,0 +1,5 @@
+runtime: documentdb
+constraints:
+  - component: engine-version
+    set: ["3.6", "4.0", "5.0"]
+    note: DocumentDB declares MongoDB API compatibility per engine version - findings differ

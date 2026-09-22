@@ -1,0 +1,10 @@
+domain: observability
+version: 1
+areas: [OBSERVE]
+rule_ids:
+  - AF-OBS-001
+  - AF-OBS-002
+  - AF-OBS-003
+summary: >-
+  RED signals per operation, tracing coverage and alarms that can actually notify - the OTel contract plus CloudWatch alarm posture.
+verified: "2026-09-21"

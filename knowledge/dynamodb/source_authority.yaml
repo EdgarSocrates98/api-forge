@@ -1,0 +1,13 @@
+sources:
+  - name: "DynamoDB Scan"
+    url: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Scan.html
+    authority: aws-docs
+    verified: "2026-09-21"
+  - name: "DynamoDB Query"
+    url: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Query.html
+    authority: aws-docs
+    verified: "2026-09-21"
+  - name: "DynamoDB point-in-time recovery"
+    url: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/PointInTimeRecovery.html
+    authority: aws-docs
+    verified: "2026-09-21"

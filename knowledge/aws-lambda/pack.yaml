@@ -1,0 +1,7 @@
+domain: aws-lambda
+version: 1
+areas: [GATEWAY, SECURITY]
+rule_ids: []
+summary: >-
+  Lambda configuration posture behind API integrations - runtime, timeout, memory, reserved concurrency; Code.Location never persisted in dumps.
+verified: "2026-09-21"

@@ -1,0 +1,13 @@
+evals:
+  - id: dynamo/e1
+    prompt: "dynamo_repo.py calls table.scan() with no Limit or FilterExpression - which rule fires?"
+    expect: {kind: rule, id: AF-DATA-009}
+  - id: dynamo/e2
+    prompt: "A query() call whose kwargs carry no KeyConditionExpression - which rule fires?"
+    expect: {kind: rule, id: AF-DATA-010}
+  - id: dynamo/e3
+    prompt: "A scan(Limit=100, FilterExpression=...) call site - does AF-DATA-009 still fire?"
+    expect: {kind: fact-kind, id: data.dynamo.operation}
+  - id: dynamo/e4
+    prompt: "A collect dynamodb dump where ContinuousBackupsDescription shows PITR disabled - which rule fires?"
+    expect: {kind: rule, id: AF-STORE-001}

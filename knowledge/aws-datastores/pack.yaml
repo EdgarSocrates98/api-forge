@@ -6,3 +6,4 @@ summary: >-
   Posture of the datastores behind an API: DynamoDB PITR and deletion
   protection, DocDB/Neptune storage encryption, Step Functions logging -
   each measured from the collect dumps, never inferred.
+verified: "2026-09-21"

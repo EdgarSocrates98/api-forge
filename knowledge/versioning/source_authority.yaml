@@ -1,0 +1,5 @@
+sources:
+  - name: "Semantic Versioning 2.0.0"
+    url: https://semver.org/spec/v2.0.0.html
+    authority: vendor-docs
+    verified: "2026-09-21"

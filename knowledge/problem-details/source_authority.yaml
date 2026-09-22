@@ -1,0 +1,5 @@
+sources:
+  - name: "Problem Details for HTTP APIs (RFC 9457)"
+    url: https://www.rfc-editor.org/rfc/rfc9457
+    authority: ietf-rfc
+    verified: "2026-09-21"

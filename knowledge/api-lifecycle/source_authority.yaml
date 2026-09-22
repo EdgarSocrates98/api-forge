@@ -1,0 +1,5 @@
+sources:
+  - name: "API Forge contract rules"
+    url: docs/catalog-contract.md
+    authority: project-docs
+    verified: "2026-09-21"

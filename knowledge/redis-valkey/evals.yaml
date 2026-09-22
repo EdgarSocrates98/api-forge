@@ -1,0 +1,10 @@
+evals:
+  - id: redis/e1
+    prompt: "cache.py calls keys('*') on the request path - which rule fires?"
+    expect: {kind: rule, id: AF-DATA-001}
+  - id: redis/e2
+    prompt: "flushall() inside an admin helper - which rule fires?"
+    expect: {kind: rule, id: AF-DATA-003}
+  - id: redis/e3
+    prompt: "setex(name, 300, value) - the ttl lives on which argument index?"
+    expect: {kind: fact-kind, id: data.redis.write}

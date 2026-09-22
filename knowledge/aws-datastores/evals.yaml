@@ -1,0 +1,10 @@
+evals:
+  - id: stores/e1
+    prompt: "collect dynamodb dump: PITR disabled and deletion protection off - which rules fire together?"
+    expect: {kind: rule, id: AF-STORE-001}
+  - id: stores/e2
+    prompt: "A neptune cluster dump with StorageEncrypted true - is AF-STORE-004 waived?"
+    expect: {kind: fact-kind, id: aws.neptune.cluster}
+  - id: stores/e3
+    prompt: "The dump lacks BackupsDescription - does the reader infer PITR?"
+    expect: {kind: refusal, id: AF-DDB-DUMP}

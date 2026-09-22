@@ -1,0 +1,9 @@
+sources:
+  - name: "Neptune Gremlin access"
+    url: https://docs.aws.amazon.com/neptune/latest/userguide/access-graph-gremlin.html
+    authority: aws-docs
+    verified: "2026-09-21"
+  - name: "Neptune encryption at rest"
+    url: https://docs.aws.amazon.com/neptune/latest/userguide/encrypt.html
+    authority: aws-docs
+    verified: "2026-09-21"

@@ -1,0 +1,9 @@
+sources:
+  - name: "HTTP Semantics - idempotent methods (RFC 9110)"
+    url: https://www.rfc-editor.org/rfc/rfc9110#name-idempotent-methods
+    authority: ietf-rfc
+    verified: "2026-09-21"
+  - name: "Idempotency-Key header draft"
+    url: https://datatracker.ietf.org/doc/draft-ietf-httpapi-idempotency-key-header/
+    authority: ietf-rfc
+    verified: "2026-09-21"

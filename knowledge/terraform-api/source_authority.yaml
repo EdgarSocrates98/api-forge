@@ -1,0 +1,5 @@
+sources:
+  - name: "Terraform aws_api_gateway_rest_api"
+    url: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/api_gateway_rest_api
+    authority: vendor-docs
+    verified: "2026-09-21"

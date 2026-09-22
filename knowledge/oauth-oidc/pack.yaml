@@ -1,0 +1,7 @@
+domain: oauth-oidc
+version: 1
+areas: [SECURITY]
+rule_ids: []
+summary: >-
+  OAuth 2.0 grant surface and OIDC identity layer - bearer-token posture the security rules assume but do not replace.
+verified: "2026-09-21"

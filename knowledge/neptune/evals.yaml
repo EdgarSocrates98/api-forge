@@ -1,0 +1,7 @@
+evals:
+  - id: neptune/e1
+    prompt: "neptune_repo.py runs g.V().has(...) with no .limit() or .range() - which rule fires?"
+    expect: {kind: rule, id: AF-DATA-013}
+  - id: neptune/e2
+    prompt: "An openCypher string ending with LIMIT 25 - does AF-DATA-013 fire?"
+    expect: {kind: fact-kind, id: data.neptune.query}

@@ -1,0 +1,11 @@
+domain: contract-testing
+version: 1
+areas: [TESTING]
+rule_ids:
+  - AF-TEST-001
+  - AF-TEST-002
+  - AF-TEST-007
+  - AF-TEST-102
+summary: >-
+  Provider/consumer contract testing and property-based boundary fuzzing - Pact and Schemathesis are the tools the TESTING rules measure reports from.
+verified: "2026-09-21"

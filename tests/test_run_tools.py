@@ -147,3 +147,61 @@ def test_list_tools_measures_install_not_declares() -> None:
     by_name = {r["name"]: r for r in rows}
     assert "installed" in by_name["k6"]  # measured via shutil.which
     assert by_name["locust"]["runnable"] is False
+
+
+def _k6_script(tmp_path: Path, url: str | None) -> Path:
+    script = tmp_path / "s.js"
+    body = (
+        f'import http from "k6/http";\n'
+        f'export default function() {{ http.get("{url}"); }}\n'
+        if url
+        else 'export default function() { http.get(__ENV.BASE_URL); }\n'
+    )
+    script.write_text(body)
+    return script
+
+
+def test_remote_load_target_gated(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    script = _k6_script(tmp_path, "https://api.example.com/orders")
+    with pytest.raises(RunError, match="AF-RUN-PROD-GATE"):
+        run_tool("k6", script, tmp_path / "o.json", {}, 5)
+    with pytest.raises(RunError, match="AF-RUN-PROD-GATE"):
+        run_tool("k6", script, tmp_path / "o.json", {}, 5, approval=None)
+
+
+def test_unresolvable_load_target_gated(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    script = _k6_script(tmp_path, None)
+    with pytest.raises(RunError, match="AF-RUN-PROD-GATE"):
+        run_tool("k6", script, tmp_path / "o.json", {}, 5)
+
+
+def test_local_target_passes_gate(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    script = _k6_script(tmp_path, "http://localhost:8080/orders")
+    # passes the policy gate; then fails honestly on the missing binary
+    with pytest.raises(RunError, match="AF-RUN-TOOL-MISSING|AF-RUN-NO-REPORT"):
+        run_tool("k6", script, tmp_path / "o.json", {}, 5)
+
+
+def test_dry_run_never_gates(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    script = _k6_script(tmp_path, "https://api.example.com")
+    result = run_tool("k6", script, tmp_path / "o.json", {}, 5, dry_run=True)
+    assert result["dry_run"] is True
+
+
+def test_approved_remote_reaches_binary_check(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    script = _k6_script(tmp_path, "https://api.example.com/orders")
+    with pytest.raises(RunError, match="AF-RUN-TOOL-MISSING|AF-RUN-NO-REPORT"):
+        run_tool("k6", script, tmp_path / "o.json", {}, 5, approval="CHG-1234")
+
+
+def test_non_load_tools_never_gated(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    with pytest.raises(RunError, match="AF-RUN-TOOL-MISSING|AF-RUN-NO-REPORT"):
+        run_tool("trivy", tmp_path, tmp_path / "o.json", {}, 5)

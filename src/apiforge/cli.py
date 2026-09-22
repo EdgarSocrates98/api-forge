@@ -1377,6 +1377,12 @@ def run_tool_cmd(
     ),
     timeout: int = typer.Option(300, "--timeout", help="Seconds before the run is refused."),
     dry_run: bool = typer.Option(False, "--dry-run", help="Print argv; execute nothing."),
+    approve: str | None = typer.Option(
+        None,
+        "--approve",
+        help="Approval reference required when a load script targets a remote or "
+        "unresolvable URL (policy gate `sensitive`).",
+    ),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
     """Execute a scanner binary (fixed argv, no shell) and read its report."""
@@ -1386,7 +1392,9 @@ def run_tool_cmd(
 
         try:
             extra = {"config": config} if config else {}
-            return run_tool(tool, target, out, extra, timeout, dry_run=dry_run)
+            return run_tool(
+                tool, target, out, extra, timeout, dry_run=dry_run, approval=approve
+            )
         except RunError as exc:
             raise AnalysisError(exc.code, str(exc).split(": ", 1)[-1]) from exc
 

@@ -306,6 +306,64 @@ TOOL_REGISTRY: dict[str, dict[str, Any]] = {
 }
 
 
+_LOCAL_HOSTS = {"localhost", "127.0.0.1", "0.0.0.0", "::1", "[::1]"}
+
+
+def _script_urls(target: Path) -> list[str]:
+    """URL literals in the load script — the argv names the script, not the API."""
+    import re
+
+    try:
+        text = Path(target).read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return []
+    return sorted(set(re.findall(r"https?://[^\s\"'`<>{}]+", text)))
+
+
+def _is_local(url: str) -> bool:
+    from urllib.parse import urlparse
+
+    return (urlparse(url).hostname or "").lower() in _LOCAL_HOSTS
+
+
+def _load_target_gate(tool: str, target: Path, approval: str | None) -> None:
+    """No load run against an unverifiable or remote target without approval.
+
+    The script's URL literals are the evidence: every one local → the run is
+    `local_reversible`. Any remote host — or *no* literal at all (e.g. a
+    `__ENV.BASE_URL` we cannot resolve) → `sensitive`, which the default
+    policy gates on `evidence` + `approval`.
+    """
+    if TOOL_REGISTRY[tool]["category"] != "load":
+        return
+    urls = _script_urls(target)
+    if urls and all(_is_local(u) for u in urls):
+        return
+    from apiforge.policy.decide import ActionRequest, decide
+    from apiforge.policy.loader import load_policy
+
+    decision = decide(
+        load_policy(),
+        ActionRequest(
+            verb="run.load",
+            autonomy_class="sensitive",
+            args=tuple(urls) or ("unresolvable-target",),
+            target=str(target),
+            detail={
+                "evidence": ",".join(urls) or "no-url-literal",
+                "approval": approval or "",
+            },
+        ),
+    )
+    if decision.outcome != "allow":
+        missing = ", ".join(decision.missing_requirements) or "policy"
+        raise RunError(
+            "AF-RUN-PROD-GATE",
+            f"{tool} targets {urls or ['unresolvable']} — {decision.outcome}: "
+            f"missing {missing}; pass --approve <ref> once approval exists",
+        )
+
+
 def list_tools() -> list[dict[str, Any]]:
     """Registry rows + *measured* install status — never declared."""
     rows: list[dict[str, Any]] = []
@@ -342,6 +400,7 @@ def run_tool(
     extra: dict[str, str],
     timeout: int,
     dry_run: bool = False,
+    approval: str | None = None,
 ) -> dict[str, object]:
     """Run the binary, read its report, return the inventory payload."""
     spec = TOOLS.get(tool)
@@ -363,6 +422,7 @@ def run_tool(
     argv = build_argv(tool, target, out, extra)
     if dry_run:
         return {"dry_run": True, "argv": argv}
+    _load_target_gate(tool, Path(target), approval)
     binary = shutil.which(str(spec["binary"]))
     if binary is None:
         raise RunError(

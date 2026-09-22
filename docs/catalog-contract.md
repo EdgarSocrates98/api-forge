@@ -384,6 +384,7 @@ scanner runs, the target stays data. `zap` is deliberately absent
 | `AF-RUN-TIMEOUT` | the run exceeded `--timeout` |
 | `AF-RUN-NO-REPORT` | the tool exited without writing the report file |
 | `AF-RUN-IMPORT-ONLY` | tool is in the registry as a report reader only — `run` never executes it; feed the report to `model <tool>` |
+| `AF-RUN-PROD-GATE` | load script targets a remote or unresolvable URL — policy gate `sensitive` requires `approval`; all-localhost scripts run free |
 
 ## Provider tokens (`economy report`)
 

@@ -204,6 +204,18 @@ def load_packs(root: Path) -> dict[str, Pack]:
     return packs
 
 
+_REQUIRED_DOCS = (
+    "index.md",
+    "quick-reference.md",
+    "concepts.md",
+    "patterns.md",
+    "anti-patterns.md",
+    "recipes.md",
+    "troubleshooting.md",
+    "evals.yaml",
+)
+
+
 def check_packs(root: Path) -> dict[str, Any]:
     """Validate all packs and cross-check rule ids against the catalog."""
     from apiforge.rules.catalog import load_areas, load_catalog
@@ -219,6 +231,12 @@ def check_packs(root: Path) -> dict[str, Any]:
         for rid in pack.rule_ids:
             if rid not in catalog:
                 problems.append(f"{name}: rule_id {rid} not in catalog")
+        pack_dir = root / name
+        for doc in _REQUIRED_DOCS:
+            if not (pack_dir / doc).is_file():
+                problems.append(f"{name}: required doc {doc} missing")
+        if pack.rule_ids and not pack.evals:
+            problems.append(f"{name}: has rules but evals.yaml declares no probes")
     return {
         "packs": sorted(packs),
         "count": len(packs),

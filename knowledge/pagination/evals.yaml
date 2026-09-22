@@ -1,0 +1,4 @@
+evals:
+  - id: pagination/AF-REST-004
+    prompt: "An artifact shows: collections are paginated by contract. Which rule fires?"
+    expect: {kind: rule, id: AF-REST-004}

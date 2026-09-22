@@ -1,0 +1,4 @@
+evals:
+  - id: idempotency/AF-REST-005
+    prompt: "An artifact shows: unsafe operations accept idempotency keys. Which rule fires?"
+    expect: {kind: rule, id: AF-REST-005}

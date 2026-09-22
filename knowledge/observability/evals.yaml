@@ -1,0 +1,10 @@
+evals:
+  - id: observability/AF-OBS-001
+    prompt: "An artifact shows: cloudwatch alarm exists but its actions are disabled. Which rule fires?"
+    expect: {kind: rule, id: AF-OBS-001}
+  - id: observability/AF-OBS-002
+    prompt: "An artifact shows: cloudwatch alarm declares no action targets. Which rule fires?"
+    expect: {kind: rule, id: AF-OBS-002}
+  - id: observability/AF-OBS-003
+    prompt: "An artifact shows: step functions state machine has x-ray tracing disabled. Which rule fires?"
+    expect: {kind: rule, id: AF-OBS-003}

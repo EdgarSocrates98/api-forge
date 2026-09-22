@@ -1,0 +1,4 @@
+evals:
+  - id: openapi-31/AF-CONTRACT-001
+    prompt: "An artifact shows: contract operation has no implementation. Which rule fires?"
+    expect: {kind: rule, id: AF-CONTRACT-001}

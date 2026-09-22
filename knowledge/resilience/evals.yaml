@@ -1,0 +1,7 @@
+evals:
+  - id: resilience/AF-PERF-005
+    prompt: "An artifact shows: timeouts exist before retries, and retries carry jitter. Which rule fires?"
+    expect: {kind: rule, id: AF-PERF-005}
+  - id: resilience/AF-PERF-007
+    prompt: "An artifact shows: sync work does not block the request path unnecessarily. Which rule fires?"
+    expect: {kind: rule, id: AF-PERF-007}

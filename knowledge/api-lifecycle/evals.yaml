@@ -1,0 +1,10 @@
+evals:
+  - id: api-lifecycle/AF-BREAK-005
+    prompt: "An artifact shows: deprecation is dated, announced and measurable. Which rule fires?"
+    expect: {kind: rule, id: AF-BREAK-005}
+  - id: api-lifecycle/AF-BREAK-006
+    prompt: "An artifact shows: semantic-version the contract, not the implementation. Which rule fires?"
+    expect: {kind: rule, id: AF-BREAK-006}
+  - id: api-lifecycle/AF-CONTRACT-001
+    prompt: "An artifact shows: contract operation has no implementation. Which rule fires?"
+    expect: {kind: rule, id: AF-CONTRACT-001}

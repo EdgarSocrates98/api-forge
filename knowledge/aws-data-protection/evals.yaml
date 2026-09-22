@@ -1,0 +1,16 @@
+evals:
+  - id: aws-data-protection/AF-SEC-107
+    prompt: "An artifact shows: customer-managed kms key has rotation disabled. Which rule fires?"
+    expect: {kind: rule, id: AF-SEC-107}
+  - id: aws-data-protection/AF-SEC-108
+    prompt: "An artifact shows: secrets manager secret has rotation disabled. Which rule fires?"
+    expect: {kind: rule, id: AF-SEC-108}
+  - id: aws-data-protection/AF-SEC-109
+    prompt: "An artifact shows: s3 bucket public access block is incomplete or absent. Which rule fires?"
+    expect: {kind: rule, id: AF-SEC-109}
+  - id: aws-data-protection/AF-SEC-110
+    prompt: "An artifact shows: s3 bucket declares no server-side encryption configuration. Which rule fires?"
+    expect: {kind: rule, id: AF-SEC-110}
+  - id: aws-data-protection/AF-GW-008
+    prompt: "An artifact shows: interface vpc endpoint without private dns. Which rule fires?"
+    expect: {kind: rule, id: AF-GW-008}

@@ -1,0 +1,22 @@
+evals:
+  - id: migration/AF-BREAK-001
+    prompt: "An artifact shows: removing an operation is always breaking. Which rule fires?"
+    expect: {kind: rule, id: AF-BREAK-001}
+  - id: migration/AF-BREAK-002
+    prompt: "An artifact shows: type and format changes are breaking. Which rule fires?"
+    expect: {kind: rule, id: AF-BREAK-002}
+  - id: migration/AF-BREAK-003
+    prompt: "An artifact shows: tightening requirements is breaking. Which rule fires?"
+    expect: {kind: rule, id: AF-BREAK-003}
+  - id: migration/AF-BREAK-004
+    prompt: "An artifact shows: response additions are safe; response removals are not. Which rule fires?"
+    expect: {kind: rule, id: AF-BREAK-004}
+  - id: migration/AF-BREAK-005
+    prompt: "An artifact shows: deprecation is dated, announced and measurable. Which rule fires?"
+    expect: {kind: rule, id: AF-BREAK-005}
+  - id: migration/AF-BREAK-006
+    prompt: "An artifact shows: semantic-version the contract, not the implementation. Which rule fires?"
+    expect: {kind: rule, id: AF-BREAK-006}
+  - id: migration/AF-BREAK-007
+    prompt: "An artifact shows: enum and constant additions are breaking for closed clients. Which rule fires?"
+    expect: {kind: rule, id: AF-BREAK-007}

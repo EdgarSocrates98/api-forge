@@ -44,6 +44,18 @@ class ReadOnlyAdapter:
                 "signals": ",".join(plan.query.signals),
             },
         )
+        violations = response.get("safety_violations", ())
+        if isinstance(violations, (list, tuple)) and violations:
+            return ReadReceipt(
+                provider=plan.provider,
+                status="blocked",
+                credential_reference=credential.reference,
+                record_count=0,
+                network_called=True,
+                mutation_performed=False,
+                violations=tuple(str(item) for item in violations),
+                evidence=("safety-policy-rejected", "network_called:true", "mutation_performed:false"),
+            )
         records = response.get("records", ())
         count = len(records) if isinstance(records, (list, tuple)) else 0
         return ReadReceipt(

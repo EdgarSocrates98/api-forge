@@ -145,6 +145,11 @@ class ReadPlan(VersionedContract):
     limitations: tuple[str, ...] = ()
 
 
+class ReadSafetyPolicy(VersionedContract):
+    max_records: int = Field(default=1000, ge=1, le=100_000)
+    max_response_bytes: int = Field(default=5_000_000, ge=1024, le=100_000_000)
+
+
 class CredentialReference(VersionedContract):
     provider: ObservabilityProvider
     reference: str
@@ -167,6 +172,7 @@ class ReadReceipt(VersionedContract):
     record_count: int = Field(ge=0)
     network_called: bool = False
     mutation_performed: bool = False
+    violations: tuple[str, ...] = ()
     evidence: tuple[str, ...] = ()
 
 

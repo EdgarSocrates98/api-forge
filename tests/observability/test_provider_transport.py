@@ -1,6 +1,6 @@
 from collections.abc import Mapping
 
-from apiforge.contracts.observability import CredentialStatus
+from apiforge.contracts.observability import CredentialStatus, ReadSafetyPolicy
 from apiforge.observability.provider_transport import provider_transport
 from apiforge.observability.read import build_read_plan
 from apiforge.observability.read_adapter import adapter_for
@@ -38,3 +38,18 @@ def test_cloudwatch_datapoints_are_normalized() -> None:
 
     assert receipt.record_count == 2
     assert receipt.mutation_performed is False
+
+
+def test_response_over_budget_is_rejected_after_network_read() -> None:
+    requester = FakeProviderRequester({"data": [{"id": "trace-1"}, {"id": "trace-2"}]})
+    plan = build_read_plan("datadog", "orders", "start", "end")
+    credential = CredentialStatus(provider="datadog", reference="broker:dd", status="available", reason="resolved")
+    transport = provider_transport(
+        "datadog", credential.reference, requester, ReadSafetyPolicy(max_records=1)
+    )
+
+    receipt = adapter_for("datadog").execute(plan, credential, transport)
+
+    assert receipt.status == "blocked"
+    assert receipt.network_called is True
+    assert receipt.violations == ("max_records_exceeded:2>1",)

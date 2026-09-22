@@ -385,8 +385,11 @@ def observability_read_plan(
     from apiforge.observability.read import build_read_plan
 
     try:
-        signals = tuple(signal) if signal else ("traces", "metrics")
-        result = build_read_plan(provider, service, start, end, environment=environment, signals=signals)  # type: ignore[arg-type]
+        signals = cast(
+            tuple[Literal["traces", "metrics", "logs", "events"], ...],
+            tuple(signal) if signal else ("traces", "metrics"),
+        )
+        result = build_read_plan(provider, service, start, end, environment=environment, signals=signals)
     except (TypeError, ValueError) as exc:
         raise AnalysisError("AF-OBS-READ-PLAN-INVALID", str(exc)) from exc
     _echo_json(result.model_dump(mode="json"), detail_level)

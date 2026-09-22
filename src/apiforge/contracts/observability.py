@@ -162,6 +162,25 @@ class CircuitBreakerPolicy(VersionedContract):
     recovery_timeout_seconds: float = Field(default=30, ge=0.1, le=86_400)
 
 
+class CircuitBreakerEvent(VersionedContract):
+    provider: ObservabilityProvider
+    kind: Literal["failure", "opened", "blocked", "half_open", "recovered"]
+    state: Literal["closed", "open", "half_open"]
+    occurred_at: float = Field(ge=0)
+    failure_count: int = Field(ge=0)
+    network_called: bool = False
+
+
+class CircuitBreakerMetrics(VersionedContract):
+    provider: ObservabilityProvider
+    failures: int = Field(ge=0)
+    openings: int = Field(ge=0)
+    blocked_calls: int = Field(ge=0)
+    recoveries: int = Field(ge=0)
+    state: Literal["closed", "open", "half_open"]
+    alerts: tuple[str, ...] = ()
+
+
 class CredentialReference(VersionedContract):
     provider: ObservabilityProvider
     reference: str

@@ -8,10 +8,12 @@ from typing import Protocol, cast
 
 from apiforge.contracts.observability import (
     CircuitBreakerPolicy,
+    ObservabilityProvider,
     ReadRetryPolicy,
     ReadSafetyPolicy,
 )
 from apiforge.observability.circuit_breaker import CircuitBreaker
+from apiforge.observability.circuit_observability import InMemoryCircuitEventSink
 from apiforge.observability.read_safety import evaluate_response
 
 
@@ -67,6 +69,7 @@ class ProviderReadTransport:
         sleeper: Callable[[float], None] = sleep,
         circuit_policy: CircuitBreakerPolicy | None = None,
         clock: Callable[[], float] = monotonic,
+        event_sink: InMemoryCircuitEventSink | None = None,
     ) -> None:
         if provider not in {"otel", "datadog", "dynatrace", "cloudwatch"}:
             raise ValueError(f"AF-OBS-ADAPTER-PROVIDER: unsupported provider {provider!r}")
@@ -78,9 +81,13 @@ class ProviderReadTransport:
         self.sleeper = sleeper
         selected_circuit = circuit_policy or CircuitBreakerPolicy()
         self.circuit = CircuitBreaker(
-            selected_circuit.failure_threshold, selected_circuit.recovery_timeout_seconds
+            selected_circuit.failure_threshold,
+            selected_circuit.recovery_timeout_seconds,
+            cast(ObservabilityProvider, provider),
+            event_sink.emit if event_sink is not None else None,
         )
         self.clock = clock
+        self.event_sink = event_sink
 
     def get(self, endpoint: str, params: Mapping[str, str]) -> Mapping[str, object]:
         if not self.circuit.before_call(self.clock()):
@@ -138,7 +145,7 @@ class ProviderReadTransport:
             violations = (f"max_pages_exceeded:{self.policy.max_pages}",)
         normalized = {"records": all_records}
         if violations:
-            self.circuit.record_success()
+            self.circuit.record_success(self.clock())
             return {
                 "records": (),
                 "request_attempts": attempts,
@@ -149,7 +156,7 @@ class ProviderReadTransport:
             }
         normalized["request_attempts"] = attempts
         normalized["page_count"] = page_count
-        self.circuit.record_success()
+        self.circuit.record_success(self.clock())
         normalized["circuit_state"] = self.circuit.state
         return normalized
 
@@ -163,6 +170,7 @@ def provider_transport(
     sleeper: Callable[[float], None] = sleep,
     circuit_policy: CircuitBreakerPolicy | None = None,
     clock: Callable[[], float] = monotonic,
+    event_sink: InMemoryCircuitEventSink | None = None,
 ) -> ProviderReadTransport:
     return ProviderReadTransport(
         provider,
@@ -173,4 +181,5 @@ def provider_transport(
         sleeper,
         circuit_policy,
         clock,
+        event_sink,
     )

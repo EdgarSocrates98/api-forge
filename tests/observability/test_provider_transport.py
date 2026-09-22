@@ -6,6 +6,10 @@ from apiforge.contracts.observability import (
     ReadRetryPolicy,
     ReadSafetyPolicy,
 )
+from apiforge.observability.circuit_observability import (
+    InMemoryCircuitEventSink,
+    metrics_for_provider,
+)
 from apiforge.observability.provider_transport import provider_transport
 from apiforge.observability.read import build_read_plan
 from apiforge.observability.read_adapter import adapter_for
@@ -164,3 +168,32 @@ def test_circuit_breaker_transitions_open_half_open_and_closed() -> None:
     assert blocked.network_called is False
     assert "circuit_state:closed" in probe.evidence
     assert probe.status == "executed"
+
+
+def test_circuit_events_project_to_provider_metrics_and_alerts() -> None:
+    class DownRequester:
+        def get(self, endpoint: str, params: Mapping[str, str], credential_reference: str) -> Mapping[str, object]:
+            raise TimeoutError("provider down")
+
+    sink = InMemoryCircuitEventSink()
+    plan = build_read_plan("datadog", "orders", "start", "end")
+    credential = CredentialStatus(provider="datadog", reference="broker:dd", status="available", reason="resolved")
+    transport = provider_transport(
+        "datadog",
+        credential.reference,
+        DownRequester(),
+        retry_policy=ReadRetryPolicy(max_attempts=1),
+        circuit_policy=CircuitBreakerPolicy(failure_threshold=1),
+        event_sink=sink,
+    )
+
+    adapter_for("datadog").execute(plan, credential, transport)
+    adapter_for("datadog").execute(plan, credential, transport)
+
+    metrics = metrics_for_provider("datadog", sink.events, transport.circuit.state)
+
+    assert metrics.failures == 1
+    assert metrics.openings == 1
+    assert metrics.blocked_calls == 1
+    assert "provider_circuit_open:datadog" in metrics.alerts
+    assert "provider_circuit_blocked:datadog" in metrics.alerts

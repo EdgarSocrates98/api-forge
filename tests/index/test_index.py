@@ -80,10 +80,14 @@ def test_analyze_records_cache_meta(tmp_path: Path) -> None:
     assert any(e["detail_level"] == "miss" for e in hits)
 
 
-def test_index_build_writes_four_files(tmp_path: Path) -> None:
+def test_index_build_writes_twelve_files(tmp_path: Path) -> None:
     manifest = build_index(PROJECT, tmp_path)
     index = tmp_path / ".apiforge" / "index"
-    for name in ("files", "symbols", "routes", "facts"):
+    assert manifest["kinds"] == [
+        "files", "symbols", "routes", "facts", "schemas", "dependencies",
+        "calls", "tests", "iac", "databases", "findings", "decisions",
+    ]
+    for name in manifest["kinds"]:
         assert (index / f"{name}.jsonl").is_file()
     assert manifest["counts"]["routes"] > 0
     assert manifest["unresolved"]["note"]
@@ -93,6 +97,88 @@ def test_index_build_writes_four_files(tmp_path: Path) -> None:
         if l.strip()
     ]
     assert all(r["method"] and r["path"] for r in rows)
+
+
+def test_derived_kinds_populate_only_from_facts(tmp_path: Path) -> None:
+    """AT-004: data.* facts -> databases.jsonl; infra.* -> iac.jsonl."""
+    from apiforge.core.models import Fact
+
+    def fact(fid: str, kind: str) -> Fact:
+        return Fact.model_validate(
+            {
+                "fact_id": fid,
+                "kind": kind,
+                "source": {
+                    "path": "app.py",
+                    "sha256": "0" * 64,
+                    "line": 1,
+                },
+            }
+        )
+
+    inventory = CodeInventory(
+        framework="fastapi",
+        root=str(PROJECT),
+        facts=(
+            fact("f-data", "data.redis.command"),
+            fact("f-infra", "infra.terraform.resource"),
+            fact("f-call", "resilience.http_call"),
+            fact("f-route", "code.route"),
+        ),
+        diagnostics=(),
+        input_hashes={},
+    )
+    manifest = build_index(PROJECT, tmp_path, framework="fastapi", inventory=inventory)
+    index = tmp_path / ".apiforge" / "index"
+    db = [json.loads(l) for l in (index / "databases.jsonl").read_text().splitlines() if l]
+    iac = [json.loads(l) for l in (index / "iac.jsonl").read_text().splitlines() if l]
+    calls = [json.loads(l) for l in (index / "calls.jsonl").read_text().splitlines() if l]
+    assert [r["fact_id"] for r in db] == ["f-data"]
+    assert [r["fact_id"] for r in iac] == ["f-infra"]
+    assert [r["fact_id"] for r in calls] == ["f-call"]
+    assert manifest["counts"]["databases"] == 1
+    # kinds with no matching facts still exist, explicitly empty
+    assert (index / "dependencies.jsonl").read_text() == ""
+    assert manifest["counts"]["dependencies"] == 0
+
+
+def test_findings_and_decisions_derive(tmp_path: Path) -> None:
+    case = tmp_path / "case"
+    case.mkdir()
+    (case / "findings.json").write_text(
+        json.dumps(
+            {
+                "findings": [
+                    {
+                        "finding_id": "F-1",
+                        "rule_id": "AF-PERF-101",
+                        "status": "confirmed",
+                        "severity": "high",
+                        "title": "t",
+                        "evidence": ["f-1"],
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    from apiforge.autonomy.service import append_ledger
+
+    append_ledger(tmp_path, {"event": "action", "verb": "judge", "outcome": "executed"})
+    manifest = build_index(
+        PROJECT, tmp_path, framework="fastapi",
+        findings_path=case / "findings.json",
+    )
+    index = tmp_path / ".apiforge" / "index"
+    findings = [
+        json.loads(l) for l in (index / "findings.jsonl").read_text().splitlines() if l
+    ]
+    decisions = [
+        json.loads(l) for l in (index / "decisions.jsonl").read_text().splitlines() if l
+    ]
+    assert findings[0]["finding_id"] == "F-1"
+    assert decisions[0]["verb"] == "judge"
+    assert manifest["counts"]["findings"] == 1
 
 
 def test_index_status_names_drift(tmp_path: Path) -> None:

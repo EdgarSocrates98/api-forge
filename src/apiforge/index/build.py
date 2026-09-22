@@ -1,9 +1,13 @@
-"""Local indexes derived from extractor output — files, symbols, routes, facts.
+"""Local indexes derived from extractor output — the 12 v1 kinds.
 
-All four index files are canonical JSONL under `<root>/.apiforge/index/`.
-The index covers what the extractor sees: route handlers and the facts they
-produced. Files without routes are named in `unresolved` rather than
-silently absent.
+All index files are canonical JSONL under `<root>/.apiforge/index/`.
+``files``/``symbols``/``routes``/``facts`` come straight from extraction;
+``schemas``, ``dependencies``, ``calls``, ``tests``, ``iac`` and
+``databases`` are *derivations* — fact kinds filtered by prefix, no extra
+parsing. ``findings`` derives from a case's ``findings.json`` when given;
+``decisions`` derives from the autonomy ledger under ``root``. Empty
+derivations still write an explicit empty file — absence is recorded,
+never filled.
 """
 
 from __future__ import annotations
@@ -17,7 +21,27 @@ from apiforge.contracts.base import ContractError
 from apiforge.index.treehash import source_digest
 
 INDEX_DIR = "index"
-INDEX_VERSION = "index/1"
+INDEX_VERSION = "index/2"
+
+# derived kind -> fact-kind prefixes (a fact lands in every matching index)
+DERIVED_KINDS: dict[str, tuple[str, ...]] = {
+    "schemas": ("contract.",),
+    "dependencies": ("dependency.",),
+    "calls": ("resilience.http_call", "http.call", "code.call"),
+    "tests": ("test.",),
+    "iac": ("infra.",),
+    "databases": ("data.",),
+}
+
+INDEX_KINDS: tuple[str, ...] = (
+    "files",
+    "symbols",
+    "routes",
+    "facts",
+    *tuple(DERIVED_KINDS),
+    "findings",
+    "decisions",
+)
 
 _FRAMEWORK_EXTRACTORS: dict[str, Any] = {}
 
@@ -48,13 +72,71 @@ def _write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
     path.write_text(text, encoding="utf-8", newline="")
 
 
+def _derive(inventory: CodeInventory, kind: str) -> list[dict[str, Any]]:
+    prefixes = DERIVED_KINDS[kind]
+    rows = [
+        {
+            "fact_id": f.fact_id,
+            "kind": f.kind,
+            "line": f.source.line,
+            "measures": dict(f.measures),
+            "path": f.source.path,
+        }
+        for f in inventory.facts
+        if f.kind.startswith(prefixes)
+    ]
+    rows.sort(key=lambda r: str(r["fact_id"]))
+    return rows
+
+
+def _derive_findings(findings_path: Path | None) -> list[dict[str, Any]]:
+    """Case findings -> index rows; absent input stays an empty index."""
+    if findings_path is None or not Path(findings_path).is_file():
+        return []
+    doc = json.loads(Path(findings_path).read_text(encoding="utf-8"))
+    payload = doc if isinstance(doc, list) else doc.get("findings", [])
+    rows = [
+        {
+            "evidence": list(f.get("evidence", [])),
+            "finding_id": f.get("finding_id"),
+            "rule_id": f.get("rule_id"),
+            "severity": f.get("severity"),
+            "status": f.get("status"),
+        }
+        for f in payload
+        if isinstance(f, dict)
+    ]
+    rows.sort(key=lambda r: str(r["finding_id"]))
+    return rows
+
+
+def _derive_decisions(root: Path) -> list[dict[str, Any]]:
+    """Autonomy ledger entries -> index rows; absent ledger stays empty."""
+    from apiforge.autonomy.service import _ledger_path, read_ledger
+
+    path = _ledger_path(Path(root))
+    if not path.is_file():
+        return []
+    try:
+        entries = read_ledger(Path(root))
+    except (json.JSONDecodeError, OSError) as exc:
+        raise ContractError(
+            "AF-INDEX-DECISIONS-CORRUPT", f"{path}: {exc}"
+        ) from exc
+    return [
+        {k: e.get(k) for k in ("at", "decision", "event", "outcome", "to", "verb") if k in e}
+        for e in entries
+    ]
+
+
 def build_index(
     project: Path,
     root: Path,
     framework: str = "auto",
     inventory: CodeInventory | None = None,
+    findings_path: Path | None = None,
 ) -> dict[str, Any]:
-    """Write the four index files plus `index.json` manifest."""
+    """Write the twelve index files plus `index.json` manifest."""
     project = Path(project)
     if not project.is_dir():
         raise ContractError("AF-INDEX-NOT-FOUND", str(project))
@@ -111,25 +193,42 @@ def build_index(
         f["path"] for f in files if f["path"] not in routed_files
     )
 
+    derived = {kind: _derive(inventory, kind) for kind in DERIVED_KINDS}
+    derived["findings"] = _derive_findings(findings_path)
+    derived["decisions"] = _derive_decisions(Path(root))
+
     out = Path(root) / ".apiforge" / INDEX_DIR
     out.mkdir(parents=True, exist_ok=True)
     _write_jsonl(out / "files.jsonl", files)
     _write_jsonl(out / "symbols.jsonl", symbols)
     _write_jsonl(out / "routes.jsonl", routes)
     _write_jsonl(out / "facts.jsonl", facts)
+    for kind, rows in derived.items():
+        _write_jsonl(out / f"{kind}.jsonl", rows)
+    counts = {
+        "files": len(files),
+        "symbols": len(symbols),
+        "routes": len(routes),
+        "facts": len(facts),
+    }
+    counts.update({kind: len(rows) for kind, rows in derived.items()})
     manifest = {
         "index_version": INDEX_VERSION,
         "framework": framework,
         "source_digest": digest,
-        "counts": {
-            "files": len(files),
-            "symbols": len(symbols),
-            "routes": len(routes),
-            "facts": len(facts),
-        },
+        "kinds": list(INDEX_KINDS),
+        "counts": counts,
         "unresolved": {
             "files_without_routes": unrouted,
             "note": "index covers extractor-visible symbols only",
+            "derivation": {
+                kind: f"fact kinds {list(prefixes)}"
+                for kind, prefixes in DERIVED_KINDS.items()
+            }
+            | {
+                "findings": "findings_path argument (case findings.json)",
+                "decisions": ".apiforge/autonomy/ledger.jsonl",
+            },
         },
     }
     (out / "index.json").write_text(

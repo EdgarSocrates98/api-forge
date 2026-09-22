@@ -2646,6 +2646,21 @@ def agentops_parity(
     _echo_json(audit_host_parity(Path.cwd()), detail_level)
 
 
+@agentops_app.command("activation-plan")
+def agentops_activation_plan(
+    host: str = typer.Option(..., "--host", help="claude, gpt-codex, devin or copilot."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Build a host activation plan; no host configuration is mutated."""
+    from apiforge.agentops.activation import build_activation_plan
+
+    try:
+        result = build_activation_plan(host, str(Path.cwd()))
+    except ValueError as exc:
+        raise AnalysisError("AF-HOST-ACTIVATION-INVALID", str(exc)) from exc
+    _echo_json(result.model_dump(mode="json"), detail_level)
+
+
 @agentops_app.command("tools")
 def agentops_tools(
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),

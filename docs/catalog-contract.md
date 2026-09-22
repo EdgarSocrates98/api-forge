@@ -22,6 +22,8 @@ requires the cost of the run that never happened.
 | `AF-OBS-READ-PLAN-INVALID` | vendor read plan fails provider, window or signal validation |
 | `AF-OBS-READ-PROVIDER` | requested observability provider has no registered read adapter |
 | `AF-OBS-READ-COUNT` | fixture receipt received a negative record count |
+| `AF-HOST-ACTIVATION-INVALID` | host activation plan input is invalid |
+| `AF-HOST-ACTIVATION-HOST` | requested host has no activation plan |
 
 ## Routing
 

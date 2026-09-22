@@ -207,6 +207,17 @@ class StreamingAccessIR(_StubPayload):
     delivery_signals: tuple[str, ...] = ()
 
 
+class MessagingAccessIR(_StubPayload):
+    """Intermediate representation for queues, topics, buses and streams."""
+
+    service: Literal["sqs", "sns", "eventbridge", "kinesis"]
+    provider: str = "aws"
+    destinations: tuple[str, ...] = ()
+    roles: tuple[Literal["producer", "consumer", "router"], ...] = ()
+    operations: tuple[str, ...] = ()
+    reliability_signals: tuple[str, ...] = ()
+
+
 class DataAccessReadiness(_StubPayload):
     """Governance preflight for Redis, MongoDB, DynamoDB and Neptune access."""
 

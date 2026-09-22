@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-from apiforge.contracts.stubs import DataAccessIR, DataAccessReadiness
+from apiforge.adapters.inventory import CodeInventory
+from apiforge.contracts.stubs import DataAccessIR, DataAccessReadiness, DataPerformanceProfile
+from apiforge.core.ids import stable_id
 
 _MUTATIONS = {
     "redis": {"set", "setex", "hset", "sadd", "lpush", "rpush", "del", "expire"},
@@ -52,4 +54,40 @@ def assess_data_access(
         mutation_patterns=mutation_patterns,
         blockers=tuple(blockers),
         evidence=tuple(evidence),
+    )
+
+
+def build_data_performance_profile(
+    inventory: CodeInventory,
+    *,
+    database: str,
+) -> DataPerformanceProfile:
+    """Summarize only facts observed by a Redis/Dynamo scanner."""
+
+    if database not in {"redis", "dynamo", "mongo", "neptune"}:
+        raise ValueError(f"unsupported database {database!r}")
+    signals: set[str] = set()
+    risks: set[str] = set()
+    for fact in inventory.facts:
+        for key, value in fact.measures.items():
+            if value is True:
+                signals.add(str(key))
+        if database == "redis" and fact.kind == "data.redis.write" and "ttl_seconds" not in fact.measures:
+            risks.add("write-without-declared-ttl")
+        if database == "dynamo" and fact.kind == "data.dynamo.operation":
+            if fact.measures.get("full_scan") is True:
+                risks.add("full-scan")
+            if fact.measures.get("query_without_key_condition") is True:
+                risks.add("query-without-key-condition")
+    latency_class = {
+        "redis": "low_latency", "dynamo": "partitioned_scale",
+        "mongo": "document", "neptune": "graph",
+    }[database]
+    return DataPerformanceProfile(
+        id=stable_id("data-profile", {"root": inventory.root, "database": database}),
+        database=database,  # type: ignore[arg-type]
+        latency_class=latency_class,  # type: ignore[arg-type]
+        observed_signals=tuple(sorted(signals)),
+        risk_findings=tuple(sorted(risks)),
+        unresolved=tuple(sorted(d.code for d in inventory.diagnostics)),
     )

@@ -218,6 +218,16 @@ class MessagingAccessIR(_StubPayload):
     reliability_signals: tuple[str, ...] = ()
 
 
+class DataPerformanceProfile(_StubPayload):
+    """Observed low-latency/partitioned datastore signals."""
+
+    database: Literal["redis", "dynamo", "mongo", "neptune"]
+    latency_class: Literal["low_latency", "partitioned_scale", "document", "graph", "unknown"]
+    observed_signals: tuple[str, ...] = ()
+    risk_findings: tuple[str, ...] = ()
+    unresolved: tuple[str, ...] = ()
+
+
 class DataAccessReadiness(_StubPayload):
     """Governance preflight for Redis, MongoDB, DynamoDB and Neptune access."""
 

@@ -6,7 +6,6 @@ import argparse
 import shutil
 from pathlib import Path
 
-
 MIRRORS = (Path(".claude/skills"), Path(".github/skills"), Path(".devin/skills"))
 
 

@@ -8,7 +8,6 @@ from pathlib import Path
 
 import yaml
 
-
 NAME_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 MIRRORS = (Path(".claude/skills"), Path(".github/skills"), Path(".devin/skills"))
 
@@ -22,7 +21,7 @@ def parse_frontmatter(path: Path) -> tuple[dict[str, object], str]:
         raise ValueError("unterminated YAML frontmatter")
     data = yaml.safe_load(text[4:marker]) or {}
     if not isinstance(data, dict):
-        raise ValueError("frontmatter must be a mapping")
+        raise TypeError("frontmatter must be a mapping")
     return data, text[marker + 5 :]
 
 
@@ -40,7 +39,11 @@ def validate(root: Path, check_mirrors: bool) -> list[str]:
             description = data.get("description")
             if name != folder or not isinstance(name, str) or not NAME_RE.fullmatch(name):
                 errors.append(f"{skill_file}: invalid name")
-            if not isinstance(description, str) or not description.strip() or len(description) > 1024:
+            if (
+                not isinstance(description, str)
+                or not description.strip()
+                or len(description) > 1024
+            ):
                 errors.append(f"{skill_file}: invalid description")
             if len(body.splitlines()) > 500:
                 errors.append(f"{skill_file}: body exceeds 500 lines")

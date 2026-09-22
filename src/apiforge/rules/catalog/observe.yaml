@@ -37,3 +37,27 @@ rules:
       small against an untraceable orchestration.
     reference: https://docs.aws.amazon.com/step-functions/latest/dg/concepts-xray-tracing.html
     check: {kind: aws.sfn.state_machine, path: measures.has_tracing, op: eq, value: false}
+  - id: AF-OBS-004
+    title: EKS cluster has no control-plane logging enabled
+    severity: medium
+    rationale: >-
+      No enabled `clusterLogging` type means api/audit/controller events
+      never reach CloudWatch — control-plane actions on the API's
+      platform are unobservable.
+    remediation: >-
+      Enable at least `api` and `audit` log types on clusters hosting the
+      API surface.
+    reference: https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html
+    check: {kind: aws.eks.cluster, path: measures.control_plane_logging, op: eq, value: false}
+  - id: AF-OBS-005
+    title: MSK cluster has no broker logging destination
+    severity: medium
+    rationale: >-
+      BrokerLogs with no enabled destination (CloudWatchLogs, Firehose or
+      S3) means broker errors and rebalances leave no durable record —
+      consumer-lag incidents lose their root-cause trail.
+    remediation: >-
+      Enable at least one broker log destination with a retention matching
+      the incident-review window.
+    reference: https://docs.aws.amazon.com/msk/latest/developerguide/msk-logging.html
+    check: {kind: aws.msk.cluster, path: measures.broker_logging, op: eq, value: false}

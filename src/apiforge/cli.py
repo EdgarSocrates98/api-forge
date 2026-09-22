@@ -528,6 +528,12 @@ _AWS_DUMP_READERS = {
     "secrets": "apiforge.adapters.awsdumps.extract_secrets",
     "vpc-endpoints": "apiforge.adapters.awsdumps.extract_vpc_endpoints",
     "s3": "apiforge.adapters.awsdumps.extract_s3",
+    "alb": "apiforge.adapters.awsdumps.extract_alb",
+    "ecs": "apiforge.adapters.awsdumps.extract_ecs",
+    "eks": "apiforge.adapters.awsdumps.extract_eks",
+    "ec2": "apiforge.adapters.awsdumps.extract_ec2",
+    "msk": "apiforge.adapters.awsdumps.extract_msk",
+    "elasticache": "apiforge.adapters.awsdumps.extract_elasticache",
 }
 
 
@@ -749,6 +755,36 @@ _COLLECT_SIMPLE = {
         "apiforge.collectors.ops.collect_s3",
         "--bucket",
         "S3 bucket name — posture only, never objects.",
+    ),
+    "alb": (
+        "apiforge.collectors.compute.collect_alb",
+        "--lb-arn",
+        "Load balancer ARN.",
+    ),
+    "ecs": (
+        "apiforge.collectors.compute.collect_ecs",
+        "--cluster",
+        "ECS cluster name — collects every service in it.",
+    ),
+    "eks": (
+        "apiforge.collectors.compute.collect_eks",
+        "--cluster-name",
+        "EKS cluster name.",
+    ),
+    "ec2": (
+        "apiforge.collectors.compute.collect_ec2",
+        "--instance-id",
+        "EC2 instance id — posture only, never user-data.",
+    ),
+    "msk": (
+        "apiforge.collectors.compute.collect_msk",
+        "--cluster-arn",
+        "MSK cluster ARN.",
+    ),
+    "elasticache": (
+        "apiforge.collectors.compute.collect_elasticache",
+        "--replication-group-id",
+        "ElastiCache replication group id.",
     ),
 }
 

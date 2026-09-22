@@ -223,3 +223,72 @@ rules:
       data) so the posture is declared, not defaulted.
     reference: https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-encryption.html
     check: {kind: aws.s3.bucket, path: measures.has_encryption, op: eq, value: false}
+  - id: AF-SEC-111
+    title: Internet-facing ALB listener serves plain HTTP
+    severity: high
+    rationale: >-
+      An HTTP listener on an internet-facing load balancer serves the API
+      in cleartext at the edge — credentials and payloads cross the public
+      network unencrypted.
+    remediation: >-
+      Terminate TLS at the listener (HTTPS with an ACM certificate) and
+      redirect port 80; internal schemes may keep HTTP listeners.
+    reference: https://docs.aws.amazon.com/elasticloadbalancing/latest/application/https-listener-certificates.html
+    check: {kind: aws.alb.listener, path: measures.internet_facing_plain_http, op: eq, value: true}
+  - id: AF-SEC-112
+    title: ALB access logging is disabled
+    severity: medium
+    rationale: >-
+      Without `access_logs.s3.enabled` the edge keeps no request record —
+      incident forensics and abuse analysis lose their primary source.
+    remediation: >-
+      Enable access logs to an S3 bucket with a retention matching the
+      incident-review window.
+    reference: https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-access-logs.html
+    check: {kind: aws.alb.loadbalancer, path: measures.access_logs_enabled, op: eq, value: false}
+  - id: AF-SEC-113
+    title: EC2 instance does not require IMDSv2
+    severity: high
+    rationale: >-
+      `MetadataOptions.HttpTokens: optional` leaves IMDSv1 enabled —
+      SSRF through the API can read instance credentials directly.
+    remediation: >-
+      Set HttpTokens=required so token-holding IMDSv2 is the only path to
+      instance metadata.
+    reference: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-service.html
+    check: {kind: aws.ec2.instance, path: measures.imdsv2_required, op: eq, value: false}
+  - id: AF-SEC-114
+    title: EC2 instance carries a public IP
+    severity: medium
+    rationale: >-
+      A public address on an API host widens the attack surface past the
+      load balancer — direct exposure is reachable whether intended or not.
+    remediation: >-
+      Move the instance behind an ALB/NLB without a public IP; reach it
+      through the load balancer's security group only.
+    reference: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-instance-addressing.html
+    check: {kind: aws.ec2.instance, path: measures.public_ip, op: eq, value: true}
+  - id: AF-SEC-115
+    title: EKS cluster endpoint is public
+    severity: medium
+    rationale: >-
+      `endpointPublicAccess: true` exposes the Kubernetes API to the
+      internet — authentication still applies, but the control plane is
+      reachable from anywhere.
+    remediation: >-
+      Disable public access or restrict it with CIDR blocks; keep the
+      private endpoint for cluster-internal traffic.
+    reference: https://docs.aws.amazon.com/eks/latest/userguide/cluster-endpoint.html
+    check: {kind: aws.eks.cluster, path: measures.public_endpoint, op: eq, value: true}
+  - id: AF-SEC-116
+    title: MSK cluster allows plaintext client-broker traffic
+    severity: high
+    rationale: >-
+      `ClientBroker: PLAINTEXT` or `TLS_PLAINTEXT` permits unencrypted
+      broker connections — consumer lag, offsets and payloads cross the
+      network readable.
+    remediation: >-
+      Set ClientBroker=TLS (and require SASL/IAM auth) so no plaintext
+      listener exists.
+    reference: https://docs.aws.amazon.com/msk/latest/developerguide/msk-encryption.html
+    check: {kind: aws.msk.cluster, path: measures.plaintext_allowed, op: eq, value: true}

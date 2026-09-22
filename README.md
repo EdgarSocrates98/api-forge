@@ -74,8 +74,10 @@ while refusal codes and `fact_id`s survive.
 | `apiforge collect lambda --function-name X --out dump/` | Fetch Lambda config into a dump (Code.Location never persisted) |
 | `apiforge collect sqs\|sns\|eventbridge\|iam-role\|cognito\|waf ... --out dump/` | Messaging/identity collectors — same offline-dump contract |
 | `apiforge collect dynamodb\|docdb\|neptune\|stepfunctions\|cloudwatch\|xray\|kms\|secrets\|vpc-endpoints\|s3 ... --out dump/` | Datastore/ops collectors — secrets reads metadata only, S3 posture only (objects never listed), unset S3 config recorded as measured absence |
+| `apiforge collect alb\|ecs\|eks\|ec2\|msk\|elasticache ... --out dump/` | Compute/LB collectors — describe-only posture (never user-data, console output or broker payloads) |
 | `apiforge model sqs\|sns\|eventbridge\|iam-role\|cognito\|waf --path dump/` | Dump → `aws.<svc>.*` facts; boolean measures record declared absence |
 | `apiforge model dynamodb\|docdb\|neptune\|stepfunctions\|cloudwatch\|xray\|kms\|secrets\|vpc-endpoints\|s3 --path dump/` | Same contract for the datastore/ops dumps; KMS rotation rule applies only to customer-managed keys |
+| `apiforge model alb\|ecs\|eks\|ec2\|msk\|elasticache --path dump/` | Same contract for the compute/LB dumps; plain-HTTP only flags on internet-facing ALBs |
 | `apiforge model lambda --path dump/` | Lambda facts offline — env var names only, values never read |
 | `apiforge model terraform --path infra/` | API Gateway + Lambda resources from HCL; `${...}` → `AF-TF-UNRESOLVED` |
 | `apiforge model sam --path template.yaml` | Serverless resources; `!Ref`/`!Sub` → `AF-SAM-UNRESOLVED` |

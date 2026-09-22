@@ -359,6 +359,12 @@ _DUMP_READERS: dict[str, str] = {
     "secrets": "apiforge.adapters.awsdumps.extract_secrets",
     "vpc-endpoints": "apiforge.adapters.awsdumps.extract_vpc_endpoints",
     "s3": "apiforge.adapters.awsdumps.extract_s3",
+    "alb": "apiforge.adapters.awsdumps.extract_alb",
+    "ecs": "apiforge.adapters.awsdumps.extract_ecs",
+    "eks": "apiforge.adapters.awsdumps.extract_eks",
+    "ec2": "apiforge.adapters.awsdumps.extract_ec2",
+    "msk": "apiforge.adapters.awsdumps.extract_msk",
+    "elasticache": "apiforge.adapters.awsdumps.extract_elasticache",
 }
 
 

@@ -284,6 +284,12 @@ _VERBS: tuple[tuple[str, tuple[str, ...], Callable[..., Any]], ...] = (
     ("model secrets", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_secrets")),
     ("model vpc-endpoints", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_vpc_endpoints")),
     ("model s3", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_s3")),
+    ("model alb", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_alb")),
+    ("model ecs", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_ecs")),
+    ("model eks", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_eks")),
+    ("model ec2", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_ec2")),
+    ("model msk", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_msk")),
+    ("model elasticache", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_elasticache")),
     ("perf compare", ("baseline", "candidate"), _verb_perf_compare),
     ("perf verdict", ("input_path",), _verb_perf_verdict),
 )

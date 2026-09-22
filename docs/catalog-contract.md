@@ -114,6 +114,12 @@ default.
 | `AF-SECRETS-DUMP` | `secret.json` missing or invalid |
 | `AF-VPC-DUMP` | `endpoints.json` missing or invalid |
 | `AF-S3-DUMP` | `encryption.json`/`public-access.json`/`versioning.json` missing or invalid |
+| `AF-ALB-DUMP` | `load-balancer.json`/`listeners.json`/`target-groups.json`/`attributes.json` missing or invalid |
+| `AF-ECS-DUMP` | `services.json`/`task-definitions.json` missing, invalid, or a `describe_services` failure was recorded |
+| `AF-EKS-DUMP` | `cluster.json` missing or invalid |
+| `AF-EC2-DUMP` | `instances.json` missing or invalid |
+| `AF-MSK-DUMP` | `cluster.json` missing or invalid |
+| `AF-ECACHE-DUMP` | `replication-group.json` missing or invalid |
 
 ## Data-access adapters (`model mongo`/`dynamodb-access`/`neptune-access`)
 

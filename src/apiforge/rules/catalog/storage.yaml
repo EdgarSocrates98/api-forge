@@ -62,3 +62,26 @@ rules:
       sized to the incident-review window.
     reference: https://docs.aws.amazon.com/step-functions/latest/dg/cw-logs.html
     check: {kind: aws.sfn.state_machine, path: measures.logging_level, op: eq, value: "OFF"}
+  - id: AF-STORE-006
+    title: ElastiCache replication group without transit encryption
+    severity: high
+    rationale: >-
+      `TransitEncryptionEnabled: false` sends cache reads/writes in
+      cleartext — cached API payloads and session data are readable on
+      the wire.
+    remediation: >-
+      Enable transit encryption (TLS) on the replication group; pair it
+      with an auth token (AUTH) for access control.
+    reference: https://docs.aws.amazon.com/AmazonElastiCache/latest/redug/in-transit-encryption.html
+    check: {kind: aws.elasticache.replicationgroup, path: measures.transit_encryption_enabled, op: eq, value: false}
+  - id: AF-STORE-007
+    title: ElastiCache replication group without at-rest encryption
+    severity: high
+    rationale: >-
+      `AtRestEncryptionEnabled: false` leaves snapshots, backups and swap
+      unencrypted — cached API data persists readable at the storage layer.
+    remediation: >-
+      Enable at-rest encryption (KMS) — it can only be set at creation;
+      migrate via snapshot restore into an encrypted group.
+    reference: https://docs.aws.amazon.com/AmazonElastiCache/latest/redug/at-rest-encryption.html
+    check: {kind: aws.elasticache.replicationgroup, path: measures.at_rest_encryption_enabled, op: eq, value: false}

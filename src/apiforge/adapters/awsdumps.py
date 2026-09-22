@@ -677,3 +677,296 @@ def extract_s3(dump_dir: Path) -> CodeInventory:
             )
         )
     return _inventory("s3", dump, facts, diagnostics, hashes)
+
+
+def extract_alb(dump_dir: Path) -> CodeInventory:
+    """Read a `collect alb` dump — load balancer, listeners, target groups."""
+    dump = Path(dump_dir)
+    diagnostics: list[Diagnostic] = []
+    hashes: dict[str, str] = {}
+    facts: list[Fact] = []
+    lb = _load(dump, "load-balancer.json", hashes, diagnostics, "AF-ALB-DUMP")
+    listeners = _load(dump, "listeners.json", hashes, diagnostics, "AF-ALB-DUMP")
+    groups = _load(dump, "target-groups.json", hashes, diagnostics, "AF-ALB-DUMP")
+    attrs = _load(dump, "attributes.json", hashes, diagnostics, "AF-ALB-DUMP")
+    internet_facing = False
+    if isinstance(lb, dict):
+        for balancer in lb.get("LoadBalancers", []):
+            if not isinstance(balancer, dict):
+                continue
+            internet_facing = balancer.get("Scheme") == "internet-facing"
+            attr_map = {}
+            if isinstance(attrs, dict):
+                attr_map = {
+                    a.get("Key"): a.get("Value")
+                    for a in attrs.get("Attributes", [])
+                    if isinstance(a, dict)
+                }
+            facts.append(
+                _fact(
+                    "aws.alb.loadbalancer",
+                    "load-balancer.json",
+                    hashes["load-balancer.json"],
+                    {
+                        "scheme": balancer.get("Scheme", ""),
+                        "type": balancer.get("Type", ""),
+                        "access_logs_enabled": attr_map.get(
+                            "access_logs.s3.enabled"
+                        )
+                        == "true",
+                        "deletion_protection": attr_map.get(
+                            "deletion_protection.enabled"
+                        )
+                        == "true",
+                    },
+                    {"dns_name": balancer.get("DNSName", "")},
+                )
+            )
+    if isinstance(listeners, list):
+        for listener in listeners:
+            if not isinstance(listener, dict):
+                continue
+            protocol = listener.get("Protocol", "")
+            tls = protocol in ("HTTPS", "TLS")
+            facts.append(
+                _fact(
+                    "aws.alb.listener",
+                    "listeners.json",
+                    hashes["listeners.json"],
+                    {
+                        "protocol": protocol,
+                        "port": listener.get("Port"),
+                        "tls": tls,
+                        # composite: plain HTTP only matters on a public LB
+                        "internet_facing_plain_http": internet_facing
+                        and protocol == "HTTP",
+                    },
+                    {"listener_arn": listener.get("ListenerArn", "")},
+                )
+            )
+    if isinstance(groups, list):
+        for group in groups:
+            if not isinstance(group, dict):
+                continue
+            facts.append(
+                _fact(
+                    "aws.alb.targetgroup",
+                    "target-groups.json",
+                    hashes["target-groups.json"],
+                    {
+                        "protocol": group.get("Protocol", ""),
+                        "health_check_enabled": bool(
+                            group.get("HealthCheckEnabled", True)
+                        ),
+                        "deregistration_delay_s": None,
+                    },
+                    {"target_group_arn": group.get("TargetGroupArn", "")},
+                )
+            )
+    return _inventory("alb", dump, facts, diagnostics, hashes)
+
+
+def extract_ecs(dump_dir: Path) -> CodeInventory:
+    """Read a `collect ecs` dump — per-service posture facts."""
+    dump = Path(dump_dir)
+    diagnostics: list[Diagnostic] = []
+    hashes: dict[str, str] = {}
+    facts: list[Fact] = []
+    services = _load(dump, "services.json", hashes, diagnostics, "AF-ECS-DUMP")
+    _load(dump, "task-definitions.json", hashes, diagnostics, "AF-ECS-DUMP")
+    if isinstance(services, dict):
+        for failure in services.get("failures", []):
+            if isinstance(failure, dict):
+                diagnostics.append(
+                    Diagnostic(
+                        code="AF-ECS-DUMP",
+                        status=FindingStatus.UNRESOLVED,
+                        message=(
+                            f"describe_services failure: "
+                            f"{failure.get('arn', '?')} — {failure.get('reason', '?')}"
+                        ),
+                        source=None,
+                    )
+                )
+        for svc in services.get("services", []):
+            if not isinstance(svc, dict):
+                continue
+            deploy = svc.get("deploymentConfiguration", {})
+            breaker = deploy.get("deploymentCircuitBreaker", {})
+            facts.append(
+                _fact(
+                    "aws.ecs.service",
+                    "services.json",
+                    hashes["services.json"],
+                    {
+                        "desired_count": svc.get("desiredCount"),
+                        "launch_type": svc.get("launchType", ""),
+                        "circuit_breaker_enabled": bool(
+                            breaker.get("enable")
+                        ),
+                        "circuit_breaker_rollback": bool(
+                            breaker.get("rollback")
+                        ),
+                        "minimum_healthy_percent": deploy.get(
+                            "minimumHealthyPercent"
+                        ),
+                    },
+                    {"service_name": svc.get("serviceName", "")},
+                )
+            )
+    return _inventory("ecs", dump, facts, diagnostics, hashes)
+
+
+def extract_eks(dump_dir: Path) -> CodeInventory:
+    """Read a `collect eks` dump — ``aws.eks.cluster`` posture."""
+    dump = Path(dump_dir)
+    diagnostics: list[Diagnostic] = []
+    hashes: dict[str, str] = {}
+    facts: list[Fact] = []
+    data = _load(dump, "cluster.json", hashes, diagnostics, "AF-EKS-DUMP")
+    if isinstance(data, dict):
+        cluster = data.get("cluster", {})
+        vpc = cluster.get("resourcesVpcConfig", {})
+        logging = cluster.get("logging", {}).get("clusterLogging", [])
+        enabled_types = [
+            t
+            for entry in logging
+            if isinstance(entry, dict) and entry.get("enabled")
+            for t in entry.get("types", [])
+        ]
+        facts.append(
+            _fact(
+                "aws.eks.cluster",
+                "cluster.json",
+                hashes["cluster.json"],
+                {
+                    "version": cluster.get("version", ""),
+                    "public_endpoint": bool(
+                        vpc.get("endpointPublicAccess", True)
+                    ),
+                    "private_endpoint": bool(
+                        vpc.get("endpointPrivateAccess")
+                    ),
+                    "control_plane_logging": bool(enabled_types),
+                    "secrets_encrypted": bool(cluster.get("encryptionConfig")),
+                },
+                {"cluster_name": cluster.get("name", "")},
+            )
+        )
+    return _inventory("eks", dump, facts, diagnostics, hashes)
+
+
+
+
+def extract_ec2(dump_dir: Path) -> CodeInventory:
+    """Read a `collect ec2` dump — per-instance posture facts."""
+    dump = Path(dump_dir)
+    diagnostics: list[Diagnostic] = []
+    hashes: dict[str, str] = {}
+    facts: list[Fact] = []
+    data = _load(dump, "instances.json", hashes, diagnostics, "AF-EC2-DUMP")
+    if isinstance(data, dict):
+        for reservation in data.get("Reservations", []):
+            if not isinstance(reservation, dict):
+                continue
+            for inst in reservation.get("Instances", []):
+                if not isinstance(inst, dict):
+                    continue
+                metadata = inst.get("MetadataOptions", {})
+                facts.append(
+                    _fact(
+                        "aws.ec2.instance",
+                        "instances.json",
+                        hashes["instances.json"],
+                        {
+                            "instance_type": inst.get("InstanceType", ""),
+                            "public_ip": bool(inst.get("PublicIpAddress")),
+                            "imdsv2_required": metadata.get("HttpTokens")
+                            == "required",
+                            "monitoring": inst.get("Monitoring", {}).get("State")
+                            == "enabled",
+                        },
+                        {"instance_id": inst.get("InstanceId", "")},
+                    )
+                )
+    return _inventory("ec2", dump, facts, diagnostics, hashes)
+
+
+def extract_msk(dump_dir: Path) -> CodeInventory:
+    """Read a `collect msk` dump — ``aws.msk.cluster`` posture."""
+    dump = Path(dump_dir)
+    diagnostics: list[Diagnostic] = []
+    hashes: dict[str, str] = {}
+    facts: list[Fact] = []
+    data = _load(dump, "cluster.json", hashes, diagnostics, "AF-MSK-DUMP")
+    if isinstance(data, dict):
+        info = data.get("ClusterInfo", {})
+        enc = info.get("EncryptionInfo", {})
+        in_transit = enc.get("EncryptionInTransit", {})
+        client_broker = in_transit.get("ClientBroker", "")
+        logging = info.get("LoggingInfo", {}).get("BrokerLogs", {})
+        logs_on = any(
+            (logging.get(dest) or {}).get("Enabled")
+            for dest in ("CloudWatchLogs", "Firehose", "S3")
+        )
+        facts.append(
+            _fact(
+                "aws.msk.cluster",
+                "cluster.json",
+                hashes["cluster.json"],
+                {
+                    "plaintext_allowed": client_broker
+                    in ("PLAINTEXT", "TLS_PLAINTEXT"),
+                    "public_access": info.get("BrokerNodeGroupInfo", {})
+                    .get("ConnectivityInfo", {})
+                    .get("PublicAccess", {})
+                    .get("Type")
+                    == "SERVICE_PROVIDED_EIPS",
+                    "broker_logging": bool(logs_on),
+                },
+                {"cluster_name": info.get("ClusterName", "")},
+            )
+        )
+    return _inventory("msk", dump, facts, diagnostics, hashes)
+
+
+def extract_elasticache(dump_dir: Path) -> CodeInventory:
+    """Read a `collect elasticache` dump — replication-group posture."""
+    dump = Path(dump_dir)
+    diagnostics: list[Diagnostic] = []
+    hashes: dict[str, str] = {}
+    facts: list[Fact] = []
+    data = _load(
+        dump, "replication-group.json", hashes, diagnostics, "AF-ECACHE-DUMP"
+    )
+    if isinstance(data, dict):
+        for group in data.get("ReplicationGroups", []):
+            if not isinstance(group, dict):
+                continue
+            facts.append(
+                _fact(
+                    "aws.elasticache.replicationgroup",
+                    "replication-group.json",
+                    hashes["replication-group.json"],
+                    {
+                        "transit_encryption_enabled": bool(
+                            group.get("TransitEncryptionEnabled")
+                        ),
+                        "at_rest_encryption_enabled": bool(
+                            group.get("AtRestEncryptionEnabled")
+                        ),
+                        "auth_token_enabled": bool(group.get("AuthTokenEnabled")),
+                        "automatic_failover": group.get("AutomaticFailover", "")
+                        == "enabled",
+                        "snapshot_retention_days": group.get(
+                            "SnapshotRetentionLimit"
+                        ),
+                    },
+                    {
+                        "replication_group_id": group.get(
+                            "ReplicationGroupId", ""
+                        )
+                    },
+                )
+            )
+    return _inventory("elasticache", dump, facts, diagnostics, hashes)

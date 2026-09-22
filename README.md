@@ -82,6 +82,7 @@ while refusal codes and `fact_id`s survive.
 | `apiforge model terraform --path infra/` | API Gateway + Lambda resources from HCL; `${...}` → `AF-TF-UNRESOLVED` |
 | `apiforge model sam --path template.yaml` | Serverless resources; `!Ref`/`!Sub` → `AF-SAM-UNRESOLVED` |
 | `apiforge model pact\|schemathesis\|k6\|coverage --path r.json` | Test-tool reports → `test.*` facts (tools never run) |
+| `apiforge model locust\|jmeter\|gatling\|vegeta\|wrk\|hey\|pytest-benchmark --path r` | Load-tool reports → `test.<tool>.summary` facts — RPS/TPS kept distinct, microbenchmarks never read as load runs |
 | `apiforge model zap\|semgrep\|trivy\|gitleaks --path r.json` | Security reports → `sec.*` facts (gitleaks never emits secrets) |
 | `apiforge report build --case .apiforge/case --out report.json` | Compose the release evidence bundle |
 | `apiforge report sign --report report.json` | Pin body/evidence/catalog hashes into the signature block |
@@ -89,6 +90,7 @@ while refusal codes and `fact_id`s survive.
 | `apiforge report keygen --name k [--keys-dir D]` | Ed25519 keypair; `report sign --key`/`verify --pubkey` prove key possession, never identity |
 | `apiforge dispatch run --coordinator C --case DIR` | Execute the playbook's dispatchable steps; missing inputs land in `pending`, never crash |
 | `apiforge run tool semgrep\|trivy\|gitleaks\|k6 --target T --out R` | Allowlisted scanner execution (fixed argv, no shell, `--dry-run` prints argv) |
+| `apiforge run list` | Tool registry — declared metadata (license, capabilities, modes, evidence producer) plus *measured* install status; import-only tools refuse `run` with `AF-RUN-IMPORT-ONLY` |
 | `apiforge debate open|submit|close` | Deterministic debate machine — positions cite `fact:` evidence, quorum of 2 sides |
 | `apiforge plan strangler --project P --contract C` | Per-route cut plan; migrated routes name the parity evidence still due |
 | `apiforge contract list\|show <name>` | Versioned canonical contracts (JSON schema per `<Name>/v1`) |

@@ -105,3 +105,45 @@ def test_tool_without_report_is_named(
     monkeypatch.setattr(subprocess, "run", silent_fail)
     with pytest.raises(RunError, match="AF-RUN-NO-REPORT"):
         run_tool("trivy", tmp_path, tmp_path / "o.json", {}, 10)
+
+
+def test_registry_covers_every_runnable_tool() -> None:
+    from apiforge.run_tools import TOOL_REGISTRY, TOOLS
+
+    for name in TOOLS:
+        entry = TOOL_REGISTRY[name]
+        assert entry["runnable"] is True
+        assert entry["parser"] == TOOLS[name]["reader"]
+
+
+def test_registry_fields_complete() -> None:
+    from apiforge.run_tools import TOOL_REGISTRY
+
+    required = {
+        "category", "license", "input", "output", "capabilities", "limits",
+        "cost", "needs_network", "needs_credentials", "local_support",
+        "aws_support", "parser", "compat", "evidence_producer", "modes",
+        "runnable", "install",
+    }
+    for name, meta in TOOL_REGISTRY.items():
+        missing = required - set(meta)
+        assert not missing, f"{name}: {missing}"
+        for field in ("capabilities", "limits", "modes"):
+            assert meta[field], f"{name}.{field} empty"
+
+
+def test_import_only_tool_named() -> None:
+    from apiforge.run_tools import run_tool
+
+    with pytest.raises(RunError, match="AF-RUN-IMPORT-ONLY"):
+        run_tool("locust", Path("."), Path("o.json"), {}, 5)
+
+
+def test_list_tools_measures_install_not_declares() -> None:
+    from apiforge.run_tools import list_tools
+
+    rows = list_tools()
+    assert len(rows) == 11
+    by_name = {r["name"]: r for r in rows}
+    assert "installed" in by_name["k6"]  # measured via shutil.which
+    assert by_name["locust"]["runnable"] is False

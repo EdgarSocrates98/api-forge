@@ -923,6 +923,21 @@ _REPORT_READERS: tuple[tuple[str, str, str], ...] = (
         "Schemathesis JSON report.",
     ),
     ("k6", "apiforge.adapters.testreports.extract_k6", "k6 --summary-export JSON."),
+    ("locust", "apiforge.adapters.testreports.extract_locust", "Locust --csv stats export."),
+    ("jmeter", "apiforge.adapters.testreports.extract_jmeter", "JMeter JTL CSV."),
+    (
+        "gatling",
+        "apiforge.adapters.testreports.extract_gatling",
+        "Gatling global_stats.json or report dir.",
+    ),
+    ("vegeta", "apiforge.adapters.testreports.extract_vegeta", "vegeta report -type=json."),
+    ("wrk", "apiforge.adapters.testreports.extract_wrk", "wrk stdout summary text."),
+    ("hey", "apiforge.adapters.testreports.extract_hey", "hey -o csv export."),
+    (
+        "pytest-benchmark",
+        "apiforge.adapters.testreports.extract_pytest_benchmark",
+        "pytest-benchmark --benchmark-json.",
+    ),
     ("coverage", "apiforge.adapters.testreports.extract_coverage", "coverage.py JSON report."),
     ("zap", "apiforge.adapters.secreports.extract_zap", "OWASP ZAP JSON report."),
     ("semgrep", "apiforge.adapters.secreports.extract_semgrep", "Semgrep --json output."),
@@ -1374,6 +1389,20 @@ def run_tool_cmd(
             return run_tool(tool, target, out, extra, timeout, dry_run=dry_run)
         except RunError as exc:
             raise AnalysisError(exc.code, str(exc).split(": ", 1)[-1]) from exc
+
+    _echo_json(_run(work), detail_level)
+
+
+@run_app.command("list")
+def run_list(
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """The tool registry — declared metadata plus *measured* install status."""
+
+    def work() -> dict[str, object]:
+        from apiforge.run_tools import list_tools
+
+        return {"tools": list_tools()}
 
     _echo_json(_run(work), detail_level)
 

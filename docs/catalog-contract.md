@@ -383,6 +383,7 @@ scanner runs, the target stays data. `zap` is deliberately absent
 | `AF-RUN-CONFIG-MISSING` | semgrep without a local `--config` (`auto` hits the network) |
 | `AF-RUN-TIMEOUT` | the run exceeded `--timeout` |
 | `AF-RUN-NO-REPORT` | the tool exited without writing the report file |
+| `AF-RUN-IMPORT-ONLY` | tool is in the registry as a report reader only — `run` never executes it; feed the report to `model <tool>` |
 
 ## Provider tokens (`economy report`)
 

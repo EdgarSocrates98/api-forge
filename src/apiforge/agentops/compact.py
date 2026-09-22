@@ -13,6 +13,8 @@ from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
 
+from apiforge.agentops.filters import apply_filter
+
 
 class CavemanMode(StrEnum):
     """Output posture shared by host integrations."""
@@ -121,7 +123,8 @@ def compact_text(
     limit = _MODE_LIMITS[selected_mode] if max_lines is None else max_lines
     original_bytes = len(text.encode("utf-8"))
     source_sha256 = hashlib.sha256(text.encode("utf-8")).hexdigest()
-    lines, critical = _clean_lines(text)
+    filtered_text = apply_filter(text, command)
+    lines, critical = _clean_lines(filtered_text)
     if limit is None:
         indexes = list(range(len(lines)))
     else:

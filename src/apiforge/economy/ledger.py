@@ -10,9 +10,13 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, Protocol
 
 LEDGER_NAME = "economy.jsonl"
+
+
+class _CompactionResult(Protocol):
+    def to_dict(self) -> dict[str, object]: ...
 
 
 def ledger_path(root: Path) -> Path:
@@ -40,6 +44,31 @@ def record(root: Path, *, verb: str, detail_level: str, payload_bytes: int) -> N
         return
 
 
+def record_compaction(root: Path, result: _CompactionResult) -> None:
+    """Record compacted transport bytes without claiming token savings."""
+    try:
+        payload = result.to_dict()  # CompactedOutput protocol, kept duck-typed.
+        path = ledger_path(Path(root))
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("a", encoding="utf-8") as fh:
+            fh.write(
+                json.dumps(
+                    {
+                        "verb": f"compact:{payload['command']}",
+                        "detail_level": payload["mode"],
+                        "payload_bytes": payload["emitted_bytes"],
+                        "source_bytes": payload["original_bytes"],
+                        "source_sha256": payload["source_sha256"],
+                        "critical_evidence_preserved": payload["critical_evidence_preserved"],
+                    },
+                    sort_keys=True,
+                )
+                + "\n"
+            )
+    except (AttributeError, KeyError, OSError, TypeError):
+        return
+
+
 def _bucket() -> dict[str, int]:
     return {"calls": 0, "payload_bytes": 0}
 
@@ -62,6 +91,7 @@ def report(root: Path) -> dict[str, Any]:
     by_level: dict[str, dict[str, int]] = {}
     per_verb_level: dict[str, dict[str, int]] = {}
     total = _bucket()
+    compaction = {"calls": 0, "source_bytes": 0, "emitted_bytes": 0, "saved_bytes": 0}
     for e in entries:
         verb = str(e.get("verb", "unknown"))
         level = str(e.get("detail_level", "normal"))
@@ -69,6 +99,12 @@ def report(root: Path) -> dict[str, Any]:
         _add(total, size)
         _add(by_verb.setdefault(verb, _bucket()), size)
         _add(by_level.setdefault(level, _bucket()), size)
+        if verb.startswith("compact:"):
+            source_bytes = int(e.get("source_bytes", size))
+            compaction["calls"] += 1
+            compaction["source_bytes"] += source_bytes
+            compaction["emitted_bytes"] += size
+            compaction["saved_bytes"] += max(0, source_bytes - size)
         levels = per_verb_level.setdefault(verb, {})
         levels[level] = levels.get(level, 0) + size
 
@@ -88,5 +124,6 @@ def report(root: Path) -> dict[str, Any]:
         "by_level": dict(sorted(by_level.items())),
         "detail_level_effect": detail_level_effect,
         "tokens_unresolved": True,
+        "compaction": compaction,
         "ledger": str(path),
     }

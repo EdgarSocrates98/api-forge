@@ -91,6 +91,12 @@ context_app = typer.Typer(
     no_args_is_help=True,
 )
 app.add_typer(context_app)
+agentops_app = typer.Typer(
+    name="agentops",
+    help="Host-neutral Caveman/RTK protocols, workflows and adapters.",
+    no_args_is_help=True,
+)
+app.add_typer(agentops_app)
 report_app = typer.Typer(
     name="report",
     help="Release evidence bundle — sign binds hashes; verify names what diverged.",
@@ -2460,18 +2466,65 @@ def context_compact(
 
     def work() -> dict[str, object]:
         from apiforge.agentops.compact import compact_file
+        from apiforge.economy.ledger import record_compaction
 
         try:
-            return compact_file(
+            result = compact_file(
                 input_path,
                 command=command,
                 mode=mode,
                 max_lines=max_lines,
-            ).to_dict()
+            )
+            record_compaction(Path.cwd(), result)
+            return result.to_dict()
         except (FileNotFoundError, ValueError) as exc:
             raise AnalysisError("AF-COMPACT-INVALID", str(exc)) from exc
 
     _echo_json(_run(work), detail_level)
+
+
+@agentops_app.command("filters")
+def agentops_filters(
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """List closed command filters used by the RTK adapter."""
+    from apiforge.agentops.filters import list_filters
+
+    _echo_json(list_filters(), detail_level)
+
+
+@agentops_app.command("workflows")
+def agentops_workflows(
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """List deterministic Caveman-inspired API workflows."""
+    from apiforge.agentops.workflows import list_workflows
+
+    _echo_json(list_workflows(), detail_level)
+
+
+@agentops_app.command("workflow")
+def agentops_workflow(
+    name: str = typer.Argument(..., help="Workflow name."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Render one workflow plan; execution remains governed by TaskSpec."""
+    from apiforge.agentops.workflows import plan_workflow
+
+    try:
+        _echo_json(plan_workflow(name).to_dict(), detail_level)
+    except ValueError as exc:
+        _fail("AF-WORKFLOW-UNKNOWN", str(exc))
+
+
+@agentops_app.command("hosts")
+def agentops_hosts(
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """List host adapters for Claude, GPT/Codex, Devin and Copilot."""
+    from apiforge.agentops.hosts import list_hosts
+
+    _echo_json(list_hosts(), detail_level)
 
 
 @app.command("playbook")

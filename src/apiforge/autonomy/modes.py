@@ -29,6 +29,22 @@ class AutonomyMode(StrEnum):
     CONTINUOUS = "continuous"
 
 
+# The v1 spec names five modes; the implementation splits that axis into
+# mode (execution posture) x policy action class (permission). The map is
+# the auditable correspondence — see docs/decisions/ADR-010.
+V1_MODE_MAP: dict[str, AutonomyMode] = {
+    # v1 name            -> resolved mode   (the class carries the rest)
+    "observe": AutonomyMode.OBSERVE,
+    # proposals are ledger entries; nothing executes under observe
+    "recommend": AutonomyMode.OBSERVE,
+    # local_reversible auto-executes; gates halt = supervised sandbox
+    "sandbox": AutonomyMode.SUPERVISED,
+    # sensitive/external_mutation proceed only with gate detail supplied
+    "approved": AutonomyMode.SUPERVISED,
+    "continuous": AutonomyMode.CONTINUOUS,
+}
+
+
 _ORDER = {
     AutonomyMode.OBSERVE: 0,
     AutonomyMode.SUPERVISED: 1,
@@ -69,13 +85,18 @@ def load_mode(root: Path) -> ModeState:
 
 
 def parse_mode(raw: str) -> AutonomyMode:
+    """Resolve a mode name — v1 vocabulary included, mapping auditable."""
     try:
         return AutonomyMode(raw)
     except ValueError:
-        raise AutonomyError(
-            "AF-AUTONOMY-MODE-UNKNOWN",
-            f"{raw!r} not in {[m.value for m in AutonomyMode]}",
-        ) from None
+        pass
+    resolved = V1_MODE_MAP.get(raw)
+    if resolved is not None:
+        return resolved
+    raise AutonomyError(
+        "AF-AUTONOMY-MODE-UNKNOWN",
+        f"{raw!r} not in {sorted(m.value for m in AutonomyMode) + sorted(V1_MODE_MAP)}",
+    ) from None
 
 
 def is_escalation(current: AutonomyMode, target: AutonomyMode) -> bool:

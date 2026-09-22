@@ -65,6 +65,7 @@ def set_mode(
     reason: str,
     policy: Policy,
     detail: dict[str, str],
+    requested: str | None = None,
 ) -> ModeState:
     """Change the mode — the change itself is a ``sensitive`` policy action.
 
@@ -93,6 +94,9 @@ def set_mode(
         "rule": decision.rule,
         "missing": list(decision.missing_requirements),
     }
+    if requested is not None and requested != target.value:
+        # v1 vocabulary accepted via V1_MODE_MAP — the mapping is recorded
+        entry["requested"] = requested
     if decision.outcome != "allow":
         entry["result"] = "refused"
         append_ledger(root, entry)

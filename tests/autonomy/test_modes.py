@@ -36,6 +36,7 @@ def _set(root: Path, mode: str, **detail: str) -> None:
         reason="test",
         policy=DEFAULT_POLICY,
         detail=detail,
+        requested=mode,
     )
 
 
@@ -254,3 +255,21 @@ def test_ledger_is_append_only_and_recorded(tmp_path: Path) -> None:
     entries = read_ledger(tmp_path)
     assert len(entries) == 2
     assert all(e["event"] == "action" for e in entries)
+
+
+def test_v1_mode_names_resolve_through_map(tmp_path: Path) -> None:
+    """AT-008: v1's five names resolve; the requested name is recorded."""
+    from apiforge.autonomy.modes import V1_MODE_MAP
+
+    assert parse_mode("recommend") is AutonomyMode.OBSERVE
+    assert parse_mode("sandbox") is AutonomyMode.SUPERVISED
+    assert parse_mode("approved") is AutonomyMode.SUPERVISED
+    assert parse_mode("continuous") is AutonomyMode.CONTINUOUS
+    assert set(V1_MODE_MAP) == {
+        "observe", "recommend", "sandbox", "approved", "continuous"
+    }
+    _set(tmp_path, "sandbox", evidence="e1", approval="ops")
+    assert load_mode(tmp_path).mode is AutonomyMode.SUPERVISED
+    entry = read_ledger(tmp_path)[-1]
+    assert entry["requested"] == "sandbox"
+    assert entry["to"] == "supervised"

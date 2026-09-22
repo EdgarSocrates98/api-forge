@@ -26,6 +26,7 @@ requires the cost of the run that never happened.
 | `AF-OBS-CREDENTIAL-PROVIDER` | credential provider is unsupported |
 | `AF-OBS-CREDENTIAL-REFERENCE` | credential reference is empty or invalid |
 | `AF-OBS-CREDENTIAL-SOURCE` | credential source is outside the closed broker vocabulary |
+| `AF-OBS-ADAPTER-PROVIDER` | read adapter, plan and credential provider do not match |
 | `AF-HOST-ACTIVATION-INVALID` | host activation plan input is invalid |
 | `AF-HOST-ACTIVATION-HOST` | requested host has no activation plan |
 

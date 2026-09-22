@@ -184,10 +184,22 @@ class CircuitBreakerMetrics(VersionedContract):
 class CircuitMetricsExportReceipt(VersionedContract):
     provider: ObservabilityProvider
     backend: Literal["otel", "datadog", "dynatrace"]
-    status: Literal["disabled", "prepared", "sent", "failed"]
+    status: Literal["blocked", "disabled", "prepared", "sent", "failed"]
     metric_count: int = Field(ge=0)
+    credential_reference: str | None = None
+    approval_id: str | None = None
     network_called: bool = False
+    violations: tuple[str, ...] = ()
     evidence: tuple[str, ...] = ()
+
+
+class HostExportBinding(VersionedContract):
+    provider: Literal["otel", "datadog", "dynatrace"]
+    backend: Literal["otel", "datadog", "dynatrace"]
+    endpoint: str
+    credential_reference: str
+    approval_id: str | None = None
+    enabled: bool = False
 
 
 class CredentialReference(VersionedContract):

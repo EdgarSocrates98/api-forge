@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Set as AbstractSet
+from collections.abc import Mapping
+from collections.abc import Set as AbstractSet
 from typing import Protocol
 from urllib.parse import urlsplit
 

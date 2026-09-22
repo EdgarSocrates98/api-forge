@@ -43,6 +43,7 @@ class DispatchContext:
     rule_id: str | None = None
     now: str | None = None
     operation_id: str | None = None  # build endpoint target
+    tool: str | None = None  # perf scenario generator selection
 
 
 def _canon_sha(payload: object) -> str:
@@ -236,6 +237,14 @@ def _verb_perf_verdict(ctx: DispatchContext) -> dict[str, object]:
     return verdict(PerformanceRun.model_validate(doc)).model_dump(mode="json")
 
 
+def _verb_perf_scenario(ctx: DispatchContext) -> dict[str, object]:
+    from apiforge.perf.scenario import generate_scenario
+
+    assert ctx.input_path is not None and ctx.tool is not None
+    spec = json.loads(ctx.input_path.read_text(encoding="utf-8"))
+    return dict(generate_scenario(ctx.tool, spec))
+
+
 def _verb_plan_architecture(ctx: DispatchContext) -> dict[str, object]:
     from apiforge.contracts.stubs import WorkloadProfile
     from apiforge.plan.architecture import recommend
@@ -303,6 +312,7 @@ _VERBS: tuple[tuple[str, tuple[str, ...], Callable[..., Any]], ...] = (
     ("model elasticache", ("input_path",), _model_verb("apiforge.adapters.awsdumps.extract_elasticache")),
     ("perf compare", ("baseline", "candidate"), _verb_perf_compare),
     ("perf verdict", ("input_path",), _verb_perf_verdict),
+    ("perf scenario", ("input_path", "tool"), _verb_perf_scenario),
     ("plan architecture", ("input_path",), _verb_plan_architecture),
 )
 

@@ -20,13 +20,13 @@ routes:
       question: style, compatibility, and lifecycle policy.
   - phase: build
     dominant_area: TESTING
-    recommended_agent: api-testing-strategist
+    recommended_agent: api-test-strategist
     rationale: >-
       Findings about missing or weak tests during build belong to the
       testing strategist.
   - phase: verify
     dominant_area: TESTING
-    recommended_agent: api-testing-strategist
+    recommended_agent: api-test-strategist
     rationale: >-
       Contract and coverage gaps found while verifying are the testing
       strategist's domain.
@@ -62,13 +62,13 @@ routes:
       SAVE) route to the performance engineer.
   - phase: build
     dominant_area: MESSAGING
-    recommended_agent: api-reliability-engineer
+    recommended_agent: api-resilience-engineer
     rationale: >-
       Missing DLQs, unconfirmed subscriptions and targetless rules are
       delivery-failure modes — the reliability engineer's domain.
   - phase: verify
     dominant_area: MESSAGING
-    recommended_agent: api-reliability-engineer
+    recommended_agent: api-resilience-engineer
     rationale: >-
       Messaging findings at verify time are delivery guarantees, judged
       by the reliability engineer.
@@ -150,3 +150,63 @@ routes:
     rationale: >-
       Gateway findings under the secure phase are edge auth and exposure —
       the security reviewer's domain.
+  - phase: plan
+    dominant_area: REST
+    recommended_agent: api-planner
+    rationale: >-
+      Planning before architecture: the planner turns discovery into a
+      declared WorkloadProfile and a sealed task decomposition.
+  - phase: plan
+    dominant_area: CONTRACT
+    recommended_agent: api-planner
+    rationale: >-
+      Contract risk feeds the plan; the planner names it before any
+      platform decision.
+  - phase: architecture
+    dominant_area: GATEWAY
+    recommended_agent: api-platform-selector
+    rationale: >-
+      Edge/compute selection at architecture time is the decision engine's
+      job — declared profile in, ranked roles out.
+  - phase: architecture
+    dominant_area: STORAGE
+    recommended_agent: api-platform-selector
+    rationale: >-
+      Datastore choice is a platform decision driven by the declared
+      data_model, never a default.
+  - phase: architecture
+    dominant_area: MESSAGING
+    recommended_agent: api-event-driven-architect
+    rationale: >-
+      Async topology (queues, topics, event buses, orchestration) is the
+      event-driven specialist's domain.
+  - phase: architecture
+    dominant_area: OBSERVE
+    recommended_agent: api-operations-engineer
+    rationale: >-
+      Operational posture (runbooks, autonomy modes, telemetry surfaces)
+      belongs in the architecture before build.
+  - phase: verify
+    dominant_area: PERF
+    recommended_agent: api-capacity-engineer
+    rationale: >-
+      A measured run at verify time is a capacity question — verdict over
+      baseline, RPS distinct from TPS.
+  - phase: benchmark
+    dominant_area: TESTING
+    recommended_agent: api-load-test-engineer
+    rationale: >-
+      Load scenarios, tool reports and generator saturation are the load
+      engineer's evidence surface.
+  - phase: build
+    dominant_area: IDENTITY
+    recommended_agent: terraform-reviewer
+    rationale: >-
+      Identity declared in IaC (roles, pools, policies) is reviewed as
+      code before it is reviewed as a dump.
+  - phase: verify
+    dominant_area: SECURITY
+    recommended_agent: api-release-guardian
+    rationale: >-
+      Security findings at verify time block release; the guardian ties
+      the evidence to the gate, not to an opinion.

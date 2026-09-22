@@ -177,7 +177,7 @@ def _parse_inputs(spec: TaskSpec) -> dict[str, Any]:
         key = key.strip()
         if key in _CTX_FIELDS:
             ctx[key] = Path(value.strip())
-        elif key in ("rule_id", "now", "operation_id"):
+        elif key in ("rule_id", "now", "operation_id", "tool"):
             ctx[key] = value.strip()
         elif key.startswith("gate."):
             ctx.setdefault("gate_detail", {})[key[5:]] = value.strip()

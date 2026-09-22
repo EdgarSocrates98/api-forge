@@ -143,7 +143,7 @@ def test_list_tools_measures_install_not_declares() -> None:
     from apiforge.run_tools import list_tools
 
     rows = list_tools()
-    assert len(rows) == 11
+    assert len(rows) == 12
     by_name = {r["name"]: r for r in rows}
     assert "installed" in by_name["k6"]  # measured via shutil.which
     assert by_name["locust"]["runnable"] is False

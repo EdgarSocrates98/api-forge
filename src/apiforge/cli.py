@@ -1189,6 +1189,32 @@ def perf_verdict(
     _echo_json(_run(work), detail_level)
 
 
+@perf_app.command("scenario")
+def perf_scenario(
+    tool: str = typer.Option(..., "--tool", help="k6 | jmeter | locust."),
+    scenario: Path = typer.Option(
+        ..., "--scenario", help="Declared scenario JSON (endpoints, rps, duration)."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Generate the tool's script for a declared scenario — never executes it."""
+
+    def work() -> object:
+        from apiforge.perf.scenario import generate_scenario
+        from apiforge.run_tools import RunError
+
+        try:
+            spec = json.loads(scenario.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError, UnicodeDecodeError) as exc:
+            raise AnalysisError("AF-SCENARIO-SCHEMA", f"{scenario}: {exc}") from exc
+        try:
+            return generate_scenario(tool, spec)
+        except RunError as exc:
+            raise AnalysisError(exc.code, str(exc).split(": ", 1)[-1]) from exc
+
+    _echo_json(_run(work), detail_level)
+
+
 def _load_performance_run(path: Path) -> PerformanceRun:
     """Accept a bare PerformanceRun or the `model otel` payload wrapping one."""
     try:
@@ -1346,6 +1372,9 @@ def dispatch_run(
     ),
     findings: Path | None = typer.Option(None, "--findings"),
     rule_id: str | None = typer.Option(None, "--rule-id"),
+    tool: str | None = typer.Option(
+        None, "--tool", help="Tool selection for verbs that need one (perf scenario)."
+    ),
     now: str | None = typer.Option(None, "--now", help="ISO8601 — the only clock."),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
@@ -1363,6 +1392,7 @@ def dispatch_run(
             input_path=input_path,
             findings=findings,
             rule_id=rule_id,
+            tool=tool,
             now=now,
         )
         return run_playbook(coordinator, ctx)

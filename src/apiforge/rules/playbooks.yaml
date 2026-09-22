@@ -23,12 +23,12 @@ api-performance-engineer:
   - {executor: af-extractor, verb: "analyze", purpose: "route surface the measurements must map to"}
   - {executor: af-judge, verb: "rules list --area PERF", purpose: "performance rules over the declared surface"}
   - {executor: af-synthesizer, verb: "economy report", purpose: "session cost in bytes; gains stay hypotheses until measured"}
-api-testing-strategist:
+api-test-strategist:
   - {executor: af-inventory, verb: "model build", purpose: "operations that demand proof"}
   - {executor: af-extractor, verb: "analyze", purpose: "served routes vs declared operations"}
   - {executor: af-judge, verb: "rules list --area TESTING", purpose: "test-layer rules to apply per operation"}
   - {executor: af-synthesizer, verb: "rules lookup", purpose: "coverage-matrix gaps cited per rule"}
-api-reliability-engineer:
+api-resilience-engineer:
   - {executor: af-inventory, verb: "model api-gateway", purpose: "declared timeouts and limits from the dump"}
   - {executor: af-extractor, verb: "analyze", purpose: "route surface for the time budget"}
   - {executor: af-judge, verb: "rules list --area GATEWAY", purpose: "timeout/throttle rules (AF-GW-003 among them)"}
@@ -61,3 +61,49 @@ api-data-access-architect:
   - {executor: af-judge, verb: "rules list --area DATA", purpose: "AF-DATA-001..013 over the call-site facts"}
   - {executor: af-judge, verb: "rules list --area STORAGE", purpose: "AF-STORE-001..005 over datastore dumps"}
   - {executor: af-synthesizer, verb: "rules lookup", purpose: "access-pattern guidance per rule applied"}
+api-planner:
+  - {executor: af-inventory, verb: "discover", purpose: "inventory project + framework before planning"}
+  - {executor: af-extractor, verb: "analyze", purpose: "facts + findings that define risk"}
+  - {executor: af-judge, verb: "judge", purpose: "severity × area map the plan must answer"}
+  - {executor: af-synthesizer, verb: "next-step", purpose: "route the dominant area; WorkloadProfile stays declared"}
+api-architecture-reviewer:
+  - {executor: af-inventory, verb: "model terraform", purpose: "declared infra as the review surface"}
+  - {executor: af-extractor, verb: "model ecs", purpose: "compute posture facts from dumps on disk"}
+  - {executor: af-judge, verb: "rules list --area GATEWAY", purpose: "edge rules applied to the posture"}
+  - {executor: af-judge, verb: "rules list --area STORAGE", purpose: "datastore posture rules"}
+  - {executor: af-synthesizer, verb: "next-step", purpose: "route; blind spots stay named"}
+api-platform-selector:
+  - {executor: af-inventory, verb: "plan architecture", purpose: "WorkloadProfile -> ranked roles with named rejections"}
+  - {executor: af-judge, verb: "rules list --area GATEWAY", purpose: "edge rules the chosen platform must still satisfy"}
+  - {executor: af-synthesizer, verb: "next-step", purpose: "hand the decision to whoever implements"}
+api-load-test-engineer:
+  - {executor: af-inventory, verb: "perf scenario", purpose: "generate the tool script from a declared scenario"}
+  - {executor: af-extractor, verb: "model k6", purpose: "load report -> test.* facts; readers for the other tools follow the same verb"}
+  - {executor: af-judge, verb: "rules list --area TESTING", purpose: "AF-TEST rules incl. generator saturation"}
+  - {executor: af-verifier, verb: "evidence emit", purpose: "receipt over scenario + report facts"}
+api-capacity-engineer:
+  - {executor: af-inventory, verb: "model otel", purpose: "telemetry export -> PerformanceRun"}
+  - {executor: af-extractor, verb: "perf verdict", purpose: "validity conditions named; inconclusive preserved"}
+  - {executor: af-judge, verb: "rules list --area PERF", purpose: "performance rules over the run facts"}
+  - {executor: af-synthesizer, verb: "perf compare", purpose: "regression deltas against the preserved baseline"}
+api-event-driven-architect:
+  - {executor: af-inventory, verb: "model sqs", purpose: "queue posture from dump"}
+  - {executor: af-extractor, verb: "model eventbridge", purpose: "event bus facts"}
+  - {executor: af-judge, verb: "rules list --area MESSAGING", purpose: "AF-MSG rules over the async surface"}
+  - {executor: af-synthesizer, verb: "next-step", purpose: "route; unmeasured lag stays a blind spot"}
+terraform-reviewer:
+  - {executor: af-inventory, verb: "model terraform", purpose: "HCL resources -> infra.* facts"}
+  - {executor: af-extractor, verb: "model sam", purpose: "serverless template facts; unresolved refs named"}
+  - {executor: af-judge, verb: "rules list --area GATEWAY", purpose: "declared edge posture"}
+  - {executor: af-judge, verb: "rules list --area SECURITY", purpose: "IaC security posture"}
+  - {executor: af-synthesizer, verb: "next-step", purpose: "route; unresolved expressions stay unresolved"}
+api-release-guardian:
+  - {executor: af-inventory, verb: "evidence emit", purpose: "evidence kinds the gate requires, with source hashes"}
+  - {executor: af-extractor, verb: "report build", purpose: "the release evidence bundle"}
+  - {executor: af-verifier, verb: "evidence emit", purpose: "receipt over the bundle for the record"}
+  - {executor: af-synthesizer, verb: "next-step", purpose: "route any blocking finding to its specialist"}
+api-operations-engineer:
+  - {executor: af-inventory, verb: "model cloudwatch", purpose: "telemetry posture from dump"}
+  - {executor: af-extractor, verb: "model xray", purpose: "tracing posture facts"}
+  - {executor: af-judge, verb: "rules list --area OBSERVE", purpose: "observability rules over the posture"}
+  - {executor: af-synthesizer, verb: "next-step", purpose: "route; unobserved signals stay named"}

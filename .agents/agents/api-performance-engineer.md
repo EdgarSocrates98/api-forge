@@ -16,7 +16,7 @@ A pergunta é **quanto custa servir** — tempo, CPU, memória, dados:
 | "Esse endpoint está lento" sem medida | você — capturar baseline primeiro |
 | Dois conjuntos de medidas do mesmo shape | você — delta atribuível |
 | "Quanto custa por requisição?" | você — depois do baseline |
-| "O timeout está certo?" | `api-reliability-engineer` |
+| "O timeout está certo?" | `api-resilience-engineer` |
 
 ## Decomposição
 

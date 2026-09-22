@@ -642,6 +642,28 @@ def run_list(detail_level: str = "normal") -> dict[str, Any]:
     return out
 
 
+def perf_scenario(
+    tool: str, scenario: str, detail_level: str = "normal"
+) -> dict[str, Any]:
+    """Generate a k6/JMeter/Locust script for a declared scenario file."""
+    from apiforge.application.analyze import AnalysisError
+    from apiforge.perf.scenario import generate_scenario
+    from apiforge.run_tools import RunError
+
+    def work() -> dict[str, Any]:
+        try:
+            spec = json.loads(Path(scenario).read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError, UnicodeDecodeError) as exc:
+            raise AnalysisError("AF-SCENARIO-SCHEMA", f"{scenario}: {exc}") from exc
+        try:
+            return dict(generate_scenario(tool, spec))
+        except RunError as exc:
+            raise AnalysisError(exc.code, str(exc).split(": ", 1)[-1]) from exc
+
+    out: dict[str, Any] = _call("perf_scenario", work, detail_level)
+    return out
+
+
 TOOLS: tuple[Callable[..., Any], ...] = (
     discover,
     analyze,
@@ -675,4 +697,5 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     knowledge_check,
     plan_architecture,
     run_list,
+    perf_scenario,
 )

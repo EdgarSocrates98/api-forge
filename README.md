@@ -106,13 +106,14 @@ while refusal codes and `fact_id`s survive.
 | `apiforge model otel --path export.json` | OTLP/JSON trace export → `perf.otel.*` facts + `performance_run`; incomplete spans named unresolved |
 | `apiforge perf compare --baseline A --candidate B --threshold-pct N` | `compare_runs`/`detect_regression` over two PerformanceRuns; `added`/`removed`/`insufficient_data` always named |
 | `apiforge perf verdict --run run.json` | `passed`/`failed`/`inconclusive` per run — validity conditions (baseline, generator saturation, TPS = completed transactions) name unevaluable evidence, never guess |
+| `apiforge perf scenario --tool k6\|jmeter\|locust --scenario s.json` | Generate the tool's script for a declared scenario — deterministic template, never executes |
 | `apiforge autonomy status|set|run|runbook|ledger` | Modes observe→supervised→continuous over the policy engine; `set` is itself policy-gated; every evaluation lands in `ledger.jsonl` |
 | `apiforge index build|status --project P` | Content-hash indexes (files/symbols/routes/facts); status names added/changed/removed |
 | — | `analyze`/`discover` extractors run through `.apiforge/cache/` — hits are recorded in the ledger and named in the payload |
 
 ## Agentic layer
 
-Eleven coordinator profiles in `agents/*.md` (one per specialty, each declaring
+Twenty coordinator profiles in `agents/*.md` (one per specialty, each declaring
 `rule_areas` and the five executors) plus five executors in
 `agents/executors/*.md` (`af-inventory`, `af-extractor`, `af-judge`,
 `af-verifier`, `af-synthesizer`). `AGENT_PROTOCOL.md` is the operating

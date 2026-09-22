@@ -20,6 +20,7 @@ from apiforge.contracts.stubs import (
     PerformanceRun,
     RuntimeMatrix,
     TelemetryEvent,
+    TestRecord,
     WorkloadProfile,
 )
 from apiforge.contracts.task import (
@@ -58,6 +59,7 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "DataAccessIR/v1": DataAccessIR,
     "RuntimeMatrix/v1": RuntimeMatrix,
     "WorkloadProfile/v1": WorkloadProfile,
+    "TestRecord/v1": TestRecord,
 }
 
 

@@ -545,6 +545,8 @@ values and `delta_pct`. Operations on only one side are named
 | `AF-OTEL-SPAN-INCOMPLETE` | spans lack usable timestamps — counted, named |
 | `AF-OTEL-SERVICE-UNKNOWN` | no `service.name` resource attribute |
 | `AF-PERF-RUN-INVALID` | compare input is not a PerformanceRun payload |
+| `AF-SCENARIO-TOOL` | `perf scenario` asked for a generator outside k6/jmeter/locust |
+| `AF-SCENARIO-SCHEMA` | scenario JSON is not an object or has no usable `endpoints` |
 
 ### Autonomy modes (`autonomy`)
 

@@ -1,6 +1,6 @@
 ---
 name: api-data-access-architect
-description: Como a API toca seus dados — access patterns, entidades e limites declarados em código (Redis/Valkey, MongoDB/DocumentDB, DynamoDB, Neptune) lidos como facts `data.*`, postura de datastore em dumps `aws.*` (PITR, criptografia, deletion protection). Entra quando a pergunta é "o que este código faz no banco"; falha-operacional (timeout, retry, disponibilidade composta) segue com o reliability-engineer.
+description: Como a API toca seus dados — access patterns, entidades e limites declarados em código (Redis/Valkey, MongoDB/DocumentDB, DynamoDB, Neptune) lidos como facts `data.*`, postura de datastore em dumps `aws.*` (PITR, criptografia, deletion protection). Entra quando a pergunta é "o que este código faz no banco"; falha-operacional (timeout, retry, disponibilidade composta) segue com o api-resilience-engineer.
 rule_areas: [DATA, STORAGE]
 executors: [af-inventory, af-extractor, af-judge, af-verifier, af-synthesizer]
 ---
@@ -33,7 +33,7 @@ A pergunta é **o acesso ao dado**, não a falha da chamada:
 
 Não executa o banco nem mede plano de query — extração estática de call
 sites; cobertura de índices e cardinalidade real são blind spots ditos.
-Não julga falha operacional (timeout, retry, DLQ) — reliability-engineer.
+Não julga falha operacional (timeout, retry, DLQ) — api-resilience-engineer.
 
 ## Pressupõe
 

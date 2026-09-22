@@ -1,5 +1,5 @@
 ---
-name: api-testing-strategist
+name: api-test-strategist
 description: Estratégia de testes de API — contract tests, fuzzing contra o schema declarado, espaço negativo, mutação, carga com hipótese, injeção de falha. Entra quando a pergunta é "o que prova que isso funciona"; a execução dos testes é da fase verify, não desta revisão.
 rule_areas: [TESTING]
 executors: [af-inventory, af-extractor, af-judge, af-verifier, af-synthesizer]

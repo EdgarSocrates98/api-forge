@@ -32,6 +32,20 @@ TestKind = Literal[
     "capacity", "failover", "chaos",
 ]
 
+# FASE 6 — the full risk-based test strategy taxonomy. PerformanceRun keeps
+# the 9 perf kinds above; TestRecord spans the whole strategy.
+TEST_TAXONOMY = (
+    "lint", "typecheck", "unit", "component", "integration", "contract",
+    "consumer_contract", "e2e", "property", "fuzz", "mutation", "security",
+    "load", "stress", "spike", "soak", "capacity", "failover", "chaos",
+    "recovery", "cost",
+)
+
+TEST_STATES = (
+    "passed", "failed", "inconclusive", "blocked",
+    "skipped_with_reason", "unsafe_to_run", "not_applicable",
+)
+
 
 class _StubPayload(VersionedContract):
     """Shared stub shape: identity, provenance, unresolved surface."""
@@ -176,3 +190,38 @@ class RuntimeMatrix(_StubPayload):
         if not isinstance(frozen, Mapping):
             raise ValueError("constraints must be a JSON object")  # noqa: TRY004
         return frozen
+
+
+class TestRecord(_StubPayload):
+    """One executed test in the risk-based strategy (FASE 6).
+
+    ``state`` is a closed 7-value vocabulary — a record is never "passed
+    by absence of error": ``passed`` requires the run to have produced
+    its declared metric. Every field is optional; ``None``/empty means
+    not recorded, never zero.
+    """
+
+    kind: Literal[
+        "lint", "typecheck", "unit", "component", "integration",
+        "contract", "consumer_contract", "e2e", "property", "fuzz",
+        "mutation", "security", "load", "stress", "spike", "soak",
+        "capacity", "failover", "chaos", "recovery", "cost",
+    ] | None = None
+    state: Literal[
+        "passed", "failed", "inconclusive", "blocked",
+        "skipped_with_reason", "unsafe_to_run", "not_applicable",
+    ] | None = None
+    objective: str | None = None
+    scenario: str | None = None
+    inputs: tuple[str, ...] = ()
+    environment: str | None = None
+    tool: str | None = None
+    tool_version: str | None = None
+    duration_s: float | None = None
+    data_used: str | None = None
+    metric: str | None = None
+    threshold: str | None = None
+    evidence: tuple[str, ...] = ()
+    limitations: tuple[str, ...] = ()
+    reproducible: bool | None = None
+    reason: str | None = None

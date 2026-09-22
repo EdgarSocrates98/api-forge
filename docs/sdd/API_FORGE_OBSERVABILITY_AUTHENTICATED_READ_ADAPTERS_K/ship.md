@@ -6,11 +6,11 @@ profile: standard
 status: draft
 upstream:
   path: benchmark.md
-  sha256: "46e407633475b8c82daa39892144bce93a8f74835779f0879c40e9e3d8f4454b"
+  sha256: "9d2d616ef46525edd8d310039052282670a7b75532c806ad818a842391050dc1"
 deviations: [fake-transport-only]
 evidence:
   - path: sdd/API_FORGE_OBSERVABILITY_AUTHENTICATED_READ_ADAPTERS_K/evidence/adapter-tests.txt
-    sha256: ""
+    sha256: "364a6865c0ecf9c9033ce3c8d9ccc8e5f528705e31c7d03b3ec1461619120333"
 ---
 # ship
 

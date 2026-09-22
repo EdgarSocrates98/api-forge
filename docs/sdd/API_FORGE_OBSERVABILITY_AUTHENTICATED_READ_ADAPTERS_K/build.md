@@ -11,7 +11,7 @@ tasks:
   - id: read-adapter
     status: done
     evidence: sdd/API_FORGE_OBSERVABILITY_AUTHENTICATED_READ_ADAPTERS_K/evidence/adapter-tests.txt
-claims: [transport-injected, get-only]
+claims: [transport-injected, get-only, provider-response-normalization]
 ---
 # build
 

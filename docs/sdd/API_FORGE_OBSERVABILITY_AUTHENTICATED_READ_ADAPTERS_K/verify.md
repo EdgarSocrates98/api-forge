@@ -6,11 +6,11 @@ profile: standard
 status: draft
 upstream:
   path: build.md
-  sha256: "9589a858dea8d1bec3a25646ea804532cb2d5c4a531478764fd8b5654950f865"
+  sha256: "d7b939b79b970027d6674e1c40546cdebf1c07af22510ada38e636cd94aeec35"
 results:
   - gate: pytest tests/observability
     outcome: pass
-    evidence: 23 passed
+    evidence: 25 passed
   - gate: mypy and ruff
     outcome: pass
     evidence: all checks passed

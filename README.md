@@ -47,6 +47,10 @@ performance, observability, AWS, databases, security, evals and host parity.
 The next cycle is selected by dependencies and risk, not by an ad-hoc sequence
 of isolated “next steps”.
 
+The first integrated evolution cycle is complete through Phase G. Runtime,
+migration, capacity, observability, data governance, security and agentic
+quality are now represented by local contracts, focused tests and SDD evidence.
+
 ## Host support
 
 The Python core and CLI are shared across Claude Code, GPT/Codex, Devin and
@@ -88,6 +92,19 @@ apiforge observability read-plan \
   --provider dynatrace --service orders \
   --start 2026-09-22T00:00:00Z --end 2026-09-22T01:00:00Z
 ```
+
+The corresponding read-only gates can also be composed by integrations:
+
+```python
+from apiforge.perf.capacity import assess_capacity
+from apiforge.observability.readiness import assess_export_readiness
+from apiforge.data_governance import assess_data_access
+from apiforge.safety import assess_api_safety
+from apiforge.quality import assess_agentic_quality
+```
+
+They produce versioned `ready`/`passed`, `review`, `blocked` or
+`inconclusive` outcomes. Missing evidence is named rather than defaulted.
 
 These commands are offline by default. Real provider reads, credentials,
 load-generator execution and external mutations remain explicit adapters and
@@ -209,6 +226,23 @@ Twenty coordinator profiles in `agents/*.md` (one per specialty, each declaring
 `af-verifier`, `af-synthesizer`). `AGENT_PROTOCOL.md` is the operating
 contract every profile points at; `next-step` routes by data, `playbook`
 is the dispatch floor, and `.apiforge/economy.jsonl` measures every call.
+
+## Evolution cycle status
+
+| Phase | Delivered local gate | Status |
+|---|---|---|
+| A | runtime review, bounded dynamic scheduler and checkpoints | complete |
+| B | migration readiness for Java/Go/Python runtime plans | complete |
+| C | capacity envelope from validated TPS/SLO evidence | complete |
+| D | Datadog/Dynatrace/OTel export preflight | complete |
+| E | Redis/MongoDB/DynamoDB/Neptune access governance | complete |
+| F | API security and resilience control gate | complete |
+| G | golden/holdout evaluation and host-parity aggregation | complete |
+| H | product documentation and release consolidation | current |
+
+Each phase has an artifact chain under `docs/sdd/`, focused tests and a
+rollback decision. External AWS, datastore, vendor and host mutations remain
+adapter-owned and approval-gated.
 
 ## Exit codes
 

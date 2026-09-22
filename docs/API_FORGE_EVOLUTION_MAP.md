@@ -17,6 +17,10 @@ O núcleo já possui:
 - exporters opcionais e binding de host com credencial, endpoint allowlist e aprovação explícita;
 - agentes especializados para arquitetura, contratos, performance, segurança,
   observabilidade, gRPC, migração, dados, AWS e revisão de tarefas.
+- gates versionados de capacidade (`CapacityAssessment`), prontidão de
+  exporters (`ObservabilityExportReadiness`), governança de dados
+  (`DataAccessReadiness`), segurança/resiliência (`ApiSafetyAssessment`) e
+  qualidade/paridade (`AgenticQualityAssessment`), todos com evidência local.
 
 O estado atual ainda é predominantemente local, offline e com callbacks/adapters
 fake ou host-owned. Isso é intencional: a segurança e a reprodutibilidade vêm
@@ -150,16 +154,20 @@ antes da ativação de rede ou mutação externa.
 7. O próximo trabalho deve ser escolhido pela matriz de dependências e pelo maior risco,
    não por uma lista linear fixa.
 
-## Próximo ciclo recomendado
+## Ciclo integrado executado
 
-O próximo ciclo completo é a Fase A: runtime agentico operacional. A ordem interna sugerida é:
+As Fases A–G foram implementadas sequencialmente, cada uma em commit próprio e
+sem push intermediário:
 
-1. reviewer independente de TaskSpec e acceptance;
-2. scheduler dinâmico com leases, dependências, orçamento e retomada;
-3. event log de trajetória e métricas de agents;
-4. salas de debate com referee e decisão reproduzível;
-5. evals do runtime com golden, holdout e mutation;
-6. exportação dessas métricas pelo mesmo control plane de observabilidade.
+1. A — runtime agentico operacional e revisão independente;
+2. B — readiness de migração Java/Go/Python;
+3. C — capacidade, TPS, SLO e headroom;
+4. D — prontidão de observabilidade host-owned;
+5. E — governança de acesso a dados;
+6. F — gate de segurança e resiliência;
+7. G — avaliação agentica e paridade de hosts.
 
-Depois disso, seguir para a Fase B de codegen/migração compilável e só então ativar
-execuções reais de performance, AWS, bancos e exporters externos em ambientes aprovados.
+O fechamento H atualiza esta documentação, executa a suíte completa e consolida
+o release. Depois, o próximo grande ciclo deve ativar adapters reais em
+ambientes aprovados, com runners de carga, schemas de vendor, queries
+read-only, Terraform plan e evals multi-linguagem compiláveis.

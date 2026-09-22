@@ -2605,6 +2605,16 @@ def agentops_hosts(
     _echo_json(list_hosts(), detail_level)
 
 
+@agentops_app.command("native")
+def agentops_native(
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Inspect repository-native Caveman/Cavekit assets and RTK configuration."""
+    from apiforge.agentops.native import native_status
+
+    _echo_json(native_status(Path.cwd()), detail_level)
+
+
 @agentops_app.command("tools")
 def agentops_tools(
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),

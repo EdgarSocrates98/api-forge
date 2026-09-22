@@ -19,6 +19,9 @@ requires the cost of the run that never happened.
 | `AF-INPUT-FRAMEWORK-UNKNOWN` | `--framework` names an adapter that is not registered |
 | `AF-INPUT-INVALID` | an input argument fails shape validation (e.g. dump dir layout) |
 | `AF-PERF-PLAN-INVALID` | declarative performance plan fails endpoint, threshold or generator validation |
+| `AF-OBS-READ-PLAN-INVALID` | vendor read plan fails provider, window or signal validation |
+| `AF-OBS-READ-PROVIDER` | requested observability provider has no registered read adapter |
+| `AF-OBS-READ-COUNT` | fixture receipt received a negative record count |
 
 ## Routing
 

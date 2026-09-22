@@ -13,6 +13,7 @@ from apiforge.core.models import JsonValue, freeze_json
 SignalKind = Literal["trace", "span", "metric", "log", "event"]
 IntentKind = Literal["monitor", "slo", "dashboard", "query", "event"]
 Risk = Literal["read_only", "local_reversible", "external_mutation"]
+ObservabilityProvider = Literal["otel", "datadog", "dynatrace", "cloudwatch"]
 
 
 class TelemetryRecord(VersionedContract):
@@ -121,6 +122,27 @@ class OperationReceipt(VersionedContract):
     provider: str
     evidence: tuple[str, ...] = ()
     reason: str = ""
+
+
+class ReadQuery(VersionedContract):
+    provider: ObservabilityProvider
+    service: str
+    environment: str = "unknown"
+    start: str
+    end: str
+    signals: tuple[Literal["traces", "metrics", "logs", "events"], ...] = ("traces", "metrics")
+
+
+class ReadPlan(VersionedContract):
+    provider: ObservabilityProvider
+    query: ReadQuery
+    method: Literal["GET"] = "GET"
+    endpoint: str
+    read_only: bool = True
+    network_allowed: bool = False
+    credential_required: bool = True
+    execution_mode: Literal["fixture_only", "provider_read"] = "fixture_only"
+    limitations: tuple[str, ...] = ()
 
 
 class ObservabilityFinding(VersionedContract):

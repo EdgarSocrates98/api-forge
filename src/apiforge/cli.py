@@ -371,6 +371,27 @@ def observability_health(
     _echo_json(result.model_dump(mode="json"), detail_level)
 
 
+@observability_app.command("read-plan")
+def observability_read_plan(
+    provider: str = typer.Option(..., "--provider", help="otel, datadog, dynatrace or cloudwatch."),
+    service: str = typer.Option(..., "--service"),
+    start: str = typer.Option(..., "--start", help="ISO-8601 start."),
+    end: str = typer.Option(..., "--end", help="ISO-8601 end."),
+    environment: str = typer.Option("unknown", "--environment"),
+    signal: list[str] = typer.Option([], "--signal", help="traces, metrics, logs or events."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Create a vendor read plan without credentials or network access."""
+    from apiforge.observability.read import build_read_plan
+
+    try:
+        signals = tuple(signal) if signal else ("traces", "metrics")
+        result = build_read_plan(provider, service, start, end, environment=environment, signals=signals)  # type: ignore[arg-type]
+    except (TypeError, ValueError) as exc:
+        raise AnalysisError("AF-OBS-READ-PLAN-INVALID", str(exc)) from exc
+    _echo_json(result.model_dump(mode="json"), detail_level)
+
+
 @app.command()
 def discover(
     project: Path = typer.Option(..., "--project", help="FastAPI project root."),

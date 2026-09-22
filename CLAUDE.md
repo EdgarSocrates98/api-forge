@@ -9,7 +9,11 @@ reasoning and must keep complete artifacts available when using compact output.
 - discovery/API-IR: `.claude/skills/api-forge-discovery`
 - contracts/OpenAPI/gRPC: `.claude/skills/api-forge-contract`
 - architecture/AWS: `.claude/skills/api-forge-architecture`
-- Redis, MongoDB, DynamoDB, Neptune: `.claude/skills/api-forge-data-access`
+- Redis/Valkey, DynamoDB, MongoDB/DocumentDB, Neptune and RDS/Aurora:
+  `.claude/skills/api-forge-data-access`
+- PostgreSQL/MySQL, Kafka/MSK, SQS/SNS/EventBridge/Kinesis, OpenSearch/Redshift,
+  RabbitMQ/NATS/Pulsar: route through the data-access and architecture skills;
+  use the specialized `model *-access` commands documented in `README.md`.
 - tests/security/resilience: `.claude/skills/api-forge-verification`
 - load, stress, TPS and capacity: `.claude/skills/api-forge-performance`
 - OTel, Datadog and Dynatrace: `.claude/skills/api-forge-observability`
@@ -41,4 +45,6 @@ the verifier, unresolved gaps and next human action.
 - no direct writes to the main tree during build;
 - use `apply_patch` for edits;
 - update tests and SDD artifacts together;
+- update the relevant IR, agent routing and host mirrors when adding a new
+  datastore, broker or messaging specialization;
 - run `apiforge sdd check --root docs/sdd` before shipping.

@@ -2,9 +2,9 @@
 
 As skills do API Forge seguem o padrão Agent Skills: cada skill é uma pasta com
 `SKILL.md`, frontmatter mínimo e recursos opcionais. A fonte canônica está em
-`.agents/skills/`, que é descoberta por Codex, Devin e GitHub Copilot. O espelho
-`.claude/skills/` atende Claude Code. O diretório `.github/skills/` pode ser
-gerado para ambientes Copilot que preferirem essa localização.
+`.agents/skills/`, que é descoberta por Codex e hosts compatíveis. Os espelhos
+`.claude/skills/`, `.devin/skills/` e `.github/skills/` atendem Claude Code,
+Devin e Copilot.
 
 ## Princípios
 
@@ -27,7 +27,9 @@ gerado para ambientes Copilot que preferirem essa localização.
 | `api-forge-discovery` | Inventário e API-IR |
 | `api-forge-contract` | Contratos e compatibilidade |
 | `api-forge-architecture` | Workload e decisão de plataforma |
-| `api-forge-data-access` | Bancos e persistência |
+| `api-forge-data-access` | Relacionais/RDS, Redis, MongoDB, DynamoDB, Neptune, OpenSearch e Redshift |
+| `api-forge-streaming` | Kafka/MSK, Kinesis, RabbitMQ, NATS e Pulsar |
+| `api-forge-messaging` | SQS, SNS e EventBridge |
 | `api-forge-verification` | Testes, segurança e resiliência |
 | `api-forge-performance` | Carga, TPS e capacidade |
 | `api-forge-observability` | Telemetria e operação |

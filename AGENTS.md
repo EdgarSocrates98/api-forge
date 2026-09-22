@@ -1,7 +1,8 @@
 # API Forge Agent Instructions
 
 API Forge is a deterministic, offline-first platform for API construction,
-evolution, migration, testing, performance, observability and data access.
+evolution, migration, testing, performance, observability, data access,
+streaming and messaging.
 
 ## Operating contract
 
@@ -36,12 +37,32 @@ Use native project capabilities:
 - `apiforge graph` for provenance and impact;
 - `apiforge task`, `runtime`, `sandbox`, `evidence` and `brief` for governed work.
 
+## Data and messaging specializations
+
+Route by engine instead of treating every datastore or broker as generic:
+
+- relational/RDS: `model rds-access`, `model postgres-access`, `model mysql-access`;
+- Kafka/MSK/Kinesis: `model kafka-access`, `model msk-access`;
+- AWS messaging: `model sqs-access`, `model sns-access`,
+  `model eventbridge-access`, `model kinesis-access`;
+- low-latency and partitioned data: Redis/Valkey and DynamoDB profiles;
+- analytics: `model opensearch-access`, `model redshift-access`;
+- brokers: `model rabbitmq-access`, `model nats-access`, `model pulsar-access`;
+- document/graph: MongoDB/DocumentDB and Neptune profiles.
+
+Use the corresponding IR (`DataAccessIR`, `StreamingAccessIR`,
+`MessagingAccessIR`, `AnalyticalAccessIR`) and preserve the distinction
+between observed signals and runtime claims. Never infer indexes, hot keys,
+consumer lag, query plans, throughput or delivery guarantees without evidence.
+
 ## Safety and evidence
 
 Never suppress critical evidence to save context. Preserve `AF-*` codes, errors,
 warnings, failed tests, status codes, security findings and unresolved states.
 Local adapters must not call model SDKs, AWS or live databases. External
 integrations belong behind explicit read-only adapters and policy gates.
+Collectors may create hashed AWS posture dumps only through `collect`; source
+models never publish, consume, execute SQL, commit offsets or mutate topology.
 
 ## Validation
 

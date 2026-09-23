@@ -31,6 +31,9 @@ evidence, limitations, prerequisites, risk, rollback and verifier. The command
 | `cloud.inspect` | heuristic | `tests/labs/test_platform_verticals.py::test_vertical_coverage` | Remote state and live posture require explicit evidence. |
 | `frontend.inspect` | heuristic | `tests/labs/test_platform_verticals.py::test_vertical_coverage` | Browser behavior and accessibility need a frontend host. |
 | `git.plan` | unresolved | `tests/runtime/test_supervisor.py` | The offline core does not mutate a Git host. |
+| `api.change-control` | supported | `tests/e2e/test_api_git_cicd_change_control.py::test_change_control_flow` | Replay/local governance is proven; provider freshness and deployment safety are not. |
+| `git.read-context` | heuristic | `tests/integrations/test_github_adapter.py` | GitHub reads are GET-only and require an explicit transport; live evidence is not bundled. |
+| `cicd.inspect-run` | heuristic | `tests/observability/test_change_metrics.py` | Check observations and configuration do not prove deployment or runtime health. |
 | `external.apply` | unsupported | `tests/runtime/test_supervisor.py` | Live mutation requires an approved provider adapter and rollback. |
 
 ## Evidence rules
@@ -42,6 +45,29 @@ evidence, limitations, prerequisites, risk, rollback and verifier. The command
 - An agent recommendation must separate facts, assumptions, risks and
   unresolved items.
 - Missing external tooling remains visible as a prerequisite or limitation.
+
+## API + Git + CI/CD change control
+
+The public replay path is:
+
+```bash
+apiforge change-control run \
+  --bundle tests/fixtures/api_git_cicd/change_bundle.json \
+  --out-dir .apiforge/change-control
+apiforge change-control verify --run-dir .apiforge/change-control
+```
+
+The bundle is `af-change-bundle/1`. It normalizes repository refs, contract
+and project inputs, provider observations, CI checks, policy and limitations.
+The run emits `analyze -> next-step -> graph -> evidence -> brief`, plus
+`result.json`, `metrics.json` and a deterministic recommendation. The
+recommendation must contain facts, assumptions, alternatives, risks,
+unresolved items, evidence references, verifier and bounded confidence.
+
+`GitHubReadOnlyAdapter` is transport-injected and only exposes GET requests.
+It never merges, pushes, dispatches workflows, deploys or changes repository
+state. Live provider collection is a separate evidence step and remains
+`heuristic` until an anonymized receipt proves freshness and permissions.
 
 ## Adding a capability
 

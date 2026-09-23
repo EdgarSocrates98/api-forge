@@ -1,0 +1,82 @@
+name: API Forge CI
+
+on:
+  push:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: api-forge-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate project
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install project and development dependencies
+        run: python -m pip install -e ".[dev]"
+
+      - name: Check vendored assets
+        run: python scripts/vendor_caveman.py --check
+
+      - name: Check Python dependency consistency
+        run: python -m pip check
+
+      - name: Validate skills
+        run: python scripts/validate_skills.py
+
+      - name: Validate agent mirrors
+        run: apiforge agents check --root .
+
+      - name: Verify public capability matrix
+        run: apiforge capabilities verify
+
+      - name: Smoke test API/Git/CI change control
+        run: >-
+          apiforge change-control run
+          --bundle tests/fixtures/api_git_cicd/change_bundle.json
+          --out-dir .apiforge/change-control
+
+      - name: Verify change-control evidence references
+        run: apiforge change-control verify --run-dir .apiforge/change-control
+
+      - name: Ruff lint
+        run: python -m ruff check src tests
+
+      - name: Ruff format
+        run: python -m ruff format --check src tests
+
+      - name: Mypy
+        run: python -m mypy src/apiforge
+
+      - name: Test suite
+        run: python -m pytest -q --junitxml=test-results.xml
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-forge-test-results
+          path: test-results.xml
+          if-no-files-found: ignore
+
+      - name: Release gate
+        run: python scripts/check_release.py

@@ -1,0 +1,45 @@
+name: API change control
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  replay-governance:
+    name: Validate API/Git/CI replay control plane
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install project
+        run: python -m pip install -e ".[dev]"
+
+      - name: Run deterministic change-control replay
+        run: >-
+          apiforge change-control run
+          --bundle tests/fixtures/api_git_cicd/change_bundle.json
+          --out-dir .apiforge/change-control
+
+      - name: Verify governed artifact references
+        run: apiforge change-control verify --run-dir .apiforge/change-control
+
+      - name: Upload change-control evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-change-control-evidence
+          path: .apiforge/change-control
+          if-no-files-found: error

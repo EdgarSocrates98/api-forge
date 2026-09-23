@@ -152,6 +152,89 @@ def next_step(findings: str, phase: str, detail_level: str = "normal") -> dict[s
     return out
 
 
+def change_control_run(
+    bundle: str,
+    out_dir: str = ".apiforge/change-control",
+    framework: str = "auto",
+    phase: str = "verify",
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Run the read-only API/Git/CI change-control pipeline from a replay bundle."""
+    from apiforge.application.change_control import run_change_control
+    from apiforge.application.change_errors import ChangeControlError
+    from apiforge.contracts.change_control import ChangeControlResult
+    from apiforge.integrations.replay import ReplayAdapter
+
+    def work() -> object:
+        try:
+            return run_change_control(
+                ReplayAdapter().load(Path(bundle)),
+                Path(out_dir),
+                framework=framework,
+                phase=phase,
+            )
+        except (ChangeControlError, OSError, ValueError) as exc:
+            error_code = getattr(exc, "code", "AF-MCP-CHANGE-CONTROL")
+            return ChangeControlResult(
+                state="unresolved",
+                status="failed",
+                gaps=(str(exc),),
+                error_code=error_code,
+            )
+
+    return cast(dict[str, Any], _call("change_control_run", work, detail_level))
+
+
+def change_control_collect(
+    repository: str,
+    base_sha: str,
+    head_sha: str,
+    pull_number: int | None = None,
+    contract: str | None = None,
+    baseline: str | None = None,
+    project: str | None = None,
+    api_base: str = "https://api.github.com",
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Collect GitHub context with the GET-only adapter into a local bundle."""
+    import os
+
+    from apiforge.contracts.change_control import ChangeCollectRequest
+    from apiforge.integrations.github import GitHubReadOnlyAdapter, UrllibReadOnlyTransport
+
+    def work() -> object:
+        try:
+            token = os.environ.get("APIFORGE_GITHUB_READ_ONLY_TOKEN")
+            if not token:
+                raise ValueError("AF-GITHUB-AUTH: read-only token is absent; use artifact replay")
+            request = ChangeCollectRequest(
+                repository=repository,
+                base_sha=base_sha,
+                head_sha=head_sha,
+                pull_number=pull_number,
+                contract=contract,
+                baseline=baseline,
+                project=project,
+                api_base=api_base,
+            )
+            return GitHubReadOnlyAdapter(
+                UrllibReadOnlyTransport(
+                    api_base,
+                    token=token,
+                )
+            ).collect(request)
+        except (OSError, RuntimeError, ValueError) as exc:
+            return {
+                "capability_id": "git.read-context",
+                "state": "unresolved",
+                "status": "failed",
+                "gaps": (str(exc),),
+                "error_code": getattr(exc, "code", "AF-MCP-GITHUB-COLLECT"),
+            }
+
+    return cast(dict[str, Any], _call("change_control_collect", work, detail_level))
+
+
 def capabilities_list(
     capability_id: str | None = None,
     detail_level: str = "normal",
@@ -1118,6 +1201,8 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     model_api_gateway,
     diff_contract,
     next_step,
+    change_control_run,
+    change_control_collect,
     capabilities_list,
     capabilities_verify,
     rules_list,

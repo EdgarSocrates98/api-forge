@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 from collections.abc import Callable
 from pathlib import Path
 from typing import Literal, NoReturn, cast
@@ -16,6 +17,8 @@ from apiforge.adapters.fastapi.extractor import extract_fastapi
 from apiforge.api_ir.builder import build_api_model
 from apiforge.application.analyze import AnalysisError, AnalysisResult, analyze_project
 from apiforge.application.artifacts import load_findings
+from apiforge.application.change_control import run_change_control
+from apiforge.application.change_errors import ChangeControlError
 from apiforge.build.service import build_endpoint
 from apiforge.case.service import CaseIntegrityError, CaseStorageError
 from apiforge.collectors.apigateway import collect
@@ -226,6 +229,12 @@ migration_app = typer.Typer(
     no_args_is_help=True,
 )
 app.add_typer(migration_app)
+change_control_app = typer.Typer(
+    name="change-control",
+    help="Govern API, Git and CI/CD changes with read-only evidence.",
+    no_args_is_help=True,
+)
+app.add_typer(change_control_app)
 
 
 @app.callback()
@@ -302,6 +311,8 @@ def _run(fn: Callable[[], object]) -> object:
     except CaseIntegrityError as exc:
         _fail(exc.code, exc.path, exit_code=3)
     except ContractError as exc:
+        _fail(exc.code, exc.detail)
+    except ChangeControlError as exc:
         _fail(exc.code, exc.detail)
     except (OSError, UnicodeDecodeError, TypeError, ValueError, json.JSONDecodeError) as exc:
         _fail("AF-CLI-INPUT", str(exc))
@@ -619,6 +630,119 @@ def next_step_cmd(
             return next_step(parsed, phase)
         except RoutingError as exc:
             raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_json(_run(work), detail_level)
+
+
+@change_control_app.command("run")
+def change_control_run(
+    bundle: Path = typer.Option(..., "--bundle", help="Provider-neutral af-change-bundle/1 JSON."),
+    out_dir: Path = typer.Option(
+        Path(".apiforge/change-control"), "--out-dir", help="Governed output directory."
+    ),
+    framework: str = typer.Option(
+        "auto", "--framework", help="fastapi|spring|go|auto (detected from files)."
+    ),
+    phase: str = typer.Option("verify", "--phase", help="Canonical SDD phase for routing."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Run analyze -> next-step -> graph -> evidence -> brief from a bundle."""
+    from apiforge.integrations.replay import ReplayAdapter
+
+    def work() -> object:
+        change_bundle = ReplayAdapter().load(bundle)
+        return run_change_control(change_bundle, out_dir, framework=framework, phase=phase)
+
+    _echo_json(_run(work), detail_level)
+
+
+@change_control_app.command("collect")
+def change_control_collect(
+    repository: str = typer.Option(..., "--repository", help="GitHub owner/repository."),
+    base_sha: str = typer.Option(..., "--base-sha", help="40-character base commit SHA."),
+    head_sha: str = typer.Option(..., "--head-sha", help="40-character head commit SHA."),
+    out_bundle: Path = typer.Option(
+        Path(".apiforge/change-control/change-bundle.json"),
+        "--out-bundle",
+        help="Sanitized bundle output path.",
+    ),
+    pull_number: int | None = typer.Option(None, "--pull-number", min=1),
+    contract: Path | None = typer.Option(None, "--contract"),
+    baseline: Path | None = typer.Option(None, "--baseline"),
+    project: Path | None = typer.Option(None, "--project"),
+    api_base: str = typer.Option("https://api.github.com", "--api-base"),
+    origin: str = typer.Option("manual", "--origin"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Collect GitHub context with a GET-only adapter into a replay bundle."""
+    from apiforge.contracts.change_control import ChangeCollectRequest, ChangeOrigin
+    from apiforge.core.io import write_json
+    from apiforge.integrations.github import GitHubReadOnlyAdapter, UrllibReadOnlyTransport
+
+    def work() -> dict[str, object]:
+        token = os.environ.get("APIFORGE_GITHUB_READ_ONLY_TOKEN")
+        if not token:
+            raise ChangeControlError(
+                "AF-GITHUB-AUTH",
+                "read-only token is absent; use artifact replay for an untrusted or forked change",
+            )
+        request = ChangeCollectRequest(
+            repository=repository,
+            base_sha=base_sha,
+            head_sha=head_sha,
+            origin=cast(ChangeOrigin, origin),
+            pull_number=pull_number,
+            contract=str(contract) if contract else None,
+            baseline=str(baseline) if baseline else None,
+            project=str(project) if project else None,
+            api_base=api_base,
+        )
+        adapter = GitHubReadOnlyAdapter(
+            UrllibReadOnlyTransport(
+                request.api_base,
+                token=token,
+            )
+        )
+        bundle = adapter.collect(request)
+        write_json(out_bundle, bundle)
+        return {
+            "bundle": str(out_bundle),
+            "provider": bundle.provider,
+            "repository": bundle.repository,
+            "base_sha": bundle.base_sha,
+            "head_sha": bundle.head_sha,
+            "checks": len(bundle.checks),
+            "sources": len(bundle.sources),
+            "read_only": bundle.policy.read_only,
+        }
+
+    _echo_json(_run(work), detail_level)
+
+
+@change_control_app.command("verify")
+def change_control_verify(
+    run_dir: Path = typer.Option(
+        ..., "--run-dir", help="Output directory from change-control run."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Verify that a change-control result still references existing artifacts."""
+
+    def work() -> dict[str, object]:
+        result_path = run_dir / "result.json"
+        if not result_path.is_file():
+            raise ChangeControlError("AF-CHANGE-RESULT-MISSING", str(result_path))
+        payload = json.loads(result_path.read_text(encoding="utf-8"))
+        result = payload.get("payload", {}) if isinstance(payload, dict) else {}
+        refs = result.get("artifacts", []) if isinstance(result, dict) else []
+        missing = tuple(str(ref) for ref in refs if not Path(str(ref)).is_file())
+        return {
+            "ok": not missing,
+            "status": "ok" if not missing else "failed",
+            "run_dir": str(run_dir),
+            "artifact_refs": refs,
+            "missing": missing,
+        }
 
     _echo_json(_run(work), detail_level)
 

@@ -1,5 +1,7 @@
 # API Forge
 
+[![CI](https://github.com/EdgarSocrates98/api-forge/actions/workflows/ci.yml/badge.svg)](https://github.com/EdgarSocrates98/api-forge/actions/workflows/ci.yml)
+
 Deterministic, offline, local-first agentic API engineering. API Forge covers
 discovery, construction, evolution, migration, contracts, gRPC, testing,
 performance, TPS validation, observability, data access and governed agentic
@@ -97,6 +99,19 @@ Start with the public capability boundary:
 apiforge capabilities list
 apiforge capabilities verify
 ```
+
+Para governar uma mudança de API ligada a Git e CI/CD:
+
+```bash
+apiforge change-control run \
+  --bundle tests/fixtures/api_git_cicd/change_bundle.json \
+  --out-dir .apiforge/change-control
+apiforge change-control verify --run-dir .apiforge/change-control
+```
+
+Esse fluxo é read-only, reproduzível por replay e termina com status `ok`,
+`review`, `blocked` ou `failed`, sem traceback governável na CLI. Merge, push,
+dispatch de workflow, deploy e autofix continuam fora da fronteira.
 
 For a real case, use the complete chain:
 
@@ -228,6 +243,9 @@ while refusal codes and `fact_id`s survive.
 | `apiforge evidence emit --case .apiforge/case --out receipt.json` | Receipt binding artifact paths to sha256 (proves correspondence, not authorship) |
 | `apiforge evidence verify --receipt receipt.json` | Re-hash every artifact the receipt lists |
 | `apiforge next-step --findings findings.json --phase verify` | Route the dominant finding area to the specialist agent |
+| `apiforge change-control run --bundle B --out-dir D` | Run the governed API/Git/CI/CD replay flow |
+| `apiforge change-control collect --repository R --base-sha S --head-sha S` | Collect GitHub context through the GET-only adapter |
+| `apiforge change-control verify --run-dir D` | Verify the local change-control artifact references |
 | `apiforge rules list [--area SECURITY]` | List catalog rules — the knowledge base every finding cites |
 | `apiforge rules lookup AF-SEC-001` | Print one rule's rationale/remediation/reference |
 | `apiforge collect api-gateway --api-id X --out dump/` | Fetch API Gateway config into an offline dump (needs `pip install apiforge[aws]`; the only family that touches AWS) |
@@ -359,8 +377,19 @@ python -c "from apiforge.case.service import load_case; print(load_case('.apifor
 ## Development
 
 ```bash
-pytest -q
-ruff check . && ruff format --check .
-mypy src/apiforge
+python -m pip install -e '.[dev]'
+python scripts/vendor_caveman.py --check
+python scripts/validate_skills.py
+apiforge agents check --root .
+apiforge capabilities verify
+python -m ruff check src tests
+python -m ruff format --check src tests
+python -m mypy src/apiforge
+python -m pytest -q
 python scripts/check_release.py
 ```
+
+The same commands run in [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
+on every push, every pull request targeting `main` and manual
+workflow dispatch. The workflow is read-only, uses Python 3.12, cancels stale
+runs for the same ref and uploads the JUnit test report when available.

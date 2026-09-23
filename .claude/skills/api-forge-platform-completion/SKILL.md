@@ -48,11 +48,29 @@ apiforge graph build --case <case> --out <graph>
 apiforge evidence emit --case <case> --out <receipt.json> --now <ISO8601>
 apiforge evidence verify --receipt <receipt.json>
 apiforge brief show --task <task-id>
+apiforge change-control run --bundle <bundle.json> --out-dir <dir>
+apiforge change-control collect --repository <owner/repo> --base-sha <sha> --head-sha <sha>
+apiforge change-control verify --run-dir <dir>
 ```
 
 `apiforge capabilities verify` é o gate de documentação, limitações,
 verificador e evidência. Se uma command line não aparece no help do CLI, não a
 documente como produção; registre-a como proposta ou `unsupported`.
+
+## API + Git + CI/CD change control
+
+Use `af-change-bundle/1` for a change tied to a branch, pull request or local
+replay. The bundle is normalized before analysis, and the supported local
+chain is `analyze -> next-step -> graph -> evidence -> brief`. Inspect
+`result.json`, `metrics.json` and `brief.json`; preserve provider freshness and
+deployment safety as unresolved unless an independent external receipt proves
+them.
+
+`GitHubReadOnlyAdapter` is a GET-only adapter behind an injected transport.
+Agents may recommend merge strategy, compatibility policy, CI gates or
+architecture, but they must not merge, push, dispatch, deploy or autofix. A
+recommendation must include facts, assumptions, alternatives, risks,
+unresolved items, evidence references, verifier and confidence.
 
 ## Estados de capability
 

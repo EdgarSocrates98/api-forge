@@ -1,0 +1,5 @@
+vertical: api-git-cicd
+status: unresolved
+case: provider_freshness
+reason: replay artifacts cannot prove live provider freshness
+mutation: replace_head_sha

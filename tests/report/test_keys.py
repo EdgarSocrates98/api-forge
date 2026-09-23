@@ -59,7 +59,9 @@ def test_tampered_signature_block_diverges_crypto(tmp_path: Path) -> None:
     keys = generate_keypair(tmp_path / "keys", "release")
     signed = sign_report(_report(), key_path=Path(keys["private"]))
     tampered = json.loads(json.dumps(signed))
-    tampered["signature"]["signature_b64"] = "A" + tampered["signature"]["signature_b64"][1:]
+    original = tampered["signature"]["signature_b64"]
+    replacement = "A" if original[0] != "A" else "B"
+    tampered["signature"]["signature_b64"] = replacement + original[1:]
     result = verify_report(tampered, pubkey_path=Path(keys["public"]))
     assert result["ok"] is False
     assert result["diverged"] == ["signature_crypto"]

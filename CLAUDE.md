@@ -19,6 +19,9 @@ reasoning and must keep complete artifacts available when using compact output.
 - OTel, Datadog and Dynatrace: `.claude/skills/api-forge-observability`
 - context, TokenSave and Graphify: `.claude/skills/api-forge-context`
 - SDD and release gates: `.claude/skills/api-forge-sdd`
+- API/Git/CI change governance: `apiforge change-control` with the
+  `af-change-bundle/1` replay contract; use `docs/architecture/API_FORGE_API_GIT_CICD_CONTROL_PLANE.md`
+  and `docs/security/api-git-cicd-control-plane.md` for the boundary.
 
 ## Caveman/RTK behavior
 
@@ -47,4 +50,6 @@ the verifier, unresolved gaps and next human action.
 - update tests and SDD artifacts together;
 - update the relevant IR, agent routing and host mirrors when adding a new
   datastore, broker or messaging specialization;
+- for API changes tied to Git or CI/CD, preserve the read-only adapter boundary,
+  recommendation fields, metrics, receipt and unresolved provider limitations;
 - run `apiforge sdd check --root docs/sdd` before shipping.

@@ -27,6 +27,15 @@ servido (ou baseline vs candidate):
 4. `af-verifier` — `evidence emit`/`verify` quando o resultado vira release.
 5. `af-synthesizer` — `next-step` para rotear a área dominante.
 
+## Mudança API ligada a Git/CI/CD
+
+Quando a entrada for um `af-change-bundle/1`, execute o replay governado com
+`apiforge change-control run` antes de recomendar merge ou arquitetura. Separe
+claramente contrato/código observado, checks de CI, pressupostos e evidência
+externa ausente. O adapter GitHub é GET-only: nunca faça merge, push, dispatch,
+deploy ou autofix. A recomendação deve conter alternativas, trade-offs,
+riscos, `unresolved` e o verificador `apiforge change-control verify`.
+
 ## Não faz
 
 Não escreve código novo (builder existe, mas a decisão de promover é gated),

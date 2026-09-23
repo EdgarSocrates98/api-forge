@@ -1,5 +1,9 @@
 version: 1
 routes:
+  - phase: discover
+    dominant_area: CONTRACT
+    recommended_agent: api-governance-reviewer
+    rationale: Normalize API contract and change evidence before selecting implementation work.
   - phase: contract
     dominant_area: CONTRACT
     recommended_agent: api-contract-architect

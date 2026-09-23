@@ -116,8 +116,9 @@ Esse fluxo é read-only, reproduzível por replay e termina com status `ok`,
 `review`, `blocked` ou `failed`, sem traceback governável na CLI. Merge, push,
 dispatch de workflow, deploy e autofix continuam fora da fronteira.
 `collect` escreve um bundle sanitizado e um
-`af-change-collection-receipt/1`; `publish` emite JUnit/Markdown e `serve`
-expõe a mesma decisão através de um host local UI/IDE read-only.
+`af-change-collection-receipt/1`; `publish` emite JUnit, Markdown, SARIF e HTML
+e `serve` expõe a mesma decisão através de um host UI/IDE read-only local ou
+remoto, autenticado e TLS.
 
 For a real case, use the complete chain:
 
@@ -131,10 +132,12 @@ Git/CI/CD/IDE/UI integration limits are documented in
 [docs/capabilities/API_FORGE_CAPABILITY_MATRIX.md](docs/capabilities/API_FORGE_CAPABILITY_MATRIX.md)
 and [docs/architecture/API_FORGE_PLATFORM_COMPLETION.md](docs/architecture/API_FORGE_PLATFORM_COMPLETION.md).
 
-The supported production boundary is explicit: local/static and read-only
-paths are available; provider-specific freshness, live runtime guarantees,
-remote IDE protocols, distributed UI and production performance claims remain
-gated until their own evidence and verifiers exist.
+The supported production boundary is explicit: local/static and authenticated
+read-only remote paths are available; provider-specific freshness, live runtime
+guarantees and production performance claims require an external receipt and
+independent verifier. The dedicated CI host can request a PR auto-merge only
+when the repository variable `APIFORGE_AUTO_MERGE=true` is explicitly set;
+agents and the core never receive that authority.
 
 ## Contract, performance and observability examples
 
@@ -252,9 +255,14 @@ while refusal codes and `fact_id`s survive.
 | `apiforge change-control run --bundle B --out-dir D` | Run the governed API/Git/CI/CD replay flow |
 | `apiforge change-control collect --repository R --base-sha S --head-sha S` | Collect GitHub context through the GET-only adapter and write a collection receipt |
 | `apiforge change-control verify --run-dir D` | Verify the local change-control artifact references |
-| `apiforge change-control publish --run-dir D` | Emit JUnit and Markdown projections |
+| `apiforge change-control publish --run-dir D` | Emit JUnit, Markdown, SARIF and HTML projections |
 | `apiforge change-control surface --run-dir D --surface ide\|ui` | Export the canonical IDE/UI projection |
 | `apiforge change-control serve --run-dir D` | Serve the local read-only IDE/UI host |
+| `apiforge integration github-issues --repository owner/repo` | Read GitHub issues with a GET-only receipt |
+| `apiforge integration health --url https://host/readyz --out receipt.json` | Record remote health and freshness |
+| `apiforge integration json --url https://tracker/api/issues --out receipt.json` | Read Jira/Linear-like JSON without mutation |
+| `apiforge integration verify-receipt --receipt receipt.json --now <ISO8601>` | Verify external receipt freshness |
+| `apiforge platform verify-runtime --out runtime-receipt.json` | Execute allowlisted local probes for six verticals |
 | `apiforge rules list [--area SECURITY]` | List catalog rules — the knowledge base every finding cites |
 | `apiforge rules lookup AF-SEC-001` | Print one rule's rationale/remediation/reference |
 | `apiforge collect api-gateway --api-id X --out dump/` | Fetch API Gateway config into an offline dump (needs `pip install apiforge[aws]`; the only family that touches AWS) |

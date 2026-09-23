@@ -26,10 +26,15 @@ evidence, limitations, prerequisites, risk, rollback and verifier. The command
 | `api.next-step` | supported | `tests/e2e/test_next_step.py` | Findings must map to the routing catalog. |
 | `api.provenance` | supported | `tests/e2e/test_platform_completion.py::test_platform_chain` | Acceptance still requires independent verification. |
 | `database.inspect` | heuristic | `tests/labs/test_platform_verticals.py::test_vertical_coverage` | Query plans, indexes and cardinality require database evidence. |
+| `database.verify-runtime` | supported | `tests/application/test_platform_runtime.py::test_all_platform_vertical_probes_execute_and_emit_receipt` | Proves the committed local SQLite fixture, not a remote database. |
 | `messaging.inspect` | heuristic | `tests/labs/test_platform_verticals.py::test_vertical_coverage` | Broker lag and delivery guarantees require observations. |
+| `messaging.verify-runtime` | supported | `tests/application/test_platform_runtime.py::test_all_platform_vertical_probes_execute_and_emit_receipt` | Proves local delivery/acknowledgement, not broker guarantees. |
 | `cicd.inspect` | heuristic | `tests/labs/test_platform_verticals.py::test_vertical_coverage` | Pipeline configuration does not prove execution. |
+| `cicd.verify-runtime` | supported | `tests/application/test_platform_runtime.py::test_all_platform_vertical_probes_execute_and_emit_receipt` | Proves the local pipeline rehearsal, not hosted CI execution. |
 | `cloud.inspect` | heuristic | `tests/labs/test_platform_verticals.py::test_vertical_coverage` | Remote state and live posture require explicit evidence. |
+| `cloud.verify-runtime` | supported | `tests/application/test_platform_runtime.py::test_all_platform_vertical_probes_execute_and_emit_receipt` | Proves local IaC parsing, not cloud apply or posture. |
 | `frontend.inspect` | heuristic | `tests/labs/test_platform_verticals.py::test_vertical_coverage` | Browser behavior and accessibility need a frontend host. |
+| `frontend.verify-runtime` | supported | `tests/application/test_platform_runtime.py::test_all_platform_vertical_probes_execute_and_emit_receipt` | Proves the typed local integration fixture, not browser accessibility. |
 | `git.plan` | unresolved | `tests/runtime/test_supervisor.py` | The offline core does not mutate a Git host. |
 | `api.change-control` | supported | `tests/e2e/test_api_git_cicd_change_control.py::test_change_control_flow`, `tests/application/test_change_control.py::test_change_control_publishers_emit_junit_and_markdown` | Replay/local governance, JUnit/Markdown publishers and local IDE/UI host are proven; provider freshness and deployment safety are not. |
 | `git.read-context` | heuristic | `tests/integrations/test_github_adapter.py`, `tests/application/test_change_control.py::test_live_collection_receipt_binds_sanitized_bundle` | GitHub reads are GET-only and now emit a live collection receipt; one receipt does not establish general provider freshness or permission guarantees. |
@@ -68,6 +73,12 @@ unresolved items, evidence references, verifier and bounded confidence.
 It never merges, pushes, dispatches workflows, deploys or changes repository
 state. Live provider collection is a separate evidence step and remains
 `heuristic` until an anonymized receipt proves freshness and permissions.
+
+`apiforge platform verify-runtime` executes only committed, allowlisted probes
+under `tests/fixtures/platform/` and emits
+`af-platform-runtime-receipt/1`. This is real local execution evidence for
+each vertical, not a claim about a remote provider. Use an external health or
+provider receipt before promoting a local result to a production decision.
 
 ## Adding a capability
 

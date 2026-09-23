@@ -1,7 +1,8 @@
 # Change-control IDE/UI host
 
-The local host turns a completed `change-control run` into a read-only browser
-and IDE bridge without introducing a second result contract.
+The host turns a completed `change-control run` into a read-only browser and
+IDE bridge without introducing a second result contract. It can run locally
+or as an authenticated TLS service behind a controlled remote host.
 
 ```bash
 apiforge change-control serve --run-dir .apiforge/change-control
@@ -15,8 +16,12 @@ The default bind address is `127.0.0.1`. Fixed endpoints are:
 | `/api/result` | Canonical `ChangeControlResult`. |
 | `/api/ide` | `CapabilityResult/v1` envelope for an IDE host. |
 | `/api/ui` | Same canonical result for a visual host. |
+| `/healthz` | Liveness probe with no project data. |
+| `/readyz` | Readiness probe proving `result.json` is readable. |
 | `/reports/change-control.junit.xml` | CI-compatible JUnit projection. |
 | `/reports/change-control.md` | Human-reviewable Markdown projection. |
+| `/reports/change-control.sarif.json` | Code-scanning-compatible SARIF. |
+| `/reports/change-control.html` | Standalone static report for remote hosting. |
 
 The host reads only the selected run directory and exposes no arbitrary file
 route. It cannot merge, push, dispatch, deploy, comment, change status or
@@ -35,4 +40,21 @@ apiforge change-control surface \
 
 The host is a local deployment proof. A shared or production deployment still
 needs host-owned authentication, TLS, network policy, retention, identity and
-independent verification.
+independent verification. Direct remote binding refuses to start without a
+Bearer token and TLS; `--trust-proxy` is permitted only when a trusted HTTPS
+proxy terminates TLS before the host.
+
+For a containerized remote host:
+
+```bash
+set APIFORGE_HOST_TOKEN=use-a-secret-manager-value
+docker compose -f docker-compose.change-control.yml up --build
+```
+
+Mount a certificate and key under `deploy/tls/`, or terminate HTTPS in a
+trusted proxy and use the documented proxy boundary. The container is
+read-only, drops Linux capabilities and exposes only the selected run.
+
+The repository also contains `.github/workflows/change-control-pages.yml`.
+After Pages is enabled for the repository, it publishes the standalone HTML,
+Markdown and SARIF projections from the canonical result on `main`.

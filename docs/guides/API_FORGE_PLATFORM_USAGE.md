@@ -202,8 +202,46 @@ pode mudar; estado, evidência, gaps e semântica de segurança não.
 `af-change-collection-receipt/1` ao lado do bundle. Ele prova a
 correspondência dos bytes coletados e os hashes das fontes, mas não prova
 autoria, freshness, permissões, deployment ou rollback. `publish` gera as
-projeções JUnit/Markdown; `surface` exporta uma projeção para IDE; e `serve`
-oferece um host UI/IDE local, read-only e loopback por padrão.
+projeções JUnit, Markdown, SARIF e HTML; `surface` exporta uma projeção para
+IDE; e `serve` oferece um host UI/IDE local ou remoto. Binding remoto exige
+Bearer token e TLS, salvo uso explícito atrás de proxy HTTPS confiável.
+
+Integrações externas read-only são explícitas e geram
+`af-external-read-receipt/1`:
+
+```bash
+apiforge integration github-issues \
+  --repository owner/repository \
+  --out .apiforge/github-issues.json
+apiforge integration health \
+  --url https://host.example/readyz \
+  --out .apiforge/health.json
+apiforge integration json \
+  --url https://tracker.example/api/issues \
+  --out .apiforge/tracker.json
+apiforge integration verify-receipt \
+  --receipt .apiforge/health.json \
+  --now 2026-09-22T12:00:00+00:00
+```
+
+O receipt prova a resposta observada e sua janela de frescor declarada; não
+prova autoria, rollback, SLO ou saúde geral da aplicação.
+O adapter `integration json` pode ler endpoints de Jira, Linear ou outras
+ferramentas por URL e token de host, mas preserva o JSON sem inventar semântica
+de issue, permissão ou workflow.
+
+Para prova de execução local das seis verticais, use somente os probes
+versionados e allowlisted:
+
+```bash
+apiforge platform verify-runtime \
+  --now 2026-09-22T12:00:00+00:00 \
+  --out .apiforge/platform-runtime-receipt.json
+```
+
+Esse receipt prova execução local de API, banco, mensageria, CI/CD, cloud/IaC
+e front-end. Ele não transforma essa prova em saúde de provider, deployment ou
+performance de produção.
 
 ## 8. Verificação antes de commit/release
 
@@ -226,9 +264,10 @@ apiforge agents sync --root .
 
 O workflow `.github/workflows/ci.yml` executa os mesmos gates em cada push.
 Quando um push para uma branch diferente de `main` termina verde, o job
-`open-green-pr` abre ou reutiliza uma PR para `main`. Ele possui apenas
+`open-green-pr` abre ou reutiliza uma PR para `main` através do host dedicado
+`scripts/github_pr_host.py`, que emite um receipt de mutação. Ele possui apenas
 permissão para ler o conteúdo e criar PR; merge, push, deploy e dispatch
-continuam proibidos. Para habilitar a criação, o repositório deve fornecer o
+continuam proibidos por padrão. Para habilitar a criação, o repositório deve fornecer o
 secret `APIFORGE_PR_TOKEN` com escopo mínimo de pull request, ou um
 administrador deve habilitar “Allow GitHub Actions to create and approve pull
 requests” nas configurações de Actions. O token pessoal nunca deve ser
@@ -236,9 +275,10 @@ commitado nem gravado em arquivos do projeto.
 
 ## 9. Limitações públicas
 
-O estado atual não declara como produção: providers live específicos, um
-protocolo IDE implantado, uma UI distribuída, execução de scanners ausentes,
-benchmarks de produção ou mutações externas. Esses limites permanecem na
-matriz para evitar promessas sem evidência. A evolução correta é adicionar um
-adapter read-only, contract, fixture/golden/holdout, verifier, documentação e
-policy de rollback antes de promover o estado.
+O container `Dockerfile.change-control`, o compose restrito e o workflow de
+Pages fornecem implantação reproduzível do host remoto read-only. Ainda assim,
+o operador precisa configurar domínio, TLS, secret, retenção e monitoramento
+do ambiente de produção. O auto-merge é opt-in por `APIFORGE_AUTO_MERGE=true`
+e continua sujeito às regras de proteção da branch. Providers live específicos,
+scanners ausentes e benchmarks de produção só podem ser promovidos após um
+receipt externo e verificador independente.

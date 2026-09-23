@@ -47,15 +47,23 @@ def _redact(value: object) -> JsonValue:
 class UrllibReadOnlyTransport:
     """Minimal GET-only transport; it never sends a mutating HTTP verb."""
 
-    def __init__(self, base_url: str, *, token: str | None = None, timeout: float = 10.0) -> None:
+    def __init__(
+        self,
+        base_url: str,
+        *,
+        token: str | None = None,
+        timeout: float = 10.0,
+        accept: str = "application/vnd.github+json",
+    ) -> None:
         self._base_url = base_url.rstrip("/")
         self._token = token
         self._timeout = timeout
+        self._accept = accept
 
     def get_json(self, path: str, *, params: Mapping[str, str] | None = None) -> object:
         query = f"?{urlencode(params)}" if params else ""
         request = Request(f"{self._base_url}/{path.lstrip('/')}{query}", method="GET")
-        request.add_header("Accept", "application/vnd.github+json")
+        request.add_header("Accept", self._accept)
         if self._token:
             request.add_header("Authorization", f"Bearer {self._token}")
         try:

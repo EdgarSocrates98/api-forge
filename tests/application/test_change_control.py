@@ -8,8 +8,10 @@ from apiforge.application.change_control import (
 )
 from apiforge.application.change_publishers import (
     publish_change_control_reports,
+    render_html,
     render_junit,
     render_markdown,
+    render_sarif,
 )
 from apiforge.contracts.change_control import ChangeCollectRequest
 from apiforge.core.io import write_json
@@ -38,6 +40,11 @@ def test_change_control_publishers_emit_junit_and_markdown(tmp_path: Path) -> No
     assert "review" in markdown
     assert "<testsuite" in render_junit(result)
     assert "Recommendation" in render_markdown(result)
+    sarif = Path(reports["sarif"]).read_text(encoding="utf-8")
+    assert '"version": "2.1.0"' in sarif
+    assert "API Forge change-control" in Path(reports["html"]).read_text(encoding="utf-8")
+    assert "<html" in render_html(result)
+    assert "sarif" in render_sarif(result)
 
 
 def test_live_collection_receipt_binds_sanitized_bundle(tmp_path: Path) -> None:

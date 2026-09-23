@@ -46,6 +46,12 @@ from apiforge.contracts.grpc import (
     GrpcService,
     GrpcVerification,
 )
+from apiforge.contracts.integration import (
+    ExternalReadReceipt,
+    ExternalReadRequest,
+    ExternalReadResult,
+    GitHubPrReceipt,
+)
 from apiforge.contracts.observability import (
     Capability,
     CircuitBreakerEvent,
@@ -70,7 +76,9 @@ from apiforge.contracts.platform import (
     CapabilityRecord,
     CapabilityRequest,
     CapabilityResult,
+    PlatformRuntimeReceipt,
     VerticalCoverage,
+    VerticalRuntimeReceipt,
 )
 from apiforge.contracts.stubs import (
     AgenticQualityAssessment,
@@ -171,6 +179,12 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "CapabilityRequest/v1": CapabilityRequest,
     "CapabilityResult/v1": CapabilityResult,
     "VerticalCoverage/v1": VerticalCoverage,
+    "VerticalRuntimeReceipt/v1": VerticalRuntimeReceipt,
+    "PlatformRuntimeReceipt/v1": PlatformRuntimeReceipt,
+    "ExternalReadRequest/v1": ExternalReadRequest,
+    "ExternalReadReceipt/v1": ExternalReadReceipt,
+    "ExternalReadResult/v1": ExternalReadResult,
+    "GitHubPrReceipt/v1": GitHubPrReceipt,
     "VendorIntent/v1": VendorIntent,
     "IntentDiff/v1": IntentDiff,
     "OperationReceipt/v1": OperationReceipt,

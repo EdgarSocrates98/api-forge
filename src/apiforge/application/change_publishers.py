@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from html import escape
 from pathlib import Path
 from typing import Any
 from xml.etree import ElementTree as ET
@@ -162,17 +163,98 @@ def render_markdown(result: ChangeControlResult) -> str:
     return "\n".join(lines)
 
 
+def render_sarif(result: ChangeControlResult) -> str:
+    """Render governed gaps as SARIF for code-scanning compatible hosts."""
+    gaps = tuple(result.gaps)
+    results: list[dict[str, object]] = [
+        {
+            "ruleId": "AF-CHANGE-CONTROL-GAP",
+            "level": "error" if result.status in {"failed", "blocked"} else "warning",
+            "message": {"text": gap},
+            "locations": [],
+        }
+        for gap in gaps
+    ]
+    if not results and result.status == "ok":
+        results.append(
+            {
+                "ruleId": "AF-CHANGE-CONTROL-PASS",
+                "level": "note",
+                "message": {"text": "Governed change-control completed without named gaps."},
+                "locations": [],
+            }
+        )
+    payload = {
+        "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+        "version": "2.1.0",
+        "runs": [
+            {
+                "tool": {
+                    "driver": {
+                        "name": "API Forge",
+                        "informationUri": "https://github.com/EdgarSocrates98/api-forge",
+                        "rules": [
+                            {
+                                "id": item["ruleId"],
+                                "shortDescription": {"text": item["ruleId"]},
+                            }
+                            for item in results
+                        ],
+                    }
+                },
+                "results": results,
+            }
+        ],
+    }
+    return json.dumps(payload, indent=2, sort_keys=True) + "\n"
+
+
+def render_html(result: ChangeControlResult) -> str:
+    """Render a standalone HTML report suitable for remote static hosting."""
+    recommendation = result.payload.get("recommendation", {})
+    recommendation_text = (
+        recommendation.get("recommendation", "not available")
+        if isinstance(recommendation, dict)
+        else "not available"
+    )
+
+    def list_html(values: tuple[str, ...]) -> str:
+        return "".join(f"<li>{escape(value)}</li>" for value in values) or "<li>None</li>"
+
+    return f"""<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>API Forge change-control report</title>
+<style>body{{font:16px system-ui,sans-serif;max-width:960px;margin:2rem auto;padding:0 1rem}}
+code,pre{{background:#f4f4f4;padding:.2rem .4rem;border-radius:4px}}
+.status{{font-weight:700}} .gap{{color:#8a3b00}}</style></head>
+<body><h1>API Forge change-control report</h1>
+<p>State: <code>{escape(result.state)}</code>; status:
+<strong class="status">{escape(result.status)}</strong></p>
+<h2>Recommendation</h2><p>{escape(str(recommendation_text))}</p>
+<h2>Gaps</h2><ul class="gap">{list_html(result.gaps)}</ul>
+<h2>Limitations</h2><ul>{list_html(result.limitations)}</ul>
+<h2>Evidence</h2><ul>{list_html(result.evidence)}</ul>
+<details><summary>Canonical result</summary><pre>{escape(json.dumps(result.model_dump(mode="json"), indent=2, sort_keys=True))}</pre></details>
+</body></html>
+"""
+
+
 def publish_change_control_reports(
     run_dir: Path,
     *,
     junit_path: Path | None = None,
     markdown_path: Path | None = None,
+    sarif_path: Path | None = None,
+    html_path: Path | None = None,
 ) -> dict[str, str]:
-    """Write JUnit and Markdown projections from a canonical run result."""
+    """Write deterministic CI, security and remote-host projections."""
     result = _load_result(run_dir)
     metrics = _load_metrics(run_dir)
     junit = junit_path or run_dir / "reports" / "change-control.junit.xml"
     markdown = markdown_path or run_dir / "reports" / "change-control.md"
+    sarif = sarif_path or run_dir / "reports" / "change-control.sarif.json"
+    html = html_path or run_dir / "reports" / "change-control.html"
     return {
         "junit": _write(junit, render_junit(result, metrics), code="AF-CHANGE-PUBLISH-JUNIT"),
         "markdown": _write(
@@ -180,4 +262,6 @@ def publish_change_control_reports(
             render_markdown(result),
             code="AF-CHANGE-PUBLISH-MARKDOWN",
         ),
+        "sarif": _write(sarif, render_sarif(result), code="AF-CHANGE-PUBLISH-SARIF"),
+        "html": _write(html, render_html(result), code="AF-CHANGE-PUBLISH-HTML"),
     }

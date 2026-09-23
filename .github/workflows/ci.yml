@@ -49,6 +49,12 @@ jobs:
       - name: Verify public capability matrix
         run: apiforge capabilities verify
 
+      - name: Execute local runtime probes for all platform verticals
+        run: >-
+          apiforge platform verify-runtime
+          --now "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          --out .apiforge/platform-runtime-receipt.json
+
       - name: Smoke test API/Git/CI change control
         run: >-
           apiforge change-control run
@@ -89,6 +95,14 @@ jobs:
           path: .apiforge/change-control/reports
           if-no-files-found: error
 
+      - name: Upload platform runtime receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-forge-platform-runtime-receipt
+          path: .apiforge/platform-runtime-receipt.json
+          if-no-files-found: error
+
       - name: Release gate
         run: python scripts/check_release.py
 
@@ -103,13 +117,14 @@ jobs:
       contents: read
       pull-requests: write
     steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
       - name: Open or reuse pull request
         env:
           PR_TOKEN: ${{ secrets.APIFORGE_PR_TOKEN }}
           WORKFLOW_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-          HEAD_BRANCH: ${{ github.ref_name }}
-          HEAD_SHA: ${{ github.sha }}
+          APIFORGE_HOST_APPROVED: "true"
         run: |
           set -euo pipefail
           if [ -n "${PR_TOKEN:-}" ]; then
@@ -117,17 +132,55 @@ jobs:
           else
             export GH_TOKEN="$WORKFLOW_TOKEN"
           fi
-          existing="$(gh pr list --repo "$GH_REPO" --state open --head "$HEAD_BRANCH" --base main --json number --jq 'length')"
-          if [ "$existing" -gt 0 ]; then
-            echo "An open PR already exists for $HEAD_BRANCH"
-            exit 0
-          fi
-          if ! gh pr create \
-              --repo "$GH_REPO" \
-              --base main \
-              --head "$HEAD_BRANCH" \
-              --title "Validate $HEAD_BRANCH" \
-              --body "Automated PR opened after all API Forge CI validations passed for commit $HEAD_SHA."; then
-            echo "::error title=PR automation is not authorized::Configure APIFORGE_PR_TOKEN with pull-request write scope, or enable GitHub Actions to create and approve pull requests in repository settings."
-            exit 1
-          fi
+          python scripts/github_pr_host.py \
+            --operation create_or_reuse \
+            --repository "${GITHUB_REPOSITORY}" \
+            --head "${GITHUB_REF_NAME}" \
+            --base main \
+            --title "Validate ${GITHUB_REF_NAME}" \
+            --body "Automated PR opened after all API Forge CI validations passed for commit ${GITHUB_SHA}." \
+            --receipt .apiforge/pr/pr-receipt.json
+
+      - name: Upload GitHub mutation receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-forge-github-pr-receipt
+          path: .apiforge/pr/pr-receipt.json
+          if-no-files-found: ignore
+
+  auto-merge-green:
+    name: Request auto-merge after green validation
+    if: >-
+      github.event_name == 'push' && startsWith(github.ref, 'refs/heads/') &&
+      github.ref != 'refs/heads/main' && github.repository == 'EdgarSocrates98/api-forge' &&
+      vars.APIFORGE_AUTO_MERGE == 'true'
+    needs: open-green-pr
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Request GitHub auto-merge
+        env:
+          GH_TOKEN: ${{ github.token }}
+          APIFORGE_HOST_APPROVED: "true"
+        run: |
+          set -euo pipefail
+          python scripts/github_pr_host.py \
+            --operation enable_auto_merge \
+            --repository "${GITHUB_REPOSITORY}" \
+            --head "${GITHUB_REF_NAME}" \
+            --base main \
+            --receipt .apiforge/pr/auto-merge-receipt.json
+
+      - name: Upload auto-merge receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-forge-github-auto-merge-receipt
+          path: .apiforge/pr/auto-merge-receipt.json
+          if-no-files-found: ignore

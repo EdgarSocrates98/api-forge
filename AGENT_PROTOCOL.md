@@ -77,7 +77,7 @@ For an API change tied to Git/CI/CD, the canonical deterministic route is:
 ```text
 af-change-bundle/1
   → analyze → next-step → graph → evidence → brief
-  → verify → publish (JUnit/Markdown) → IDE/UI projection
+  → verify → publish (JUnit/Markdown/SARIF/HTML) → IDE/UI projection
 ```
 
 The provider collection is an optional read-only ingress before the bundle is
@@ -96,6 +96,12 @@ replayed; it is not part of the offline core.
 - Every refusal names an `AF-*` code, a `field` and an `unlock`; change-control
   codes are documented in `docs/catalog-contract.md`, while SDD and policy
   refusals remain documented in their respective contracts.
+- `apiforge platform verify-runtime` executes only committed allowlisted probes
+  and emits `af-platform-runtime-receipt/1`. It proves local fixture execution
+  and never upgrades provider or production claims by inference.
+- `apiforge integration github-issues` and `integration health` are explicit
+  GET-only external adapters. Their `af-external-read-receipt/1` records a
+  response hash and freshness window; it does not authorize a mutation.
 
 ## Agent recommendation contract
 

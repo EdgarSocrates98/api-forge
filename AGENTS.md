@@ -30,7 +30,9 @@ streaming and messaging.
     the code must be present in `docs/catalog-contract.md`.
 11. CI may open a PR only through the dedicated green-validation workflow job
     and an explicitly configured least-privilege credential; agents and the
-    application core never perform that mutation.
+    application core never perform that mutation. The host script emits a
+    `af-github-pr-receipt/1`; auto-merge is an explicit repository-variable
+    policy and remains controlled by branch protection.
 
 ## Agentic runtime
 
@@ -74,7 +76,10 @@ integrations belong behind explicit read-only adapters and policy gates.
 Collectors may create hashed AWS posture dumps only through the AWS collector
 family; source models never publish, consume, execute SQL, commit offsets or
 mutate topology. `change-control collect` is a separate GitHub GET-only path
-that creates a sanitized replay bundle and collection receipt.
+that creates a sanitized replay bundle and collection receipt. The external
+issue/health adapters are also GET-only and emit freshness receipts. Local
+vertical runtime proof is opt-in and allowlisted through
+`apiforge platform verify-runtime`; it proves fixtures, not production.
 
 ## Validation
 

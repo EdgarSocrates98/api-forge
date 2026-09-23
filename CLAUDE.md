@@ -61,4 +61,9 @@ the verifier, unresolved gaps and next human action.
   explicitly configured least-privilege token and never merges or deploys;
 - validate JUnit/Markdown publisher output and the local IDE/UI host when the
   change-control surface is part of the task;
+- validate SARIF/HTML projections, authenticated remote host configuration and
+  `apiforge platform verify-runtime` when platform completion is part of the
+  task;
+- keep `scripts/github_pr_host.py` as the only GitHub mutation boundary; its
+  receipt and opt-in auto-merge policy must be reviewed independently;
 - run `apiforge sdd check --root docs/sdd` before shipping.

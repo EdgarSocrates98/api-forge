@@ -244,6 +244,18 @@ change_control_app = typer.Typer(
     no_args_is_help=True,
 )
 app.add_typer(change_control_app)
+integration_app = typer.Typer(
+    name="integration",
+    help="Read-only external evidence adapters and freshness receipts.",
+    no_args_is_help=True,
+)
+app.add_typer(integration_app)
+platform_app = typer.Typer(
+    name="platform",
+    help="Run allowlisted local runtime probes for platform verticals.",
+    no_args_is_help=True,
+)
+app.add_typer(platform_app)
 
 
 @app.callback()
@@ -332,7 +344,12 @@ def _run(fn: Callable[[], object]) -> object:
     except CaseIntegrityError as exc:
         _fail(exc.code, exc.path, exit_code=3)
     except ContractError as exc:
-        _fail(exc.code, exc.detail)
+        _fail(
+            exc.code,
+            exc.detail,
+            field=getattr(exc, "field", "contract"),
+            unlock=getattr(exc, "unlock", "inspect the documented contract and retry"),
+        )
     except ChangeControlError as exc:
         _fail(exc.code, exc.detail, field=exc.field, unlock=exc.unlock)
     except ChangePublishError as exc:
@@ -792,15 +809,19 @@ def change_control_publish(
     ),
     junit: Path | None = typer.Option(None, "--junit", help="JUnit XML output path."),
     markdown: Path | None = typer.Option(None, "--markdown", help="Markdown report output path."),
+    sarif: Path | None = typer.Option(None, "--sarif", help="SARIF JSON output path."),
+    html: Path | None = typer.Option(None, "--html", help="Standalone HTML output path."),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
-    """Publish the canonical result to JUnit XML and Markdown."""
+    """Publish the canonical result to JUnit, Markdown, SARIF and HTML."""
     _echo_json(
         _run(
             lambda: publish_change_control_reports(
                 run_dir,
                 junit_path=junit,
                 markdown_path=markdown,
+                sarif_path=sarif,
+                html_path=html,
             )
         ),
         detail_level,
@@ -837,11 +858,157 @@ def change_control_serve(
     ),
     host: str = typer.Option("127.0.0.1", "--host"),
     port: int = typer.Option(8765, "--port", min=1, max=65535),
+    token_env: str = typer.Option("APIFORGE_HOST_TOKEN", "--token-env"),
+    tls_cert: Path | None = typer.Option(None, "--tls-cert"),
+    tls_key: Path | None = typer.Option(None, "--tls-key"),
+    trust_proxy: bool = typer.Option(False, "--trust-proxy"),
 ) -> None:
-    """Serve the local read-only UI and IDE bridge for a governed run."""
+    """Serve a local or authenticated TLS read-only UI and IDE bridge."""
     from apiforge.surfaces.change_control_host import serve_change_control
 
-    _run(lambda: serve_change_control(run_dir, host=host, port=port))
+    _run(
+        lambda: serve_change_control(
+            run_dir,
+            host=host,
+            port=port,
+            auth_token=os.environ.get(token_env),
+            tls_cert=tls_cert,
+            tls_key=tls_key,
+            trust_proxy=trust_proxy,
+        )
+    )
+
+
+@integration_app.command("github-issues")
+def integration_github_issues(
+    repository: str = typer.Option(..., "--repository"),
+    state: str = typer.Option("open", "--state"),
+    api_base: str = typer.Option("https://api.github.com", "--api-base"),
+    max_age: int = typer.Option(300, "--max-age", min=1, max=86_400),
+    out: Path | None = typer.Option(None, "--out", help="Optional JSON evidence path."),
+    token_env: str = typer.Option("GITHUB_TOKEN", "--token-env"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Read GitHub issues through a GET-only adapter and emit a receipt."""
+    from apiforge.core.io import write_json
+    from apiforge.integrations.external import GitHubIssuesReadOnlyAdapter
+    from apiforge.integrations.github import UrllibReadOnlyTransport
+
+    def work() -> object:
+        result = GitHubIssuesReadOnlyAdapter(
+            UrllibReadOnlyTransport(api_base, token=os.environ.get(token_env))
+        ).read(repository, state=state, max_age_seconds=max_age)
+        payload = result.model_dump(mode="json")
+        if out:
+            write_json(out, payload)
+            return {"out": str(out), "receipt": payload["receipt"]}
+        return payload
+
+    _echo_json(_run(work), detail_level)
+
+
+@integration_app.command("health")
+def integration_health(
+    url: str = typer.Option(..., "--url"),
+    max_age: int = typer.Option(60, "--max-age", min=1, max=86_400),
+    out: Path | None = typer.Option(None, "--out", help="Optional JSON evidence path."),
+    token_env: str = typer.Option("APIFORGE_HOST_TOKEN", "--token-env"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Read a remote HTTP health endpoint and emit a freshness receipt."""
+    from apiforge.core.io import write_json
+    from apiforge.integrations.external import adapter_for_url
+
+    def work() -> object:
+        result = adapter_for_url(url, token=os.environ.get(token_env)).read(
+            url, max_age_seconds=max_age
+        )
+        payload = result.model_dump(mode="json")
+        if out:
+            write_json(out, payload)
+            return {"out": str(out), "receipt": payload["receipt"]}
+        return payload
+
+    _echo_json(_run(work), detail_level)
+
+
+@integration_app.command("json")
+def integration_json(
+    url: str = typer.Option(..., "--url"),
+    max_age: int = typer.Option(300, "--max-age", min=1, max=86_400),
+    out: Path | None = typer.Option(None, "--out", help="Optional JSON evidence path."),
+    token_env: str = typer.Option("APIFORGE_EXTERNAL_READ_TOKEN", "--token-env"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Read a generic external JSON endpoint (Jira, Linear or similar)."""
+    from urllib.parse import urlsplit
+
+    from apiforge.core.io import write_json
+    from apiforge.integrations.external import HttpJsonReadOnlyAdapter
+    from apiforge.integrations.github import UrllibReadOnlyTransport
+
+    def work() -> object:
+        parsed = urlsplit(url)
+        adapter = HttpJsonReadOnlyAdapter(
+            UrllibReadOnlyTransport(
+                f"{parsed.scheme}://{parsed.netloc}",
+                token=os.environ.get(token_env),
+                accept="application/json",
+            )
+        )
+        payload = adapter.read(url, max_age_seconds=max_age).model_dump(mode="json")
+        if out:
+            write_json(out, payload)
+            return {"out": str(out), "receipt": payload["receipt"]}
+        return payload
+
+    _echo_json(_run(work), detail_level)
+
+
+@integration_app.command("verify-receipt")
+def integration_verify_receipt(
+    receipt: Path = typer.Option(..., "--receipt"),
+    now: str = typer.Option(..., "--now", help="Explicit ISO-8601 verification time."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Verify external receipt correspondence and declared freshness."""
+    from apiforge.contracts.integration import ExternalReadReceipt
+    from apiforge.integrations.external import verify_external_receipt
+
+    def work() -> object:
+        payload = json.loads(receipt.read_text(encoding="utf-8"))
+        raw = payload.get("receipt", payload) if isinstance(payload, dict) else payload
+        return verify_external_receipt(ExternalReadReceipt.model_validate(raw), now=now)
+
+    _echo_json(_run(work), detail_level)
+
+
+@platform_app.command("verify-runtime")
+def platform_verify_runtime(
+    root: Path = typer.Option(Path("."), "--root"),
+    vertical: list[str] = typer.Option([], "--vertical"),
+    now: str | None = typer.Option(None, "--now", help="Explicit ISO-8601 observation time."),
+    out: Path | None = typer.Option(None, "--out", help="Optional runtime receipt path."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Execute committed probes and emit local runtime evidence."""
+    from apiforge.application.platform_runtime import (
+        VERTICALS,
+        runtime_summary,
+        verify_platform_runtime,
+    )
+    from apiforge.core.io import write_json
+
+    def work() -> object:
+        selected = tuple(vertical) or VERTICALS
+        receipt = verify_platform_runtime(root, verticals=selected, now=now)
+        payload = receipt.model_dump(mode="json") | {"summary": runtime_summary(receipt)}
+        if out:
+            write_json(out, payload)
+            return {"out": str(out), "summary": payload["summary"]}
+        return payload
+
+    _echo_json(_run(work), detail_level)
 
 
 @diff_app.command("contract")

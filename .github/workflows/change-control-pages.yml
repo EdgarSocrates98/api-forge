@@ -1,0 +1,81 @@
+name: Publish change-control UI
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: change-control-pages
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    name: Publish remote read-only UI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install project
+        run: python -m pip install -e .
+
+      - name: Build governed result and remote projections
+        run: |
+          apiforge change-control run \
+            --bundle tests/fixtures/api_git_cicd/change_bundle.json \
+            --out-dir .apiforge/change-control
+          apiforge change-control publish --run-dir .apiforge/change-control
+          mkdir -p _site
+          cp .apiforge/change-control/reports/change-control.html _site/index.html
+          cp .apiforge/change-control/reports/change-control.sarif.json _site/change-control.sarif.json
+          cp .apiforge/change-control/reports/change-control.md _site/change-control.md
+          printf '{"status":"ready"}\n' > _site/healthz
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy Pages artifact
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Verify deployed Pages health receipt
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3 4 5; do
+            if apiforge integration health \
+                --url "${PAGE_URL%/}/healthz" \
+                --out .apiforge/pages-health.json; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Pages health endpoint did not become readable" >&2
+          exit 1
+
+      - name: Upload deployment health receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-forge-pages-health-receipt
+          path: .apiforge/pages-health.json
+          if-no-files-found: ignore

@@ -100,3 +100,28 @@ class VerticalCoverage(VersionedContract):
     golden: str
     holdout: str
     verifier: str
+
+
+class VerticalRuntimeReceipt(VersionedContract):
+    """Receipt for one allowlisted local runtime probe."""
+
+    vertical: str
+    fixture: str
+    probe: str
+    probe_sha256: str
+    observed_at: str
+    status: Literal["passed", "failed", "unresolved"]
+    checks: tuple[str, ...] = ()
+    limitations: tuple[str, ...] = ()
+
+
+class PlatformRuntimeReceipt(VersionedContract):
+    """Aggregate local runtime evidence for the six required verticals."""
+
+    schema_version: Literal["af-platform-runtime-receipt/1"] = "af-platform-runtime-receipt/1"
+    observed_at: str
+    verticals: tuple[VerticalRuntimeReceipt, ...] = ()
+    limitations: tuple[str, ...] = (
+        "probes prove the committed local fixture runtime only",
+        "provider freshness, deployment safety and production SLOs require external receipts",
+    )

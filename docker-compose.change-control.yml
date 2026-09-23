@@ -1,0 +1,17 @@
+services:
+  change-control-host:
+    build:
+      context: .
+      dockerfile: Dockerfile.change-control
+    ports:
+      - "8765:8765"
+    environment:
+      APIFORGE_HOST_TOKEN: ${APIFORGE_HOST_TOKEN:?set APIFORGE_HOST_TOKEN}
+    volumes:
+      - ./.apiforge/change-control:/data/run:ro
+      - ./deploy/tls:/tls:ro
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL

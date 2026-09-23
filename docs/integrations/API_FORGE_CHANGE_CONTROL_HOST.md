@@ -58,6 +58,10 @@ read-only, drops Linux capabilities and exposes only the selected run.
 The repository also contains `.github/workflows/change-control-pages.yml`.
 After Pages is enabled for the repository, it publishes the standalone HTML,
 Markdown and SARIF projections from the canonical result on `main`.
+If Pages has not yet been enabled, configure the repository with a compatible
+Pages plan and a dedicated `APIFORGE_PAGES_TOKEN` secret. That token is used
+only by `actions/configure-pages` for the one-time enablement; the runtime host
+still receives no mutation authority.
 
 ## Green PR lifecycle
 

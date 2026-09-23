@@ -46,6 +46,12 @@ jobs:
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
+        with:
+          # A Pages site that already exists only needs GITHUB_TOKEN. On a
+          # compatible repository plan, APIFORGE_PAGES_TOKEN lets the host
+          # enable Pages once without moving that authority into the core.
+          token: ${{ secrets.APIFORGE_PAGES_TOKEN || github.token }}
+          enablement: ${{ secrets.APIFORGE_PAGES_TOKEN != '' }}
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

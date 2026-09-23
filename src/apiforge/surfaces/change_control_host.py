@@ -3,15 +3,31 @@
 from __future__ import annotations
 
 import json
+import ssl
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, Literal
 from urllib.parse import urlparse
 
-from apiforge.application.change_publishers import render_junit, render_markdown
+from apiforge.application.change_publishers import (
+    render_html,
+    render_junit,
+    render_markdown,
+    render_sarif,
+)
+from apiforge.contracts.base import ContractError
 from apiforge.contracts.change_control import ChangeControlResult
 
 Surface = Literal["ide", "ui"]
+
+
+class ChangeHostError(ContractError):
+    """A refused remote host configuration with an actionable unlock."""
+
+    def __init__(self, code: str, detail: str, *, field: str, unlock: str) -> None:
+        self.field = field
+        self.unlock = unlock
+        super().__init__(code, detail)
 
 
 def load_change_result(run_dir: Path) -> ChangeControlResult:
@@ -62,7 +78,7 @@ document.getElementById("json").textContent = JSON.stringify(projection, null, 2
 </script></body></html>"""
 
 
-def _handler(run_dir: Path) -> type[BaseHTTPRequestHandler]:
+def _handler(run_dir: Path, auth_token: str | None) -> type[BaseHTTPRequestHandler]:
     class Handler(BaseHTTPRequestHandler):
         def _send(self, content: bytes, content_type: str, status: int = 200) -> None:
             self.send_response(status)
@@ -75,7 +91,19 @@ def _handler(run_dir: Path) -> type[BaseHTTPRequestHandler]:
         def do_GET(self) -> None:
             path = urlparse(self.path).path
             try:
+                if path == "/healthz":
+                    self._send(b'{"status":"ok"}\n', "application/json")
+                    return
+                if path == "/readyz":
+                    load_change_result(run_dir)
+                    self._send(b'{"status":"ready"}\n', "application/json")
+                    return
                 result = load_change_result(run_dir)
+                if auth_token is not None and self.headers.get("Authorization") != (
+                    f"Bearer {auth_token}"
+                ):
+                    self._send(b"unauthorized\n", "text/plain; charset=utf-8", 401)
+                    return
                 if path == "/":
                     self._send(
                         render_ui_document(run_dir).encode("utf-8"), "text/html; charset=utf-8"
@@ -113,6 +141,10 @@ def _handler(run_dir: Path) -> type[BaseHTTPRequestHandler]:
                     self._send(
                         render_markdown(result).encode("utf-8"), "text/markdown; charset=utf-8"
                     )
+                elif path == "/reports/change-control.sarif.json":
+                    self._send(render_sarif(result).encode("utf-8"), "application/json")
+                elif path == "/reports/change-control.html":
+                    self._send(render_html(result).encode("utf-8"), "text/html; charset=utf-8")
                 else:
                     self._send(b"not found\n", "text/plain; charset=utf-8", 404)
             except (OSError, ValueError, json.JSONDecodeError) as exc:
@@ -124,9 +156,44 @@ def _handler(run_dir: Path) -> type[BaseHTTPRequestHandler]:
     return Handler
 
 
-def serve_change_control(run_dir: Path, *, host: str = "127.0.0.1", port: int = 8765) -> None:
-    """Serve the read-only UI/IDE bridge until interrupted by the host."""
-    server = ThreadingHTTPServer((host, port), _handler(Path(run_dir)))
+def serve_change_control(
+    run_dir: Path,
+    *,
+    host: str = "127.0.0.1",
+    port: int = 8765,
+    auth_token: str | None = None,
+    tls_cert: Path | None = None,
+    tls_key: Path | None = None,
+    trust_proxy: bool = False,
+) -> None:
+    """Serve the read-only IDE/UI bridge locally or as an authenticated TLS host."""
+    remote = host not in {"127.0.0.1", "localhost", "::1"}
+    if remote and not auth_token:
+        raise ChangeHostError(
+            "AF-CHANGE-HOST-AUTH",
+            "remote host requires a bearer token",
+            field="auth_token",
+            unlock="set APIFORGE_HOST_TOKEN and pass --token-env APIFORGE_HOST_TOKEN",
+        )
+    if (tls_cert is None) != (tls_key is None):
+        raise ChangeHostError(
+            "AF-CHANGE-HOST-TLS",
+            "TLS certificate and key must be configured together",
+            field="tls_cert/tls_key",
+            unlock="provide both --tls-cert and --tls-key, or terminate TLS in a trusted proxy",
+        )
+    if remote and tls_cert is None and not trust_proxy:
+        raise ChangeHostError(
+            "AF-CHANGE-HOST-TLS",
+            "remote host requires TLS or an explicitly trusted TLS-terminating proxy",
+            field="tls_cert/tls_key/trust_proxy",
+            unlock="provide both TLS files or pass --trust-proxy only behind a trusted HTTPS proxy",
+        )
+    server = ThreadingHTTPServer((host, port), _handler(Path(run_dir), auth_token))
+    if tls_cert is not None and tls_key is not None:
+        context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        context.load_cert_chain(certfile=tls_cert, keyfile=tls_key)
+        server.socket = context.wrap_socket(server.socket, server_side=True)
     try:
         server.serve_forever()
     finally:

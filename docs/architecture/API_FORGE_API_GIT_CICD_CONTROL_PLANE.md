@@ -49,11 +49,11 @@ verifier and human approval remain necessary for a release decision.
 
 ## Published reports and host surfaces
 
-`apiforge change-control publish` produces deterministic JUnit XML and
-Markdown from `result.json`; CI uploads both as artifacts. The same canonical
-result is available through `change-control surface --surface ide|ui` and the
-local `change-control serve` host at `/api/ide`, `/api/ui`, `/api/result`,
-`/reports/change-control.junit.xml` and `/reports/change-control.md`.
+`apiforge change-control publish` produces deterministic JUnit XML, Markdown,
+SARIF and standalone HTML from `result.json`; CI uploads them as artifacts.
+The same canonical result is available through `change-control surface
+--surface ide|ui` and the `change-control serve` host at `/api/ide`, `/api/ui`,
+`/api/result`, `/healthz`, `/readyz` and all four report endpoints.
 
 The host binds to loopback by default, serves no project files and performs no
 external mutation. A remote or production IDE/UI deployment still requires a
@@ -61,7 +61,11 @@ host-owned authentication, network and retention policy.
 
 ## Evolution path
 
-The next safe extension is provider-specific freshness policy and a remote IDE
-or UI host with host-owned authentication. Mutation requires a separate
-adapter, policy approval, identity, rollback, receipt and independent
-verification. The core remains small until those proofs exist.
+Provider freshness is represented by `af-external-read-receipt/1` and can be
+verified with `apiforge integration verify-receipt`. Remote UI/IDE serving is
+supported through the authenticated TLS host, the container recipe and the
+GitHub Pages workflow. Mutation remains a separate host adapter: the CI-only
+`scripts/github_pr_host.py` boundary can create/reuse a PR and optionally
+request auto-merge, emitting `af-github-pr-receipt/1`; the core still cannot
+perform those operations. Deployment health remains a separate GET receipt,
+not an inference from a green build.

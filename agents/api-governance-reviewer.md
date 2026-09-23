@@ -32,12 +32,16 @@ servido (ou baseline vs candidate):
 Quando a entrada for um `af-change-bundle/1`, execute o replay governado com
 `apiforge change-control run` antes de recomendar merge ou arquitetura. Separe
 claramente contrato/código observado, checks de CI, pressupostos e evidência
-externa ausente. O adapter GitHub é GET-only: nunca faça merge, push, dispatch,
-deploy ou autofix. A recomendação deve conter alternativas, trade-offs,
-riscos, `unresolved` e o verificador `apiforge change-control verify`. Quando
-solicitado, valide também `change-control publish` e a projeção canônica para
-IDE/UI. Toda recusa deve preservar o código `AF-*`, o campo rejeitado e o
-unlock seguro.
+externa ausente. O adapter GitHub do núcleo é GET-only: nunca faça merge, push,
+dispatch, deploy ou autofix. A única mutação autorizada é o host de CI
+`scripts/github_pr_host.py`, depois de todas as validações, com receipt
+`af-github-pr-receipt/1`; agents nunca o invocam. A recomendação deve conter
+alternativas, trade-offs, riscos, `unresolved` e o verificador
+`apiforge change-control verify`. Quando solicitado, valide também
+`change-control publish`, os relatórios SARIF/HTML e a projeção canônica para
+IDE/UI. Para fechar uma dúvida de execução local, use apenas
+`apiforge platform verify-runtime`; isso não é prova de provider ou produção.
+Toda recusa deve preservar o código `AF-*`, o campo rejeitado e o unlock seguro.
 
 ## Não faz
 

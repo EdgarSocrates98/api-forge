@@ -56,6 +56,20 @@ capabilities:
     verifier: tests/labs/test_platform_verticals.py::test_vertical_coverage
     documentation: docs/capabilities/API_FORGE_CAPABILITY_MATRIX.md
     adapter: static-data-access
+  database.verify-runtime:
+    vertical: database
+    operation: verify-local-runtime
+    state: supported
+    surfaces: [cli, mcp, ide, ui]
+    evidence: [allowlisted_probe, runtime_receipt, sqlite_execution]
+    limitations:
+      - proves the committed local SQLite fixture, not a remote engine or production query plan
+    prerequisites: [repository fixtures, local Python runtime]
+    risk: read_only
+    rollback: no external state
+    verifier: tests/application/test_platform_runtime.py::test_all_platform_vertical_probes_execute_and_emit_receipt
+    documentation: docs/capabilities/API_FORGE_CAPABILITY_MATRIX.md
+    adapter: local-runtime-probe
   messaging.inspect:
     vertical: messaging
     operation: inspect-topology
@@ -70,6 +84,20 @@ capabilities:
     verifier: tests/labs/test_platform_verticals.py::test_vertical_coverage
     documentation: docs/capabilities/API_FORGE_CAPABILITY_MATRIX.md
     adapter: static-messaging
+  messaging.verify-runtime:
+    vertical: messaging
+    operation: verify-local-runtime
+    state: supported
+    surfaces: [cli, mcp, ide, ui]
+    evidence: [allowlisted_probe, runtime_receipt, acknowledgement_execution]
+    limitations:
+      - proves the committed local message flow, not broker lag, ordering or delivery guarantees
+    prerequisites: [repository fixtures, local Python runtime]
+    risk: read_only
+    rollback: no external state
+    verifier: tests/application/test_platform_runtime.py::test_all_platform_vertical_probes_execute_and_emit_receipt
+    documentation: docs/capabilities/API_FORGE_CAPABILITY_MATRIX.md
+    adapter: local-runtime-probe
   cicd.inspect:
     vertical: cicd
     operation: inspect-pipeline
@@ -84,6 +112,20 @@ capabilities:
     verifier: tests/labs/test_platform_verticals.py::test_vertical_coverage
     documentation: docs/capabilities/API_FORGE_CAPABILITY_MATRIX.md
     adapter: static-cicd
+  cicd.verify-runtime:
+    vertical: cicd
+    operation: verify-local-pipeline
+    state: supported
+    surfaces: [cli, mcp, ide, ui]
+    evidence: [allowlisted_probe, runtime_receipt, pipeline_execution]
+    limitations:
+      - proves the committed pipeline manifest rehearsal, not a provider's hosted execution
+    prerequisites: [repository fixtures, local Python runtime]
+    risk: read_only
+    rollback: no external state
+    verifier: tests/application/test_platform_runtime.py::test_all_platform_vertical_probes_execute_and_emit_receipt
+    documentation: docs/capabilities/API_FORGE_CAPABILITY_MATRIX.md
+    adapter: local-runtime-probe
   cloud.inspect:
     vertical: cloud
     operation: inspect-infrastructure
@@ -98,6 +140,20 @@ capabilities:
     verifier: tests/labs/test_platform_verticals.py::test_vertical_coverage
     documentation: docs/capabilities/API_FORGE_CAPABILITY_MATRIX.md
     adapter: static-cloud
+  cloud.verify-runtime:
+    vertical: cloud
+    operation: verify-local-iac-runtime
+    state: supported
+    surfaces: [cli, mcp, ide, ui]
+    evidence: [allowlisted_probe, runtime_receipt, hcl_execution]
+    limitations:
+      - proves local IaC parsing and declared resources, not cloud apply or remote posture
+    prerequisites: [Terraform fixture, local HCL parser]
+    risk: read_only
+    rollback: no external state
+    verifier: tests/application/test_platform_runtime.py::test_all_platform_vertical_probes_execute_and_emit_receipt
+    documentation: docs/capabilities/API_FORGE_CAPABILITY_MATRIX.md
+    adapter: local-runtime-probe
   frontend.inspect:
     vertical: frontend
     operation: inspect-api-integration
@@ -112,6 +168,20 @@ capabilities:
     verifier: tests/labs/test_platform_verticals.py::test_vertical_coverage
     documentation: docs/capabilities/API_FORGE_CAPABILITY_MATRIX.md
     adapter: static-frontend
+  frontend.verify-runtime:
+    vertical: frontend
+    operation: verify-local-integration
+    state: supported
+    surfaces: [cli, mcp, ide, ui]
+    evidence: [allowlisted_probe, runtime_receipt, typed_fetch_contract]
+    limitations:
+      - proves the committed integration fixture, not a browser engine or accessibility audit
+    prerequisites: [frontend fixture, local Python runtime]
+    risk: read_only
+    rollback: no external state
+    verifier: tests/application/test_platform_runtime.py::test_all_platform_vertical_probes_execute_and_emit_receipt
+    documentation: docs/capabilities/API_FORGE_CAPABILITY_MATRIX.md
+    adapter: local-runtime-probe
   git.plan:
     vertical: integration
     operation: plan-git-change
@@ -156,6 +226,48 @@ capabilities:
     verifier: tests/integrations/test_github_adapter.py
     documentation: docs/security/api-git-cicd-control-plane.md
     adapter: github-read-only
+  integration.github-issues:
+    vertical: integration
+    operation: read-issue-tracker-context
+    state: supported
+    surfaces: [cli, mcp, ide, ui]
+    evidence: [github_issues_get, external_read_receipt]
+    limitations:
+      - issue state and permissions are observations at collection time, not mutation authorization
+    prerequisites: [GET-only host transport, repository reference, optional read token]
+    risk: read_only
+    rollback: no external state
+    verifier: tests/integrations/test_external_read_adapters.py::test_github_issues_adapter_is_get_only_and_emits_receipt
+    documentation: docs/guides/API_FORGE_PLATFORM_USAGE.md
+    adapter: github-issues-read-only
+  integration.health:
+    vertical: integration
+    operation: read-remote-health
+    state: supported
+    surfaces: [cli, mcp, ide, ui]
+    evidence: [health_get, external_read_receipt, freshness_verification]
+    limitations:
+      - a health endpoint cannot prove SLO compliance, rollback readiness or application correctness
+    prerequisites: [absolute HTTP(S) URL, read-only network access]
+    risk: read_only
+    rollback: no external state
+    verifier: tests/integrations/test_external_read_adapters.py::test_health_receipt_has_reproducible_freshness_verification
+    documentation: docs/guides/API_FORGE_PLATFORM_USAGE.md
+    adapter: http-health-read-only
+  integration.json-read:
+    vertical: integration
+    operation: read-external-json
+    state: supported
+    surfaces: [cli, mcp, ide, ui]
+    evidence: [json_get, external_read_receipt]
+    limitations:
+      - provider-specific issue and permission semantics are not inferred from generic JSON
+    prerequisites: [absolute HTTP(S) URL, read-only host credential when required]
+    risk: read_only
+    rollback: no external state
+    verifier: tests/integrations/test_external_read_adapters.py::test_generic_json_adapter_preserves_external_payload_without_inference
+    documentation: docs/guides/API_FORGE_PLATFORM_USAGE.md
+    adapter: http-json-read-only
   cicd.inspect-run:
     vertical: cicd
     operation: inspect-ci-observations

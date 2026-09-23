@@ -259,9 +259,11 @@ def change_control_publish(
     run_dir: str,
     junit: str | None = None,
     markdown: str | None = None,
+    sarif: str | None = None,
+    html: str | None = None,
     detail_level: str = "normal",
 ) -> dict[str, Any]:
-    """Publish a canonical change-control result to JUnit and Markdown."""
+    """Publish a canonical change-control result to CI and host formats."""
     from apiforge.application.change_publishers import publish_change_control_reports
 
     return cast(
@@ -272,6 +274,8 @@ def change_control_publish(
                 Path(run_dir),
                 junit_path=Path(junit) if junit else None,
                 markdown_path=Path(markdown) if markdown else None,
+                sarif_path=Path(sarif) if sarif else None,
+                html_path=Path(html) if html else None,
             ),
             detail_level,
         ),
@@ -291,6 +295,106 @@ def change_control_surface(
         _call(
             "change_control_surface",
             lambda: surface_projection(Path(run_dir), surface),
+            detail_level,
+        ),
+    )
+
+
+def integration_github_issues(
+    repository: str,
+    state: str = "open",
+    api_base: str = "https://api.github.com",
+    max_age: int = 300,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Read GitHub issues through the GET-only adapter."""
+    import os
+
+    from apiforge.integrations.external import GitHubIssuesReadOnlyAdapter
+    from apiforge.integrations.github import UrllibReadOnlyTransport
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "integration_github_issues",
+            lambda: GitHubIssuesReadOnlyAdapter(
+                UrllibReadOnlyTransport(api_base, token=os.environ.get("GITHUB_TOKEN"))
+            ).read(repository, state=state, max_age_seconds=max_age),
+            detail_level,
+        ),
+    )
+
+
+def integration_health(
+    url: str,
+    max_age: int = 60,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Read a remote health endpoint and return its freshness receipt."""
+    import os
+
+    from apiforge.integrations.external import adapter_for_url
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "integration_health",
+            lambda: adapter_for_url(url, token=os.environ.get("APIFORGE_HOST_TOKEN")).read(
+                url, max_age_seconds=max_age
+            ),
+            detail_level,
+        ),
+    )
+
+
+def integration_json(
+    url: str,
+    max_age: int = 300,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Read a generic external JSON endpoint without mutation."""
+    import os
+    from urllib.parse import urlsplit
+
+    from apiforge.integrations.external import HttpJsonReadOnlyAdapter
+    from apiforge.integrations.github import UrllibReadOnlyTransport
+
+    parsed = urlsplit(url)
+    return cast(
+        dict[str, Any],
+        _call(
+            "integration_json",
+            lambda: HttpJsonReadOnlyAdapter(
+                UrllibReadOnlyTransport(
+                    f"{parsed.scheme}://{parsed.netloc}",
+                    token=os.environ.get("APIFORGE_EXTERNAL_READ_TOKEN"),
+                    accept="application/json",
+                )
+            ).read(url, max_age_seconds=max_age),
+            detail_level,
+        ),
+    )
+
+
+def platform_verify_runtime(
+    root: str = ".",
+    verticals: tuple[str, ...] = (),
+    now: str | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Execute the same allowlisted local vertical probes as the CLI."""
+    from apiforge.application.platform_runtime import (
+        VERTICALS,
+        runtime_summary,
+        verify_platform_runtime,
+    )
+
+    receipt = verify_platform_runtime(Path(root), verticals=verticals or VERTICALS, now=now)
+    return cast(
+        dict[str, Any],
+        _call(
+            "platform_verify_runtime",
+            lambda: receipt.model_dump(mode="json") | {"summary": runtime_summary(receipt)},
             detail_level,
         ),
     )
@@ -1266,6 +1370,10 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     change_control_collect,
     change_control_publish,
     change_control_surface,
+    integration_github_issues,
+    integration_health,
+    integration_json,
+    platform_verify_runtime,
     capabilities_list,
     capabilities_verify,
     rules_list,

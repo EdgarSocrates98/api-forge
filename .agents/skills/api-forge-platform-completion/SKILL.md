@@ -54,6 +54,11 @@ apiforge change-control verify --run-dir <dir>
 apiforge change-control publish --run-dir <dir>
 apiforge change-control surface --run-dir <dir> --surface ide|ui --out <file>
 apiforge change-control serve --run-dir <dir>
+apiforge integration github-issues --repository <owner/repo> --out <receipt.json>
+apiforge integration health --url <https-url>/readyz --out <receipt.json>
+apiforge integration json --url <https-url>/api/issues --out <receipt.json>
+apiforge integration verify-receipt --receipt <receipt.json> --now <ISO8601>
+apiforge platform verify-runtime --out <receipt.json>
 ```
 
 `apiforge capabilities verify` é o gate de documentação, limitações,
@@ -77,6 +82,14 @@ autofix. A recommendation must include facts, assumptions, alternatives,
 risks, unresolved items, evidence references, verifier and confidence.
 `publish` emits JUnit/Markdown; `surface` and `serve` expose the same canonical
 result to IDE/UI without changing status or evidence.
+
+`publish` also emits SARIF and standalone HTML. The host supports a local
+loopback deployment or an authenticated TLS remote deployment; the container
+recipe and Pages workflow are host-owned surfaces, not core mutation paths.
+External issue and health reads use `af-external-read-receipt/1`; local
+vertical probes use `af-platform-runtime-receipt/1`. Both receipts preserve
+freshness and limitations instead of turning local proof into a production
+claim.
 
 Every governed refusal exposes an `AF-*` code, rejected field and unlock;
 catalog new codes in `docs/catalog-contract.md` before exposing them publicly.

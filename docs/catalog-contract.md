@@ -68,11 +68,20 @@ provider mutation.
 | `AF-CHANGE-PUBLISH-RESULT` | canonical result is absent or malformed for publishing |
 | `AF-CHANGE-PUBLISH-JUNIT` | JUnit projection could not be written |
 | `AF-CHANGE-PUBLISH-MARKDOWN` | Markdown projection could not be written |
+| `AF-CHANGE-PUBLISH-SARIF` | SARIF projection could not be written |
+| `AF-CHANGE-PUBLISH-HTML` | standalone HTML projection could not be written |
 | `AF-GITHUB-HTTP` | GitHub read request returned an HTTP failure |
 | `AF-GITHUB-NETWORK` | GitHub read transport could not reach the provider |
 | `AF-GITHUB-JSON` | provider response was not valid JSON |
 | `AF-GITHUB-PAYLOAD` | provider response has an unexpected JSON shape |
 | `AF-GITHUB-AUTH` | required read-only token is absent; use replay or supply the host credential |
+| `AF-GITHUB-HOST-APPROVAL` | dedicated host mutation lacks explicit CI policy approval |
+| `AF-GITHUB-PR-RECEIPT` | GitHub PR mutation could not be read back into a receipt |
+| `AF-GITHUB-PR-NOT-FOUND` | requested auto-merge has no matching open pull request |
+| `AF-GITHUB-HOST-PR` | dedicated GitHub host command failed or lacks its configured policy |
+| `AF-EXTERNAL-URL` | external read URL is not an absolute HTTP(S) reference |
+| `AF-EXTERNAL-RECEIPT` | external receipt timestamps are invalid or cannot prove freshness |
+| `AF-PLATFORM-VERTICAL` | requested runtime vertical is not in the allowlisted platform set |
 | `AF-MCP-CHANGE-CONTROL` | MCP change-control input failed before a typed code was available |
 | `AF-MCP-GITHUB-COLLECT` | MCP GitHub collection failed before a typed transport code was available |
 

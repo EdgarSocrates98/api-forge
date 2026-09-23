@@ -58,3 +58,15 @@ read-only, drops Linux capabilities and exposes only the selected run.
 The repository also contains `.github/workflows/change-control-pages.yml`.
 After Pages is enabled for the repository, it publishes the standalone HTML,
 Markdown and SARIF projections from the canonical result on `main`.
+
+## Green PR lifecycle
+
+The CI workflow opens or reuses the pull request only after the complete
+validation job succeeds. A repository administrator may opt into the separate
+host-owned auto-merge job by setting the repository variable
+`APIFORGE_AUTO_MERGE=true`; the job uses the GitHub workflow token, reads the
+open PR back, and uploads an `af-github-pr-receipt/1`. The receipt proves the
+request and read-back, not authorship, branch protection, merge completion or
+deployment health. Enable this variable only together with the repository's
+required-review and required-check policy; the API Forge core and agents never
+receive merge authority.

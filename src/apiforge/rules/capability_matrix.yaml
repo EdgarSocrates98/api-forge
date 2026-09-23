@@ -131,10 +131,10 @@ capabilities:
     operation: govern-api-git-cicd-change
     state: supported
     surfaces: [cli, mcp, ide, ui]
-    evidence: [change_bundle, case_manifest, next_step, graph_export, receipt, outcome_brief]
+    evidence: [change_bundle, collection_receipt, case_manifest, next_step, graph_export, receipt, outcome_brief, junit, markdown, ide_projection, ui_host]
     limitations:
       - provider observations are read-only and do not prove deployment success
-      - live GitHub evidence requires an explicit read-only transport and policy
+      - live GitHub evidence is a time-bound observation and requires an explicit read-only transport and policy
     prerequisites: [af-change-bundle/1, OpenAPI 3.1 contract, supported project adapter]
     risk: read_only
     rollback: delete the local governed output directory only

@@ -24,6 +24,8 @@ def test_tools_export_all_expected_verbs() -> None:
         "next_step",
         "change_control_run",
         "change_control_collect",
+        "change_control_publish",
+        "change_control_surface",
         "capabilities_list",
         "capabilities_verify",
         "rules_list",

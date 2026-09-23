@@ -4,6 +4,10 @@ vertical: api-git-cicd
 fixture: tests/fixtures/api_git_cicd/change_bundle.json
 golden: tests/fixtures/api_git_cicd/golden.json
 holdout: tests/fixtures/api_git_cicd/holdout.yaml
+live_receipt: tests/fixtures/api_git_cicd/live/github-success.receipt.json
+real_anonymized_examples:
+  - tests/fixtures/api_git_cicd/real_anonymized/github-actions-success.bundle.json
+  - tests/fixtures/api_git_cicd/real_anonymized/provenance.json
 cases:
   - id: api-git-cicd-replay
     domain: api-git-cicd

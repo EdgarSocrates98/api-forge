@@ -17,8 +17,15 @@ from apiforge.adapters.fastapi.extractor import extract_fastapi
 from apiforge.api_ir.builder import build_api_model
 from apiforge.application.analyze import AnalysisError, AnalysisResult, analyze_project
 from apiforge.application.artifacts import load_findings
-from apiforge.application.change_control import run_change_control
+from apiforge.application.change_control import (
+    build_change_collection_receipt,
+    run_change_control,
+)
 from apiforge.application.change_errors import ChangeControlError
+from apiforge.application.change_publishers import (
+    ChangePublishError,
+    publish_change_control_reports,
+)
 from apiforge.build.service import build_endpoint
 from apiforge.case.service import CaseIntegrityError, CaseStorageError
 from apiforge.collectors.apigateway import collect
@@ -35,6 +42,8 @@ from apiforge.core.detail import apply_detail_level
 from apiforge.core.models import Fact, Finding, FindingStatus, Severity
 from apiforge.debate.service import DebateError
 from apiforge.dispatch.runner import DispatchError
+from apiforge.integrations.replay import ReplayAdapterError
+from apiforge.integrations.transport import TransportError
 from apiforge.openapi.diff import diff_contracts
 from apiforge.openapi.loader import OpenApiLoadError, load_openapi
 from apiforge.rules.fact_judge import judge_facts
@@ -280,8 +289,15 @@ def _echo_json(value: object, detail_level: str = "normal") -> None:
     typer.echo(text)
 
 
-def _fail(code: str, detail: str, exit_code: int = 2) -> NoReturn:
-    typer.echo(f"{code}: {detail}", err=True)
+def _fail(
+    code: str,
+    detail: str,
+    exit_code: int = 2,
+    *,
+    field: str = "unknown",
+    unlock: str = "inspect the documented contract and rerun the verifier",
+) -> NoReturn:
+    typer.echo(f"{code}: {detail} (field={field}; unlock={unlock})", err=True)
     raise typer.Exit(code=exit_code)
 
 
@@ -301,7 +317,12 @@ def _run(fn: Callable[[], object]) -> object:
     try:
         return fn()
     except AnalysisError as exc:
-        _fail(exc.code, exc.detail)
+        _fail(
+            exc.code,
+            exc.detail,
+            field=getattr(exc, "field", "analysis input"),
+            unlock=getattr(exc, "unlock", "correct the input and rerun analysis"),
+        )
     except DebateError as exc:
         _fail(exc.code, str(exc).split(": ", 1)[-1])
     except DispatchError as exc:
@@ -313,7 +334,13 @@ def _run(fn: Callable[[], object]) -> object:
     except ContractError as exc:
         _fail(exc.code, exc.detail)
     except ChangeControlError as exc:
-        _fail(exc.code, exc.detail)
+        _fail(exc.code, exc.detail, field=exc.field, unlock=exc.unlock)
+    except ChangePublishError as exc:
+        _fail(exc.code, exc.detail, field=exc.field, unlock=exc.unlock)
+    except ReplayAdapterError as exc:
+        _fail(exc.code, exc.detail, field=exc.field, unlock=exc.unlock)
+    except TransportError as exc:
+        _fail(exc.code, exc.detail, field=exc.field, unlock=exc.unlock)
     except (OSError, UnicodeDecodeError, TypeError, ValueError, json.JSONDecodeError) as exc:
         _fail("AF-CLI-INPUT", str(exc))
     except Exception as exc:  # noqa: BLE001
@@ -685,6 +712,8 @@ def change_control_collect(
             raise ChangeControlError(
                 "AF-GITHUB-AUTH",
                 "read-only token is absent; use artifact replay for an untrusted or forked change",
+                field="APIFORGE_GITHUB_READ_ONLY_TOKEN",
+                unlock="provide a host-managed read-only token or use `change-control run` with a replay bundle",
             )
         request = ChangeCollectRequest(
             repository=repository,
@@ -705,8 +734,12 @@ def change_control_collect(
         )
         bundle = adapter.collect(request)
         write_json(out_bundle, bundle)
+        receipt_path = out_bundle.with_suffix(".receipt.json")
+        receipt = build_change_collection_receipt(bundle, out_bundle)
+        write_json(receipt_path, receipt)
         return {
             "bundle": str(out_bundle),
+            "receipt": str(receipt_path),
             "provider": bundle.provider,
             "repository": bundle.repository,
             "base_sha": bundle.base_sha,
@@ -731,7 +764,12 @@ def change_control_verify(
     def work() -> dict[str, object]:
         result_path = run_dir / "result.json"
         if not result_path.is_file():
-            raise ChangeControlError("AF-CHANGE-RESULT-MISSING", str(result_path))
+            raise ChangeControlError(
+                "AF-CHANGE-RESULT-MISSING",
+                str(result_path),
+                field="run_dir/result.json",
+                unlock="run `apiforge change-control run` before verification",
+            )
         payload = json.loads(result_path.read_text(encoding="utf-8"))
         result = payload.get("payload", {}) if isinstance(payload, dict) else {}
         refs = result.get("artifacts", []) if isinstance(result, dict) else []
@@ -745,6 +783,65 @@ def change_control_verify(
         }
 
     _echo_json(_run(work), detail_level)
+
+
+@change_control_app.command("publish")
+def change_control_publish(
+    run_dir: Path = typer.Option(
+        ..., "--run-dir", help="Output directory from change-control run."
+    ),
+    junit: Path | None = typer.Option(None, "--junit", help="JUnit XML output path."),
+    markdown: Path | None = typer.Option(None, "--markdown", help="Markdown report output path."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Publish the canonical result to JUnit XML and Markdown."""
+    _echo_json(
+        _run(
+            lambda: publish_change_control_reports(
+                run_dir,
+                junit_path=junit,
+                markdown_path=markdown,
+            )
+        ),
+        detail_level,
+    )
+
+
+@change_control_app.command("surface")
+def change_control_surface(
+    run_dir: Path = typer.Option(
+        ..., "--run-dir", help="Output directory from change-control run."
+    ),
+    surface: Literal["ide", "ui"] = typer.Option("ide", "--surface"),
+    out: Path | None = typer.Option(None, "--out", help="Optional projection JSON path."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Export a canonical IDE/UI projection without changing its semantics."""
+    from apiforge.core.io import write_json
+    from apiforge.surfaces.change_control_host import surface_projection
+
+    def work() -> dict[str, object]:
+        projection = surface_projection(run_dir, surface)
+        if out:
+            write_json(out, projection)
+            return {"surface": surface, "out": str(out)}
+        return projection
+
+    _echo_json(_run(work), detail_level)
+
+
+@change_control_app.command("serve")
+def change_control_serve(
+    run_dir: Path = typer.Option(
+        ..., "--run-dir", help="Output directory from change-control run."
+    ),
+    host: str = typer.Option("127.0.0.1", "--host"),
+    port: int = typer.Option(8765, "--port", min=1, max=65535),
+) -> None:
+    """Serve the local read-only UI and IDE bridge for a governed run."""
+    from apiforge.surfaces.change_control_host import serve_change_control
+
+    _run(lambda: serve_change_control(run_dir, host=host, port=port))
 
 
 @diff_app.command("contract")

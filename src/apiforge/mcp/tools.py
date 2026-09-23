@@ -180,6 +180,14 @@ def change_control_run(
                 status="failed",
                 gaps=(str(exc),),
                 error_code=error_code,
+                payload={
+                    "error_field": getattr(exc, "field", "change-control"),
+                    "error_unlock": getattr(
+                        exc,
+                        "unlock",
+                        "inspect the documented contract and rerun the verifier",
+                    ),
+                },
             )
 
     return cast(dict[str, Any], _call("change_control_run", work, detail_level))
@@ -199,6 +207,7 @@ def change_control_collect(
     """Collect GitHub context with the GET-only adapter into a local bundle."""
     import os
 
+    from apiforge.application.change_errors import ChangeControlError
     from apiforge.contracts.change_control import ChangeCollectRequest
     from apiforge.integrations.github import GitHubReadOnlyAdapter, UrllibReadOnlyTransport
 
@@ -206,7 +215,12 @@ def change_control_collect(
         try:
             token = os.environ.get("APIFORGE_GITHUB_READ_ONLY_TOKEN")
             if not token:
-                raise ValueError("AF-GITHUB-AUTH: read-only token is absent; use artifact replay")
+                raise ChangeControlError(
+                    "AF-GITHUB-AUTH",
+                    "read-only token is absent; use artifact replay",
+                    field="APIFORGE_GITHUB_READ_ONLY_TOKEN",
+                    unlock="provide a host-managed read-only token or use replay",
+                )
             request = ChangeCollectRequest(
                 repository=repository,
                 base_sha=base_sha,
@@ -230,9 +244,56 @@ def change_control_collect(
                 "status": "failed",
                 "gaps": (str(exc),),
                 "error_code": getattr(exc, "code", "AF-MCP-GITHUB-COLLECT"),
+                "error_field": getattr(exc, "field", "github collection"),
+                "error_unlock": getattr(
+                    exc,
+                    "unlock",
+                    "inspect the provider evidence and retry through the read-only adapter",
+                ),
             }
 
     return cast(dict[str, Any], _call("change_control_collect", work, detail_level))
+
+
+def change_control_publish(
+    run_dir: str,
+    junit: str | None = None,
+    markdown: str | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Publish a canonical change-control result to JUnit and Markdown."""
+    from apiforge.application.change_publishers import publish_change_control_reports
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "change_control_publish",
+            lambda: publish_change_control_reports(
+                Path(run_dir),
+                junit_path=Path(junit) if junit else None,
+                markdown_path=Path(markdown) if markdown else None,
+            ),
+            detail_level,
+        ),
+    )
+
+
+def change_control_surface(
+    run_dir: str,
+    surface: Literal["ide", "ui"] = "ide",
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Return the canonical result through the requested IDE/UI surface."""
+    from apiforge.surfaces.change_control_host import surface_projection
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "change_control_surface",
+            lambda: surface_projection(Path(run_dir), surface),
+            detail_level,
+        ),
+    )
 
 
 def capabilities_list(
@@ -1203,6 +1264,8 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     next_step,
     change_control_run,
     change_control_collect,
+    change_control_publish,
+    change_control_surface,
     capabilities_list,
     capabilities_verify,
     rules_list,

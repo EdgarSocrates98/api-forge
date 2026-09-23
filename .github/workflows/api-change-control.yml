@@ -36,6 +36,9 @@ jobs:
       - name: Verify governed artifact references
         run: apiforge change-control verify --run-dir .apiforge/change-control
 
+      - name: Publish JUnit and Markdown reports
+        run: apiforge change-control publish --run-dir .apiforge/change-control
+
       - name: Upload change-control evidence
         if: always()
         uses: actions/upload-artifact@v4

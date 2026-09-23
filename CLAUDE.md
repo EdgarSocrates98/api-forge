@@ -22,6 +22,9 @@ reasoning and must keep complete artifacts available when using compact output.
 - API/Git/CI change governance: `apiforge change-control` with the
   `af-change-bundle/1` replay contract; use `docs/architecture/API_FORGE_API_GIT_CICD_CONTROL_PLANE.md`
   and `docs/security/api-git-cicd-control-plane.md` for the boundary.
+- The governed change route is `analyze -> next-step -> graph -> evidence ->
+  brief -> verify -> publish`; `collect` is an explicit GitHub GET-only ingress
+  and its receipt never proves authorship, deployment safety or freshness.
 
 ## Caveman/RTK behavior
 
@@ -52,4 +55,8 @@ the verifier, unresolved gaps and next human action.
   datastore, broker or messaging specialization;
 - for API changes tied to Git or CI/CD, preserve the read-only adapter boundary,
   recommendation fields, metrics, receipt and unresolved provider limitations;
+- every refusal must preserve an `AF-*` code, `field` and `unlock` in CLI/MCP
+  output and the code must be cataloged;
+- validate JUnit/Markdown publisher output and the local IDE/UI host when the
+  change-control surface is part of the task;
 - run `apiforge sdd check --root docs/sdd` before shipping.

@@ -46,6 +46,19 @@ model and any tool.
     bytes*, not *who wrote them*. Gates are satisfied by evidence kinds —
     presence of the named kind, never the content, and never a boolean.
 
+11. **Change-control is a separate governed path.** An `af-change-bundle/1`
+    is untrusted input. `change-control collect` may read GitHub only through
+    the GET-only adapter and an injected host credential; it never merges,
+    pushes, dispatches, deploys, comments, changes status or autofixes.
+    `change-control run` consumes the bundle offline and preserves provider
+    freshness, deployment safety and permissions as evidence limits unless an
+    independent receipt proves them.
+
+12. **Every refusal is actionable.** Public error payloads carry an `AF-*`
+    code, the rejected `field` and an `unlock` describing the safe next step.
+    The code must exist in `docs/catalog-contract.md`; never replace a named
+    refusal with a traceback or a generic success value.
+
 ## Phase loop
 
 ```
@@ -56,14 +69,36 @@ next-step → collect → extract facts → judge → hypothesis → experiment
 One primary variable per experiment. Without a baseline there is no impact
 to prove.
 
+For an API change tied to Git/CI/CD, the canonical deterministic route is:
+
+```text
+af-change-bundle/1
+  → analyze → next-step → graph → evidence → brief
+  → verify → publish (JUnit/Markdown) → IDE/UI projection
+```
+
+The provider collection is an optional read-only ingress before the bundle is
+replayed; it is not part of the offline core.
+
 ## Boundaries that are data, not prose
 
-- `collect *` is the only verb family that touches AWS; boto3 lives in
-  `apiforge.collectors` and the release gate enforces it.
+- AWS collection is restricted to the AWS collector family; boto3 lives in
+  `apiforge.collectors` and the release gate enforces it. This does not make
+  GitHub collection implicit: `change-control collect` is a distinct,
+  provider-scoped GET-only adapter and requires its own host credential.
 - tree-sitter lives in `adapters/spring|go`; it never executes code and
   never calls a toolchain.
 - The core imports no model SDK — `openai|anthropic|litellm` are banned
   from `src/` by the gate; `boto3` is banned outside `collectors/`.
-- Every refusal names an `AF-*` code, a `field` and an `unlock` — documented
-  in `docs/catalog-contract.md`, `docs/sdd-contract.md` and
-  `docs/policy-contract.md`.
+- Every refusal names an `AF-*` code, a `field` and an `unlock`; change-control
+  codes are documented in `docs/catalog-contract.md`, while SDD and policy
+  refusals remain documented in their respective contracts.
+
+## Agent recommendation contract
+
+Agents understand the need before proposing action. A recommendation keeps
+observations, assumptions, alternatives, trade-offs, risks, unresolved gaps,
+evidence references, verifier and bounded confidence separate. Agents may
+recommend merge strategy, compatibility policy, CI gates or architecture, but
+they do not authorize a mutation. The supervisor decides from contracts,
+evidence and policy; a human remains responsible for external approval.

@@ -51,3 +51,5 @@ def test_github_adapter_refuses_malformed_provider_payload() -> None:
     with pytest.raises(TransportError) as captured:
         GitHubReadOnlyAdapter(BadTransport()).collect(request)
     assert captured.value.code == "AF-GITHUB-PAYLOAD"
+    assert captured.value.field == "provider response"
+    assert captured.value.unlock

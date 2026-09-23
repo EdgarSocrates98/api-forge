@@ -31,8 +31,8 @@ evidence, limitations, prerequisites, risk, rollback and verifier. The command
 | `cloud.inspect` | heuristic | `tests/labs/test_platform_verticals.py::test_vertical_coverage` | Remote state and live posture require explicit evidence. |
 | `frontend.inspect` | heuristic | `tests/labs/test_platform_verticals.py::test_vertical_coverage` | Browser behavior and accessibility need a frontend host. |
 | `git.plan` | unresolved | `tests/runtime/test_supervisor.py` | The offline core does not mutate a Git host. |
-| `api.change-control` | supported | `tests/e2e/test_api_git_cicd_change_control.py::test_change_control_flow` | Replay/local governance is proven; provider freshness and deployment safety are not. |
-| `git.read-context` | heuristic | `tests/integrations/test_github_adapter.py` | GitHub reads are GET-only and require an explicit transport; live evidence is not bundled. |
+| `api.change-control` | supported | `tests/e2e/test_api_git_cicd_change_control.py::test_change_control_flow`, `tests/application/test_change_control.py::test_change_control_publishers_emit_junit_and_markdown` | Replay/local governance, JUnit/Markdown publishers and local IDE/UI host are proven; provider freshness and deployment safety are not. |
+| `git.read-context` | heuristic | `tests/integrations/test_github_adapter.py`, `tests/application/test_change_control.py::test_live_collection_receipt_binds_sanitized_bundle` | GitHub reads are GET-only and now emit a live collection receipt; one receipt does not establish general provider freshness or permission guarantees. |
 | `cicd.inspect-run` | heuristic | `tests/observability/test_change_metrics.py` | Check observations and configuration do not prove deployment or runtime health. |
 | `external.apply` | unsupported | `tests/runtime/test_supervisor.py` | Live mutation requires an approved provider adapter and rollback. |
 

@@ -65,3 +65,5 @@ def test_github_collect_without_token_is_governed(monkeypatch) -> None:
     assert result.exit_code != 0
     assert "Traceback" not in result.output
     assert "AF-GITHUB-AUTH" in result.output
+    assert "field=APIFORGE_GITHUB_READ_ONLY_TOKEN" in result.output
+    assert "unlock=" in result.output

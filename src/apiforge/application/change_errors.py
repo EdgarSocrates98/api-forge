@@ -4,9 +4,18 @@ from __future__ import annotations
 
 
 class ChangeControlError(ValueError):
-    """A change-control refusal with a stable AF error code."""
+    """A change-control refusal with code, field and an explicit unlock."""
 
-    def __init__(self, code: str, detail: str) -> None:
+    def __init__(
+        self,
+        code: str,
+        detail: str,
+        *,
+        field: str = "change-control",
+        unlock: str = "inspect the documented contract and rerun the verifier",
+    ) -> None:
         self.code = code
         self.detail = detail
-        super().__init__(f"{code}: {detail}")
+        self.field = field
+        self.unlock = unlock
+        super().__init__(f"{code}: {detail} (field={field}; unlock={unlock})")

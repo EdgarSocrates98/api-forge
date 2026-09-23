@@ -107,6 +107,24 @@ class ChangeBundle(VersionedContract):
     limitations: tuple[str, ...] = ()
 
 
+class ChangeCollectionReceipt(VersionedContract):
+    """Small immutable receipt for a live provider collection."""
+
+    schema_version: Literal["af-change-collection-receipt/1"] = "af-change-collection-receipt/1"
+    provider: ChangeProvider
+    repository: str
+    base_sha: CommitSha
+    head_sha: CommitSha
+    bundle_sha256: Sha256
+    observed_at: str
+    source_hashes: tuple[Sha256, ...] = ()
+    check_names: tuple[str, ...] = ()
+    check_conclusions: tuple[CheckConclusion, ...] = ()
+    read_only: bool = True
+    mutation_allowed: bool = False
+    limitations: tuple[str, ...] = ()
+
+
 class Recommendation(VersionedContract):
     """Explainable recommendation shape used by agents and deterministic evals."""
 

@@ -89,6 +89,10 @@ apiforge change-control run \
   --bundle tests/fixtures/api_git_cicd/change_bundle.json \
   --out-dir .apiforge/change-control
 apiforge change-control verify --run-dir .apiforge/change-control
+apiforge change-control publish --run-dir .apiforge/change-control
+apiforge change-control surface --run-dir .apiforge/change-control --surface ide \
+  --out .apiforge/change-control/ide.json
+apiforge change-control serve --run-dir .apiforge/change-control
 ```
 
 Quando uma coleta GitHub read-only for autorizada, gere primeiro um bundle
@@ -194,6 +198,13 @@ isso, o resultado correto é `blocked`, `unresolved` ou `unsupported`.
 CLI, MCP, IDE e UI devem projetar o mesmo resultado canônico. A apresentação
 pode mudar; estado, evidência, gaps e semântica de segurança não.
 
+`change-control collect` também escreve um receipt
+`af-change-collection-receipt/1` ao lado do bundle. Ele prova a
+correspondência dos bytes coletados e os hashes das fontes, mas não prova
+autoria, freshness, permissões, deployment ou rollback. `publish` gera as
+projeções JUnit/Markdown; `surface` exporta uma projeção para IDE; e `serve`
+oferece um host UI/IDE local, read-only e loopback por padrão.
+
 ## 8. Verificação antes de commit/release
 
 ```bash
@@ -212,6 +223,16 @@ Para alterações em skill ou agent, sincronize os mirrors antes dos gates:
 python scripts/sync_skills.py --root .
 apiforge agents sync --root .
 ```
+
+O workflow `.github/workflows/ci.yml` executa os mesmos gates em cada push.
+Quando um push para uma branch diferente de `main` termina verde, o job
+`open-green-pr` abre ou reutiliza uma PR para `main`. Ele possui apenas
+permissão para ler o conteúdo e criar PR; merge, push, deploy e dispatch
+continuam proibidos. Para habilitar a criação, o repositório deve fornecer o
+secret `APIFORGE_PR_TOKEN` com escopo mínimo de pull request, ou um
+administrador deve habilitar “Allow GitHub Actions to create and approve pull
+requests” nas configurações de Actions. O token pessoal nunca deve ser
+commitado nem gravado em arquivos do projeto.
 
 ## 9. Limitações públicas
 

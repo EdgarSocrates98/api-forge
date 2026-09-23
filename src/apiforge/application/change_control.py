@@ -12,6 +12,7 @@ from apiforge.application.change_errors import ChangeControlError
 from apiforge.application.next_step import RoutingError, next_step
 from apiforge.contracts.change_control import (
     ChangeBundle,
+    ChangeCollectionReceipt,
     ChangeControlResult,
     Recommendation,
 )
@@ -30,10 +31,20 @@ from apiforge.observability.change_metrics import (
 
 def _path(value: str | None, field: str) -> Path:
     if not value:
-        raise ChangeControlError("AF-CHANGE-INPUT-MISSING", f"bundle field {field!r} is required")
+        raise ChangeControlError(
+            "AF-CHANGE-INPUT-MISSING",
+            f"bundle field {field!r} is required",
+            field=f"bundle.{field}",
+            unlock=f"provide a valid {field} path in af-change-bundle/1",
+        )
     result = Path(value)
     if not result.exists():
-        raise ChangeControlError("AF-CHANGE-INPUT-NOT-FOUND", f"{field}: {result}")
+        raise ChangeControlError(
+            "AF-CHANGE-INPUT-NOT-FOUND",
+            f"{field}: {result}",
+            field=f"bundle.{field}",
+            unlock=f"make the declared {field} path available and rerun the verifier",
+        )
     return result
 
 
@@ -72,6 +83,34 @@ def _recommendation(
     )
 
 
+def build_change_collection_receipt(
+    bundle: ChangeBundle,
+    bundle_path: Path,
+) -> ChangeCollectionReceipt:
+    """Bind a live collection to its sanitized replay bundle without secrets."""
+    try:
+        observed_at = max((source.observed_at for source in bundle.sources), default="")
+        return ChangeCollectionReceipt(
+            provider=bundle.provider,
+            repository=bundle.repository,
+            base_sha=bundle.base_sha,
+            head_sha=bundle.head_sha,
+            bundle_sha256=sha256_file(bundle_path),
+            observed_at=observed_at,
+            source_hashes=tuple(source.sha256 for source in bundle.sources),
+            check_names=tuple(check.name for check in bundle.checks),
+            check_conclusions=tuple(check.conclusion for check in bundle.checks),
+            limitations=tuple(bundle.limitations) + tuple(bundle.policy.limitations),
+        )
+    except (OSError, ValueError) as exc:
+        raise ChangeControlError(
+            "AF-CHANGE-RECEIPT",
+            str(exc),
+            field="change bundle",
+            unlock="write a valid sanitized bundle and rerun collection",
+        ) from exc
+
+
 def run_change_control(
     bundle: ChangeBundle,
     out_dir: Path,
@@ -102,7 +141,12 @@ def run_change_control(
         stages.append(
             ChangeStageMetric(stage="analyze", duration_ms=0, status="failed", error_code=code)
         )
-        raise ChangeControlError(code, detail) from exc
+        raise ChangeControlError(
+            code,
+            detail,
+            field="change-control.analyze",
+            unlock="correct the contract/project/framework evidence and rerun analyze",
+        ) from exc
     try:
         started = time.perf_counter()
         findings = load_findings(case_dir / "findings.json")
@@ -116,7 +160,12 @@ def run_change_control(
         stages.append(
             ChangeStageMetric(stage="next_step", duration_ms=0, status="failed", error_code=code)
         )
-        raise ChangeControlError(code, str(exc)) from exc
+        raise ChangeControlError(
+            code,
+            str(exc),
+            field="change-control.next_step",
+            unlock="add a catalog route or resolve the unmapped finding before rerun",
+        ) from exc
     try:
         started = time.perf_counter()
         graph = build_graph(case_dir, root / "graph")
@@ -128,7 +177,12 @@ def run_change_control(
                 stage="graph", duration_ms=0, status="failed", error_code="AF-CHANGE-GRAPH"
             )
         )
-        raise ChangeControlError("AF-CHANGE-GRAPH", str(exc)) from exc
+        raise ChangeControlError(
+            "AF-CHANGE-GRAPH",
+            str(exc),
+            field="change-control.graph",
+            unlock="repair the case artifacts and rerun graph verification",
+        ) from exc
     try:
         started = time.perf_counter()
         receipt = emit_receipt(case_dir)
@@ -142,7 +196,12 @@ def run_change_control(
         stages.append(
             ChangeStageMetric(stage="evidence", duration_ms=0, status="failed", error_code=code)
         )
-        raise ChangeControlError(code, str(exc)) from exc
+        raise ChangeControlError(
+            code,
+            str(exc),
+            field="change-control.evidence",
+            unlock="restore the case artifacts and rerun evidence verification",
+        ) from exc
     artifact_refs: tuple[str, ...] = (
         str(case_dir / "case.json"),
         str(root / "next-step.json"),
@@ -186,7 +245,12 @@ def run_change_control(
                 stage="brief", duration_ms=0, status="failed", error_code="AF-CHANGE-BRIEF"
             )
         )
-        raise ChangeControlError("AF-CHANGE-BRIEF", str(exc)) from exc
+        raise ChangeControlError(
+            "AF-CHANGE-BRIEF",
+            str(exc),
+            field="change-control.brief",
+            unlock="repair the outcome brief inputs and rerun the governed flow",
+        ) from exc
     raw_payload = {
         "run_id": run_id,
         "repository": bundle.repository,
@@ -203,7 +267,12 @@ def run_change_control(
     }
     payload = freeze_json(raw_payload)
     if not isinstance(payload, dict):
-        raise ChangeControlError("AF-CHANGE-RESULT-SHAPE", "result payload must be an object")
+        raise ChangeControlError(
+            "AF-CHANGE-RESULT-SHAPE",
+            "result payload must be an object",
+            field="result.payload",
+            unlock="regenerate the canonical result with the supported schema",
+        )
     result = ChangeControlResult(
         state="supported",
         status="review" if gaps or findings else "ok",

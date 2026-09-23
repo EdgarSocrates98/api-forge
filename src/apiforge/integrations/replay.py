@@ -13,9 +13,19 @@ from apiforge.core.io import read_json
 class ReplayAdapterError(ValueError):
     """A replay artifact is missing, malformed or not a change bundle."""
 
-    def __init__(self, code: str, detail: str) -> None:
+    def __init__(
+        self,
+        code: str,
+        detail: str,
+        *,
+        field: str = "replay bundle",
+        unlock: str = "provide a valid af-change-bundle/1 artifact and retry",
+    ) -> None:
         self.code = code
-        super().__init__(f"{code}: {detail}")
+        self.detail = detail
+        self.field = field
+        self.unlock = unlock
+        super().__init__(f"{code}: {detail} (field={field}; unlock={unlock})")
 
 
 class ReplayAdapter:

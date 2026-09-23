@@ -58,6 +58,9 @@ jobs:
       - name: Verify change-control evidence references
         run: apiforge change-control verify --run-dir .apiforge/change-control
 
+      - name: Publish change-control reports
+        run: apiforge change-control publish --run-dir .apiforge/change-control
+
       - name: Ruff lint
         run: python -m ruff check src tests
 
@@ -78,5 +81,53 @@ jobs:
           path: test-results.xml
           if-no-files-found: ignore
 
+      - name: Upload governed change-control reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-forge-change-control-reports
+          path: .apiforge/change-control/reports
+          if-no-files-found: error
+
       - name: Release gate
         run: python scripts/check_release.py
+
+  open-green-pr:
+    name: Open PR after green validation
+    if: >-
+      github.event_name == 'push' && startsWith(github.ref, 'refs/heads/') &&
+      github.ref != 'refs/heads/main' && github.repository == 'EdgarSocrates98/api-forge'
+    needs: validate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Open or reuse pull request
+        env:
+          PR_TOKEN: ${{ secrets.APIFORGE_PR_TOKEN }}
+          WORKFLOW_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          HEAD_BRANCH: ${{ github.ref_name }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          if [ -n "${PR_TOKEN:-}" ]; then
+            export GH_TOKEN="$PR_TOKEN"
+          else
+            export GH_TOKEN="$WORKFLOW_TOKEN"
+          fi
+          existing="$(gh pr list --repo "$GH_REPO" --state open --head "$HEAD_BRANCH" --base main --json number --jq 'length')"
+          if [ "$existing" -gt 0 ]; then
+            echo "An open PR already exists for $HEAD_BRANCH"
+            exit 0
+          fi
+          if ! gh pr create \
+              --repo "$GH_REPO" \
+              --base main \
+              --head "$HEAD_BRANCH" \
+              --title "Validate $HEAD_BRANCH" \
+              --body "Automated PR opened after all API Forge CI validations passed for commit $HEAD_SHA."; then
+            echo "::error title=PR automation is not authorized::Configure APIFORGE_PR_TOKEN with pull-request write scope, or enable GitHub Actions to create and approve pull requests in repository settings."
+            exit 1
+          fi

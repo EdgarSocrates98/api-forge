@@ -21,6 +21,16 @@ streaming and messaging.
 7. Do not declare `DONE` without independent verification, holdout/mutation
    checks when applicable, and an Outcome Brief with unresolved gaps.
 8. Record tools, versions, commands, results, artifacts and hashes in the case.
+9. For API changes tied to Git/CI/CD, use `af-change-bundle/1` and preserve
+   the read-only GitHub adapter boundary. The deterministic route is
+   `analyze -> next-step -> graph -> evidence -> brief`; provider freshness,
+   deployment safety and permissions remain unresolved without independent
+   external evidence.
+10. Every refusal must expose an `AF-*` code, rejected field and safe unlock;
+    the code must be present in `docs/catalog-contract.md`.
+11. CI may open a PR only through the dedicated green-validation workflow job
+    and an explicitly configured least-privilege credential; agents and the
+    application core never perform that mutation.
 
 ## Agentic runtime
 
@@ -61,8 +71,10 @@ Never suppress critical evidence to save context. Preserve `AF-*` codes, errors,
 warnings, failed tests, status codes, security findings and unresolved states.
 Local adapters must not call model SDKs, AWS or live databases. External
 integrations belong behind explicit read-only adapters and policy gates.
-Collectors may create hashed AWS posture dumps only through `collect`; source
-models never publish, consume, execute SQL, commit offsets or mutate topology.
+Collectors may create hashed AWS posture dumps only through the AWS collector
+family; source models never publish, consume, execute SQL, commit offsets or
+mutate topology. `change-control collect` is a separate GitHub GET-only path
+that creates a sanitized replay bundle and collection receipt.
 
 ## Validation
 

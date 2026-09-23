@@ -9,10 +9,21 @@ from typing import Protocol
 class TransportError(RuntimeError):
     """A bounded failure from an external read-only transport."""
 
-    def __init__(self, code: str, detail: str, *, retryable: bool = False) -> None:
+    def __init__(
+        self,
+        code: str,
+        detail: str,
+        *,
+        retryable: bool = False,
+        field: str = "provider response",
+        unlock: str = "inspect the provider evidence and retry through the read-only adapter",
+    ) -> None:
         self.code = code
+        self.detail = detail
         self.retryable = retryable
-        super().__init__(f"{code}: {detail}")
+        self.field = field
+        self.unlock = unlock
+        super().__init__(f"{code}: {detail} (field={field}; unlock={unlock})")
 
 
 class ReadOnlyTransport(Protocol):

@@ -51,6 +51,9 @@ apiforge brief show --task <task-id>
 apiforge change-control run --bundle <bundle.json> --out-dir <dir>
 apiforge change-control collect --repository <owner/repo> --base-sha <sha> --head-sha <sha>
 apiforge change-control verify --run-dir <dir>
+apiforge change-control publish --run-dir <dir>
+apiforge change-control surface --run-dir <dir> --surface ide|ui --out <file>
+apiforge change-control serve --run-dir <dir>
 ```
 
 `apiforge capabilities verify` é o gate de documentação, limitações,
@@ -67,10 +70,19 @@ deployment safety as unresolved unless an independent external receipt proves
 them.
 
 `GitHubReadOnlyAdapter` is a GET-only adapter behind an injected transport.
-Agents may recommend merge strategy, compatibility policy, CI gates or
-architecture, but they must not merge, push, dispatch, deploy or autofix. A
-recommendation must include facts, assumptions, alternatives, risks,
-unresolved items, evidence references, verifier and confidence.
+`collect` emits a sanitized bundle and `af-change-collection-receipt/1` without
+credentials. Agents may recommend merge strategy, compatibility policy, CI
+gates or architecture, but they must not merge, push, dispatch, deploy or
+autofix. A recommendation must include facts, assumptions, alternatives,
+risks, unresolved items, evidence references, verifier and confidence.
+`publish` emits JUnit/Markdown; `surface` and `serve` expose the same canonical
+result to IDE/UI without changing status or evidence.
+
+Every governed refusal exposes an `AF-*` code, rejected field and unlock;
+catalog new codes in `docs/catalog-contract.md` before exposing them publicly.
+The CI `open-green-pr` job is a separate host boundary: it may open or reuse a
+PR only with an explicitly configured least-privilege credential after all
+validation gates pass. Agents and the core never perform that mutation.
 
 ## Estados de capability
 

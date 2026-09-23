@@ -34,7 +34,10 @@ Quando a entrada for um `af-change-bundle/1`, execute o replay governado com
 claramente contrato/código observado, checks de CI, pressupostos e evidência
 externa ausente. O adapter GitHub é GET-only: nunca faça merge, push, dispatch,
 deploy ou autofix. A recomendação deve conter alternativas, trade-offs,
-riscos, `unresolved` e o verificador `apiforge change-control verify`.
+riscos, `unresolved` e o verificador `apiforge change-control verify`. Quando
+solicitado, valide também `change-control publish` e a projeção canônica para
+IDE/UI. Toda recusa deve preservar o código `AF-*`, o campo rejeitado e o
+unlock seguro.
 
 ## Não faz
 

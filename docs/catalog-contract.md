@@ -63,12 +63,22 @@ provider mutation.
 | `AF-CHANGE-EVIDENCE` | evidence receipt stage failed |
 | `AF-CHANGE-BRIEF` | outcome brief could not be materialized |
 | `AF-CHANGE-RESULT-SHAPE` | canonical result payload is not a JSON object |
+| `AF-CHANGE-RESULT-MISSING` | governed result is absent when verification or publishing starts |
+| `AF-CHANGE-RECEIPT` | live collection receipt could not bind to the sanitized bundle |
+| `AF-CHANGE-PUBLISH-RESULT` | canonical result is absent or malformed for publishing |
+| `AF-CHANGE-PUBLISH-JUNIT` | JUnit projection could not be written |
+| `AF-CHANGE-PUBLISH-MARKDOWN` | Markdown projection could not be written |
 | `AF-GITHUB-HTTP` | GitHub read request returned an HTTP failure |
 | `AF-GITHUB-NETWORK` | GitHub read transport could not reach the provider |
 | `AF-GITHUB-JSON` | provider response was not valid JSON |
+| `AF-GITHUB-PAYLOAD` | provider response has an unexpected JSON shape |
 | `AF-GITHUB-AUTH` | required read-only token is absent; use replay or supply the host credential |
 | `AF-MCP-CHANGE-CONTROL` | MCP change-control input failed before a typed code was available |
 | `AF-MCP-GITHUB-COLLECT` | MCP GitHub collection failed before a typed transport code was available |
+
+Public change-control refusals serialize `code`, `detail`, `field` and
+`unlock`. The unlock is remediation guidance only; it never authorizes a
+provider mutation or bypasses policy.
 
 ## Spring adapter
 

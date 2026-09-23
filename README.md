@@ -107,11 +107,17 @@ apiforge change-control run \
   --bundle tests/fixtures/api_git_cicd/change_bundle.json \
   --out-dir .apiforge/change-control
 apiforge change-control verify --run-dir .apiforge/change-control
+apiforge change-control publish --run-dir .apiforge/change-control
+apiforge change-control surface --run-dir .apiforge/change-control --surface ide \
+  --out .apiforge/change-control/ide.json
 ```
 
 Esse fluxo é read-only, reproduzível por replay e termina com status `ok`,
 `review`, `blocked` ou `failed`, sem traceback governável na CLI. Merge, push,
 dispatch de workflow, deploy e autofix continuam fora da fronteira.
+`collect` escreve um bundle sanitizado e um
+`af-change-collection-receipt/1`; `publish` emite JUnit/Markdown e `serve`
+expõe a mesma decisão através de um host local UI/IDE read-only.
 
 For a real case, use the complete chain:
 
@@ -126,9 +132,9 @@ Git/CI/CD/IDE/UI integration limits are documented in
 and [docs/architecture/API_FORGE_PLATFORM_COMPLETION.md](docs/architecture/API_FORGE_PLATFORM_COMPLETION.md).
 
 The supported production boundary is explicit: local/static and read-only
-paths are available; provider mutation, live runtime guarantees, deployed IDE
-protocols, deployed UI and production performance claims remain gated until
-their own evidence and verifiers exist.
+paths are available; provider-specific freshness, live runtime guarantees,
+remote IDE protocols, distributed UI and production performance claims remain
+gated until their own evidence and verifiers exist.
 
 ## Contract, performance and observability examples
 
@@ -244,8 +250,11 @@ while refusal codes and `fact_id`s survive.
 | `apiforge evidence verify --receipt receipt.json` | Re-hash every artifact the receipt lists |
 | `apiforge next-step --findings findings.json --phase verify` | Route the dominant finding area to the specialist agent |
 | `apiforge change-control run --bundle B --out-dir D` | Run the governed API/Git/CI/CD replay flow |
-| `apiforge change-control collect --repository R --base-sha S --head-sha S` | Collect GitHub context through the GET-only adapter |
+| `apiforge change-control collect --repository R --base-sha S --head-sha S` | Collect GitHub context through the GET-only adapter and write a collection receipt |
 | `apiforge change-control verify --run-dir D` | Verify the local change-control artifact references |
+| `apiforge change-control publish --run-dir D` | Emit JUnit and Markdown projections |
+| `apiforge change-control surface --run-dir D --surface ide\|ui` | Export the canonical IDE/UI projection |
+| `apiforge change-control serve --run-dir D` | Serve the local read-only IDE/UI host |
 | `apiforge rules list [--area SECURITY]` | List catalog rules — the knowledge base every finding cites |
 | `apiforge rules lookup AF-SEC-001` | Print one rule's rationale/remediation/reference |
 | `apiforge collect api-gateway --api-id X --out dump/` | Fetch API Gateway config into an offline dump (needs `pip install apiforge[aws]`; the only family that touches AWS) |
@@ -392,4 +401,9 @@ python scripts/check_release.py
 The same commands run in [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
 on every push, every pull request targeting `main` and manual
 workflow dispatch. The workflow is read-only, uses Python 3.12, cancels stale
-runs for the same ref and uploads the JUnit test report when available.
+runs for the same ref and uploads the JUnit test report when available. A push
+to a non-main branch that finishes every validation green opens or reuses a PR
+to `main`; this job can create a PR but cannot merge, push, deploy or dispatch.
+The repository must authorize that operation with a least-privilege
+`APIFORGE_PR_TOKEN` secret or the GitHub Actions setting that allows workflows
+to create and approve pull requests.

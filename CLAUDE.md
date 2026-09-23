@@ -57,6 +57,8 @@ the verifier, unresolved gaps and next human action.
   recommendation fields, metrics, receipt and unresolved provider limitations;
 - every refusal must preserve an `AF-*` code, `field` and `unlock` in CLI/MCP
   output and the code must be cataloged;
+- the CI `open-green-pr` job is the only PR-creation boundary; it requires an
+  explicitly configured least-privilege token and never merges or deploys;
 - validate JUnit/Markdown publisher output and the local IDE/UI host when the
   change-control surface is part of the task;
 - run `apiforge sdd check --root docs/sdd` before shipping.

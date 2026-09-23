@@ -228,7 +228,11 @@ O workflow `.github/workflows/ci.yml` executa os mesmos gates em cada push.
 Quando um push para uma branch diferente de `main` termina verde, o job
 `open-green-pr` abre ou reutiliza uma PR para `main`. Ele possui apenas
 permissão para ler o conteúdo e criar PR; merge, push, deploy e dispatch
-continuam proibidos.
+continuam proibidos. Para habilitar a criação, o repositório deve fornecer o
+secret `APIFORGE_PR_TOKEN` com escopo mínimo de pull request, ou um
+administrador deve habilitar “Allow GitHub Actions to create and approve pull
+requests” nas configurações de Actions. O token pessoal nunca deve ser
+commitado nem gravado em arquivos do projeto.
 
 ## 9. Limitações públicas
 

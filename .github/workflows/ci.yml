@@ -105,20 +105,29 @@ jobs:
     steps:
       - name: Open or reuse pull request
         env:
-          GH_TOKEN: ${{ github.token }}
+          PR_TOKEN: ${{ secrets.APIFORGE_PR_TOKEN }}
+          WORKFLOW_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           HEAD_BRANCH: ${{ github.ref_name }}
           HEAD_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
+          if [ -n "${PR_TOKEN:-}" ]; then
+            export GH_TOKEN="$PR_TOKEN"
+          else
+            export GH_TOKEN="$WORKFLOW_TOKEN"
+          fi
           existing="$(gh pr list --repo "$GH_REPO" --state open --head "$HEAD_BRANCH" --base main --json number --jq 'length')"
           if [ "$existing" -gt 0 ]; then
             echo "An open PR already exists for $HEAD_BRANCH"
             exit 0
           fi
-          gh pr create \
-            --repo "$GH_REPO" \
-            --base main \
-            --head "$HEAD_BRANCH" \
-            --title "Validate $HEAD_BRANCH" \
-            --body "Automated PR opened after all API Forge CI validations passed for commit $HEAD_SHA."
+          if ! gh pr create \
+              --repo "$GH_REPO" \
+              --base main \
+              --head "$HEAD_BRANCH" \
+              --title "Validate $HEAD_BRANCH" \
+              --body "Automated PR opened after all API Forge CI validations passed for commit $HEAD_SHA."; then
+            echo "::error title=PR automation is not authorized::Configure APIFORGE_PR_TOKEN with pull-request write scope, or enable GitHub Actions to create and approve pull requests in repository settings."
+            exit 1
+          fi

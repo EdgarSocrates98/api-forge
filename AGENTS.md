@@ -28,6 +28,9 @@ streaming and messaging.
    external evidence.
 10. Every refusal must expose an `AF-*` code, rejected field and safe unlock;
     the code must be present in `docs/catalog-contract.md`.
+11. CI may open a PR only through the dedicated green-validation workflow job
+    and an explicitly configured least-privilege credential; agents and the
+    application core never perform that mutation.
 
 ## Agentic runtime
 

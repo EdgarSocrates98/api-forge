@@ -80,6 +80,9 @@ result to IDE/UI without changing status or evidence.
 
 Every governed refusal exposes an `AF-*` code, rejected field and unlock;
 catalog new codes in `docs/catalog-contract.md` before exposing them publicly.
+The CI `open-green-pr` job is a separate host boundary: it may open or reuse a
+PR only with an explicitly configured least-privilege credential after all
+validation gates pass. Agents and the core never perform that mutation.
 
 ## Estados de capability
 

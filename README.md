@@ -404,3 +404,6 @@ workflow dispatch. The workflow is read-only, uses Python 3.12, cancels stale
 runs for the same ref and uploads the JUnit test report when available. A push
 to a non-main branch that finishes every validation green opens or reuses a PR
 to `main`; this job can create a PR but cannot merge, push, deploy or dispatch.
+The repository must authorize that operation with a least-privilege
+`APIFORGE_PR_TOKEN` secret or the GitHub Actions setting that allows workflows
+to create and approve pull requests.

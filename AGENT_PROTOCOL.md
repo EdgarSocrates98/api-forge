@@ -52,7 +52,10 @@ model and any tool.
     pushes, dispatches, deploys, comments, changes status or autofixes.
     `change-control run` consumes the bundle offline and preserves provider
     freshness, deployment safety and permissions as evidence limits unless an
-    independent receipt proves them.
+    independent receipt proves them. The repository workflow may open a PR
+    only in its separate green-validation job with an explicitly authorized
+    least-privilege token; this does not authorize agents or the core to push,
+    merge or mutate GitHub.
 
 12. **Every refusal is actionable.** Public error payloads carry an `AF-*`
     code, the rejected `field` and an `unlock` describing the safe next step.

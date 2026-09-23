@@ -62,6 +62,24 @@ def _find_pr(repository: str, head: str, base: str) -> dict[str, Any] | None:
     return rows[0] if isinstance(rows, list) and rows else None
 
 
+def _view_pr(repository: str, number: int) -> dict[str, Any]:
+    raw = _run_gh(
+        [
+            "pr",
+            "view",
+            str(number),
+            "--repo",
+            repository,
+            "--json",
+            "number,url,headRefName,baseRefName,state,mergedAt,autoMergeRequest",
+        ]
+    )
+    payload = json.loads(raw or "{}")
+    if not isinstance(payload, dict):
+        raise TypeError("AF-GITHUB-PR-RECEIPT: pull request read-back is not an object")
+    return payload
+
+
 def open_or_reuse(args: argparse.Namespace) -> dict[str, Any]:
     if args.dry_run:
         return {
@@ -140,6 +158,7 @@ def enable_auto_merge(args: argparse.Namespace) -> dict[str, Any]:
             "--delete-branch",
         ]
     )
+    post_mutation = _view_pr(args.repository, int(pr["number"]))
     return {
         "schema_version": "af-github-pr-receipt/1",
         "operation": "enable_auto_merge",
@@ -147,7 +166,8 @@ def enable_auto_merge(args: argparse.Namespace) -> dict[str, Any]:
         "repository": args.repository,
         "head": args.head,
         "base": args.base,
-        "pull_request": pr,
+        "pull_request_before": pr,
+        "pull_request_after": post_mutation,
         "observed_at": datetime.now(UTC).isoformat(),
         "read_only": False,
         "mutation_allowed": True,

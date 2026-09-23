@@ -5,9 +5,11 @@
 
 The receipt records repository, base and head refs, the host operation
 (`create_or_reuse` or `enable_auto_merge`), the GitHub read-back of the pull
-request, observation time and whether the operation was a dry run. It states
-the limitation that it proves the host request/read-back, not approval
-identity, eventual merge or deployment safety.
+request, observation time and whether the operation was a dry run. For
+`enable_auto_merge`, `pull_request_before` and `pull_request_after` preserve
+the read-back surrounding the mutation request. It states the limitation that
+it proves the host request/read-back, not approval identity, eventual merge or
+deployment safety.
 
 The mutation boundary requires `APIFORGE_HOST_APPROVED=true`, a GitHub token
 provided by the CI host and an idempotent lookup before creation. Agents,

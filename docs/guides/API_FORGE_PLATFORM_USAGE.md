@@ -79,6 +79,45 @@ decisão governada, não uma falha do pipeline. `DONE` só é aceitável quando 
 evidência independente, o receipt, os hashes, os holdouts e os gaps obrigatórios
 estão resolvidos.
 
+### Fluxo de mudança API + Git + CI/CD
+
+Para uma mudança de API associada a uma branch, PR ou replay local, use o
+bundle versionado e o executor read-only:
+
+```bash
+apiforge change-control run \
+  --bundle tests/fixtures/api_git_cicd/change_bundle.json \
+  --out-dir .apiforge/change-control
+apiforge change-control verify --run-dir .apiforge/change-control
+```
+
+Quando uma coleta GitHub read-only for autorizada, gere primeiro um bundle
+sanitizado. O token é lido apenas da variável de ambiente
+`APIFORGE_GITHUB_READ_ONLY_TOKEN` e nunca vira campo do bundle:
+
+```bash
+apiforge change-control collect \
+  --repository owner/repository \
+  --base-sha <40-hex-base> \
+  --head-sha <40-hex-head> \
+  --pull-number 123 \
+  --contract openapi.yaml \
+  --project . \
+  --out-bundle .apiforge/change-control/change-bundle.json
+```
+
+Essa coleta só faz leituras GET; rate limit, escopo ausente e payload inválido
+terminam como erro governado. Para forks ou código não confiável, prefira
+replay de artefato sem segredos.
+
+O bundle pode ser produzido por um adapter de provider ou revisado como
+artefato. O executor não executa a aplicação, não altera GitHub e não presume
+que uma check de CI prova deploy ou saúde em produção. Consulte
+[`docs/security/api-git-cicd-control-plane.md`](../security/api-git-cicd-control-plane.md)
+para limites e
+[`docs/architecture/API_FORGE_API_GIT_CICD_CONTROL_PLANE.md`](../architecture/API_FORGE_API_GIT_CICD_CONTROL_PLANE.md)
+para o contrato interno.
+
 ## 4. Capability matrix
 
 A fonte é `src/apiforge/rules/capability_matrix.yaml` e a explicação humana é
@@ -142,6 +181,11 @@ As integrações locais em `src/apiforge/integrations/` oferecem uma boundary
 estática/read-only. Elas podem inspecionar contexto, montar plano e nomear
 requisitos; não devem publicar, executar SQL, alterar pipeline, fazer deploy,
 commitar, enviar mensagens ou mudar topology.
+
+GitHub é suportado somente por `GitHubReadOnlyAdapter` com transporte
+injetável; o caminho offline recomendado é `ReplayAdapter`. Isso permite
+reproduzir uma decisão sem credenciais e separar prova local de evidência
+externa.
 
 Uma ação `apply` só pode avançar quando houver adapter explícito, policy
 allowlist, identidade/credencial, aprovação humana, rollback e receipt. Sem

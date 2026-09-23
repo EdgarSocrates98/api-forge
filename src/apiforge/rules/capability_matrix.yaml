@@ -126,6 +126,50 @@ capabilities:
     verifier: tests/runtime/test_supervisor.py
     documentation: docs/capabilities/API_FORGE_CAPABILITY_MATRIX.md
     adapter: integration-gateway
+  api.change-control:
+    vertical: api
+    operation: govern-api-git-cicd-change
+    state: supported
+    surfaces: [cli, mcp, ide, ui]
+    evidence: [change_bundle, case_manifest, next_step, graph_export, receipt, outcome_brief]
+    limitations:
+      - provider observations are read-only and do not prove deployment success
+      - live GitHub evidence requires an explicit read-only transport and policy
+    prerequisites: [af-change-bundle/1, OpenAPI 3.1 contract, supported project adapter]
+    risk: read_only
+    rollback: delete the local governed output directory only
+    verifier: tests/e2e/test_api_git_cicd_change_control.py::test_change_control_flow
+    documentation: docs/capabilities/API_FORGE_CAPABILITY_MATRIX.md
+    adapter: artifact-replay
+  git.read-context:
+    vertical: integration
+    operation: read-git-provider-context
+    state: heuristic
+    surfaces: [cli, mcp, ide, ui]
+    evidence: [github_read_only_adapter, transport_contract, replay_fixture]
+    limitations:
+      - provider availability, permissions and freshness remain unresolved without a live evidence receipt
+      - no merge, push, workflow dispatch or deployment mutation is available
+    prerequisites: [read-only transport, repository ref and policy]
+    risk: read_only
+    rollback: no external state
+    verifier: tests/integrations/test_github_adapter.py
+    documentation: docs/security/api-git-cicd-control-plane.md
+    adapter: github-read-only
+  cicd.inspect-run:
+    vertical: cicd
+    operation: inspect-ci-observations
+    state: heuristic
+    surfaces: [cli, mcp, ide, ui]
+    evidence: [check_run_observation, change_metrics, holdout]
+    limitations:
+      - configuration and check observations do not prove deployment safety or runtime health
+    prerequisites: [change bundle or provider read-only adapter]
+    risk: read_only
+    rollback: no external state
+    verifier: tests/observability/test_change_metrics.py
+    documentation: docs/guides/API_FORGE_PLATFORM_USAGE.md
+    adapter: github-read-only
   external.apply:
     vertical: integration
     operation: apply-external-change
@@ -171,3 +215,8 @@ verticals:
     golden: tests/fixtures/platform/frontend/golden.json
     holdout: tests/fixtures/platform/frontend/holdout.yaml
     verifier: tests/labs/test_platform_verticals.py::test_vertical_coverage
+  - vertical: api-git-cicd
+    fixture: tests/fixtures/api_git_cicd/change_bundle.json
+    golden: tests/fixtures/api_git_cicd/golden.json
+    holdout: tests/fixtures/api_git_cicd/holdout.yaml
+    verifier: tests/e2e/test_api_git_cicd_change_control.py::test_change_control_flow

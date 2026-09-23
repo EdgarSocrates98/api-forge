@@ -22,6 +22,8 @@ def test_tools_export_all_expected_verbs() -> None:
         "model_api_gateway",
         "diff_contract",
         "next_step",
+        "change_control_run",
+        "change_control_collect",
         "capabilities_list",
         "capabilities_verify",
         "rules_list",

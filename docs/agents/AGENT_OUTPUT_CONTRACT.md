@@ -39,6 +39,12 @@ verifier: "tests/... or an explicit read-only check"
 confidence: 0.0
 ```
 
+No change-control, os campos acima são obrigatórios no contrato
+`Recommendation/v1`. A recomendação deve transformar a necessidade observada
+em uma decisão técnica verificável: boas práticas, técnica ou arquitetura,
+alternativas e trade-offs. O agent não deve preencher lacunas com memória de
+provider; deve marcar `unresolved` e apontar o próximo verificador.
+
 `confidence` é limitado a `0..1` e não compensa evidência ausente. Uma
 recomendação pode ser útil e ainda terminar em `REVIEW`, `DECIDE` ou `BLOCKED`;
 esses estados não podem ser reescritos como `DONE`.

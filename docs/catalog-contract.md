@@ -44,6 +44,32 @@ severity then area name; unmapped rule_ids are counted, never routed.
 | `AF-ROUTING-NO-FINDINGS` | `next-step` invoked with an empty finding list |
 | `AF-ROUTING-NO-ROUTE` | no route covers the (phase, dominant_area) pair — refusal, never a guess |
 
+## API/Git/CI change control
+
+The change-control adapters are read-only and produce replayable bundles. These
+codes describe malformed inputs or bounded transport failures; none authorizes
+provider mutation.
+
+| Code | Meaning |
+|---|---|
+| `AF-CHANGE-REPLAY-MISSING` | replay bundle path does not exist |
+| `AF-CHANGE-REPLAY-SHAPE` | replay bundle is not a JSON object |
+| `AF-CHANGE-REPLAY-CONTRACT` | replay bundle fails `af-change-bundle/1` validation |
+| `AF-CHANGE-INPUT-MISSING` | required contract or project field is absent |
+| `AF-CHANGE-INPUT-NOT-FOUND` | declared contract or project path does not exist |
+| `AF-CHANGE-ANALYZE` | analysis failed before a named analysis code was available |
+| `AF-CHANGE-NEXT-STEP` | routing stage could not produce a governed next step |
+| `AF-CHANGE-GRAPH` | provenance graph stage failed |
+| `AF-CHANGE-EVIDENCE` | evidence receipt stage failed |
+| `AF-CHANGE-BRIEF` | outcome brief could not be materialized |
+| `AF-CHANGE-RESULT-SHAPE` | canonical result payload is not a JSON object |
+| `AF-GITHUB-HTTP` | GitHub read request returned an HTTP failure |
+| `AF-GITHUB-NETWORK` | GitHub read transport could not reach the provider |
+| `AF-GITHUB-JSON` | provider response was not valid JSON |
+| `AF-GITHUB-AUTH` | required read-only token is absent; use replay or supply the host credential |
+| `AF-MCP-CHANGE-CONTROL` | MCP change-control input failed before a typed code was available |
+| `AF-MCP-GITHUB-COLLECT` | MCP GitHub collection failed before a typed transport code was available |
+
 ## Spring adapter
 
 `extract_spring` parses `*.java` with tree-sitter — no JDK, no build tool, no

@@ -1,0 +1,15 @@
+version: 1
+dataset: api-git-cicd
+vertical: api-git-cicd
+fixture: tests/fixtures/api_git_cicd/change_bundle.json
+golden: tests/fixtures/api_git_cicd/golden.json
+holdout: tests/fixtures/api_git_cicd/holdout.yaml
+cases:
+  - id: api-git-cicd-replay
+    domain: api-git-cicd
+    input: tests/fixtures/api_git_cicd/change_bundle.json
+    expected: review
+    required_evidence: [case.json, next-step.json, graph.json, receipt.json, brief.json]
+    mutation: replace_head_sha
+    quality_axes: [evidence, governance, recommendation]
+    adapter: artifact-replay

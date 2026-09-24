@@ -7,6 +7,7 @@ from typing import Literal
 from pydantic import model_validator
 
 from apiforge.contracts.base import VersionedContract
+from apiforge.contracts.evidence import EvidenceLevel
 
 ProofAxis = Literal["contract", "security", "idempotency", "pagination", "adapter", "execution"]
 ProofVerdict = Literal["pass", "fail", "inconclusive"]
@@ -19,6 +20,7 @@ class VerificationCheck(VersionedContract):
     evidence: tuple[str, ...] = ()
     gaps: tuple[str, ...] = ()
     limitation: str | None = None
+    evidence_level: EvidenceLevel = "unknown"
 
 
 class HoldoutRecord(VersionedContract):
@@ -28,6 +30,7 @@ class HoldoutRecord(VersionedContract):
     detected: bool
     evidence: tuple[str, ...] = ()
     limitation: str | None = None
+    evidence_level: EvidenceLevel = "unknown"
 
 
 class VerificationRecord(VersionedContract):
@@ -40,6 +43,7 @@ class VerificationRecord(VersionedContract):
     gaps: tuple[str, ...] = ()
     holdout: tuple[HoldoutRecord, ...] = ()
     verified_by: str
+    evidence_level: EvidenceLevel = "unknown"
 
     @model_validator(mode="after")
     def pass_requires_holdout(self) -> VerificationRecord:

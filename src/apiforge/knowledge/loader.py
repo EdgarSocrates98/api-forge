@@ -16,6 +16,8 @@ from pathlib import Path
 from typing import Any
 
 from apiforge.contracts.base import ContractError
+from apiforge.contracts.evidence import EvidenceLevel
+from apiforge.contracts.knowledge import PackFreshness
 from apiforge.core.yaml import StrictYamlError, load_yaml_mapping
 
 _AUTHORITIES = frozenset(
@@ -73,6 +75,8 @@ class Pack:
     verified: str | None
     matrix: tuple[dict[str, Any], ...] = field(default=())
     evals: tuple[dict[str, Any], ...] = field(default=())
+    freshness: PackFreshness | None = None
+    evidence_level: EvidenceLevel = "unknown"
 
 
 def _err(code: str, detail: str) -> KnowledgeError:
@@ -200,6 +204,25 @@ def load_pack(domain_dir: Path) -> Pack:
     verified = data.get("verified")
     if verified is not None and not _DATE.match(str(verified)):
         raise _err("AF-KNOW-SCHEMA", "pack.yaml: verified must be YYYY-MM-DD")
+    freshness_raw = data.get("freshness")
+    freshness: PackFreshness | None = None
+    if freshness_raw is not None:
+        if not isinstance(freshness_raw, dict):
+            raise _err("AF-KNOW-SCHEMA", "pack.yaml: freshness must be a mapping")
+        try:
+            freshness = PackFreshness.model_validate(freshness_raw)
+        except ValueError as exc:
+            raise _err("AF-KNOW-SCHEMA", f"pack.yaml: invalid freshness ({exc})") from exc
+    evidence_level = str(data.get("evidence_level", "unknown"))
+    if evidence_level not in {
+        "observed",
+        "declared",
+        "inferred",
+        "heuristic",
+        "verified",
+        "unknown",
+    }:
+        raise _err("AF-KNOW-SCHEMA", "pack.yaml: invalid evidence_level")
     return Pack(
         domain=domain,
         version=version,
@@ -210,6 +233,8 @@ def load_pack(domain_dir: Path) -> Pack:
         verified=str(verified) if verified is not None else None,
         matrix=_matrix(domain_dir / "matrix.yaml"),
         evals=_evals(domain_dir / "evals.yaml"),
+        freshness=freshness,
+        evidence_level=evidence_level,  # type: ignore[arg-type]
     )
 
 

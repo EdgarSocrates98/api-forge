@@ -23,10 +23,12 @@ class RunStore:
     def _write(self, relative: str, payload: object) -> Path:
         path = self.directory / relative
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(
+        temporary = path.with_name(f"{path.name}.tmp")
+        temporary.write_text(
             json.dumps(payload, sort_keys=True, indent=2, ensure_ascii=False) + "\n",
             encoding="utf-8",
         )
+        temporary.replace(path)
         return path
 
     def save_run(self, run: AgenticRun) -> Path:
@@ -43,6 +45,28 @@ class RunStore:
             f"artifacts/{artifact.artifact_id.replace(':', '-')}.json",
             artifact.model_dump(mode="json"),
         )
+
+    def load_run(self) -> AgenticRun | None:
+        path = self.directory / "run.json"
+        if not path.is_file():
+            return None
+        return AgenticRun.model_validate(json.loads(path.read_text(encoding="utf-8")))
+
+    def load_artifact(self, artifact_id: str) -> AgentArtifact | None:
+        path = self.directory / "artifacts" / f"{artifact_id.replace(':', '-')}.json"
+        if not path.is_file():
+            return None
+        return AgentArtifact.model_validate(json.loads(path.read_text(encoding="utf-8")))
+
+    def artifact_for_invocation(self, invocation_id: str) -> AgentArtifact | None:
+        directory = self.directory / "artifacts"
+        if not directory.is_dir():
+            return None
+        for path in sorted(directory.glob("*.json")):
+            artifact = AgentArtifact.model_validate(json.loads(path.read_text(encoding="utf-8")))
+            if artifact.invocation_id == invocation_id:
+                return artifact
+        return None
 
     def json(self, name: str, payload: object) -> Path:
         return self._write(name, payload)

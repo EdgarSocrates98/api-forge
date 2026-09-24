@@ -392,6 +392,25 @@ distinct sides. A closed debate refuses further mutation.
 | `AF-DEBATE-NO-EVIDENCE` | position without `fact:`-prefixed citations |
 | `AF-DEBATE-NO-QUORUM` | close attempted with < 2 sides having submitted |
 | `AF-DEBATE-CLOSED` | mutation attempted on a resolved/unresolved debate |
+| `AF-DEBATE-PARTICIPANTS` | adaptive plan cannot satisfy its bounded quorum |
+| `AF-DEBATE-BUDGET` | adaptive debate exceeded its declared round/participant budget |
+
+The adaptive debate extension records a bounded participant plan, retry budget,
+replay id and dissent alongside the existing debate state machine. It never
+turns an unsupported participant into evidence.
+
+## Experience and compatibility surfaces
+
+| Code | Meaning |
+|---|---|
+| `AF-TUI-UNAVAILABLE` | optional Textual dependency is unavailable; use the Rich/JSON fallback |
+| `AF-MIGRATION-RECEIPT` | a runtime receipt names an ecosystem/version absent from the declared matrix |
+| `AF-MIGRATION-INTERPRETER` | a matrix probe was not an allowlisted Python interpreter or could not complete |
+| `AF-HOST-DECLARATION` | a local host capability declaration is unreadable or schema-invalid |
+| `AF-DEVIN-OBJECTIVE` | Devin payload objective is empty |
+| `AF-DEVIN-PAYLOAD` | Devin payload input is malformed or outside its closed vocabulary |
+| `AF-DEVIN-SANDBOX-UNAVAILABLE` | Devin CLI sandbox was requested on native Windows; use WSL 2 or remove the flag |
+| `AF-DEVIN-DESTRUCTIVE-COMMAND` | Devin hook blocked an irreversible repository or Docker cleanup command |
 
 ## Dispatch and agent mirrors
 
@@ -542,6 +561,24 @@ The local runtime is provider-neutral and executes only against a sealed TaskSpe
 | `AF-RUNTIME-SCHEMA` | adapter output is not a structured object |
 | `AF-RUNTIME-HASH` | runtime artifact hash could not be computed |
 | `AF-RUNTIME-NOT-FOUND` | requested runtime run is not persisted |
+| `AF-RUNTIME-PROFILES` | agent profile registry is missing or malformed; field=runtime.profiles_file; unlock=provide the versioned local profile registry |
+| `AF-RUNTIME-COMPATIBILITY` | legacy runtime payload lacks a proven compatible state; field=runtime.run; unlock=record a versioned migration and independent proof |
+| `AF-RUNTIME-DEPENDENCY-FAILED` | invocation dependency failed; field=invocation.dependencies; unlock=resolve the prerequisite failure and resume |
+| `AF-RUNTIME-EVAL-GATE` | mandatory golden/holdout/mutation evidence is missing or failed; field=runtime.eval_gate; unlock=run the missing cases and preserve their evidence |
+| `AF-CAPABILITY-ELIGIBILITY` | no capability satisfies state, profile, risk, prerequisite and evidence requirements; field=capability; unlock=provide the missing evidence/prerequisite or choose a supported capability |
+| `AF-SCORECARD-INVALID` | persisted agent scorecard is malformed; field=scorecard; unlock=regenerate it from validated eval results |
+| `AF-CONTROL-RUN-NOT-FOUND` | control run is not persisted; field=run_id; unlock=provide an existing local control run |
+| `AF-CONTROL-STEPS` | control run has no steps; field=steps; unlock=declare at least one bounded step |
+| `AF-CONTROL-DEPENDENCY` | control step dependency is missing from the declared DAG; field=steps.dependencies; unlock=declare the prerequisite or remove the edge |
+| `AF-CONTROL-TERMINAL` | transition targets a terminal control run; field=run.status; unlock=resume only a non-terminal run |
+| `AF-CONTROL-BUDGET` | control run call budget is exhausted; field=max_calls; unlock=increase the declared policy budget or split the TaskSpec |
+| `AF-CONTROL-STEP-NOT-FOUND` | control step is not persisted; field=step_id; unlock=use a step from the control run |
+| `AF-CONTROL-NOT-READY` | step prerequisites are not complete; field=step_id; unlock=complete dependencies before claiming the step |
+| `AF-CONTROL-LEASE` | lease owner or lease boundary is invalid; field=lease; unlock=claim with a valid worker and lease or recover expiry |
+| `AF-CONTROL-LEASE-EXPIRED` | persisted worker lease expired and work was returned to the queue; field=step.lease_until; unlock=claim the recovered step with a new lease |
+| `AF-CONTROL-STEP-STATE` | step transition is invalid for its current state; field=step.status; unlock=follow the persisted state machine |
+| `AF-CONTROL-REVIEW-STATE` | review was requested before all required steps reached review; field=run.status; unlock=complete or recover the run first |
+| `AF-CONTROL-IDEMPOTENCY-CONFLICT` | same idempotency key has a different result hash; field=step.idempotency_key; unlock=preserve both receipts and reconcile manually |
 | `AF-BRIEF` | outcome brief rendering failed |
 | `AF-RECIPE-INVALID` | `recipes.yaml` is malformed |
 
@@ -718,6 +755,8 @@ pre-execute snapshot of every `--writable-path` file and re-hashes it.
 | `AF-AUTONOMY-DETAIL` | `--detail` pair is not `key=value` |
 | `AF-HEAL-NO-FINDINGS` | `autonomy heal` without `--findings` — detect has no signal |
 | `AF-HEAL-FINDINGS-INVALID` | the findings file is unreadable or fails schema |
+| `AF-HEAL-ROLLBACK-CONFLICT` | current target bytes differ from the recorded post-state; field=writable_path; unlock=reconcile the concurrent change and rerun with a new snapshot |
+| `AF-HEAL-ROLLBACK-VERSION-UNKNOWN` | pre/post rollback evidence is incomplete; field=heal.snapshot; unlock=record both states before attempting rollback |
 
 ### Knowledge packs (`knowledge`)
 

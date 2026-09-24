@@ -58,6 +58,10 @@ def _sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _state(path: Path) -> str:
+    return _sha(path) if path.is_file() else "absent"
+
+
 def _load_findings(path: Path | None) -> list[Finding]:
     if path is None:
         raise HealError("AF-HEAL-NO-FINDINGS", "detect requires ctx.findings")
@@ -89,30 +93,38 @@ def _snapshot(root: Path, run_id: str, paths: tuple[str, ...]) -> dict[str, str]
 
 
 def _restore(root: Path, run_id: str, paths: tuple[str, ...]) -> dict[str, str]:
-    """Restore snapshot bytes; verify restored hash == pre-execute hash."""
+    """Restore only when the current state equals the recorded post-state."""
     snap_dir = Path(root) / ".apiforge" / "heal" / run_id
     pre_path = snap_dir / "pre.json"
     import json
 
     pre = json.loads(pre_path.read_text(encoding="utf-8")) if pre_path.is_file() else {}
+    post_path = snap_dir / "post.json"
+    post = json.loads(post_path.read_text(encoding="utf-8")) if post_path.is_file() else {}
     result: dict[str, str] = {}
     for raw in paths:
         target = Path(raw)
         snap = snap_dir / target.name
         expected = pre.get(raw)
-        if expected in (None, "absent"):
-            result[raw] = "absent"
+        expected_post = post.get(raw)
+        if expected is None or expected_post is None:
+            result[raw] = "version-unknown"
+            continue
+        current = _state(target)
+        if current != expected_post:
+            result[raw] = "conflict"
+            continue
+        if expected == "absent":
+            target.unlink(missing_ok=True)
+            result[raw] = "restored" if _state(target) == "absent" else "restore-failed"
             continue
         if not snap.is_file():
             result[raw] = "snapshot-missing"
             continue
-        snap_bytes = snap.read_bytes()
-        if target.is_file() and hashlib.sha256(target.read_bytes()).hexdigest() != expected:
-            # changed since snapshot — could be the pipeline's own write or
-            # an outside change; restoring is still bounded to declared paths
-            pass
-        target.write_bytes(snap_bytes)
-        result[raw] = "restored" if _sha(target) == expected else "restore-failed"
+        temporary = target.with_name(f".{target.name}.heal.tmp")
+        temporary.write_bytes(snap.read_bytes())
+        temporary.replace(target)
+        result[raw] = "restored" if _state(target) == expected else "restore-failed"
     return result
 
 
@@ -295,6 +307,10 @@ def run_heal(
         record(
             "execute", "ok" if executed else "no_dispatchable_steps", steps=executed, snapshot=pre
         )
+        post_state = {raw: _state(Path(raw)) for raw in writable_paths}
+        (snap_dir / "post.json").write_text(
+            json.dumps(post_state, sort_keys=True) + "\n", encoding="utf-8"
+        )
 
     # -- verify -------------------------------------------------------------
     if mode is AutonomyMode.OBSERVE:
@@ -304,12 +320,12 @@ def run_heal(
         record("verify", "not_reached")
         verified = False
     else:
-        post = _load_findings(ctx.findings)
-        verified = len([f for f in post if f.status.value == "confirmed"]) < len(findings)
+        post_findings = _load_findings(ctx.findings)
+        verified = len([f for f in post_findings if f.status.value == "confirmed"]) < len(findings)
         record(
             "verify",
             "ok" if verified else "unchanged",
-            post_confirmed=len([f for f in post if f.status.value == "confirmed"]),
+            post_confirmed=len([f for f in post_findings if f.status.value == "confirmed"]),
         )
 
     # -- compare ------------------------------------------------------------
@@ -337,8 +353,20 @@ def run_heal(
         resolution = "accepted"
     else:
         restored = _restore(root, run_id, writable_paths)
-        record("rollback", "rolled_back", restored=restored)
-        resolution = "rolled_back"
+        conflict = any(value in {"conflict", "version-unknown"} for value in restored.values())
+        record(
+            "rollback",
+            "conflict" if conflict else "rolled_back",
+            restored=restored,
+            error_code=(
+                "AF-HEAL-ROLLBACK-CONFLICT"
+                if any(value == "conflict" for value in restored.values())
+                else "AF-HEAL-ROLLBACK-VERSION-UNKNOWN"
+                if any(value == "version-unknown" for value in restored.values())
+                else None
+            ),
+        )
+        resolution = "conflict" if conflict else "rolled_back"
 
     append_ledger(
         root,

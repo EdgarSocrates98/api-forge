@@ -11,6 +11,7 @@ def test_control_plane_recovers_expired_worker_lease(tmp_path) -> None:
         run.run_id, step.step_id, worker_id="worker-a", lease_until="2026-01-01T00:00:00+00:00"
     )
     assert claimed.steps[0].lease_owner == "worker-a"
+    assert claimed.state_revision > run.state_revision
 
     recovered = plane.recover_expired(run.run_id, now="2026-01-01T00:00:01+00:00")
     assert recovered.steps[0].status == "pending"

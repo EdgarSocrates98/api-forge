@@ -54,3 +54,31 @@ def test_scheduler_accepts_dynamic_parallelism_within_bound() -> None:
         )
     )
     assert len(result) == 3
+
+
+def test_scheduler_retries_and_skips_dependents_after_failure() -> None:
+    items = (
+        AgentInvocation(
+            invocation_id="root", run_id="r", agent="a", capability="c", adapter="fake"
+        ),
+        AgentInvocation(
+            invocation_id="child",
+            run_id="r",
+            agent="a",
+            capability="c",
+            adapter="fake",
+            dependencies=("root",),
+        ),
+    )
+    calls = 0
+
+    async def worker(item: AgentInvocation) -> object:
+        nonlocal calls
+        calls += 1
+        raise RuntimeError("broken")
+
+    result = asyncio.run(run_bounded(items, worker, limit=1, timeout_seconds=1, max_retries=1))
+    assert calls == 2
+    by_id = {item.invocation.invocation_id: item for item in result}
+    assert by_id["root"].invocation.status.value == "failed"
+    assert by_id["child"].invocation.status.value == "skipped"

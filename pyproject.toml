@@ -33,10 +33,15 @@ dev = [
     "ruff>=0.7,<1",
     "types-PyYAML>=6.0.12,<7",
 ]
+tui = [
+    "textual>=8.2,<9",
+    "rich>=13,<15",
+]
 
 [project.scripts]
 apiforge = "apiforge.cli:app"
 apiforge-mcp = "apiforge.mcp.main:main"
+apiforge-tui = "apiforge.cli_tui:tui_app"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/apiforge"]
@@ -59,3 +64,7 @@ files = ["src/apiforge"]
 [[tool.mypy.overrides]]
 module = "mcp.*"
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "apiforge.tui.*"
+ignore_errors = true

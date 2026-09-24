@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from apiforge.contracts.agentic import AgentCapabilityProfile
 from apiforge.contracts.platform import CapabilityRecord
 
 
@@ -41,4 +42,30 @@ def verify_capabilities(
         "verified": len(records) - len(gaps),
         "gaps": tuple(sorted(gaps)),
         "capabilities": tuple(record.capability_id for record in records),
+    }
+
+
+def verify_profiles(
+    records: tuple[CapabilityRecord, ...],
+    profiles: tuple[AgentCapabilityProfile, ...],
+) -> dict[str, object]:
+    public = {record.capability_id: record for record in records}
+    gaps: list[str] = []
+    for profile in profiles:
+        if not profile.enabled:
+            continue
+        for capability in profile.capabilities:
+            record = public.get(capability)
+            if record is None:
+                continue
+            if record.state == "unsupported":
+                gaps.append(f"{profile.profile_id}: unsupported capability {capability}")
+            if not set(profile.required_evidence).issubset(record.evidence):
+                missing = sorted(set(profile.required_evidence) - set(record.evidence))
+                gaps.append(f"{profile.profile_id}: missing evidence {missing}")
+    return {
+        "ok": not gaps,
+        "profile_count": len(profiles),
+        "verified": len(profiles) - len(gaps),
+        "gaps": tuple(sorted(gaps)),
     }

@@ -7,13 +7,39 @@ from apiforge.contracts.adapter import (
     AdapterStatus,
     EvidenceLevel,
 )
+from apiforge.contracts.compatibility import CompatibilityCell, CompatibilityMatrix, RuntimeReceipt
 from apiforge.contracts.data_runtime import DataProvider, DataReadReceipt, DataReadRequest
+from apiforge.contracts.debate import (
+    AdaptivePlan,
+    AdaptivePolicy,
+    DebateReplay,
+    ParticipantDeclaration,
+)
+from apiforge.contracts.devin import (
+    DevinCheck,
+    DevinCliProbe,
+    DevinLaunch,
+    DevinPayload,
+    DevinPermissionMode,
+    DevinPromptTransport,
+    DevinSurface,
+    DevinTaskKind,
+)
+from apiforge.contracts.evidence import EvidenceRecord
+from apiforge.contracts.experience import ExperienceAction, ExperienceSnapshot, ExperienceView
+from apiforge.contracts.host import (
+    HostCapability,
+    HostCapabilityRequest,
+    HostDeclaration,
+    HostResolution,
+)
 from apiforge.contracts.integration import (
     ExternalReadReceipt,
     ExternalReadRequest,
     ExternalReadResult,
     GitHubPrReceipt,
 )
+from apiforge.contracts.knowledge import FreshnessResult, PackFreshness, SourceObservation
 from apiforge.contracts.platform import (
     CapabilityRecord,
     CapabilityRequest,
@@ -29,20 +55,46 @@ __all__ = [
     "AdapterExecution",
     "AdapterMode",
     "AdapterStatus",
+    "AdaptivePlan",
+    "AdaptivePolicy",
     "CapabilityRecord",
     "CapabilityRequest",
     "CapabilityResult",
+    "CompatibilityCell",
+    "CompatibilityMatrix",
     "DataProvider",
     "DataReadReceipt",
     "DataReadRequest",
+    "DebateReplay",
+    "DevinCheck",
+    "DevinCliProbe",
+    "DevinLaunch",
+    "DevinPayload",
+    "DevinPermissionMode",
+    "DevinPromptTransport",
+    "DevinSurface",
+    "DevinTaskKind",
     "EvidenceLevel",
+    "EvidenceRecord",
+    "ExperienceAction",
+    "ExperienceSnapshot",
+    "ExperienceView",
     "ExternalReadReceipt",
     "ExternalReadRequest",
     "ExternalReadResult",
+    "FreshnessResult",
     "GitHubPrReceipt",
+    "HostCapability",
+    "HostCapabilityRequest",
+    "HostDeclaration",
+    "HostResolution",
+    "PackFreshness",
+    "ParticipantDeclaration",
     "PlatformRuntimeReceipt",
+    "RuntimeReceipt",
     "SandboxCommand",
     "SandboxCommandResult",
+    "SourceObservation",
     "VerticalCoverage",
     "VerticalRuntimeReceipt",
 ]

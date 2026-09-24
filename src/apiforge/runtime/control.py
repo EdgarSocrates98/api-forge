@@ -27,6 +27,9 @@ class ControlStep(VersionedContract):
     attempts: int = 0
     max_retries: int = Field(default=2, ge=0)
     result_sha256: str | None = None
+    checkpoint_sha256: str | None = None
+    idempotency_key: str | None = None
+    result_ref: str | None = None
     error: str | None = None
     lease_owner: str | None = None
     lease_until: str | None = None
@@ -44,6 +47,7 @@ class ControlRun(VersionedContract):
     reviewer: str | None = None
     review_verdict: Literal["approved", "rejected", "review"] | None = None
     cancellation_actor: str | None = None
+    state_revision: int = Field(default=0, ge=0)
 
 
 class ControlPlane:
@@ -60,10 +64,12 @@ class ControlPlane:
     def _save(self, run: ControlRun) -> None:
         directory = self._directory(run.run_id)
         directory.mkdir(parents=True, exist_ok=True)
-        (directory / "run.json").write_text(
+        temporary = directory / "run.json.tmp"
+        temporary.write_text(
             json.dumps(run.model_dump(mode="json"), sort_keys=True, indent=2) + "\n",
             encoding="utf-8",
         )
+        temporary.replace(directory / "run.json")
 
     def _event(self, run: ControlRun, event: str, **payload: object) -> None:
         path = self._directory(run.run_id) / "events.jsonl"
@@ -112,6 +118,10 @@ class ControlPlane:
                     name=name,
                     dependencies=deps,
                     max_retries=max_retries,
+                    idempotency_key=stable_id(
+                        "step-idempotency",
+                        {"run": identifier, "name": name, "dependencies": deps},
+                    ),
                 )
                 for name, deps in steps
             ),
@@ -155,11 +165,21 @@ class ControlPlane:
         if step not in self.ready(run_id):
             raise ContractError("AF-CONTROL-NOT-READY", step_id)
         updated = step.model_copy(
-            update={"status": "running", "attempts": step.attempts + 1, "error": None}
+            update={
+                "status": "running",
+                "attempts": step.attempts + 1,
+                "error": None,
+                "checkpoint_sha256": None,
+            }
         )
         steps = tuple(updated if item.step_id == step_id else item for item in run.steps)
         result = run.model_copy(
-            update={"status": "running", "steps": steps, "calls_used": run.calls_used + 1}
+            update={
+                "status": "running",
+                "steps": steps,
+                "calls_used": run.calls_used + 1,
+                "state_revision": run.state_revision + 1,
+            }
         )
         self._save(result)
         self._event(result, "step_started", step_id=step_id, attempt=updated.attempts)
@@ -210,7 +230,8 @@ class ControlPlane:
         updated = step.model_copy(update={"lease_until": lease_until, "heartbeat_at": lease_until})
         result = run.model_copy(
             update={
-                "steps": tuple(updated if item.step_id == step_id else item for item in run.steps)
+                "steps": tuple(updated if item.step_id == step_id else item for item in run.steps),
+                "state_revision": run.state_revision + 1,
             }
         )
         self._save(result)
@@ -246,7 +267,11 @@ class ControlPlane:
             else:
                 steps.append(step)
         result = run.model_copy(
-            update={"status": "running" if recovered else run.status, "steps": tuple(steps)}
+            update={
+                "status": "running" if recovered else run.status,
+                "steps": tuple(steps),
+                "state_revision": run.state_revision + (1 if recovered else 0),
+            }
         )
         self._save(result)
         if recovered:
@@ -256,16 +281,35 @@ class ControlPlane:
     def complete(self, run_id: str, step_id: str, result: object) -> ControlRun:
         run = self._load(run_id)
         step = next((item for item in run.steps if item.step_id == step_id), None)
-        if step is None or step.status != "running":
+        if step is None:
+            raise ContractError("AF-CONTROL-STEP-STATE", step_id)
+        result_digest = content_hash(result)
+        if step.status == "succeeded":
+            if step.result_sha256 == result_digest:
+                return run
+            raise ContractError(
+                "AF-CONTROL-IDEMPOTENCY-CONFLICT",
+                f"step {step_id} already completed with a different result",
+            )
+        if step.status != "running":
             raise ContractError("AF-CONTROL-STEP-STATE", step_id)
         updated = step.model_copy(
-            update={"status": "succeeded", "result_sha256": content_hash(result)}
+            update={
+                "status": "succeeded",
+                "result_sha256": result_digest,
+                "checkpoint_sha256": result_digest,
+                "lease_owner": None,
+                "lease_until": None,
+                "heartbeat_at": None,
+            }
         )
         steps = tuple(updated if item.step_id == step_id else item for item in run.steps)
         status: RunStatus = (
             "awaiting_review" if all(item.status == "succeeded" for item in steps) else "running"
         )
-        result_run = run.model_copy(update={"status": status, "steps": steps})
+        result_run = run.model_copy(
+            update={"status": status, "steps": steps, "state_revision": run.state_revision + 1}
+        )
         self._save(result_run)
         self._event(
             result_run, "step_succeeded", step_id=step_id, result_sha256=updated.result_sha256
@@ -286,6 +330,7 @@ class ControlPlane:
             update={
                 "status": status,
                 "steps": tuple(updated if item.step_id == step_id else item for item in run.steps),
+                "state_revision": run.state_revision + 1,
             }
         )
         self._save(result_run)
@@ -301,7 +346,12 @@ class ControlPlane:
             for item in run.steps
         )
         result = run.model_copy(
-            update={"status": "cancelled", "steps": steps, "cancellation_actor": actor}
+            update={
+                "status": "cancelled",
+                "steps": steps,
+                "cancellation_actor": actor,
+                "state_revision": run.state_revision + 1,
+            }
         )
         self._save(result)
         self._event(result, "cancelled", actor=actor)
@@ -321,7 +371,12 @@ class ControlPlane:
             else "awaiting_review"
         )
         result = run.model_copy(
-            update={"status": status, "reviewer": reviewer, "review_verdict": verdict}
+            update={
+                "status": status,
+                "reviewer": reviewer,
+                "review_verdict": verdict,
+                "state_revision": run.state_revision + 1,
+            }
         )
         self._save(result)
         self._event(result, "reviewed", reviewer=reviewer, verdict=verdict)

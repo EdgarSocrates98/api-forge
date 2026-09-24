@@ -37,6 +37,7 @@ from apiforge.contract_intel import (
     simulate_twin,
 )
 from apiforge.contracts.base import ContractError
+from apiforge.contracts.devin import DevinPermissionMode, DevinSurface, DevinTaskKind
 from apiforge.contracts.stubs import PerformanceRun
 from apiforge.core.detail import apply_detail_level
 from apiforge.core.models import Fact, Finding, FindingStatus, Severity
@@ -116,6 +117,12 @@ agentops_app = typer.Typer(
     no_args_is_help=True,
 )
 app.add_typer(agentops_app)
+devin_app = typer.Typer(
+    name="devin",
+    help="Generate and inspect offline-first payloads for Devin Desktop, CLI and Cloud.",
+    no_args_is_help=True,
+)
+app.add_typer(devin_app)
 evals_app = typer.Typer(
     name="evals",
     help="Declarative local eval matrix, goldens and holdout metadata.",
@@ -256,6 +263,9 @@ platform_app = typer.Typer(
     no_args_is_help=True,
 )
 app.add_typer(platform_app)
+from apiforge.cli_tui import tui_app
+
+app.add_typer(tui_app, name="tui")
 
 
 @app.callback()
@@ -362,6 +372,78 @@ def _run(fn: Callable[[], object]) -> object:
         _fail("AF-CLI-INPUT", str(exc))
     except Exception as exc:  # noqa: BLE001
         _fail("AF-CLI-INTERNAL", str(exc))
+
+
+from apiforge.cli_experience import register as _register_experience
+
+_register_experience(app)
+
+
+@app.command("doctor")
+def runtime_doctor(
+    task_id: str = typer.Argument(..., help="TaskSpec id to inspect."),
+    root: Path = typer.Option(Path("."), "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Inspect runtime persistence, control state, proof and gaps."""
+    from apiforge.application.runtime_experience import doctor
+
+    _echo_json(_run(lambda: doctor(root, task_id)), detail_level)
+
+
+@app.command("status")
+def runtime_status(
+    task_id: str = typer.Argument(..., help="TaskSpec id to inspect."),
+    root: Path = typer.Option(Path("."), "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Show the canonical status projection for a TaskSpec run."""
+    from apiforge.application.runtime_experience import status
+
+    _echo_json(_run(lambda: status(root, task_id)), detail_level)
+
+
+@app.command("review")
+def runtime_review(
+    task_id: str = typer.Argument(..., help="TaskSpec id to review."),
+    root: Path = typer.Option(Path("."), "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Render the canonical Outcome Brief for a runtime run."""
+    from apiforge.application.runtime_experience import review
+
+    _echo_json(_run(lambda: review(root, task_id)), detail_level)
+
+
+@app.command("evolve")
+def runtime_evolve(
+    task_id: str = typer.Argument(..., help="TaskSpec id to execute."),
+    root: Path = typer.Option(Path("."), "--root"),
+    policy: str = typer.Option("local-ci-safe", "--policy"),
+    now: str | None = typer.Option(None, "--now"),
+    debate: bool = typer.Option(False, "--debate"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Execute a bounded, evidence-backed API evolution run."""
+    from apiforge.application.runtime_experience import evolve
+
+    _echo_json(
+        _run(lambda: evolve(root, task_id, policy_id=policy, now=now, requested_debate=debate)),
+        detail_level,
+    )
+
+
+@app.command("resume")
+def runtime_resume_friendly(
+    task_id: str = typer.Argument(..., help="TaskSpec id to resume."),
+    root: Path = typer.Option(Path("."), "--root"),
+    policy: str = typer.Option("local-ci-safe", "--policy"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Resume only persisted, eligible work from the latest control run."""
+    from apiforge.application.runtime_experience import resume
+
+    _echo_json(_run(lambda: resume(root, task_id, policy_id=policy)), detail_level)
 
 
 @capabilities_app.command("list")
@@ -3302,6 +3384,95 @@ def agentops_parity(
     _echo_json(audit_host_parity(Path.cwd()), detail_level)
 
 
+@agentops_app.command("negotiate")
+def agentops_negotiate(
+    capability: str = typer.Option(..., "--capability"),
+    host: list[str] = typer.Option([], "--host", help="Limit to one or more declared hosts."),
+    root: Path = typer.Option(Path("."), "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Resolve a capability intersection from local host declarations."""
+    from apiforge.agentops.negotiation import negotiate_from_root
+    from apiforge.contracts.host import HostCapabilityRequest, HostName
+
+    request = HostCapabilityRequest(
+        capability=capability,
+        hosts=(
+            cast(tuple[HostName, ...], tuple(host))
+            if host
+            else HostCapabilityRequest.model_fields["hosts"].default
+        ),
+    )
+    _echo_json(_run(lambda: negotiate_from_root(root, request)), detail_level)
+
+
+@devin_app.command("payload")
+def devin_payload(
+    objective: str = typer.Argument(..., help="Objective to send to Devin."),
+    surface: str = typer.Option("cli", "--surface", help="desktop, cli or cloud."),
+    task_kind: str = typer.Option(
+        "planning",
+        "--task-kind",
+        help="discovery, planning, implementation, verification, review or handoff.",
+    ),
+    root: Path = typer.Option(Path("."), "--root"),
+    title: str | None = typer.Option(None, "--title"),
+    permission_mode: str = typer.Option("normal", "--permission-mode"),
+    sandbox: bool = typer.Option(False, "--sandbox"),
+    model: str | None = typer.Option(None, "--model"),
+    platform: str = typer.Option("unknown", "--platform"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Create a Devin payload; this command never starts Devin or mutates Git."""
+    from apiforge.integrations.devin import build_devin_payload
+
+    try:
+        payload = build_devin_payload(
+            objective=objective,
+            surface=cast(DevinSurface, surface),
+            task_kind=cast(DevinTaskKind, task_kind),
+            root=root,
+            title=title,
+            permission_mode=cast(DevinPermissionMode, permission_mode),
+            sandbox=sandbox,
+            model=model,
+            platform=platform,
+        )
+    except (ContractError, ValueError) as exc:
+        if isinstance(exc, ContractError):
+            _fail(
+                exc.code, exc.detail, field="Devin payload", unlock="correct the payload and rerun"
+            )
+        _fail(
+            "AF-DEVIN-PAYLOAD",
+            str(exc),
+            field="Devin payload",
+            unlock="correct the payload and rerun",
+        )
+    _echo_json(payload, detail_level)
+
+
+@devin_app.command("probe")
+def devin_probe(
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Observe whether a local Devin CLI executable is available on PATH."""
+    from apiforge.integrations.devin import probe_devin_cli
+
+    _echo_json(probe_devin_cli(), detail_level)
+
+
+@devin_app.command("capabilities")
+def devin_capabilities(
+    root: Path = typer.Option(Path("."), "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Report Devin capability declarations plus local CLI observation."""
+    from apiforge.integrations.devin import build_devin_declaration
+
+    _echo_json(build_devin_declaration(root), detail_level)
+
+
 @agentops_app.command("activation-plan")
 def agentops_activation_plan(
     host: str = typer.Option(..., "--host", help="claude, gpt-codex, devin or copilot."),
@@ -3490,6 +3661,8 @@ def knowledge_list(
                     "rule_ids": list(p.rule_ids),
                     "sources": len(p.sources),
                     "verified": p.verified,
+                    "freshness": p.freshness.model_dump(mode="json") if p.freshness else None,
+                    "evidence_level": p.evidence_level,
                 }
                 for p in packs.values()
             ],
@@ -3524,6 +3697,8 @@ def knowledge_show(
             "sources": [s.__dict__ for s in pack.sources],
             "summary": pack.summary,
             "verified": pack.verified,
+            "freshness": pack.freshness.model_dump(mode="json") if pack.freshness else None,
+            "evidence_level": pack.evidence_level,
             "version": pack.version,
         }
 
@@ -3551,6 +3726,31 @@ def knowledge_check(
                 "pack problems: " + "; ".join(str(p) for p in result["problems"]),
             )
         return result
+
+    _echo_json(_run(work), detail_level)
+
+
+@knowledge_app.command("freshness")
+def knowledge_freshness(
+    domain: str = typer.Argument(..., help="Pack directory name."),
+    receipt: Path | None = typer.Option(None, "--receipt", help="Read-only observation JSON."),
+    root: Path = typer.Option(Path("knowledge"), "--root"),
+    now: str = typer.Option(..., "--now", help="Explicit ISO8601 clock."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Verify pack freshness from a local read-only source receipt."""
+    from apiforge.contracts.knowledge import SourceObservation
+    from apiforge.knowledge.freshness import verify_pack_freshness
+    from apiforge.knowledge.loader import load_pack
+
+    def work() -> object:
+        pack = load_pack(root / domain)
+        observation = (
+            SourceObservation.model_validate(json.loads(receipt.read_text(encoding="utf-8")))
+            if receipt
+            else None
+        )
+        return verify_pack_freshness(pack, observation, now=now)
 
     _echo_json(_run(work), detail_level)
 
@@ -3959,3 +4159,24 @@ def migration_verify_cmd(
     except (OSError, UnicodeDecodeError, json.JSONDecodeError, ValueError) as exc:
         _fail("AF-MIGRATION-REPORT", str(exc))
     _echo_json(result, detail_level)
+
+
+@migration_app.command("matrix")
+def migration_matrix_cmd(
+    ecosystem: str = typer.Option(..., "--ecosystem"),
+    receipt: list[Path] = typer.Option([], "--receipt", help="Runtime receipt JSON; repeatable."),
+    matrix: Path | None = typer.Option(None, "--matrix"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Project an observed compatibility matrix; missing cells remain unresolved."""
+    from apiforge.contracts.compatibility import RuntimeReceipt
+    from apiforge.migration.matrix import compatibility_matrix
+
+    def work() -> object:
+        receipts = tuple(
+            RuntimeReceipt.model_validate(json.loads(path.read_text(encoding="utf-8")))
+            for path in receipt
+        )
+        return compatibility_matrix(ecosystem, receipts, matrix)
+
+    _echo_json(_run(work), detail_level)

@@ -7,7 +7,12 @@ from apiforge.migration.contracts import (
     MigrationSpec,
 )
 from apiforge.migration.discovery import discover
-from apiforge.migration.matrix import load_matrix, resolve_versions
+from apiforge.migration.matrix import (
+    compatibility_matrix,
+    load_matrix,
+    observe_python_interpreter,
+    resolve_versions,
+)
 from apiforge.migration.planner import compile_plan
 from apiforge.migration.verifier import verify_report
 
@@ -16,9 +21,11 @@ __all__ = [
     "MigrationFinding",
     "MigrationReport",
     "MigrationSpec",
+    "compatibility_matrix",
     "compile_plan",
     "discover",
     "load_matrix",
+    "observe_python_interpreter",
     "resolve_versions",
     "verify_report",
 ]

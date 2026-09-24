@@ -14,10 +14,18 @@ from typing import Literal
 from pydantic import Field, field_validator
 
 from apiforge.contracts.base import VersionedContract
+from apiforge.contracts.evidence import EvidenceLevel
+
+__all__ = [
+    "AdapterCapability",
+    "AdapterExecution",
+    "AdapterMode",
+    "AdapterStatus",
+    "EvidenceLevel",
+]
 
 AdapterMode = Literal["static", "fixture", "live_read_only", "live_mutation"]
 AdapterStatus = Literal["completed", "partial", "blocked", "failed", "inconclusive"]
-EvidenceLevel = Literal["observed", "declared", "inferred", "heuristic", "verified", "unknown"]
 
 
 class AdapterExecution(VersionedContract):

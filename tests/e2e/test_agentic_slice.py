@@ -15,6 +15,7 @@ from apiforge.evidence.build import emit_receipt
 from apiforge.openapi.loader import load_openapi
 from apiforge.report.keys import generate_keypair
 from apiforge.rules.judge import judge_api_model
+from apiforge.runtime.control import ControlPlane
 from apiforge.sandbox.service import sandbox_apply
 from apiforge.taskspec.runner import accept_task, run_task
 from apiforge.taskspec.service import create_task, review_task, seal_task
@@ -134,3 +135,21 @@ def test_slice_receipt_serializes(tmp_path: Path) -> None:
     receipt = emit_receipt(case_dir)
     payload = json.dumps(receipt.model_dump(mode="json"), sort_keys=True)
     assert json.loads(payload)["schema_version"] == "af-receipt/1"
+
+
+def test_agentic_kernel_replay_is_persisted_end_to_end(tmp_path: Path) -> None:
+    plane = ControlPlane(tmp_path)
+    run = plane.create(
+        "kernel-e2e",
+        (("inventory", ()), ("verify", ("inventory",))),
+        run_id="run:kernel-e2e",
+    )
+    inventory = run.steps[0]
+    plane.start(run.run_id, inventory.step_id)
+    plane.complete(run.run_id, inventory.step_id, {"facts": ["f1"]})
+    verify = plane.ready(run.run_id)[0]
+    plane.start(run.run_id, verify.step_id)
+    plane.complete(run.run_id, verify.step_id, {"verified": True})
+    replay = plane.replay(run.run_id)
+    assert replay["run"]["status"] == "awaiting_review"
+    assert [event["event"] for event in replay["events"]].count("step_succeeded") == 2

@@ -8,6 +8,7 @@ from typing import Literal
 from pydantic import Field, model_validator
 
 from apiforge.contracts.base import VersionedContract
+from apiforge.contracts.evidence import EvidenceLevel
 from apiforge.core.models import JsonValue, Sha256, freeze_json
 
 
@@ -53,10 +54,14 @@ class AgenticRun(VersionedContract):
     decision_ids: tuple[str, ...] = ()
     evidence: tuple[str, ...] = ()
     gaps: tuple[str, ...] = ()
+    control_run_id: str | None = None
+    verification_evidence: tuple[str, ...] = ()
+    eval_status: Literal["not_run", "passed", "review", "blocked"] = "not_run"
     final_status: Literal["DONE", "REVIEW", "BLOCKED"] | None = None
     started_at: str
     finished_at: str | None = None
     run_digest: Sha256 | None = None
+    evidence_level: EvidenceLevel = "unknown"
 
 
 class RuntimeReview(VersionedContract):
@@ -68,6 +73,7 @@ class RuntimeReview(VersionedContract):
     finding_codes: tuple[str, ...] = ()
     finding_messages: tuple[str, ...] = ()
     content_sha256: Sha256
+    evidence_level: EvidenceLevel = "unknown"
 
 
 class AgenticPolicy(VersionedContract):
@@ -100,6 +106,7 @@ class AgenticPolicy(VersionedContract):
     adapter: str = "fake"
     replay_normalize: bool = True
     redact_sensitive: bool = True
+    evidence_level: EvidenceLevel = "declared"
 
     @model_validator(mode="after")
     def mutation_requires_gate(self) -> AgenticPolicy:
@@ -124,6 +131,35 @@ class AgentInvocation(VersionedContract):
     duration_ms: int | None = None
     retry_count: int = 0
     error_code: str | None = None
+    idempotency_key: str | None = None
+    checkpoint_sha256: Sha256 | None = None
+    result_sha256: Sha256 | None = None
+    evidence_level: EvidenceLevel = "unknown"
+
+
+class AgentCapabilityProfile(VersionedContract):
+    profile_id: str
+    agent: str
+    capabilities: tuple[str, ...] = ()
+    required_evidence: tuple[str, ...] = ()
+    quality_axes: tuple[str, ...] = ()
+    accepted_risks: tuple[str, ...] = ("read_only",)
+    adapter: str = "fake"
+    enabled: bool = True
+    evidence_level: EvidenceLevel = "declared"
+
+
+class AgentScorecard(VersionedContract):
+    agent: str
+    profile_id: str
+    evaluation_count: int = Field(default=0, ge=0)
+    passed_count: int = Field(default=0, ge=0)
+    quality_score: float = Field(default=0.0, ge=0, le=1)
+    last_verdict: Literal["unknown", "PASS", "REVIEW", "BLOCKED"] = "unknown"
+    evidence: tuple[str, ...] = ()
+    gaps: tuple[str, ...] = ()
+    computed_from: tuple[str, ...] = ()
+    evidence_level: EvidenceLevel = "unknown"
 
 
 class AgentArtifact(VersionedContract):
@@ -141,6 +177,7 @@ class AgentArtifact(VersionedContract):
     unresolved: tuple[str, ...] = ()
     confidence: float | None = Field(default=None, ge=0, le=1)
     content_sha256: Sha256
+    evidence_level: EvidenceLevel = "unknown"
 
     @model_validator(mode="after")
     def payload_is_frozen(self) -> AgentArtifact:
@@ -157,6 +194,7 @@ class HandoffRecord(VersionedContract):
     context_refs: tuple[str, ...] = ()
     evidence_refs: tuple[str, ...] = ()
     created_at: str
+    evidence_level: EvidenceLevel = "unknown"
 
 
 class DecisionRecord(VersionedContract):
@@ -170,6 +208,7 @@ class DecisionRecord(VersionedContract):
     dissent: tuple[str, ...] = ()
     referee: str | None = None
     reason: str = ""
+    evidence_level: EvidenceLevel = "unknown"
 
 
 class ApprovalGate(VersionedContract):
@@ -182,6 +221,7 @@ class ApprovalGate(VersionedContract):
     decided_by: str | None = None
     evidence: tuple[str, ...] = ()
     decision_note: str = ""
+    evidence_level: EvidenceLevel = "unknown"
 
 
 class TrajectoryEvent(VersionedContract):
@@ -192,3 +232,4 @@ class TrajectoryEvent(VersionedContract):
     subject: str | None = None
     payload: JsonValue = Field(default_factory=dict)
     created_at: str
+    evidence_level: EvidenceLevel = "unknown"

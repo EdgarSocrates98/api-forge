@@ -121,7 +121,7 @@ def check() -> list[str]:
 
 
 def _run(args: list[str], cwd: Path | None = None) -> None:
-    subprocess.run(args, cwd=cwd, check=True, capture_output=True)  # noqa: S603
+    subprocess.run(args, cwd=cwd, check=True, capture_output=True)
 
 
 # `PINS.json` e config revisada, nao entrada de usuario -- e mesmo assim todo

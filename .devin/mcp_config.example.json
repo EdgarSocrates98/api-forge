@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "api-forge": {
+      "command": "apiforge-mcp",
+      "args": [],
+      "env": {
+        "PYTHONPATH": "src"
+      }
+    }
+  }
+}

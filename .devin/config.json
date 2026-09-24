@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(**)",
+      "Exec(git status)",
+      "Exec(git diff)",
+      "Exec(git diff --check)",
+      "Exec(git log)"
+    ],
+    "deny": [
+      "Exec(git reset --hard)",
+      "Exec(git checkout --)",
+      "Exec(git clean -fd)",
+      "Exec(git push --force)",
+      "Exec(git push --force-with-lease)",
+      "Exec(sudo)",
+      "Exec(docker system prune)"
+    ],
+    "ask": [
+      "Write(**/.env*)",
+      "Exec(git commit)",
+      "Exec(git push)",
+      "Exec(docker)"
+    ]
+  },
+  "read_config_from": {
+    "agents_standard": true,
+    "claude": true,
+    "copilot": true,
+    "cursor": false,
+    "windsurf": false,
+    "opencode": false,
+    "zed": false
+  }
+}

@@ -1,0 +1,7 @@
+scenarios:
+  - id: execution-first
+    status: REVIEW
+    surface: textual
+  - id: governance-review
+    status: REVIEW
+    surface: fallback

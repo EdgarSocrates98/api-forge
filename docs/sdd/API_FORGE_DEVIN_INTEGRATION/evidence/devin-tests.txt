@@ -1,0 +1,10 @@
+API Forge Devin integration verification
+focused: 12 passed
+contract registry: passed
+full suite: 873 passed, 1 skipped
+ruff: passed
+mypy: passed
+release gate: passed
+skills validation: passed
+hook probe: AF-DEVIN-DESTRUCTIVE-COMMAND blocks git reset --hard
+local Devin CLI probe: observed on this workstation; version is not a contract guarantee

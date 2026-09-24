@@ -9,6 +9,7 @@ from typing import Literal
 from pydantic import Field, field_validator
 
 from apiforge.contracts.base import VersionedContract
+from apiforge.contracts.evidence import EvidenceLevel
 from apiforge.core.models import JsonValue, Sha256, freeze_json
 
 
@@ -18,6 +19,7 @@ class ArtifactRef(VersionedContract):
     path: str
     sha256: Sha256
     kind: str = "file"
+    evidence_level: EvidenceLevel = "unknown"
 
 
 class DecisionStatus(StrEnum):
@@ -37,6 +39,7 @@ class Decision(VersionedContract):
     evidence: tuple[str, ...] = ()
     supersedes: str | None = None
     rationale: str = ""
+    evidence_level: EvidenceLevel = "unknown"
 
 
 class ActionRisk(StrEnum):
@@ -72,6 +75,7 @@ class ActionPlan(VersionedContract):
     requires_approval: bool = False
     status: Literal["proposed", "authorized", "executed", "refused"] = "proposed"
     reason: str = ""
+    evidence_level: EvidenceLevel = "unknown"
 
 
 class VerificationResult(StrEnum):
@@ -89,3 +93,4 @@ class Verification(VersionedContract):
     result: VerificationResult = VerificationResult.UNRESOLVED
     evidence: tuple[str, ...] = ()
     verified_by: str = "apiforge"
+    evidence_level: EvidenceLevel = "unknown"

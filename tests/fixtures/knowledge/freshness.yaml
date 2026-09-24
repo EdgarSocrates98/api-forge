@@ -1,0 +1,7 @@
+cases:
+  - id: fresh
+    state: fresh
+  - id: stale-hash
+    state: stale
+  - id: missing-receipt
+    state: unresolved

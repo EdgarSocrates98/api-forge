@@ -47,3 +47,15 @@ def test_control_plane_replay_is_persisted(tmp_path: Path) -> None:
     plane.start(run.run_id, run.steps[0].step_id)
     replay = plane.replay(run.run_id)
     assert [event["event"] for event in replay["events"]] == ["planned", "step_started"]
+
+
+def test_control_plane_completion_is_idempotent_and_conflict_safe(tmp_path: Path) -> None:
+    plane = _plane(tmp_path)
+    run = plane.create("api", (("verify", ()),))
+    step = run.steps[0]
+    plane.start(run.run_id, step.step_id)
+    completed = plane.complete(run.run_id, step.step_id, {"ok": True})
+    assert completed.steps[0].checkpoint_sha256 == completed.steps[0].result_sha256
+    assert plane.complete(run.run_id, step.step_id, {"ok": True}).steps[0].status == "succeeded"
+    with pytest.raises(ContractError, match="AF-CONTROL-IDEMPOTENCY-CONFLICT"):
+        plane.complete(run.run_id, step.step_id, {"ok": False})

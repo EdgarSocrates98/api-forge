@@ -14,6 +14,8 @@ IR, evidence, plans, verifiable tasks and bounded decisions instead of guesses.
 
 ```bash
 python -m pip install -e '.[dev]'   # Python >=3.12,<3.13
+# Optional visual terminal UX:
+python -m pip install -e '.[tui]'
 ```
 
 The repository also carries the native Caveman/Cavekit assets under `vendor/`,
@@ -65,6 +67,13 @@ durable control-plane steps support worker leases, heartbeats and recovery.
 The first integrated evolution cycle is complete through Phase G. Runtime,
 migration, capacity, observability, data governance, security and agentic
 quality are now represented by local contracts, focused tests and SDD evidence.
+
+The next interoperability program is also implemented as an additive local
+surface: `apiforge tui TASK` opens the execution-first Textual UX, while
+`--fallback` or a host without Textual uses the same Rich/JSON projection.
+Knowledge freshness, four-host capability negotiation, observed Python matrix
+receipts, modular `experience` CLI projections and bounded adaptive debate are
+all evidence-driven; missing external receipts remain `unresolved`.
 
 ## Host support
 
@@ -294,6 +303,12 @@ while refusal codes and `fact_id`s survive.
 | `apiforge run tool semgrep\|trivy\|gitleaks\|k6 --target T --out R` | Allowlisted scanner execution (fixed argv, no shell, `--dry-run` prints argv) |
 | `apiforge run list` | Tool registry — declared metadata (license, capabilities, modes, evidence producer) plus *measured* install status; import-only tools refuse `run` with `AF-RUN-IMPORT-ONLY` |
 | `apiforge debate open|submit|close` | Deterministic debate machine — positions cite `fact:` evidence, quorum of 2 sides |
+| `apiforge tui TASK --root .` | Execution-first Textual TUI with governance, evidence and debate navigation (`pip install -e '.[tui]'`) |
+| `apiforge tui TASK --root . --fallback` | Headless Rich/JSON projection with `AF-TUI-UNAVAILABLE` unlock metadata |
+| `apiforge experience status|doctor|review TASK` | Modular projection facade; legacy top-level aliases remain available |
+| `apiforge agentops negotiate --capability mcp [--host claude]` | Evidence-aware host capability intersection from local declarations |
+| `apiforge knowledge freshness DOMAIN --receipt R --now ISO8601` | Verify freshness without mutating Knowledge Packs |
+| `apiforge migration matrix --ecosystem python --receipt R` | Publish observed compatibility cells; unexecuted versions stay unresolved |
 | `apiforge plan strangler --project P --contract C` | Per-route cut plan; migrated routes name the parity evidence still due |
 | `apiforge plan architecture --profile w.json` | Decision engine: ranks AWS primitives per role over a declared `WorkloadProfile`; every rejection names its cause, cost stays `cost_to_validate` |
 | `apiforge contract list\|show <name>` | Versioned canonical contracts (JSON schema per `<Name>/v1`) |

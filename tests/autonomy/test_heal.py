@@ -166,3 +166,32 @@ def test_ledger_records_resolution(tmp_path: Path) -> None:
     )
     final = [e for e in read_ledger(tmp_path) if e["event"] == "heal"]
     assert final[-1]["resolution"] == "rolled_back"
+
+
+def test_rollback_preserves_external_change_and_records_conflict(tmp_path: Path, monkeypatch) -> None:
+    _set(tmp_path, "supervised", evidence="e1", approval="ops")
+    findings = _findings_file(tmp_path, [_CONFIRMED])
+    target = tmp_path / "config.yaml"
+    target.write_text("timeout: 0\n", encoding="utf-8")
+    original_load = __import__("apiforge.autonomy.heal", fromlist=["_load_findings"])._load_findings
+    calls = 0
+
+    def load_with_external_change(path: Path | None):
+        nonlocal calls
+        calls += 1
+        if calls == 2:
+            target.write_text("timeout: external\n", encoding="utf-8")
+        return original_load(path)
+
+    monkeypatch.setattr("apiforge.autonomy.heal._load_findings", load_with_external_change)
+    result = run_heal(
+        tmp_path,
+        ctx=_ctx(tmp_path, findings=findings),
+        policy=DEFAULT_POLICY,
+        detail={},
+        writable_paths=(str(target),),
+    )
+    assert result["resolution"] == "conflict"
+    assert target.read_text(encoding="utf-8") == "timeout: external\n"
+    rollback = next(stage for stage in result["stages"] if stage["stage"] == "rollback")
+    assert rollback["restored"][str(target)] == "conflict"

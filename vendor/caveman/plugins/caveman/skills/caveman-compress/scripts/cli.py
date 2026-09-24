@@ -16,8 +16,8 @@ for _stream in (sys.stdout, sys.stderr):
     if callable(reconfigure):
         try:
             reconfigure(encoding="utf-8", errors="replace")
-        except Exception:
-            pass
+        except (OSError, ValueError):
+            continue
 
 from pathlib import Path
 
@@ -76,7 +76,7 @@ def main():
         print("\nInterrupted by user")
         sys.exit(130)
 
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - CLI boundary renders unexpected failures
         print(f"\n❌ Error: {e}")
         sys.exit(1)
 

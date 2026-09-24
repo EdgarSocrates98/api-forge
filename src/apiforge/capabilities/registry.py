@@ -50,6 +50,10 @@ def load_capabilities(path: Path | None = None) -> tuple[CapabilityRecord, ...]:
     return tuple(sorted(records, key=lambda item: item.capability_id))
 
 
+def capability_index(path: Path | None = None) -> dict[str, CapabilityRecord]:
+    return {record.capability_id: record for record in load_capabilities(path)}
+
+
 def load_vertical_coverage(path: Path | None = None) -> tuple[VerticalCoverage, ...]:
     """Load the fixture/golden/holdout declarations from the matrix."""
     document = _load_document(path)

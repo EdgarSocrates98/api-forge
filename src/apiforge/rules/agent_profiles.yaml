@@ -1,0 +1,58 @@
+version: 1
+profiles:
+  api-contract-review:
+    agent: api-contract-architect
+    capabilities: [api-contract-review]
+    required_evidence: [task_spec]
+    quality_axes: [outcome, evidence]
+    accepted_risks: [read_only]
+    adapter: fake
+  api-security-review:
+    agent: api-security-reviewer
+    capabilities: [api-security-review]
+    required_evidence: [task_spec]
+    quality_axes: [outcome, evidence, security]
+    accepted_risks: [read_only, sensitive]
+    adapter: fake
+  api-performance-review:
+    agent: api-performance-engineer
+    capabilities: [api-performance-review]
+    required_evidence: [task_spec]
+    quality_axes: [outcome, evidence, performance]
+    accepted_risks: [read_only]
+    adapter: fake
+  api-data-review:
+    agent: api-data-access-architect
+    capabilities: [api-data-review]
+    required_evidence: [task_spec]
+    quality_axes: [outcome, evidence, data]
+    accepted_risks: [read_only, sensitive]
+    adapter: fake
+  api-architecture-review:
+    agent: api-architecture-reviewer
+    capabilities: [api-architecture-review]
+    required_evidence: [task_spec]
+    quality_axes: [outcome, evidence]
+    accepted_risks: [read_only]
+    adapter: fake
+  adversarial-critic:
+    agent: api-adversarial-critic
+    capabilities: [adversarial-critic]
+    required_evidence: [task_spec]
+    quality_axes: [outcome, evidence, safety]
+    accepted_risks: [read_only, sensitive]
+    adapter: fake
+  task-review:
+    agent: api-task-spec-reviewer
+    capabilities: [task-review]
+    required_evidence: [task_spec]
+    quality_axes: [outcome, evidence]
+    accepted_risks: [read_only]
+    adapter: fake
+  debate-referee:
+    agent: api-debate-referee
+    capabilities: [debate-referee]
+    required_evidence: [task_spec]
+    quality_axes: [outcome, evidence, dissent]
+    accepted_risks: [read_only, sensitive]
+    adapter: fake

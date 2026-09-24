@@ -123,12 +123,16 @@ antes da ativação de rede ou mutação externa.
 - adicionar evals de segurança: prompt injection, tool misuse, data exfiltration e scope creep;
 - versionar knowledge packs com autoridade, data, runtime matrix, validade e fonte;
 - publicar skills portáveis para Claude, GPT/Codex, Devin e Copilot com protocolo comum;
-- testar paridade de comandos, contratos, capacidades e evidências entre hosts.
+- testar paridade de comandos, contratos, capacidades e evidências entre hosts;
+- **entregue no programa de interoperabilidade:** freshness read-only, Evidence
+  Levels, negociação por interseção, matriz Python observada e debate adaptativo
+  bounded; claims externos continuam dependentes de receipts independentes.
 
 ### 11. Produto e experiência
 
 - consolidar CLI, MCP e uma API control-plane estável sobre os mesmos contratos;
-- criar TUI/web UI opcional para casos, planos, debates, evidências, grafo e approvals;
+- **entregue terminal-first:** TUI Textual/Rich opcional para execução, governança,
+  evidências e debate; web UI pesada permanece fora da primeira fase;
 - fornecer templates de projeto, onboarding, exemplos de vertical slice e troubleshooting;
 - adicionar modo `explain`, `dry-run`, `review`, `approve`, `resume` e `export` consistente;
 - manter documentação de arquitetura, limites, threat model, ADRs, skills e compatibilidade sempre atualizada.

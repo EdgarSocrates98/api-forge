@@ -19,3 +19,8 @@ features it does not expose.
 All hosts can use the core CLI after the package is installed in their
 workspace environment. “100%” means shared core behavior, not identical host
 UI, hooks, MCP lifecycle or subagent orchestration.
+
+Capability negotiation is available through `apiforge agentops negotiate`.
+Host-owned declarations may be placed under `.apiforge/hosts/*.json`; absent
+declarations use the conservative static layout and retain host limitations.
+The resolver publishes intersections only, never host equivalence.

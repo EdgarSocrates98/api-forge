@@ -19,6 +19,8 @@ Canonical invariants:
 
 - `version` is a literal contract version; incompatible changes require v2.
 - Extra fields are rejected and instances are frozen.
+- Artifact, run, verification and interoperability contracts carry an explicit
+  `evidence_level`; legacy payloads load as `unknown` until a receipt proves more.
 - A run references one TaskSpec revision and cannot execute a stale plan.
 - `DONE` is derived by `OutcomeBrief` only after independent verification and
   clean holdout/mutation evidence.

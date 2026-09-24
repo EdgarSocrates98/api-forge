@@ -15,6 +15,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from apiforge.contracts.debate import AdaptivePlan, AdaptivePolicy, ParticipantDeclaration
 from apiforge.core.ids import stable_id
 
 _QUORUM_SIDES = 2
@@ -39,6 +40,10 @@ class Debate:
     decision: str = ""
     referee: str = ""
     closed_at: str = ""
+    policy: dict[str, Any] | None = None
+    plan: dict[str, Any] | None = None
+    replay_id: str = ""
+    dissent: tuple[dict[str, Any], ...] = ()
 
 
 def _path(case_dir: Path, debate_id: str) -> Path:
@@ -58,6 +63,10 @@ def _write(case_dir: Path, debate: Debate) -> Path:
         "decision": debate.decision,
         "referee": debate.referee,
         "closed_at": debate.closed_at,
+        "policy": debate.policy,
+        "plan": debate.plan,
+        "replay_id": debate.replay_id,
+        "dissent": list(debate.dissent),
     }
     out.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return out
@@ -78,6 +87,10 @@ def _load(case_dir: Path, debate_id: str) -> Debate:
         decision=doc.get("decision", ""),
         referee=doc.get("referee", ""),
         closed_at=doc.get("closed_at", ""),
+        policy=doc.get("policy"),
+        plan=doc.get("plan"),
+        replay_id=doc.get("replay_id", ""),
+        dissent=tuple(doc.get("dissent", [])),
     )
 
 
@@ -101,6 +114,60 @@ def open_debate(case_dir: Path, question: str, sides: tuple[str, ...], now: str)
     return debate
 
 
+def select_plan(
+    risk: str,
+    participants: tuple[ParticipantDeclaration, ...],
+    policy: AdaptivePolicy | None = None,
+) -> AdaptivePlan:
+    """Choose a bounded participant set from declared adapters."""
+    selected_policy = policy or AdaptivePolicy()
+    normalized_risk = risk.lower()
+    desired = 2 if normalized_risk == "low" else 3 if normalized_risk in {"medium", "high"} else selected_policy.max_participants
+    selected = tuple(sorted(participants, key=lambda item: (item.host, item.participant_id))[: min(desired, selected_policy.max_participants)])
+    if len(selected) < selected_policy.quorum_sides:
+        raise DebateError(
+            "AF-DEBATE-PARTICIPANTS",
+            f"risk {risk!r} has {len(selected)} participants; needs {selected_policy.quorum_sides}",
+        )
+    return AdaptivePlan(
+        risk=normalized_risk,
+        participants=selected,
+        quorum_sides=selected_policy.quorum_sides,
+        max_rounds=selected_policy.max_rounds,
+        retry_budget=selected_policy.retry_budget,
+        reason=f"bounded plan for {normalized_risk} risk",
+    )
+
+
+def open_adaptive_debate(
+    case_dir: Path,
+    question: str,
+    sides: tuple[str, ...],
+    now: str,
+    *,
+    risk: str,
+    participants: tuple[ParticipantDeclaration, ...],
+    policy: AdaptivePolicy | None = None,
+) -> Debate:
+    """Open a normal debate with an auditable adaptive plan attached."""
+    selected_policy = policy or AdaptivePolicy()
+    plan = select_plan(risk, participants, selected_policy)
+    debate = open_debate(case_dir, question, sides, now)
+    updated = Debate(
+        **{
+            **debate.__dict__,
+            "policy": selected_policy.model_dump(mode="json"),
+            "plan": plan.model_dump(mode="json"),
+            "replay_id": stable_id(
+                "debate-replay",
+                {"debate_id": debate.debate_id, "plan": plan.model_dump(mode="json")},
+            ),
+        }
+    )
+    _write(case_dir, updated)
+    return updated
+
+
 def submit(
     case_dir: Path,
     debate_id: str,
@@ -113,6 +180,15 @@ def submit(
     _require_open(debate)
     if side not in debate.sides:
         raise DebateError("AF-DEBATE-SIDE", f"{side!r} not among sides {sorted(debate.sides)}")
+    if debate.plan:
+        participant_count = len(debate.plan.get("participants", ()))
+        max_rounds = int(debate.plan.get("max_rounds", 1))
+        budget = max(1, participant_count) * max_rounds
+        if len(debate.submissions) >= budget:
+            raise DebateError(
+                "AF-DEBATE-BUDGET",
+                f"adaptive debate budget exhausted after {budget} submissions",
+            )
     if not evidence or not all(e.startswith("fact:") for e in evidence):
         raise DebateError("AF-DEBATE-NO-EVIDENCE", "positions must cite fact_id evidence")
     submission = {
@@ -150,6 +226,10 @@ def close(
             "decision": decision or "recorded unresolved — disagreement stands",
             "referee": referee,
             "closed_at": now,
+            "dissent": tuple(
+                submission for submission in debate.submissions
+                if submission.get("side") != decision
+            ),
         }
     )
     _write(case_dir, updated)

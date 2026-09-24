@@ -92,3 +92,28 @@ def test_sandbox_apply_via_cli(tmp_path: Path) -> None:
     )
     assert result.exit_code == 0
     assert json.loads(result.stdout)["applied"] is True
+
+
+def test_friendly_runtime_commands_project_canonical_status(tmp_path: Path) -> None:
+    from tests.runtime.test_runtime import make_task
+
+    make_task(tmp_path)
+    evolved = runner.invoke(
+        app,
+        [
+            "evolve",
+            "evolve-orders-api",
+            "--root",
+            str(tmp_path),
+            "--now",
+            "2026-09-23T12:40:00+00:00",
+        ],
+    )
+    assert evolved.exit_code == 0
+    assert json.loads(evolved.stdout)["command"] == "evolve"
+    status = runner.invoke(app, ["status", "evolve-orders-api", "--root", str(tmp_path)])
+    assert status.exit_code == 0
+    assert json.loads(status.stdout)["command"] == "status"
+    doctor = runner.invoke(app, ["doctor", "evolve-orders-api", "--root", str(tmp_path)])
+    assert doctor.exit_code == 0
+    assert json.loads(doctor.stdout)["command"] == "doctor"

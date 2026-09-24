@@ -20,6 +20,8 @@ class EvalCase:
     mutation: str
     quality_axes: tuple[str, ...]
     adapter: str | None = None
+    kind: str = "golden"
+    mandatory: bool = True
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -31,6 +33,8 @@ class EvalCase:
             "mutation": self.mutation,
             "quality_axes": list(self.quality_axes),
             "adapter": self.adapter,
+            "kind": self.kind,
+            "mandatory": self.mandatory,
         }
 
 
@@ -42,6 +46,7 @@ class EvalResult:
     missing_evidence: tuple[str, ...] = ()
     failed_axes: tuple[str, ...] = ()
     holdout_digest: str | None = None
+    evidence: tuple[str, ...] = ()
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -51,6 +56,7 @@ class EvalResult:
             "missing_evidence": list(self.missing_evidence),
             "failed_axes": list(self.failed_axes),
             "holdout_digest": self.holdout_digest,
+            "evidence": list(self.evidence),
         }
 
 
@@ -72,6 +78,8 @@ def load_cases(path: Path) -> tuple[EvalCase, ...]:
                 mutation=str(raw.get("mutation", "none")),
                 quality_axes=tuple(str(item) for item in raw.get("quality_axes", ())),
                 adapter=str(raw["adapter"]) if raw.get("adapter") is not None else None,
+                kind=str(raw.get("kind", raw.get("type", "golden"))),
+                mandatory=bool(raw.get("mandatory", True)),
             )
         )
     return tuple(cases)
@@ -99,7 +107,7 @@ def evaluate_case(
     digest = None
     if holdout_payload is not None:
         digest = str(mutation_probe(holdout_payload, case.mutation)["source_digest"])
-    return EvalResult(case.case_id, verdict, score, missing, failed_axes, digest)
+    return EvalResult(case.case_id, verdict, score, missing, failed_axes, digest, tuple(evidence))
 
 
 def list_case_dicts(path: Path) -> list[dict[str, object]]:

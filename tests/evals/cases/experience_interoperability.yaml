@@ -1,0 +1,42 @@
+feature: experience-interoperability
+cases:
+  - id: experience-tui-parity
+    domain: tui
+    input: tests/fixtures/tui/experience_runs.yaml
+    expected: PASS
+    required_evidence: [projection-parity]
+    mutation: remove-status
+    quality_axes: [parity]
+    kind: golden
+  - id: experience-knowledge-freshness
+    domain: knowledge
+    input: tests/fixtures/knowledge/freshness.yaml
+    expected: PASS
+    required_evidence: [freshness-receipt]
+    mutation: alter-source-hash
+    quality_axes: [freshness]
+    kind: holdout
+  - id: experience-host-intersection
+    domain: hosts
+    input: tests/fixtures/hosts/negotiation.yaml
+    expected: PASS
+    required_evidence: [host-declarations]
+    mutation: enable-copilot-mcp
+    quality_axes: [limitations]
+    kind: mutation
+  - id: experience-python-observation
+    domain: compatibility
+    input: tests/fixtures/compatibility/python-matrix.yaml
+    expected: PASS
+    required_evidence: [runtime-receipt]
+    mutation: infer-neighbor
+    quality_axes: [observed-only]
+    kind: integration
+  - id: experience-adaptive-debate
+    domain: debate
+    input: tests/fixtures/debate/adaptive.yaml
+    expected: PASS
+    required_evidence: [replay-id, dissent]
+    mutation: remove-budget
+    quality_axes: [bounded]
+    kind: golden

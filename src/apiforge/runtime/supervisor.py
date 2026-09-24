@@ -8,6 +8,7 @@ from typing import Any
 
 from pydantic import TypeAdapter
 
+from apiforge.capabilities.scorecard import load_scorecards
 from apiforge.contracts.agentic import (
     AgentArtifact,
     AgenticRun,
@@ -20,6 +21,7 @@ from apiforge.contracts.base import ContractError
 from apiforge.core.ids import stable_id
 from apiforge.core.models import JsonValue
 from apiforge.runtime.adapters import AgentRequest, ModelAdapter
+from apiforge.runtime.control import ControlPlane
 from apiforge.runtime.critic import critic_findings
 from apiforge.runtime.guardrails import validate_agent_payload
 from apiforge.runtime.policy import (
@@ -28,7 +30,7 @@ from apiforge.runtime.policy import (
     requires_human_gate,
     should_open_room,
 )
-from apiforge.runtime.registry import load_capabilities, select_capabilities
+from apiforge.runtime.registry import load_capabilities, load_profiles, select_eligible_capabilities
 from apiforge.runtime.review import build_runtime_review, review_task_spec
 from apiforge.runtime.scheduler import run_bounded
 from apiforge.runtime.store import RunStore, content_hash
@@ -144,7 +146,39 @@ async def execute_run(
             "run_dir": str(storage.directory),
         }
 
-    capabilities = select_capabilities(load_capabilities(), risk=spec.risk.value)
+    capabilities = select_eligible_capabilities(
+        load_capabilities(),
+        load_profiles(),
+        risk=spec.risk.value,
+        available_evidence=("task_spec",),
+        scorecards=load_scorecards(root),
+    )
+    if not capabilities:
+        run = run.model_copy(
+            update={
+                "state": AgenticState.BLOCKED,
+                "final_status": "BLOCKED",
+                "gaps": ("AF-CAPABILITY-ELIGIBILITY: no eligible capability",),
+                "finished_at": timestamp,
+            }
+        )
+        storage.save_run(run)
+        return {
+            "run": run.model_dump(mode="json"),
+            "artifacts": [],
+            "status": "BLOCKED",
+            "run_dir": str(storage.directory),
+        }
+    control = ControlPlane(root)
+    control_run = control.create(
+        task_id,
+        tuple((item.name, ()) for item in capabilities),
+        max_parallel=policy.max_parallel_agents,
+        max_calls=policy.max_calls,
+        max_retries=policy.max_retries,
+        run_id=run_id,
+    )
+    control_steps = {step.name: step for step in control_run.steps}
     invocation_ids = tuple(
         stable_id("inv", {"run": run_id, "capability": item.name}) for item in capabilities
     )
@@ -157,6 +191,7 @@ async def execute_run(
             adapter=adapter.name,
             dependencies=(),
             input_refs=spec.inputs,
+            idempotency_key=control_steps[item.name].idempotency_key,
         )
         for invocation_id, item in zip(invocation_ids, capabilities, strict=True)
     )
@@ -164,9 +199,12 @@ async def execute_run(
         update={
             "state": AgenticState.RUNNING,
             "invocation_ids": invocation_ids,
+            "control_run_id": control_run.run_id,
         }
     )
     storage.save_run(run)
+    for step in control_run.steps:
+        control.start(control_run.run_id, step.step_id)
 
     async def worker(invocation: AgentInvocation) -> object:
         request = AgentRequest(
@@ -185,6 +223,7 @@ async def execute_run(
         limit=policy.max_parallel_agents,
         timeout_seconds=policy.timeout_seconds,
         max_calls=policy.max_calls,
+        max_retries=policy.max_retries,
         parallelism=lambda ready, remaining: min(
             policy.max_parallel_agents,
             max(1, ready // 2)
@@ -195,13 +234,16 @@ async def execute_run(
     artifacts: list[AgentArtifact] = []
     errors: list[str] = []
     for result in results:
+        control_step = control_steps[result.invocation.capability]
         if result.error is not None or result.response is None:
             errors.append(result.error or "invocation failed")
+            control.fail(control_run.run_id, control_step.step_id, result.error or "invocation failed")
             continue
         payload = _json_payload(result.response)
         guardrail_gaps = validate_agent_payload(payload)
         if guardrail_gaps:
             errors.extend(f"{result.invocation.capability}: {gap}" for gap in guardrail_gaps)
+            control.fail(control_run.run_id, control_step.step_id, "; ".join(guardrail_gaps))
             continue
         artifact_id = stable_id(
             "artifact", {"run": run_id, "invocation": result.invocation.invocation_id}
@@ -223,6 +265,7 @@ async def execute_run(
             content_sha256=content_hash(payload),
         )
         artifacts.append(artifact)
+        control.complete(control_run.run_id, control_step.step_id, artifact.model_dump(mode="json"))
         storage.artifact(artifact)
         storage.event(
             TrajectoryEvent(
@@ -310,5 +353,175 @@ async def execute_run(
         "critic": {"required": critic_required, "findings": critic},
         "debate": {"opened": room, "reasons": reasons},
         "status": final_status,
+        "run_dir": str(storage.directory),
+    }
+
+
+async def resume_existing_run(
+    root: Path,
+    task_id: str,
+    run_id: str,
+    *,
+    adapter: ModelAdapter,
+    policy_id: str = "local-ci-safe",
+    now: str | None = None,
+) -> dict[str, object]:
+    root = Path(root)
+    spec = task_store.load(root, task_id)
+    timestamp = _now(now)
+    policy = load_policy(policy_id)
+    storage = RunStore(root, task_id, run_id)
+    previous = storage.load_run()
+    if previous is None:
+        raise ContractError("AF-RUNTIME-NOT-FOUND", f"no runtime run {run_id!r}")
+    control = ControlPlane(root)
+    control_run = control.get(run_id)
+    if control_run.task_id != task_id:
+        raise ContractError("AF-RUNTIME-COMPATIBILITY", "control run task does not match task_id")
+    if control_run.status in {"completed", "cancelled", "blocked", "awaiting_review"}:
+        return {
+            "run": previous.model_dump(mode="json"),
+            "status": previous.final_status or "REVIEW",
+            "resumed": True,
+            "reused_invocations": len(previous.invocation_ids),
+            "run_dir": str(storage.directory),
+        }
+    control.recover_expired(run_id, now=timestamp)
+    ready = control.ready(run_id)
+    if not ready:
+        return {
+            "run": previous.model_dump(mode="json"),
+            "status": "REVIEW",
+            "resumed": True,
+            "reused_invocations": len(previous.invocation_ids),
+            "gaps": ("AF-CONTROL-NOT-READY: no resumable step",),
+            "run_dir": str(storage.directory),
+        }
+    capabilities = load_capabilities()
+    profiles = load_profiles()
+    routed = select_eligible_capabilities(
+        capabilities,
+        profiles,
+        risk=spec.risk.value,
+        available_evidence=("task_spec",),
+        scorecards=load_scorecards(root),
+    )
+    by_name = {item.name: item for item in routed}
+    selected = tuple(by_name[step.name] for step in ready if step.name in by_name)
+    if not selected:
+        raise ContractError("AF-CAPABILITY-ELIGIBILITY", "no resumable capability is eligible")
+    step_map = {step.name: step for step in ready}
+    invocations: list[AgentInvocation] = []
+    for capability in selected:
+        step = step_map[capability.name]
+        control.start(run_id, step.step_id)
+        invocations.append(
+            AgentInvocation(
+                invocation_id=stable_id(
+                    "inv", {"run": run_id, "capability": capability.name}
+                ),
+                run_id=run_id,
+                agent=capability.agent,
+                capability=capability.name,
+                adapter=adapter.name,
+                input_refs=spec.inputs,
+                idempotency_key=step.idempotency_key,
+                retry_count=step.attempts,
+            )
+        )
+
+    async def worker(invocation: AgentInvocation) -> object:
+        return await adapter.invoke(
+            AgentRequest(
+                invocation_id=invocation.invocation_id,
+                agent=invocation.agent,
+                capability=invocation.capability,
+                prompt=f"Resume API evolution for capability {invocation.capability}",
+                output_contract="AgentArtifact/v1",
+            )
+        )
+
+    results = await run_bounded(
+        tuple(invocations),
+        worker,
+        limit=policy.max_parallel_agents,
+        timeout_seconds=policy.timeout_seconds,
+        max_calls=max(0, policy.max_calls - control_run.calls_used),
+        max_retries=policy.max_retries,
+    )
+    new_artifacts: list[AgentArtifact] = []
+    errors: list[str] = []
+    for result in results:
+        step = step_map[result.invocation.capability]
+        if result.error is not None or result.response is None:
+            error = result.error or "invocation failed"
+            errors.append(error)
+            control.fail(run_id, step.step_id, error)
+            continue
+        payload = _json_payload(result.response)
+        gaps = validate_agent_payload(payload)
+        if gaps:
+            error = "; ".join(gaps)
+            errors.extend(f"{result.invocation.capability}: {error}" for _ in [0])
+            control.fail(run_id, step.step_id, error)
+            continue
+        artifact = AgentArtifact(
+            artifact_id=stable_id(
+                "artifact", {"run": run_id, "invocation": result.invocation.invocation_id}
+            ),
+            run_id=run_id,
+            invocation_id=result.invocation.invocation_id,
+            agent=result.invocation.agent,
+            capability=result.invocation.capability,
+            kind=ArtifactKind.SPECIALIST,
+            schema_name="AgentArtifact/v1",
+            payload=payload,
+            evidence=_strings(payload, "facts"),
+            assumptions=_strings(payload, "assumptions"),
+            risks=_strings(payload, "risks"),
+            unresolved=_strings(payload, "unresolved"),
+            confidence=_confidence(payload),
+            content_sha256=content_hash(payload),
+        )
+        control.complete(run_id, step.step_id, artifact.model_dump(mode="json"))
+        storage.artifact(artifact)
+        storage.event(
+            TrajectoryEvent(
+                event_id=stable_id(
+                    "event",
+                    {"run": run_id, "invocation": artifact.invocation_id, "event": "resume"},
+                ),
+                run_id=run_id,
+                event="resume_checkpoint",
+                actor="api-agentic-orchestrator",
+                subject=artifact.invocation_id,
+                payload={"artifact_id": artifact.artifact_id},
+                created_at=timestamp,
+            )
+        )
+        new_artifacts.append(artifact)
+    artifact_ids = tuple(dict.fromkeys((*previous.artifact_ids, *(item.artifact_id for item in new_artifacts))))
+    final_status = "REVIEW" if errors or artifact_ids else "BLOCKED"
+    resumed = previous.model_copy(
+        update={
+            "state": AgenticState.AWAITING_SUPERVISION
+            if final_status == "REVIEW"
+            else AgenticState.BLOCKED,
+            "artifact_ids": artifact_ids,
+            "gaps": tuple(sorted({*previous.gaps, *errors})),
+            "final_status": final_status,
+            "finished_at": timestamp,
+            "run_digest": content_hash({"run": run_id, "artifacts": artifact_ids}),
+        }
+    )
+    storage.save_run(resumed)
+    storage.json("replay.json", storage.replay())
+    task_store.record_agentic_run(root, resumed)
+    return {
+        "run": resumed.model_dump(mode="json"),
+        "artifacts": [item.model_dump(mode="json") for item in new_artifacts],
+        "status": final_status,
+        "resumed": True,
+        "reused_invocations": len(previous.invocation_ids),
         "run_dir": str(storage.directory),
     }

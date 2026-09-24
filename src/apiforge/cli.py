@@ -37,6 +37,7 @@ from apiforge.contract_intel import (
     simulate_twin,
 )
 from apiforge.contracts.base import ContractError
+from apiforge.contracts.devin import DevinPermissionMode, DevinSurface, DevinTaskKind
 from apiforge.contracts.stubs import PerformanceRun
 from apiforge.core.detail import apply_detail_level
 from apiforge.core.models import Fact, Finding, FindingStatus, Severity
@@ -116,6 +117,12 @@ agentops_app = typer.Typer(
     no_args_is_help=True,
 )
 app.add_typer(agentops_app)
+devin_app = typer.Typer(
+    name="devin",
+    help="Generate and inspect offline-first payloads for Devin Desktop, CLI and Cloud.",
+    no_args_is_help=True,
+)
+app.add_typer(devin_app)
 evals_app = typer.Typer(
     name="evals",
     help="Declarative local eval matrix, goldens and holdout metadata.",
@@ -3397,6 +3404,66 @@ def agentops_negotiate(
         ),
     )
     _echo_json(_run(lambda: negotiate_from_root(root, request)), detail_level)
+
+
+@devin_app.command("payload")
+def devin_payload(
+    objective: str = typer.Argument(..., help="Objective to send to Devin."),
+    surface: str = typer.Option("cli", "--surface", help="desktop, cli or cloud."),
+    task_kind: str = typer.Option(
+        "planning",
+        "--task-kind",
+        help="discovery, planning, implementation, verification, review or handoff.",
+    ),
+    root: Path = typer.Option(Path("."), "--root"),
+    title: str | None = typer.Option(None, "--title"),
+    permission_mode: str = typer.Option("normal", "--permission-mode"),
+    sandbox: bool = typer.Option(False, "--sandbox"),
+    model: str | None = typer.Option(None, "--model"),
+    platform: str = typer.Option("unknown", "--platform"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Create a Devin payload; this command never starts Devin or mutates Git."""
+    from apiforge.integrations.devin import build_devin_payload
+
+    try:
+        payload = build_devin_payload(
+            objective=objective,
+            surface=cast(DevinSurface, surface),
+            task_kind=cast(DevinTaskKind, task_kind),
+            root=root,
+            title=title,
+            permission_mode=cast(DevinPermissionMode, permission_mode),
+            sandbox=sandbox,
+            model=model,
+            platform=platform,
+        )
+    except (ContractError, ValueError) as exc:
+        if isinstance(exc, ContractError):
+            _fail(exc.code, exc.detail, field="Devin payload", unlock="correct the payload and rerun")
+        _fail("AF-DEVIN-PAYLOAD", str(exc), field="Devin payload", unlock="correct the payload and rerun")
+    _echo_json(payload, detail_level)
+
+
+@devin_app.command("probe")
+def devin_probe(
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Observe whether a local Devin CLI executable is available on PATH."""
+    from apiforge.integrations.devin import probe_devin_cli
+
+    _echo_json(probe_devin_cli(), detail_level)
+
+
+@devin_app.command("capabilities")
+def devin_capabilities(
+    root: Path = typer.Option(Path("."), "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Report Devin capability declarations plus local CLI observation."""
+    from apiforge.integrations.devin import build_devin_declaration
+
+    _echo_json(build_devin_declaration(root), detail_level)
 
 
 @agentops_app.command("activation-plan")

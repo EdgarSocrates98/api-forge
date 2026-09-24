@@ -25,6 +25,7 @@ from apiforge.contracts.core import (
     Decision,
     Verification,
 )
+from apiforge.contracts.devin import DevinCheck, DevinCliProbe, DevinLaunch, DevinPayload
 from apiforge.contracts.graph import GraphEdge, GraphExport, GraphNode
 from apiforge.contracts.grpc import (
     GrpcArtifact,
@@ -132,6 +133,10 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "ActionPlan/v1": ActionPlan,
     "ActionStep/v1": ActionStep,
     "Verification/v1": Verification,
+    "DevinCheck/v1": DevinCheck,
+    "DevinCliProbe/v1": DevinCliProbe,
+    "DevinLaunch/v1": DevinLaunch,
+    "DevinPayload/v1": DevinPayload,
     "TaskSpec/v1": TaskSpec,
     "TaskRevision/v1": TaskRevision,
     "TaskPlan/v1": TaskPlan,

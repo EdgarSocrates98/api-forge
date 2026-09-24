@@ -20,7 +20,11 @@ def sync(root: Path) -> dict[str, list[str]]:
         mirror = root / mirror_rel
         mirror.mkdir(parents=True, exist_ok=True)
         for existing in mirror.iterdir():
-            if existing.is_dir() and existing.name not in names:
+            # Devin can carry project-specific skills that are intentionally
+            # not mirrored to Claude/Copilot. Preserve those extensions while
+            # keeping the shared canonical set synchronized.
+            devin_extension = mirror_rel == Path(".devin/skills") and existing.is_dir()
+            if existing.is_dir() and existing.name not in names and not devin_extension:
                 shutil.rmtree(existing)
                 result["removed"].append(str(existing.relative_to(root)))
         for name in sorted(names):

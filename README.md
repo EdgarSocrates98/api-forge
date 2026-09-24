@@ -91,7 +91,17 @@ apiforge agentops activation-plan --host copilot
 ```
 
 Activation plans are `plan_only` and approval-gated; they do not alter user
-configuration. See [docs/HOST_PARITY.md](docs/HOST_PARITY.md).
+configuration. Devin has an additional payload-first adapter for Desktop, CLI
+and Cloud:
+
+```bash
+apiforge devin probe
+apiforge devin capabilities
+apiforge devin payload "Review the current API evolution slice" --surface cli --task-kind review
+```
+
+See [docs/HOST_PARITY.md](docs/HOST_PARITY.md) and
+[docs/integrations/API_FORGE_DEVIN.md](docs/integrations/API_FORGE_DEVIN.md).
 
 ## Platform completion workflow
 

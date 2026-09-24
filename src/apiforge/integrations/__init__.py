@@ -1,5 +1,10 @@
 """Provider-neutral, policy-gated integration boundaries."""
 
+from apiforge.integrations.devin import (
+    build_devin_declaration,
+    build_devin_payload,
+    probe_devin_cli,
+)
 from apiforge.integrations.external import (
     GitHubIssuesReadOnlyAdapter,
     HttpHealthReadOnlyAdapter,
@@ -21,4 +26,7 @@ __all__ = [
     "ReplayAdapter",
     "TransportError",
     "UrllibReadOnlyTransport",
+    "build_devin_declaration",
+    "build_devin_payload",
+    "probe_devin_cli",
 ]

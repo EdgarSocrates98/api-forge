@@ -407,6 +407,10 @@ turns an unsupported participant into evidence.
 | `AF-MIGRATION-RECEIPT` | a runtime receipt names an ecosystem/version absent from the declared matrix |
 | `AF-MIGRATION-INTERPRETER` | a matrix probe was not an allowlisted Python interpreter or could not complete |
 | `AF-HOST-DECLARATION` | a local host capability declaration is unreadable or schema-invalid |
+| `AF-DEVIN-OBJECTIVE` | Devin payload objective is empty |
+| `AF-DEVIN-PAYLOAD` | Devin payload input is malformed or outside its closed vocabulary |
+| `AF-DEVIN-SANDBOX-UNAVAILABLE` | Devin CLI sandbox was requested on native Windows; use WSL 2 or remove the flag |
+| `AF-DEVIN-DESTRUCTIVE-COMMAND` | Devin hook blocked an irreversible repository or Docker cleanup command |
 
 ## Dispatch and agent mirrors
 

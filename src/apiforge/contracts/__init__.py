@@ -15,6 +15,16 @@ from apiforge.contracts.debate import (
     DebateReplay,
     ParticipantDeclaration,
 )
+from apiforge.contracts.devin import (
+    DevinCheck,
+    DevinCliProbe,
+    DevinLaunch,
+    DevinPayload,
+    DevinPermissionMode,
+    DevinPromptTransport,
+    DevinSurface,
+    DevinTaskKind,
+)
 from apiforge.contracts.evidence import EvidenceRecord
 from apiforge.contracts.experience import ExperienceAction, ExperienceSnapshot, ExperienceView
 from apiforge.contracts.host import (
@@ -56,6 +66,14 @@ __all__ = [
     "DataReadReceipt",
     "DataReadRequest",
     "DebateReplay",
+    "DevinCheck",
+    "DevinCliProbe",
+    "DevinLaunch",
+    "DevinPayload",
+    "DevinPermissionMode",
+    "DevinPromptTransport",
+    "DevinSurface",
+    "DevinTaskKind",
     "EvidenceLevel",
     "EvidenceRecord",
     "ExperienceAction",

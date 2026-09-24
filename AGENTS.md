@@ -96,3 +96,26 @@ Gaps:
 Next:
 Open:
 ```
+
+## Devin Desktop, CLI and Cloud adapter
+
+Devin CLI loads this file automatically. The repository also ships the
+Devin-native `.devin/` layer:
+
+- `.devin/config.json` keeps project permissions fail-closed and asks before
+  commits, pushes, Docker use or secret-file writes.
+- `.devin/hooks.v1.json` blocks irreversible shell commands and announces the
+  API Forge case/routing preconditions at session start.
+- `.devin/skills/api-forge-devin-runbook/` is the entry skill for a governed
+  Devin task; `.devin/agents/api-forge-reviewer.md` is a read-only reviewer.
+- `apiforge devin payload` emits a portable prompt for `desktop`, `cli` or
+  `cloud`; `apiforge devin probe` only observes a local `devin` executable;
+  `apiforge devin capabilities` reports declared versus observed support.
+
+Use `/plan` or `--permission-mode normal` for discovery and planning. Use
+`accept-edits` only after the plan and writable paths are reviewed. Use
+`--sandbox`/Autonomous only on a supported host; native Windows requires WSL 2
+for Devin CLI sandboxing. `/handoff`, `/open desktop`, `/pickup` and Cloud
+sessions remain human-reviewed boundaries. Never put credentials in a payload;
+personal MCP secrets belong in `.devin/mcp_config.local.json` and must not be
+committed. The API Forge core never invokes Devin APIs or opens PRs.

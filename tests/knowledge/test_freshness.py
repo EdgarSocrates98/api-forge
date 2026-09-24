@@ -35,8 +35,14 @@ def _observation(observed_at: str, source_hash: str = "abc123") -> SourceObserva
 def test_freshness_fresh_stale_and_unresolved(tmp_path: Path) -> None:
     pack = load_pack(_pack(tmp_path))
     now = "2026-09-23T00:00:00+00:00"
-    assert verify_pack_freshness(pack, _observation("2026-09-20T00:00:00+00:00"), now=now).state == "fresh"
-    assert verify_pack_freshness(pack, _observation("2026-09-01T00:00:00+00:00"), now=now).state == "stale"
+    assert (
+        verify_pack_freshness(pack, _observation("2026-09-20T00:00:00+00:00"), now=now).state
+        == "fresh"
+    )
+    assert (
+        verify_pack_freshness(pack, _observation("2026-09-01T00:00:00+00:00"), now=now).state
+        == "stale"
+    )
     assert verify_pack_freshness(pack, None, now=now).state == "unresolved"
 
 

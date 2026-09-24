@@ -38,12 +38,14 @@ def run_runtime_gate(
     present_kinds = {case.kind for case in cases if case.case_id in observations}
     missing_kinds = tuple(sorted(required_kinds - present_kinds))
     mandatory_results = tuple(
-        result for result in results if next(
-            case for case in cases if case.case_id == result.case_id
-        ).mandatory
+        result
+        for result in results
+        if next(case for case in cases if case.case_id == result.case_id).mandatory
     )
     failed = tuple(result for result in mandatory_results if result.verdict != "PASS")
-    blocked = bool(missing_cases or missing_kinds or any(result.verdict == "BLOCKED" for result in failed))
+    blocked = bool(
+        missing_cases or missing_kinds or any(result.verdict == "BLOCKED" for result in failed)
+    )
     status = "BLOCKED" if blocked else "REVIEW" if failed else "PASS"
     return {
         "status": status,

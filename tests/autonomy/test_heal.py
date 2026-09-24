@@ -168,7 +168,9 @@ def test_ledger_records_resolution(tmp_path: Path) -> None:
     assert final[-1]["resolution"] == "rolled_back"
 
 
-def test_rollback_preserves_external_change_and_records_conflict(tmp_path: Path, monkeypatch) -> None:
+def test_rollback_preserves_external_change_and_records_conflict(
+    tmp_path: Path, monkeypatch
+) -> None:
     _set(tmp_path, "supervised", evidence="e1", approval="ops")
     findings = _findings_file(tmp_path, [_CONFIRMED])
     target = tmp_path / "config.yaml"

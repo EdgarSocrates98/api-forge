@@ -14,7 +14,9 @@ def test_matrix_publishes_only_observed_python_cells() -> None:
         command="pytest -q",
         receipt_ref="receipt:python:3.12",
     )
-    matrix = compatibility_matrix("python", (receipt,), Path("knowledge/runtime-migration/matrix.yaml"))
+    matrix = compatibility_matrix(
+        "python", (receipt,), Path("knowledge/runtime-migration/matrix.yaml")
+    )
     cell = next(item for item in matrix.cells if item.runtime_version == "3.12")
     assert cell.state == "passed"
     assert "3.12" in matrix.observed_versions

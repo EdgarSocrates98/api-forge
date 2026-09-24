@@ -24,7 +24,9 @@ class ExperienceView(VersionedContract):
     evidence_refs: tuple[str, ...] = ()
     evidence: EvidenceRecord = Field(default_factory=EvidenceRecord)
     payload: dict[str, object] = Field(default_factory=dict)
-    evidence_level: Literal["observed", "declared", "inferred", "heuristic", "verified", "unknown"] = "unknown"
+    evidence_level: Literal[
+        "observed", "declared", "inferred", "heuristic", "verified", "unknown"
+    ] = "unknown"
 
     @field_validator("gaps", "actions", "evidence_refs", mode="after")
     @classmethod
@@ -39,7 +41,9 @@ class ExperienceAction(VersionedContract):
     label: str
     safe: bool = True
     requires_confirmation: bool = False
-    evidence_level: Literal["observed", "declared", "inferred", "heuristic", "verified", "unknown"] = "declared"
+    evidence_level: Literal[
+        "observed", "declared", "inferred", "heuristic", "verified", "unknown"
+    ] = "declared"
 
 
 class ExperienceSnapshot(VersionedContract):
@@ -48,4 +52,6 @@ class ExperienceSnapshot(VersionedContract):
     view: ExperienceView
     actions: tuple[ExperienceAction, ...] = ()
     surface: str = "json"
-    evidence_level: Literal["observed", "declared", "inferred", "heuristic", "verified", "unknown"] = "unknown"
+    evidence_level: Literal[
+        "observed", "declared", "inferred", "heuristic", "verified", "unknown"
+    ] = "unknown"

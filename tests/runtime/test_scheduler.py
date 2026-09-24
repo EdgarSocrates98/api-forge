@@ -58,7 +58,9 @@ def test_scheduler_accepts_dynamic_parallelism_within_bound() -> None:
 
 def test_scheduler_retries_and_skips_dependents_after_failure() -> None:
     items = (
-        AgentInvocation(invocation_id="root", run_id="r", agent="a", capability="c", adapter="fake"),
+        AgentInvocation(
+            invocation_id="root", run_id="r", agent="a", capability="c", adapter="fake"
+        ),
         AgentInvocation(
             invocation_id="child",
             run_id="r",

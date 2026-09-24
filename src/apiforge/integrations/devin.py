@@ -73,8 +73,7 @@ def _checks(task_kind: DevinTaskKind) -> tuple[DevinCheck, ...]:
             DevinCheck(
                 name="routing",
                 command=(
-                    "apiforge next-step --findings .apiforge/case/findings.json "
-                    "--phase discover"
+                    "apiforge next-step --findings .apiforge/case/findings.json --phase discover"
                 ),
                 purpose="route from persisted findings before selecting a specialist",
             ),
@@ -301,7 +300,9 @@ def probe_devin_cli(*, env: dict[str, str] | None = None) -> DevinCliProbe:
         installed=completed.returncode == 0,
         executable=executable,
         cli_version=version[0] if version else None,
-        error=None if completed.returncode == 0 else (completed.stderr.strip() or "version probe failed"),
+        error=None
+        if completed.returncode == 0
+        else (completed.stderr.strip() or "version probe failed"),
         evidence=EvidenceRecord(
             level="observed",
             source="devin --version",
@@ -338,7 +339,9 @@ def build_devin_declaration(root: Path = Path(".")) -> HostDeclaration:
             state="supported",
             prerequisites=("Devin Desktop installed",),
             limits=("installation and account state are not locally verified",),
-            evidence=EvidenceRecord(level="declared", source="official Devin Desktop documentation", refs=DEVIN_DOCS),
+            evidence=EvidenceRecord(
+                level="declared", source="official Devin Desktop documentation", refs=DEVIN_DOCS
+            ),
             evidence_level="declared",
         ),
         HostCapability(
@@ -346,7 +349,9 @@ def build_devin_declaration(root: Path = Path(".")) -> HostDeclaration:
             state="supported",
             prerequisites=("Devin account", "repository access", "explicit human review"),
             limits=("Cloud session execution is outside the offline API Forge core",),
-            evidence=EvidenceRecord(level="declared", source="official Devin CLI documentation", refs=DEVIN_DOCS),
+            evidence=EvidenceRecord(
+                level="declared", source="official Devin CLI documentation", refs=DEVIN_DOCS
+            ),
             evidence_level="declared",
         ),
         HostCapability(
@@ -365,9 +370,7 @@ def build_devin_declaration(root: Path = Path(".")) -> HostDeclaration:
             level="declared",
             source=str(Path(root) / ".devin"),
             refs=DEVIN_DOCS,
-            limitations=(
-                "official product capabilities are declarations until locally observed",
-            ),
+            limitations=("official product capabilities are declarations until locally observed",),
         ),
         evidence_level="declared",
     )

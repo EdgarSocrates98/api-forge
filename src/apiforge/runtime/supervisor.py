@@ -237,7 +237,9 @@ async def execute_run(
         control_step = control_steps[result.invocation.capability]
         if result.error is not None or result.response is None:
             errors.append(result.error or "invocation failed")
-            control.fail(control_run.run_id, control_step.step_id, result.error or "invocation failed")
+            control.fail(
+                control_run.run_id, control_step.step_id, result.error or "invocation failed"
+            )
             continue
         payload = _json_payload(result.response)
         guardrail_gaps = validate_agent_payload(payload)
@@ -417,9 +419,7 @@ async def resume_existing_run(
         control.start(run_id, step.step_id)
         invocations.append(
             AgentInvocation(
-                invocation_id=stable_id(
-                    "inv", {"run": run_id, "capability": capability.name}
-                ),
+                invocation_id=stable_id("inv", {"run": run_id, "capability": capability.name}),
                 run_id=run_id,
                 agent=capability.agent,
                 capability=capability.name,
@@ -500,7 +500,9 @@ async def resume_existing_run(
             )
         )
         new_artifacts.append(artifact)
-    artifact_ids = tuple(dict.fromkeys((*previous.artifact_ids, *(item.artifact_id for item in new_artifacts))))
+    artifact_ids = tuple(
+        dict.fromkeys((*previous.artifact_ids, *(item.artifact_id for item in new_artifacts)))
+    )
     final_status = "REVIEW" if errors or artifact_ids else "BLOCKED"
     resumed = previous.model_copy(
         update={

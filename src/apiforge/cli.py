@@ -3440,8 +3440,15 @@ def devin_payload(
         )
     except (ContractError, ValueError) as exc:
         if isinstance(exc, ContractError):
-            _fail(exc.code, exc.detail, field="Devin payload", unlock="correct the payload and rerun")
-        _fail("AF-DEVIN-PAYLOAD", str(exc), field="Devin payload", unlock="correct the payload and rerun")
+            _fail(
+                exc.code, exc.detail, field="Devin payload", unlock="correct the payload and rerun"
+            )
+        _fail(
+            "AF-DEVIN-PAYLOAD",
+            str(exc),
+            field="Devin payload",
+            unlock="correct the payload and rerun",
+        )
     _echo_json(payload, detail_level)
 
 

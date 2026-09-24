@@ -58,10 +58,18 @@ def negotiate(
     evidence = []
     for host in request.hosts:
         declaration = declaration_map.get(host)
-        capability = next(
-            (item for item in declaration.capabilities if item.capability == request.capability),
-            None,
-        ) if declaration else None
+        capability = (
+            next(
+                (
+                    item
+                    for item in declaration.capabilities
+                    if item.capability == request.capability
+                ),
+                None,
+            )
+            if declaration
+            else None
+        )
         if declaration is None:
             excluded.append(host)
             limitations.append(f"{host}: no declaration")
@@ -69,7 +77,10 @@ def negotiate(
         evidence.append(declaration.evidence)
         if capability is None or capability.state != "supported":
             excluded.append(host)
-            limitations.extend(f"{host}: {item}" for item in (capability.limits if capability else ("capability not declared",)))
+            limitations.extend(
+                f"{host}: {item}"
+                for item in (capability.limits if capability else ("capability not declared",))
+            )
             continue
         missing = sorted(set(request.required_prerequisites) - set(capability.prerequisites))
         if missing:
@@ -100,7 +111,9 @@ def load_declarations(root: Path) -> tuple[HostDeclaration, ...]:
                 HostDeclaration.model_validate(json.loads(path.read_text(encoding="utf-8")))
             )
         except (OSError, UnicodeDecodeError, json.JSONDecodeError, ValueError) as exc:
-            raise ContractError("AF-HOST-DECLARATION", f"invalid declaration {path}: {exc}") from exc
+            raise ContractError(
+                "AF-HOST-DECLARATION", f"invalid declaration {path}: {exc}"
+            ) from exc
     return tuple(declarations)
 
 

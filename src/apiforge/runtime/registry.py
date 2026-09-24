@@ -65,9 +65,7 @@ def load_profiles(path: Path | None = None) -> dict[str, AgentCapabilityProfile]
         if not isinstance(raw, dict):
             raise ContractError("AF-RUNTIME-PROFILES", f"profile {profile_id!r} is not a mapping")
         try:
-            profile = AgentCapabilityProfile.model_validate(
-                {"profile_id": str(profile_id), **raw}
-            )
+            profile = AgentCapabilityProfile.model_validate({"profile_id": str(profile_id), **raw})
         except (TypeError, ValueError) as exc:
             raise ContractError("AF-RUNTIME-PROFILES", f"profile {profile_id!r}: {exc}") from exc
         profiles[profile.profile_id] = profile
@@ -118,10 +116,13 @@ def select_eligible_capabilities(
         sorted(
             eligible,
             key=lambda item: (
-                -by_agent.get(item.agent, AgentScorecard(
-                    agent=item.agent,
-                    profile_id=item.name,
-                )).quality_score,
+                -by_agent.get(
+                    item.agent,
+                    AgentScorecard(
+                        agent=item.agent,
+                        profile_id=item.name,
+                    ),
+                ).quality_score,
                 item.name,
             ),
         )

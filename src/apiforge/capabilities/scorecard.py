@@ -20,16 +20,8 @@ def build_scorecard(
     gaps = tuple(
         sorted(
             {
-                *(
-                    item
-                    for result in results
-                    for item in result.missing_evidence
-                ),
-                *(
-                    item
-                    for result in results
-                    for item in result.failed_axes
-                ),
+                *(item for result in results for item in result.missing_evidence),
+                *(item for result in results for item in result.failed_axes),
             }
         )
     )
@@ -68,7 +60,9 @@ def load_scorecards(root: Path) -> tuple[AgentScorecard, ...]:
     records: list[AgentScorecard] = []
     for path in sorted(directory.glob("*.json")):
         try:
-            records.append(AgentScorecard.model_validate(json.loads(path.read_text(encoding="utf-8"))))
+            records.append(
+                AgentScorecard.model_validate(json.loads(path.read_text(encoding="utf-8")))
+            )
         except (OSError, UnicodeDecodeError, ValueError) as exc:
             raise ContractError("AF-SCORECARD-INVALID", f"{path}: {exc}") from exc
     return tuple(records)

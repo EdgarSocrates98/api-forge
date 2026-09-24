@@ -40,5 +40,12 @@ def can_promote(level: EvidenceLevel, target: EvidenceLevel) -> bool:
     not a replacement for the receipt itself.
     """
 
-    order = {"unknown": 0, "heuristic": 1, "inferred": 2, "declared": 3, "observed": 4, "verified": 5}
+    order = {
+        "unknown": 0,
+        "heuristic": 1,
+        "inferred": 2,
+        "declared": 3,
+        "observed": 4,
+        "verified": 5,
+    }
     return order[level] >= order[target]

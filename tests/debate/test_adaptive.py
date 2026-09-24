@@ -30,8 +30,7 @@ def test_adaptive_debate_is_bounded_and_replayable(tmp_path: Path) -> None:
 
 def test_adaptive_debate_refuses_submissions_over_budget(tmp_path: Path) -> None:
     participants = tuple(
-        ParticipantDeclaration(participant_id=name, host=name)
-        for name in ("codex", "claude")
+        ParticipantDeclaration(participant_id=name, host=name) for name in ("codex", "claude")
     )
     debate = open_adaptive_debate(
         tmp_path,

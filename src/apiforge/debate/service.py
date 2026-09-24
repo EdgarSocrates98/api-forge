@@ -122,8 +122,18 @@ def select_plan(
     """Choose a bounded participant set from declared adapters."""
     selected_policy = policy or AdaptivePolicy()
     normalized_risk = risk.lower()
-    desired = 2 if normalized_risk == "low" else 3 if normalized_risk in {"medium", "high"} else selected_policy.max_participants
-    selected = tuple(sorted(participants, key=lambda item: (item.host, item.participant_id))[: min(desired, selected_policy.max_participants)])
+    desired = (
+        2
+        if normalized_risk == "low"
+        else 3
+        if normalized_risk in {"medium", "high"}
+        else selected_policy.max_participants
+    )
+    selected = tuple(
+        sorted(participants, key=lambda item: (item.host, item.participant_id))[
+            : min(desired, selected_policy.max_participants)
+        ]
+    )
     if len(selected) < selected_policy.quorum_sides:
         raise DebateError(
             "AF-DEBATE-PARTICIPANTS",
@@ -227,7 +237,8 @@ def close(
             "referee": referee,
             "closed_at": now,
             "dissent": tuple(
-                submission for submission in debate.submissions
+                submission
+                for submission in debate.submissions
                 if submission.get("side") != decision
             ),
         }

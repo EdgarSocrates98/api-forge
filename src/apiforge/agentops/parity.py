@@ -23,9 +23,11 @@ def audit_host_parity(root: Path) -> dict[str, object]:
     for name, required in _HOST_LAYOUT.items():
         missing = [item for item in required if not (root / item).exists()]
         host_skills = root / required[-1] if required[-1].endswith("skills") else root / required[1]
-        host_skill_names = {
-            path.parent.name for path in host_skills.glob("*/SKILL.md")
-        } if host_skills.is_dir() else set()
+        host_skill_names = (
+            {path.parent.name for path in host_skills.glob("*/SKILL.md")}
+            if host_skills.is_dir()
+            else set()
+        )
         # A host may add native extensions (for example Devin-only skills).
         # Parity requires every shared canonical skill, not identical counts.
         skill_count = len(host_skill_names & skills)

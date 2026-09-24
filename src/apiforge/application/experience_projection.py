@@ -26,7 +26,9 @@ def _status(value: object) -> str:
     return _STATUS_ALIASES.get(normalized.lower(), normalized)
 
 
-def project_payload(task_id: str, payload: dict[str, Any], *, surface: str = "json") -> ExperienceSnapshot:
+def project_payload(
+    task_id: str, payload: dict[str, Any], *, surface: str = "json"
+) -> ExperienceSnapshot:
     """Normalize a legacy application payload without mutating it."""
     gaps_raw = payload.get("gaps", ())
     refs_raw = payload.get("evidence_refs", ())
@@ -70,4 +72,3 @@ def project_doctor(root: Path, task_id: str, *, surface: str = "json") -> Experi
 
 def project_review(root: Path, task_id: str, *, surface: str = "json") -> ExperienceSnapshot:
     return project_payload(task_id, runtime_experience.review(root, task_id), surface=surface)
-

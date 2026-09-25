@@ -1,5 +1,7 @@
 # Host parity
 
+[Português (Brasil)](HOST_PARITY.pt-BR.md) · [Portable distribution in English](guides/API_FORGE_PORTABLE_DISTRIBUTION.md) · [Distribuição portátil em português](guides/API_FORGE_PORTABLE_DISTRIBUTION.pt-BR.md)
+
 API Forge has one Python core and host-specific discovery mirrors. Run:
 
 ```text

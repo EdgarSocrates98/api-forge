@@ -1,5 +1,7 @@
 # Distribution-v1
 
+[Português (Brasil)](Distribution-v1.pt-BR.md) · [Portable distribution guide](../guides/API_FORGE_PORTABLE_DISTRIBUTION.md)
+
 API Forge is an installed Python package. The package, not a consumer
 repository mirror, owns the executable, contracts, agents, skills, knowledge
 packs, SDD templates and host adapter templates.

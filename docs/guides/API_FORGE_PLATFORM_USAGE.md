@@ -4,6 +4,10 @@ Este guia descreve o uso público da fundação de completude da API Forge. Ele
 é válido para CLI, MCP, bridges de IDE e projeções de UI porque essas surfaces
 compartilham `CapabilityRequest/v1` e `CapabilityResult/v1`.
 
+[English version](API_FORGE_PLATFORM_USAGE.en.md) · [Distribuição portátil em
+português](API_FORGE_PORTABLE_DISTRIBUTION.pt-BR.md) · [Portable distribution
+in English](API_FORGE_PORTABLE_DISTRIBUTION.md)
+
 ## 1. Princípio operacional
 
 API Forge é um control plane determinístico, offline-first e evidence-first.

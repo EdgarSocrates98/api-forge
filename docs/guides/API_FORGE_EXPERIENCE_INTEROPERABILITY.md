@@ -4,6 +4,10 @@ Este programa entrega uma superfície terminal unificada sobre os mesmos
 serviços de application usados pela CLI/JSON. A TUI é uma projeção: ela não
 acessa `RunStore`, `TaskStore`, bancos, hosts ou providers diretamente.
 
+[English version](API_FORGE_EXPERIENCE_INTEROPERABILITY.en.md) · [Distribuição
+portátil em português](API_FORGE_PORTABLE_DISTRIBUTION.pt-BR.md) · [Portable
+distribution in English](API_FORGE_PORTABLE_DISTRIBUTION.md)
+
 ## TUI
 
 Instalação opcional:

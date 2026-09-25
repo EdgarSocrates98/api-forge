@@ -1,5 +1,7 @@
 # WorkspaceManifest-v1
 
+[Português (Brasil)](WorkspaceManifest-v1.pt-BR.md) · [Portable distribution guide](../guides/API_FORGE_PORTABLE_DISTRIBUTION.md)
+
 `.apiforge/workspace.yaml` registers independent repositories under a virtual
 workspace. It does not change Git metadata or require a monorepo.
 

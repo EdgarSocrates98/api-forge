@@ -1,5 +1,7 @@
 # API Forge
 
+[Português (Brasil)](README.pt-BR.md) · [Portable distribution in English](docs/guides/API_FORGE_PORTABLE_DISTRIBUTION.md) · [Distribuição portátil em português](docs/guides/API_FORGE_PORTABLE_DISTRIBUTION.pt-BR.md)
+
 [![CI](https://github.com/EdgarSocrates98/api-forge/actions/workflows/ci.yml/badge.svg)](https://github.com/EdgarSocrates98/api-forge/actions/workflows/ci.yml)
 
 Deterministic, offline, local-first agentic API engineering. API Forge covers
@@ -35,6 +37,22 @@ apiforge status
 apiforge doctor
 apiforge context resolve --scope repo
 ```
+
+### Documentation languages and quickstart
+
+The portable/workspace feature has paired English and Brazilian Portuguese
+guides. Start with the step-by-step guide for your language:
+
+- [Portable distribution and workspace — English](docs/guides/API_FORGE_PORTABLE_DISTRIBUTION.md)
+- [Distribuição portátil e workspace — PT-BR](docs/guides/API_FORGE_PORTABLE_DISTRIBUTION.pt-BR.md)
+- [Platform usage — English](docs/guides/API_FORGE_PLATFORM_USAGE.en.md)
+- [Uso da plataforma — PT-BR](docs/guides/API_FORGE_PLATFORM_USAGE.md)
+- [Experience and interoperability — English](docs/guides/API_FORGE_EXPERIENCE_INTEROPERABILITY.en.md)
+- [Experiência e interoperabilidade — PT-BR](docs/guides/API_FORGE_EXPERIENCE_INTEROPERABILITY.md)
+- [Host parity — English](docs/HOST_PARITY.md)
+- [Paridade entre hosts — PT-BR](docs/HOST_PARITY.pt-BR.md)
+- [Evolution map — English](docs/API_FORGE_EVOLUTION_MAP.en.md)
+- [Mapa de evolução — PT-BR](docs/API_FORGE_EVOLUTION_MAP.md)
 
 It works offline and without a configured agent host. Claude, Codex, Devin,
 Copilot and MCP are optional adapters; unavailable capabilities remain explicit

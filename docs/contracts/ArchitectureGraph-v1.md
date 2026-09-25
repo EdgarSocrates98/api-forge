@@ -1,5 +1,7 @@
 # ArchitectureGraph-v1
 
+[Português (Brasil)](ArchitectureGraph-v1.pt-BR.md) · [ContextScope-v1](ContextScope-v1.md)
+
 The first-wave workspace graph is a deterministic local projection over
 workspace, repository, service, contract, dependency and runtime claims.
 

@@ -4,6 +4,10 @@ Este documento substitui a sequência informal de “próximo passo”. Ele é o
 produto, arquitetura e engenharia para transformar o API Forge em uma plataforma
 agentica autônoma, verificável e segura para construir, evoluir e operar APIs.
 
+[English companion](API_FORGE_EVOLUTION_MAP.en.md) · [Guia portátil em
+português](guides/API_FORGE_PORTABLE_DISTRIBUTION.pt-BR.md) · [Portable guide
+in English](guides/API_FORGE_PORTABLE_DISTRIBUTION.md)
+
 ## Estado atual
 
 O núcleo já possui:

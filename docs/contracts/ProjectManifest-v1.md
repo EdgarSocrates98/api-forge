@@ -1,5 +1,7 @@
 # ProjectManifest-v1
 
+[Português (Brasil)](ProjectManifest-v1.pt-BR.md) · [Portable distribution guide](../guides/API_FORGE_PORTABLE_DISTRIBUTION.md)
+
 The optional `.apiforge/project.yaml` file connects one repository to API
 Forge. It is not a copy of the Forge and must not contain knowledge, prompts,
 tokens, credentials or provider payloads.

@@ -1,5 +1,7 @@
 # ContextScope-v1
 
+[Português (Brasil)](ContextScope-v1.pt-BR.md) · [Portable distribution guide](../guides/API_FORGE_PORTABLE_DISTRIBUTION.md)
+
 Context resolution is internal to API Forge; a separate `apiforge here`
 command is intentionally deferred. The closed scopes are:
 

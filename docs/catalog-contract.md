@@ -561,6 +561,7 @@ The local runtime is provider-neutral and executes only against a sealed TaskSpe
 | `AF-RUNTIME-SCHEMA` | adapter output is not a structured object |
 | `AF-RUNTIME-HASH` | runtime artifact hash could not be computed |
 | `AF-RUNTIME-NOT-FOUND` | requested runtime run is not persisted |
+| `AF-RUNTIME-ROUTING` | persisted routing decision is malformed; field=runtime.routing; unlock=regenerate the trace from the versioned routing contracts |
 | `AF-RUNTIME-PROFILES` | agent profile registry is missing or malformed; field=runtime.profiles_file; unlock=provide the versioned local profile registry |
 | `AF-RUNTIME-COMPATIBILITY` | legacy runtime payload lacks a proven compatible state; field=runtime.run; unlock=record a versioned migration and independent proof |
 | `AF-RUNTIME-DEPENDENCY-FAILED` | invocation dependency failed; field=invocation.dependencies; unlock=resolve the prerequisite failure and resume |

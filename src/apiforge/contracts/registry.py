@@ -81,6 +81,14 @@ from apiforge.contracts.platform import (
     VerticalCoverage,
     VerticalRuntimeReceipt,
 )
+from apiforge.contracts.routing import (
+    CandidateAssessment,
+    ObservedSignal,
+    RoutingDecision,
+    RoutingPolicy,
+    RoutingRequest,
+    ScorecardFeedback,
+)
 from apiforge.contracts.stubs import (
     AgenticQualityAssessment,
     AnalyticalAccessIR,
@@ -185,6 +193,12 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "CapabilityResult/v1": CapabilityResult,
     "VerticalCoverage/v1": VerticalCoverage,
     "VerticalRuntimeReceipt/v1": VerticalRuntimeReceipt,
+    "ObservedSignal/v1": ObservedSignal,
+    "RoutingPolicy/v1": RoutingPolicy,
+    "RoutingRequest/v1": RoutingRequest,
+    "CandidateAssessment/v1": CandidateAssessment,
+    "RoutingDecision/v1": RoutingDecision,
+    "ScorecardFeedback/v1": ScorecardFeedback,
     "PlatformRuntimeReceipt/v1": PlatformRuntimeReceipt,
     "ExternalReadRequest/v1": ExternalReadRequest,
     "ExternalReadReceipt/v1": ExternalReadReceipt,

@@ -9,6 +9,7 @@ from typing import Any
 
 from apiforge.contracts.agentic import AgentArtifact, AgenticRun, TrajectoryEvent
 from apiforge.contracts.base import ContractError
+from apiforge.contracts.routing import RoutingDecision
 from apiforge.taskspec import store as task_store
 
 
@@ -45,6 +46,18 @@ class RunStore:
             f"artifacts/{artifact.artifact_id.replace(':', '-')}.json",
             artifact.model_dump(mode="json"),
         )
+
+    def save_routing(self, decision: RoutingDecision) -> Path:
+        return self._write("routing.json", decision.model_dump(mode="json"))
+
+    def load_routing(self) -> RoutingDecision | None:
+        path = self.directory / "routing.json"
+        if not path.is_file():
+            return None
+        try:
+            return RoutingDecision.model_validate(json.loads(path.read_text(encoding="utf-8")))
+        except (OSError, UnicodeDecodeError, ValueError) as exc:
+            raise ContractError("AF-RUNTIME-ROUTING", f"{path}: {exc}") from exc
 
     def load_run(self) -> AgenticRun | None:
         path = self.directory / "run.json"

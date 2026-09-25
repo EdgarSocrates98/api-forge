@@ -48,6 +48,14 @@ from apiforge.contracts.platform import (
     VerticalCoverage,
     VerticalRuntimeReceipt,
 )
+from apiforge.contracts.routing import (
+    CandidateAssessment,
+    ObservedSignal,
+    RoutingDecision,
+    RoutingPolicy,
+    RoutingRequest,
+    ScorecardFeedback,
+)
 from apiforge.contracts.sandbox import SandboxCommand, SandboxCommandResult
 
 __all__ = [
@@ -57,6 +65,7 @@ __all__ = [
     "AdapterStatus",
     "AdaptivePlan",
     "AdaptivePolicy",
+    "CandidateAssessment",
     "CapabilityRecord",
     "CapabilityRequest",
     "CapabilityResult",
@@ -88,12 +97,17 @@ __all__ = [
     "HostCapabilityRequest",
     "HostDeclaration",
     "HostResolution",
+    "ObservedSignal",
     "PackFreshness",
     "ParticipantDeclaration",
     "PlatformRuntimeReceipt",
+    "RoutingDecision",
+    "RoutingPolicy",
+    "RoutingRequest",
     "RuntimeReceipt",
     "SandboxCommand",
     "SandboxCommandResult",
+    "ScorecardFeedback",
     "SourceObservation",
     "VerticalCoverage",
     "VerticalRuntimeReceipt",

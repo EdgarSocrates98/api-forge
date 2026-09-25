@@ -30,8 +30,13 @@ from apiforge.runtime.policy import (
     requires_human_gate,
     should_open_room,
 )
-from apiforge.runtime.registry import load_capabilities, load_profiles, select_eligible_capabilities
+from apiforge.runtime.registry import load_capabilities, load_profiles
 from apiforge.runtime.review import build_runtime_review, review_task_spec
+from apiforge.runtime.routing import (
+    build_routing_request,
+    load_routing_policy,
+    route_capabilities,
+)
 from apiforge.runtime.scheduler import run_bounded
 from apiforge.runtime.store import RunStore, content_hash
 from apiforge.taskspec import store as task_store
@@ -146,19 +151,52 @@ async def execute_run(
             "run_dir": str(storage.directory),
         }
 
-    capabilities = select_eligible_capabilities(
-        load_capabilities(),
+    capabilities_catalog = load_capabilities()
+    scorecards = load_scorecards(root)
+    routing_policy = load_routing_policy()
+    routing = route_capabilities(
+        capabilities_catalog,
         load_profiles(),
-        risk=spec.risk.value,
-        available_evidence=("task_spec",),
-        scorecards=load_scorecards(root),
+        build_routing_request(
+            spec,
+            policy_id=routing_policy.policy_id,
+            available_evidence=("task_spec",),
+        ),
+        policy=routing_policy,
+        scorecards=scorecards,
     )
+    storage.save_routing(routing)
+    storage.event(
+        TrajectoryEvent(
+            event_id=stable_id(
+                "event", {"run": run_id, "event": "routing", "decision": routing.decision_id}
+            ),
+            run_id=run_id,
+            event="routing_decision",
+            actor="api-agentic-orchestrator",
+            subject=routing.decision_id,
+            payload={
+                "selected": routing.selected,
+                "fallback_order": routing.fallback_order,
+                "unresolved": routing.unresolved,
+            },
+            created_at=timestamp,
+        )
+    )
+    capabilities = tuple(capabilities_catalog[name] for name in routing.fallback_order)
     if not capabilities:
         run = run.model_copy(
             update={
                 "state": AgenticState.BLOCKED,
                 "final_status": "BLOCKED",
-                "gaps": ("AF-CAPABILITY-ELIGIBILITY: no eligible capability",),
+                "decision_ids": (routing.decision_id,),
+                "gaps": routing.unresolved
+                or (
+                    (
+                        "AF-CAPABILITY-ELIGIBILITY: field=capability; "
+                        "unlock=provide the missing evidence or choose a supported capability"
+                    ),
+                ),
                 "finished_at": timestamp,
             }
         )
@@ -200,6 +238,7 @@ async def execute_run(
             "state": AgenticState.RUNNING,
             "invocation_ids": invocation_ids,
             "control_run_id": control_run.run_id,
+            "decision_ids": (routing.decision_id,),
         }
     )
     storage.save_run(run)
@@ -401,17 +440,31 @@ async def resume_existing_run(
         }
     capabilities = load_capabilities()
     profiles = load_profiles()
-    routed = select_eligible_capabilities(
+    scorecards = load_scorecards(root)
+    routing_policy = load_routing_policy()
+    routing = route_capabilities(
         capabilities,
         profiles,
-        risk=spec.risk.value,
-        available_evidence=("task_spec",),
-        scorecards=load_scorecards(root),
+        build_routing_request(
+            spec,
+            policy_id=routing_policy.policy_id,
+            available_evidence=("task_spec",),
+        ),
+        policy=routing_policy,
+        scorecards=scorecards,
     )
-    by_name = {item.name: item for item in routed}
-    selected = tuple(by_name[step.name] for step in ready if step.name in by_name)
+    storage.save_routing(routing)
+    by_name = {item.name: item for item in capabilities.values()}
+    selected = tuple(
+        by_name[step.name]
+        for step in ready
+        if step.name in by_name and step.name in routing.fallback_order
+    )
     if not selected:
-        raise ContractError("AF-CAPABILITY-ELIGIBILITY", "no resumable capability is eligible")
+        raise ContractError(
+            "AF-CAPABILITY-ELIGIBILITY",
+            "field=capability; unlock=provide a resumable eligible capability",
+        )
     step_map = {step.name: step for step in ready}
     invocations: list[AgentInvocation] = []
     for capability in selected:

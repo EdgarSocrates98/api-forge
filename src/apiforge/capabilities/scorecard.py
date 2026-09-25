@@ -8,12 +8,16 @@ from typing import Literal, cast
 
 from apiforge.contracts.agentic import AgentCapabilityProfile, AgentScorecard
 from apiforge.contracts.base import ContractError
+from apiforge.contracts.routing import ObservedSignal
 from apiforge.evals.suite import EvalResult
 
 
 def build_scorecard(
     profile: AgentCapabilityProfile,
     results: tuple[EvalResult, ...],
+    *,
+    observations: tuple[ObservedSignal, ...] = (),
+    allow_quality_promotion: bool = True,
 ) -> AgentScorecard:
     scores = tuple(result.score for result in results)
     passed = sum(result.verdict == "PASS" for result in results)
@@ -29,12 +33,30 @@ def build_scorecard(
         Literal["unknown", "PASS", "REVIEW", "BLOCKED"],
         results[-1].verdict if results else "unknown",
     )
+    costs = tuple(
+        item.value
+        for item in observations
+        if item.name == "cost" and item.status == "observed" and item.value is not None
+    )
+    durations = tuple(
+        item.value
+        for item in observations
+        if item.name == "duration" and item.status == "observed" and item.value is not None
+    )
     return AgentScorecard(
         agent=profile.agent,
         profile_id=profile.profile_id,
         evaluation_count=len(results),
         passed_count=passed,
-        quality_score=round(sum(scores) / len(scores), 3) if scores else 0.0,
+        quality_score=round(sum(scores) / len(scores), 3)
+        if scores and allow_quality_promotion
+        else 0.0,
+        quality_promoted=bool(results) and allow_quality_promotion,
+        observed_cost=round(sum(costs) / len(costs), 3) if costs else None,
+        observed_duration_ms=round(sum(durations) / len(durations), 3) if durations else None,
+        observation_refs=tuple(
+            sorted({ref for item in observations for ref in item.evidence_refs})
+        ),
         last_verdict=last,
         evidence=tuple(sorted({item for result in results for item in result.evidence})),
         gaps=gaps,

@@ -14,6 +14,7 @@ def test_routing_contracts_are_registered() -> None:
         "RoutingDecision/v1",
         "ScorecardRoutingAssessment/v1",
         "ScorecardRoutingPolicy/v1",
+        "ScorecardShadowEvaluation/v1",
         "ScorecardFeedback/v1",
     } <= set(CONTRACTS)
 

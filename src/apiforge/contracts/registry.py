@@ -106,6 +106,7 @@ from apiforge.contracts.scorecard_routing import (
     ScorecardRoutingAssessment,
     ScorecardRoutingPolicy,
 )
+from apiforge.contracts.scorecard_shadow import ScorecardShadowEvaluation
 from apiforge.contracts.stubs import (
     AgenticQualityAssessment,
     AnalyticalAccessIR,
@@ -221,6 +222,7 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "ScorecardRoutingPolicy/v1": ScorecardRoutingPolicy,
     "ScorecardCandidateAssessment/v1": ScorecardCandidateAssessment,
     "ScorecardRoutingAssessment/v1": ScorecardRoutingAssessment,
+    "ScorecardShadowEvaluation/v1": ScorecardShadowEvaluation,
     "ExpertisePack/v1": ExpertisePack,
     "ScorecardFeedback/v1": ScorecardFeedback,
     "EvidenceRef/v1": EvidenceRef,

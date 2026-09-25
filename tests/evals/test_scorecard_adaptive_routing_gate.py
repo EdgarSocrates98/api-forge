@@ -7,7 +7,7 @@ def _observations() -> dict[str, dict[str, object]]:
     return {
         "scorecard-adaptive-golden": {
             "observed": "PASS",
-            "evidence": ["scorecard-assessment", "routing-plan"],
+            "evidence": ["scorecard-assessment", "routing-plan", "shadow-evaluation"],
             "axes": {"champion-selection": True},
         },
         "scorecard-adaptive-holdout": {

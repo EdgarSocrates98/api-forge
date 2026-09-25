@@ -92,6 +92,7 @@ from apiforge.contracts.scorecard_routing import (
     ScorecardRoutingAssessment,
     ScorecardRoutingPolicy,
 )
+from apiforge.contracts.scorecard_shadow import ScorecardShadowEvaluation
 from apiforge.contracts.workspace import (
     ProjectManifest,
     RepositoryRef,
@@ -180,6 +181,7 @@ __all__ = [
     "ScorecardLane",
     "ScorecardRoutingAssessment",
     "ScorecardRoutingPolicy",
+    "ScorecardShadowEvaluation",
     "SourceObservation",
     "VerticalCoverage",
     "VerticalRuntimeReceipt",

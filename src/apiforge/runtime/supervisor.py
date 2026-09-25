@@ -243,6 +243,8 @@ async def execute_run(
         scorecards=scorecards,
     )
     storage.save_routing(routing)
+    if routing.shadow_evaluation is not None:
+        storage.save_shadow_evaluation(routing.shadow_evaluation)
     routing_plan = build_routing_plan(routing, capabilities_catalog, policy=routing_policy)
     storage.save_routing_plan(routing_plan)
     storage.event(
@@ -263,6 +265,11 @@ async def execute_run(
                 "selected": routing.selected,
                 "fallback_order": routing.fallback_order,
                 "routing_plan": routing_plan.model_dump(mode="json"),
+                "shadow_evaluation": (
+                    routing.shadow_evaluation.model_dump(mode="json")
+                    if routing.shadow_evaluation is not None
+                    else None
+                ),
                 "evidence": routing.evidence,
                 "unresolved": routing.unresolved,
             },
@@ -690,6 +697,8 @@ async def resume_existing_run(
         scorecards=scorecards,
     )
     storage.save_routing(routing)
+    if routing.shadow_evaluation is not None:
+        storage.save_shadow_evaluation(routing.shadow_evaluation)
     evolution_gate = _persist_evolution_gate(storage, routing, run_id, timestamp)
     if not is_active(evolution_gate):
         return _blocked_by_evolution_gate(

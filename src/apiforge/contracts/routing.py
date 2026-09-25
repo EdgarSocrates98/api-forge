@@ -18,6 +18,7 @@ from apiforge.contracts.scorecard_routing import (
     ScorecardRoutingPolicy,
     default_scorecard_routing_policy,
 )
+from apiforge.contracts.scorecard_shadow import ScorecardShadowEvaluation
 
 RoutingSignalName = Literal["cost", "duration", "quality", "security"]
 SignalStatus = Literal["observed", "unknown", "unresolved"]
@@ -120,6 +121,7 @@ class RoutingDecision(VersionedContract):
     fallback_order: tuple[str, ...] = ()
     risk_complexity: RiskComplexityAssessment | None = None
     scorecard_routing: ScorecardRoutingAssessment | None = None
+    shadow_evaluation: ScorecardShadowEvaluation | None = None
     evidence: tuple[str, ...] = ()
     unresolved: tuple[str, ...] = ()
 

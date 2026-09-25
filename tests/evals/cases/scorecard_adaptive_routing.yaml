@@ -4,7 +4,7 @@ cases:
     domain: routing
     input: fixtures/agentic_runtime/scorecard_adaptive_cases.yaml#scorecard-fresh-champion
     expected: PASS
-    required_evidence: [scorecard-assessment, routing-plan]
+    required_evidence: [scorecard-assessment, routing-plan, shadow-evaluation]
     mutation: none
     quality_axes: [champion-selection]
     kind: golden

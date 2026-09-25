@@ -41,3 +41,7 @@ def test_shadow_policy_stops_before_capability_invocation(tmp_path: Path, monkey
     assert result["status"] == "REVIEW"
     assert result["artifacts"] == []
     assert "evolution" in result
+    run_dir = Path(str(result["run_dir"]))
+    shadow = yaml.safe_load((run_dir / "shadow-evaluation.json").read_text(encoding="utf-8"))
+    assert shadow["executed"] is False
+    assert shadow["limitations"] == ["offline-only", "no-capability-invocation"]

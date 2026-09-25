@@ -22,6 +22,7 @@ from apiforge.core.ids import stable_id
 from apiforge.runtime.registry import Capability, select_capabilities
 from apiforge.runtime.risk_complexity import assess_risk_complexity
 from apiforge.runtime.scorecard_routing import assess_scorecard_routing
+from apiforge.runtime.scorecard_shadow import evaluate_scorecard_shadow
 
 
 def _routing_path() -> Path:
@@ -384,6 +385,14 @@ def route_capabilities(
         if name in ranked_by_name
     )
     role_names = set(_role_capabilities(capabilities, assessment.required_roles))
+    baseline_order = tuple(
+        item.capability
+        for group in (
+            tuple(item for item in ranked_candidates if item.capability not in role_names),
+            tuple(item for item in ranked_candidates if item.capability in role_names),
+        )
+        for item in group
+    )
     ranked = tuple(
         item
         for group in (
@@ -391,6 +400,15 @@ def route_capabilities(
             tuple(item for item in adaptive_candidates if item.capability in role_names),
         )
         for item in group
+    )
+    ordered = tuple(item.capability for item in ranked)
+    shadow_evaluation = evaluate_scorecard_shadow(
+        assessment=scorecard_routing,
+        baseline_policy_version=selected_policy.policy_version,
+        baseline_order=baseline_order,
+        adaptive_order=ordered,
+        baseline_selected=baseline_order[0] if baseline_order else None,
+        adaptive_selected=ordered[0] if ordered else None,
     )
     unresolved = [
         f"{item.capability}:{signal.name}:unresolved"
@@ -417,10 +435,10 @@ def route_capabilities(
         "policy": selected_policy.model_dump(mode="json"),
         "assessment": assessment.model_dump(mode="json"),
         "scorecard_routing": scorecard_routing.model_dump(mode="json"),
+        "shadow_evaluation": shadow_evaluation.model_dump(mode="json"),
         "candidates": [item.model_dump(mode="json") for item in candidate_trace],
     }
     decision_id = stable_id("routing", decision_payload)
-    ordered = tuple(item.capability for item in ranked)
     return RoutingDecision(
         decision_id=decision_id,
         task_id=request.task_id,
@@ -431,6 +449,7 @@ def route_capabilities(
         fallback_order=ordered,
         risk_complexity=assessment,
         scorecard_routing=scorecard_routing,
+        shadow_evaluation=shadow_evaluation,
         evidence=tuple(sorted({*request.available_evidence, *scorecard_routing.evidence})),
         unresolved=tuple(sorted(set(unresolved))),
     )

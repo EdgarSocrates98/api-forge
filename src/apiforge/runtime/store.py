@@ -11,6 +11,7 @@ from apiforge.contracts.agentic import AgentArtifact, AgenticRun, TrajectoryEven
 from apiforge.contracts.base import ContractError
 from apiforge.contracts.routing import RoutingDecision, RoutingPlan
 from apiforge.contracts.routing_evolution import PromotionGate
+from apiforge.contracts.scorecard_shadow import ScorecardShadowEvaluation
 from apiforge.taskspec import store as task_store
 
 
@@ -56,6 +57,9 @@ class RunStore:
 
     def save_evolution(self, gate: PromotionGate) -> Path:
         return self._write("evolution.json", gate.model_dump(mode="json"))
+
+    def save_shadow_evaluation(self, evaluation: ScorecardShadowEvaluation) -> Path:
+        return self._write("shadow-evaluation.json", evaluation.model_dump(mode="json"))
 
     def load_evolution(self) -> PromotionGate | None:
         path = self.directory / "evolution.json"

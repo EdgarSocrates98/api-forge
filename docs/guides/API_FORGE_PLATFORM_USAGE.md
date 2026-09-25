@@ -317,6 +317,11 @@ promovem qualidade. Um expertise pack ausente recusa o candidato com
 declarativos: famílias podem comparar múltiplas implementações, sem download,
 auto-update, symlink ou sobrescrita automática de arquivos do host.
 
+As referências canônicas voltadas à máquina são [`RoutingPlan/v1`](../contracts/RoutingPlan-v1.md)
+e [`ExpertisePack/v1`](../contracts/ExpertisePack-v1.md). Elas descrevem o
+plano persistido e os metadados de conhecimento local sem autorizar chamadas
+ao provider ou mutação de arquivos do host.
+
 ## 8. Verificação antes de commit/release
 
 ```bash

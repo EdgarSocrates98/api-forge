@@ -174,6 +174,11 @@ promote quality. A missing expertise pack refuses a candidate with
 declarative: families can compare multiple implementations without download,
 auto-update, symlink or automatic host-file overwrite.
 
+The canonical machine-readable references are [`RoutingPlan/v1`](../contracts/RoutingPlan-v1.md)
+and [`ExpertisePack/v1`](../contracts/ExpertisePack-v1.md). They describe the
+persisted plan and local knowledge metadata without authorizing provider calls
+or host-file mutation.
+
 ## 8. Capabilities and external evidence
 
 ```bash

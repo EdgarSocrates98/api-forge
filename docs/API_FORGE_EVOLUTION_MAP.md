@@ -29,6 +29,56 @@ O estado atual ainda é predominantemente local, offline e com callbacks/adapter
 fake ou host-owned. Isso é intencional: a segurança e a reprodutibilidade vêm
 antes da ativação de rede ou mutação externa.
 
+## Programa I — Distribution, Workspace e Host Activation
+
+O próximo programa transforma o API Forge em uma plataforma instalada e portátil:
+
+- o core, agents, skills, conhecimento, contratos, SDD, graph, evidência e
+  verificação pertencem à instalação do API Forge, não ao repositório consumidor;
+- `init`, `inspect`, `status`, `doctor` e `context` resolvem projeto, repositório
+  e workspace sem depender do host agentic;
+- a instalação aceita modo user-local, virtual environment, prefixo escolhido
+  pelo usuário, volume, container ou outro caminho permitido, sem exigir
+  privilégios administrativos;
+- a operação local permanece disponível com rede bloqueada, host ausente,
+  capability opcional indisponível ou provider externo não configurado;
+- `.apiforge/project.yaml` e `workspace.yaml` são manifests mínimos para
+  repositórios independentes, sem exigir monorepo;
+- o workspace produz IRs e architecture graph com scopes repo, workspace e
+  target, sempre separando fatos observados, declarações, inferências bounded,
+  freshness, hashes e `unresolved`;
+- MCP local via stdio, adapters de host e mirrors gerados são superfícies
+  opcionais e explícitas; nenhum host é autoridade do core;
+- a documentação deve acompanhar todos os contratos, comandos, modos de
+  instalação, limites de segurança, migração, troubleshooting, hosts, MCP,
+  manifests, graph, contexto, roadmap e exemplos.
+
+O contrato exploratório está em
+`.claude/sdd/features/BRAINSTORM_API_FORGE_PORTABLE_DISTRIBUTION_WORKSPACE.md`.
+A fase de definição deve converter essa visão em contratos versionados, ondas
+verticais, critérios de verificação e um plano de documentação completa antes
+do build.
+
+### Roadmap pós-ship explicitamente adiado
+
+Os itens abaixo continuam pertencendo ao programa, mas só entram no próximo
+brainstorm após o ship e o commit da primeira entrega portátil:
+
+- `ask`, `improve`, `migrate` e `fix` como orquestração autônoma de alto nível;
+- inferência completa de relações entre todos os tipos de repositório;
+- `apiforge here` como comando separado, além da resolução interna de contexto;
+- auto-update e atualização remota de Knowledge Packs;
+- symlink como modo de instalação;
+- sincronização automática que sobrescreva arquivos de host;
+- precedência completa até o nível de task;
+- debate multiagente distribuído pelo workspace;
+- promessa de paridade funcional total entre hosts.
+
+Cada item deve retornar ao ciclo `discover → intent → contract → architecture →
+plan → build → verify → secure → benchmark → ship`, com evidência própria,
+limitações explícitas e sem ser tratado como consequência automática do
+primeiro ship.
+
 ## Lacunas principais
 
 ### 1. Runtime agentico e governança

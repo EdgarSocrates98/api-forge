@@ -10,7 +10,7 @@
 | **Date** | 2026-09-24 |
 | **Author** | design-agent |
 | **DEFINE** | [DEFINE_API_FORGE_PORTABLE_DISTRIBUTION_WORKSPACE.md](./DEFINE_API_FORGE_PORTABLE_DISTRIBUTION_WORKSPACE.md) |
-| **Status** | ✅ Complete (Built) |
+| **Status** | ✅ Shipped |
 
 The design confidence is **strong** for the selected architecture: the codebase already has versioned immutable contracts, canonical CLI/MCP projections, plan-only host activation, read-only evidence boundaries, context funneling and local test fixtures. The novel distribution/workspace combination is bounded by explicit contracts and must be validated with temporary filesystem fixtures before promotion.
 
@@ -780,9 +780,10 @@ belong to the host-owned adapter boundary.
 |---------|------|--------|---------|
 | 1.0 | 2026-09-24 | design-agent | Initial architecture and technical specification from validated DEFINE |
 | 1.1 | 2026-09-24 | build-agent | Portable distribution, workspace/context services, host asset provenance, CLI/MCP surfaces, contracts, tests and documentation built and verified |
+| 1.2 | 2026-09-24 | ship-agent | Shipped and archived with verified build evidence |
 
 ---
 
 ## Next Step
 
-**Ready for:** `/ship .claude/sdd/features/DEFINE_API_FORGE_PORTABLE_DISTRIBUTION_WORKSPACE.md`
+**Archived:** `.claude/sdd/archive/API_FORGE_PORTABLE_DISTRIBUTION_WORKSPACE/`

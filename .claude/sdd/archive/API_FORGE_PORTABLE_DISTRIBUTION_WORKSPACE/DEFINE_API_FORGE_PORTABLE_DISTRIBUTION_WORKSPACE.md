@@ -9,7 +9,7 @@
 | **Feature** | API_FORGE_PORTABLE_DISTRIBUTION_WORKSPACE |
 | **Date** | 2026-09-24 |
 | **Author** | define-agent |
-| **Status** | ✅ Complete (Built) |
+| **Status** | ✅ Shipped |
 | **Clarity Score** | 15/15 |
 
 ---
@@ -202,9 +202,10 @@ The following are Design-phase questions, not blockers for Define:
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0 | 2026-09-24 | define-agent | Initial requirements extracted from validated BRAINSTORM |
+| 1.1 | 2026-09-24 | ship-agent | Shipped and archived with verified build evidence |
 
 ---
 
 ## Next Step
 
-**Ready for:** `/ship .claude/sdd/features/DEFINE_API_FORGE_PORTABLE_DISTRIBUTION_WORKSPACE.md`
+**Archived:** `.claude/sdd/archive/API_FORGE_PORTABLE_DISTRIBUTION_WORKSPACE/`

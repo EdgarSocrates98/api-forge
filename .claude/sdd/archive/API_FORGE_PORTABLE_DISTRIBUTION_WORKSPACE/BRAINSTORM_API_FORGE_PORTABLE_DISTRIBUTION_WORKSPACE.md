@@ -9,7 +9,7 @@
 | **Feature** | API_FORGE_PORTABLE_DISTRIBUTION_WORKSPACE |
 | **Date** | 2026-09-24 |
 | **Author** | brainstorm-agent |
-| **Status** | ✅ Complete (Defined) |
+| **Status** | ✅ Shipped |
 
 ---
 
@@ -264,6 +264,11 @@ API Forge precisa deixar de depender de cópias de conhecimento e mirrors dentro
 
 ---
 
+## Ship Closure
+
+The feature was implemented, verified and archived on 2026-09-24. The deferred
+items listed in the roadmap remain available for a new SDD cycle.
+
 ## Next Step
 
-**Ready for:** `/define .claude/sdd/features/BRAINSTORM_API_FORGE_PORTABLE_DISTRIBUTION_WORKSPACE.md`
+**Archived:** begin the next cycle with `/brainstorm` or `/define` for a new feature.

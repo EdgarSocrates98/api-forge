@@ -11,7 +11,7 @@
 | **Author** | build-agent |
 | **DEFINE** | [DEFINE_API_FORGE_PORTABLE_DISTRIBUTION_WORKSPACE.md](../features/DEFINE_API_FORGE_PORTABLE_DISTRIBUTION_WORKSPACE.md) |
 | **DESIGN** | [DESIGN_API_FORGE_PORTABLE_DISTRIBUTION_WORKSPACE.md](../features/DESIGN_API_FORGE_PORTABLE_DISTRIBUTION_WORKSPACE.md) |
-| **Status** | Complete |
+| **Status** | ✅ Shipped |
 
 ---
 
@@ -225,7 +225,7 @@ workspace debate; and a promise of total host parity.
 
 ## Final Status
 
-### Overall: ✅ COMPLETE
+### Overall: ✅ SHIPPED
 
 **Completion Checklist:**
 
@@ -234,11 +234,11 @@ workspace debate; and a promise of total host parity.
 - [x] Full test suite passes
 - [x] No blocking issues remain
 - [x] Acceptance tests verified with explicit partial/unresolved cases
-- [x] DEFINE and DESIGN statuses updated to `✅ Complete (Built)`
-- [x] Ready for `/ship`
+- [x] DEFINE, DESIGN and BUILD_REPORT statuses updated to `✅ Shipped`
+- [x] Archive created and working artifacts removed
 
 ---
 
 ## Next Step
 
-`/ship .claude/sdd/features/DEFINE_API_FORGE_PORTABLE_DISTRIBUTION_WORKSPACE.md`
+Feature archived at `.claude/sdd/archive/API_FORGE_PORTABLE_DISTRIBUTION_WORKSPACE/`.

@@ -86,6 +86,12 @@ from apiforge.contracts.routing_evolution import (
     RoutingEvolution,
 )
 from apiforge.contracts.sandbox import SandboxCommand, SandboxCommandResult
+from apiforge.contracts.scorecard_routing import (
+    ScorecardCandidateAssessment,
+    ScorecardLane,
+    ScorecardRoutingAssessment,
+    ScorecardRoutingPolicy,
+)
 from apiforge.contracts.workspace import (
     ProjectManifest,
     RepositoryRef,
@@ -169,7 +175,11 @@ __all__ = [
     "RuntimeReceipt",
     "SandboxCommand",
     "SandboxCommandResult",
+    "ScorecardCandidateAssessment",
     "ScorecardFeedback",
+    "ScorecardLane",
+    "ScorecardRoutingAssessment",
+    "ScorecardRoutingPolicy",
     "SourceObservation",
     "VerticalCoverage",
     "VerticalRuntimeReceipt",

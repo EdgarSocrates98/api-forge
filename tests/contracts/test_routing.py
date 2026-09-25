@@ -12,6 +12,8 @@ def test_routing_contracts_are_registered() -> None:
         "RoutingRequest/v1",
         "CandidateAssessment/v1",
         "RoutingDecision/v1",
+        "ScorecardRoutingAssessment/v1",
+        "ScorecardRoutingPolicy/v1",
         "ScorecardFeedback/v1",
     } <= set(CONTRACTS)
 
@@ -28,6 +30,13 @@ def test_routing_policy_rejects_duplicate_objectives() -> None:
             policy_version="routing/v1",
             objective_order=("efficiency", "efficiency"),
         )
+
+
+def test_routing_policy_defaults_to_bounded_scorecard_adaptation() -> None:
+    policy = RoutingPolicy(policy_id="routing/v1", policy_version="routing/v1")
+
+    assert policy.scorecard_adaptation.policy_version == "scorecard-routing/v1"
+    assert policy.scorecard_adaptation.challenger_slots == 1
 
 
 def test_routing_request_preserves_declared_evidence() -> None:

@@ -29,6 +29,13 @@ runtime:
     scorecard_update: eval_required
     execution_mode: parallel_review
     max_fallbacks: 1
+    scorecard_adaptation:
+      policy_version: scorecard-routing/v1
+      min_evaluations: 1
+      min_quality_score: 0.0
+      challenger_slots: 1
+      require_quality_promoted: true
+      stale_behavior: unresolved
     risk_complexity:
       policy_version: risk-complexity/v1
       unknown_behavior: unresolved

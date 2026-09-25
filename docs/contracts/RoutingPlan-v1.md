@@ -19,6 +19,8 @@ legacy `routing.json` decision and `fallback_order` fields.
 | `complexity` / `verification_depth` | Policy effects selected by the assessment |
 | `required_roles` | Review roles requested by the assessment |
 | `gate_state` | `open`, `review` or `blocked` policy state |
+| `challenger_order` | Bounded, read-only scorecard challenge metadata; not an implicit execution role |
+| `challenger_slots` | Policy bound used to derive the challenge metadata |
 | `evidence` / `unresolved` | Provenance and gaps retained from routing |
 
 Roles cannot contain duplicate capabilities. Fallbacks cannot exceed the

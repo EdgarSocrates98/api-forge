@@ -101,6 +101,11 @@ from apiforge.contracts.routing_evolution import (
     PromotionGate,
     RoutingEvolution,
 )
+from apiforge.contracts.scorecard_routing import (
+    ScorecardCandidateAssessment,
+    ScorecardRoutingAssessment,
+    ScorecardRoutingPolicy,
+)
 from apiforge.contracts.stubs import (
     AgenticQualityAssessment,
     AnalyticalAccessIR,
@@ -213,6 +218,9 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "RoutingDecision/v1": RoutingDecision,
     "RoutingPlan/v1": RoutingPlan,
     "RiskComplexityAssessment/v1": RiskComplexityAssessment,
+    "ScorecardRoutingPolicy/v1": ScorecardRoutingPolicy,
+    "ScorecardCandidateAssessment/v1": ScorecardCandidateAssessment,
+    "ScorecardRoutingAssessment/v1": ScorecardRoutingAssessment,
     "ExpertisePack/v1": ExpertisePack,
     "ScorecardFeedback/v1": ScorecardFeedback,
     "EvidenceRef/v1": EvidenceRef,

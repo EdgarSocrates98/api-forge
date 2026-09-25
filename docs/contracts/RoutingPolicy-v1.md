@@ -8,7 +8,14 @@ behavior, tie-breaker, eval-gated scorecard updates and the local
 used to produce `RiskComplexityAssessment/v1`. MVP predicates are explicit:
 missing evidence, missing expertise, task size, declared dependencies,
 expected proofs and verification-oriented strategy. Safety risks are explicit
-overrides; scorecards and graph impact are not consulted.
+overrides; scorecards and graph impact are not consulted by the risk/complexity policy.
+
+`scorecard_adaptation.policy_version` versions the champion/challenger policy
+applied after the inherited objective ranking. A champion requires fresh
+promoted history, the configured minimum evaluation count and quality
+threshold. Missing or unpromoted history is a bounded challenger opportunity;
+stale or unresolved history remains visible but cannot authorize champion
+status. The policy does not execute shadow runs or promote external state.
 
 The effects map each complexity level to objective order, verification depth
 and required review roles. Malformed or incomplete policy data is refused with

@@ -21,6 +21,7 @@ from apiforge.contracts.task import TaskSpec
 from apiforge.core.ids import stable_id
 from apiforge.runtime.registry import Capability, select_capabilities
 from apiforge.runtime.risk_complexity import assess_risk_complexity
+from apiforge.runtime.scorecard_routing import assess_scorecard_routing
 
 
 def _routing_path() -> Path:
@@ -51,6 +52,8 @@ def load_routing_policy(path: Path | None = None) -> RoutingPolicy:
         }
         if raw.get("risk_complexity") is not None:
             values["risk_complexity"] = raw["risk_complexity"]
+        if raw.get("scorecard_adaptation") is not None:
+            values["scorecard_adaptation"] = raw["scorecard_adaptation"]
         return RoutingPolicy.model_validate(values)
     except (KeyError, TypeError, ValueError) as exc:
         raise ContractError("AF-RUNTIME-POLICY", f"invalid runtime.routing: {exc}") from exc
@@ -154,7 +157,7 @@ def check_eligibility(
 
 def _scorecard_map(scorecards: Sequence[AgentScorecard]) -> dict[str, AgentScorecard]:
     values: dict[str, AgentScorecard] = {}
-    for scorecard in scorecards:
+    for scorecard in sorted(scorecards, key=lambda item: item.model_dump_json()):
         values[scorecard.profile_id] = scorecard
         values[scorecard.agent] = scorecard
     return values
@@ -164,7 +167,7 @@ def signals_from_scorecards(
     scorecards: Sequence[AgentScorecard],
 ) -> dict[str, tuple[ObservedSignal, ...]]:
     result: dict[str, tuple[ObservedSignal, ...]] = {}
-    for scorecard in scorecards:
+    for scorecard in sorted(scorecards, key=lambda item: item.model_dump_json()):
         signals: list[ObservedSignal] = []
         if scorecard.observed_cost is not None:
             signals.append(
@@ -371,12 +374,23 @@ def route_capabilities(
         scorecards=scorecard_values,
         policy=ranking_policy,
     )
+    scorecard_routing = assess_scorecard_routing(
+        ranked_candidates,
+        scorecard_values,
+        selected_policy.scorecard_adaptation,
+    )
+    ranked_by_name = {item.capability: item for item in ranked_candidates}
+    adaptive_candidates = tuple(
+        ranked_by_name[name]
+        for name in scorecard_routing.ordered_candidates
+        if name in ranked_by_name
+    )
     role_names = set(_role_capabilities(capabilities, assessment.required_roles))
     ranked = tuple(
         item
         for group in (
-            tuple(item for item in ranked_candidates if item.capability not in role_names),
-            tuple(item for item in ranked_candidates if item.capability in role_names),
+            tuple(item for item in adaptive_candidates if item.capability not in role_names),
+            tuple(item for item in adaptive_candidates if item.capability in role_names),
         )
         for item in group
     )
@@ -387,6 +401,7 @@ def route_capabilities(
         if signal.status != "observed" and signal.name in {"cost", "duration", "quality"}
     ]
     unresolved.extend(assessment.unresolved)
+    unresolved.extend(scorecard_routing.unresolved)
     if not ranked:
         unresolved.append(
             "AF-CAPABILITY-ELIGIBILITY: field=capability; unlock=provide eligible evidence"
@@ -403,6 +418,7 @@ def route_capabilities(
         "revision": request.revision,
         "policy": selected_policy.model_dump(mode="json"),
         "assessment": assessment.model_dump(mode="json"),
+        "scorecard_routing": scorecard_routing.model_dump(mode="json"),
         "candidates": [item.model_dump(mode="json") for item in candidate_trace],
     }
     decision_id = stable_id("routing", decision_payload)
@@ -416,7 +432,8 @@ def route_capabilities(
         selected=ordered[0] if ordered else None,
         fallback_order=ordered,
         risk_complexity=assessment,
-        evidence=tuple(sorted(request.available_evidence)),
+        scorecard_routing=scorecard_routing,
+        evidence=tuple(sorted({*request.available_evidence, *scorecard_routing.evidence})),
         unresolved=tuple(sorted(set(unresolved))),
     )
 
@@ -430,8 +447,8 @@ def build_routing_plan(
     """Convert ranked candidates into explicit, stable execution roles."""
     selected_policy = policy or load_routing_policy()
     ordered = tuple(name for name in decision.fallback_order if name in capabilities)
-    assessment = decision.risk_complexity
-    required_roles = assessment.required_roles if assessment is not None else (
+    risk_assessment = decision.risk_complexity
+    required_roles = risk_assessment.required_roles if risk_assessment is not None else (
         "reviewer",
         "critic",
         "referee",
@@ -501,7 +518,7 @@ def build_routing_plan(
     gate_unresolved = tuple(
         sorted(
             {
-                *(assessment.unresolved if assessment is not None else ()),
+                *(risk_assessment.unresolved if risk_assessment is not None else ()),
                 *missing_roles,
             }
         )
@@ -509,8 +526,9 @@ def build_routing_plan(
     gate_state = (
         "blocked"
         if gate_unresolved
-        else assessment.gate_state if assessment is not None else "open"
+        else risk_assessment.gate_state if risk_assessment is not None else "open"
     )
+    scorecard_assessment = decision.scorecard_routing
     payload = {
         "decision_id": decision.decision_id,
         "task_id": decision.task_id,
@@ -523,13 +541,21 @@ def build_routing_plan(
         "referee": referee,
         "execution_mode": selected_policy.execution_mode,
         "max_fallbacks": selected_policy.max_fallbacks,
-        "assessment_id": assessment.assessment_id if assessment is not None else None,
-        "complexity": assessment.complexity if assessment is not None else None,
+        "assessment_id": risk_assessment.assessment_id if risk_assessment is not None else None,
+        "complexity": risk_assessment.complexity if risk_assessment is not None else None,
         "verification_depth": (
-            assessment.verification_depth if assessment is not None else None
+            risk_assessment.verification_depth if risk_assessment is not None else None
         ),
         "required_roles": required_roles,
         "gate_state": gate_state,
+        "challenger_order": (
+            scorecard_assessment.selected_challengers
+            if scorecard_assessment is not None
+            else ()
+        ),
+        "challenger_slots": (
+            scorecard_assessment.challenger_slots if scorecard_assessment is not None else 0
+        ),
     }
     return RoutingPlan(
         plan_id=stable_id("routing-plan", payload),
@@ -544,11 +570,23 @@ def build_routing_plan(
         referee=referee,
         execution_mode=selected_policy.execution_mode,
         max_fallbacks=selected_policy.max_fallbacks,
-        assessment_id=assessment.assessment_id if assessment is not None else None,
-        complexity=assessment.complexity if assessment is not None else None,
-        verification_depth=assessment.verification_depth if assessment is not None else None,
+        assessment_id=risk_assessment.assessment_id if risk_assessment is not None else None,
+        complexity=risk_assessment.complexity if risk_assessment is not None else None,
+        verification_depth=(
+            risk_assessment.verification_depth if risk_assessment is not None else None
+        ),
         required_roles=required_roles,
         gate_state=gate_state,
+        challenger_order=(
+            decision.scorecard_routing.selected_challengers
+            if decision.scorecard_routing is not None
+            else ()
+        ),
+        challenger_slots=(
+            decision.scorecard_routing.challenger_slots
+            if decision.scorecard_routing is not None
+            else 0
+        ),
         evidence=decision.evidence,
         unresolved=unresolved,
     )

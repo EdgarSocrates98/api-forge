@@ -13,6 +13,11 @@ from apiforge.contracts.risk_complexity import (
     RiskComplexityPolicy,
     default_risk_complexity_policy,
 )
+from apiforge.contracts.scorecard_routing import (
+    ScorecardRoutingAssessment,
+    ScorecardRoutingPolicy,
+    default_scorecard_routing_policy,
+)
 
 RoutingSignalName = Literal["cost", "duration", "quality", "security"]
 SignalStatus = Literal["observed", "unknown", "unresolved"]
@@ -56,6 +61,9 @@ class RoutingPolicy(VersionedContract):
     execution_mode: RoutingExecutionMode = "parallel_review"
     max_fallbacks: int = Field(default=1, ge=0, le=64)
     risk_complexity: RiskComplexityPolicy = Field(default_factory=default_risk_complexity_policy)
+    scorecard_adaptation: ScorecardRoutingPolicy = Field(
+        default_factory=default_scorecard_routing_policy
+    )
 
     @model_validator(mode="after")
     def objectives_are_unique(self) -> RoutingPolicy:
@@ -111,6 +119,7 @@ class RoutingDecision(VersionedContract):
     selected: str | None = None
     fallback_order: tuple[str, ...] = ()
     risk_complexity: RiskComplexityAssessment | None = None
+    scorecard_routing: ScorecardRoutingAssessment | None = None
     evidence: tuple[str, ...] = ()
     unresolved: tuple[str, ...] = ()
 
@@ -135,6 +144,8 @@ class RoutingPlan(VersionedContract):
     verification_depth: str | None = None
     required_roles: tuple[str, ...] = ()
     gate_state: str = "open"
+    challenger_order: tuple[str, ...] = ()
+    challenger_slots: int = Field(default=0, ge=0, le=8)
     evidence: tuple[str, ...] = ()
     unresolved: tuple[str, ...] = ()
 

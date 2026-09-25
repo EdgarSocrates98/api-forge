@@ -40,6 +40,8 @@ def test_parallel_plan_separates_roles_and_is_stable() -> None:
     assert first.reviewers == ("reviewer",)
     assert first.critic == "critic"
     assert first.fallbacks == ("fallback",)
+    assert first.challenger_slots == 0
+    assert first.challenger_order == ()
 
 
 def test_sequential_policy_turns_specialists_into_bounded_fallbacks() -> None:

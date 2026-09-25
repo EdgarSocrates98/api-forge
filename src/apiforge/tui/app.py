@@ -71,8 +71,33 @@ class ForgeApp(App[None]):
         try:
             snapshot = loader(self.root, self.task_id, surface="textual")  # type: ignore[operator]
             view = snapshot.view
+            routing = view.payload.get("routing")
+            plan = view.payload.get("routing_plan")
+            assessment = routing.get("risk_complexity") if isinstance(routing, dict) else None
+            routing_lines = []
+            if isinstance(assessment, dict):
+                routing_lines.extend(
+                    (
+                        f"Complexity: {assessment.get('complexity', 'unknown')}",
+                        f"Verification: {assessment.get('verification_depth', 'unknown')}",
+                        f"Policy: {assessment.get('policy_version', 'unknown')}",
+                    )
+                )
+            if isinstance(plan, dict):
+                roles = [
+                    str(plan.get("primary")) if plan.get("primary") is not None else "",
+                    *(str(item) for item in plan.get("reviewers", ())),
+                    str(plan.get("critic")) if plan.get("critic") is not None else "",
+                    str(plan.get("referee")) if plan.get("referee") is not None else "",
+                ]
+                routing_lines.append(
+                    f"Roles: {', '.join(item for item in roles if item) or 'none'}"
+                )
+            routing_summary = "\n".join(routing_lines)
             self.query_one("#status", Static).update(
-                f"Task: {view.task_id}\nStatus: {view.status}\n{view.summary or 'No summary'}"
+                f"Task: {view.task_id}\nStatus: {view.status}\n"
+                f"{view.summary or 'No summary'}\n"
+                f"{routing_summary}"
             )
             self.query_one("#governance-body", Static).update(
                 f"Evidence: {view.evidence.level}\n"

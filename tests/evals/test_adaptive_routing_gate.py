@@ -25,6 +25,26 @@ def _observations() -> dict[str, dict[str, object]]:
             "evidence": ["adversarial-refusal"],
             "axes": {"provenance": True},
         },
+        "risk-complexity-golden": {
+            "observed": "PASS",
+            "evidence": ["risk-assessment", "routing-plan", "projection-parity"],
+            "axes": {"deterministic": True, "complexity": True},
+        },
+        "risk-complexity-holdout": {
+            "observed": "PASS",
+            "evidence": ["risk-assessment", "routing-replay"],
+            "axes": {"replay": True, "composition": True},
+        },
+        "risk-complexity-mutation": {
+            "observed": "PASS",
+            "evidence": ["risk-assessment", "refusal"],
+            "axes": {"safety": True, "complexity": True},
+        },
+        "risk-complexity-adversarial": {
+            "observed": "PASS",
+            "evidence": ["risk-assessment", "unresolved", "adversarial-refusal"],
+            "axes": {"provenance": True, "evidence": True},
+        },
     }
 
 
@@ -42,6 +62,7 @@ def test_adversarial_kind_is_an_explicit_gate_requirement() -> None:
 def test_adversarial_kind_cannot_be_omitted() -> None:
     observations = _observations()
     observations.pop("adaptive-routing-adversarial")
+    observations.pop("risk-complexity-adversarial")
 
     result = run_runtime_gate(
         Path("tests/evals/cases/adaptive_routing.yaml"),

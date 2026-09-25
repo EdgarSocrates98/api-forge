@@ -1,0 +1,22 @@
+version: 1
+cases:
+  - id: scorecard-fresh-champion
+    kind: golden
+    scorecard_state: fresh_promoted
+    expected_lane: champion
+    expected_reason: fresh-promoted-scorecard
+  - id: scorecard-missing-challenger
+    kind: holdout
+    scorecard_state: missing
+    expected_lane: challenger
+    expected_reason: scorecard-missing
+  - id: scorecard-stale-unresolved
+    kind: mutation
+    scorecard_state: stale
+    expected_lane: unresolved
+    expected_reason: scorecard-stale
+  - id: scorecard-permutation-replay
+    kind: adversarial
+    scorecard_state: reordered_inputs
+    expected_lane: champion
+    expected_reason: stable-assessment-id

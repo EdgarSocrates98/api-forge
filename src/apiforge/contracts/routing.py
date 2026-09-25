@@ -5,9 +5,26 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Literal
 
-from pydantic import Field, model_validator
+from pydantic import AliasChoices, Field, model_validator
 
 from apiforge.contracts.base import VersionedContract
+from apiforge.contracts.graph_impact import (
+    GraphImpactAssessment,
+    GraphImpactMode,
+    GraphImpactPolicy,
+    default_graph_impact_policy,
+)
+from apiforge.contracts.risk_complexity import (
+    RiskComplexityAssessment,
+    RiskComplexityPolicy,
+    default_risk_complexity_policy,
+)
+from apiforge.contracts.scorecard_routing import (
+    ScorecardRoutingAssessment,
+    ScorecardRoutingPolicy,
+    default_scorecard_routing_policy,
+)
+from apiforge.contracts.scorecard_shadow import ScorecardShadowEvaluation
 
 RoutingSignalName = Literal["cost", "duration", "quality", "security"]
 SignalStatus = Literal["observed", "unknown", "unresolved"]
@@ -50,6 +67,11 @@ class RoutingPolicy(VersionedContract):
     scorecard_update: Literal["eval_required"] = "eval_required"
     execution_mode: RoutingExecutionMode = "parallel_review"
     max_fallbacks: int = Field(default=1, ge=0, le=64)
+    risk_complexity: RiskComplexityPolicy = Field(default_factory=default_risk_complexity_policy)
+    scorecard_adaptation: ScorecardRoutingPolicy = Field(
+        default_factory=default_scorecard_routing_policy
+    )
+    graph_impact: GraphImpactPolicy = Field(default_factory=default_graph_impact_policy)
 
     @model_validator(mode="after")
     def objectives_are_unique(self) -> RoutingPolicy:
@@ -70,7 +92,19 @@ class RoutingRequest(VersionedContract):
     required_expertise: tuple[str, ...] = ()
     available_expertise: tuple[str, ...] = ()
     inputs: tuple[str, ...] = ()
+    task_size: Literal["S", "M", "L"] | None = Field(
+        default=None,
+        validation_alias=AliasChoices("task_size", "size"),
+    )
+    dependencies: tuple[str, ...] = ()
+    expected_proofs: tuple[str, ...] = ()
+    strategy: str | None = None
     policy_id: str
+    graph_target: str | None = None
+    graph_mode: GraphImpactMode | None = None
+    graph_candidate_refs: Mapping[str, tuple[str, ...]] = Field(default_factory=dict)
+    graph_freshness_state: Literal["fresh", "stale", "unresolved", "unknown"] | None = None
+    graph_evidence: tuple[str, ...] = ()
 
 
 class CandidateAssessment(VersionedContract):
@@ -97,6 +131,10 @@ class RoutingDecision(VersionedContract):
     candidates: tuple[CandidateAssessment, ...] = ()
     selected: str | None = None
     fallback_order: tuple[str, ...] = ()
+    risk_complexity: RiskComplexityAssessment | None = None
+    graph_impact: GraphImpactAssessment | None = None
+    scorecard_routing: ScorecardRoutingAssessment | None = None
+    shadow_evaluation: ScorecardShadowEvaluation | None = None
     evidence: tuple[str, ...] = ()
     unresolved: tuple[str, ...] = ()
 
@@ -116,6 +154,14 @@ class RoutingPlan(VersionedContract):
     referee: str | None = None
     execution_mode: RoutingExecutionMode = "parallel_review"
     max_fallbacks: int = Field(default=1, ge=0, le=64)
+    assessment_id: str | None = None
+    graph_impact: GraphImpactAssessment | None = None
+    complexity: str | None = None
+    verification_depth: str | None = None
+    required_roles: tuple[str, ...] = ()
+    gate_state: str = "open"
+    challenger_order: tuple[str, ...] = ()
+    challenger_slots: int = Field(default=0, ge=0, le=8)
     evidence: tuple[str, ...] = ()
     unresolved: tuple[str, ...] = ()
 

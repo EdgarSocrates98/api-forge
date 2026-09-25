@@ -179,6 +179,27 @@ and [`ExpertisePack/v1`](../contracts/ExpertisePack-v1.md). They describe the
 persisted plan and local knowledge metadata without authorizing provider calls
 or host-file mutation.
 
+### 7.2 Graph-aware impact (C)
+
+When a run needs graph-governed impact, its `TaskSpec` may declare explicit
+local inputs:
+
+```text
+graph_target=service:orders
+graph_mode=transitive
+graph_dir=graph
+graph_freshness_state=fresh
+graph_candidate_ref=api-performance-review=agent:api-performance-review
+```
+
+`direct`, `transitive` and `all` remain bounded by local policy. The runtime
+persists one assessment in `graph-impact.json`, and routing, briefs and
+projections read that same artifact. Missing, stale or unresolved relationships
+never become implicit authorization: they produce a conservative effect and
+visible evidence. See [`GraphImpactAssessment/v1`](../contracts/GraphImpactAssessment-v1.md),
+[`GraphImpactPolicy/v1`](../contracts/GraphImpactPolicy-v1.md) and the
+[C SDD archive](../../.claude/sdd/archive/GRAPH_AWARE_IMPACT/SHIPPED_2026-09-25.md).
+
 ## 8. Capabilities and external evidence
 
 ```bash

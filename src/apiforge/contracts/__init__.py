@@ -35,6 +35,13 @@ from apiforge.contracts.distribution import (
 )
 from apiforge.contracts.evidence import EvidenceKind, EvidenceRecord, EvidenceRef
 from apiforge.contracts.experience import ExperienceAction, ExperienceSnapshot, ExperienceView
+from apiforge.contracts.graph_impact import (
+    GraphCandidateImpact,
+    GraphImpactAssessment,
+    GraphImpactEffect,
+    GraphImpactNode,
+    GraphImpactPolicy,
+)
 from apiforge.contracts.host import (
     HostCapability,
     HostCapabilityRequest,
@@ -62,6 +69,12 @@ from apiforge.contracts.platform import (
     VerticalCoverage,
     VerticalRuntimeReceipt,
 )
+from apiforge.contracts.risk_complexity import (
+    RiskComplexityAssessment,
+    RiskComplexityEffect,
+    RiskComplexityPolicy,
+    RiskComplexityRule,
+)
 from apiforge.contracts.routing import (
     CandidateAssessment,
     ObservedSignal,
@@ -80,6 +93,13 @@ from apiforge.contracts.routing_evolution import (
     RoutingEvolution,
 )
 from apiforge.contracts.sandbox import SandboxCommand, SandboxCommandResult
+from apiforge.contracts.scorecard_routing import (
+    ScorecardCandidateAssessment,
+    ScorecardLane,
+    ScorecardRoutingAssessment,
+    ScorecardRoutingPolicy,
+)
+from apiforge.contracts.scorecard_shadow import ScorecardShadowEvaluation
 from apiforge.contracts.workspace import (
     ProjectManifest,
     RepositoryRef,
@@ -138,6 +158,11 @@ __all__ = [
     "ForgePaths",
     "FreshnessResult",
     "GitHubPrReceipt",
+    "GraphCandidateImpact",
+    "GraphImpactAssessment",
+    "GraphImpactEffect",
+    "GraphImpactNode",
+    "GraphImpactPolicy",
     "HostCapability",
     "HostCapabilityRequest",
     "HostDeclaration",
@@ -151,6 +176,10 @@ __all__ = [
     "PromotionGate",
     "PromotionState",
     "RepositoryRef",
+    "RiskComplexityAssessment",
+    "RiskComplexityEffect",
+    "RiskComplexityPolicy",
+    "RiskComplexityRule",
     "RoutingDecision",
     "RoutingEvolution",
     "RoutingPlan",
@@ -159,7 +188,12 @@ __all__ = [
     "RuntimeReceipt",
     "SandboxCommand",
     "SandboxCommandResult",
+    "ScorecardCandidateAssessment",
     "ScorecardFeedback",
+    "ScorecardLane",
+    "ScorecardRoutingAssessment",
+    "ScorecardRoutingPolicy",
+    "ScorecardShadowEvaluation",
     "SourceObservation",
     "VerticalCoverage",
     "VerticalRuntimeReceipt",

@@ -30,6 +30,13 @@ from apiforge.contracts.devin import DevinCheck, DevinCliProbe, DevinLaunch, Dev
 from apiforge.contracts.distribution import DistributionDoctor
 from apiforge.contracts.evidence import EvidenceRef
 from apiforge.contracts.graph import GraphEdge, GraphExport, GraphNode
+from apiforge.contracts.graph_impact import (
+    GraphCandidateImpact,
+    GraphImpactAssessment,
+    GraphImpactEffect,
+    GraphImpactNode,
+    GraphImpactPolicy,
+)
 from apiforge.contracts.grpc import (
     GrpcArtifact,
     GrpcCapability,
@@ -85,6 +92,7 @@ from apiforge.contracts.platform import (
     VerticalCoverage,
     VerticalRuntimeReceipt,
 )
+from apiforge.contracts.risk_complexity import RiskComplexityAssessment
 from apiforge.contracts.routing import (
     CandidateAssessment,
     ObservedSignal,
@@ -100,6 +108,12 @@ from apiforge.contracts.routing_evolution import (
     PromotionGate,
     RoutingEvolution,
 )
+from apiforge.contracts.scorecard_routing import (
+    ScorecardCandidateAssessment,
+    ScorecardRoutingAssessment,
+    ScorecardRoutingPolicy,
+)
+from apiforge.contracts.scorecard_shadow import ScorecardShadowEvaluation
 from apiforge.contracts.stubs import (
     AgenticQualityAssessment,
     AnalyticalAccessIR,
@@ -167,6 +181,11 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "GraphNode/v1": GraphNode,
     "GraphEdge/v1": GraphEdge,
     "GraphExport/v1": GraphExport,
+    "GraphImpactPolicy/v1": GraphImpactPolicy,
+    "GraphImpactEffect/v1": GraphImpactEffect,
+    "GraphImpactNode/v1": GraphImpactNode,
+    "GraphCandidateImpact/v1": GraphCandidateImpact,
+    "GraphImpactAssessment/v1": GraphImpactAssessment,
     "TelemetryEvent/v1": TelemetryEvent,
     "PerformanceRun/v1": PerformanceRun,
     "CapacityAssessment/v1": CapacityAssessment,
@@ -211,6 +230,11 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "CandidateAssessment/v1": CandidateAssessment,
     "RoutingDecision/v1": RoutingDecision,
     "RoutingPlan/v1": RoutingPlan,
+    "RiskComplexityAssessment/v1": RiskComplexityAssessment,
+    "ScorecardRoutingPolicy/v1": ScorecardRoutingPolicy,
+    "ScorecardCandidateAssessment/v1": ScorecardCandidateAssessment,
+    "ScorecardRoutingAssessment/v1": ScorecardRoutingAssessment,
+    "ScorecardShadowEvaluation/v1": ScorecardShadowEvaluation,
     "ExpertisePack/v1": ExpertisePack,
     "ScorecardFeedback/v1": ScorecardFeedback,
     "EvidenceRef/v1": EvidenceRef,

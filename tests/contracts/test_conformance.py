@@ -209,6 +209,27 @@ def test_outcome_brief_done_refusals() -> None:
     assert blocked.gaps == ("needs creds",)
 
 
+def test_outcome_brief_round_trips_graph_impact() -> None:
+    payload = {
+        "status": "REVIEW",
+        "outcome": "review graph impact",
+        "graph_impact": {
+            "assessment_id": "graph-impact:test",
+            "target_id": "service:orders",
+            "mode": "direct",
+            "policy_version": "graph-impact/v1",
+            "coverage": "complete",
+            "freshness_state": "fresh",
+            "impact_band": "none",
+        },
+    }
+
+    brief = OutcomeBrief.model_validate(payload)
+
+    assert brief.graph_impact is not None
+    assert brief.graph_impact.assessment_id == "graph-impact:test"
+
+
 def test_graph_vocabularies_are_closed() -> None:
     node = GraphNode.model_validate(
         {"id": "n1", "kind": "finding", "props": {"rule": "AF-SEC-101"}}

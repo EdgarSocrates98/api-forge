@@ -39,9 +39,7 @@ def _verbs_for(domain: str) -> list[str]:
     from apiforge.dispatch.runner import _VERBS
 
     tokens = _domain_tokens(domain)
-    return sorted(
-        v[0] for v in _VERBS if any(t in v[0] for t in tokens)
-    )
+    return sorted(v[0] for v in _VERBS if any(t in v[0] for t in tokens))
 
 
 def _error_codes_for(domain: str, doc: str) -> list[tuple[str, str]]:
@@ -65,7 +63,9 @@ def _write(path: Path, text: str) -> bool:
 
 
 def main() -> int:
-    root = Path(sys.argv[sys.argv.index("--root") + 1]) if "--root" in sys.argv else Path("knowledge")
+    root = (
+        Path(sys.argv[sys.argv.index("--root") + 1]) if "--root" in sys.argv else Path("knowledge")
+    )
     packs = load_packs(root)
     catalog = load_catalog()
     error_doc = Path("docs/catalog-contract.md").read_text(encoding="utf-8")
@@ -102,9 +102,12 @@ def main() -> int:
         written += _write(d / "quick-reference.md", body)
 
         # concepts.md
-        body = header + "## Source authority\n\n| Source | Authority | Verified |\n|---|---|---|\n" + "".join(
-            f"| {s.name} | {s.authority} | {s.verified} |\n" for s in pack.sources
-        ) + "\nNormative claims cite these sources; nothing here overrides them.\n"
+        body = (
+            header
+            + "## Source authority\n\n| Source | Authority | Verified |\n|---|---|---|\n"
+            + "".join(f"| {s.name} | {s.authority} | {s.verified} |\n" for s in pack.sources)
+            + "\nNormative claims cite these sources; nothing here overrides them.\n"
+        )
         written += _write(d / "concepts.md", body)
 
         # patterns.md — what the platform can extract for this domain
@@ -134,9 +137,7 @@ def main() -> int:
         # recipes.md
         body = header + "## Recipes\n\n"
         if verbs:
-            body += "".join(
-                f"- `apiforge {v} --path <dump-or-project>`\n" for v in verbs
-            )
+            body += "".join(f"- `apiforge {v} --path <dump-or-project>`\n" for v in verbs)
         body += (
             f"- `apiforge knowledge show {domain}`\n"
             f"- `apiforge judge` then filter findings by rules "
@@ -160,10 +161,9 @@ def main() -> int:
             if rules:
                 lines = ["evals:"]
                 for r in rules:
-                    prompt = (
-                        f"An artifact shows: {r.title.lower()}. "
-                        f"Which rule fires?"
-                    ).replace('"', "'")
+                    prompt = (f"An artifact shows: {r.title.lower()}. Which rule fires?").replace(
+                        '"', "'"
+                    )
                     lines += [
                         f"  - id: {domain}/{r.rule_id}",
                         f'    prompt: "{prompt}"',

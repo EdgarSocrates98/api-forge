@@ -34,6 +34,13 @@ streaming and messaging.
     `af-github-pr-receipt/1`; auto-merge is an explicit repository-variable
     policy and remains controlled by branch protection.
 
+## User preference
+
+- When Codex makes repository changes, create a Git commit after verification
+  by default. Do not commit unrelated pre-existing changes, and skip the
+  commit only when the user explicitly asks not to commit or a safety/policy
+  gate blocks it.
+
 ## Agentic runtime
 
 The supervisor is deterministic. Agents propose; TaskSpec governs; sandbox

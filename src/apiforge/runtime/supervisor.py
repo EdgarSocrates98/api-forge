@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -18,10 +19,12 @@ from apiforge.contracts.agentic import (
     TrajectoryEvent,
 )
 from apiforge.contracts.base import ContractError
+from apiforge.contracts.graph import GraphEdge, GraphExport, GraphNode
 from apiforge.contracts.routing import RoutingDecision
 from apiforge.contracts.routing_evolution import PromotionGate
 from apiforge.core.ids import stable_id
 from apiforge.core.models import JsonValue
+from apiforge.graph.store import read_graph
 from apiforge.runtime.adapters import AgentRequest, ModelAdapter
 from apiforge.runtime.control import ControlPlane
 from apiforge.runtime.critic import critic_findings
@@ -94,6 +97,86 @@ def _input_paths(spec: Any) -> dict[str, Path]:
         if sep and key in {"project", "contract", "case", "manifest"}:
             paths[key] = Path(value)
     return paths
+
+
+def _graph_runtime_inputs(
+    root: Path, spec: Any
+) -> tuple[
+    str | None,
+    str | None,
+    dict[str, tuple[str, ...]],
+    str | None,
+    tuple[str, ...],
+    tuple[GraphNode, ...],
+    tuple[GraphEdge, ...],
+    GraphExport | None,
+]:
+    values: dict[str, str] = {}
+    candidate_refs: dict[str, list[str]] = {}
+    for item in spec.inputs:
+        key, separator, value = item.partition("=")
+        if not separator:
+            continue
+        if key in {"graph_target", "graph_mode", "graph_dir", "graph_freshness_state"}:
+            values[key] = value
+        elif key == "graph_candidate_ref":
+            candidate, candidate_separator, node_id = value.partition("=")
+            if candidate_separator and candidate and node_id:
+                candidate_refs.setdefault(candidate, []).append(node_id)
+    target = values.get("graph_target")
+    refs = {key: tuple(sorted(set(value))) for key, value in sorted(candidate_refs.items())}
+    if target is None:
+        return None, None, refs, None, (), (), (), None
+    evidence: set[str] = set()
+    graph_dir_value = values.get("graph_dir")
+    if graph_dir_value is None:
+        evidence.add("graph:directory-missing")
+        return (
+            target,
+            values.get("graph_mode"),
+            refs,
+            "unresolved",
+            tuple(sorted(evidence)),
+            (),
+            (),
+            None,
+        )
+    graph_dir = Path(graph_dir_value)
+    if not graph_dir.is_absolute():
+        graph_dir = root / graph_dir
+    try:
+        nodes, edges = read_graph(graph_dir)
+    except ContractError as exc:
+        evidence.add(f"graph:load:{exc.code}")
+        return (
+            target,
+            values.get("graph_mode"),
+            refs,
+            "unresolved",
+            tuple(sorted(evidence)),
+            (),
+            (),
+            None,
+        )
+    snapshot: GraphExport | None = None
+    export_path = graph_dir / "export.json"
+    if export_path.is_file():
+        try:
+            snapshot = GraphExport.model_validate(
+                json.loads(export_path.read_text(encoding="utf-8"))
+            )
+        except (OSError, UnicodeDecodeError, ValueError):
+            evidence.add("graph:export:unresolved")
+    return (
+        target,
+        values.get("graph_mode"),
+        refs,
+        values.get("graph_freshness_state", "fresh"),
+        tuple(sorted(evidence)),
+        tuple(nodes),
+        tuple(edges),
+        snapshot,
+    )
 
 
 def _persist_evolution_gate(
@@ -231,18 +314,41 @@ async def execute_run(
     capabilities_catalog = load_capabilities()
     scorecards = load_scorecards(root)
     routing_policy = load_routing_policy()
+    (
+        graph_target,
+        graph_mode,
+        graph_candidate_refs,
+        graph_freshness_state,
+        graph_evidence,
+        graph_nodes,
+        graph_edges,
+        graph_snapshot,
+    ) = _graph_runtime_inputs(root, spec)
+    routing_request = build_routing_request(
+        spec,
+        policy_id=routing_policy.policy_id,
+        available_evidence=("task_spec",),
+        graph_target=graph_target,
+        graph_mode=graph_mode,
+        graph_candidate_refs=graph_candidate_refs,
+        graph_freshness_state=graph_freshness_state,
+        graph_evidence=graph_evidence,
+    )
     routing = route_capabilities(
         capabilities_catalog,
         load_profiles(),
-        build_routing_request(
-            spec,
-            policy_id=routing_policy.policy_id,
-            available_evidence=("task_spec",),
-        ),
+        routing_request,
         policy=routing_policy,
         scorecards=scorecards,
+        graph_nodes=graph_nodes,
+        graph_edges=graph_edges,
+        graph_snapshot=graph_snapshot,
     )
     storage.save_routing(routing)
+    if routing.graph_impact is not None:
+        storage.save_graph_impact(routing.graph_impact)
+    if routing.shadow_evaluation is not None:
+        storage.save_shadow_evaluation(routing.shadow_evaluation)
     routing_plan = build_routing_plan(routing, capabilities_catalog, policy=routing_policy)
     storage.save_routing_plan(routing_plan)
     storage.event(
@@ -255,9 +361,20 @@ async def execute_run(
             actor="api-agentic-orchestrator",
             subject=routing.decision_id,
             payload={
+                "assessment": (
+                    routing.risk_complexity.model_dump(mode="json")
+                    if routing.risk_complexity is not None
+                    else None
+                ),
                 "selected": routing.selected,
                 "fallback_order": routing.fallback_order,
                 "routing_plan": routing_plan.model_dump(mode="json"),
+                "shadow_evaluation": (
+                    routing.shadow_evaluation.model_dump(mode="json")
+                    if routing.shadow_evaluation is not None
+                    else None
+                ),
+                "evidence": routing.evidence,
                 "unresolved": routing.unresolved,
             },
             created_at=timestamp,
@@ -672,18 +789,41 @@ async def resume_existing_run(
     profiles = load_profiles()
     scorecards = load_scorecards(root)
     routing_policy = load_routing_policy()
+    (
+        graph_target,
+        graph_mode,
+        graph_candidate_refs,
+        graph_freshness_state,
+        graph_evidence,
+        graph_nodes,
+        graph_edges,
+        graph_snapshot,
+    ) = _graph_runtime_inputs(root, spec)
+    routing_request = build_routing_request(
+        spec,
+        policy_id=routing_policy.policy_id,
+        available_evidence=("task_spec",),
+        graph_target=graph_target,
+        graph_mode=graph_mode,
+        graph_candidate_refs=graph_candidate_refs,
+        graph_freshness_state=graph_freshness_state,
+        graph_evidence=graph_evidence,
+    )
     routing = route_capabilities(
         capabilities,
         profiles,
-        build_routing_request(
-            spec,
-            policy_id=routing_policy.policy_id,
-            available_evidence=("task_spec",),
-        ),
+        routing_request,
         policy=routing_policy,
         scorecards=scorecards,
+        graph_nodes=graph_nodes,
+        graph_edges=graph_edges,
+        graph_snapshot=graph_snapshot,
     )
     storage.save_routing(routing)
+    if routing.graph_impact is not None:
+        storage.save_graph_impact(routing.graph_impact)
+    if routing.shadow_evaluation is not None:
+        storage.save_shadow_evaluation(routing.shadow_evaluation)
     evolution_gate = _persist_evolution_gate(storage, routing, run_id, timestamp)
     if not is_active(evolution_gate):
         return _blocked_by_evolution_gate(

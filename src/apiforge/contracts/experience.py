@@ -23,6 +23,8 @@ class ExperienceView(VersionedContract):
     actions: tuple[str, ...] = ()
     evidence_refs: tuple[str, ...] = ()
     evidence: EvidenceRecord = Field(default_factory=EvidenceRecord)
+    routing: dict[str, object] | None = None
+    routing_plan: dict[str, object] | None = None
     payload: dict[str, object] = Field(default_factory=dict)
     evidence_level: Literal[
         "observed", "declared", "inferred", "heuristic", "verified", "unknown"

@@ -73,6 +73,21 @@ Uma especialização só avança para integração real quando possui:
 Cada onda foi verificada e commitada separadamente. O funcionamento permanece
 hostless, offline-first e sem atualização remota ou sobrescrita automática.
 
+### Extensões A/B/C entregues
+
+O programa de roteamento agora inclui três ciclos SDD adicionais e compatíveis:
+
+- **A — Risk-Aware Routing e Task Complexity:** risco e complexidade explícitos
+  governam a composição do plano.
+- **B — Scorecard-Adaptive Routing:** scorecards locais frescos governam lanes
+  bounded de champion, challenger e unresolved.
+- **C — Graph-Aware Impact:** grafo local explícito governa impacto, seleção e
+  brief, sempre com fallback conservador para evidência incompleta.
+
+Os detalhes, contratos e evidências estão no
+[arquivo de C](../../.claude/sdd/archive/GRAPH_AWARE_IMPACT/SHIPPED_2026-09-25.md).
+As extensões não adicionam providers, rede, SDK de modelo ou mutação externa.
+
 O fechamento de cada item exige adapter real, ambiente autorizado e evidência
 correspondente. Sem isso, o resultado permanece `REVIEW` ou `BLOCKED`.
 

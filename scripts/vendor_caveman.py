@@ -24,6 +24,7 @@ vendorizado E a linha correspondente do manifest passa no gate. O gate pega
 divergencia acidental e edicao que esqueceu o manifest; contra um commit
 deliberado, o controle e a revisao do diff, nao este arquivo.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -195,9 +196,7 @@ def materialize(entry: dict, src: Path, dest: Path) -> None:
     for name in entry["keep"]:
         origin = _confinado(src, name, campo="keep", entrada=nome)
         if not origin.exists():
-            raise SystemExit(
-                f"{nome}: `keep` cita {name}, que nao existe em {entry['sha']}"
-            )
+            raise SystemExit(f"{nome}: `keep` cita {name}, que nao existe em {entry['sha']}")
         target = _confinado(dest, name, campo="keep", entrada=nome)
         target.parent.mkdir(parents=True, exist_ok=True)
         if origin.is_dir():
@@ -207,9 +206,7 @@ def materialize(entry: dict, src: Path, dest: Path) -> None:
     for patch in entry.get("patches", []):
         origin = _confinado(src, patch["copy"], campo="patches[].copy", entrada=nome)
         if not origin.exists():
-            raise SystemExit(
-                f"{nome}: patch cita {patch['copy']}, ausente em {entry['sha']}"
-            )
+            raise SystemExit(f"{nome}: patch cita {patch['copy']}, ausente em {entry['sha']}")
         target = _confinado(dest, patch["to"], campo="patches[].to", entrada=nome)
         if target.exists():
             shutil.rmtree(target) if target.is_dir() else target.unlink()

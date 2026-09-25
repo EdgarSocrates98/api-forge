@@ -120,6 +120,15 @@ request compares eligible implementations. A missing pack returns
 `AF-CAPABILITY-ELIGIBILITY` with `field=capability.expertise_packs`; the core
 does not download knowledge or alter host-owned files.
 
+### A/B/C extensions
+
+Routing uses A for risk/complexity, B for local scorecards and C for graph-aware
+impact. C adds impact, selection and brief evidence without recalculating the
+assessment in each surface. The canonical artifact is `graph-impact.json`;
+`stale`, `missing` and `unresolved` states remain conservative. See the
+[GraphImpactAssessment/v1 contract](../contracts/GraphImpactAssessment-v1.md)
+and the [shipped C archive](../../.claude/sdd/archive/GRAPH_AWARE_IMPACT/SHIPPED_2026-09-25.md).
+
 ## Gates
 
 ```text

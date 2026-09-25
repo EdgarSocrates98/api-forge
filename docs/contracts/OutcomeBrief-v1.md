@@ -15,5 +15,11 @@ conformance tests.
 | `next` | string|null | no |
 | `open` | array | no |
 | `subject` | string|null | no |
+| `graph_impact` | `GraphImpactAssessment/v1`|null | no |
 
 The closing brief — DONE is refused while mandatory gaps exist.
+
+When present, `graph_impact` is the exact assessment persisted with the runtime
+run. The brief renderer reads that artifact and does not recalculate graph
+impact, so impacted nodes, edge evidence, policy effects and unresolved gaps
+remain identical across routing, plan and brief projections.

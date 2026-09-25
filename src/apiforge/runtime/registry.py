@@ -85,6 +85,7 @@ def select_capabilities(
     *,
     requested: tuple[str, ...] = (),
     risk: str,
+    additional_names: tuple[str, ...] = (),
 ) -> tuple[Capability, ...]:
     selected = [
         item
@@ -93,9 +94,23 @@ def select_capabilities(
     ]
     if not selected:
         selected = [item for item in capabilities.values() if item.kind == "specialist"]
+    selected_names = {item.name for item in selected}
+    selected.extend(
+        item
+        for item in capabilities.values()
+        if item.name in additional_names and item.name not in selected_names
+    )
     if risk in {"sensitive", "destructive", "irreversible"}:
         selected = [item for item in selected if item.name != "api-data-review"] or selected
-    return tuple(sorted(selected, key=lambda item: item.name))
+    return tuple(
+        sorted(
+            selected,
+            key=lambda item: (
+                0 if item.kind == "specialist" else 1,
+                item.name,
+            ),
+        )
+    )
 
 
 def select_eligible_capabilities(

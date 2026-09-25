@@ -332,9 +332,7 @@ def _check_agents(root: Path, failures: list[str]) -> None:
     agents_dir = root / "agents"
     coordinators = {p.stem for p in agents_dir.glob("*.md")} if agents_dir.is_dir() else set()
     executors_dir = agents_dir / "executors"
-    executors = (
-        {p.stem for p in executors_dir.glob("*.md")} if executors_dir.is_dir() else set()
-    )
+    executors = {p.stem for p in executors_dir.glob("*.md")} if executors_dir.is_dir() else set()
     for profile in sorted(agents_dir.rglob("*.md")):
         if "AGENT_PROTOCOL.md" not in profile.read_text(encoding="utf-8"):
             failures.append(f"{profile}: does not reference AGENT_PROTOCOL.md")
@@ -361,21 +359,15 @@ def _check_agents(root: Path, failures: list[str]) -> None:
         return
     for route in routes:
         if route.recommended_agent not in coordinators:
-            failures.append(
-                f"routing agent {route.recommended_agent!r} has no agents/*.md profile"
-            )
+            failures.append(f"routing agent {route.recommended_agent!r} has no agents/*.md profile")
         if route.recommended_agent not in playbooks:
-            failures.append(
-                f"routing agent {route.recommended_agent!r} has no playbook"
-            )
+            failures.append(f"routing agent {route.recommended_agent!r} has no playbook")
     for name, steps in playbooks.items():
         if name not in coordinators:
             failures.append(f"playbook {name!r} has no agents/*.md profile")
         for step in steps:
             if step["executor"] not in executors:
-                failures.append(
-                    f"playbook {name!r}: unknown executor {step['executor']!r}"
-                )
+                failures.append(f"playbook {name!r}: unknown executor {step['executor']!r}")
     # host-native mirrors must be byte-identical to agents/*.md
     from apiforge.dispatch.mirrors import mirror_drift
 

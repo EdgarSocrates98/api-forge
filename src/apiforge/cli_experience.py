@@ -18,6 +18,7 @@ experience_app = typer.Typer(
 
 
 def _emit(value: object, detail_level: str) -> None:
+    """Emit the application result, including canonical routing artifacts."""
     # Import lazily so the legacy CLI remains the composition root.
     from apiforge.cli import _echo_json, _run
 

@@ -11,15 +11,15 @@
 | **Author** | build-agent |
 | **DEFINE** | [DEFINE_ADAPTIVE_ROUTING_THREE_WAVE_PROGRAM.md](../features/DEFINE_ADAPTIVE_ROUTING_THREE_WAVE_PROGRAM.md) |
 | **DESIGN** | [DESIGN_ADAPTIVE_ROUTING_THREE_WAVE_PROGRAM.md](../features/DESIGN_ADAPTIVE_ROUTING_THREE_WAVE_PROGRAM.md) |
-| **Status** | In Progress — Wave 2 complete |
+| **Status** | ✅ Complete |
 
 ## Wave Status
 
 | Wave | Scope | Status | Commit |
 |------|-------|--------|--------|
 | 1 | `RoutingPlan`, papéis explícitos e execução compatível | ✅ Complete | `c3424df` |
-| 2 | scorecards multidimensionais, frescor e eval adversarial | ✅ Complete | pending in this build turn |
-| 3 | expertise packs e múltiplas implementações | ⏳ Pending | — |
+| 2 | scorecards multidimensionais, frescor e eval adversarial | ✅ Complete | `7178788` |
+| 3 | expertise packs e múltiplas implementações | ✅ Complete | pending in this build turn |
 
 ## Wave 1 Implemented
 
@@ -62,6 +62,19 @@ spec-linter DESIGN
 VERDICT: PASS
 ```
 
+## Wave 3 Implemented
+
+- Added the versioned `ExpertisePack/v1` contract and registry entry.
+- Projected validated local Knowledge Packs into routing metadata without
+  fetching or mutating them.
+- Added required/available expertise to routing requests and explicit refusal
+  semantics for missing packs.
+- Added family and implementation selection, including two contract-review
+  implementations in the declarative registry.
+- Updated Portuguese and English platform, portable, interoperability,
+  evolution-map and roadmap documentation with operational walkthroughs and
+  deferred scope.
+
 ## Acceptance Coverage
 
 | ID | Scenario | Wave | Status |
@@ -72,8 +85,8 @@ VERDICT: PASS
 | AT-004 | Unused fallback is auditable and skipped | 1 | ✅ |
 | AT-005 | Stale scorecard cannot promote quality | 2 | ✅ |
 | AT-006 | Adversarial eval kind is enforceable | 2 | ✅ |
-| AT-007 | Missing expertise pack produces an actionable refusal | 3 | ⏳ |
-| AT-008 | Shared family selects multiple implementations | 3 | ⏳ |
+| AT-007 | Missing expertise pack produces an actionable refusal | 3 | ✅ |
+| AT-008 | Shared family selects multiple implementations | 3 | ✅ |
 
 ## Deferred Scope
 
@@ -82,7 +95,9 @@ inference, `apiforge here`, remote updates, symlinks, host overwrite sync,
 task-level precedence, distributed workspace debate and total host parity remain
 after ship.
 
-## Next Step
+## Final Verification Plan
 
-Continue directly with Wave 2. Do not ship or open a duplicate PR until Wave 3
-and final verification are complete.
+Run the focused suites already used by each wave, then the full pytest, Ruff,
+mypy, release checks, SDD check and bilingual documentation/status review.
+Push the existing branch and update its already-open PR; do not create a
+duplicate PR.

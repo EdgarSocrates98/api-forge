@@ -120,6 +120,23 @@ rounds e retry budget por risco. O JSON persistido inclui policy, plan,
 impede fan-out ilimitado. Providers reais continuam adapters externos; os
 gates obrigatórios usam participantes/fakes determinísticos.
 
+## Roteamento adaptativo, scorecards e expertise
+
+As superfícies CLI, MCP, TUI e bridges projetam a mesma decisão e o mesmo
+`RoutingPlan/v1`. A run mantém `routing.json` para compatibilidade e grava
+`routing-plan.json` com `primary`, `fallbacks`, `parallel`, `reviewers`,
+`critic` e `referee`. Isso permite revisar o plano sem depender do host.
+
+O scorecard só é promovido após evidence gate e pode carregar qualidade por
+dimensão, custo, duração, tokens e frescor. O corpus adaptativo exige, quando
+configurado, `golden`, `holdout`, `mutation` e `adversarial`; sinais observados
+precisam de receipts e estados stale/unresolved permanecem não promovidos.
+
+Capabilities podem declarar uma família, uma implementação e expertise packs.
+Uma solicitação de família compara implementações elegíveis. Pack ausente gera
+`AF-CAPABILITY-ELIGIBILITY` com `field=capability.expertise_packs`; o core não
+baixa conhecimento nem altera arquivos do host.
+
 ## Gates
 
 ```text

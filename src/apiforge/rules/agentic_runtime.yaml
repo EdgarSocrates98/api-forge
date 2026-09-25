@@ -49,6 +49,8 @@ runtime:
     api-contract-review:
       agent: api-contract-architect
       kind: specialist
+      family: api-contract-review
+      implementation: contract
       risk: read_only
       state: supported
       evidence: [task_spec]
@@ -77,6 +79,8 @@ runtime:
     api-architecture-review:
       agent: api-architecture-reviewer
       kind: specialist
+      family: api-contract-review
+      implementation: architecture
       risk: read_only
       state: supported
       evidence: [task_spec]

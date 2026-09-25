@@ -102,6 +102,24 @@ Adaptive debate is bounded by policy, quorum, rounds and retry budget. Positions
 must cite facts; real providers remain external adapters and deterministic fakes
 are used for mandatory local gates.
 
+## Adaptive routing, scorecards and expertise
+
+CLI, MCP, TUI and bridge surfaces project the same decision and
+`RoutingPlan/v1`. A run keeps `routing.json` for compatibility and writes
+`routing-plan.json` with `primary`, `fallbacks`, `parallel`, `reviewers`,
+`critic` and `referee`, so the plan can be reviewed without a host.
+
+Scorecards are promoted only after an evidence gate and can carry
+multidimensional quality, cost, duration, tokens and freshness. The adaptive
+corpus can require `golden`, `holdout`, `mutation` and `adversarial` cases;
+observed signals need receipts, while stale/unresolved states remain
+unpromoted.
+
+Capabilities may declare a family, implementation and expertise packs. A family
+request compares eligible implementations. A missing pack returns
+`AF-CAPABILITY-ELIGIBILITY` with `field=capability.expertise_packs`; the core
+does not download knowledge or alter host-owned files.
+
 ## Gates
 
 ```text

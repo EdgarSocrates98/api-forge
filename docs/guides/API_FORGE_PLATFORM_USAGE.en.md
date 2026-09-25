@@ -135,6 +135,45 @@ Activation is `plan_only`, source-hash-aware and approval-gated. It does not
 overwrite user-owned files automatically. MCP uses local stdio; if the optional
 extra is absent, the named refusal is `AF-MCP-OPTIONAL-UNAVAILABLE`.
 
+## 7.1 Three-wave adaptive routing
+
+The supervisor persists two complementary run artifacts: `routing.json` keeps
+the compatible decision/ranking trace, while `routing-plan.json` exposes
+execution roles (`primary`, `fallbacks`, `parallel`, `reviewers`, `critic` and
+`referee`). Consumers must not interpret `fallback_order` as mandatory calls.
+
+Local walkthrough:
+
+```bash
+apiforge task create routing-demo --outcome "review contract" --root .apiforge
+apiforge runtime run routing-demo --root .
+apiforge runtime status routing-demo --root .
+```
+
+1. The TaskSpec and policy produce a `RoutingRequest`.
+2. The registry, scorecards and evidence produce a `RoutingDecision`.
+3. The runtime derives a stable, bounded `RoutingPlan/v1`; parallel review is
+   the compatible default.
+4. Unused fallbacks are recorded as `skipped` with an auditable reason; risk,
+   failures and evidence gaps remain visible as `AF-*` codes.
+
+Scorecards are promoted only after an evidence gate and can carry dimensions,
+cost, duration, tokens and freshness. The adaptive gate covers `golden`,
+`holdout`, `mutation` and `adversarial` cases:
+
+```bash
+apiforge evals list --path tests/evals/cases/adaptive_routing.yaml
+apiforge evals validate --path tests/evals/cases/adaptive_routing.yaml
+apiforge knowledge check --root knowledge
+apiforge knowledge freshness --root knowledge
+```
+
+Every observed signal needs a receipt; `stale` or `unresolved` signals do not
+promote quality. A missing expertise pack refuses a candidate with
+`field=capability.expertise_packs` and an explicit unlock. Packs are local and
+declarative: families can compare multiple implementations without download,
+auto-update, symlink or automatic host-file overwrite.
+
 ## 8. Capabilities and external evidence
 
 ```bash

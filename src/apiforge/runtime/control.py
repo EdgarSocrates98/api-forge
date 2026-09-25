@@ -13,7 +13,7 @@ from apiforge.contracts.base import ContractError, VersionedContract
 from apiforge.core.ids import stable_id
 from apiforge.runtime.store import content_hash
 
-StepStatus = Literal["pending", "running", "succeeded", "failed", "cancelled"]
+StepStatus = Literal["pending", "running", "succeeded", "failed", "cancelled", "skipped"]
 RunStatus = Literal[
     "planned", "running", "awaiting_review", "completed", "failed", "cancelled", "blocked"
 ]

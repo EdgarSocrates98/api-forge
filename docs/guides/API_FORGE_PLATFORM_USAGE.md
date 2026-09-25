@@ -277,6 +277,46 @@ Esse receipt prova execução local de API, banco, mensageria, CI/CD, cloud/IaC
 e front-end. Ele não transforma essa prova em saúde de provider, deployment ou
 performance de produção.
 
+## 7.1 Roteamento adaptativo em três ondas
+
+O supervisor persiste dois artefatos complementares na run: `routing.json`
+mantém a decisão/ranking compatível e `routing-plan.json` expõe os papéis de
+execução (`primary`, `fallbacks`, `parallel`, `reviewers`, `critic` e
+`referee`). Assim, `fallback_order` não deve ser interpretado como uma lista de
+chamadas obrigatórias.
+
+Passo a passo local:
+
+```bash
+apiforge task create routing-demo --outcome "revisar contrato" --root .apiforge
+apiforge runtime run routing-demo --root .
+apiforge runtime status routing-demo --root .
+```
+
+1. TaskSpec e policy geram uma `RoutingRequest`.
+2. Registry, scorecards e evidências produzem uma `RoutingDecision`.
+3. O runtime deriva um `RoutingPlan/v1` estável e limitado; revisão paralela é
+   o padrão compatível.
+4. Fallbacks não usados ficam `skipped`, com razão auditável; riscos, falhas e
+   gaps de evidência continuam visíveis como códigos `AF-*`.
+
+Scorecards só são promovidos após um gate com evidência e podem carregar
+dimensões, custo, duração, tokens e frescor. O gate adaptativo cobre
+`golden`, `holdout`, `mutation` e `adversarial`:
+
+```bash
+apiforge evals list --path tests/evals/cases/adaptive_routing.yaml
+apiforge evals validate --path tests/evals/cases/adaptive_routing.yaml
+apiforge knowledge check --root knowledge
+apiforge knowledge freshness --root knowledge
+```
+
+Todo sinal observado precisa de receipt; sinais `stale` ou `unresolved` não
+promovem qualidade. Um expertise pack ausente recusa o candidato com
+`field=capability.expertise_packs` e informa o desbloqueio. Packs são locais e
+declarativos: famílias podem comparar múltiplas implementações, sem download,
+auto-update, symlink ou sobrescrita automática de arquivos do host.
+
 ## 8. Verificação antes de commit/release
 
 ```bash

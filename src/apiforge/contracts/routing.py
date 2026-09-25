@@ -67,6 +67,8 @@ class RoutingRequest(VersionedContract):
     requested_capabilities: tuple[str, ...] = ()
     required_evidence: tuple[str, ...] = ()
     available_evidence: tuple[str, ...] = ()
+    required_expertise: tuple[str, ...] = ()
+    available_expertise: tuple[str, ...] = ()
     inputs: tuple[str, ...] = ()
     policy_id: str
 

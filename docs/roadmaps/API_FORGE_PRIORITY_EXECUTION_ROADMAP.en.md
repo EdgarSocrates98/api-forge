@@ -64,6 +64,16 @@ A specialization advances to real integration only when it has:
 - **Product:** a shared `ApiForgePlatform` facade is used by CLI/MCP for
   discovery and analysis.
 
+### Completed adaptive-routing waves
+
+- Wave 1: `RoutingPlan/v1` with explicit roles, bounded fallback and replay.
+- Wave 2: multidimensional scorecards, freshness and an optional adversarial
+  gate.
+- Wave 3: local expertise packs, families and multiple implementations.
+
+Each wave was verified and committed separately. Operation remains hostless,
+offline-first and without remote updates or automatic overwrite synchronization.
+
 Closing each item requires a real adapter, an authorized environment and
 corresponding evidence. Without those, the result remains `REVIEW` or
 `BLOCKED`.

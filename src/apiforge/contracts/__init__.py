@@ -48,6 +48,7 @@ from apiforge.contracts.integration import (
     GitHubPrReceipt,
 )
 from apiforge.contracts.knowledge import (
+    ExpertisePack,
     FreshnessResult,
     KnowledgeObservation,
     PackFreshness,
@@ -130,6 +131,7 @@ __all__ = [
     "ExperienceAction",
     "ExperienceSnapshot",
     "ExperienceView",
+    "ExpertisePack",
     "ExternalReadReceipt",
     "ExternalReadRequest",
     "ExternalReadResult",

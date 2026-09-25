@@ -145,7 +145,30 @@ Os valores aceitos para `--impact` são `direct`, `transitive` e `all`. Um alvo
 desconhecido retorna `AF-CONTEXT-TARGET-NOT-FOUND`; não é convertido em uma
 seleção heurística silenciosa.
 
-## 8. Use hosts e MCP somente quando necessário
+## 8. Roteamento, scorecards e expertise sem host
+
+A distribuição portátil também executa o núcleo de roteamento sem Claude,
+Codex, Devin, Copilot, MCP ou rede. Depois de criar um TaskSpec, rode:
+
+```bash
+apiforge runtime run <task-id> --root .
+apiforge runtime status <task-id> --root .
+```
+
+Na run, `routing.json` guarda a decisão compatível e `routing-plan.json`
+separa primary, fallbacks, revisão paralela, reviewer, critic e referee.
+Fallbacks não usados são `skipped` com motivo; a execução padrão continua
+determinística e bounded.
+
+Scorecards podem registrar qualidade por dimensão, custo, duração, tokens e
+frescor. O gate pode exigir `golden`, `holdout`, `mutation` e `adversarial`;
+receipts são obrigatórios para sinais observados e dados stale/unresolved não
+promovem qualidade. Expertise packs são carregados localmente, e uma família
+pode selecionar mais de uma implementação. Se um pack exigido não estiver
+disponível, o candidato é recusado com `AF-CAPABILITY-ELIGIBILITY` e
+`field=capability.expertise_packs`.
+
+## 9. Use hosts e MCP somente quando necessário
 
 O core não exige Claude, Codex, Devin, Copilot ou MCP. Quando um host estiver
 presente, inspecione as capacidades e gere um plano:
@@ -165,7 +188,7 @@ ações mutáveis. Não há sobrescrita automática de arquivos do usuário. MCP
 usa stdio; se o extra não estiver instalado, a CLI continua utilizável e o
 refusal é `AF-MCP-OPTIONAL-UNAVAILABLE`.
 
-## 9. Rode a cadeia determinística completa
+## 10. Rode a cadeia determinística completa
 
 Depois de inicializar um case, a sequência governada é:
 
@@ -193,7 +216,7 @@ Não remova diagnósticos ou `unresolved` para obter `DONE`. Um receipt prova
 correspondência de bytes; ele não prova autoria, deploy, permissão ou saúde de
 produção.
 
-## 10. Solução de problemas
+## 11. Solução de problemas
 
 | Situação | Comando/ação segura |
 |---|---|

@@ -336,6 +336,7 @@ async def execute_run(
         )
         for invocation_id, item in zip(invocation_ids, initial_capabilities, strict=True)
     )
+    all_invocation_ids = list(invocation_ids)
     run = run.model_copy(
         update={
             "state": AgenticState.RUNNING,
@@ -449,6 +450,106 @@ async def execute_run(
                 fallback_step.step_id,
                 "AF-ROUTING-FALLBACK-NOT-USED: primary completed successfully",
             )
+    elif routing_plan.execution_mode == "sequential_failover":
+        for fallback in routing_plan.fallbacks:
+            fallback_step = control_steps[fallback]
+            control.start(control_run.run_id, fallback_step.step_id)
+            fallback_invocation = AgentInvocation(
+                invocation_id=stable_id("inv", {"run": run_id, "capability": fallback}),
+                run_id=run_id,
+                agent=capabilities_catalog[fallback].agent,
+                capability=fallback,
+                adapter=adapter.name,
+                dependencies=(),
+                input_refs=spec.inputs,
+                idempotency_key=fallback_step.idempotency_key,
+                retry_count=fallback_step.attempts,
+            )
+            all_invocation_ids.append(fallback_invocation.invocation_id)
+            fallback_results = await run_bounded(
+                (fallback_invocation,),
+                worker,
+                limit=1,
+                timeout_seconds=policy.timeout_seconds,
+                max_calls=max(0, policy.max_calls - control.get(control_run.run_id).calls_used),
+                max_retries=policy.max_retries,
+            )
+            if not fallback_results:
+                errors.append(f"{fallback}: AF-CONTROL-BUDGET: no fallback call remained")
+                control.skip(
+                    control_run.run_id,
+                    fallback_step.step_id,
+                    "AF-ROUTING-FALLBACK-BUDGET: no call budget remained",
+                )
+                continue
+            fallback_result = fallback_results[0]
+            if fallback_result.error is not None or fallback_result.response is None:
+                error = fallback_result.error or "fallback invocation failed"
+                errors.append(f"{fallback}: {error}")
+                failed_run = control.fail(control_run.run_id, fallback_step.step_id, error)
+                if next(item for item in failed_run.steps if item.name == fallback).status == "pending":
+                    control.skip(
+                        control_run.run_id,
+                        fallback_step.step_id,
+                        f"AF-ROUTING-FALLBACK-FAILED: {error}",
+                    )
+                continue
+            payload = _json_payload(fallback_result.response)
+            fallback_gaps = validate_agent_payload(payload)
+            if fallback_gaps:
+                error = "; ".join(fallback_gaps)
+                errors.extend(f"{fallback}: {error}" for _ in [0])
+                failed_run = control.fail(control_run.run_id, fallback_step.step_id, error)
+                if next(item for item in failed_run.steps if item.name == fallback).status == "pending":
+                    control.skip(
+                        control_run.run_id,
+                        fallback_step.step_id,
+                        f"AF-ROUTING-FALLBACK-INVALID: {error}",
+                    )
+                continue
+            artifact = AgentArtifact(
+                artifact_id=stable_id(
+                    "artifact", {"run": run_id, "invocation": fallback_result.invocation.invocation_id}
+                ),
+                run_id=run_id,
+                invocation_id=fallback_result.invocation.invocation_id,
+                agent=fallback_result.invocation.agent,
+                capability=fallback_result.invocation.capability,
+                kind=ArtifactKind.SPECIALIST,
+                schema_name="AgentArtifact/v1",
+                payload=payload,
+                evidence=_strings(payload, "facts"),
+                assumptions=_strings(payload, "assumptions"),
+                risks=_strings(payload, "risks"),
+                unresolved=_strings(payload, "unresolved"),
+                confidence=_confidence(payload),
+                content_sha256=content_hash(payload),
+            )
+            artifacts.append(artifact)
+            control.complete(control_run.run_id, fallback_step.step_id, artifact.model_dump(mode="json"))
+            storage.artifact(artifact)
+            storage.event(
+                TrajectoryEvent(
+                    event_id=stable_id(
+                        "event",
+                        {"run": run_id, "invocation": artifact.invocation_id, "event": "fallback"},
+                    ),
+                    run_id=run_id,
+                    event="fallback_checkpoint",
+                    actor="api-agentic-orchestrator",
+                    subject=artifact.invocation_id,
+                    payload={"artifact_id": artifact.artifact_id},
+                    created_at=timestamp,
+                )
+            )
+            for unused in routing_plan.fallbacks[routing_plan.fallbacks.index(fallback) + 1 :]:
+                unused_step = control_steps[unused]
+                control.skip(
+                    control_run.run_id,
+                    unused_step.step_id,
+                    "AF-ROUTING-FALLBACK-NOT-USED: earlier fallback completed successfully",
+                )
+            break
 
     all_unresolved = tuple(item for artifact in artifacts for item in artifact.unresolved)
     confidences = [item.confidence for item in artifacts if item.confidence is not None]
@@ -474,6 +575,7 @@ async def execute_run(
             if final_status == "REVIEW"
             else AgenticState.BLOCKED,
             "artifact_ids": tuple(item.artifact_id for item in artifacts),
+            "invocation_ids": tuple(all_invocation_ids),
             "gaps": tuple(sorted(set(errors + list(critic) + list(all_unresolved)))),
             "final_status": final_status,
             "finished_at": timestamp,

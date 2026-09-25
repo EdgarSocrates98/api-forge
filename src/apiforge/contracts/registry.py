@@ -56,6 +56,7 @@ from apiforge.contracts.integration import (
     ExternalReadResult,
     GitHubPrReceipt,
 )
+from apiforge.contracts.knowledge import ExpertisePack
 from apiforge.contracts.observability import (
     Capability,
     CircuitBreakerEvent,
@@ -88,6 +89,7 @@ from apiforge.contracts.routing import (
     CandidateAssessment,
     ObservedSignal,
     RoutingDecision,
+    RoutingPlan,
     RoutingPolicy,
     RoutingRequest,
     ScorecardFeedback,
@@ -208,6 +210,8 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "RoutingRequest/v1": RoutingRequest,
     "CandidateAssessment/v1": CandidateAssessment,
     "RoutingDecision/v1": RoutingDecision,
+    "RoutingPlan/v1": RoutingPlan,
+    "ExpertisePack/v1": ExpertisePack,
     "ScorecardFeedback/v1": ScorecardFeedback,
     "EvidenceRef/v1": EvidenceRef,
     "EvidenceCoverage/v1": EvidenceCoverage,

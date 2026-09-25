@@ -39,6 +39,22 @@ The implementation and verification record is archived at:
 
 `.claude/sdd/archive/API_FORGE_PORTABLE_DISTRIBUTION_WORKSPACE/`
 
+## Shipped program: adaptive routing in three waves
+
+The three waves were completed in sequence:
+
+1. `RoutingPlan/v1`: primary, fallbacks, parallel, reviewers, critic and
+   referee, with a compatible decision, persisted plan and auditable
+   `ControlPlane` transitions.
+2. Scorecards/evals: quality dimensions, cost, duration, tokens, freshness,
+   receipts for observed signals and an optional `adversarial` gate.
+3. Expertise: versioned local packs, family selection, multiple
+   implementations and explicit refusals when required knowledge is missing.
+
+The default remains offline-first, deterministic and bounded. Run artifacts are
+`routing.json` and `routing-plan.json`; no wave depends on a host, network,
+model SDK or external mutation.
+
 ## Post-ship roadmap
 
 The following capabilities remain in the program and were not removed:

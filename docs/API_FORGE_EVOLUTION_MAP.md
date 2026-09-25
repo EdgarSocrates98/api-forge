@@ -73,6 +73,21 @@ Os contratos versionados e o design estão em
 `.claude/sdd/features/DEFINE_API_FORGE_PORTABLE_DISTRIBUTION_WORKSPACE.md` e
 `.claude/sdd/features/DESIGN_API_FORGE_PORTABLE_DISTRIBUTION_WORKSPACE.md`.
 
+## Programa II — Adaptive Routing em três ondas
+
+As três ondas do programa foram fechadas em sequência:
+
+1. `RoutingPlan/v1`: primary, fallbacks, parallel, reviewers, critic e referee,
+   com decisão compatível, plano persistido e `ControlPlane` auditável.
+2. Scorecards/evals: dimensões de qualidade, custo, duração, tokens, frescor,
+   receipts para sinais observados e gate opcional com `adversarial`.
+3. Expertise: packs locais versionados, seleção por família, implementações
+   múltiplas e recusas explícitas quando conhecimento obrigatório está ausente.
+
+O padrão continua offline-first, determinístico e bounded. Os artefatos de run
+são `routing.json` e `routing-plan.json`; nenhuma onda depende de host, rede,
+SDK de modelo ou mutação externa.
+
 ### Roadmap pós-ship explicitamente adiado
 
 Os itens abaixo continuam pertencendo ao programa, mas só entram no próximo

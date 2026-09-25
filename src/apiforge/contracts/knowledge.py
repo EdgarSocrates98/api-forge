@@ -7,7 +7,7 @@ from typing import Literal
 from pydantic import Field
 
 from apiforge.contracts.base import VersionedContract
-from apiforge.contracts.evidence import EvidenceRecord
+from apiforge.contracts.evidence import EvidenceLevel, EvidenceRecord
 
 FreshnessState = Literal["fresh", "stale", "unresolved", "unknown"]
 
@@ -49,3 +49,15 @@ class KnowledgeObservation(VersionedContract):
     freshness: FreshnessState
     source_refs: tuple[str, ...] = ()
     limitations: tuple[str, ...] = ()
+
+
+class ExpertisePack(VersionedContract):
+    """Validated local domain knowledge that a capability may require."""
+
+    pack_id: str
+    domain: str
+    pack_version: int = Field(ge=0)
+    freshness: FreshnessState = "unknown"
+    source_refs: tuple[str, ...] = ()
+    limitations: tuple[str, ...] = ()
+    evidence_level: EvidenceLevel = "unknown"

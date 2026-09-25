@@ -59,6 +59,8 @@ def build_routing_request(
     *,
     policy_id: str,
     available_evidence: tuple[str, ...] = (),
+    required_expertise: tuple[str, ...] = (),
+    available_expertise: tuple[str, ...] = (),
 ) -> RoutingRequest:
     requested = (spec.capability_covered,) if spec.capability_covered else ()
     evidence = tuple(sorted({"task_spec", *available_evidence}))
@@ -69,6 +71,8 @@ def build_routing_request(
         requested_capabilities=requested,
         required_evidence=spec.preconditions,
         available_evidence=evidence,
+        required_expertise=required_expertise,
+        available_expertise=available_expertise,
         inputs=spec.inputs,
         policy_id=policy_id,
     )
@@ -126,6 +130,18 @@ def check_eligibility(
             f"missing evidence or prerequisites: {', '.join(missing)}",
             field="capability.evidence",
             unlock="provide the missing evidence before routing",
+        )
+    required_packs = (
+        set(profile.expertise_packs)
+        | set(capability.expertise_packs)
+        | set(request.required_expertise)
+    )
+    missing_packs = tuple(sorted(required_packs.difference(request.available_expertise)))
+    if missing_packs:
+        return _rejection(
+            f"missing expertise packs: {', '.join(missing_packs)}",
+            field="capability.expertise_packs",
+            unlock="make the validated local expertise pack available before routing",
         )
     return None
 

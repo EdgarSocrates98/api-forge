@@ -144,6 +144,7 @@ class AgentCapabilityProfile(VersionedContract):
     capabilities: tuple[str, ...] = ()
     required_evidence: tuple[str, ...] = ()
     quality_axes: tuple[str, ...] = ()
+    expertise_packs: tuple[str, ...] = ()
     accepted_risks: tuple[str, ...] = ("read_only",)
     adapter: str = "fake"
     enabled: bool = True

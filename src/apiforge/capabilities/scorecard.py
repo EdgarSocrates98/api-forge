@@ -8,6 +8,7 @@ from typing import Literal, cast
 
 from apiforge.contracts.agentic import AgentCapabilityProfile, AgentScorecard
 from apiforge.contracts.base import ContractError
+from apiforge.contracts.knowledge import FreshnessState
 from apiforge.contracts.routing import ObservedSignal
 from apiforge.evals.suite import EvalResult
 
@@ -57,7 +58,7 @@ def build_scorecard(
         if results
     }
     freshness_states = {item.freshness_state for item in observations}
-    freshness_state = (
+    freshness_state: FreshnessState = (
         "stale"
         if "stale" in freshness_states
         else "unresolved"

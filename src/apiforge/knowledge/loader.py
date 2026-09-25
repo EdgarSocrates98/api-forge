@@ -17,7 +17,7 @@ from typing import Any
 
 from apiforge.contracts.base import ContractError
 from apiforge.contracts.evidence import EvidenceLevel
-from apiforge.contracts.knowledge import PackFreshness
+from apiforge.contracts.knowledge import ExpertisePack, FreshnessState, PackFreshness
 from apiforge.core.yaml import StrictYamlError, load_yaml_mapping
 
 _AUTHORITIES = frozenset(
@@ -77,6 +77,23 @@ class Pack:
     evals: tuple[dict[str, Any], ...] = field(default=())
     freshness: PackFreshness | None = None
     evidence_level: EvidenceLevel = "unknown"
+
+    def as_expertise_pack(
+        self,
+        *,
+        freshness: FreshnessState = "unknown",
+        source_refs: tuple[str, ...] = (),
+    ) -> ExpertisePack:
+        """Project validated local pack metadata into the routing contract."""
+        return ExpertisePack(
+            pack_id=self.domain,
+            domain=self.domain,
+            pack_version=self.version,
+            freshness=freshness,
+            source_refs=source_refs,
+            limitations=("pack metadata does not prove runtime parity",),
+            evidence_level=self.evidence_level,
+        )
 
 
 def _err(code: str, detail: str) -> KnowledgeError:

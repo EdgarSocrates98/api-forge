@@ -114,6 +114,28 @@ apiforge workspace status --root "$HOME/work/platform"
 apiforge context resolve --root "$HOME/work/platform" --scope workspace
 ```
 
+## Routing, scorecards and expertise without a host
+
+The portable distribution can run the routing core without Claude, Codex,
+Devin, Copilot, MCP or network access. After creating a TaskSpec:
+
+```bash
+apiforge runtime run <task-id> --root .
+apiforge runtime status <task-id> --root .
+```
+
+The run stores a compatible decision in `routing.json` and an explicit role
+plan in `routing-plan.json`: primary, fallbacks, parallel review, reviewer,
+critic and referee. Unused fallbacks are marked `skipped` with a reason; the
+default remains deterministic and bounded.
+
+Scorecards can record multidimensional quality, cost, duration, tokens and
+freshness. The gate can require `golden`, `holdout`, `mutation` and
+`adversarial`; observed signals need receipts, and stale/unresolved data does
+not promote quality. Expertise packs are local, and a family can select more
+than one implementation. A missing required pack returns
+`AF-CAPABILITY-ELIGIBILITY` with `field=capability.expertise_packs`.
+
 ## Host adapters and MCP
 
 Host activation is generated from package-owned templates and defaults to a

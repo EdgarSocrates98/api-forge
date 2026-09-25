@@ -144,6 +144,7 @@ implementation commit and passed.
 |-----------|--------|--------|
 | `RoutingPlan/v1` includes `gate_state` and concrete assessment effect fields | Required to expose composition and gating without recomputation in projections | Additive fields; role disjointness and fallback limits remain unchanged |
 | `ExperienceView` exposes typed `routing` and `routing_plan` fields in addition to payload | Makes projection parity inspectable while retaining the canonical generic payload | Existing callers remain valid because fields default to `None` |
+| `src/apiforge/runtime/registry.py` accepts additive role candidates | The router must include policy-required reviewer/critic/referee capabilities without changing legacy requested-capability selection | Small runtime seam extension; existing capability ordering and eligibility remain covered |
 | No separate sidecar assessment file was persisted | DESIGN chose `RoutingDecision/v1` as the canonical artifact | Prevents projection drift and keeps replay identity bound to the decision |
 
 ---

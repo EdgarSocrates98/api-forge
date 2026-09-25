@@ -11,7 +11,7 @@
 | **Author** | build-agent |
 | **DEFINE** | [DEFINE_RISK_AWARE_ROUTING_TASK_COMPLEXITY.md](../features/DEFINE_RISK_AWARE_ROUTING_TASK_COMPLEXITY.md) |
 | **DESIGN** | [DESIGN_RISK_AWARE_ROUTING_TASK_COMPLEXITY.md](../features/DESIGN_RISK_AWARE_ROUTING_TASK_COMPLEXITY.md) |
-| **Status** | In Progress — final clean-suite rerun pending |
+| **Status** | Complete |
 
 ---
 
@@ -21,9 +21,9 @@
 |--------|-------|
 | **Tasks Completed** | 33/33 manifest files implemented or updated |
 | **Files Created** | 6 manifest files |
-| **Lines of Code** | Recorded by `git diff --stat` at final handoff |
-| **Build Time** | Recorded at final handoff |
-| **Tests Passing** | Focused: 46 passed; full pre-clean rerun: 948 passed, 2 skipped |
+| **Lines of Code** | 1,317 insertions, 50 deletions across 35 files in `ee9363d` |
+| **Build Time** | Final full suite: 50.08s |
+| **Tests Passing** | Focused: 46 passed; final full suite: 950 passed, 2 skipped |
 | **Agents Used** | 0 delegated; direct build with specialist review lenses |
 
 ---
@@ -39,7 +39,7 @@
 | 5 | Persist routing artifacts and runtime event provenance | (direct) | ✅ Complete | Assessment, evidence and unresolved state are serialized |
 | 6 | Project routing artifacts through runtime, CLI, TUI and governance | (direct) | ✅ Complete | Shared read-only payload and typed view fields |
 | 7 | Add contracts, runtime, integration, parity and evaluation tests | (direct) | ✅ Complete | Golden/holdout/mutation/adversarial fixture coverage |
-| 8 | Add contract documentation and this build report | (direct) | 🔄 In Progress | Statuses advance after clean full-suite verification |
+| 8 | Add contract documentation and this build report | (direct) | ✅ Complete | Clean full-suite verification completed |
 
 No delegated Task tool was available in the current Codex surface, so all
 manifest work was performed directly and checked against the specialist
@@ -96,14 +96,14 @@ Success: no issues found in 362 source files
 
 ```text
 Focused routing/projection/evaluation suite: 46 passed, 8 existing warnings.
-Full pre-clean run: 948 passed, 2 skipped, 2 environment-sensitive failures.
+Final clean-worktree full run: 950 passed, 2 skipped in 50.08s.
 ```
 
-The two full-run failures were not feature failures: one requires a clean Git
-worktree, and the other was caused by placing pytest's basetemp inside the
-repository, making generated nested Git fixtures look like repository state.
-The final clean rerun uses an external basetemp after the implementation
-commit.
+An earlier full run exposed two environment-sensitive failures: one requires a
+clean Git worktree, and the other was caused by placing pytest's basetemp
+inside the repository, making generated nested Git fixtures look like
+repository state. The final rerun used an external basetemp after the
+implementation commit and passed.
 
 | Test Area | Result |
 |-----------|--------|
@@ -112,7 +112,7 @@ commit.
 | Supervisor persistence and runtime | ✅ Pass |
 | Application/CLI/TUI projection parity | ✅ Pass |
 | Evaluation gate and fixture matrix | ✅ Pass |
-| Full suite clean-worktree rerun | 🔄 Pending |
+| Full suite clean-worktree rerun | ✅ Pass — 950 passed, 2 skipped |
 
 ---
 
@@ -152,7 +152,7 @@ commit.
 
 | Blocker | Required Action | Owner |
 |---------|-----------------|-------|
-| None in implementation | Complete clean full-suite rerun, update statuses and hand off to `/ship` | build-agent |
+| None | No blocking action remains; hand off to `/ship` | build-agent |
 
 ---
 
@@ -182,21 +182,19 @@ commit.
 
 ## Final Status
 
-### Overall: 🔄 IN PROGRESS
+### Overall: ✅ COMPLETE
 
 **Completion Checklist:**
 
 - [x] All tasks from manifest completed
 - [x] Focused verification checks pass
-- [ ] Full clean-worktree test suite pass recorded
+- [x] Full clean-worktree test suite pass recorded
 - [x] No feature blocking issues
 - [x] Acceptance tests verified by focused coverage
-- [ ] Ready for `/ship`
+- [x] Ready for `/ship`
 
 ---
 
 ## Next Step
-
-After the clean full-suite rerun and status update:
 
 `/ship .claude/sdd/features/DEFINE_RISK_AWARE_ROUTING_TASK_COMPLEXITY.md`

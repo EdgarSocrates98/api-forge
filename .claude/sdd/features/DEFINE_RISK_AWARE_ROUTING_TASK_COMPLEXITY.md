@@ -9,7 +9,7 @@
 | **Feature** | RISK_AWARE_ROUTING_TASK_COMPLEXITY |
 | **Date** | 2026-09-25 |
 | **Author** | define-agent |
-| **Status** | ✅ Complete (Designed) |
+| **Status** | ✅ Complete (Built) |
 | **Clarity Score** | 15/15 |
 
 ---
@@ -179,4 +179,4 @@ No questions block Design. Design must resolve:
 
 ## Next Step
 
-**Ready for:** `/build .claude/sdd/features/DESIGN_RISK_AWARE_ROUTING_TASK_COMPLEXITY.md`
+**Ready for:** `/ship .claude/sdd/features/DEFINE_RISK_AWARE_ROUTING_TASK_COMPLEXITY.md`

@@ -1,5 +1,7 @@
 # Security Policy
 
+Language: [English](SECURITY.md) · [Português (Brasil)](SECURITY.pt-BR.md)
+
 ## Scope
 
 API Forge is an offline-first engineering platform. Its deterministic core

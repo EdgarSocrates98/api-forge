@@ -7,7 +7,7 @@ runtime:
     require_idempotency_key: true
     legacy_without_control: review
   eval_gate:
-    required_kinds: [golden, holdout, mutation]
+    required_kinds: [golden, holdout, mutation, adversarial]
     block_on_missing_evidence: true
   routing_evolution:
     active_wave: 0
@@ -27,6 +27,8 @@ runtime:
     unknown_signal: unresolved
     tie_breaker: capability
     scorecard_update: eval_required
+    execution_mode: parallel_review
+    max_fallbacks: 1
   healing:
     rollback_mode: cas_strict
   policies:
@@ -47,6 +49,8 @@ runtime:
     api-contract-review:
       agent: api-contract-architect
       kind: specialist
+      family: api-contract-review
+      implementation: contract
       risk: read_only
       state: supported
       evidence: [task_spec]
@@ -75,6 +79,8 @@ runtime:
     api-architecture-review:
       agent: api-architecture-reviewer
       kind: specialist
+      family: api-contract-review
+      implementation: architecture
       risk: read_only
       state: supported
       evidence: [task_spec]

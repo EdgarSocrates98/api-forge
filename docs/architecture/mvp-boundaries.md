@@ -1,5 +1,7 @@
 # MVP boundaries
 
+Language: [English](mvp-boundaries.md) · [Português (Brasil)](mvp-boundaries.pt-BR.md)
+
 The vertical slice is deliberately bounded. Everything outside this list is
 out of scope for the MVP and must surface as an `unresolved` diagnostic or a
 named refusal — never a fabricated conclusion.

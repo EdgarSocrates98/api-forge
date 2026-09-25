@@ -9,6 +9,7 @@ from typing import Any
 from apiforge.evals.suite import EvalResult, evaluate_case, load_cases
 
 REQUIRED_KINDS = frozenset({"golden", "holdout", "mutation"})
+ADVERSARIAL_REQUIRED_KINDS = frozenset((*REQUIRED_KINDS, "adversarial"))
 
 
 def run_runtime_gate(

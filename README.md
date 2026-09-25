@@ -1,5 +1,9 @@
 # API Forge
 
+[Português (Brasil)](README.pt-BR.md) · [Portable distribution in English](docs/guides/API_FORGE_PORTABLE_DISTRIBUTION.md) · [Distribuição portátil em português](docs/guides/API_FORGE_PORTABLE_DISTRIBUTION.pt-BR.md)
+
+[Documentation index](docs/README.md) · [Índice de documentação em PT-BR](docs/README.pt-BR.md)
+
 [![CI](https://github.com/EdgarSocrates98/api-forge/actions/workflows/ci.yml/badge.svg)](https://github.com/EdgarSocrates98/api-forge/actions/workflows/ci.yml)
 
 Deterministic, offline, local-first agentic API engineering. API Forge covers
@@ -14,9 +18,64 @@ IR, evidence, plans, verifiable tasks and bounded decisions instead of guesses.
 
 ```bash
 python -m pip install -e '.[dev]'   # Python >=3.12,<3.13
+# Optional all-in-one local extras:
+python -m pip install -e '.[all]'
 # Optional visual terminal UX:
 python -m pip install -e '.[tui]'
 ```
+
+The package can live in a user-selected virtual environment, prefix, mounted
+volume or container. Add its executable directory to `PATH`, or invoke it by
+absolute path. Set `APIFORGE_HOME`, `APIFORGE_CONFIG` and `APIFORGE_CACHE` when
+the default project state location is not writable. See
+[the portable distribution guide](docs/guides/API_FORGE_PORTABLE_DISTRIBUTION.md).
+
+The hostless first-run surface is:
+
+```text
+apiforge inspect
+apiforge init
+apiforge status
+apiforge doctor
+apiforge context resolve --scope repo
+```
+
+### Documentation languages and quickstart
+
+The portable/workspace feature has paired English and Brazilian Portuguese
+guides. Start with the step-by-step guide for your language:
+
+- [Portable distribution and workspace — English](docs/guides/API_FORGE_PORTABLE_DISTRIBUTION.md)
+- [Distribuição portátil e workspace — PT-BR](docs/guides/API_FORGE_PORTABLE_DISTRIBUTION.pt-BR.md)
+- [Platform usage — English](docs/guides/API_FORGE_PLATFORM_USAGE.en.md)
+- [Uso da plataforma — PT-BR](docs/guides/API_FORGE_PLATFORM_USAGE.md)
+- [Experience and interoperability — English](docs/guides/API_FORGE_EXPERIENCE_INTEROPERABILITY.en.md)
+- [Experiência e interoperabilidade — PT-BR](docs/guides/API_FORGE_EXPERIENCE_INTEROPERABILITY.md)
+- [Host parity — English](docs/HOST_PARITY.md)
+- [Paridade entre hosts — PT-BR](docs/HOST_PARITY.pt-BR.md)
+- [Evolution map — English](docs/API_FORGE_EVOLUTION_MAP.en.md)
+- [Mapa de evolução — PT-BR](docs/API_FORGE_EVOLUTION_MAP.md)
+- [Security policy — English](SECURITY.md)
+- [Política de segurança — PT-BR](SECURITY.pt-BR.md)
+- [Product closure specification — English](SPEC.md)
+- [Especificação de encerramento — PT-BR](SPEC.pt-BR.md)
+- [Architecture and MVP boundaries — English](docs/architecture/API_FORGE_PLATFORM_COMPLETION.md)
+- [Arquitetura e fronteiras do MVP — PT-BR](docs/architecture/API_FORGE_PLATFORM_COMPLETION.pt-BR.md)
+- [Capability matrix — English](docs/capabilities/API_FORGE_CAPABILITY_MATRIX.md)
+- [Matriz de capacidades — PT-BR](docs/capabilities/API_FORGE_CAPABILITY_MATRIX.pt-BR.md)
+- [Change-control host — English](docs/integrations/API_FORGE_CHANGE_CONTROL_HOST.md)
+- [Host de change-control — PT-BR](docs/integrations/API_FORGE_CHANGE_CONTROL_HOST.pt-BR.md)
+- [Devin integration — English](docs/integrations/API_FORGE_DEVIN.md)
+- [Integração Devin — PT-BR](docs/integrations/API_FORGE_DEVIN.pt-BR.md)
+- [Observability integrations — English](docs/OBSERVABILITY_INTEGRATIONS.en.md)
+- [Integrações de observabilidade — PT-BR](docs/OBSERVABILITY_INTEGRATIONS.md)
+- [Priority roadmap — English](docs/roadmaps/API_FORGE_PRIORITY_EXECUTION_ROADMAP.en.md)
+- [Roadmap prioritário — PT-BR](docs/roadmaps/API_FORGE_PRIORITY_EXECUTION_ROADMAP.md)
+
+It works offline and without a configured agent host. Claude, Codex, Devin,
+Copilot and MCP are optional adapters; unavailable capabilities remain explicit
+in `doctor` and context payloads. `workspace.yaml` registers independent
+repositories without requiring a monorepo.
 
 The repository also carries the native Caveman/Cavekit assets under `vendor/`,
 with pinned provenance and a SHA-256 manifest. RTK project filters live under

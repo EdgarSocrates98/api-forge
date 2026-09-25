@@ -13,6 +13,7 @@ from apiforge.contracts.routing import (
     CandidateAssessment,
     ObservedSignal,
     RoutingDecision,
+    RoutingPlan,
     RoutingPolicy,
     RoutingRequest,
 )
@@ -45,6 +46,8 @@ def load_routing_policy(path: Path | None = None) -> RoutingPolicy:
                 "unknown_signal": str(raw.get("unknown_signal", "unresolved")),
                 "tie_breaker": str(raw.get("tie_breaker", "capability")),
                 "scorecard_update": str(raw.get("scorecard_update", "eval_required")),
+                "execution_mode": str(raw.get("execution_mode", "parallel_review")),
+                "max_fallbacks": int(raw.get("max_fallbacks", 1)),
             }
         )
     except (KeyError, TypeError, ValueError) as exc:
@@ -56,6 +59,8 @@ def build_routing_request(
     *,
     policy_id: str,
     available_evidence: tuple[str, ...] = (),
+    required_expertise: tuple[str, ...] = (),
+    available_expertise: tuple[str, ...] = (),
 ) -> RoutingRequest:
     requested = (spec.capability_covered,) if spec.capability_covered else ()
     evidence = tuple(sorted({"task_spec", *available_evidence}))
@@ -66,6 +71,8 @@ def build_routing_request(
         requested_capabilities=requested,
         required_evidence=spec.preconditions,
         available_evidence=evidence,
+        required_expertise=required_expertise,
+        available_expertise=available_expertise,
         inputs=spec.inputs,
         policy_id=policy_id,
     )
@@ -124,6 +131,18 @@ def check_eligibility(
             field="capability.evidence",
             unlock="provide the missing evidence before routing",
         )
+    required_packs = (
+        set(profile.expertise_packs)
+        | set(capability.expertise_packs)
+        | set(request.required_expertise)
+    )
+    missing_packs = tuple(sorted(required_packs.difference(request.available_expertise)))
+    if missing_packs:
+        return _rejection(
+            f"missing expertise packs: {', '.join(missing_packs)}",
+            field="capability.expertise_packs",
+            unlock="make the validated local expertise pack available before routing",
+        )
     return None
 
 
@@ -150,6 +169,9 @@ def signals_from_scorecards(
                     unit="cost",
                     source="scorecard",
                     evidence_refs=scorecard.observation_refs,
+                    freshness_state=scorecard.freshness_state,
+                    observed_at=scorecard.observed_at,
+                    expires_at=scorecard.expires_at,
                 )
             )
         if scorecard.observed_duration_ms is not None:
@@ -161,6 +183,9 @@ def signals_from_scorecards(
                     unit="ms",
                     source="scorecard",
                     evidence_refs=scorecard.observation_refs,
+                    freshness_state=scorecard.freshness_state,
+                    observed_at=scorecard.observed_at,
+                    expires_at=scorecard.expires_at,
                 )
             )
         if scorecard.quality_promoted and scorecard.evaluation_count:
@@ -172,6 +197,9 @@ def signals_from_scorecards(
                     unit="score",
                     source="scorecard",
                     evidence_refs=scorecard.computed_from,
+                    freshness_state=scorecard.freshness_state,
+                    observed_at=scorecard.observed_at,
+                    expires_at=scorecard.expires_at,
                 )
             )
         result[scorecard.profile_id] = tuple(signals)
@@ -209,6 +237,9 @@ def assess_candidates(
                 eligible=rejection is None,
                 rejection=rejection,
                 signals=_signals_for(capability.name, signals or {}),
+                family=capability.family,
+                implementation=capability.implementation,
+                expertise_packs=capability.expertise_packs,
             )
         )
     return tuple(assessments)
@@ -218,7 +249,10 @@ def _observed_value(assessment: CandidateAssessment, name: str) -> float | None:
     values = [
         signal.value
         for signal in assessment.signals
-        if signal.name == name and signal.status == "observed" and signal.value is not None
+        if signal.name == name
+        and signal.status == "observed"
+        and signal.freshness_state not in {"stale", "unresolved"}
+        and signal.value is not None
     ]
     if not values:
         return None
@@ -347,4 +381,66 @@ def route_capabilities(
         fallback_order=ordered,
         evidence=tuple(sorted(request.available_evidence)),
         unresolved=tuple(sorted(set(unresolved))),
+    )
+
+
+def build_routing_plan(
+    decision: RoutingDecision,
+    capabilities: Mapping[str, Capability],
+    *,
+    policy: RoutingPolicy | None = None,
+) -> RoutingPlan:
+    """Convert ranked candidates into explicit, stable execution roles."""
+    selected_policy = policy or load_routing_policy()
+    ordered = tuple(name for name in decision.fallback_order if name in capabilities)
+    primary = decision.selected if decision.selected in capabilities else None
+    remaining = tuple(name for name in ordered if name != primary)
+    reviewers = tuple(name for name in remaining if capabilities[name].kind == "reviewer")
+    critic = next(
+        (name for name in remaining if capabilities[name].kind == "critic"),
+        None,
+    )
+    referee = next(
+        (name for name in remaining if capabilities[name].kind == "referee"),
+        None,
+    )
+    role_names = set(reviewers) | {name for name in (critic, referee) if name is not None}
+    explicit_fallbacks = tuple(name for name in remaining if capabilities[name].kind == "fallback")
+    specialists = tuple(
+        name for name in remaining if name not in role_names and name not in explicit_fallbacks
+    )
+    if selected_policy.execution_mode == "sequential_failover":
+        fallbacks = (*explicit_fallbacks, *specialists)[: selected_policy.max_fallbacks]
+        parallel: tuple[str, ...] = ()
+    else:
+        fallbacks = explicit_fallbacks[: selected_policy.max_fallbacks]
+        parallel = tuple(name for name in specialists if name not in fallbacks)
+    payload = {
+        "decision_id": decision.decision_id,
+        "task_id": decision.task_id,
+        "revision": decision.revision,
+        "primary": primary,
+        "fallbacks": fallbacks,
+        "parallel": parallel,
+        "reviewers": reviewers,
+        "critic": critic,
+        "referee": referee,
+        "execution_mode": selected_policy.execution_mode,
+        "max_fallbacks": selected_policy.max_fallbacks,
+    }
+    return RoutingPlan(
+        plan_id=stable_id("routing-plan", payload),
+        decision_id=decision.decision_id,
+        task_id=decision.task_id,
+        revision=decision.revision,
+        primary=primary,
+        fallbacks=fallbacks,
+        parallel=parallel,
+        reviewers=reviewers,
+        critic=critic,
+        referee=referee,
+        execution_mode=selected_policy.execution_mode,
+        max_fallbacks=selected_policy.max_fallbacks,
+        evidence=decision.evidence,
+        unresolved=decision.unresolved,
     )

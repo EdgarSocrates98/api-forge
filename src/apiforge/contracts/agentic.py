@@ -9,6 +9,7 @@ from pydantic import Field, model_validator
 
 from apiforge.contracts.base import VersionedContract
 from apiforge.contracts.evidence import EvidenceLevel
+from apiforge.contracts.knowledge import FreshnessState
 from apiforge.core.models import JsonValue, Sha256, freeze_json
 
 
@@ -143,6 +144,7 @@ class AgentCapabilityProfile(VersionedContract):
     capabilities: tuple[str, ...] = ()
     required_evidence: tuple[str, ...] = ()
     quality_axes: tuple[str, ...] = ()
+    expertise_packs: tuple[str, ...] = ()
     accepted_risks: tuple[str, ...] = ("read_only",)
     adapter: str = "fake"
     enabled: bool = True
@@ -158,6 +160,11 @@ class AgentScorecard(VersionedContract):
     quality_promoted: bool = False
     observed_cost: float | None = Field(default=None, ge=0)
     observed_duration_ms: float | None = Field(default=None, ge=0)
+    observed_tokens: float | None = Field(default=None, ge=0)
+    dimension_scores: dict[str, float] = Field(default_factory=dict)
+    freshness_state: FreshnessState = "unknown"
+    observed_at: str | None = None
+    expires_at: str | None = None
     observation_refs: tuple[str, ...] = ()
     last_verdict: Literal["unknown", "PASS", "REVIEW", "BLOCKED"] = "unknown"
     evidence: tuple[str, ...] = ()

@@ -29,6 +29,20 @@ requires the cost of the run that never happened.
 | `AF-OBS-ADAPTER-PROVIDER` | read adapter, plan and credential provider do not match |
 | `AF-HOST-ACTIVATION-INVALID` | host activation plan input is invalid |
 | `AF-HOST-ACTIVATION-HOST` | requested host has no activation plan |
+| `AF-DIST-PATH-INVALID` | selected installation, state, config or cache path is empty, invalid or not usable |
+| `AF-DIST-ASSET-MISSING` | packaged API Forge asset or host asset manifest is missing or unreadable |
+| `AF-DIST-ASSET-DIVERGED` | packaged asset hash does not match the declared source hash |
+| `AF-MANIFEST-INVALID` | project or workspace manifest is missing, malformed or violates its versioned schema |
+| `AF-MANIFEST-SECRET` | project, workspace or user config contains secret-like material refused by the local contract |
+| `AF-MANIFEST-WRITE` | minimal manifest could not be written to the requested user-owned location |
+| `AF-ROOT-NOT-FOUND` | bounded discovery could not find a project, repository or workspace root |
+| `AF-WORKSPACE-REPO-MISSING` | workspace repository entry points to a missing local root |
+| `AF-CONTEXT-SCOPE-INVALID` | context scope, impact mode or required target is outside the closed vocabulary |
+| `AF-CONTEXT-TARGET-NOT-FOUND` | requested context target was not observed in the selected scope |
+| `AF-HOST-CONFLICT` | generated host output conflicts with a user-owned file; no overwrite is performed |
+| `AF-HOST-TEMPLATE` | packaged host template could not be rendered from the supplied safe values |
+| `AF-MCP-OPTIONAL-UNAVAILABLE` | optional MCP capability is not installed; local CLI remains available |
+| `AF-KNOW-PACKAGED-MISSING` | installed package has no bundled knowledge assets for the requested operation |
 
 ## Routing
 
@@ -53,6 +67,9 @@ the static route as the only Wave 0 fallback.
 | `AF-EVOLUTION-POLICY` | `runtime.routing_evolution` is missing, malformed or violates the bounded policy |
 | `AF-EVOLUTION-PROMOTION` | route promotion is not active because mode, coverage or rollback evidence is unresolved |
 | `AF-RUNTIME-EVOLUTION` | persisted `evolution.json` is missing its typed `PromotionGate` shape |
+| `AF-RUNTIME-ROUTING-PLAN` | persisted `routing-plan.json` is missing or fails the typed `RoutingPlan/v1` shape |
+| `AF-RUNTIME-SCORECARD-FRESHNESS` | scorecard promotion is blocked because an observation is stale or unresolved |
+| `AF-RUNTIME-SCORECARD-OBSERVATION` | an observed scorecard signal has no receipt/evidence reference |
 
 ## API/Git/CI change control
 

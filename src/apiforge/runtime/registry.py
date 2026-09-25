@@ -20,6 +20,9 @@ class Capability:
     state: str = "supported"
     evidence: tuple[str, ...] = ()
     prerequisites: tuple[str, ...] = ()
+    family: str | None = None
+    implementation: str | None = None
+    expertise_packs: tuple[str, ...] = ()
 
 
 def _load_yaml(path: Path, code: str) -> object:
@@ -48,6 +51,11 @@ def load_capabilities(path: Path | None = None) -> dict[str, Capability]:
                 state=str(raw.get("state", "supported")),
                 evidence=tuple(str(item) for item in raw.get("evidence", ())),
                 prerequisites=tuple(str(item) for item in raw.get("prerequisites", ())),
+                family=str(raw["family"]) if raw.get("family") is not None else None,
+                implementation=(
+                    str(raw["implementation"]) if raw.get("implementation") is not None else None
+                ),
+                expertise_packs=tuple(str(item) for item in raw.get("expertise_packs", ())),
             )
         except KeyError as exc:
             raise ContractError("AF-RUNTIME-REGISTRY", f"capability {name!r} misses {exc}") from exc
@@ -78,7 +86,11 @@ def select_capabilities(
     requested: tuple[str, ...] = (),
     risk: str,
 ) -> tuple[Capability, ...]:
-    selected = [capabilities[name] for name in requested if name in capabilities]
+    selected = [
+        item
+        for item in capabilities.values()
+        if item.name in requested or (item.family is not None and item.family in requested)
+    ]
     if not selected:
         selected = [item for item in capabilities.values() if item.kind == "specialist"]
     if risk in {"sensitive", "destructive", "irreversible"}:

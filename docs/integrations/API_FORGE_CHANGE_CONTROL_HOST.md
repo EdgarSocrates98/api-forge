@@ -1,5 +1,7 @@
 # Change-control IDE/UI host
 
+Language: [English](API_FORGE_CHANGE_CONTROL_HOST.md) · [Português (Brasil)](API_FORGE_CHANGE_CONTROL_HOST.pt-BR.md)
+
 The host turns a completed `change-control run` into a read-only browser and
 IDE bridge without introducing a second result contract. It can run locally
 or as an authenticated TLS service behind a controlled remote host.

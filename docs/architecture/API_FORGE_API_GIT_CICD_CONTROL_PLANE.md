@@ -1,5 +1,7 @@
 # API Forge API + Git + CI/CD Control Plane
 
+Language: [English](API_FORGE_API_GIT_CICD_CONTROL_PLANE.md) · [Português (Brasil)](API_FORGE_API_GIT_CICD_CONTROL_PLANE.pt-BR.md)
+
 ## Boundary
 
 The feature normalizes a pull request, branch or replay artifact into

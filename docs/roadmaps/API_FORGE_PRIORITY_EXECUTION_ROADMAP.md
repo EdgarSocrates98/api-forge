@@ -1,5 +1,7 @@
 # API Forge — Priority Execution Roadmap
 
+Idioma: [English](API_FORGE_PRIORITY_EXECUTION_ROADMAP.en.md) · [Português (Brasil)](API_FORGE_PRIORITY_EXECUTION_ROADMAP.md)
+
 ## Objective
 
 Evoluir o API Forge de um control plane determinístico local-first para uma
@@ -61,6 +63,15 @@ Uma especialização só avança para integração real quando possui:
   providers; SDKs/credenciais continuam fora do core.
 - **Produto:** fachada `ApiForgePlatform` compartilhada por CLI/MCP em
   descoberta/análise.
+
+### Onda adaptive routing concluída
+
+- Onda 1: `RoutingPlan/v1` com papéis explícitos, fallback bounded e replay.
+- Onda 2: scorecards multidimensionais, frescor e gate adversarial opcional.
+- Onda 3: expertise packs locais, famílias e múltiplas implementações.
+
+Cada onda foi verificada e commitada separadamente. O funcionamento permanece
+hostless, offline-first e sem atualização remota ou sobrescrita automática.
 
 O fechamento de cada item exige adapter real, ambiente autorizado e evidência
 correspondente. Sem isso, o resultado permanece `REVIEW` ou `BLOCKED`.

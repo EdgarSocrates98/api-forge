@@ -1,0 +1,8 @@
+scope:
+  default: repo
+evidence:
+  strict: true
+network:
+  mode: offline_first
+assets:
+  verify_hashes: true

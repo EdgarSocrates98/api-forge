@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from apiforge.application import runtime_experience
 from apiforge.contracts.evidence import EvidenceRecord
@@ -72,3 +72,15 @@ def project_doctor(root: Path, task_id: str, *, surface: str = "json") -> Experi
 
 def project_review(root: Path, task_id: str, *, surface: str = "json") -> ExperienceSnapshot:
     return project_payload(task_id, runtime_experience.review(root, task_id), surface=surface)
+
+
+def project_result(task_id: str, result: object, *, surface: str = "json") -> ExperienceSnapshot:
+    """Project a new canonical application result without adding semantics."""
+
+    if hasattr(result, "model_dump"):
+        payload = cast(Any, result).model_dump(mode="json")
+    elif isinstance(result, dict):
+        payload = result
+    else:
+        raise TypeError(f"unsupported projection result: {type(result).__name__}")
+    return project_payload(task_id, payload, surface=surface)

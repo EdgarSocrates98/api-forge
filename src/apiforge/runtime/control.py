@@ -13,7 +13,7 @@ from apiforge.contracts.base import ContractError, VersionedContract
 from apiforge.core.ids import stable_id
 from apiforge.runtime.store import content_hash
 
-StepStatus = Literal["pending", "running", "succeeded", "failed", "cancelled"]
+StepStatus = Literal["pending", "running", "succeeded", "failed", "cancelled", "skipped"]
 RunStatus = Literal[
     "planned", "running", "awaiting_review", "completed", "failed", "cancelled", "blocked"
 ]
@@ -304,8 +304,9 @@ class ControlPlane:
             }
         )
         steps = tuple(updated if item.step_id == step_id else item for item in run.steps)
+        terminal_steps = {"succeeded", "skipped", "cancelled"}
         status: RunStatus = (
-            "awaiting_review" if all(item.status == "succeeded" for item in steps) else "running"
+            "awaiting_review" if all(item.status in terminal_steps for item in steps) else "running"
         )
         result_run = run.model_copy(
             update={"status": status, "steps": steps, "state_revision": run.state_revision + 1}
@@ -315,6 +316,29 @@ class ControlPlane:
             result_run, "step_succeeded", step_id=step_id, result_sha256=updated.result_sha256
         )
         return result_run
+
+    def skip(self, run_id: str, step_id: str, reason: str) -> ControlRun:
+        """Mark a planned step as intentionally unused without hiding the reason."""
+        run = self._load(run_id)
+        step = next((item for item in run.steps if item.step_id == step_id), None)
+        if step is None or step.status not in {"pending", "skipped"}:
+            raise ContractError("AF-CONTROL-STEP-STATE", step_id)
+        if step.status == "skipped" and step.error == reason:
+            return run
+        updated = step.model_copy(update={"status": "skipped", "error": reason})
+        steps = tuple(updated if item.step_id == step_id else item for item in run.steps)
+        terminal_steps = {"succeeded", "skipped", "cancelled"}
+        status: RunStatus = (
+            "awaiting_review"
+            if all(item.status in terminal_steps for item in steps)
+            else run.status
+        )
+        result = run.model_copy(
+            update={"status": status, "steps": steps, "state_revision": run.state_revision + 1}
+        )
+        self._save(result)
+        self._event(result, "step_skipped", step_id=step_id, reason=reason)
+        return result
 
     def fail(self, run_id: str, step_id: str, error: str) -> ControlRun:
         run = self._load(run_id)

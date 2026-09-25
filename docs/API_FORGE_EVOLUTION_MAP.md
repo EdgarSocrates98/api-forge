@@ -4,6 +4,10 @@ Este documento substitui a sequência informal de “próximo passo”. Ele é o
 produto, arquitetura e engenharia para transformar o API Forge em uma plataforma
 agentica autônoma, verificável e segura para construir, evoluir e operar APIs.
 
+[English companion](API_FORGE_EVOLUTION_MAP.en.md) · [Guia portátil em
+português](guides/API_FORGE_PORTABLE_DISTRIBUTION.pt-BR.md) · [Portable guide
+in English](guides/API_FORGE_PORTABLE_DISTRIBUTION.md)
+
 ## Estado atual
 
 O núcleo já possui:
@@ -28,6 +32,81 @@ O núcleo já possui:
 O estado atual ainda é predominantemente local, offline e com callbacks/adapters
 fake ou host-owned. Isso é intencional: a segurança e a reprodutibilidade vêm
 antes da ativação de rede ou mutação externa.
+
+## Programa I — Distribution, Workspace e Host Activation
+
+### Estado da primeira onda
+
+Implementada nesta entrega como uma superfície local e aditiva: a instalação
+é a fonte de verdade, `inspect`/`init`/`status`/`doctor`/`context` funcionam sem
+host e com rede bloqueada, paths podem ser redirecionados por ambiente, e
+manifests mínimos conectam repositórios independentes a um workspace virtual.
+O grafo, o contexto, o doctor e os adapters carregam evidência, hashes,
+limitações e `unresolved`. A ativação de host e o MCP local são opcionais e
+plan-only.
+
+O próximo programa transforma o API Forge em uma plataforma instalada e portátil:
+
+- o core, agents, skills, conhecimento, contratos, SDD, graph, evidência e
+  verificação pertencem à instalação do API Forge, não ao repositório consumidor;
+- `init`, `inspect`, `status`, `doctor` e `context` resolvem projeto, repositório
+  e workspace sem depender do host agentic;
+- a instalação aceita modo user-local, virtual environment, prefixo escolhido
+  pelo usuário, volume, container ou outro caminho permitido, sem exigir
+  privilégios administrativos;
+- a operação local permanece disponível com rede bloqueada, host ausente,
+  capability opcional indisponível ou provider externo não configurado;
+- `.apiforge/project.yaml` e `workspace.yaml` são manifests mínimos para
+  repositórios independentes, sem exigir monorepo;
+- o workspace produz IRs e architecture graph com scopes repo, workspace e
+  target, sempre separando fatos observados, declarações, inferências bounded,
+  freshness, hashes e `unresolved`;
+- MCP local via stdio, adapters de host e mirrors gerados são superfícies
+  opcionais e explícitas; nenhum host é autoridade do core;
+- a documentação deve acompanhar todos os contratos, comandos, modos de
+  instalação, limites de segurança, migração, troubleshooting, hosts, MCP,
+  manifests, graph, contexto, roadmap e exemplos.
+
+O contrato exploratório está em
+`.claude/sdd/features/BRAINSTORM_API_FORGE_PORTABLE_DISTRIBUTION_WORKSPACE.md`.
+Os contratos versionados e o design estão em
+`.claude/sdd/features/DEFINE_API_FORGE_PORTABLE_DISTRIBUTION_WORKSPACE.md` e
+`.claude/sdd/features/DESIGN_API_FORGE_PORTABLE_DISTRIBUTION_WORKSPACE.md`.
+
+## Programa II — Adaptive Routing em três ondas
+
+As três ondas do programa foram fechadas em sequência:
+
+1. `RoutingPlan/v1`: primary, fallbacks, parallel, reviewers, critic e referee,
+   com decisão compatível, plano persistido e `ControlPlane` auditável.
+2. Scorecards/evals: dimensões de qualidade, custo, duração, tokens, frescor,
+   receipts para sinais observados e gate opcional com `adversarial`.
+3. Expertise: packs locais versionados, seleção por família, implementações
+   múltiplas e recusas explícitas quando conhecimento obrigatório está ausente.
+
+O padrão continua offline-first, determinístico e bounded. Os artefatos de run
+são `routing.json` e `routing-plan.json`; nenhuma onda depende de host, rede,
+SDK de modelo ou mutação externa.
+
+### Roadmap pós-ship explicitamente adiado
+
+Os itens abaixo continuam pertencendo ao programa, mas só entram no próximo
+brainstorm após o ship e o commit da primeira entrega portátil:
+
+- `ask`, `improve`, `migrate` e `fix` como orquestração autônoma de alto nível;
+- inferência completa de relações entre todos os tipos de repositório;
+- `apiforge here` como comando separado, além da resolução interna de contexto;
+- auto-update e atualização remota de Knowledge Packs;
+- symlink como modo de instalação;
+- sincronização automática que sobrescreva arquivos de host;
+- precedência completa até o nível de task;
+- debate multiagente distribuído pelo workspace;
+- promessa de paridade funcional total entre hosts.
+
+Cada item deve retornar ao ciclo `discover → intent → contract → architecture →
+plan → build → verify → secure → benchmark → ship`, com evidência própria,
+limitações explícitas e sem ser tratado como consequência automática do
+primeiro ship.
 
 ## Lacunas principais
 

@@ -4,6 +4,10 @@ Este programa entrega uma superfície terminal unificada sobre os mesmos
 serviços de application usados pela CLI/JSON. A TUI é uma projeção: ela não
 acessa `RunStore`, `TaskStore`, bancos, hosts ou providers diretamente.
 
+[English version](API_FORGE_EXPERIENCE_INTEROPERABILITY.en.md) · [Distribuição
+portátil em português](API_FORGE_PORTABLE_DISTRIBUTION.pt-BR.md) · [Portable
+distribution in English](API_FORGE_PORTABLE_DISTRIBUTION.md)
+
 ## TUI
 
 Instalação opcional:
@@ -30,6 +34,25 @@ apiforge experience status TASK
 apiforge experience doctor TASK
 apiforge experience review TASK
 ```
+
+## Distribuição portátil e contexto
+
+As superfícies novas usam as mesmas facades canônicas para JSON, CLI, MCP e
+hosts:
+
+```text
+apiforge inspect
+apiforge init
+apiforge status
+apiforge doctor
+apiforge workspace status
+apiforge context resolve --scope repo
+```
+
+O comando separado `apiforge here` não faz parte desta onda: a resolução do
+contexto é interna. Sem host, rede ou provider SDK, as capacidades locais
+continuam disponíveis. MCP é um processo stdio opcional; a ausência dele não
+reduz a capacidade da CLI.
 
 ## Evidence Levels
 
@@ -70,6 +93,11 @@ Hosts excluídos e limitações permanecem no payload; a ferramenta nunca
 transforma ausência de prova em equivalência entre Codex, Claude, Devin e
 Copilot.
 
+Host activation usa templates pertencentes ao pacote, source hashes e preview
+com `mutation: none`. Não há overwrite automático de arquivos do usuário;
+conflitos exigem aprovação explícita. Symlink, auto-update remoto e paridade
+total entre hosts continuam adiados.
+
 ## Python matrix
 
 Cada célula precisa de execução observada:
@@ -91,6 +119,23 @@ rounds e retry budget por risco. O JSON persistido inclui policy, plan,
 `replay_id` e dissent. Toda posição precisa de evidência `fact:` e o budget
 impede fan-out ilimitado. Providers reais continuam adapters externos; os
 gates obrigatórios usam participantes/fakes determinísticos.
+
+## Roteamento adaptativo, scorecards e expertise
+
+As superfícies CLI, MCP, TUI e bridges projetam a mesma decisão e o mesmo
+`RoutingPlan/v1`. A run mantém `routing.json` para compatibilidade e grava
+`routing-plan.json` com `primary`, `fallbacks`, `parallel`, `reviewers`,
+`critic` e `referee`. Isso permite revisar o plano sem depender do host.
+
+O scorecard só é promovido após evidence gate e pode carregar qualidade por
+dimensão, custo, duração, tokens e frescor. O corpus adaptativo exige, quando
+configurado, `golden`, `holdout`, `mutation` e `adversarial`; sinais observados
+precisam de receipts e estados stale/unresolved permanecem não promovidos.
+
+Capabilities podem declarar uma família, uma implementação e expertise packs.
+Uma solicitação de família compara implementações elegíveis. Pack ausente gera
+`AF-CAPABILITY-ELIGIBILITY` com `field=capability.expertise_packs`; o core não
+baixa conhecimento nem altera arquivos do host.
 
 ## Gates
 

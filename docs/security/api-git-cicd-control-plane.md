@@ -1,5 +1,7 @@
 # API + Git + CI/CD Control Plane Security
 
+Language: [English](api-git-cicd-control-plane.md) · [Português (Brasil)](api-git-cicd-control-plane.pt-BR.md)
+
 The change-control feature is an evidence boundary, not a deployment engine.
 Its default path is local replay from `af-change-bundle/1`; the bundle is
 untrusted input and is validated before it reaches the deterministic core.

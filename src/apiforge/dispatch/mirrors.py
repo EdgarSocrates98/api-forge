@@ -8,9 +8,29 @@ a failure, not a warning.
 
 from __future__ import annotations
 
+import hashlib
 from pathlib import Path
 
 MIRROR_DIRS = (".agents/agents", ".claude/agents")
+
+
+def generated_mirror_plan(root: Path) -> dict[str, object]:
+    """Describe compatibility mirror output without changing consumer files."""
+
+    source_paths = _coordinators(Path(root))
+    return {
+        "source": "repository:agents",
+        "mutation": "none",
+        "artifacts": [
+            {
+                "source": str(path),
+                "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+                "targets": [str(Path(root) / mirror / path.name) for mirror in MIRROR_DIRS],
+            }
+            for path in source_paths
+        ],
+        "limitations": ["legacy mirror publication remains an explicit local action"],
+    }
 
 
 def _coordinators(root: Path) -> list[Path]:

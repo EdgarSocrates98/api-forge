@@ -1,5 +1,7 @@
 # Observabilidade e integrações externas
 
+Idioma: [English](OBSERVABILITY_INTEGRATIONS.en.md) · [Português (Brasil)](OBSERVABILITY_INTEGRATIONS.md)
+
 O API Forge separa o núcleo determinístico do host que controla rede, credenciais e SDKs.
 
 ## Fluxo seguro

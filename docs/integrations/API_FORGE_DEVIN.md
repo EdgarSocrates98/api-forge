@@ -1,5 +1,7 @@
 # API Forge + Devin Desktop / CLI / Cloud
 
+Language: [English](API_FORGE_DEVIN.md) · [Português (Brasil)](API_FORGE_DEVIN.pt-BR.md)
+
 This integration is intentionally payload-first. API Forge generates a
 versioned Devin task, its launch instructions, checks and safety boundaries;
 it never calls Devin's API, starts a session, changes a repository or opens a

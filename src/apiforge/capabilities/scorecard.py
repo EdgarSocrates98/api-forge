@@ -8,6 +8,7 @@ from typing import Literal, cast
 
 from apiforge.contracts.agentic import AgentCapabilityProfile, AgentScorecard
 from apiforge.contracts.base import ContractError
+from apiforge.contracts.knowledge import FreshnessState
 from apiforge.contracts.routing import ObservedSignal
 from apiforge.evals.suite import EvalResult
 
@@ -43,17 +44,49 @@ def build_scorecard(
         for item in observations
         if item.name == "duration" and item.status == "observed" and item.value is not None
     )
+    tokens = tuple(
+        item.value
+        for item in observations
+        if item.name == "cost"
+        and item.unit == "tokens"
+        and item.status == "observed"
+        and item.value is not None
+    )
+    dimension_scores = {
+        axis: round(
+            sum(axis not in result.failed_axes for result in results) / len(results),
+            3,
+        )
+        for axis in profile.quality_axes
+        if results
+    }
+    freshness_states = {item.freshness_state for item in observations}
+    freshness_state: FreshnessState = (
+        "stale"
+        if "stale" in freshness_states
+        else "unresolved"
+        if "unresolved" in freshness_states
+        else "fresh"
+        if "fresh" in freshness_states
+        else "unknown"
+    )
+    promotion_allowed = allow_quality_promotion and not freshness_states.intersection(
+        {"stale", "unresolved"}
+    )
     return AgentScorecard(
         agent=profile.agent,
         profile_id=profile.profile_id,
         evaluation_count=len(results),
         passed_count=passed,
-        quality_score=round(sum(scores) / len(scores), 3)
-        if scores and allow_quality_promotion
-        else 0.0,
-        quality_promoted=bool(results) and allow_quality_promotion,
+        quality_score=round(sum(scores) / len(scores), 3) if scores and promotion_allowed else 0.0,
+        quality_promoted=bool(results) and promotion_allowed,
         observed_cost=round(sum(costs) / len(costs), 3) if costs else None,
         observed_duration_ms=round(sum(durations) / len(durations), 3) if durations else None,
+        observed_tokens=round(sum(tokens) / len(tokens), 3) if tokens else None,
+        dimension_scores=dimension_scores,
+        freshness_state=freshness_state,
+        observed_at=next((item.observed_at for item in observations if item.observed_at), None),
+        expires_at=next((item.expires_at for item in observations if item.expires_at), None),
         observation_refs=tuple(
             sorted({ref for item in observations for ref in item.evidence_refs})
         ),

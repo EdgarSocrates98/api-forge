@@ -1,5 +1,7 @@
 # Threat model — MVP
 
+Language: [English](threat-model-mvp.md) · [Português (Brasil)](threat-model-mvp.pt-BR.md)
+
 API Forge parses potentially hostile inputs: a contract and a source tree the
 operator did not write. The analysis path executes no input code and touches
 no network, which removes the largest classes; the remaining ones are listed

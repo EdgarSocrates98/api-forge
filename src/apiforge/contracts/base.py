@@ -2,9 +2,19 @@
 
 from __future__ import annotations
 
+import warnings
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
+
+# The wire contract intentionally keeps the public ``schema`` field. Pydantic
+# warns because that name shadows its legacy ``BaseModel.schema`` helper; the
+# narrow filter preserves the stable payload without hiding unrelated warnings.
+warnings.filterwarnings(
+    "ignore",
+    message=r'^Field name "schema" in ".*" shadows an attribute in parent "VersionedContract"$',
+    category=UserWarning,
+)
 
 
 class VersionedContract(BaseModel):

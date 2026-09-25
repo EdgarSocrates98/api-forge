@@ -23,7 +23,7 @@
 | **Files Created** | 13 |
 | **Lines of Code** | 1,465 insertions, 38 deletions in implementation commit |
 | **Build Time** | Not instrumented for this session |
-| **Tests Passing** | 1,014 passed, 1 skipped |
+| **Tests Passing** | Pending final post-gap verification |
 | **Agents Used** | 0 delegated; direct build-agent execution |
 
 ---
@@ -97,7 +97,7 @@ mypy src/apiforge: Success: no issues found in 368 source files
 
 ```text
 Focused Graph-Aware Impact and integration tests: 75 passed, 6 warnings
-Full suite (clean Git worktree, external basetemp): 1,014 passed, 1 skipped, 6 warnings in 65.14s
+Full suite (clean Git worktree, external basetemp): rerun after warning-gap fix
 Release gate: []
 SDD check: ok=true, refused=[], unresolved=[]
 DESIGN spec-linter: PASS (no findings)
@@ -121,7 +121,7 @@ DESIGN spec-linter: PASS (no findings)
 |---|-------|------------|-------------|
 | 1 | Release gate initially required documentation for nested registered contracts | Added `GraphImpactEffect`, `GraphImpactNode` and `GraphCandidateImpact` contract docs and updated the DESIGN manifest | Build iteration |
 | 2 | Early full-suite attempt ran while the implementation worktree was dirty and used an in-repository temp directory | Committed the implementation first and reran the full suite with an external basetemp; final result passed | Build iteration |
-| 3 | Existing Pydantic field-shadow warnings appear during imports | Preserved as non-blocking existing warnings; no functional failure or new unresolved implementation gap | None |
+| 3 | Existing Pydantic field-shadow warnings appeared during imports | Added a narrow warning filter for the intentional public `schema` wire field and a subprocess regression test with `-W error::UserWarning` | Resolved |
 
 ---
 
@@ -178,7 +178,8 @@ The build phase runs autonomously — it never pauses to ask the user. Every dec
 | Metric | Expected | Actual | Status |
 |--------|----------|--------|--------|
 | Traversal bounds | Never exceed configured depth, node or edge limits | Covered by focused tests and full suite | ✅ |
-| Full repository verification | Green after clean commit | 1,014 passed, 1 skipped in 65.14s | ✅ |
+| Schema warning boundary | No Pydantic schema-shadow warning escapes contract imports | Regression test runs imports under `-W error::UserWarning` | ✅ |
+| Full repository verification | Green after clean commit | Pending final post-gap verification | 🔄 |
 
 ---
 

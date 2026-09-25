@@ -16,9 +16,7 @@ from apiforge.taskspec import store as task_store
 
 def _routing_fields(payload: dict[str, object]) -> dict[str, object]:
     return {
-        key: payload[key]
-        for key in ("routing", "routing_plan", "routing_errors")
-        if key in payload
+        key: payload[key] for key in ("routing", "routing_plan", "routing_errors") if key in payload
     }
 
 

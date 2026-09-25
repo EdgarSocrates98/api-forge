@@ -229,6 +229,7 @@ def perf_memory(
 
     def work() -> dict[str, object]:
         from apiforge.perf.run_store import search_runs
+
         return {"runs": search_runs(root, subject=subject, tool=tool)}
 
     _echo_json(_run(work), detail_level)

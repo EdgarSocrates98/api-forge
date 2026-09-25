@@ -406,7 +406,9 @@ def negotiate(request: CapabilityRequest, declarations: Sequence[HostDeclaration
             eligible.append(declaration.host)
         else:
             unresolved.append(f"{declaration.host}: unsupported or missing prerequisite")
-    return Resolution(capability=request.capability, eligible_hosts=tuple(eligible), gaps=tuple(unresolved))
+    return Resolution(
+        capability=request.capability, eligible_hosts=tuple(eligible), gaps=tuple(unresolved)
+    )
 ```
 
 The result reports capability-level evidence and limitations, never a global

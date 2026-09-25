@@ -476,16 +476,12 @@ class ForgePaths:
     cache_root: Path
 
 
-def resolve_paths(
-    *, cwd: Path, package_root: Path, env: Mapping[str, str]
-) -> ForgePaths:
+def resolve_paths(*, cwd: Path, package_root: Path, env: Mapping[str, str]) -> ForgePaths:
     project_state = cwd / ".apiforge"
-    state_root = Path(env["APIFORGE_HOME"]).expanduser() if env.get("APIFORGE_HOME") else project_state
-    config_path = (
-        Path(env["APIFORGE_CONFIG"]).expanduser()
-        if env.get("APIFORGE_CONFIG")
-        else None
+    state_root = (
+        Path(env["APIFORGE_HOME"]).expanduser() if env.get("APIFORGE_HOME") else project_state
     )
+    config_path = Path(env["APIFORGE_CONFIG"]).expanduser() if env.get("APIFORGE_CONFIG") else None
     cache_root = (
         Path(env["APIFORGE_CACHE"]).expanduser()
         if env.get("APIFORGE_CACHE")

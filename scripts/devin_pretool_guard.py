@@ -40,7 +40,9 @@ def main() -> int:
     if not isinstance(event, dict):
         return 0
     command = _command(event)
-    matched = next((pattern.pattern for pattern in BLOCKED_PATTERNS if pattern.search(command)), None)
+    matched = next(
+        (pattern.pattern for pattern in BLOCKED_PATTERNS if pattern.search(command)), None
+    )
     if matched is None:
         return 0
     print(

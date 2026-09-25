@@ -44,12 +44,7 @@ def runtime_status(root: Path, task_id: str) -> dict[str, object]:
         run_id = latest.get("run_id")
         if isinstance(run_id, str):
             run_dir = (
-                Path(root)
-                / ".apiforge"
-                / "tasks"
-                / task_id
-                / "runs"
-                / run_id.replace(":", "-")
+                Path(root) / ".apiforge" / "tasks" / task_id / "runs" / run_id.replace(":", "-")
             )
             for name, contract in (
                 ("routing.json", RoutingDecision),

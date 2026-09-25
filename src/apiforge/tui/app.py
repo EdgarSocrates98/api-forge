@@ -90,7 +90,9 @@ class ForgeApp(App[None]):
                     str(plan.get("critic")) if plan.get("critic") is not None else "",
                     str(plan.get("referee")) if plan.get("referee") is not None else "",
                 ]
-                routing_lines.append(f"Roles: {', '.join(item for item in roles if item) or 'none'}")
+                routing_lines.append(
+                    f"Roles: {', '.join(item for item in roles if item) or 'none'}"
+                )
             routing_summary = "\n".join(routing_lines)
             self.query_one("#status", Static).update(
                 f"Task: {view.task_id}\nStatus: {view.status}\n"

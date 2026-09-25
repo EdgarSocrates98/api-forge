@@ -40,12 +40,8 @@ def project_payload(
     plan = canonical_payload.get("routing_plan")
     gaps_value = canonical_payload.get("gaps", ())
     refs_value = canonical_payload.get("evidence_refs", ())
-    gaps_values: list[object] = (
-        list(gaps_value) if isinstance(gaps_value, (list, tuple)) else []
-    )
-    refs_values: list[object] = (
-        list(refs_value) if isinstance(refs_value, (list, tuple)) else []
-    )
+    gaps_values: list[object] = list(gaps_value) if isinstance(gaps_value, (list, tuple)) else []
+    refs_values: list[object] = list(refs_value) if isinstance(refs_value, (list, tuple)) else []
     if isinstance(routing, dict):
         gaps_values.extend(routing.get("unresolved", ()))
         refs_values.extend(routing.get("evidence", ()))

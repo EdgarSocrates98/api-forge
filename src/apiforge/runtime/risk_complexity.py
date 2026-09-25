@@ -69,7 +69,9 @@ def _ordered_unique(values: list[str]) -> tuple[str, ...]:
 
 def _unresolved_inputs(request: RoutingRequest) -> tuple[str, ...]:
     unresolved: list[str] = []
-    missing_evidence = tuple(sorted(set(request.required_evidence).difference(request.available_evidence)))
+    missing_evidence = tuple(
+        sorted(set(request.required_evidence).difference(request.available_evidence))
+    )
     if missing_evidence:
         unresolved.append(
             "AF-CAPABILITY-ELIGIBILITY: field=required_evidence; "
@@ -87,8 +89,7 @@ def _unresolved_inputs(request: RoutingRequest) -> tuple[str, ...]:
         )
     if request.risk not in _SUPPORTED_RISKS:
         unresolved.append(
-            "AF-CAPABILITY-ELIGIBILITY: field=risk; "
-            "unlock=provide a supported TaskRisk value"
+            "AF-CAPABILITY-ELIGIBILITY: field=risk; unlock=provide a supported TaskRisk value"
         )
     return tuple(unresolved)
 
@@ -111,7 +112,10 @@ def assess_risk_complexity(
     unresolved = _unresolved_inputs(request)
     effect = policy.risk_complexity.effects.get(complexity)
     if effect is None:
-        unresolved = (*unresolved, "AF-RUNTIME-POLICY: field=risk_complexity.effects; unlock=define the selected complexity effect")
+        unresolved = (
+            *unresolved,
+            "AF-RUNTIME-POLICY: field=risk_complexity.effects; unlock=define the selected complexity effect",
+        )
         effect = policy.risk_complexity.effects["critical"]
     gate_state: RiskComplexityGate = (
         "blocked" if unresolved else "review" if complexity != "simple" else "open"

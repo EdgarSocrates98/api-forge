@@ -25,7 +25,9 @@ def test_cli_status_keeps_routing_assessment_canonical(tmp_path: Path) -> None:
     run_runtime(tmp_path, "evolve-orders-api", now="2026-09-25T10:01:00+00:00")
     runner = CliRunner()
 
-    result = runner.invoke(app, ["experience", "status", "evolve-orders-api", "--root", str(tmp_path)])
+    result = runner.invoke(
+        app, ["experience", "status", "evolve-orders-api", "--root", str(tmp_path)]
+    )
 
     assert result.exit_code == 0, result.stdout
     payload = json.loads(result.stdout)

@@ -55,9 +55,7 @@ def test_assessment_is_frozen_and_preserves_unresolved() -> None:
         required_roles=("reviewer", "critic", "referee"),
         gate_state="blocked",
         evidence=("task_spec",),
-        unresolved=(
-            "AF-CAPABILITY-ELIGIBILITY: field=required_evidence; unlock=provide evidence",
-        ),
+        unresolved=("AF-CAPABILITY-ELIGIBILITY: field=required_evidence; unlock=provide evidence",),
     )
 
     assert assessment.unresolved

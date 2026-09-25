@@ -446,8 +446,7 @@ class AgentResponse(BaseModel):
 class ModelAdapter(Protocol):
     name: str
 
-    async def invoke(self, request: AgentRequest) -> AgentResponse:
-        ...
+    async def invoke(self, request: AgentRequest) -> AgentResponse: ...
 ```
 
 Every adapter must return structured output or a typed runtime error. The

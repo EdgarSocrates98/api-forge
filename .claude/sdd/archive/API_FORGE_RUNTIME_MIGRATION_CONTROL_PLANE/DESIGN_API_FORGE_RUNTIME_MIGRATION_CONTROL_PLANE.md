@@ -254,10 +254,7 @@ class MigrationSpec(VersionedContract):
     max_parallel_agents: int = Field(default=4, ge=1, le=64)
 
     def identity(self) -> str:
-        return (
-            f"{self.ecosystem}:{self.source_version}->{self.target_version}:"
-            f"{self.project_root}"
-        )
+        return f"{self.ecosystem}:{self.source_version}->{self.target_version}:{self.project_root}"
 ```
 
 O parser deve rejeitar origem/alvo vazios, paths fora do root e `read_only=False` no perfil MVP. A ordem dos campos de entrada não pode alterar o digest.
@@ -323,8 +320,13 @@ Cada tarefa derivada por eixo (runtime, dependencies, contract, data, cloud, tes
 ### Pattern 4: Status conservador
 
 ```python
-def decide_status(*, critical_gaps: tuple[str, ...], evidence_ok: bool,
-                  contract_breaking: bool, verification_ok: bool) -> str:
+def decide_status(
+    *,
+    critical_gaps: tuple[str, ...],
+    evidence_ok: bool,
+    contract_breaking: bool,
+    verification_ok: bool,
+) -> str:
     if critical_gaps or contract_breaking:
         return "BLOCKED"
     if not evidence_ok or not verification_ok:

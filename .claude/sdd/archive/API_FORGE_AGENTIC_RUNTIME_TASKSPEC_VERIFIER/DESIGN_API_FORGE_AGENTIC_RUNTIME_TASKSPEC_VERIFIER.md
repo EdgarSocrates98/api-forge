@@ -304,11 +304,8 @@ def plan_task(spec: TaskSpec, steps: tuple[dict[str, object], ...]) -> TaskPlan:
         raise ContractError("AF-TASK-PLAN-EMPTY", "a sealed task needs at least one step")
     for step in steps:
         if not step.get("verb") or not step.get("expected_artifacts"):
-            raise ContractError(
-                "AF-TASK-PLAN-STEP", "every step needs verb and expected_artifacts"
-            )
-    return TaskPlan(task_id=spec.id, revision=spec.revision,
-                    recipe=spec.strategy, steps=steps)
+            raise ContractError("AF-TASK-PLAN-STEP", "every step needs verb and expected_artifacts")
+    return TaskPlan(task_id=spec.id, revision=spec.revision, recipe=spec.strategy, steps=steps)
 
 
 def plan_digest(plan: TaskPlan) -> str:
@@ -335,8 +332,10 @@ def aggregate_checks(checks: tuple[VerificationCheck, ...]) -> str:
 def verify_task(task, plan, run_record, evidence) -> VerificationRecord:
     # Re-load task/plan/evidence from disk in the service; run_record is input,
     # not an authority. Every check returns evidence or an explicit gap.
-    checks = tuple(run_check(axis, task, plan, evidence)
-                   for axis in ("contract", "security", "idempotency", "pagination"))
+    checks = tuple(
+        run_check(axis, task, plan, evidence)
+        for axis in ("contract", "security", "idempotency", "pagination")
+    )
     return VerificationRecord(
         task_id=task.id,
         revision=task.revision,
@@ -373,8 +372,7 @@ class FixtureStore:
         return dict(value) if value is not None else None
 
     def scan(self, prefix: str = "") -> tuple[Mapping[str, object], ...]:
-        return tuple(dict(v) for k, v in sorted(self._records.items())
-                     if k.startswith(prefix))
+        return tuple(dict(v) for k, v in sorted(self._records.items()) if k.startswith(prefix))
 ```
 
 No `set`, `delete`, transaction or network method belongs in this first-slice protocol. Future Redis/Mongo/DynamoDB/Neptune adapters can implement the read-only contract behind explicit capability declarations.

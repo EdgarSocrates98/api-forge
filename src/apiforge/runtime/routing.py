@@ -338,9 +338,7 @@ def _role_capabilities(
     capabilities: Mapping[str, Capability], roles: tuple[str, ...]
 ) -> tuple[str, ...]:
     required_kinds = set(roles)
-    return tuple(
-        sorted(item.name for item in capabilities.values() if item.kind in required_kinds)
-    )
+    return tuple(sorted(item.name for item in capabilities.values() if item.kind in required_kinds))
 
 
 def route_capabilities(
@@ -448,21 +446,25 @@ def build_routing_plan(
     selected_policy = policy or load_routing_policy()
     ordered = tuple(name for name in decision.fallback_order if name in capabilities)
     risk_assessment = decision.risk_complexity
-    required_roles = risk_assessment.required_roles if risk_assessment is not None else (
-        "reviewer",
-        "critic",
-        "referee",
+    required_roles = (
+        risk_assessment.required_roles
+        if risk_assessment is not None
+        else (
+            "reviewer",
+            "critic",
+            "referee",
+        )
     )
     role_kinds = {"reviewer", "critic", "referee"}
     primary_candidates = tuple(
-        name
-        for name in ordered
-        if capabilities[name].kind not in role_kinds | {"fallback"}
+        name for name in ordered if capabilities[name].kind not in role_kinds | {"fallback"}
     )
     primary = (
         decision.selected
         if decision.selected in primary_candidates
-        else primary_candidates[0] if primary_candidates else None
+        else primary_candidates[0]
+        if primary_candidates
+        else None
     )
     remaining = tuple(name for name in ordered if name != primary)
     reviewers = tuple(
@@ -526,7 +528,9 @@ def build_routing_plan(
     gate_state = (
         "blocked"
         if gate_unresolved
-        else risk_assessment.gate_state if risk_assessment is not None else "open"
+        else risk_assessment.gate_state
+        if risk_assessment is not None
+        else "open"
     )
     scorecard_assessment = decision.scorecard_routing
     payload = {
@@ -549,9 +553,7 @@ def build_routing_plan(
         "required_roles": required_roles,
         "gate_state": gate_state,
         "challenger_order": (
-            scorecard_assessment.selected_challengers
-            if scorecard_assessment is not None
-            else ()
+            scorecard_assessment.selected_challengers if scorecard_assessment is not None else ()
         ),
         "challenger_slots": (
             scorecard_assessment.challenger_slots if scorecard_assessment is not None else 0

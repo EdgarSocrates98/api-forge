@@ -9,7 +9,7 @@
 | **Feature** | SCORECARD_ADAPTIVE_ROUTING |
 | **Date** | 2026-09-25 |
 | **Author** | define-agent |
-| **Status** | Ready for Design |
+| **Status** | ✅ Complete (Designed) |
 | **Clarity Score** | 15/15 |
 
 ---
@@ -147,4 +147,4 @@ None - ready for Design. Design will fix the initial local policy defaults and e
 
 ## Next Step
 
-**Ready for:** `/design .claude/sdd/features/DEFINE_SCORECARD_ADAPTIVE_ROUTING.md`
+**Ready for:** `/build .claude/sdd/features/DESIGN_SCORECARD_ADAPTIVE_ROUTING.md`

@@ -2,6 +2,8 @@
 
 [Português (Brasil)](README.pt-BR.md) · [Portable distribution in English](docs/guides/API_FORGE_PORTABLE_DISTRIBUTION.md) · [Distribuição portátil em português](docs/guides/API_FORGE_PORTABLE_DISTRIBUTION.pt-BR.md)
 
+[Documentation index](docs/README.md) · [Índice de documentação em PT-BR](docs/README.pt-BR.md)
+
 [![CI](https://github.com/EdgarSocrates98/api-forge/actions/workflows/ci.yml/badge.svg)](https://github.com/EdgarSocrates98/api-forge/actions/workflows/ci.yml)
 
 Deterministic, offline, local-first agentic API engineering. API Forge covers
@@ -53,6 +55,22 @@ guides. Start with the step-by-step guide for your language:
 - [Paridade entre hosts — PT-BR](docs/HOST_PARITY.pt-BR.md)
 - [Evolution map — English](docs/API_FORGE_EVOLUTION_MAP.en.md)
 - [Mapa de evolução — PT-BR](docs/API_FORGE_EVOLUTION_MAP.md)
+- [Security policy — English](SECURITY.md)
+- [Política de segurança — PT-BR](SECURITY.pt-BR.md)
+- [Product closure specification — English](SPEC.md)
+- [Especificação de encerramento — PT-BR](SPEC.pt-BR.md)
+- [Architecture and MVP boundaries — English](docs/architecture/API_FORGE_PLATFORM_COMPLETION.md)
+- [Arquitetura e fronteiras do MVP — PT-BR](docs/architecture/API_FORGE_PLATFORM_COMPLETION.pt-BR.md)
+- [Capability matrix — English](docs/capabilities/API_FORGE_CAPABILITY_MATRIX.md)
+- [Matriz de capacidades — PT-BR](docs/capabilities/API_FORGE_CAPABILITY_MATRIX.pt-BR.md)
+- [Change-control host — English](docs/integrations/API_FORGE_CHANGE_CONTROL_HOST.md)
+- [Host de change-control — PT-BR](docs/integrations/API_FORGE_CHANGE_CONTROL_HOST.pt-BR.md)
+- [Devin integration — English](docs/integrations/API_FORGE_DEVIN.md)
+- [Integração Devin — PT-BR](docs/integrations/API_FORGE_DEVIN.pt-BR.md)
+- [Observability integrations — English](docs/OBSERVABILITY_INTEGRATIONS.en.md)
+- [Integrações de observabilidade — PT-BR](docs/OBSERVABILITY_INTEGRATIONS.md)
+- [Priority roadmap — English](docs/roadmaps/API_FORGE_PRIORITY_EXECUTION_ROADMAP.en.md)
+- [Roadmap prioritário — PT-BR](docs/roadmaps/API_FORGE_PRIORITY_EXECUTION_ROADMAP.md)
 
 It works offline and without a configured agent host. Claude, Codex, Devin,
 Copilot and MCP are optional adapters; unavailable capabilities remain explicit

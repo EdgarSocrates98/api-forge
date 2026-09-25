@@ -1,5 +1,7 @@
 # Devin payload catalog
 
+Language: [English](README.md) · [Português (Brasil)](README.pt-BR.md)
+
 Generate each payload from the repository root. The command emits the complete
 `DevinPayload/v1` JSON; keep the output as a local artifact when a transcript or
 review record is needed.

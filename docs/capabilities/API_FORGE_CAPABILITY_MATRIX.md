@@ -1,5 +1,7 @@
 # API Forge Capability Matrix
 
+Language: [English](API_FORGE_CAPABILITY_MATRIX.md) · [Português (Brasil)](API_FORGE_CAPABILITY_MATRIX.pt-BR.md)
+
 The machine-readable source is
 `src/apiforge/rules/capability_matrix.yaml`. This document explains how to
 read it and what the states mean.

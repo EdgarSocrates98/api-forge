@@ -1,5 +1,7 @@
 # API Forge — Priority Execution Roadmap
 
+Idioma: [English](API_FORGE_PRIORITY_EXECUTION_ROADMAP.en.md) · [Português (Brasil)](API_FORGE_PRIORITY_EXECUTION_ROADMAP.md)
+
 ## Objective
 
 Evoluir o API Forge de um control plane determinístico local-first para uma

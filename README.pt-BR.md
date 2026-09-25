@@ -3,7 +3,7 @@
 Engenharia determinística, offline-first e local-first de APIs com evidência,
 contratos, graph, SDD e execução de agentes governada.
 
-[English README](README.md) · [Guia portátil em português](docs/guides/API_FORGE_PORTABLE_DISTRIBUTION.pt-BR.md) · [Portable guide in English](docs/guides/API_FORGE_PORTABLE_DISTRIBUTION.md)
+[English README](README.md) · [Índice de documentação](docs/README.pt-BR.md) · [Documentation index in English](docs/README.md) · [Guia portátil em português](docs/guides/API_FORGE_PORTABLE_DISTRIBUTION.pt-BR.md) · [Portable guide in English](docs/guides/API_FORGE_PORTABLE_DISTRIBUTION.md)
 
 ## Instalação sem administrador
 
@@ -86,6 +86,22 @@ produção.
 - [Mapa de evolução em português](docs/API_FORGE_EVOLUTION_MAP.md)
 - [Evolution map in English](docs/API_FORGE_EVOLUTION_MAP.en.md)
 - [Catálogo de contratos e recusas](docs/catalog-contract.md)
+- [Política de segurança em português](SECURITY.pt-BR.md)
+- [Security policy in English](SECURITY.md)
+- [Especificação de encerramento em português](SPEC.pt-BR.md)
+- [Product closure specification in English](SPEC.md)
+- [Arquitetura e fronteiras do MVP em português](docs/architecture/API_FORGE_PLATFORM_COMPLETION.pt-BR.md)
+- [Architecture and MVP boundaries in English](docs/architecture/API_FORGE_PLATFORM_COMPLETION.md)
+- [Matriz de capacidades em português](docs/capabilities/API_FORGE_CAPABILITY_MATRIX.pt-BR.md)
+- [Capability matrix in English](docs/capabilities/API_FORGE_CAPABILITY_MATRIX.md)
+- [Host de change-control em português](docs/integrations/API_FORGE_CHANGE_CONTROL_HOST.pt-BR.md)
+- [Change-control host in English](docs/integrations/API_FORGE_CHANGE_CONTROL_HOST.md)
+- [Integração Devin em português](docs/integrations/API_FORGE_DEVIN.pt-BR.md)
+- [Devin integration in English](docs/integrations/API_FORGE_DEVIN.md)
+- [Integrações de observabilidade em português](docs/OBSERVABILITY_INTEGRATIONS.md)
+- [Observability integrations in English](docs/OBSERVABILITY_INTEGRATIONS.en.md)
+- [Roadmap prioritário em português](docs/roadmaps/API_FORGE_PRIORITY_EXECUTION_ROADMAP.md)
+- [Priority roadmap in English](docs/roadmaps/API_FORGE_PRIORITY_EXECUTION_ROADMAP.en.md)
 
 Os itens adiados — `ask`, `improve`, `migrate`, `fix`, inferência completa,
 `apiforge here`, auto-update, symlink, overwrite automático, precedência por

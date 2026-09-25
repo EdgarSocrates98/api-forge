@@ -1,5 +1,7 @@
 # SPEC.md — API_FORGE_V1_CLOSURE
 
+Language: [English](SPEC.md) · [Português (Brasil)](SPEC.pt-BR.md)
+
 Source: .claude/sdd/features/DESIGN_API_FORGE_V1_CLOSURE.md (linted PASS)
 
 ## §G

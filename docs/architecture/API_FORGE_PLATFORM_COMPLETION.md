@@ -1,5 +1,7 @@
 # API Forge Platform Completion Architecture
 
+Language: [English](API_FORGE_PLATFORM_COMPLETION.md) · [Português (Brasil)](API_FORGE_PLATFORM_COMPLETION.pt-BR.md)
+
 API Forge is a deterministic control plane for software engineering work. Its
 surfaces can accept a natural-language intent, but the execution boundary is
 always a typed request, a persisted case, a policy decision and a verifiable

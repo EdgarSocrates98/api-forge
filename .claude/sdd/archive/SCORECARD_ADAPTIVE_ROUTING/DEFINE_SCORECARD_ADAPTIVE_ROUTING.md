@@ -9,7 +9,7 @@
 | **Feature** | SCORECARD_ADAPTIVE_ROUTING |
 | **Date** | 2026-09-25 |
 | **Author** | define-agent |
-| **Status** | ✅ Complete (Built) |
+| **Status** | ✅ Shipped |
 | **Clarity Score** | 15/15 |
 
 ---
@@ -144,7 +144,8 @@ None - ready for Design. Design will fix the initial local policy defaults and e
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0 | 2026-09-25 | define-agent | Captured autonomous B requirements from the validated brainstorm |
+| 1.1 | 2026-09-25 | ship-agent | Archived after implementation, evaluation and independent verification |
 
 ## Next Step
 
-**Ready for:** `/ship .claude/sdd/features/DEFINE_SCORECARD_ADAPTIVE_ROUTING.md`
+**Archived.** Start a separate brainstorm for live shadow/promotion lifecycle or planned C when selected.

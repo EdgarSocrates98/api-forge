@@ -9,7 +9,7 @@
 | **Feature** | SCORECARD_ADAPTIVE_ROUTING |
 | **Date** | 2026-09-25 |
 | **Author** | brainstorm-agent |
-| **Status** | ✅ Complete (Defined) |
+| **Status** | ✅ Shipped |
 
 ---
 
@@ -225,6 +225,12 @@ API Forge stores verified scorecards but does not yet expose a deterministic cha
 
 ---
 
+## Archive Note
+
+| Version | Date | Author | Changes |
+|---------|------|--------|---------|
+| 1.1 | 2026-09-25 | ship-agent | Archived after deterministic scorecard-adaptive routing build and verification |
+
 ## Next Step
 
-**Defined.** The validated requirements are captured in `DEFINE_SCORECARD_ADAPTIVE_ROUTING.md`.
+**Archived.** B is shipped; live shadow execution and C remain future design slices.

@@ -11,7 +11,7 @@
 | **Author** | build-agent |
 | **DEFINE** | [DEFINE_SCORECARD_ADAPTIVE_ROUTING.md](../features/DEFINE_SCORECARD_ADAPTIVE_ROUTING.md) |
 | **DESIGN** | [DESIGN_SCORECARD_ADAPTIVE_ROUTING.md](../features/DESIGN_SCORECARD_ADAPTIVE_ROUTING.md) |
-| **Status** | Complete |
+| **Status** | ✅ Shipped |
 
 ---
 
@@ -222,4 +222,4 @@ Final clean external-basetemp full suite: 961 passed, 2 skipped in 49.71s
 
 ## Next Step
 
-`/ship .claude/sdd/features/DEFINE_SCORECARD_ADAPTIVE_ROUTING.md`
+Archived with all SDD phase artifacts after final verification.

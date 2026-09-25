@@ -25,7 +25,7 @@ from apiforge.contracts.devin import (
     DevinSurface,
     DevinTaskKind,
 )
-from apiforge.contracts.evidence import EvidenceRecord
+from apiforge.contracts.evidence import EvidenceKind, EvidenceRecord, EvidenceRef
 from apiforge.contracts.experience import ExperienceAction, ExperienceSnapshot, ExperienceView
 from apiforge.contracts.host import (
     HostCapability,
@@ -39,7 +39,12 @@ from apiforge.contracts.integration import (
     ExternalReadResult,
     GitHubPrReceipt,
 )
-from apiforge.contracts.knowledge import FreshnessResult, PackFreshness, SourceObservation
+from apiforge.contracts.knowledge import (
+    FreshnessResult,
+    KnowledgeObservation,
+    PackFreshness,
+    SourceObservation,
+)
 from apiforge.contracts.platform import (
     CapabilityRecord,
     CapabilityRequest,
@@ -47,6 +52,22 @@ from apiforge.contracts.platform import (
     PlatformRuntimeReceipt,
     VerticalCoverage,
     VerticalRuntimeReceipt,
+)
+from apiforge.contracts.routing import (
+    CandidateAssessment,
+    ObservedSignal,
+    RoutingDecision,
+    RoutingPolicy,
+    RoutingRequest,
+    ScorecardFeedback,
+)
+from apiforge.contracts.routing_evolution import (
+    EvidenceCoverage,
+    EvolutionMode,
+    EvolutionPolicy,
+    PromotionGate,
+    PromotionState,
+    RoutingEvolution,
 )
 from apiforge.contracts.sandbox import SandboxCommand, SandboxCommandResult
 
@@ -57,6 +78,7 @@ __all__ = [
     "AdapterStatus",
     "AdaptivePlan",
     "AdaptivePolicy",
+    "CandidateAssessment",
     "CapabilityRecord",
     "CapabilityRequest",
     "CapabilityResult",
@@ -74,8 +96,13 @@ __all__ = [
     "DevinPromptTransport",
     "DevinSurface",
     "DevinTaskKind",
+    "EvidenceCoverage",
+    "EvidenceKind",
     "EvidenceLevel",
     "EvidenceRecord",
+    "EvidenceRef",
+    "EvolutionMode",
+    "EvolutionPolicy",
     "ExperienceAction",
     "ExperienceSnapshot",
     "ExperienceView",
@@ -88,12 +115,21 @@ __all__ = [
     "HostCapabilityRequest",
     "HostDeclaration",
     "HostResolution",
+    "KnowledgeObservation",
+    "ObservedSignal",
     "PackFreshness",
     "ParticipantDeclaration",
     "PlatformRuntimeReceipt",
+    "PromotionGate",
+    "PromotionState",
+    "RoutingDecision",
+    "RoutingEvolution",
+    "RoutingPolicy",
+    "RoutingRequest",
     "RuntimeReceipt",
     "SandboxCommand",
     "SandboxCommandResult",
+    "ScorecardFeedback",
     "SourceObservation",
     "VerticalCoverage",
     "VerticalRuntimeReceipt",

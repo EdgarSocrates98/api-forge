@@ -95,6 +95,11 @@ def select_eligible_capabilities(
     available_evidence: tuple[str, ...] = (),
     scorecards: tuple[AgentScorecard, ...] = (),
 ) -> tuple[Capability, ...]:
+    """Return the legacy eligible projection for existing callers.
+
+    New runtime routing uses ``apiforge.runtime.routing`` so eligibility and
+    ranking remain separate and the full decision trace is persisted.
+    """
     candidates = select_capabilities(capabilities, requested=requested, risk=risk)
     evidence = set(available_evidence)
     by_agent = {item.agent: item for item in scorecards}

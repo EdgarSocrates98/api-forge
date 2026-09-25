@@ -44,6 +44,16 @@ severity then area name; unmapped rule_ids are counted, never routed.
 | `AF-ROUTING-NO-FINDINGS` | `next-step` invoked with an empty finding list |
 | `AF-ROUTING-NO-ROUTE` | no route covers the (phase, dominant_area) pair — refusal, never a guess |
 
+Evolution policy is local and evidence-gated. A mode or promotion state is not
+an execution authorization by itself; the runtime persists the gate and uses
+the static route as the only Wave 0 fallback.
+
+| Code | Meaning |
+|---|---|
+| `AF-EVOLUTION-POLICY` | `runtime.routing_evolution` is missing, malformed or violates the bounded policy |
+| `AF-EVOLUTION-PROMOTION` | route promotion is not active because mode, coverage or rollback evidence is unresolved |
+| `AF-RUNTIME-EVOLUTION` | persisted `evolution.json` is missing its typed `PromotionGate` shape |
+
 ## API/Git/CI change control
 
 The change-control adapters are read-only and produce replayable bundles. These
@@ -561,6 +571,7 @@ The local runtime is provider-neutral and executes only against a sealed TaskSpe
 | `AF-RUNTIME-SCHEMA` | adapter output is not a structured object |
 | `AF-RUNTIME-HASH` | runtime artifact hash could not be computed |
 | `AF-RUNTIME-NOT-FOUND` | requested runtime run is not persisted |
+| `AF-RUNTIME-ROUTING` | persisted routing decision is malformed; field=runtime.routing; unlock=regenerate the trace from the versioned routing contracts |
 | `AF-RUNTIME-PROFILES` | agent profile registry is missing or malformed; field=runtime.profiles_file; unlock=provide the versioned local profile registry |
 | `AF-RUNTIME-COMPATIBILITY` | legacy runtime payload lacks a proven compatible state; field=runtime.run; unlock=record a versioned migration and independent proof |
 | `AF-RUNTIME-DEPENDENCY-FAILED` | invocation dependency failed; field=invocation.dependencies; unlock=resolve the prerequisite failure and resume |

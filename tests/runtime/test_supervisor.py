@@ -25,6 +25,16 @@ def test_supervisor_persists_control_authority(tmp_path: Path) -> None:
     assert all(step.status == "succeeded" for step in control.steps)
 
 
+def test_supervisor_persists_routing_trace(tmp_path: Path) -> None:
+    make_task(tmp_path)
+    result = run_runtime(tmp_path, "evolve-orders-api", now="2026-09-23T12:00:00+00:00")
+    routing = Path(str(result["run_dir"])) / "routing.json"
+    assert routing.is_file()
+    payload = routing.read_text(encoding="utf-8")
+    assert "fallback_order" in payload
+    assert "unresolved" in payload
+
+
 def test_external_mutation_requires_policy_approval_and_rollback() -> None:
     record = next(item for item in load_capabilities() if item.capability_id == "external.apply")
     gateway = IntegrationGateway((StaticIntegrationAdapter("fake", (record,)),))

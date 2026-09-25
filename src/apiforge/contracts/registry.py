@@ -26,6 +26,7 @@ from apiforge.contracts.core import (
     Verification,
 )
 from apiforge.contracts.devin import DevinCheck, DevinCliProbe, DevinLaunch, DevinPayload
+from apiforge.contracts.evidence import EvidenceRef
 from apiforge.contracts.graph import GraphEdge, GraphExport, GraphNode
 from apiforge.contracts.grpc import (
     GrpcArtifact,
@@ -80,6 +81,20 @@ from apiforge.contracts.platform import (
     PlatformRuntimeReceipt,
     VerticalCoverage,
     VerticalRuntimeReceipt,
+)
+from apiforge.contracts.routing import (
+    CandidateAssessment,
+    ObservedSignal,
+    RoutingDecision,
+    RoutingPolicy,
+    RoutingRequest,
+    ScorecardFeedback,
+)
+from apiforge.contracts.routing_evolution import (
+    EvidenceCoverage,
+    EvolutionPolicy,
+    PromotionGate,
+    RoutingEvolution,
 )
 from apiforge.contracts.stubs import (
     AgenticQualityAssessment,
@@ -185,6 +200,17 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "CapabilityResult/v1": CapabilityResult,
     "VerticalCoverage/v1": VerticalCoverage,
     "VerticalRuntimeReceipt/v1": VerticalRuntimeReceipt,
+    "ObservedSignal/v1": ObservedSignal,
+    "RoutingPolicy/v1": RoutingPolicy,
+    "RoutingRequest/v1": RoutingRequest,
+    "CandidateAssessment/v1": CandidateAssessment,
+    "RoutingDecision/v1": RoutingDecision,
+    "ScorecardFeedback/v1": ScorecardFeedback,
+    "EvidenceRef/v1": EvidenceRef,
+    "EvidenceCoverage/v1": EvidenceCoverage,
+    "EvolutionPolicy/v1": EvolutionPolicy,
+    "PromotionGate/v1": PromotionGate,
+    "RoutingEvolution/v1": RoutingEvolution,
     "PlatformRuntimeReceipt/v1": PlatformRuntimeReceipt,
     "ExternalReadRequest/v1": ExternalReadRequest,
     "ExternalReadReceipt/v1": ExternalReadReceipt,

@@ -3,6 +3,9 @@ from pathlib import Path
 import yaml
 
 from apiforge.evals.runtime_gate import run_runtime_gate
+from apiforge.evals.suite import EvalCase, evaluate_case
+from apiforge.runtime.feedback import update_scorecard
+from apiforge.runtime.registry import load_profiles
 
 
 def test_runtime_eval_cases_declare_refusal_and_evidence_expectations() -> None:
@@ -84,3 +87,32 @@ def test_experience_interoperability_gate_covers_all_required_quality_kinds() ->
     result = run_runtime_gate(path, observations)
     assert result["status"] == "PASS"
     assert result["quality_gate"] is True
+
+
+def test_routing_feedback_does_not_promote_incomplete_gate(tmp_path: Path) -> None:
+    result = evaluate_case(
+        EvalCase(
+            case_id="routing-missing-holdout",
+            domain="runtime",
+            input_ref="fixture",
+            expected="PASS",
+            required_evidence=("routing",),
+            mutation="none",
+            quality_axes=(),
+            kind="golden",
+        ),
+        observed="PASS",
+        evidence=("routing",),
+    )
+    feedback, scorecard = update_scorecard(
+        tmp_path,
+        load_profiles()["api-contract-review"],
+        (result,),
+        gate={
+            "status": "BLOCKED",
+            "missing_kinds": ("holdout", "mutation"),
+        },
+    )
+    assert feedback.status == "blocked"
+    assert scorecard is not None
+    assert scorecard.quality_promoted is False

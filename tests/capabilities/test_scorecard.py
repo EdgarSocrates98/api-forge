@@ -2,6 +2,7 @@ from pathlib import Path
 
 from apiforge.capabilities.registry import capability_index
 from apiforge.capabilities.scorecard import build_scorecard, load_scorecards, save_scorecard
+from apiforge.contracts.routing import ObservedSignal
 from apiforge.evals.suite import EvalCase, evaluate_case
 from apiforge.runtime.registry import load_capabilities, load_profiles, select_eligible_capabilities
 
@@ -52,6 +53,26 @@ def test_scorecard_orders_only_eligible_capabilities(tmp_path: Path) -> None:
     assert all(item.name in profiles for item in selected)
     assert all(item.state == "supported" for item in selected)
     assert capability_index()
+
+
+def test_scorecard_keeps_observations_additive_and_explicit() -> None:
+    profile = load_profiles()["api-contract-review"]
+    scorecard = build_scorecard(
+        profile,
+        (),
+        observations=(
+            ObservedSignal(
+                name="cost",
+                value=2.5,
+                status="observed",
+                unit="cost",
+                evidence_refs=("run-1",),
+            ),
+        ),
+    )
+    assert scorecard.observed_cost == 2.5
+    assert scorecard.observation_refs == ("run-1",)
+    assert scorecard.quality_promoted is False
 
 
 def test_unsupported_runtime_capability_is_not_routed(tmp_path: Path) -> None:

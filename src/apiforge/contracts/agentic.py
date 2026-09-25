@@ -155,6 +155,10 @@ class AgentScorecard(VersionedContract):
     evaluation_count: int = Field(default=0, ge=0)
     passed_count: int = Field(default=0, ge=0)
     quality_score: float = Field(default=0.0, ge=0, le=1)
+    quality_promoted: bool = False
+    observed_cost: float | None = Field(default=None, ge=0)
+    observed_duration_ms: float | None = Field(default=None, ge=0)
+    observation_refs: tuple[str, ...] = ()
     last_verdict: Literal["unknown", "PASS", "REVIEW", "BLOCKED"] = "unknown"
     evidence: tuple[str, ...] = ()
     gaps: tuple[str, ...] = ()

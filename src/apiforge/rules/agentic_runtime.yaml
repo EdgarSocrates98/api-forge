@@ -9,6 +9,24 @@ runtime:
   eval_gate:
     required_kinds: [golden, holdout, mutation]
     block_on_missing_evidence: true
+  routing_evolution:
+    active_wave: 0
+    mode: local
+    promotion: evidence_gated
+    fallback: static-routing
+    allow_external_mutation: false
+    require_rollback_ref: true
+    unknown_evidence: unresolved
+    adaptive_plan:
+      enabled: false
+      max_steps: null
+  routing:
+    policy_version: routing/v1
+    objective_order: [efficiency, quality]
+    security_mode: gate
+    unknown_signal: unresolved
+    tie_breaker: capability
+    scorecard_update: eval_required
   healing:
     rollback_mode: cas_strict
   policies:

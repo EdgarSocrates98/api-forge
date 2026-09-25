@@ -39,3 +39,13 @@ class FreshnessResult(VersionedContract):
     reason: str
     evidence: EvidenceRecord = Field(default_factory=EvidenceRecord)
     next_action: str = "review"
+
+
+class KnowledgeObservation(VersionedContract):
+    """A local or read-only observation about a versioned knowledge pack."""
+
+    domain: str
+    pack_version: int = Field(ge=0)
+    freshness: FreshnessState
+    source_refs: tuple[str, ...] = ()
+    limitations: tuple[str, ...] = ()

@@ -2,13 +2,18 @@
 
 Bounded routing policy defining objective order, security gate, unknown-signal
 behavior, tie-breaker, eval-gated scorecard updates and the local
-`risk_complexity` policy.
+`risk_complexity` policy. The optional `graph_impact` policy adds bounded,
+explicit graph evidence without replacing either A or B.
 
 `risk_complexity.policy_version` versions the ordered predicates and effects
 used to produce `RiskComplexityAssessment/v1`. MVP predicates are explicit:
 missing evidence, missing expertise, task size, declared dependencies,
 expected proofs and verification-oriented strategy. Safety risks are explicit
 overrides; scorecards and graph impact are not consulted by the risk/complexity policy.
+
+`graph_impact.policy_version` versions the direct/transitive/all traversal
+bounds and the monotonic effects for incomplete graph evidence. Its default is
+an offline transitive assessment bounded by depth, node and edge budgets.
 
 `scorecard_adaptation.policy_version` versions the champion/challenger policy
 applied after the inherited objective ranking. A champion requires fresh

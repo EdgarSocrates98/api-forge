@@ -9,6 +9,7 @@ from typing import Literal
 from pydantic import Field, field_validator, model_validator
 
 from apiforge.contracts.base import VersionedContract
+from apiforge.contracts.graph_impact import GraphImpactAssessment
 from apiforge.core.models import JsonValue, Sha256, freeze_json
 
 
@@ -182,6 +183,7 @@ class OutcomeBrief(VersionedContract):
     next: str | None = None
     open: tuple[str, ...] = ()
     subject: str | None = None
+    graph_impact: GraphImpactAssessment | None = None
 
     @model_validator(mode="after")
     def done_requires_clean(self) -> OutcomeBrief:

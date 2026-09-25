@@ -1,0 +1,26 @@
+version: 1
+cases:
+  - id: graph-impact-replay
+    acceptance: AT-001
+    fixture: tests/fixtures/workspaces/graph_impact_cases.yaml#direct-chain
+    required_evidence: [graph-impact-assessment, graph-snapshot]
+  - id: graph-impact-modes
+    acceptance: AT-002-AT-004
+    fixture: tests/fixtures/workspaces/graph_impact_cases.yaml#direct-chain
+    required_evidence: [impacted-nodes, edge-evidence]
+  - id: graph-impact-bounds
+    acceptance: AT-005
+    fixture: tests/fixtures/workspaces/graph_impact_cases.yaml#cycle-and-budget
+    required_evidence: [bounded-traversal, limitations]
+  - id: graph-impact-unresolved
+    acceptance: AT-006
+    fixture: tests/fixtures/workspaces/graph_impact_cases.yaml#unresolved-target
+    required_evidence: [unresolved, conservative-fallback]
+  - id: graph-impact-routing
+    acceptance: AT-007-AT-010
+    fixture: tests/fixtures/workspaces/graph_impact_cases.yaml#direct-chain
+    required_evidence: [routing-decision, routing-plan, experience-projection]
+  - id: graph-impact-offline
+    acceptance: AT-011
+    fixture: local-only
+    required_evidence: [offline-boundary]

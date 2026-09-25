@@ -17,6 +17,7 @@ import json
 from pathlib import Path
 
 from apiforge.contracts.base import ContractError
+from apiforge.contracts.graph_impact import GraphImpactAssessment
 from apiforge.contracts.task import BriefStatus, OutcomeBrief, TaskState
 from apiforge.taskspec import store
 from apiforge.verification.service import load_verification
@@ -133,15 +134,32 @@ def brief_for_agentic_run(root: Path, task_id: str, run_id: str) -> OutcomeBrief
         raise ContractError("AF-RUNTIME-NOT-FOUND", f"no runtime run {run_id!r}")
     payload = json.loads(run_path.read_text(encoding="utf-8"))
     spec = store.load(root, task_id)
+    graph_impact: GraphImpactAssessment | None = None
+    graph_path = run_path.parent / "graph-impact.json"
+    if graph_path.is_file():
+        try:
+            graph_impact = GraphImpactAssessment.model_validate(
+                json.loads(graph_path.read_text(encoding="utf-8"))
+            )
+        except (OSError, UnicodeDecodeError, ValueError) as exc:
+            raise ContractError("AF-RUNTIME-ROUTING", f"{graph_path}: {exc}") from exc
     status = str(payload.get("final_status", "REVIEW"))
     gaps = tuple(str(item) for item in payload.get("gaps", ()))
     if status == "BLOCKED":
         return OutcomeBrief(
-            status=BriefStatus.BLOCKED, outcome=spec.outcome, gaps=gaps, subject=run_id
+            status=BriefStatus.BLOCKED,
+            outcome=spec.outcome,
+            gaps=gaps,
+            subject=run_id,
+            graph_impact=graph_impact,
         )
     if status == "DONE":
         return OutcomeBrief(
-            status=BriefStatus.DONE, outcome=spec.outcome, proof=(str(run_path),), subject=run_id
+            status=BriefStatus.DONE,
+            outcome=spec.outcome,
+            proof=(str(run_path),),
+            subject=run_id,
+            graph_impact=graph_impact,
         )
     return OutcomeBrief(
         status=BriefStatus.REVIEW,
@@ -149,6 +167,7 @@ def brief_for_agentic_run(root: Path, task_id: str, run_id: str) -> OutcomeBrief
         gaps=gaps,
         proof=(str(run_path),),
         subject=run_id,
+        graph_impact=graph_impact,
     )
 
 

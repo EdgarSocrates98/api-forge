@@ -195,6 +195,7 @@ The existing risk/complexity assessment remains authoritative for task risk, com
 |---|------|--------|---------|-------|--------------|
 | 1 | `src/apiforge/contracts/graph_impact.py` | Create | Define `GraphImpactPolicy`, effect, node, candidate and `GraphImpactAssessment/v1` contracts plus defaults | @python-developer | None |
 | 2 | `src/apiforge/contracts/routing.py` | Modify | Add optional graph target/mode/candidate refs to `RoutingRequest`, graph assessment to `RoutingDecision`, and additive graph evidence to `RoutingPlan` if required by implementation | @python-developer | 1 |
+| 2a | `src/apiforge/contracts/task.py` | Modify | Carry the stored graph assessment through `OutcomeBrief/v1` for the explainable brief projection | @python-developer | 1 |
 | 3 | `src/apiforge/contracts/__init__.py` | Modify | Export graph impact contracts | @python-developer | 1 |
 | 4 | `src/apiforge/contracts/registry.py` | Modify | Register versioned graph impact contracts for validation and artifact discovery | @python-developer | 1 |
 | 5 | `src/apiforge/graph/impact.py` | Create | Implement pure bounded reverse traversal, canonical ordering, coverage classification and candidate matching | @python-developer | 1 |
@@ -208,20 +209,25 @@ The existing risk/complexity assessment remains authoritative for task risk, com
 | 13 | `src/apiforge/rules/agentic_runtime.yaml` | Modify | Add versioned default graph impact policy under `runtime.routing.graph_impact` | (general) | 1, 7 |
 | 14 | `docs/contracts/GraphImpactPolicy-v1.md` | Create | Document policy fields, closed effect vocabulary and defaults | @code-documenter | 1, 13 |
 | 15 | `docs/contracts/GraphImpactAssessment-v1.md` | Create | Document assessment schema, identity, provenance and unresolved semantics | @code-documenter | 1, 5 |
+| 15a | `docs/contracts/GraphImpactEffect-v1.md` | Create | Document the closed monotonic gate, verification and selection effect | @code-documenter | 1 |
+| 15b | `docs/contracts/GraphImpactNode-v1.md` | Create | Document explicit impacted-node provenance and ordering | @code-documenter | 1, 5 |
+| 15c | `docs/contracts/GraphCandidateImpact-v1.md` | Create | Document caller-supplied candidate mapping and safe selection effect | @code-documenter | 1, 5 |
 | 16 | `docs/contracts/RoutingRequest-v1.md` | Modify | Document optional graph target/mode/candidate-reference inputs and compatibility | @code-documenter | 2 |
 | 17 | `docs/contracts/RoutingDecision-v1.md` | Modify | Document embedded canonical assessment and monotonic gate composition | @code-documenter | 2, 7 |
 | 18 | `docs/contracts/RoutingPlan-v1.md` | Modify | Document graph-derived evidence, gate and unresolved projection | @code-documenter | 2, 7 |
+| 18a | `docs/contracts/OutcomeBrief-v1.md` | Modify | Document the optional canonical graph assessment in runtime briefs | @code-documenter | 2a, 12 |
 | 19 | `tests/graph/test_impact.py` | Create | Unit-test direct, transitive, all, order, cycle, depth, node/edge budget and unresolved behavior | @test-generator | 1, 5 |
 | 20 | `tests/contracts/test_graph_impact.py` | Create | Test validation, defaults, stable serialization and closed policy vocabularies | @test-generator | 1 |
 | 21 | `tests/runtime/test_routing.py` | Modify | Test graph-aware gate, explicit candidate selection, A/B compatibility and decision replay | @test-generator | 2, 5, 7 |
 | 22 | `tests/runtime/test_routing_plan.py` | Modify | Test monotonic plan gate, required roles, evidence and unresolved propagation | @test-generator | 2, 7 |
 | 23 | `tests/application/test_runtime_experience.py` | Modify | Test runtime/governance/capability-owner projections consume the stored assessment | @test-generator | 9, 11, 12 |
+| 23a | `tests/contracts/test_conformance.py` | Modify | Preserve existing brief validation and prove graph assessment round-trip | @test-generator | 2a, 18a |
 | 24 | `tests/fixtures/workspaces/graph_impact_cases.yaml` | Create | Canonical graph fixtures for direct, transitive, all, cycle, cutoff, stale and missing evidence cases | (general) | None |
 | 25 | `tests/fixtures/workspaces/graph_impact_expected.yaml` | Create | Expected assessment, gate, order and projection outputs for each fixture | (general) | 24 |
 | 26 | `tests/evals/cases/graph_aware_impact.yaml` | Create | Offline evaluation cases covering AT-001 through AT-011 | @test-generator | 24, 25 |
 | 27 | `tests/evals/test_graph_aware_impact.py` | Create | Execute the evaluation cases and assert no external integration is invoked | @test-generator | 5, 7, 26 |
 
-**Total Files:** 27
+**Total Files:** 33
 
 The Build phase may omit file 9 or 10 if existing routing serialization already exposes the embedded assessment directly; if it does, the omission must be documented in the implementation result and the acceptance tests must still verify direct artifact replay. No file outside this manifest may be changed without updating the design or recording a build-time scope exception.
 

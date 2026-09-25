@@ -35,6 +35,13 @@ from apiforge.contracts.distribution import (
 )
 from apiforge.contracts.evidence import EvidenceKind, EvidenceRecord, EvidenceRef
 from apiforge.contracts.experience import ExperienceAction, ExperienceSnapshot, ExperienceView
+from apiforge.contracts.graph_impact import (
+    GraphCandidateImpact,
+    GraphImpactAssessment,
+    GraphImpactEffect,
+    GraphImpactNode,
+    GraphImpactPolicy,
+)
 from apiforge.contracts.host import (
     HostCapability,
     HostCapabilityRequest,
@@ -151,6 +158,11 @@ __all__ = [
     "ForgePaths",
     "FreshnessResult",
     "GitHubPrReceipt",
+    "GraphCandidateImpact",
+    "GraphImpactAssessment",
+    "GraphImpactEffect",
+    "GraphImpactNode",
+    "GraphImpactPolicy",
     "HostCapability",
     "HostCapabilityRequest",
     "HostDeclaration",

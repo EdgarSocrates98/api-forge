@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 
 from apiforge.contracts.base import ContractError
+from apiforge.contracts.graph_impact import GraphImpactAssessment
 from apiforge.contracts.routing import RoutingDecision, RoutingPlan
 from apiforge.runtime.adapters import FakeModelAdapter, ModelAdapter
 from apiforge.runtime.control import ControlPlane
@@ -49,6 +50,7 @@ def runtime_status(root: Path, task_id: str) -> dict[str, object]:
             for name, contract in (
                 ("routing.json", RoutingDecision),
                 ("routing-plan.json", RoutingPlan),
+                ("graph-impact.json", GraphImpactAssessment),
             ):
                 path = run_dir / name
                 if not path.is_file():
@@ -62,9 +64,12 @@ def runtime_status(root: Path, task_id: str) -> dict[str, object]:
                         result["routing_errors"] = errors
                     errors.append(f"{name}: {exc}")
                 else:
-                    result["routing_plan" if name == "routing-plan.json" else "routing"] = (
-                        value.model_dump(mode="json")
-                    )
+                    result[
+                        {
+                            "routing-plan.json": "routing_plan",
+                            "graph-impact.json": "graph_impact",
+                        }.get(name, "routing")
+                    ] = value.model_dump(mode="json")
     if isinstance(latest, dict) and latest.get("control_run_id"):
         try:
             control = ControlPlane(root).get(str(latest["control_run_id"]))

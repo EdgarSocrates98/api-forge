@@ -9,6 +9,8 @@ import yaml
 
 from apiforge.contracts.agentic import AgentCapabilityProfile, AgentScorecard
 from apiforge.contracts.base import ContractError
+from apiforge.contracts.graph import GraphEdge, GraphExport, GraphNode
+from apiforge.contracts.graph_impact import GraphImpactAssessment
 from apiforge.contracts.routing import (
     CandidateAssessment,
     ObservedSignal,
@@ -19,6 +21,7 @@ from apiforge.contracts.routing import (
 )
 from apiforge.contracts.task import TaskSpec
 from apiforge.core.ids import stable_id
+from apiforge.graph.impact import assess_graph_impact
 from apiforge.runtime.registry import Capability, select_capabilities
 from apiforge.runtime.risk_complexity import assess_risk_complexity
 from apiforge.runtime.scorecard_routing import assess_scorecard_routing
@@ -55,6 +58,8 @@ def load_routing_policy(path: Path | None = None) -> RoutingPolicy:
             values["risk_complexity"] = raw["risk_complexity"]
         if raw.get("scorecard_adaptation") is not None:
             values["scorecard_adaptation"] = raw["scorecard_adaptation"]
+        if raw.get("graph_impact") is not None:
+            values["graph_impact"] = raw["graph_impact"]
         return RoutingPolicy.model_validate(values)
     except (KeyError, TypeError, ValueError) as exc:
         raise ContractError("AF-RUNTIME-POLICY", f"invalid runtime.routing: {exc}") from exc
@@ -67,6 +72,11 @@ def build_routing_request(
     available_evidence: tuple[str, ...] = (),
     required_expertise: tuple[str, ...] = (),
     available_expertise: tuple[str, ...] = (),
+    graph_target: str | None = None,
+    graph_mode: str | None = None,
+    graph_candidate_refs: Mapping[str, Sequence[str]] | None = None,
+    graph_freshness_state: str | None = None,
+    graph_evidence: tuple[str, ...] = (),
 ) -> RoutingRequest:
     requested = (spec.capability_covered,) if spec.capability_covered else ()
     evidence = tuple(sorted({"task_spec", *available_evidence}))
@@ -85,6 +95,14 @@ def build_routing_request(
         expected_proofs=spec.expected_proofs,
         strategy=spec.strategy.value,
         policy_id=policy_id,
+        graph_target=graph_target,
+        graph_mode=graph_mode,  # type: ignore[arg-type]
+        graph_candidate_refs={
+            str(name): tuple(sorted({str(ref) for ref in refs}))
+            for name, refs in sorted((graph_candidate_refs or {}).items())
+        },
+        graph_freshness_state=graph_freshness_state,  # type: ignore[arg-type]
+        graph_evidence=tuple(sorted(set(graph_evidence))),
     )
 
 
@@ -335,6 +353,52 @@ def rank_eligible(
     return tuple(sorted(ranked, key=lambda item: item.ranking_key))
 
 
+def _graph_selection_rank(effect: str) -> int:
+    return {"prefer": 0, "neutral": 1, "unresolved": 1, "demote": 2, "exclude": 3}.get(effect, 1)
+
+
+def apply_graph_selection(
+    assessments: Sequence[CandidateAssessment],
+    graph_impact: GraphImpactAssessment | None,
+) -> tuple[CandidateAssessment, ...]:
+    """Apply only explicit graph preferences while preserving static fallback order."""
+    if graph_impact is None:
+        return tuple(assessments)
+    effects = {item.candidate: item.selection for item in graph_impact.candidate_impacts}
+    return tuple(
+        sorted(
+            assessments,
+            key=lambda item: (
+                _graph_selection_rank(effects.get(item.capability, "unresolved")),
+                item.ranking_key,
+            ),
+        )
+    )
+
+
+def _graph_assessment(
+    request: RoutingRequest,
+    policy: RoutingPolicy,
+    *,
+    graph_nodes: Sequence[GraphNode],
+    graph_edges: Sequence[GraphEdge],
+    graph_snapshot: GraphExport | None,
+) -> GraphImpactAssessment | None:
+    if request.graph_target is None:
+        return None
+    return assess_graph_impact(
+        graph_nodes,
+        graph_edges,
+        request.graph_target,
+        mode=request.graph_mode,
+        policy=policy.graph_impact,
+        graph_snapshot=graph_snapshot,
+        freshness_state=request.graph_freshness_state or "fresh",
+        candidate_refs=request.graph_candidate_refs,
+        evidence=request.graph_evidence,
+    )
+
+
 def _role_capabilities(
     capabilities: Mapping[str, Capability], roles: tuple[str, ...]
 ) -> tuple[str, ...]:
@@ -350,9 +414,27 @@ def route_capabilities(
     policy: RoutingPolicy | None = None,
     scorecards: Sequence[AgentScorecard] = (),
     signals: Mapping[str, tuple[ObservedSignal, ...]] | None = None,
+    graph_nodes: Sequence[GraphNode] = (),
+    graph_edges: Sequence[GraphEdge] = (),
+    graph_snapshot: GraphExport | None = None,
 ) -> RoutingDecision:
     selected_policy = policy or load_routing_policy()
     assessment = assess_risk_complexity(request, selected_policy)
+    graph_impact = _graph_assessment(
+        request,
+        selected_policy,
+        graph_nodes=graph_nodes,
+        graph_edges=graph_edges,
+        graph_snapshot=graph_snapshot,
+    )
+    required_roles = tuple(
+        sorted(
+            {
+                *assessment.required_roles,
+                *(graph_impact.required_roles if graph_impact is not None else ()),
+            }
+        )
+    )
     scorecard_values = _scorecard_map(scorecards)
     supplied_signals = signals or signals_from_scorecards(scorecards)
     assessments = assess_candidates(
@@ -362,7 +444,7 @@ def route_capabilities(
         signals=supplied_signals,
         additional_capabilities=_role_capabilities(
             capabilities,
-            assessment.required_roles,
+            required_roles,
         ),
     )
     ranking_policy = selected_policy.model_copy(
@@ -373,6 +455,7 @@ def route_capabilities(
         scorecards=scorecard_values,
         policy=ranking_policy,
     )
+    ranked_candidates = apply_graph_selection(ranked_candidates, graph_impact)
     scorecard_routing = assess_scorecard_routing(
         ranked_candidates,
         scorecard_values,
@@ -384,7 +467,7 @@ def route_capabilities(
         for name in scorecard_routing.ordered_candidates
         if name in ranked_by_name
     )
-    role_names = set(_role_capabilities(capabilities, assessment.required_roles))
+    role_names = set(_role_capabilities(capabilities, required_roles))
     baseline_order = tuple(
         item.capability
         for group in (
@@ -417,6 +500,8 @@ def route_capabilities(
         if signal.status != "observed" and signal.name in {"cost", "duration", "quality"}
     ]
     unresolved.extend(assessment.unresolved)
+    if graph_impact is not None:
+        unresolved.extend(graph_impact.unresolved)
     unresolved.extend(scorecard_routing.unresolved)
     if not ranked:
         unresolved.append(
@@ -434,6 +519,9 @@ def route_capabilities(
         "revision": request.revision,
         "policy": selected_policy.model_dump(mode="json"),
         "assessment": assessment.model_dump(mode="json"),
+        "graph_impact": (
+            graph_impact.model_dump(mode="json") if graph_impact is not None else None
+        ),
         "scorecard_routing": scorecard_routing.model_dump(mode="json"),
         "shadow_evaluation": shadow_evaluation.model_dump(mode="json"),
         "candidates": [item.model_dump(mode="json") for item in candidate_trace],
@@ -448,9 +536,23 @@ def route_capabilities(
         selected=ordered[0] if ordered else None,
         fallback_order=ordered,
         risk_complexity=assessment,
+        graph_impact=graph_impact,
         scorecard_routing=scorecard_routing,
         shadow_evaluation=shadow_evaluation,
-        evidence=tuple(sorted({*request.available_evidence, *scorecard_routing.evidence})),
+        evidence=tuple(
+            sorted(
+                {
+                    *request.available_evidence,
+                    *scorecard_routing.evidence,
+                    *(graph_impact.evidence if graph_impact is not None else ()),
+                    *(
+                        (f"graph-impact:{graph_impact.assessment_id}",)
+                        if graph_impact is not None
+                        else ()
+                    ),
+                }
+            )
+        ),
         unresolved=tuple(sorted(set(unresolved))),
     )
 
@@ -465,13 +567,26 @@ def build_routing_plan(
     selected_policy = policy or load_routing_policy()
     ordered = tuple(name for name in decision.fallback_order if name in capabilities)
     risk_assessment = decision.risk_complexity
+    graph_assessment = decision.graph_impact
     required_roles = (
-        risk_assessment.required_roles
+        tuple(
+            sorted(
+                {
+                    *(risk_assessment.required_roles if risk_assessment is not None else ()),
+                    *(graph_assessment.required_roles if graph_assessment is not None else ()),
+                }
+            )
+        )
         if risk_assessment is not None
-        else (
-            "reviewer",
-            "critic",
-            "referee",
+        else tuple(
+            sorted(
+                {
+                    "reviewer",
+                    "critic",
+                    "referee",
+                    *(graph_assessment.required_roles if graph_assessment is not None else ()),
+                }
+            )
         )
     )
     role_kinds = {"reviewer", "critic", "referee"}
@@ -541,15 +656,27 @@ def build_routing_plan(
             {
                 *(risk_assessment.unresolved if risk_assessment is not None else ()),
                 *missing_roles,
+                *(
+                    ("graph-impact:blocked-by-policy",)
+                    if graph_assessment is not None and graph_assessment.gate_state == "blocked"
+                    else ()
+                ),
             }
         )
     )
-    gate_state = (
-        "blocked"
-        if gate_unresolved
-        else risk_assessment.gate_state
-        if risk_assessment is not None
-        else "open"
+    gate_states = [
+        risk_assessment.gate_state if risk_assessment is not None else "open",
+        graph_assessment.gate_state if graph_assessment is not None else "open",
+        "blocked" if gate_unresolved else "open",
+    ]
+    gate_state = max(gate_states, key=lambda value: {"open": 0, "review": 1, "blocked": 2}[value])
+    depth_states = [
+        risk_assessment.verification_depth if risk_assessment is not None else "standard",
+        graph_assessment.verification_depth if graph_assessment is not None else "standard",
+    ]
+    verification_depth = max(
+        depth_states,
+        key=lambda value: {"standard": 0, "elevated": 1, "strict": 2}[value],
     )
     scorecard_assessment = decision.scorecard_routing
     payload = {
@@ -565,10 +692,11 @@ def build_routing_plan(
         "execution_mode": selected_policy.execution_mode,
         "max_fallbacks": selected_policy.max_fallbacks,
         "assessment_id": risk_assessment.assessment_id if risk_assessment is not None else None,
-        "complexity": risk_assessment.complexity if risk_assessment is not None else None,
-        "verification_depth": (
-            risk_assessment.verification_depth if risk_assessment is not None else None
+        "graph_impact": (
+            graph_assessment.model_dump(mode="json") if graph_assessment is not None else None
         ),
+        "complexity": risk_assessment.complexity if risk_assessment is not None else None,
+        "verification_depth": verification_depth,
         "required_roles": required_roles,
         "gate_state": gate_state,
         "challenger_order": (
@@ -592,10 +720,9 @@ def build_routing_plan(
         execution_mode=selected_policy.execution_mode,
         max_fallbacks=selected_policy.max_fallbacks,
         assessment_id=risk_assessment.assessment_id if risk_assessment is not None else None,
+        graph_impact=graph_assessment,
         complexity=risk_assessment.complexity if risk_assessment is not None else None,
-        verification_depth=(
-            risk_assessment.verification_depth if risk_assessment is not None else None
-        ),
+        verification_depth=verification_depth,
         required_roles=required_roles,
         gate_state=gate_state,
         challenger_order=(

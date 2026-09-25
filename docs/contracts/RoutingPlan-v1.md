@@ -16,6 +16,7 @@ legacy `routing.json` decision and `fallback_order` fields.
 | `execution_mode` | `parallel_review` or `sequential_failover` |
 | `max_fallbacks` | Deterministic fallback budget |
 | `assessment_id` | Source `RiskComplexityAssessment/v1`, when present |
+| `graph_impact` | The same canonical `GraphImpactAssessment/v1`, when graph routing was requested |
 | `complexity` / `verification_depth` | Policy effects selected by the assessment |
 | `required_roles` | Review roles requested by the assessment |
 | `gate_state` | `open`, `review` or `blocked` policy state |

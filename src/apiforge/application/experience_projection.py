@@ -49,6 +49,10 @@ def project_payload(
         if isinstance(assessment, dict):
             gaps_values.extend(assessment.get("unresolved", ()))
             refs_values.extend(assessment.get("evidence", ()))
+        graph_impact = routing.get("graph_impact")
+        if isinstance(graph_impact, dict):
+            gaps_values.extend(graph_impact.get("unresolved", ()))
+            refs_values.extend(graph_impact.get("evidence", ()))
     if isinstance(plan, dict):
         gaps_values.extend(plan.get("unresolved", ()))
         refs_values.extend(plan.get("evidence", ()))

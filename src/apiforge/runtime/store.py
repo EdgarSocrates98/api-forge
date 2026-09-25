@@ -9,6 +9,7 @@ from typing import Any
 
 from apiforge.contracts.agentic import AgentArtifact, AgenticRun, TrajectoryEvent
 from apiforge.contracts.base import ContractError
+from apiforge.contracts.graph_impact import GraphImpactAssessment
 from apiforge.contracts.routing import RoutingDecision, RoutingPlan
 from apiforge.contracts.routing_evolution import PromotionGate
 from apiforge.contracts.scorecard_shadow import ScorecardShadowEvaluation
@@ -54,6 +55,20 @@ class RunStore:
 
     def save_routing_plan(self, plan: RoutingPlan) -> Path:
         return self._write("routing-plan.json", plan.model_dump(mode="json"))
+
+    def save_graph_impact(self, assessment: GraphImpactAssessment) -> Path:
+        return self._write("graph-impact.json", assessment.model_dump(mode="json"))
+
+    def load_graph_impact(self) -> GraphImpactAssessment | None:
+        path = self.directory / "graph-impact.json"
+        if not path.is_file():
+            return None
+        try:
+            return GraphImpactAssessment.model_validate(
+                json.loads(path.read_text(encoding="utf-8"))
+            )
+        except (OSError, UnicodeDecodeError, ValueError) as exc:
+            raise ContractError("AF-RUNTIME-ROUTING", f"{path}: {exc}") from exc
 
     def save_evolution(self, gate: PromotionGate) -> Path:
         return self._write("evolution.json", gate.model_dump(mode="json"))

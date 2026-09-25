@@ -36,6 +36,35 @@ runtime:
       challenger_slots: 1
       require_quality_promoted: true
       stale_behavior: unresolved
+    graph_impact:
+      policy_version: graph-impact/v1
+      default_mode: transitive
+      max_depth: 4
+      max_nodes: 256
+      max_edges: 1024
+      incomplete_effect: elevated
+      unknown_candidate_effect: unresolved
+      effects:
+        none:
+          gate_state: open
+          verification_depth: standard
+          required_roles: []
+          selection: neutral
+        explicit:
+          gate_state: review
+          verification_depth: elevated
+          required_roles: [reviewer]
+          selection: prefer
+        bounded:
+          gate_state: review
+          verification_depth: strict
+          required_roles: [reviewer, critic]
+          selection: prefer
+        unresolved:
+          gate_state: review
+          verification_depth: elevated
+          required_roles: [reviewer]
+          selection: unresolved
     risk_complexity:
       policy_version: risk-complexity/v1
       unknown_behavior: unresolved

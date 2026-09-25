@@ -5,9 +5,14 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Literal
 
-from pydantic import Field, model_validator
+from pydantic import AliasChoices, Field, model_validator
 
 from apiforge.contracts.base import VersionedContract
+from apiforge.contracts.risk_complexity import (
+    RiskComplexityAssessment,
+    RiskComplexityPolicy,
+    default_risk_complexity_policy,
+)
 
 RoutingSignalName = Literal["cost", "duration", "quality", "security"]
 SignalStatus = Literal["observed", "unknown", "unresolved"]
@@ -50,6 +55,7 @@ class RoutingPolicy(VersionedContract):
     scorecard_update: Literal["eval_required"] = "eval_required"
     execution_mode: RoutingExecutionMode = "parallel_review"
     max_fallbacks: int = Field(default=1, ge=0, le=64)
+    risk_complexity: RiskComplexityPolicy = Field(default_factory=default_risk_complexity_policy)
 
     @model_validator(mode="after")
     def objectives_are_unique(self) -> RoutingPolicy:
@@ -70,6 +76,13 @@ class RoutingRequest(VersionedContract):
     required_expertise: tuple[str, ...] = ()
     available_expertise: tuple[str, ...] = ()
     inputs: tuple[str, ...] = ()
+    task_size: Literal["S", "M", "L"] | None = Field(
+        default=None,
+        validation_alias=AliasChoices("task_size", "size"),
+    )
+    dependencies: tuple[str, ...] = ()
+    expected_proofs: tuple[str, ...] = ()
+    strategy: str | None = None
     policy_id: str
 
 
@@ -97,6 +110,7 @@ class RoutingDecision(VersionedContract):
     candidates: tuple[CandidateAssessment, ...] = ()
     selected: str | None = None
     fallback_order: tuple[str, ...] = ()
+    risk_complexity: RiskComplexityAssessment | None = None
     evidence: tuple[str, ...] = ()
     unresolved: tuple[str, ...] = ()
 
@@ -116,6 +130,11 @@ class RoutingPlan(VersionedContract):
     referee: str | None = None
     execution_mode: RoutingExecutionMode = "parallel_review"
     max_fallbacks: int = Field(default=1, ge=0, le=64)
+    assessment_id: str | None = None
+    complexity: str | None = None
+    verification_depth: str | None = None
+    required_roles: tuple[str, ...] = ()
+    gate_state: str = "open"
     evidence: tuple[str, ...] = ()
     unresolved: tuple[str, ...] = ()
 

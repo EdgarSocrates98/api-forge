@@ -32,6 +32,7 @@ def test_supervisor_persists_routing_trace(tmp_path: Path) -> None:
     assert routing.is_file()
     payload = routing.read_text(encoding="utf-8")
     assert "fallback_order" in payload
+    assert "risk_complexity" in payload
     assert "unresolved" in payload
 
 

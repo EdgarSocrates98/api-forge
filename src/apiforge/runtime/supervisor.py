@@ -255,9 +255,15 @@ async def execute_run(
             actor="api-agentic-orchestrator",
             subject=routing.decision_id,
             payload={
+                "assessment": (
+                    routing.risk_complexity.model_dump(mode="json")
+                    if routing.risk_complexity is not None
+                    else None
+                ),
                 "selected": routing.selected,
                 "fallback_order": routing.fallback_order,
                 "routing_plan": routing_plan.model_dump(mode="json"),
+                "evidence": routing.evidence,
                 "unresolved": routing.unresolved,
             },
             created_at=timestamp,

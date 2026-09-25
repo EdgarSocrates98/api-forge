@@ -20,6 +20,7 @@ from apiforge.contracts.routing import (
 from apiforge.contracts.task import TaskSpec
 from apiforge.core.ids import stable_id
 from apiforge.runtime.registry import Capability, select_capabilities
+from apiforge.runtime.risk_complexity import assess_risk_complexity
 
 
 def _routing_path() -> Path:
@@ -37,19 +38,20 @@ def load_routing_policy(path: Path | None = None) -> RoutingPolicy:
         raise ContractError("AF-RUNTIME-POLICY", "missing runtime.routing")
     try:
         policy_version = str(raw["policy_version"])
-        return RoutingPolicy.model_validate(
-            {
-                "policy_id": policy_version,
-                "policy_version": policy_version,
-                "objective_order": tuple(str(item) for item in raw.get("objective_order", ())),
-                "security_mode": str(raw.get("security_mode", "gate")),
-                "unknown_signal": str(raw.get("unknown_signal", "unresolved")),
-                "tie_breaker": str(raw.get("tie_breaker", "capability")),
-                "scorecard_update": str(raw.get("scorecard_update", "eval_required")),
-                "execution_mode": str(raw.get("execution_mode", "parallel_review")),
-                "max_fallbacks": int(raw.get("max_fallbacks", 1)),
-            }
-        )
+        values: dict[str, object] = {
+            "policy_id": policy_version,
+            "policy_version": policy_version,
+            "objective_order": tuple(str(item) for item in raw.get("objective_order", ())),
+            "security_mode": str(raw.get("security_mode", "gate")),
+            "unknown_signal": str(raw.get("unknown_signal", "unresolved")),
+            "tie_breaker": str(raw.get("tie_breaker", "capability")),
+            "scorecard_update": str(raw.get("scorecard_update", "eval_required")),
+            "execution_mode": str(raw.get("execution_mode", "parallel_review")),
+            "max_fallbacks": int(raw.get("max_fallbacks", 1)),
+        }
+        if raw.get("risk_complexity") is not None:
+            values["risk_complexity"] = raw["risk_complexity"]
+        return RoutingPolicy.model_validate(values)
     except (KeyError, TypeError, ValueError) as exc:
         raise ContractError("AF-RUNTIME-POLICY", f"invalid runtime.routing: {exc}") from exc
 
@@ -74,6 +76,10 @@ def build_routing_request(
         required_expertise=required_expertise,
         available_expertise=available_expertise,
         inputs=spec.inputs,
+        task_size=spec.size.value,
+        dependencies=spec.dependencies,
+        expected_proofs=spec.expected_proofs,
+        strategy=spec.strategy.value,
         policy_id=policy_id,
     )
 
@@ -222,12 +228,14 @@ def assess_candidates(
     request: RoutingRequest,
     *,
     signals: Mapping[str, tuple[ObservedSignal, ...]] | None = None,
+    additional_capabilities: tuple[str, ...] = (),
 ) -> tuple[CandidateAssessment, ...]:
     assessments: list[CandidateAssessment] = []
     for capability in select_capabilities(
         dict(capabilities),
         requested=request.requested_capabilities,
         risk=request.risk,
+        additional_names=additional_capabilities,
     ):
         rejection = check_eligibility(capability, profiles, request)
         assessments.append(
@@ -323,6 +331,15 @@ def rank_eligible(
     return tuple(sorted(ranked, key=lambda item: item.ranking_key))
 
 
+def _role_capabilities(
+    capabilities: Mapping[str, Capability], roles: tuple[str, ...]
+) -> tuple[str, ...]:
+    required_kinds = set(roles)
+    return tuple(
+        sorted(item.name for item in capabilities.values() if item.kind in required_kinds)
+    )
+
+
 def route_capabilities(
     capabilities: Mapping[str, Capability],
     profiles: Mapping[str, AgentCapabilityProfile],
@@ -333,6 +350,7 @@ def route_capabilities(
     signals: Mapping[str, tuple[ObservedSignal, ...]] | None = None,
 ) -> RoutingDecision:
     selected_policy = policy or load_routing_policy()
+    assessment = assess_risk_complexity(request, selected_policy)
     scorecard_values = _scorecard_map(scorecards)
     supplied_signals = signals or signals_from_scorecards(scorecards)
     assessments = assess_candidates(
@@ -340,18 +358,35 @@ def route_capabilities(
         profiles,
         request,
         signals=supplied_signals,
+        additional_capabilities=_role_capabilities(
+            capabilities,
+            assessment.required_roles,
+        ),
     )
-    ranked = rank_eligible(
+    ranking_policy = selected_policy.model_copy(
+        update={"objective_order": assessment.objective_order}
+    )
+    ranked_candidates = rank_eligible(
         assessments,
         scorecards=scorecard_values,
-        policy=selected_policy,
+        policy=ranking_policy,
+    )
+    role_names = set(_role_capabilities(capabilities, assessment.required_roles))
+    ranked = tuple(
+        item
+        for group in (
+            tuple(item for item in ranked_candidates if item.capability not in role_names),
+            tuple(item for item in ranked_candidates if item.capability in role_names),
+        )
+        for item in group
     )
     unresolved = [
         f"{item.capability}:{signal.name}:unresolved"
-        for item in ranked
+        for item in assessments
         for signal in item.signals
         if signal.status != "observed" and signal.name in {"cost", "duration", "quality"}
     ]
+    unresolved.extend(assessment.unresolved)
     if not ranked:
         unresolved.append(
             "AF-CAPABILITY-ELIGIBILITY: field=capability; unlock=provide eligible evidence"
@@ -367,6 +402,7 @@ def route_capabilities(
         "task_id": request.task_id,
         "revision": request.revision,
         "policy": selected_policy.model_dump(mode="json"),
+        "assessment": assessment.model_dump(mode="json"),
         "candidates": [item.model_dump(mode="json") for item in candidate_trace],
     }
     decision_id = stable_id("routing", decision_payload)
@@ -379,6 +415,7 @@ def route_capabilities(
         candidates=candidate_trace,
         selected=ordered[0] if ordered else None,
         fallback_order=ordered,
+        risk_complexity=assessment,
         evidence=tuple(sorted(request.available_evidence)),
         unresolved=tuple(sorted(set(unresolved))),
     )
@@ -393,21 +430,50 @@ def build_routing_plan(
     """Convert ranked candidates into explicit, stable execution roles."""
     selected_policy = policy or load_routing_policy()
     ordered = tuple(name for name in decision.fallback_order if name in capabilities)
-    primary = decision.selected if decision.selected in capabilities else None
+    assessment = decision.risk_complexity
+    required_roles = assessment.required_roles if assessment is not None else (
+        "reviewer",
+        "critic",
+        "referee",
+    )
+    role_kinds = {"reviewer", "critic", "referee"}
+    primary_candidates = tuple(
+        name
+        for name in ordered
+        if capabilities[name].kind not in role_kinds | {"fallback"}
+    )
+    primary = (
+        decision.selected
+        if decision.selected in primary_candidates
+        else primary_candidates[0] if primary_candidates else None
+    )
     remaining = tuple(name for name in ordered if name != primary)
-    reviewers = tuple(name for name in remaining if capabilities[name].kind == "reviewer")
+    reviewers = tuple(
+        name
+        for name in remaining
+        if capabilities[name].kind == "reviewer" and "reviewer" in required_roles
+    )
     critic = next(
-        (name for name in remaining if capabilities[name].kind == "critic"),
+        (
+            name
+            for name in remaining
+            if capabilities[name].kind == "critic" and "critic" in required_roles
+        ),
         None,
     )
     referee = next(
-        (name for name in remaining if capabilities[name].kind == "referee"),
+        (
+            name
+            for name in remaining
+            if capabilities[name].kind == "referee" and "referee" in required_roles
+        ),
         None,
     )
-    role_names = set(reviewers) | {name for name in (critic, referee) if name is not None}
     explicit_fallbacks = tuple(name for name in remaining if capabilities[name].kind == "fallback")
     specialists = tuple(
-        name for name in remaining if name not in role_names and name not in explicit_fallbacks
+        name
+        for name in remaining
+        if capabilities[name].kind not in role_kinds and name not in explicit_fallbacks
     )
     if selected_policy.execution_mode == "sequential_failover":
         fallbacks = (*explicit_fallbacks, *specialists)[: selected_policy.max_fallbacks]
@@ -415,6 +481,36 @@ def build_routing_plan(
     else:
         fallbacks = explicit_fallbacks[: selected_policy.max_fallbacks]
         parallel = tuple(name for name in specialists if name not in fallbacks)
+    missing_roles = []
+    if "reviewer" in required_roles and not reviewers:
+        missing_roles.append(
+            "AF-CAPABILITY-ELIGIBILITY: field=routing_plan.reviewers; "
+            "unlock=provide an eligible reviewer capability"
+        )
+    if "critic" in required_roles and critic is None:
+        missing_roles.append(
+            "AF-CAPABILITY-ELIGIBILITY: field=routing_plan.critic; "
+            "unlock=provide an eligible critic capability"
+        )
+    if "referee" in required_roles and referee is None:
+        missing_roles.append(
+            "AF-CAPABILITY-ELIGIBILITY: field=routing_plan.referee; "
+            "unlock=provide an eligible referee capability"
+        )
+    unresolved = tuple(sorted({*decision.unresolved, *missing_roles}))
+    gate_unresolved = tuple(
+        sorted(
+            {
+                *(assessment.unresolved if assessment is not None else ()),
+                *missing_roles,
+            }
+        )
+    )
+    gate_state = (
+        "blocked"
+        if gate_unresolved
+        else assessment.gate_state if assessment is not None else "open"
+    )
     payload = {
         "decision_id": decision.decision_id,
         "task_id": decision.task_id,
@@ -427,6 +523,13 @@ def build_routing_plan(
         "referee": referee,
         "execution_mode": selected_policy.execution_mode,
         "max_fallbacks": selected_policy.max_fallbacks,
+        "assessment_id": assessment.assessment_id if assessment is not None else None,
+        "complexity": assessment.complexity if assessment is not None else None,
+        "verification_depth": (
+            assessment.verification_depth if assessment is not None else None
+        ),
+        "required_roles": required_roles,
+        "gate_state": gate_state,
     }
     return RoutingPlan(
         plan_id=stable_id("routing-plan", payload),
@@ -441,6 +544,11 @@ def build_routing_plan(
         referee=referee,
         execution_mode=selected_policy.execution_mode,
         max_fallbacks=selected_policy.max_fallbacks,
+        assessment_id=assessment.assessment_id if assessment is not None else None,
+        complexity=assessment.complexity if assessment is not None else None,
+        verification_depth=assessment.verification_depth if assessment is not None else None,
+        required_roles=required_roles,
+        gate_state=gate_state,
         evidence=decision.evidence,
-        unresolved=decision.unresolved,
+        unresolved=unresolved,
     )

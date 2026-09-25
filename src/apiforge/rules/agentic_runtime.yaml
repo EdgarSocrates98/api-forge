@@ -29,6 +29,53 @@ runtime:
     scorecard_update: eval_required
     execution_mode: parallel_review
     max_fallbacks: 1
+    risk_complexity:
+      policy_version: risk-complexity/v1
+      unknown_behavior: unresolved
+      risk_overrides:
+        sensitive: complex
+        external_mutation: critical
+        destructive: critical
+        irreversible: critical
+      ordered_rules:
+        - rule_id: missing-required-evidence
+          when: required_evidence_unavailable
+          complexity: critical
+        - rule_id: missing-required-expertise
+          when: required_expertise_unavailable
+          complexity: complex
+        - rule_id: large-task
+          when: size_is_L
+          complexity: complex
+        - rule_id: medium-task
+          when: size_is_M
+          complexity: moderate
+        - rule_id: dependencies-present
+          when: dependencies_present
+          complexity: moderate
+        - rule_id: expected-proofs-present
+          when: expected_proofs_present
+          complexity: moderate
+        - rule_id: verification-strategy
+          when: strategy_requires_verification
+          complexity: moderate
+      effects:
+        simple:
+          objective_order: [efficiency, quality]
+          verification_depth: standard
+          required_roles: []
+        moderate:
+          objective_order: [quality, efficiency]
+          verification_depth: elevated
+          required_roles: [reviewer]
+        complex:
+          objective_order: [quality, efficiency]
+          verification_depth: strict
+          required_roles: [reviewer, critic]
+        critical:
+          objective_order: [quality]
+          verification_depth: strict
+          required_roles: [reviewer, critic, referee]
   healing:
     rollback_mode: cas_strict
   policies:

@@ -49,6 +49,8 @@ def test_routing_fixture_prioritizes_observed_efficiency() -> None:
     )
     assert decision.selected == "api-performance-review"
     assert decision.fallback_order[0] == "api-performance-review"
+    assert decision.risk_complexity is not None
+    assert decision.risk_complexity.complexity == "simple"
     selected = next(item for item in decision.candidates if item.capability == decision.selected)
     assert selected.ranking_key
 
@@ -78,6 +80,8 @@ def test_routing_records_unknown_signals_and_replays_deterministically() -> None
     assert first.fallback_order == second.fallback_order
     assert first.decision_id == second.decision_id
     assert any(item.endswith(":duration:unresolved") for item in first.unresolved)
+    assert first.risk_complexity is not None
+    assert first.risk_complexity.assessment_id == second.risk_complexity.assessment_id
 
 
 def test_routing_preserves_eligibility_refusal_when_no_candidate_exists() -> None:

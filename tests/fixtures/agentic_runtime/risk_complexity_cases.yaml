@@ -1,0 +1,41 @@
+version: 1
+cases:
+  - id: risk-complexity-simple
+    kind: golden
+    risk: read_only
+    size: S
+    expected_complexity: simple
+    expected_verification: standard
+    required_evidence: [task_spec]
+  - id: risk-complexity-moderate
+    kind: golden
+    risk: read_only
+    size: M
+    expected_complexity: moderate
+    expected_verification: elevated
+    expected_roles: [reviewer]
+    required_evidence: [task_spec]
+  - id: risk-complexity-complex
+    kind: holdout
+    risk: read_only
+    size: L
+    expected_complexity: complex
+    expected_verification: strict
+    expected_roles: [reviewer, critic]
+    required_evidence: [task_spec]
+  - id: risk-complexity-critical
+    kind: mutation
+    risk: irreversible
+    size: S
+    expected_complexity: critical
+    expected_verification: strict
+    expected_roles: [reviewer, critic, referee]
+    required_evidence: [task_spec]
+  - id: risk-complexity-unresolved
+    kind: adversarial
+    risk: read_only
+    size: M
+    required_evidence: [task_spec, approval]
+    available_evidence: [task_spec]
+    expected_complexity: critical
+    expected_gate: blocked

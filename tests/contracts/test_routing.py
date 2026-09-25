@@ -39,3 +39,19 @@ def test_routing_request_preserves_declared_evidence() -> None:
         policy_id="routing/v1",
     )
     assert request.available_evidence == ("task_spec",)
+
+
+def test_routing_request_accepts_additive_complexity_inputs() -> None:
+    request = RoutingRequest(
+        task_id="task",
+        revision=1,
+        risk="read_only",
+        size="L",
+        dependencies=("contract",),
+        expected_proofs=("review",),
+        strategy="plan-execute-verify",
+        policy_id="routing/v1",
+    )
+
+    assert request.task_size == "L"
+    assert request.dependencies == ("contract",)

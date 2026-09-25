@@ -85,6 +85,7 @@ from apiforge.contracts.platform import (
     VerticalCoverage,
     VerticalRuntimeReceipt,
 )
+from apiforge.contracts.risk_complexity import RiskComplexityAssessment
 from apiforge.contracts.routing import (
     CandidateAssessment,
     ObservedSignal,
@@ -211,6 +212,7 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "CandidateAssessment/v1": CandidateAssessment,
     "RoutingDecision/v1": RoutingDecision,
     "RoutingPlan/v1": RoutingPlan,
+    "RiskComplexityAssessment/v1": RiskComplexityAssessment,
     "ExpertisePack/v1": ExpertisePack,
     "ScorecardFeedback/v1": ScorecardFeedback,
     "EvidenceRef/v1": EvidenceRef,

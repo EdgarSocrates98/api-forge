@@ -62,6 +62,12 @@ from apiforge.contracts.platform import (
     VerticalCoverage,
     VerticalRuntimeReceipt,
 )
+from apiforge.contracts.risk_complexity import (
+    RiskComplexityAssessment,
+    RiskComplexityEffect,
+    RiskComplexityPolicy,
+    RiskComplexityRule,
+)
 from apiforge.contracts.routing import (
     CandidateAssessment,
     ObservedSignal,
@@ -151,6 +157,10 @@ __all__ = [
     "PromotionGate",
     "PromotionState",
     "RepositoryRef",
+    "RiskComplexityAssessment",
+    "RiskComplexityEffect",
+    "RiskComplexityPolicy",
+    "RiskComplexityRule",
     "RoutingDecision",
     "RoutingEvolution",
     "RoutingPlan",

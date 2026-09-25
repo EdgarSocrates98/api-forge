@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import asyncio
+import json
 from pathlib import Path
 
 from apiforge.contracts.base import ContractError
+from apiforge.contracts.routing import RoutingDecision, RoutingPlan
 from apiforge.runtime.adapters import FakeModelAdapter, ModelAdapter
 from apiforge.runtime.control import ControlPlane
 from apiforge.runtime.supervisor import execute_run, resume_existing_run
@@ -38,6 +40,36 @@ def runtime_status(root: Path, task_id: str) -> dict[str, object]:
 
     latest = latest_run(root, task_id)
     result: dict[str, object] = {"task_id": task_id, "run": latest, "found": latest is not None}
+    if isinstance(latest, dict):
+        run_id = latest.get("run_id")
+        if isinstance(run_id, str):
+            run_dir = (
+                Path(root)
+                / ".apiforge"
+                / "tasks"
+                / task_id
+                / "runs"
+                / run_id.replace(":", "-")
+            )
+            for name, contract in (
+                ("routing.json", RoutingDecision),
+                ("routing-plan.json", RoutingPlan),
+            ):
+                path = run_dir / name
+                if not path.is_file():
+                    continue
+                try:
+                    value = contract.model_validate(json.loads(path.read_text(encoding="utf-8")))
+                except (OSError, UnicodeDecodeError, ValueError) as exc:
+                    errors = result.get("routing_errors")
+                    if not isinstance(errors, list):
+                        errors = []
+                        result["routing_errors"] = errors
+                    errors.append(f"{name}: {exc}")
+                else:
+                    result["routing_plan" if name == "routing-plan.json" else "routing"] = (
+                        value.model_dump(mode="json")
+                    )
     if isinstance(latest, dict) and latest.get("control_run_id"):
         try:
             control = ControlPlane(root).get(str(latest["control_run_id"]))

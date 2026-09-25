@@ -36,3 +36,39 @@ cases:
     quality_axes: [provenance]
     kind: adversarial
     mandatory: true
+  - id: risk-complexity-golden
+    domain: routing
+    input: fixtures/agentic_runtime/risk_complexity_cases.yaml#risk-complexity-moderate
+    expected: PASS
+    required_evidence: [risk-assessment, routing-plan, projection-parity]
+    mutation: none
+    quality_axes: [deterministic, complexity]
+    kind: golden
+    mandatory: true
+  - id: risk-complexity-holdout
+    domain: routing
+    input: fixtures/agentic_runtime/risk_complexity_cases.yaml#risk-complexity-complex
+    expected: PASS
+    required_evidence: [risk-assessment, routing-replay]
+    mutation: reorder
+    quality_axes: [replay, composition]
+    kind: holdout
+    mandatory: true
+  - id: risk-complexity-mutation
+    domain: routing
+    input: fixtures/agentic_runtime/risk_complexity_cases.yaml#risk-complexity-critical
+    expected: PASS
+    required_evidence: [risk-assessment, refusal]
+    mutation: change-risk
+    quality_axes: [safety, complexity]
+    kind: mutation
+    mandatory: true
+  - id: risk-complexity-adversarial
+    domain: routing
+    input: fixtures/agentic_runtime/risk_complexity_cases.yaml#risk-complexity-unresolved
+    expected: PASS
+    required_evidence: [risk-assessment, unresolved, adversarial-refusal]
+    mutation: forged-evidence
+    quality_axes: [provenance, evidence]
+    kind: adversarial
+    mandatory: true

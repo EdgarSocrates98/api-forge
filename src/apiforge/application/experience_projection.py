@@ -30,19 +30,47 @@ def project_payload(
     task_id: str, payload: dict[str, Any], *, surface: str = "json"
 ) -> ExperienceSnapshot:
     """Normalize a legacy application payload without mutating it."""
-    gaps_raw = payload.get("gaps", ())
-    refs_raw = payload.get("evidence_refs", ())
+    canonical_payload = dict(payload)
+    runtime_payload = canonical_payload.get("runtime")
+    if isinstance(runtime_payload, dict):
+        for key in ("routing", "routing_plan", "routing_errors"):
+            if key not in canonical_payload and key in runtime_payload:
+                canonical_payload[key] = runtime_payload[key]
+    routing = canonical_payload.get("routing")
+    plan = canonical_payload.get("routing_plan")
+    gaps_value = canonical_payload.get("gaps", ())
+    refs_value = canonical_payload.get("evidence_refs", ())
+    gaps_values: list[object] = (
+        list(gaps_value) if isinstance(gaps_value, (list, tuple)) else []
+    )
+    refs_values: list[object] = (
+        list(refs_value) if isinstance(refs_value, (list, tuple)) else []
+    )
+    if isinstance(routing, dict):
+        gaps_values.extend(routing.get("unresolved", ()))
+        refs_values.extend(routing.get("evidence", ()))
+        assessment = routing.get("risk_complexity")
+        if isinstance(assessment, dict):
+            gaps_values.extend(assessment.get("unresolved", ()))
+            refs_values.extend(assessment.get("evidence", ()))
+    if isinstance(plan, dict):
+        gaps_values.extend(plan.get("unresolved", ()))
+        refs_values.extend(plan.get("evidence", ()))
+    gaps_raw = gaps_values
+    refs_raw = refs_values
     gaps = tuple(str(item) for item in gaps_raw) if isinstance(gaps_raw, (list, tuple)) else ()
     refs = tuple(str(item) for item in refs_raw) if isinstance(refs_raw, (list, tuple)) else ()
-    status = _status(payload.get("status", payload.get("final_status", "REVIEW")))
+    status = _status(
+        canonical_payload.get("status", canonical_payload.get("final_status", "REVIEW"))
+    )
     if status not in {"READY", "RUNNING", "DONE", "REVIEW", "BLOCKED", "UNRESOLVED"}:
         status = "REVIEW"
     evidence_level = "verified" if payload.get("run_digest") else "observed"
     view = ExperienceView(
         task_id=task_id,
         status=status,  # type: ignore[arg-type]
-        title=str(payload.get("title", "API Forge")),
-        summary=str(payload.get("summary", payload.get("message", ""))),
+        title=str(canonical_payload.get("title", "API Forge")),
+        summary=str(canonical_payload.get("summary", canonical_payload.get("message", ""))),
         gaps=gaps,
         actions=("evolve", "resume", "review", "doctor"),
         evidence_refs=refs,
@@ -52,7 +80,9 @@ def project_payload(
             refs=refs,
             limitations=tuple(gaps),
         ),
-        payload=dict(payload),
+        routing=routing if isinstance(routing, dict) else None,
+        routing_plan=plan if isinstance(plan, dict) else None,
+        payload=canonical_payload,
     )
     actions = tuple(
         ExperienceAction(name=name, label=name.capitalize(), safe=name in {"review", "doctor"})

@@ -14,6 +14,18 @@ from apiforge.runtime.runner import (
 from apiforge.taskspec import store as task_store
 
 
+def _routing_fields(payload: dict[str, object]) -> dict[str, object]:
+    return {
+        key: payload[key]
+        for key in ("routing", "routing_plan", "routing_errors")
+        if key in payload
+    }
+
+
+def _attach_routing(root: Path, task_id: str, payload: dict[str, object]) -> dict[str, object]:
+    return {**payload, **_routing_fields(runtime_status(root, task_id))}
+
+
 def doctor(root: Path, task_id: str) -> dict[str, object]:
     status = runtime_status(root, task_id)
     if not status["found"]:
@@ -34,6 +46,7 @@ def doctor(root: Path, task_id: str) -> dict[str, object]:
         "checks": checks,
         "gaps": unresolved,
         "runtime": status,
+        **_routing_fields(status),
     }
 
 
@@ -51,7 +64,12 @@ def review(root: Path, task_id: str) -> dict[str, object]:
     if not isinstance(run_id, str):
         raise ContractError("AF-RUNTIME-COMPATIBILITY", "latest run has no run_id")
     brief = brief_for_agentic_run(root, task_id, run_id)
-    return {"command": "review", "brief": brief.model_dump(mode="json"), "run": latest}
+    return {
+        "command": "review",
+        "brief": brief.model_dump(mode="json"),
+        "run": latest,
+        **_routing_fields(runtime_status(root, task_id)),
+    }
 
 
 def evolve(
@@ -62,24 +80,24 @@ def evolve(
     now: str | None = None,
     requested_debate: bool = False,
 ) -> dict[str, object]:
-    return {
-        "command": "evolve",
-        **run_runtime(
-            root,
-            task_id,
-            policy_id=policy_id,
-            now=now,
-            requested_debate=requested_debate,
-        ),
-    }
+    result = run_runtime(
+        root,
+        task_id,
+        policy_id=policy_id,
+        now=now,
+        requested_debate=requested_debate,
+    )
+    return _attach_routing(root, task_id, {"command": "evolve", **result})
 
 
 def resume(root: Path, task_id: str, *, policy_id: str = "local-ci-safe") -> dict[str, object]:
-    return {"command": "resume", **resume_runtime(root, task_id, policy_id=policy_id)}
+    result = resume_runtime(root, task_id, policy_id=policy_id)
+    return _attach_routing(root, task_id, {"command": "resume", **result})
 
 
 def debate(root: Path, task_id: str, *, policy_id: str = "local-ci-safe") -> dict[str, object]:
-    return {"command": "debate", **debate_runtime(root, task_id, policy_id=policy_id)}
+    result = debate_runtime(root, task_id, policy_id=policy_id)
+    return _attach_routing(root, task_id, {"command": "debate", **result})
 
 
 def cancel(root: Path, task_id: str, *, actor: str = "tui-user") -> dict[str, object]:

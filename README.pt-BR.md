@@ -50,6 +50,28 @@ Os escopos de contexto são `repo`, `workspace` e `target`; o impacto pode ser
 `direct`, `transitive` ou `all`. O projeto consumidor recebe apenas manifests
 mínimos; agents, skills, knowledge e templates permanecem na instalação.
 
+### Roteamento adaptativo entregue em três ondas
+
+O programa de roteamento adaptativo está concluído e disponível no core
+portátil e sem host:
+
+- Onda 1 adiciona `RoutingPlan/v1` com papéis explícitos de primary, fallback,
+  paralelo, reviewer, critic e referee.
+- Onda 2 adiciona scorecards multidimensionais, sinais com frescor, receipts
+  para observações e um gate opcional de avaliação adversarial.
+- Onda 3 adiciona expertise packs locais versionados, roteamento por
+  família/implementação e recusa explícita quando o conhecimento local exigido
+  não está disponível.
+
+As runs preservam `routing.json` para a decisão compatível e
+`routing-plan.json` para o plano de execução bounded. As três ondas não exigem
+host, rede, SDK de modelo ou mutação externa. O mapa de evolução registra os
+itens pós-ship ainda adiados, incluindo orquestração de alto nível com
+`ask`/`improve`/`migrate`/`fix`, inferência completa de relações, atualização
+remota de Knowledge Packs, instalação por symlink, overwrite automático de
+arquivos de host, precedência por task, debate distribuído no workspace e
+paridade total entre hosts.
+
 ## Hosts e MCP
 
 Claude, Codex, Devin, Copilot e MCP são adapters opcionais. Verifique:
@@ -102,7 +124,3 @@ produção.
 - [Observability integrations in English](docs/OBSERVABILITY_INTEGRATIONS.en.md)
 - [Roadmap prioritário em português](docs/roadmaps/API_FORGE_PRIORITY_EXECUTION_ROADMAP.md)
 - [Priority roadmap in English](docs/roadmaps/API_FORGE_PRIORITY_EXECUTION_ROADMAP.en.md)
-
-Os itens adiados — `ask`, `improve`, `migrate`, `fix`, inferência completa,
-`apiforge here`, auto-update, symlink, overwrite automático, precedência por
-task, debate distribuído e paridade total — continuam no roadmap.

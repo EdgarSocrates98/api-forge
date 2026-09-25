@@ -77,6 +77,27 @@ Copilot and MCP are optional adapters; unavailable capabilities remain explicit
 in `doctor` and context payloads. `workspace.yaml` registers independent
 repositories without requiring a monorepo.
 
+### Adaptive routing shipped in three waves
+
+The adaptive-routing program is complete and available in the portable,
+hostless core:
+
+- Wave 1 adds `RoutingPlan/v1` with explicit primary, fallback, parallel,
+  reviewer, critic and referee roles.
+- Wave 2 adds multidimensional scorecards, freshness-aware signals, receipts
+  for observations and an optional adversarial evaluation gate.
+- Wave 3 adds versioned local expertise packs, family/implementation routing and
+  explicit refusal when required local knowledge is unavailable.
+
+Runs preserve `routing.json` for the compatible decision trace and
+`routing-plan.json` for the bounded execution plan. The three waves do not
+require a host, network, model SDK or external mutation. The evolution map
+records the post-ship items that remain deferred, including high-level
+`ask`/`improve`/`migrate`/`fix` orchestration, complete relationship inference,
+remote Knowledge Pack updates, symlink installation, automatic host-file
+overwrite, task-level precedence, distributed workspace debate and total host
+parity.
+
 The repository also carries the native Caveman/Cavekit assets under `vendor/`,
 with pinned provenance and a SHA-256 manifest. RTK project filters live under
 `.rtk/`; the optional RTK binary is not silently installed by API Forge.

@@ -9,7 +9,7 @@
 | **Feature** | GRAPH_AWARE_IMPACT |
 | **Date** | 2026-09-25 |
 | **Author** | define-agent |
-| **Status** | ✅ Complete (Designed) |
+| **Status** | ✅ Complete (Built) |
 | **Clarity Score** | 15/15 |
 
 ---
@@ -222,9 +222,10 @@ No blocking questions remain for Design. Design must finalize the exact additive
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0 | 2026-09-25 | define-agent | Captured validated requirements from the GRAPH_AWARE_IMPACT brainstorm |
+| 1.1 | 2026-09-25 | build-agent | Built and verified the approved graph-aware impact implementation |
 
 ---
 
 ## Next Step
 
-**Ready for:** `/build .claude/sdd/features/DESIGN_GRAPH_AWARE_IMPACT.md`
+**Ready for:** `/ship .claude/sdd/features/DEFINE_GRAPH_AWARE_IMPACT.md`

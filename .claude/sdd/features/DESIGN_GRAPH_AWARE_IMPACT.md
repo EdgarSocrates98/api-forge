@@ -10,7 +10,7 @@
 | **Date** | 2026-09-25 |
 | **Author** | design-agent |
 | **DEFINE** | [DEFINE_GRAPH_AWARE_IMPACT.md](./DEFINE_GRAPH_AWARE_IMPACT.md) |
-| **Status** | Ready for Build |
+| **Status** | ✅ Complete (Built) |
 
 ---
 
@@ -593,9 +593,10 @@ This feature is not an ETL, analytics or streaming pipeline. The closest applica
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0 | 2026-09-25 | design-agent | Initial technical design from the approved Graph-Aware Impact DEFINE |
+| 1.1 | 2026-09-25 | build-agent | Implemented the 33-file manifest, added OutcomeBrief propagation and registered nested contract documentation |
 
 ---
 
 ## Next Step
 
-**Ready for:** `/build .claude/sdd/features/DESIGN_GRAPH_AWARE_IMPACT.md`
+**Ready for:** `/ship .claude/sdd/features/DEFINE_GRAPH_AWARE_IMPACT.md`

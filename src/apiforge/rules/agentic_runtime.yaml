@@ -7,7 +7,7 @@ runtime:
     require_idempotency_key: true
     legacy_without_control: review
   eval_gate:
-    required_kinds: [golden, holdout, mutation]
+    required_kinds: [golden, holdout, mutation, adversarial]
     block_on_missing_evidence: true
   routing_evolution:
     active_wave: 0

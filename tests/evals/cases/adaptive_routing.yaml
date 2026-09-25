@@ -1,0 +1,38 @@
+version: 1
+cases:
+  - id: adaptive-routing-golden
+    domain: routing
+    input: fixtures/routing/golden.json
+    expected: PASS
+    required_evidence: [routing-plan]
+    mutation: none
+    quality_axes: [deterministic]
+    kind: golden
+    mandatory: true
+  - id: adaptive-routing-holdout
+    domain: routing
+    input: fixtures/routing/holdout.json
+    expected: PASS
+    required_evidence: [routing-replay]
+    mutation: reorder
+    quality_axes: [replay]
+    kind: holdout
+    mandatory: true
+  - id: adaptive-routing-mutation
+    domain: routing
+    input: fixtures/routing/mutation.json
+    expected: BLOCKED
+    required_evidence: [refusal]
+    mutation: duplicate-role
+    quality_axes: [safety]
+    kind: mutation
+    mandatory: true
+  - id: adaptive-routing-adversarial
+    domain: routing
+    input: fixtures/routing/adversarial.json
+    expected: BLOCKED
+    required_evidence: [adversarial-refusal]
+    mutation: forged-evidence
+    quality_axes: [provenance]
+    kind: adversarial
+    mandatory: true

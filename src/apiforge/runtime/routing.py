@@ -153,6 +153,9 @@ def signals_from_scorecards(
                     unit="cost",
                     source="scorecard",
                     evidence_refs=scorecard.observation_refs,
+                    freshness_state=scorecard.freshness_state,
+                    observed_at=scorecard.observed_at,
+                    expires_at=scorecard.expires_at,
                 )
             )
         if scorecard.observed_duration_ms is not None:
@@ -164,6 +167,9 @@ def signals_from_scorecards(
                     unit="ms",
                     source="scorecard",
                     evidence_refs=scorecard.observation_refs,
+                    freshness_state=scorecard.freshness_state,
+                    observed_at=scorecard.observed_at,
+                    expires_at=scorecard.expires_at,
                 )
             )
         if scorecard.quality_promoted and scorecard.evaluation_count:
@@ -175,6 +181,9 @@ def signals_from_scorecards(
                     unit="score",
                     source="scorecard",
                     evidence_refs=scorecard.computed_from,
+                    freshness_state=scorecard.freshness_state,
+                    observed_at=scorecard.observed_at,
+                    expires_at=scorecard.expires_at,
                 )
             )
         result[scorecard.profile_id] = tuple(signals)
@@ -224,7 +233,10 @@ def _observed_value(assessment: CandidateAssessment, name: str) -> float | None:
     values = [
         signal.value
         for signal in assessment.signals
-        if signal.name == name and signal.status == "observed" and signal.value is not None
+        if signal.name == name
+        and signal.status == "observed"
+        and signal.freshness_state not in {"stale", "unresolved"}
+        and signal.value is not None
     ]
     if not values:
         return None

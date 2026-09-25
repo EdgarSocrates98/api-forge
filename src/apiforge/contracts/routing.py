@@ -13,6 +13,7 @@ RoutingSignalName = Literal["cost", "duration", "quality", "security"]
 SignalStatus = Literal["observed", "unknown", "unresolved"]
 RoutingObjective = Literal["efficiency", "quality"]
 RoutingExecutionMode = Literal["parallel_review", "sequential_failover"]
+SignalFreshness = Literal["fresh", "stale", "unresolved", "unknown"]
 
 
 class ObservedSignal(VersionedContract):
@@ -24,6 +25,9 @@ class ObservedSignal(VersionedContract):
     unit: str = ""
     source: str = "unknown"
     evidence_refs: tuple[str, ...] = ()
+    freshness_state: SignalFreshness = "unknown"
+    observed_at: str | None = None
+    expires_at: str | None = None
 
     @model_validator(mode="after")
     def observed_values_are_present(self) -> ObservedSignal:

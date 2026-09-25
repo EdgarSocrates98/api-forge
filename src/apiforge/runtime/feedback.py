@@ -62,6 +62,16 @@ def update_scorecard(
             "AF-RUNTIME-EVAL-GATE",
             "field=results.evidence; unlock=preserve evidence refs for every eval result",
         )
+    observed_without_evidence = tuple(
+        item.name
+        for item in observations
+        if item.status == "observed" and not item.evidence_refs
+    )
+    if observed_without_evidence:
+        raise ContractError(
+            "AF-RUNTIME-SCORECARD-OBSERVATION",
+            "field=observations.evidence_refs; unlock=preserve a receipt for every observed signal",
+        )
     scorecard = build_scorecard(
         profile,
         results,
@@ -76,6 +86,17 @@ def update_scorecard(
         scorecard_path=str(path),
         eval_refs=eval_refs,
         evidence=evidence,
-        gaps=gaps,
+        gaps=tuple(
+            sorted(
+                {
+                    *gaps,
+                    *(
+                        ("AF-RUNTIME-SCORECARD-FRESHNESS",)
+                        if scorecard.freshness_state in {"stale", "unresolved"}
+                        else ()
+                    ),
+                }
+            )
+        ),
     )
     return feedback, scorecard

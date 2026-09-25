@@ -10,7 +10,7 @@
 | **Date** | 2026-09-25 |
 | **Author** | design-agent |
 | **DEFINE** | [DEFINE_SCORECARD_ADAPTIVE_ROUTING.md](./DEFINE_SCORECARD_ADAPTIVE_ROUTING.md) |
-| **Status** | Ready for Build |
+| **Status** | ✅ Complete (Built) |
 
 ---
 
@@ -326,4 +326,4 @@ Input collections are canonicalized before the stable ID is computed, following 
 
 ## Next Step
 
-**Ready for:** `/build .claude/sdd/features/DESIGN_SCORECARD_ADAPTIVE_ROUTING.md`
+**Ready for:** `/ship .claude/sdd/features/DEFINE_SCORECARD_ADAPTIVE_ROUTING.md`

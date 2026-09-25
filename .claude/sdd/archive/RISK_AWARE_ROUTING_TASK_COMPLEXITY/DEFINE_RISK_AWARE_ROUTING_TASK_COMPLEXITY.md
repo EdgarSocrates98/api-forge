@@ -9,7 +9,7 @@
 | **Feature** | RISK_AWARE_ROUTING_TASK_COMPLEXITY |
 | **Date** | 2026-09-25 |
 | **Author** | define-agent |
-| **Status** | ✅ Complete (Built) |
+| **Status** | ✅ Shipped |
 | **Clarity Score** | 15/15 |
 
 ---
@@ -174,9 +174,10 @@ No questions block Design. Design must resolve:
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0 | 2026-09-25 | define-agent | Converted the confirmed BRAINSTORM into requirements with a 15/15 clarity score and measurable MVP gates |
+| 1.1 | 2026-09-25 | ship-agent | Archived after implementation, evaluation and independent verification |
 
 ---
 
 ## Next Step
 
-**Ready for:** `/ship .claude/sdd/features/DEFINE_RISK_AWARE_ROUTING_TASK_COMPLEXITY.md`
+**Archived.** Continue with a separate `/brainstorm` for B or C when their scope is selected.

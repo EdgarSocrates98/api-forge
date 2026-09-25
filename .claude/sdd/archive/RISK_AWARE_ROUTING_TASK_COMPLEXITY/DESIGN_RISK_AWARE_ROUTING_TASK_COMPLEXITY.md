@@ -10,7 +10,7 @@
 | **Date** | 2026-09-25 |
 | **Author** | design-agent |
 | **DEFINE** | [DEFINE_RISK_AWARE_ROUTING_TASK_COMPLEXITY.md](./DEFINE_RISK_AWARE_ROUTING_TASK_COMPLEXITY.md) |
-| **Status** | ✅ Complete (Built) |
+| **Status** | ✅ Shipped |
 
 ---
 
@@ -457,7 +457,8 @@ Policy loading must produce a typed versioned policy object. Defaults may only b
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0 | 2026-09-25 | design-agent | Initial architecture for MVP A; B scorecard-adaptive and C graph-aware impact are explicit deferred extension seams |
+| 1.1 | 2026-09-25 | ship-agent | Archived after implementation, evaluation and independent verification |
 
 ## Next Step
 
-**Ready for:** `/ship .claude/sdd/features/DEFINE_RISK_AWARE_ROUTING_TASK_COMPLEXITY.md`
+**Archived.** Use this design as the baseline for future B/C extension brainstorms.

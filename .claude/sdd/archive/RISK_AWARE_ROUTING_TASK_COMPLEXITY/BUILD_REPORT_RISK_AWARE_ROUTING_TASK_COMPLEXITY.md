@@ -11,7 +11,7 @@
 | **Author** | build-agent |
 | **DEFINE** | [DEFINE_RISK_AWARE_ROUTING_TASK_COMPLEXITY.md](../features/DEFINE_RISK_AWARE_ROUTING_TASK_COMPLEXITY.md) |
 | **DESIGN** | [DESIGN_RISK_AWARE_ROUTING_TASK_COMPLEXITY.md](../features/DESIGN_RISK_AWARE_ROUTING_TASK_COMPLEXITY.md) |
-| **Status** | Complete |
+| **Status** | ✅ Shipped |
 
 ---
 
@@ -198,4 +198,4 @@ implementation commit and passed.
 
 ## Next Step
 
-`/ship .claude/sdd/features/DEFINE_RISK_AWARE_ROUTING_TASK_COMPLEXITY.md`
+Archived with the SDD phase artifacts after final verification.

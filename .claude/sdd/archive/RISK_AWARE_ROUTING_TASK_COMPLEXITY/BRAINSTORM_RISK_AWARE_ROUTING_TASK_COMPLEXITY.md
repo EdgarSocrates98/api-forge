@@ -9,7 +9,7 @@
 | **Feature** | RISK_AWARE_ROUTING_TASK_COMPLEXITY |
 | **Date** | 2026-09-25 |
 | **Author** | brainstorm-agent |
-| **Status** | ✅ Complete (Defined) |
+| **Status** | ✅ Shipped |
 
 ---
 
@@ -227,8 +227,14 @@ API Forge can already select and execute explicit routing plans, but its policy 
 
 ---
 
+## Archive Note
+
+| Version | Date | Author | Changes |
+|---------|------|--------|---------|
+| 1.1 | 2026-09-25 | ship-agent | Archived after MVP A build and verification; B scorecard-adaptive routing and C graph-aware impact remain planned extensions |
+
 ## Next Step
 
-**Ready for:** `/define .claude/sdd/features/BRAINSTORM_RISK_AWARE_ROUTING_TASK_COMPLEXITY.md`
+**Archived.** Start a separate brainstorm for B (scorecard-adaptive routing) or C (graph-aware impact analysis) when ready.
 
 After A reaches the build/verification boundary, start a separate brainstorm for B (scorecard-adaptive routing) and C (graph-aware impact analysis) if their requirements are not yet sufficiently clear.

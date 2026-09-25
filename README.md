@@ -14,9 +14,32 @@ IR, evidence, plans, verifiable tasks and bounded decisions instead of guesses.
 
 ```bash
 python -m pip install -e '.[dev]'   # Python >=3.12,<3.13
+# Optional all-in-one local extras:
+python -m pip install -e '.[all]'
 # Optional visual terminal UX:
 python -m pip install -e '.[tui]'
 ```
+
+The package can live in a user-selected virtual environment, prefix, mounted
+volume or container. Add its executable directory to `PATH`, or invoke it by
+absolute path. Set `APIFORGE_HOME`, `APIFORGE_CONFIG` and `APIFORGE_CACHE` when
+the default project state location is not writable. See
+[the portable distribution guide](docs/guides/API_FORGE_PORTABLE_DISTRIBUTION.md).
+
+The hostless first-run surface is:
+
+```text
+apiforge inspect
+apiforge init
+apiforge status
+apiforge doctor
+apiforge context resolve --scope repo
+```
+
+It works offline and without a configured agent host. Claude, Codex, Devin,
+Copilot and MCP are optional adapters; unavailable capabilities remain explicit
+in `doctor` and context payloads. `workspace.yaml` registers independent
+repositories without requiring a monorepo.
 
 The repository also carries the native Caveman/Cavekit assets under `vendor/`,
 with pinned provenance and a SHA-256 manifest. RTK project filters live under

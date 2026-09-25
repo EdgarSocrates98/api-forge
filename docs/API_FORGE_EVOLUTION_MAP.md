@@ -31,6 +31,16 @@ antes da ativação de rede ou mutação externa.
 
 ## Programa I — Distribution, Workspace e Host Activation
 
+### Estado da primeira onda
+
+Implementada nesta entrega como uma superfície local e aditiva: a instalação
+é a fonte de verdade, `inspect`/`init`/`status`/`doctor`/`context` funcionam sem
+host e com rede bloqueada, paths podem ser redirecionados por ambiente, e
+manifests mínimos conectam repositórios independentes a um workspace virtual.
+O grafo, o contexto, o doctor e os adapters carregam evidência, hashes,
+limitações e `unresolved`. A ativação de host e o MCP local são opcionais e
+plan-only.
+
 O próximo programa transforma o API Forge em uma plataforma instalada e portátil:
 
 - o core, agents, skills, conhecimento, contratos, SDD, graph, evidência e
@@ -55,9 +65,9 @@ O próximo programa transforma o API Forge em uma plataforma instalada e portát
 
 O contrato exploratório está em
 `.claude/sdd/features/BRAINSTORM_API_FORGE_PORTABLE_DISTRIBUTION_WORKSPACE.md`.
-A fase de definição deve converter essa visão em contratos versionados, ondas
-verticais, critérios de verificação e um plano de documentação completa antes
-do build.
+Os contratos versionados e o design estão em
+`.claude/sdd/features/DEFINE_API_FORGE_PORTABLE_DISTRIBUTION_WORKSPACE.md` e
+`.claude/sdd/features/DESIGN_API_FORGE_PORTABLE_DISTRIBUTION_WORKSPACE.md`.
 
 ### Roadmap pós-ship explicitamente adiado
 

@@ -263,9 +263,15 @@ platform_app = typer.Typer(
     no_args_is_help=True,
 )
 app.add_typer(platform_app)
+from apiforge.cli_context import register as _register_context
+from apiforge.cli_distribution import register as _register_distribution
 from apiforge.cli_tui import tui_app
+from apiforge.cli_workspace import register as _register_workspace
 
 app.add_typer(tui_app, name="tui")
+_register_distribution(app)
+_register_workspace(app)
+_register_context(context_app)
 
 
 @app.callback()
@@ -381,26 +387,54 @@ _register_experience(app)
 
 @app.command("doctor")
 def runtime_doctor(
-    task_id: str = typer.Argument(..., help="TaskSpec id to inspect."),
+    task_id: str | None = typer.Argument(None, help="TaskSpec id, or omit for installation doctor."),
     root: Path = typer.Option(Path("."), "--root"),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
-    """Inspect runtime persistence, control state, proof and gaps."""
+    """Inspect runtime state, or the local installation when no task is supplied."""
+    from apiforge.application.portable import doctor as portable_doctor
     from apiforge.application.runtime_experience import doctor
 
-    _echo_json(_run(lambda: doctor(root, task_id)), detail_level)
+    result = portable_doctor(root) if task_id is None else doctor(root, task_id)
+    _echo_json(_run(lambda: result), detail_level)
 
 
 @app.command("status")
 def runtime_status(
-    task_id: str = typer.Argument(..., help="TaskSpec id to inspect."),
+    task_id: str | None = typer.Argument(None, help="TaskSpec id, or omit for project status."),
     root: Path = typer.Option(Path("."), "--root"),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
-    """Show the canonical status projection for a TaskSpec run."""
+    """Show TaskSpec status, or project/workspace status when no task is supplied."""
+    from apiforge.application.portable import status as portable_status
     from apiforge.application.runtime_experience import status
 
-    _echo_json(_run(lambda: status(root, task_id)), detail_level)
+    result = portable_status(root) if task_id is None else status(root, task_id)
+    _echo_json(_run(lambda: result), detail_level)
+
+
+@app.command("inspect")
+def portable_inspect(
+    root: Path = typer.Option(Path("."), "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Inspect installed assets and bounded project/workspace discovery."""
+    from apiforge.application.portable import inspect
+
+    _echo_json(_run(lambda: inspect(root)), detail_level)
+
+
+@app.command("init")
+def portable_init(
+    root: Path = typer.Option(Path("."), "--root"),
+    workspace: bool = typer.Option(False, "--workspace"),
+    name: str | None = typer.Option(None, "--name"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Create only a minimal local project or workspace manifest."""
+    from apiforge.application.portable import initialize
+
+    _echo_json(_run(lambda: initialize(root, workspace=workspace, name=name)), detail_level)
 
 
 @app.command("review")

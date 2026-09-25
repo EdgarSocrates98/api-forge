@@ -8,9 +8,16 @@ from __future__ import annotations
 
 from typing import Any
 
+MCP_OPTIONAL_UNAVAILABLE = "AF-MCP-OPTIONAL-UNAVAILABLE"
+
 
 def build_server() -> Any:
-    from mcp.server.fastmcp import FastMCP
+    try:
+        from mcp.server.fastmcp import FastMCP
+    except ImportError as exc:
+        raise RuntimeError(
+            f"{MCP_OPTIONAL_UNAVAILABLE}: install the 'mcp' extra to run local stdio"
+        ) from exc
 
     from apiforge.mcp.tools import GRPC_TOOLS, MIGRATION_TOOLS, OBSERVABILITY_TOOLS, TOOLS
 

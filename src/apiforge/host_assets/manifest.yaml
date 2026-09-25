@@ -1,0 +1,13 @@
+schema: apiforge/host-assets/v1
+version: 1
+generator: apiforge
+assets:
+  - name: CLAUDE.md.tmpl
+    host: claude
+    capability: instruction-file
+  - name: AGENTS.md.tmpl
+    host: gpt-codex
+    capability: instruction-file
+  - name: mcp_config.json.tmpl
+    host: claude
+    capability: mcp-stdio

@@ -31,6 +31,25 @@ apiforge experience doctor TASK
 apiforge experience review TASK
 ```
 
+## Distribuição portátil e contexto
+
+As superfícies novas usam as mesmas facades canônicas para JSON, CLI, MCP e
+hosts:
+
+```text
+apiforge inspect
+apiforge init
+apiforge status
+apiforge doctor
+apiforge workspace status
+apiforge context resolve --scope repo
+```
+
+O comando separado `apiforge here` não faz parte desta onda: a resolução do
+contexto é interna. Sem host, rede ou provider SDK, as capacidades locais
+continuam disponíveis. MCP é um processo stdio opcional; a ausência dele não
+reduz a capacidade da CLI.
+
 ## Evidence Levels
 
 Os contratos de artefato, run, verificação e as novas superfícies carregam
@@ -69,6 +88,11 @@ apiforge agentops negotiate --capability subagents --host claude
 Hosts excluídos e limitações permanecem no payload; a ferramenta nunca
 transforma ausência de prova em equivalência entre Codex, Claude, Devin e
 Copilot.
+
+Host activation usa templates pertencentes ao pacote, source hashes e preview
+com `mutation: none`. Não há overwrite automático de arquivos do usuário;
+conflitos exigem aprovação explícita. Symlink, auto-update remoto e paridade
+total entre hosts continuam adiados.
 
 ## Python matrix
 

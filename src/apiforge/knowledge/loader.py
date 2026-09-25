@@ -250,6 +250,17 @@ def load_packs(root: Path) -> dict[str, Pack]:
     return packs
 
 
+def load_packaged_packs() -> dict[str, Pack]:
+    """Load packaged knowledge when available, without consulting the cwd."""
+
+    from apiforge.distribution.assets import package_root
+
+    packaged = package_root() / "knowledge"
+    if packaged.is_dir():
+        return load_packs(packaged)
+    raise _err("AF-KNOW-PACKAGED-MISSING", f"installed package has no knowledge assets: {packaged}")
+
+
 _REQUIRED_DOCS = (
     "index.md",
     "quick-reference.md",

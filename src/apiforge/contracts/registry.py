@@ -18,6 +18,7 @@ from apiforge.contracts.agentic import (
     TrajectoryEvent,
 )
 from apiforge.contracts.base import ContractError
+from apiforge.contracts.context import ContextScope
 from apiforge.contracts.core import (
     ActionPlan,
     ActionStep,
@@ -26,6 +27,7 @@ from apiforge.contracts.core import (
     Verification,
 )
 from apiforge.contracts.devin import DevinCheck, DevinCliProbe, DevinLaunch, DevinPayload
+from apiforge.contracts.distribution import DistributionDoctor
 from apiforge.contracts.evidence import EvidenceRef
 from apiforge.contracts.graph import GraphEdge, GraphExport, GraphNode
 from apiforge.contracts.grpc import (
@@ -126,6 +128,7 @@ from apiforge.contracts.verification import (
     VerificationCheck,
     VerificationRecord,
 )
+from apiforge.contracts.workspace import ProjectManifest, WorkspaceGraph, WorkspaceManifest
 from apiforge.core.models import Fact, Finding
 from apiforge.evidence.models import Receipt
 from apiforge.migration.contracts import (
@@ -254,6 +257,11 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "MigrationTask/v1": MigrationTask,
     "MigrationPlan/v1": MigrationPlan,
     "MigrationReport/v1": MigrationReport,
+    "Distribution/v1": DistributionDoctor,
+    "ProjectManifest/v1": ProjectManifest,
+    "WorkspaceManifest/v1": WorkspaceManifest,
+    "ArchitectureGraph/v1": WorkspaceGraph,
+    "ContextScope/v1": ContextScope,
 }
 
 

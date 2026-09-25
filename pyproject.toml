@@ -21,6 +21,12 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+all = [
+    "boto3>=1.34,<2",
+    "mcp>=1.12,<2",
+    "textual>=8.2,<9",
+    "rich>=13,<15",
+]
 aws = [
     "boto3>=1.34,<2",
 ]

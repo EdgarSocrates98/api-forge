@@ -9,7 +9,7 @@
 | **Feature** | API_FORGE_PORTABLE_DISTRIBUTION_WORKSPACE |
 | **Date** | 2026-09-24 |
 | **Author** | define-agent |
-| **Status** | ✅ Complete (Designed) |
+| **Status** | ✅ Complete (Built) |
 | **Clarity Score** | 15/15 |
 
 ---
@@ -207,4 +207,4 @@ The following are Design-phase questions, not blockers for Define:
 
 ## Next Step
 
-**Ready for:** `/build .claude/sdd/features/DESIGN_API_FORGE_PORTABLE_DISTRIBUTION_WORKSPACE.md`
+**Ready for:** `/ship .claude/sdd/features/DEFINE_API_FORGE_PORTABLE_DISTRIBUTION_WORKSPACE.md`

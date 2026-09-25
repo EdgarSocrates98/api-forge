@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 from collections.abc import Callable
+from dataclasses import asdict, is_dataclass
 from pathlib import Path
 from typing import Any, Literal, TypeVar, cast
 
@@ -23,6 +24,8 @@ def _call(verb: str, fn: Callable[[], Any], detail_level: str) -> Any:
         value = [v.model_dump(mode="json") if hasattr(v, "model_dump") else v for v in value]
     elif hasattr(value, "model_dump"):
         value = value.model_dump(mode="json")
+    elif is_dataclass(value):
+        value = asdict(cast(Any, value))
     value = apply_detail_level(value, detail_level)
     from apiforge.economy.ledger import record
 
@@ -150,6 +153,82 @@ def next_step(findings: str, phase: str, detail_level: str = "normal") -> dict[s
 
     out: dict[str, Any] = _call("next_step", work, detail_level)
     return out
+
+
+def portable_inspect(root: str = ".", detail_level: str = "normal") -> dict[str, Any]:
+    """Inspect installed assets and bounded local discovery."""
+    from apiforge.application.portable import inspect
+
+    return cast(dict[str, Any], _call("inspect", lambda: inspect(Path(root)), detail_level))
+
+
+def portable_init(
+    root: str = ".",
+    workspace: bool = False,
+    name: str | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Create a minimal project or workspace manifest locally."""
+    from apiforge.application.portable import initialize
+
+    return cast(
+        dict[str, Any],
+        _call("init", lambda: initialize(Path(root), workspace=workspace, name=name), detail_level),
+    )
+
+
+def portable_status(root: str = ".", detail_level: str = "normal") -> dict[str, Any]:
+    """Return canonical project/workspace status."""
+    from apiforge.application.portable import status
+
+    return cast(dict[str, Any], _call("status", lambda: status(Path(root)), detail_level))
+
+
+def portable_doctor(root: str = ".", detail_level: str = "normal") -> dict[str, Any]:
+    """Return offline installation and optional capability diagnostics."""
+    from apiforge.application.portable import doctor
+
+    return cast(dict[str, Any], _call("doctor", lambda: doctor(Path(root)), detail_level))
+
+
+def workspace_discover(root: str = ".", detail_level: str = "normal") -> dict[str, Any]:
+    from apiforge.application.workspace import discover
+
+    return cast(dict[str, Any], _call("workspace_discover", lambda: discover(Path(root)), detail_level))
+
+
+def workspace_status(root: str = ".", detail_level: str = "normal") -> dict[str, Any]:
+    from apiforge.application.workspace import status
+
+    return cast(dict[str, Any], _call("workspace_status", lambda: status(Path(root)), detail_level))
+
+
+def workspace_add(repository: str, root: str = ".", detail_level: str = "normal") -> dict[str, Any]:
+    from apiforge.application.workspace import add
+
+    return cast(
+        dict[str, Any],
+        _call("workspace_add", lambda: add(Path(root), Path(repository)), detail_level),
+    )
+
+
+def context_resolve(
+    root: str = ".",
+    scope: str = "repo",
+    target: str | None = None,
+    impact: str | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    from apiforge.application.context import resolve_context
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "context_resolve",
+            lambda: resolve_context(Path(root), scope=scope, target=target, impact=impact),
+            detail_level,
+        ),
+    )
 
 
 def change_control_run(
@@ -1366,6 +1445,14 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     model_api_gateway,
     diff_contract,
     next_step,
+    portable_inspect,
+    portable_init,
+    portable_status,
+    portable_doctor,
+    workspace_discover,
+    workspace_status,
+    workspace_add,
+    context_resolve,
     change_control_run,
     change_control_collect,
     change_control_publish,

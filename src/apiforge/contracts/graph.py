@@ -13,6 +13,11 @@ from apiforge.core.models import JsonValue, Sha256, freeze_json
 
 
 class NodeKind(StrEnum):
+    WORKSPACE = "workspace"
+    REPOSITORY = "repository"
+    SERVICE = "service"
+    DEPENDENCY = "dependency"
+    RUNTIME = "runtime"
     PROJECT = "project"
     CASE = "case"
     ARTIFACT = "artifact"
@@ -41,6 +46,10 @@ class NodeKind(StrEnum):
 
 
 class EdgeKind(StrEnum):
+    CONTAINS = "contains"
+    EXPOSES = "exposes"
+    USES = "uses"
+    DECLARED_AS = "declared_as"
     IMPLEMENTED_BY = "implemented_by"
     DESCRIBED_BY = "described_by"
     BACKED_BY = "backed_by"

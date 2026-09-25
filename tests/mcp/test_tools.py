@@ -22,6 +22,14 @@ def test_tools_export_all_expected_verbs() -> None:
         "model_api_gateway",
         "diff_contract",
         "next_step",
+        "portable_inspect",
+        "portable_init",
+        "portable_status",
+        "portable_doctor",
+        "workspace_discover",
+        "workspace_status",
+        "workspace_add",
+        "context_resolve",
         "change_control_run",
         "change_control_collect",
         "change_control_publish",
@@ -142,5 +150,5 @@ def test_server_imports_or_refuses() -> None:
 
         server = build_server()
         assert server is not None
-    except ImportError:
+    except (ImportError, RuntimeError):
         pytest.skip("mcp extra not installed")

@@ -20,6 +20,8 @@ class HostCapability(VersionedContract):
     limits: tuple[str, ...] = ()
     evidence: EvidenceRecord = Field(default_factory=EvidenceRecord)
     evidence_level: EvidenceLevel = "declared"
+    asset_source: str | None = None
+    asset_sha256: str | None = None
 
     @field_validator("prerequisites", "limits", mode="after")
     @classmethod
@@ -33,6 +35,8 @@ class HostDeclaration(VersionedContract):
     capabilities: tuple[HostCapability, ...] = ()
     evidence: EvidenceRecord = Field(default_factory=EvidenceRecord)
     evidence_level: EvidenceLevel = "declared"
+    asset_source: str | None = None
+    asset_sha256: str | None = None
 
 
 class HostCapabilityRequest(VersionedContract):

@@ -41,6 +41,36 @@ apiforge analyze \
 como `heuristic`, `unresolved` ou `unsupported`, esse estado é a conclusão
 correta até que sua evidência e verificador sejam adicionados.
 
+## 2.1 Distribuição portátil e operação sem host
+
+O pacote pode ser instalado em virtual environment, prefixo user-local,
+volume, container ou outro diretório escolhido pelo usuário sem privilégio de
+administrador. `APIFORGE_HOME`, `APIFORGE_CONFIG` e `APIFORGE_CACHE` movem o
+estado, a configuração e o cache para locais permitidos. O pacote instalado
+continua sendo a fonte de verdade; o repositório consumidor recebe apenas
+manifests mínimos e adapters explicitamente solicitados.
+
+```text
+apiforge inspect
+apiforge init
+apiforge status
+apiforge doctor
+apiforge context resolve --scope repo
+```
+
+Rede bloqueada, host ausente ou MCP não instalado não impedem SDD, agents,
+skills, graph, evidence e verification locais. `doctor` preserva as lacunas
+opcionais com estado, `field`, `unlock` e evidência.
+
+Para múltiplos repositórios independentes:
+
+```text
+apiforge workspace init --root <workspace>
+apiforge workspace add <repo> --root <workspace>
+apiforge workspace status --root <workspace>
+apiforge context resolve --root <workspace> --scope workspace
+```
+
 ## 3. Cadeia crítica completa
 
 O fluxo mínimo de prova é:

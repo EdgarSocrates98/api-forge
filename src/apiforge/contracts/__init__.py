@@ -8,6 +8,7 @@ from apiforge.contracts.adapter import (
     EvidenceLevel,
 )
 from apiforge.contracts.compatibility import CompatibilityCell, CompatibilityMatrix, RuntimeReceipt
+from apiforge.contracts.context import ContextResult, ContextScope, ContextTarget
 from apiforge.contracts.data_runtime import DataProvider, DataReadReceipt, DataReadRequest
 from apiforge.contracts.debate import (
     AdaptivePlan,
@@ -24,6 +25,13 @@ from apiforge.contracts.devin import (
     DevinPromptTransport,
     DevinSurface,
     DevinTaskKind,
+)
+from apiforge.contracts.distribution import (
+    AssetStatus,
+    CapabilityDiagnostic,
+    DistributionDoctor,
+    DistributionRefusal,
+    ForgePaths,
 )
 from apiforge.contracts.evidence import EvidenceKind, EvidenceRecord, EvidenceRef
 from apiforge.contracts.experience import ExperienceAction, ExperienceSnapshot, ExperienceView
@@ -70,6 +78,14 @@ from apiforge.contracts.routing_evolution import (
     RoutingEvolution,
 )
 from apiforge.contracts.sandbox import SandboxCommand, SandboxCommandResult
+from apiforge.contracts.workspace import (
+    ProjectManifest,
+    RepositoryRef,
+    WorkspaceGraph,
+    WorkspaceManifest,
+    WorkspaceRelation,
+    WorkspaceStatus,
+)
 
 __all__ = [
     "AdapterCapability",
@@ -78,12 +94,17 @@ __all__ = [
     "AdapterStatus",
     "AdaptivePlan",
     "AdaptivePolicy",
+    "AssetStatus",
     "CandidateAssessment",
+    "CapabilityDiagnostic",
     "CapabilityRecord",
     "CapabilityRequest",
     "CapabilityResult",
     "CompatibilityCell",
     "CompatibilityMatrix",
+    "ContextResult",
+    "ContextScope",
+    "ContextTarget",
     "DataProvider",
     "DataReadReceipt",
     "DataReadRequest",
@@ -96,6 +117,8 @@ __all__ = [
     "DevinPromptTransport",
     "DevinSurface",
     "DevinTaskKind",
+    "DistributionDoctor",
+    "DistributionRefusal",
     "EvidenceCoverage",
     "EvidenceKind",
     "EvidenceLevel",
@@ -109,6 +132,7 @@ __all__ = [
     "ExternalReadReceipt",
     "ExternalReadRequest",
     "ExternalReadResult",
+    "ForgePaths",
     "FreshnessResult",
     "GitHubPrReceipt",
     "HostCapability",
@@ -120,8 +144,10 @@ __all__ = [
     "PackFreshness",
     "ParticipantDeclaration",
     "PlatformRuntimeReceipt",
+    "ProjectManifest",
     "PromotionGate",
     "PromotionState",
+    "RepositoryRef",
     "RoutingDecision",
     "RoutingEvolution",
     "RoutingPolicy",
@@ -133,4 +159,8 @@ __all__ = [
     "SourceObservation",
     "VerticalCoverage",
     "VerticalRuntimeReceipt",
+    "WorkspaceGraph",
+    "WorkspaceManifest",
+    "WorkspaceRelation",
+    "WorkspaceStatus",
 ]

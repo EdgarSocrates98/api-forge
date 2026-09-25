@@ -44,6 +44,16 @@ severity then area name; unmapped rule_ids are counted, never routed.
 | `AF-ROUTING-NO-FINDINGS` | `next-step` invoked with an empty finding list |
 | `AF-ROUTING-NO-ROUTE` | no route covers the (phase, dominant_area) pair — refusal, never a guess |
 
+Evolution policy is local and evidence-gated. A mode or promotion state is not
+an execution authorization by itself; the runtime persists the gate and uses
+the static route as the only Wave 0 fallback.
+
+| Code | Meaning |
+|---|---|
+| `AF-EVOLUTION-POLICY` | `runtime.routing_evolution` is missing, malformed or violates the bounded policy |
+| `AF-EVOLUTION-PROMOTION` | route promotion is not active because mode, coverage or rollback evidence is unresolved |
+| `AF-RUNTIME-EVOLUTION` | persisted `evolution.json` is missing its typed `PromotionGate` shape |
+
 ## API/Git/CI change control
 
 The change-control adapters are read-only and produce replayable bundles. These

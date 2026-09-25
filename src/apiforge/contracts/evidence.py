@@ -13,8 +13,31 @@ from pydantic import Field, field_validator
 from apiforge.contracts.base import VersionedContract
 
 EvidenceLevel = Literal["observed", "declared", "inferred", "heuristic", "verified", "unknown"]
+EvidenceKind = Literal[
+    "trace",
+    "receipt",
+    "evaluation",
+    "fixture",
+    "policy",
+    "rollback",
+    "knowledge",
+]
 
-__all__ = ["EvidenceLevel", "EvidenceRecord", "can_promote"]
+__all__ = ["EvidenceKind", "EvidenceLevel", "EvidenceRecord", "EvidenceRef", "can_promote"]
+
+
+class EvidenceRef(VersionedContract):
+    """Typed reference to evidence without claiming its semantic validity."""
+
+    ref: str
+    kind: EvidenceKind = "trace"
+    level: EvidenceLevel = "unknown"
+    limitations: tuple[str, ...] = ()
+
+    @field_validator("limitations", mode="after")
+    @classmethod
+    def normalize_limitations(cls, value: tuple[str, ...]) -> tuple[str, ...]:
+        return tuple(sorted(set(value)))
 
 
 class EvidenceRecord(VersionedContract):

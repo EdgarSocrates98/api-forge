@@ -60,7 +60,9 @@ def test_routing_rejects_unsafe_candidates_before_ranking() -> None:
         _request(risk=TaskRisk.SENSITIVE),
         policy=load_routing_policy(),
     )
-    assert decision.selected == "api-adversarial-critic" or decision.selected == "api-security-review"
+    assert (
+        decision.selected == "api-adversarial-critic" or decision.selected == "api-security-review"
+    )
     rejected = {item.capability: item for item in decision.candidates if not item.eligible}
     assert rejected["api-contract-review"].rejection is not None
     assert rejected["api-contract-review"].rejection["field"] == "profile.accepted_risks"

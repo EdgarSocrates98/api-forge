@@ -18,6 +18,8 @@ from apiforge.contracts.agentic import (
     TrajectoryEvent,
 )
 from apiforge.contracts.base import ContractError
+from apiforge.contracts.routing import RoutingDecision
+from apiforge.contracts.routing_evolution import PromotionGate
 from apiforge.core.ids import stable_id
 from apiforge.core.models import JsonValue
 from apiforge.runtime.adapters import AgentRequest, ModelAdapter
@@ -30,9 +32,11 @@ from apiforge.runtime.policy import (
     requires_human_gate,
     should_open_room,
 )
+from apiforge.runtime.promotion import decide_promotion, is_active, load_evolution_policy
 from apiforge.runtime.registry import load_capabilities, load_profiles
 from apiforge.runtime.review import build_runtime_review, review_task_spec
 from apiforge.runtime.routing import (
+    available_routing_evidence,
     build_routing_request,
     load_routing_policy,
     route_capabilities,
@@ -89,6 +93,78 @@ def _input_paths(spec: Any) -> dict[str, Path]:
         if sep and key in {"project", "contract", "case", "manifest"}:
             paths[key] = Path(value)
     return paths
+
+
+def _persist_evolution_gate(
+    storage: RunStore,
+    routing: RoutingDecision,
+    run_id: str,
+    timestamp: str,
+) -> PromotionGate:
+    """Persist the evidence gate that authorizes or refuses route execution."""
+    policy = load_evolution_policy()
+    gate = decide_promotion(
+        decision_id=routing.decision_id,
+        policy=policy,
+        required_evidence=("task_spec", "routing_decision"),
+        available_evidence=available_routing_evidence(routing),
+        rollback_ref=f"{run_id}:static-routing",
+    )
+    storage.save_evolution(gate)
+    storage.event(
+        TrajectoryEvent(
+            event_id=stable_id("event", {"run": run_id, "event": "routing_evolution_gate"}),
+            run_id=run_id,
+            event="routing_evolution_gate",
+            actor="api-agentic-orchestrator",
+            subject=routing.decision_id,
+            payload={
+                "mode": gate.mode,
+                "state": gate.state,
+                "coverage": gate.coverage.model_dump(mode="json"),
+                "fallback": gate.fallback,
+                "gaps": gate.gaps,
+                "policy_version": gate.policy_version,
+                "rollback_ref": gate.rollback_ref,
+            },
+            created_at=timestamp,
+        )
+    )
+    return gate
+
+
+def _blocked_by_evolution_gate(
+    run: AgenticRun,
+    storage: RunStore,
+    routing_id: str,
+    gate: PromotionGate,
+    timestamp: str,
+) -> dict[str, object]:
+    """Return a governed result when route promotion is not active."""
+    status = "BLOCKED" if gate.state == "blocked" else "REVIEW"
+    gap = (
+        f"AF-EVOLUTION-PROMOTION: field=mode/state; unlock=resolve the evidence gate "
+        f"before active execution ({gate.state})"
+    )
+    updated = run.model_copy(
+        update={
+            "state": AgenticState.BLOCKED
+            if status == "BLOCKED"
+            else AgenticState.AWAITING_SUPERVISION,
+            "final_status": status,
+            "decision_ids": (routing_id,),
+            "gaps": tuple(sorted({*gate.gaps, gap})),
+            "finished_at": timestamp,
+        }
+    )
+    storage.save_run(updated)
+    return {
+        "run": updated.model_dump(mode="json"),
+        "artifacts": [],
+        "status": status,
+        "evolution": gate.model_dump(mode="json"),
+        "run_dir": str(storage.directory),
+    }
 
 
 async def execute_run(
@@ -183,6 +259,15 @@ async def execute_run(
             created_at=timestamp,
         )
     )
+    evolution_gate = _persist_evolution_gate(storage, routing, run_id, timestamp)
+    if not is_active(evolution_gate):
+        return _blocked_by_evolution_gate(
+            run,
+            storage,
+            routing.decision_id,
+            evolution_gate,
+            timestamp,
+        )
     capabilities = tuple(capabilities_catalog[name] for name in routing.fallback_order)
     if not capabilities:
         run = run.model_copy(
@@ -454,6 +539,15 @@ async def resume_existing_run(
         scorecards=scorecards,
     )
     storage.save_routing(routing)
+    evolution_gate = _persist_evolution_gate(storage, routing, run_id, timestamp)
+    if not is_active(evolution_gate):
+        return _blocked_by_evolution_gate(
+            previous,
+            storage,
+            routing.decision_id,
+            evolution_gate,
+            timestamp,
+        )
     by_name = {item.name: item for item in capabilities.values()}
     selected = tuple(
         by_name[step.name]

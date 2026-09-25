@@ -71,6 +71,11 @@ def build_routing_request(
     )
 
 
+def available_routing_evidence(decision: RoutingDecision) -> tuple[str, ...]:
+    """Return deterministic evidence references available after routing."""
+    return tuple(sorted({"routing_decision", *decision.evidence, "task_spec"}))
+
+
 def _rejection(detail: str, *, field: str, unlock: str) -> dict[str, str]:
     return {
         "code": "AF-CAPABILITY-ELIGIBILITY",
@@ -251,8 +256,10 @@ def ranking_key(
                 )
                 else None
             )
-            quality = scorecard_quality if scorecard_quality is not None else _observed_value(
-                assessment, "quality"
+            quality = (
+                scorecard_quality
+                if scorecard_quality is not None
+                else _observed_value(assessment, "quality")
             )
             parts.extend(
                 (
@@ -312,7 +319,9 @@ def route_capabilities(
         if signal.status != "observed" and signal.name in {"cost", "duration", "quality"}
     ]
     if not ranked:
-        unresolved.append("AF-CAPABILITY-ELIGIBILITY: field=capability; unlock=provide eligible evidence")
+        unresolved.append(
+            "AF-CAPABILITY-ELIGIBILITY: field=capability; unlock=provide eligible evidence"
+        )
     candidate_trace = tuple(
         next(
             (item for item in ranked if item.capability == assessment.capability),

@@ -55,6 +55,23 @@ The default remains offline-first, deterministic and bounded. Run artifacts are
 `routing.json` and `routing-plan.json`; no wave depends on a host, network,
 model SDK or external mutation.
 
+### Completed A/B/C extensions
+
+After the three waves, adaptive routing was closed through three complementary
+SDD cycles:
+
+1. **A — Risk-Aware Routing and Task Complexity:** canonical risk and
+   complexity assessment for gates, verification depth, roles and fallback.
+2. **B — Scorecard-Adaptive Routing:** champion/challenger/unresolved lanes
+   from local scorecards with freshness and evidence gates.
+3. **C — Graph-Aware Impact:** bounded impact assessment over explicit
+   relationships, evidence-based selection and an explainable brief.
+
+C composes with A and B monotonically, without external authorization or
+inference of missing relationships. The assessment is persisted and projected
+without recalculation; see the [GraphImpact contracts](contracts/GraphImpactAssessment-v1.md)
+and the [C SDD archive](../.claude/sdd/archive/GRAPH_AWARE_IMPACT/SHIPPED_2026-09-25.md).
+
 ## Post-ship roadmap
 
 The following capabilities remain in the program and were not removed:

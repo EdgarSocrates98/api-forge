@@ -88,6 +88,23 @@ O padrão continua offline-first, determinístico e bounded. Os artefatos de run
 são `routing.json` e `routing-plan.json`; nenhuma onda depende de host, rede,
 SDK de modelo ou mutação externa.
 
+### Extensões A/B/C concluídas
+
+Depois das três ondas, o roteamento adaptativo foi fechado em três ciclos SDD
+complementares:
+
+1. **A — Risk-Aware Routing e Task Complexity:** avaliação canônica de risco e
+   complexidade para gate, profundidade de verificação, papéis e fallback.
+2. **B — Scorecard-Adaptive Routing:** lanes champion/challenger/unresolved a
+   partir de scorecards locais com frescor e evidence gate.
+3. **C — Graph-Aware Impact:** avaliação bounded de impacto sobre relações
+   explícitas, seleção baseada em evidência e brief explicável.
+
+C consome A e B de forma monotônica, sem autorização externa e sem inferir
+relações ausentes. O assessment é persistido e projetado sem recálculo; consulte
+os [contratos GraphImpact](contracts/GraphImpactAssessment-v1.md) e o
+[arquivo SDD de C](../.claude/sdd/archive/GRAPH_AWARE_IMPACT/SHIPPED_2026-09-25.md).
+
 ### Roadmap pós-ship explicitamente adiado
 
 Os itens abaixo continuam pertencendo ao programa, mas só entram no próximo

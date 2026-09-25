@@ -74,6 +74,21 @@ A specialization advances to real integration only when it has:
 Each wave was verified and committed separately. Operation remains hostless,
 offline-first and without remote updates or automatic overwrite synchronization.
 
+### Delivered A/B/C extensions
+
+The routing program now includes three additional compatible SDD cycles:
+
+- **A — Risk-Aware Routing and Task Complexity:** explicit risk and complexity
+  govern plan composition.
+- **B — Scorecard-Adaptive Routing:** fresh local scorecards govern bounded
+  champion, challenger and unresolved lanes.
+- **C — Graph-Aware Impact:** explicit local graph evidence governs impact,
+  selection and briefs, with conservative fallback for incomplete evidence.
+
+Details, contracts and evidence live in the
+[C archive](../../.claude/sdd/archive/GRAPH_AWARE_IMPACT/SHIPPED_2026-09-25.md).
+These extensions add no provider, network, model SDK or external mutation.
+
 Closing each item requires a real adapter, an authorized environment and
 corresponding evidence. Without those, the result remains `REVIEW` or
 `BLOCKED`.

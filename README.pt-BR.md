@@ -72,6 +72,24 @@ remota de Knowledge Packs, instalação por symlink, overwrite automático de
 arquivos de host, precedência por task, debate distribuído no workspace e
 paridade total entre hosts.
 
+### Extensões atuais de roteamento adaptativo: A, B e C
+
+O programa pós-ondas está fechado em três entregas SDD aditivas, offline-first:
+
+- **A — Risk-Aware Routing e Task Complexity:** risco explícito e complexidade
+  governam profundidade de verificação, papéis e fallback bounded.
+- **B — Scorecard-Adaptive Routing:** scorecards locais frescos fornecem
+  evidência bounded de champion/challenger/unresolved sem promoção automática.
+- **C — Graph-Aware Impact:** evidência explícita e bounded do grafo adiciona
+  gates conservadores de impacto, evidência de seleção e um brief explicável.
+
+A, B e C permanecem aditivos: C não pode reduzir o gate de risco/complexidade
+de A nem os gates de evidência de scorecard de B. A avaliação canônica de C é
+persistida em `graph-impact.json`; evidências stale, ausentes ou unresolved
+continuam visíveis e conservadoras. Consulte o
+[contrato GraphImpactAssessment/v1](docs/contracts/GraphImpactAssessment-v1.md)
+e o [arquivo de C](.claude/sdd/archive/GRAPH_AWARE_IMPACT/SHIPPED_2026-09-25.md).
+
 ## Hosts e MCP
 
 Claude, Codex, Devin, Copilot e MCP são adapters opcionais. Verifique:

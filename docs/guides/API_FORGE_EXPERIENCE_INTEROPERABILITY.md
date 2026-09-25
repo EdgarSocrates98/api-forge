@@ -137,6 +137,15 @@ Uma solicitação de família compara implementações elegíveis. Pack ausente 
 `AF-CAPABILITY-ELIGIBILITY` com `field=capability.expertise_packs`; o core não
 baixa conhecimento nem altera arquivos do host.
 
+### Extensões A/B/C
+
+O roteamento usa A para risco/complexidade, B para scorecards locais e C para
+impacto graph-aware. C acrescenta evidência de impacto, seleção e brief sem
+recalcular a avaliação em cada superfície. O artefato canônico é
+`graph-impact.json`; `stale`, `missing` e `unresolved` continuam conservadores.
+Consulte o [contrato GraphImpactAssessment/v1](../contracts/GraphImpactAssessment-v1.md)
+e o [arquivo shipped de C](../../.claude/sdd/archive/GRAPH_AWARE_IMPACT/SHIPPED_2026-09-25.md).
+
 ## Gates
 
 ```text

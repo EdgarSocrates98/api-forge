@@ -9,7 +9,7 @@
 | **Feature** | GRAPH_AWARE_IMPACT |
 | **Date** | 2026-09-25 |
 | **Author** | define-agent |
-| **Status** | ✅ Complete (Built) |
+| **Status** | ✅ Shipped |
 | **Clarity Score** | 15/15 |
 
 ---
@@ -223,9 +223,10 @@ No blocking questions remain for Design. Design must finalize the exact additive
 |---------|------|--------|---------|
 | 1.0 | 2026-09-25 | define-agent | Captured validated requirements from the GRAPH_AWARE_IMPACT brainstorm |
 | 1.1 | 2026-09-25 | build-agent | Built and verified the approved graph-aware impact implementation |
+| 1.2 | 2026-09-25 | ship-agent | Archived after final verification and documentation closure |
 
 ---
 
 ## Next Step
 
-**Ready for:** `/ship .claude/sdd/features/DEFINE_GRAPH_AWARE_IMPACT.md`
+**Archived.** C is shipped with deterministic graph impact contracts, bounded assessment and explainable projections.

@@ -11,7 +11,7 @@
 | **Author** | build-agent |
 | **DEFINE** | [DEFINE_GRAPH_AWARE_IMPACT.md](../features/DEFINE_GRAPH_AWARE_IMPACT.md) |
 | **DESIGN** | [DESIGN_GRAPH_AWARE_IMPACT.md](../features/DESIGN_GRAPH_AWARE_IMPACT.md) |
-| **Status** | Complete |
+| **Status** | ✅ Shipped |
 
 ---
 
@@ -20,7 +20,7 @@
 | Metric | Value |
 |--------|-------|
 | **Tasks Completed** | 33/33 manifest files |
-| **Files Created** | 13 |
+| **Files Created** | 14 including the post-build warning regression |
 | **Lines of Code** | 1,465 insertions, 38 deletions in implementation commit |
 | **Build Time** | Not instrumented for this session |
 | **Tests Passing** | 1,015 passed, 1 skipped |
@@ -36,7 +36,7 @@
 | 2 | Implement bounded deterministic reverse traversal and candidate mapping | (direct) | ✅ Complete | - | Direct, transitive and all modes preserve canonical ordering and unresolved evidence |
 | 3 | Integrate policy into routing, supervisor, runtime store, runner and projections | (direct) | ✅ Complete | - | Graph assessment is computed once and propagated as an additive artifact |
 | 4 | Add contract documentation, fixtures, offline evaluations and regression tests | (direct) | ✅ Complete | - | Added nested contract docs required by the release gate |
-| 5 | Run static checks, SDD checks, release gate and clean-worktree full suite | (direct) | ✅ Complete | - | Final full suite ran after implementation commit against an external basetemp |
+| 5 | Run static checks, close the Pydantic warning gap and run the clean-worktree full suite | (direct) | ✅ Complete | - | Final full suite ran after the warning fix against an external basetemp |
 
 **Legend:** ✅ Complete | 🔄 In Progress | ⏳ Pending | ❌ Blocked
 
@@ -70,6 +70,7 @@
 | `tests/fixtures/workspaces/graph_impact_cases.yaml` | 36 | (direct) | ✅ | Canonical graph scenarios |
 | `tests/fixtures/workspaces/graph_impact_expected.yaml` | 10 | (direct) | ✅ | Expected deterministic outputs |
 | `tests/graph/test_impact.py` | 117 | (direct) | ✅ | Traversal, cycle, bound and unresolved coverage |
+| `tests/contracts/test_schema_shadow_warning.py` | 23 | (direct) | ✅ | Post-build regression for warning-free public schema imports |
 
 ---
 
@@ -79,7 +80,7 @@
 
 ```text
 ruff check on Python files under src and tests: All checks passed
-ruff format --check on Python files under src and tests: 673 files already formatted
+ruff format --check src tests: 686 files already formatted
 git diff --check: pass
 ```
 
@@ -144,6 +145,7 @@ The build phase runs autonomously — it never pauses to ask the user. Every dec
 |-----------|--------|--------|
 | Added `OutcomeBrief.graph_impact` and its conformance coverage | The stored assessment needed to survive the brief projection without recalculation | Additive, backward-compatible brief field; DESIGN manifest expanded from 27 to 33 files |
 | Added three nested contract documents | The release gate requires documentation for all registered versioned contracts | No runtime behavior change; improves contract completeness |
+| Closed the Pydantic `schema` shadow-warning gap after the initial build | The public wire field must remain named `schema` for compatibility | Added a narrow filter and a subprocess regression test; full suite is warning-free |
 
 ---
 
@@ -191,7 +193,7 @@ Not applicable. This feature evaluates local graph evidence and emits versioned 
 
 ## Final Status
 
-### Overall: ✅ COMPLETE
+### Overall: ✅ SHIPPED
 
 **Completion Checklist:**
 
@@ -206,8 +208,4 @@ Not applicable. This feature evaluates local graph evidence and emits versioned 
 
 ## Next Step
 
-**If Complete:** `/ship .claude/sdd/features/DEFINE_GRAPH_AWARE_IMPACT.md`
-
-**If Blocked:** Resolve blockers, then `/build` to resume
-
-**If Issues Found:** `/iterate DESIGN_GRAPH_AWARE_IMPACT.md "change needed"`
+Archived with all SDD phase artifacts after final verification and documentation closure.

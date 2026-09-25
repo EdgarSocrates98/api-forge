@@ -102,6 +102,24 @@ The repository also carries the native Caveman/Cavekit assets under `vendor/`,
 with pinned provenance and a SHA-256 manifest. RTK project filters live under
 `.rtk/`; the optional RTK binary is not silently installed by API Forge.
 
+### Current adaptive-routing extensions: A, B and C
+
+The post-wave routing program is now closed as three additive, offline-first
+SDD shipments:
+
+- **A — Risk-Aware Routing and Task Complexity:** explicit risk and task
+  complexity govern verification depth, roles and bounded fallback behavior.
+- **B — Scorecard-Adaptive Routing:** fresh local scorecards provide bounded
+  champion/challenger/unresolved evidence without automatic promotion.
+- **C — Graph-Aware Impact:** bounded explicit graph evidence adds conservative
+  impact gates, candidate selection evidence and one explainable brief.
+
+A, B and C remain additive: C cannot weaken A's risk/complexity gate or B's
+scorecard evidence. The canonical C assessment is persisted as
+`graph-impact.json`; stale, missing and unresolved graph evidence remains
+visible and conservative. See the [GraphImpactAssessment/v1 contract](docs/contracts/GraphImpactAssessment-v1.md)
+and the [C archive](.claude/sdd/archive/GRAPH_AWARE_IMPACT/SHIPPED_2026-09-25.md).
+
 ```bash
 python scripts/vendor_caveman.py --check
 apiforge agentops native

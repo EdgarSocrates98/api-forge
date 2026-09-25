@@ -10,7 +10,7 @@
 | **Date** | 2026-09-25 |
 | **Author** | design-agent |
 | **DEFINE** | [DEFINE_GRAPH_AWARE_IMPACT.md](./DEFINE_GRAPH_AWARE_IMPACT.md) |
-| **Status** | ✅ Complete (Built) |
+| **Status** | ✅ Shipped |
 
 ---
 
@@ -594,9 +594,10 @@ This feature is not an ETL, analytics or streaming pipeline. The closest applica
 |---------|------|--------|---------|
 | 1.0 | 2026-09-25 | design-agent | Initial technical design from the approved Graph-Aware Impact DEFINE |
 | 1.1 | 2026-09-25 | build-agent | Implemented the 33-file manifest, added OutcomeBrief propagation and registered nested contract documentation |
+| 1.2 | 2026-09-25 | ship-agent | Archived after final verification and documentation closure |
 
 ---
 
 ## Next Step
 
-**Ready for:** `/ship .claude/sdd/features/DEFINE_GRAPH_AWARE_IMPACT.md`
+**Archived.** The design is the baseline for future graph completeness, freshness and shadow-evaluation extensions.

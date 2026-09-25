@@ -9,7 +9,7 @@
 | **Feature** | GRAPH_AWARE_IMPACT |
 | **Date** | 2026-09-25 |
 | **Author** | brainstorm-agent |
-| **Status** | ✅ Complete (Defined) |
+| **Status** | ✅ Shipped |
 
 ---
 
@@ -242,6 +242,12 @@ API Forge needs one deterministic, evidence-preserving graph impact assessment t
 
 ---
 
+## Archive Note
+
+| Version | Date | Author | Changes |
+|---------|------|--------|---------|
+| 1.1 | 2026-09-25 | ship-agent | Archived after deterministic graph-aware impact build, warning-gap closure and verification |
+
 ## Next Step
 
-**Ready for:** `/define .claude/sdd/features/BRAINSTORM_GRAPH_AWARE_IMPACT.md`
+**Archived.** C is shipped; graph-aware impact is now documented as the additive layer over A risk/complexity and B scorecard evidence.

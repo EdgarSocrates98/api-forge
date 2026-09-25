@@ -322,6 +322,27 @@ e [`ExpertisePack/v1`](../contracts/ExpertisePack-v1.md). Elas descrevem o
 plano persistido e os metadados de conhecimento local sem autorizar chamadas
 ao provider ou mutação de arquivos do host.
 
+### 7.2 Impacto graph-aware (C)
+
+Quando uma run precisa governar impacto por grafo, o `TaskSpec` pode declarar
+entradas locais explícitas:
+
+```text
+graph_target=service:orders
+graph_mode=transitive
+graph_dir=graph
+graph_freshness_state=fresh
+graph_candidate_ref=api-performance-review=agent:api-performance-review
+```
+
+`direct`, `transitive` e `all` permanecem bounded pela política local. O runtime
+persiste uma única avaliação em `graph-impact.json`, e routing, brief e
+projeções leem esse mesmo artefato. Relações ausentes, stale ou unresolved não
+viram autorização implícita: produzem efeito conservador e evidência visível.
+Consulte [`GraphImpactAssessment/v1`](../contracts/GraphImpactAssessment-v1.md),
+[`GraphImpactPolicy/v1`](../contracts/GraphImpactPolicy-v1.md) e o
+[arquivo SDD de C](../../.claude/sdd/archive/GRAPH_AWARE_IMPACT/SHIPPED_2026-09-25.md).
+
 ## 8. Verificação antes de commit/release
 
 ```bash

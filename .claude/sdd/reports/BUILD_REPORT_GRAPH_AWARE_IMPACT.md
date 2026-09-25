@@ -23,7 +23,7 @@
 | **Files Created** | 13 |
 | **Lines of Code** | 1,465 insertions, 38 deletions in implementation commit |
 | **Build Time** | Not instrumented for this session |
-| **Tests Passing** | Pending final post-gap verification |
+| **Tests Passing** | 1,015 passed, 1 skipped |
 | **Agents Used** | 0 delegated; direct build-agent execution |
 
 ---
@@ -96,8 +96,8 @@ mypy src/apiforge: Success: no issues found in 368 source files
 ### Tests
 
 ```text
-Focused Graph-Aware Impact and integration tests: 75 passed, 6 warnings
-Full suite (clean Git worktree, external basetemp): rerun after warning-gap fix
+Focused contract/schema-warning regression tests: 19 passed, 0 warnings
+Full suite (clean Git worktree, external basetemp): 1,015 passed, 1 skipped, 0 warnings in 65.19s
 Release gate: []
 SDD check: ok=true, refused=[], unresolved=[]
 DESIGN spec-linter: PASS (no findings)
@@ -108,10 +108,10 @@ DESIGN spec-linter: PASS (no findings)
 | Graph impact contracts and traversal | ✅ Pass |
 | Routing, plan and supervisor integration | ✅ Pass |
 | Offline evaluation and conformance | ✅ Pass |
-| Full repository suite | ✅ 1,014 passed, 1 skipped |
+| Full repository suite | ✅ 1,015 passed, 1 skipped |
 | Release contract/documentation gate | ✅ Pass |
 
-**Status:** ✅ 1,014/1,014 executed tests pass; 1 test is intentionally skipped.
+**Status:** ✅ 1,015/1,015 executed tests pass; 1 test is intentionally skipped.
 
 ---
 
@@ -179,7 +179,7 @@ The build phase runs autonomously — it never pauses to ask the user. Every dec
 |--------|----------|--------|--------|
 | Traversal bounds | Never exceed configured depth, node or edge limits | Covered by focused tests and full suite | ✅ |
 | Schema warning boundary | No Pydantic schema-shadow warning escapes contract imports | Regression test runs imports under `-W error::UserWarning` | ✅ |
-| Full repository verification | Green after clean commit | Pending final post-gap verification | 🔄 |
+| Full repository verification | Green after clean commit | 1,015 passed, 1 skipped, 0 warnings in 65.19s | ✅ |
 
 ---
 

@@ -9,7 +9,7 @@
 | **Feature** | SCORECARD_ADAPTIVE_ROUTING |
 | **Date** | 2026-09-25 |
 | **Author** | brainstorm-agent |
-| **Status** | Ready for Define |
+| **Status** | ✅ Complete (Defined) |
 
 ---
 
@@ -227,4 +227,4 @@ API Forge stores verified scorecards but does not yet expose a deterministic cha
 
 ## Next Step
 
-**Ready for:** `/define .claude/sdd/features/BRAINSTORM_SCORECARD_ADAPTIVE_ROUTING.md`
+**Defined.** The validated requirements are captured in `DEFINE_SCORECARD_ADAPTIVE_ROUTING.md`.

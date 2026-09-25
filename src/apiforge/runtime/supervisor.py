@@ -37,6 +37,7 @@ from apiforge.runtime.registry import load_capabilities, load_profiles
 from apiforge.runtime.review import build_runtime_review, review_task_spec
 from apiforge.runtime.routing import (
     available_routing_evidence,
+    build_routing_plan,
     build_routing_request,
     load_routing_policy,
     route_capabilities,
@@ -242,6 +243,8 @@ async def execute_run(
         scorecards=scorecards,
     )
     storage.save_routing(routing)
+    routing_plan = build_routing_plan(routing, capabilities_catalog, policy=routing_policy)
+    storage.save_routing_plan(routing_plan)
     storage.event(
         TrajectoryEvent(
             event_id=stable_id(
@@ -254,6 +257,7 @@ async def execute_run(
             payload={
                 "selected": routing.selected,
                 "fallback_order": routing.fallback_order,
+                "routing_plan": routing_plan.model_dump(mode="json"),
                 "unresolved": routing.unresolved,
             },
             created_at=timestamp,
@@ -268,8 +272,21 @@ async def execute_run(
             evolution_gate,
             timestamp,
         )
-    capabilities = tuple(capabilities_catalog[name] for name in routing.fallback_order)
-    if not capabilities:
+    initial_names = tuple(
+        name
+        for name in (
+            routing_plan.primary,
+            *routing_plan.parallel,
+            *routing_plan.reviewers,
+            routing_plan.critic,
+            routing_plan.referee,
+        )
+        if name is not None
+    )
+    planned_names = tuple(dict.fromkeys((*initial_names, *routing_plan.fallbacks)))
+    capabilities = tuple(capabilities_catalog[name] for name in planned_names)
+    initial_capabilities = tuple(capabilities_catalog[name] for name in initial_names)
+    if not planned_names or not initial_capabilities:
         run = run.model_copy(
             update={
                 "state": AgenticState.BLOCKED,
@@ -303,7 +320,8 @@ async def execute_run(
     )
     control_steps = {step.name: step for step in control_run.steps}
     invocation_ids = tuple(
-        stable_id("inv", {"run": run_id, "capability": item.name}) for item in capabilities
+        stable_id("inv", {"run": run_id, "capability": item.name})
+        for item in initial_capabilities
     )
     invocations = tuple(
         AgentInvocation(
@@ -316,7 +334,7 @@ async def execute_run(
             input_refs=spec.inputs,
             idempotency_key=control_steps[item.name].idempotency_key,
         )
-        for invocation_id, item in zip(invocation_ids, capabilities, strict=True)
+        for invocation_id, item in zip(invocation_ids, initial_capabilities, strict=True)
     )
     run = run.model_copy(
         update={
@@ -328,6 +346,8 @@ async def execute_run(
     )
     storage.save_run(run)
     for step in control_run.steps:
+        if step.name not in initial_names:
+            continue
         control.start(control_run.run_id, step.step_id)
 
     async def worker(invocation: AgentInvocation) -> object:
@@ -414,6 +434,21 @@ async def execute_run(
                 created_at=timestamp,
             )
         )
+
+    primary_succeeded = any(
+        result.invocation.capability == routing_plan.primary
+        and result.error is None
+        and result.response is not None
+        for result in results
+    )
+    if primary_succeeded:
+        for fallback in routing_plan.fallbacks:
+            fallback_step = control_steps[fallback]
+            control.skip(
+                control_run.run_id,
+                fallback_step.step_id,
+                "AF-ROUTING-FALLBACK-NOT-USED: primary completed successfully",
+            )
 
     all_unresolved = tuple(item for artifact in artifacts for item in artifact.unresolved)
     confidences = [item.confidence for item in artifacts if item.confidence is not None]
@@ -549,10 +584,25 @@ async def resume_existing_run(
             timestamp,
         )
     by_name = {item.name: item for item in capabilities.values()}
+    routing_plan = build_routing_plan(routing, capabilities, policy=routing_policy)
+    storage.save_routing_plan(routing_plan)
     selected = tuple(
         by_name[step.name]
         for step in ready
-        if step.name in by_name and step.name in routing.fallback_order
+        if step.name in by_name
+        and step.name
+        in {
+            name
+            for name in (
+                routing_plan.primary,
+                *routing_plan.parallel,
+                *routing_plan.reviewers,
+                routing_plan.critic,
+                routing_plan.referee,
+                *routing_plan.fallbacks,
+            )
+            if name is not None
+        }
     )
     if not selected:
         raise ContractError(

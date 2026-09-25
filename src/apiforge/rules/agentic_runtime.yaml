@@ -27,6 +27,8 @@ runtime:
     unknown_signal: unresolved
     tie_breaker: capability
     scorecard_update: eval_required
+    execution_mode: parallel_review
+    max_fallbacks: 1
   healing:
     rollback_mode: cas_strict
   policies:

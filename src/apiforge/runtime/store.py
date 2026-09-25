@@ -9,7 +9,7 @@ from typing import Any
 
 from apiforge.contracts.agentic import AgentArtifact, AgenticRun, TrajectoryEvent
 from apiforge.contracts.base import ContractError
-from apiforge.contracts.routing import RoutingDecision
+from apiforge.contracts.routing import RoutingDecision, RoutingPlan
 from apiforge.contracts.routing_evolution import PromotionGate
 from apiforge.taskspec import store as task_store
 
@@ -51,6 +51,9 @@ class RunStore:
     def save_routing(self, decision: RoutingDecision) -> Path:
         return self._write("routing.json", decision.model_dump(mode="json"))
 
+    def save_routing_plan(self, plan: RoutingPlan) -> Path:
+        return self._write("routing-plan.json", plan.model_dump(mode="json"))
+
     def save_evolution(self, gate: PromotionGate) -> Path:
         return self._write("evolution.json", gate.model_dump(mode="json"))
 
@@ -71,6 +74,15 @@ class RunStore:
             return RoutingDecision.model_validate(json.loads(path.read_text(encoding="utf-8")))
         except (OSError, UnicodeDecodeError, ValueError) as exc:
             raise ContractError("AF-RUNTIME-ROUTING", f"{path}: {exc}") from exc
+
+    def load_routing_plan(self) -> RoutingPlan | None:
+        path = self.directory / "routing-plan.json"
+        if not path.is_file():
+            return None
+        try:
+            return RoutingPlan.model_validate(json.loads(path.read_text(encoding="utf-8")))
+        except (OSError, UnicodeDecodeError, ValueError) as exc:
+            raise ContractError("AF-RUNTIME-ROUTING-PLAN", f"{path}: {exc}") from exc
 
     def load_run(self) -> AgenticRun | None:
         path = self.directory / "run.json"

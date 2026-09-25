@@ -13,6 +13,7 @@ from apiforge.contracts.routing import (
     CandidateAssessment,
     ObservedSignal,
     RoutingDecision,
+    RoutingPlan,
     RoutingPolicy,
     RoutingRequest,
 )
@@ -45,6 +46,8 @@ def load_routing_policy(path: Path | None = None) -> RoutingPolicy:
                 "unknown_signal": str(raw.get("unknown_signal", "unresolved")),
                 "tie_breaker": str(raw.get("tie_breaker", "capability")),
                 "scorecard_update": str(raw.get("scorecard_update", "eval_required")),
+                "execution_mode": str(raw.get("execution_mode", "parallel_review")),
+                "max_fallbacks": int(raw.get("max_fallbacks", 1)),
             }
         )
     except (KeyError, TypeError, ValueError) as exc:
@@ -209,6 +212,9 @@ def assess_candidates(
                 eligible=rejection is None,
                 rejection=rejection,
                 signals=_signals_for(capability.name, signals or {}),
+                family=capability.family,
+                implementation=capability.implementation,
+                expertise_packs=capability.expertise_packs,
             )
         )
     return tuple(assessments)
@@ -347,4 +353,68 @@ def route_capabilities(
         fallback_order=ordered,
         evidence=tuple(sorted(request.available_evidence)),
         unresolved=tuple(sorted(set(unresolved))),
+    )
+
+
+def build_routing_plan(
+    decision: RoutingDecision,
+    capabilities: Mapping[str, Capability],
+    *,
+    policy: RoutingPolicy | None = None,
+) -> RoutingPlan:
+    """Convert ranked candidates into explicit, stable execution roles."""
+    selected_policy = policy or load_routing_policy()
+    ordered = tuple(name for name in decision.fallback_order if name in capabilities)
+    primary = decision.selected if decision.selected in capabilities else None
+    remaining = tuple(name for name in ordered if name != primary)
+    reviewers = tuple(name for name in remaining if capabilities[name].kind == "reviewer")
+    critic = next(
+        (name for name in remaining if capabilities[name].kind == "critic"),
+        None,
+    )
+    referee = next(
+        (name for name in remaining if capabilities[name].kind == "referee"),
+        None,
+    )
+    role_names = set(reviewers) | {name for name in (critic, referee) if name is not None}
+    explicit_fallbacks = tuple(name for name in remaining if capabilities[name].kind == "fallback")
+    specialists = tuple(
+        name
+        for name in remaining
+        if name not in role_names and name not in explicit_fallbacks
+    )
+    if selected_policy.execution_mode == "sequential_failover":
+        fallbacks = (*explicit_fallbacks, *specialists)[: selected_policy.max_fallbacks]
+        parallel: tuple[str, ...] = ()
+    else:
+        fallbacks = explicit_fallbacks[: selected_policy.max_fallbacks]
+        parallel = tuple(name for name in specialists if name not in fallbacks)
+    payload = {
+        "decision_id": decision.decision_id,
+        "task_id": decision.task_id,
+        "revision": decision.revision,
+        "primary": primary,
+        "fallbacks": fallbacks,
+        "parallel": parallel,
+        "reviewers": reviewers,
+        "critic": critic,
+        "referee": referee,
+        "execution_mode": selected_policy.execution_mode,
+        "max_fallbacks": selected_policy.max_fallbacks,
+    }
+    return RoutingPlan(
+        plan_id=stable_id("routing-plan", payload),
+        decision_id=decision.decision_id,
+        task_id=decision.task_id,
+        revision=decision.revision,
+        primary=primary,
+        fallbacks=fallbacks,
+        parallel=parallel,
+        reviewers=reviewers,
+        critic=critic,
+        referee=referee,
+        execution_mode=selected_policy.execution_mode,
+        max_fallbacks=selected_policy.max_fallbacks,
+        evidence=decision.evidence,
+        unresolved=decision.unresolved,
     )

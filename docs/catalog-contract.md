@@ -67,6 +67,9 @@ the static route as the only Wave 0 fallback.
 | `AF-EVOLUTION-POLICY` | `runtime.routing_evolution` is missing, malformed or violates the bounded policy |
 | `AF-EVOLUTION-PROMOTION` | route promotion is not active because mode, coverage or rollback evidence is unresolved |
 | `AF-RUNTIME-EVOLUTION` | persisted `evolution.json` is missing its typed `PromotionGate` shape |
+| `AF-RUNTIME-ROUTING-PLAN` | persisted `routing-plan.json` is missing or fails the typed `RoutingPlan/v1` shape |
+| `AF-RUNTIME-SCORECARD-FRESHNESS` | scorecard promotion is blocked because an observation is stale or unresolved |
+| `AF-RUNTIME-SCORECARD-OBSERVATION` | an observed scorecard signal has no receipt/evidence reference |
 
 ## API/Git/CI change control
 

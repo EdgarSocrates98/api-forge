@@ -101,3 +101,23 @@ Run the focused suites already used by each wave, then the full pytest, Ruff,
 mypy, release checks, SDD check and bilingual documentation/status review.
 Push the existing branch and update its already-open PR; do not create a
 duplicate PR.
+
+## Final Verification Results
+
+```text
+pytest --basetemp E:\api-forge-test-tmp -q
+938 passed, 1 skipped
+
+ruff check src tests
+All checks passed
+
+mypy src/apiforge
+Success: no issues found in 360 source files
+
+python scripts/check_release.py
+API Forge release gate: PASS
+```
+
+The first full-suite attempt used a basetemp inside the repository and caused
+the non-Git worktree fixture to see the repository parent. It was rerun with a
+basetemp outside the checkout; the test then passed as designed.

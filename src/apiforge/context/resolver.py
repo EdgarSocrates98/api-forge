@@ -28,7 +28,9 @@ def resolve_scope(
     return context_scope, found
 
 
-def resolve_targets(scope: ContextScope, status: WorkspaceStatus | None) -> tuple[ContextTarget, ...]:
+def resolve_targets(
+    scope: ContextScope, status: WorkspaceStatus | None
+) -> tuple[ContextTarget, ...]:
     if status is None or status.graph is None:
         return ()
     targets: list[ContextTarget] = []

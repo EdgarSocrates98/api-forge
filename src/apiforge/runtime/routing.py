@@ -407,9 +407,7 @@ def build_routing_plan(
     role_names = set(reviewers) | {name for name in (critic, referee) if name is not None}
     explicit_fallbacks = tuple(name for name in remaining if capabilities[name].kind == "fallback")
     specialists = tuple(
-        name
-        for name in remaining
-        if name not in role_names and name not in explicit_fallbacks
+        name for name in remaining if name not in role_names and name not in explicit_fallbacks
     )
     if selected_policy.execution_mode == "sequential_failover":
         fallbacks = (*explicit_fallbacks, *specialists)[: selected_policy.max_fallbacks]

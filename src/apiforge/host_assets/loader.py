@@ -36,7 +36,9 @@ def load_manifest() -> dict[str, Any]:
     try:
         return dict(load_yaml_mapping(content, source="host_assets/manifest.yaml"))
     except (StrictLoadError, ValueError) as exc:
-        raise ContractError("AF-DIST-ASSET-MISSING", f"host asset manifest is invalid: {exc}") from exc
+        raise ContractError(
+            "AF-DIST-ASSET-MISSING", f"host asset manifest is invalid: {exc}"
+        ) from exc
 
 
 def render_template(name: str, values: dict[str, str]) -> tuple[str, str]:

@@ -47,7 +47,10 @@ def build_scorecard(
     tokens = tuple(
         item.value
         for item in observations
-        if item.name == "cost" and item.unit == "tokens" and item.status == "observed" and item.value is not None
+        if item.name == "cost"
+        and item.unit == "tokens"
+        and item.status == "observed"
+        and item.value is not None
     )
     dimension_scores = {
         axis: round(
@@ -75,9 +78,7 @@ def build_scorecard(
         profile_id=profile.profile_id,
         evaluation_count=len(results),
         passed_count=passed,
-        quality_score=round(sum(scores) / len(scores), 3)
-        if scores and promotion_allowed
-        else 0.0,
+        quality_score=round(sum(scores) / len(scores), 3) if scores and promotion_allowed else 0.0,
         quality_promoted=bool(results) and promotion_allowed,
         observed_cost=round(sum(costs) / len(costs), 3) if costs else None,
         observed_duration_ms=round(sum(durations) / len(durations), 3) if durations else None,

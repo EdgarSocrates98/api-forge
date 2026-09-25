@@ -23,7 +23,9 @@ def inspect(root: Path | None = None) -> dict[str, Any]:
             "module_root": str(found.module_root),
             "repository_root": str(found.repository_root) if found.repository_root else None,
             "project_manifest": str(found.project_manifest) if found.project_manifest else None,
-            "workspace_manifest": str(found.workspace_manifest) if found.workspace_manifest else None,
+            "workspace_manifest": str(found.workspace_manifest)
+            if found.workspace_manifest
+            else None,
             "evidence": list(found.evidence),
         },
         "assets": [
@@ -37,9 +39,13 @@ def inspect(root: Path | None = None) -> dict[str, Any]:
     }
 
 
-def initialize(root: Path | None = None, *, workspace: bool = False, name: str | None = None) -> object:
+def initialize(
+    root: Path | None = None, *, workspace: bool = False, name: str | None = None
+) -> object:
     base = Path(root or Path.cwd()).resolve()
-    manifest = init_workspace_manifest(base, name=name) if workspace else init_project_manifest(base)
+    manifest = (
+        init_workspace_manifest(base, name=name) if workspace else init_project_manifest(base)
+    )
     return {
         "status": "ready",
         "manifest": str(base / ".apiforge" / ("workspace.yaml" if workspace else "project.yaml")),
@@ -60,7 +66,9 @@ def status(root: Path | None = None) -> dict[str, Any]:
         "project": workspace_status.discovered_project.model_dump(mode="json")
         if workspace_status.discovered_project
         else None,
-        "workspace": workspace_status.workspace.model_dump(mode="json") if workspace_status.workspace else None,
+        "workspace": workspace_status.workspace.model_dump(mode="json")
+        if workspace_status.workspace
+        else None,
         "graph": workspace_status.graph.model_dump(mode="json") if workspace_status.graph else None,
         "gaps": list(workspace_status.gaps),
         "unresolved": list(workspace_status.gaps),

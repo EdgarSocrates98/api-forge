@@ -32,7 +32,9 @@ class WorkspaceService:
         found = self.discovery(workspace_root=workspace_root)
         gaps: list[str] = []
         project = load_project_manifest(found.project_manifest) if found.project_manifest else None
-        workspace = load_workspace_manifest(found.workspace_manifest) if found.workspace_manifest else None
+        workspace = (
+            load_workspace_manifest(found.workspace_manifest) if found.workspace_manifest else None
+        )
         if project is None:
             gaps.append("AF-ROOT-NOT-FOUND: project manifest was not discovered")
         if workspace is None:
@@ -53,14 +55,18 @@ class WorkspaceService:
             status=status,
         )
 
-    def init(self, *, workspace: bool = False, name: str | None = None) -> WorkspaceManifest | object:
+    def init(
+        self, *, workspace: bool = False, name: str | None = None
+    ) -> WorkspaceManifest | object:
         if workspace:
             return init_workspace_manifest(self.root, name=name)
         from apiforge.workspace.manifests import init_project_manifest
 
         return init_project_manifest(self.root)
 
-    def add(self, repository_root: Path, *, workspace_root: Path | None = None) -> WorkspaceManifest:
+    def add(
+        self, repository_root: Path, *, workspace_root: Path | None = None
+    ) -> WorkspaceManifest:
         target = (workspace_root or self.root).resolve()
         manifest_path = target / ".apiforge" / "workspace.yaml"
         if manifest_path.is_file():

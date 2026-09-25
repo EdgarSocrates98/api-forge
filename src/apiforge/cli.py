@@ -387,7 +387,9 @@ _register_experience(app)
 
 @app.command("doctor")
 def runtime_doctor(
-    task_id: str | None = typer.Argument(None, help="TaskSpec id, or omit for installation doctor."),
+    task_id: str | None = typer.Argument(
+        None, help="TaskSpec id, or omit for installation doctor."
+    ),
     root: Path = typer.Option(Path("."), "--root"),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:

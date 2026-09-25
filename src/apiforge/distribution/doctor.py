@@ -88,9 +88,7 @@ def diagnose(
     assets = asset_status(verify=verify_assets)
     gaps = tuple(
         f"{item.capability}: {item.detail}" for item in capabilities if item.state != "ready"
-    ) + tuple(
-        f"asset {item.asset}: {item.state}" for item in assets if item.state != "present"
-    )
+    ) + tuple(f"asset {item.asset}: {item.state}" for item in assets if item.state != "present")
     status: Literal["ready", "degraded", "unresolved", "blocked"] = (
         "ready" if not gaps else "degraded"
     )

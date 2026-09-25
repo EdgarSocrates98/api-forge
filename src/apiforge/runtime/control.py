@@ -329,7 +329,9 @@ class ControlPlane:
         steps = tuple(updated if item.step_id == step_id else item for item in run.steps)
         terminal_steps = {"succeeded", "skipped", "cancelled"}
         status: RunStatus = (
-            "awaiting_review" if all(item.status in terminal_steps for item in steps) else run.status
+            "awaiting_review"
+            if all(item.status in terminal_steps for item in steps)
+            else run.status
         )
         result = run.model_copy(
             update={"status": status, "steps": steps, "state_revision": run.state_revision + 1}

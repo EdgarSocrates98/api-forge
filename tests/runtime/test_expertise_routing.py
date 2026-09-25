@@ -65,7 +65,9 @@ def _request(*, available_expertise: tuple[str, ...] = ()) -> RoutingRequest:
 
 
 def test_family_request_exposes_all_eligible_implementations() -> None:
-    assessments = assess_candidates(_capabilities(), _profiles(), _request(available_expertise=("openapi",)))
+    assessments = assess_candidates(
+        _capabilities(), _profiles(), _request(available_expertise=("openapi",))
+    )
 
     assert [item.capability for item in assessments] == ["contract-v1", "contract-v2"]
     assert all(item.eligible for item in assessments)
@@ -77,7 +79,11 @@ def test_missing_expertise_is_an_actionable_eligibility_refusal() -> None:
 
     assert all(not item.eligible for item in assessments)
     assert all(item.rejection is not None for item in assessments)
-    assert all(item.rejection["field"] == "capability.expertise_packs" for item in assessments if item.rejection)
+    assert all(
+        item.rejection["field"] == "capability.expertise_packs"
+        for item in assessments
+        if item.rejection
+    )
 
 
 def test_validated_pack_projects_to_routing_metadata() -> None:

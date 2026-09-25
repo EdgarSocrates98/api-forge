@@ -77,9 +77,7 @@ def load_workspace_manifest(path: Path) -> WorkspaceManifest:
 
 def _dump(path: Path, value: dict[str, Any]) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        yaml.safe_dump(value, sort_keys=True, allow_unicode=False), encoding="utf-8"
-    )
+    path.write_text(yaml.safe_dump(value, sort_keys=True, allow_unicode=False), encoding="utf-8")
     return path
 
 
@@ -93,7 +91,9 @@ def init_project_manifest(root: Path, *, hosts: tuple[str, ...] = ()) -> Project
 def init_workspace_manifest(root: Path, *, name: str | None = None) -> WorkspaceManifest:
     target = Path(root).resolve()
     manifest = WorkspaceManifest(
-        workspace_id=_id("workspace", target), name=name or target.name or "workspace", root=str(target)
+        workspace_id=_id("workspace", target),
+        name=name or target.name or "workspace",
+        root=str(target),
     )
     write_workspace_manifest(target, manifest)
     return manifest

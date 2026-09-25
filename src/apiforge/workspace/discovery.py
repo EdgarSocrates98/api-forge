@@ -17,7 +17,9 @@ class Discovery:
 
     @property
     def project_root(self) -> Path | None:
-        return self.project_manifest.parent.parent if self.project_manifest else self.repository_root
+        return (
+            self.project_manifest.parent.parent if self.project_manifest else self.repository_root
+        )
 
     @property
     def workspace_root(self) -> Path | None:
@@ -78,7 +80,9 @@ def discover(
     workspace = (
         base / ".apiforge" / "workspace.yaml"
         if workspace_root and (base / ".apiforge" / "workspace.yaml").is_file()
-        else find_workspace_manifest(base if discover_parent else module, stop=base if workspace_root else None)
+        else find_workspace_manifest(
+            base if discover_parent else module, stop=base if workspace_root else None
+        )
     )
     evidence = [f"module:{module}"]
     evidence.append(f"repository:{repository}" if repository else "repository:unresolved")
@@ -87,4 +91,11 @@ def discover(
     return Discovery(module, module, repository, project, workspace, tuple(evidence))
 
 
-__all__ = ["Discovery", "ancestors", "discover", "find_project_manifest", "find_repo_root", "find_workspace_manifest"]
+__all__ = [
+    "Discovery",
+    "ancestors",
+    "discover",
+    "find_project_manifest",
+    "find_repo_root",
+    "find_workspace_manifest",
+]

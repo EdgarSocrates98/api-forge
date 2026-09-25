@@ -4,7 +4,9 @@ from apiforge.cli import app
 
 
 def test_cli_inspect_is_hostless(tmp_path):
-    result = CliRunner().invoke(app, ["inspect", "--root", str(tmp_path), "--detail-level", "summary"])
+    result = CliRunner().invoke(
+        app, ["inspect", "--root", str(tmp_path), "--detail-level", "summary"]
+    )
     assert result.exit_code == 0, result.stdout
     assert '"paths"' in result.stdout
 

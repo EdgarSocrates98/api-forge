@@ -63,9 +63,7 @@ def update_scorecard(
             "field=results.evidence; unlock=preserve evidence refs for every eval result",
         )
     observed_without_evidence = tuple(
-        item.name
-        for item in observations
-        if item.status == "observed" and not item.evidence_refs
+        item.name for item in observations if item.status == "observed" and not item.evidence_refs
     )
     if observed_without_evidence:
         raise ContractError(

@@ -8,7 +8,9 @@ from apiforge.contracts.base import ContractError
 from apiforge.contracts.context import ContextScope
 
 
-def validate_scope(scope: str, *, root: Path, target: str | None = None, impact: str | None = None) -> ContextScope:
+def validate_scope(
+    scope: str, *, root: Path, target: str | None = None, impact: str | None = None
+) -> ContextScope:
     if scope not in {"repo", "workspace", "target"}:
         raise ContractError(
             "AF-CONTEXT-SCOPE-INVALID",
@@ -21,7 +23,9 @@ def validate_scope(scope: str, *, root: Path, target: str | None = None, impact:
     return ContextScope(scope=scope, root=str(Path(root).resolve()), target=target, impact=impact)  # type: ignore[arg-type]
 
 
-def scope_roots(scope: ContextScope, *, project_root: Path | None, workspace_root: Path | None) -> tuple[Path, ...]:
+def scope_roots(
+    scope: ContextScope, *, project_root: Path | None, workspace_root: Path | None
+) -> tuple[Path, ...]:
     if scope.scope == "repo":
         return (Path(project_root or scope.root).resolve(),)
     if scope.scope == "workspace":

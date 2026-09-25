@@ -320,8 +320,7 @@ async def execute_run(
     )
     control_steps = {step.name: step for step in control_run.steps}
     invocation_ids = tuple(
-        stable_id("inv", {"run": run_id, "capability": item.name})
-        for item in initial_capabilities
+        stable_id("inv", {"run": run_id, "capability": item.name}) for item in initial_capabilities
     )
     invocations = tuple(
         AgentInvocation(
@@ -487,7 +486,10 @@ async def execute_run(
                 error = fallback_result.error or "fallback invocation failed"
                 errors.append(f"{fallback}: {error}")
                 failed_run = control.fail(control_run.run_id, fallback_step.step_id, error)
-                if next(item for item in failed_run.steps if item.name == fallback).status == "pending":
+                if (
+                    next(item for item in failed_run.steps if item.name == fallback).status
+                    == "pending"
+                ):
                     control.skip(
                         control_run.run_id,
                         fallback_step.step_id,
@@ -500,7 +502,10 @@ async def execute_run(
                 error = "; ".join(fallback_gaps)
                 errors.extend(f"{fallback}: {error}" for _ in [0])
                 failed_run = control.fail(control_run.run_id, fallback_step.step_id, error)
-                if next(item for item in failed_run.steps if item.name == fallback).status == "pending":
+                if (
+                    next(item for item in failed_run.steps if item.name == fallback).status
+                    == "pending"
+                ):
                     control.skip(
                         control_run.run_id,
                         fallback_step.step_id,
@@ -509,7 +514,8 @@ async def execute_run(
                 continue
             artifact = AgentArtifact(
                 artifact_id=stable_id(
-                    "artifact", {"run": run_id, "invocation": fallback_result.invocation.invocation_id}
+                    "artifact",
+                    {"run": run_id, "invocation": fallback_result.invocation.invocation_id},
                 ),
                 run_id=run_id,
                 invocation_id=fallback_result.invocation.invocation_id,
@@ -526,7 +532,9 @@ async def execute_run(
                 content_sha256=content_hash(payload),
             )
             artifacts.append(artifact)
-            control.complete(control_run.run_id, fallback_step.step_id, artifact.model_dump(mode="json"))
+            control.complete(
+                control_run.run_id, fallback_step.step_id, artifact.model_dump(mode="json")
+            )
             storage.artifact(artifact)
             storage.event(
                 TrajectoryEvent(

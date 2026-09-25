@@ -194,7 +194,9 @@ def portable_doctor(root: str = ".", detail_level: str = "normal") -> dict[str, 
 def workspace_discover(root: str = ".", detail_level: str = "normal") -> dict[str, Any]:
     from apiforge.application.workspace import discover
 
-    return cast(dict[str, Any], _call("workspace_discover", lambda: discover(Path(root)), detail_level))
+    return cast(
+        dict[str, Any], _call("workspace_discover", lambda: discover(Path(root)), detail_level)
+    )
 
 
 def workspace_status(root: str = ".", detail_level: str = "normal") -> dict[str, Any]:

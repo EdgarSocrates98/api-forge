@@ -9,7 +9,7 @@
 | **Feature** | GRAPH_AWARE_IMPACT |
 | **Date** | 2026-09-25 |
 | **Author** | define-agent |
-| **Status** | Ready for Design |
+| **Status** | ✅ Complete (Designed) |
 | **Clarity Score** | 15/15 |
 
 ---
@@ -227,4 +227,4 @@ No blocking questions remain for Design. Design must finalize the exact additive
 
 ## Next Step
 
-**Ready for:** `/design .claude/sdd/features/DEFINE_GRAPH_AWARE_IMPACT.md`
+**Ready for:** `/build .claude/sdd/features/DESIGN_GRAPH_AWARE_IMPACT.md`

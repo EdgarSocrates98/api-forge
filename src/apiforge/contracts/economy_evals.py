@@ -43,6 +43,27 @@ class MatrixRow(VersionedContract):
     latency_ms: int = Field(default=0, ge=0)
 
 
+class BenchmarkIdentity(VersionedContract):
+    """What experiment a report measured; a baseline must match it to count as a regression check."""
+
+    schema: Literal["apiforge/benchmark-identity/v1"] = "apiforge/benchmark-identity/v1"  # type: ignore[assignment]
+    corpus_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    case_ids_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    case_count: int = Field(ge=1)
+    profiles: tuple[str, ...]
+    claim_scope: str = Field(min_length=1)
+    evaluator_version: str = Field(min_length=1)
+
+    def same_experiment(self, other: BenchmarkIdentity) -> bool:
+        """Same corpus, cases, profiles and claim; the evaluator version is informational."""
+        return (
+            self.corpus_sha256 == other.corpus_sha256
+            and self.case_ids_sha256 == other.case_ids_sha256
+            and tuple(self.profiles) == tuple(other.profiles)
+            and self.claim_scope == other.claim_scope
+        )
+
+
 class EconomyMatrix(VersionedContract):
     """Canonical task × profile matrix with per-axis aggregates and gates."""
 

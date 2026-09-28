@@ -124,7 +124,9 @@ frescor de knowledge, orçamento por fase SDD e checkpoint no resume. Segurança
 e evidência nunca entram no orçamento. Veja o
 [guia de economia](docs/guides/API_FORGE_ECONOMY.md).
 
-Duas rodadas de hardening vieram de uma revisão externa: todo path de case,
+Três rodadas de hardening vieram de uma revisão externa (programa encerrado;
+governança do GitHub em
+[docs/guides/API_FORGE_GITHUB_GOVERNANCE.md](docs/guides/API_FORGE_GITHUB_GOVERNANCE.md)): todo path de case,
 fact, grafo ou fornecido pelo caller fica restrito ao projeto e aos
 repositórios declarados no workspace; budgets de contexto, chamadas e tokens
 são invariantes de contrato; a parada L0 exige recibos de prova re-hasheados;

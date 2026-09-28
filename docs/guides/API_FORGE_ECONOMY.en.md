@@ -2,9 +2,9 @@
 
 [Português](API_FORGE_ECONOMY.md) · [Code catalog](../catalog-contract.md) · [Platform usage](API_FORGE_PLATFORM_USAGE.en.md)
 
-The economy program (`prompt_evo_economy.md`, waves 0–8, then two hardening
-rounds from `prompt_evo_new_economy_arch.md` and `prompt_evo_new_economy.md`)
-cuts context, calls,
+The economy program (`prompt_evo_economy.md`, waves 0–8, then three hardening
+rounds from `prompt_evo_new_economy_arch.md`, `prompt_evo_new_economy.md` and
+`prompt_evo_new_economy_final.md`; the program is closed) cuts context, calls,
 tools and verification down to the smallest sufficient amount **without
 economizing on safety or evidence**. Everything is deterministic, offline and
 read-only; no verb calls a provider, executes tests or mutates infrastructure.
@@ -82,7 +82,7 @@ Keep claims in their own class:
 |---|---|---|
 | Deterministic benchmark | `evals economy`, `economy-routing`, `cache`, `economy-matrix` (`claim_scope: deterministic-safety-economy`), `economy-hardening` | contract correctness, mandatory roles, bytes and invariants on this corpus |
 | Provider/token | `economy stats` with `token_coverage`, `economy report --transcript` | tokens only where measured; only model-facing rows (`rules/token_eligibility.yaml`) are eligible; `partial` is never an observed total |
-| End-to-end agentic quality | `evals agentic-quality` (`recorded-agentic-outputs`, `--responses-dir`, `--min-accuracy`, `--baseline`) | recorded specialist verdicts against ground truth under each profile; passes only above an absolute floor and without regressing vs deep or a baseline |
+| End-to-end agentic quality | `evals agentic-quality` (`recorded-agentic-outputs`, `--responses-dir`, `--min-accuracy`, `--baseline`) | recorded specialist verdicts against ground truth under each profile; passes only above an absolute floor and without regressing vs deep or a baseline of the same benchmark (`BenchmarkIdentity/v1`) |
 
 ## Hard invariants
 

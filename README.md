@@ -521,7 +521,9 @@ budgets and resume checkpoints. See the
 [economy guide](docs/guides/API_FORGE_ECONOMY.en.md); safety and evidence
 never enter the budget.
 
-Two hardening rounds followed an external review: every case, fact, graph
+Three hardening rounds followed an external review (the program is now
+closed; GitHub governance lives in
+[docs/guides/API_FORGE_GITHUB_GOVERNANCE.en.md](docs/guides/API_FORGE_GITHUB_GOVERNANCE.en.md)): every case, fact, graph
 and caller-supplied path is confined to the project and declared workspace
 repositories; context, call and token budgets are contract invariants
 (class pools, one ControlPlane counter including shadow challengers, token

@@ -34,15 +34,9 @@ def test_baseline_regression_fails_and_equal_passes(tmp_path: Path) -> None:
     _case(corpus, "right", "breaking", "breaking")
     _case(corpus, "wrong", "breaking", "compatible")
     baseline = tmp_path / "baseline.json"
-    baseline.write_text(
-        json.dumps(
-            {
-                "schema": "apiforge/agentic-quality-eval/v1",
-                "accuracy": {"economy": 1.0, "balanced": 1.0, "deep": 1.0},
-            }
-        ),
-        encoding="utf-8",
-    )
+    report = run_agentic_quality(corpus, min_accuracy=0.0)
+    report["accuracy"] = {"economy": 1.0, "balanced": 1.0, "deep": 1.0}
+    baseline.write_text(json.dumps(report), encoding="utf-8")
     regressed = run_agentic_quality(corpus, min_accuracy=0.0, baseline=baseline)
     assert regressed["gates"]["economy_not_below_baseline"] is False
     assert regressed["passed"] is False

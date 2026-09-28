@@ -3825,6 +3825,11 @@ def evals_agentic_quality(
     baseline: Path | None = typer.Option(
         None, "--baseline", help="Previous agentic-quality report; no profile may regress."
     ),
+    allow_cross_corpus_baseline: bool = typer.Option(
+        False,
+        "--allow-cross-corpus-baseline",
+        help="Compare with a baseline of another benchmark (recorded as cross_corpus).",
+    ),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
     """Recorded specialist verdicts vs ground truth under each profile (no model calls)."""
@@ -3832,7 +3837,11 @@ def evals_agentic_quality(
 
     result = _run(
         lambda: run_agentic_quality(
-            corpus, responses_dir, min_accuracy=min_accuracy, baseline=baseline
+            corpus,
+            responses_dir,
+            min_accuracy=min_accuracy,
+            baseline=baseline,
+            allow_cross_corpus_baseline=allow_cross_corpus_baseline,
         )
     )
     _echo_json(result, detail_level)

@@ -25,6 +25,7 @@ from typing import Any
 import yaml
 
 from apiforge.contracts.base import ContractError
+from apiforge.contracts.economy_evals import BenchmarkIdentity
 
 PROFILES = ("economy", "balanced", "deep")
 NOW = "2026-09-28T00:00:00+00:00"
@@ -151,22 +152,64 @@ def _refusal(code: str, detail: str, field: str, unlock: str) -> ContractError:
     return error
 
 
-def load_baseline(path: Path) -> tuple[dict[str, float], str]:
-    """A previous agentic-quality report: its per-profile accuracy and sha256."""
+EVALUATOR = "agentic-quality/2"
+
+
+def benchmark_identity(corpus: Path, cases: list[dict[str, Any]]) -> BenchmarkIdentity:
+    import apiforge
+
+    hasher = hashlib.sha256()
+    for path in sorted(Path(corpus).glob("*.yaml")):
+        hasher.update(path.name.encode("utf-8") + bytes(1))
+        hasher.update(path.read_bytes().replace(bytes([13, 10]), bytes([10])) + bytes(1))
+    ids = "\n".join(sorted(str(case["id"]) for case in cases))
+    return BenchmarkIdentity(
+        corpus_sha256=hasher.hexdigest(),
+        case_ids_sha256=hashlib.sha256(ids.encode("utf-8")).hexdigest(),
+        case_count=len(cases),
+        profiles=PROFILES,
+        claim_scope=CLAIM_SCOPE,
+        evaluator_version=f"{EVALUATOR}+apiforge-{apiforge.__version__}",
+    )
+
+
+def load_baseline(
+    path: Path, identity: BenchmarkIdentity, *, allow_cross_corpus: bool = False
+) -> tuple[dict[str, float], str, str]:
+    """A previous report of the same experiment: accuracy for all profiles, sha256, scope."""
     try:
         raw = Path(path).read_bytes()
         data = json.loads(raw.decode("utf-8"))
         if not isinstance(data, dict) or data.get("schema") != "apiforge/agentic-quality-eval/v1":
             raise ValueError("not an apiforge/agentic-quality-eval/v1 report")
-        accuracy = {str(key): float(value) for key, value in dict(data["accuracy"]).items()}
+        if "benchmark_identity" not in data:
+            raise ValueError("report has no benchmark_identity (made by an older evaluator)")
+        previous = BenchmarkIdentity.model_validate(data["benchmark_identity"])
+        raw_accuracy = dict(data["accuracy"])
+        if set(raw_accuracy) != set(PROFILES):
+            raise ValueError(f"accuracy must cover exactly {', '.join(PROFILES)}")
+        accuracy = {str(key): float(value) for key, value in raw_accuracy.items()}
+        if not all(0.0 <= value <= 1.0 for value in accuracy.values()):
+            raise ValueError("accuracy values must be within [0, 1]")
     except (OSError, ValueError, KeyError, TypeError) as exc:
         raise _refusal(
             "AF-EVALS-BASELINE-INVALID",
-            f"{path}: {exc}",
+            f"{path}: {str(exc).splitlines()[0]}",
             "baseline",
-            "pass a report saved from `apiforge evals agentic-quality > baseline.json`",
+            "regenerate it with `apiforge evals agentic-quality > baseline.json`",
         ) from exc
-    return accuracy, hashlib.sha256(raw).hexdigest()
+    scope = "same_corpus"
+    if not previous.same_experiment(identity):
+        if not allow_cross_corpus:
+            raise _refusal(
+                "AF-EVALS-BASELINE-MISMATCH",
+                f"{path} measured another benchmark "
+                f"(corpus {previous.corpus_sha256[:12]} vs {identity.corpus_sha256[:12]})",
+                "baseline",
+                "use a baseline of the same corpus or pass --allow-cross-corpus-baseline",
+            )
+        scope = "cross_corpus"
+    return accuracy, hashlib.sha256(raw).hexdigest(), scope
 
 
 def run_agentic_quality(
@@ -175,6 +218,7 @@ def run_agentic_quality(
     *,
     min_accuracy: float = 1.0,
     baseline: Path | None = None,
+    allow_cross_corpus_baseline: bool = False,
 ) -> dict[str, Any]:
     """Gate = absolute floor per profile AND non-regression (vs deep, vs a baseline).
 
@@ -187,8 +231,15 @@ def run_agentic_quality(
             "min_accuracy",
             "pass a value between 0 and 1 (1.0 for the canonical corpus)",
         )
-    baseline_accuracy, baseline_sha = load_baseline(baseline) if baseline else ({}, None)
     cases = load_cases(Path(corpus))
+    identity = benchmark_identity(Path(corpus), cases)
+    baseline_accuracy: dict[str, float] = {}
+    baseline_sha: str | None = None
+    baseline_scope: str | None = None
+    if baseline:
+        baseline_accuracy, baseline_sha, baseline_scope = load_baseline(
+            baseline, identity, allow_cross_corpus=allow_cross_corpus_baseline
+        )
     rows: list[dict[str, Any]] = []
     with tempfile.TemporaryDirectory(prefix="af-agentic-quality-") as tmp:
         for index, case in enumerate(cases):
@@ -208,16 +259,21 @@ def run_agentic_quality(
     }
     gates["economy_not_below_deep"] = accuracy["economy"] >= accuracy["deep"]
     gates["balanced_not_below_deep"] = accuracy["balanced"] >= accuracy["deep"]
+    suffix = "_cross_corpus" if baseline_scope == "cross_corpus" else ""
     for profile in PROFILES:
         if profile in baseline_accuracy:
-            gates[f"{profile}_not_below_baseline"] = accuracy[profile] >= baseline_accuracy[profile]
+            gates[f"{profile}_not_below_baseline{suffix}"] = (
+                accuracy[profile] >= baseline_accuracy[profile]
+            )
     gates["every_case_answered"] = all(row["answered"] for row in rows)
     gates["no_blocked_runs"] = not blocked
     return {
         "schema": "apiforge/agentic-quality-eval/v1",
         "claim_scope": CLAIM_SCOPE,
         "cases": len(cases),
+        "benchmark_identity": identity.model_dump(mode="json"),
         "min_accuracy": min_accuracy,
+        "baseline_scope": baseline_scope,
         "baseline_sha256": baseline_sha,
         "baseline_accuracy": baseline_accuracy or None,
         "accuracy": accuracy,
@@ -227,4 +283,10 @@ def run_agentic_quality(
     }
 
 
-__all__ = ["CLAIM_SCOPE", "load_baseline", "load_cases", "run_agentic_quality"]
+__all__ = [
+    "CLAIM_SCOPE",
+    "benchmark_identity",
+    "load_baseline",
+    "load_cases",
+    "run_agentic_quality",
+]

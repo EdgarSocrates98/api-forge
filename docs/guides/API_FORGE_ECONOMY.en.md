@@ -82,7 +82,7 @@ Keep claims in their own class:
 |---|---|---|
 | Deterministic benchmark | `evals economy`, `economy-routing`, `cache`, `economy-matrix` (`claim_scope: deterministic-safety-economy`), `economy-hardening` | contract correctness, mandatory roles, bytes and invariants on this corpus |
 | Provider/token | `economy stats` with `token_coverage`, `economy report --transcript` | tokens only where measured; only model-facing rows (`rules/token_eligibility.yaml`) are eligible; `partial` is never an observed total |
-| End-to-end agentic quality | `evals agentic-quality` (`recorded-agentic-outputs`, `--responses-dir`, `--min-accuracy`, `--baseline`) | recorded specialist verdicts against ground truth under each profile; passes only above an absolute floor and without regressing vs deep or a baseline |
+| End-to-end agentic quality | `evals agentic-quality` (`recorded-agentic-outputs`, `--responses-dir`, `--min-accuracy`, `--baseline`) | recorded specialist verdicts against ground truth under each profile; passes only above an absolute floor and without regressing vs deep or a baseline of the same benchmark (`BenchmarkIdentity/v1`) |
 
 ## Hard invariants
 

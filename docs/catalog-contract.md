@@ -605,9 +605,10 @@ Gateway, `evidence resolve` and `context delta` read cases only through
 | `AF-ECONOMY-PROOF-HASH-MISMATCH` | diagnostic: a `ProofReceipt` artifact is missing or its sha256 differs; never L0 |
 | `AF-ECONOMY-PROOF-INVALID` | diagnostic: a step `proofs` entry is not a valid `ProofReceipt` or its artifact leaves the allowed roots |
 | `AF-DELTA-UNMAPPED-SOURCE` | a changed source, config or contract file maps to no impacted operation; the delta is `degraded`, never `ready` |
-| `AF-EVALS-BASELINE-INVALID` | `evals agentic-quality --baseline` is missing, not JSON or not an `apiforge/agentic-quality-eval/v1` report; unlock: save a report with `apiforge evals agentic-quality > baseline.json` |
+| `AF-EVALS-BASELINE-INVALID` | `evals agentic-quality --baseline` is missing, not JSON, not an `apiforge/agentic-quality-eval/v1` report, has no `benchmark_identity`, misses a profile or has an accuracy outside [0, 1]; unlock: regenerate it with `apiforge evals agentic-quality > baseline.json` |
+| `AF-EVALS-BASELINE-MISMATCH` | the baseline's `BenchmarkIdentity/v1` (corpus, case ids, profiles, claim scope) differs from the current benchmark; unlock: use a baseline of the same corpus or pass `--allow-cross-corpus-baseline` (recorded as `cross_corpus`) |
 | `AF-EVALS-INPUT-INVALID` | `--min-accuracy` is outside [0, 1] |
-| `AF-ECONOMY-TOKEN-RULE-INVALID` | `rules/token_eligibility.yaml` is malformed; unlock: restore it |
+| `AF-ECONOMY-TOKEN-RULE-INVALID` | `rules/token_eligibility.yaml` has another schema, an empty prefix list, a blank or a duplicated prefix; coverage is never computed from a broken policy (fail closed); unlock: restore it |
 | `AF-ECONOMY-LEDGER-PERSIST` | an auditable ledger row (runtime role bytes) could not be written; the run's economy block and `economy stats` report it as unresolved; unlock: make `.apiforge` writable and re-run |
 
 `BudgetEnvelope.context_bytes` is a global budget: each context class gets a

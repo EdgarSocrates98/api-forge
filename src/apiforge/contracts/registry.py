@@ -46,6 +46,7 @@ from apiforge.contracts.economy import (
     RunLedgerEntry,
 )
 from apiforge.contracts.economy_evals import (
+    BenchmarkIdentity,
     EconomyMatrix,
     EvaluationGate,
     InformationGain,
@@ -389,6 +390,7 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "PhaseBudgetPlan/v1": PhaseBudgetPlan,
     "EconomyCheckpoint/v1": EconomyCheckpoint,
     "ProofReceipt/v1": ProofReceipt,
+    "BenchmarkIdentity/v1": BenchmarkIdentity,
 }
 
 

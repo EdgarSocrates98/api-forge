@@ -876,6 +876,7 @@ def evals_agentic_quality(
     responses_dir: str | None = None,
     min_accuracy: float = 1.0,
     baseline: str | None = None,
+    allow_cross_corpus_baseline: bool = False,
     detail_level: str = "normal",
 ) -> dict[str, Any]:
     """Recorded specialist verdicts vs ground truth: absolute floor + non-regression gates."""
@@ -888,6 +889,7 @@ def evals_agentic_quality(
             Path(responses_dir) if responses_dir else None,
             min_accuracy=min_accuracy,
             baseline=Path(baseline) if baseline else None,
+            allow_cross_corpus_baseline=allow_cross_corpus_baseline,
         ),
         detail_level,
     )

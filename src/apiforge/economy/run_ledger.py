@@ -92,9 +92,15 @@ ELIGIBILITY_FILE = Path(__file__).resolve().parents[1] / "rules" / "token_eligib
 def eligible_prefixes(path: str = str(ELIGIBILITY_FILE)) -> tuple[str, ...]:
     try:
         raw = yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}
+        if raw.get("schema") != "apiforge/token-eligibility/v1":
+            raise ValueError("schema must be apiforge/token-eligibility/v1")
         prefixes = raw.get("verb_prefixes")
-        if not isinstance(prefixes, list) or not all(isinstance(item, str) for item in prefixes):
-            raise ValueError("verb_prefixes must be a list of strings")
+        if not isinstance(prefixes, list) or not prefixes:
+            raise ValueError("verb_prefixes must be a non-empty list")
+        if not all(isinstance(item, str) and item.strip() for item in prefixes):
+            raise ValueError("verb_prefixes must be non-blank strings")
+        if len(set(prefixes)) != len(prefixes):
+            raise ValueError("verb_prefixes must be unique")
     except (OSError, yaml.YAMLError, ValueError, AttributeError) as exc:
         raise EconomyError(
             "AF-ECONOMY-TOKEN-RULE-INVALID",

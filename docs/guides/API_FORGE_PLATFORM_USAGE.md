@@ -215,6 +215,10 @@ payload incompleto e mantém os gaps visíveis.
 
 ## 7. Git, CI/CD, IDE, UI e integrações
 
+Governança de merge (ruleset `protect`, checks obrigatórios e CODEOWNERS):
+[governança do GitHub](API_FORGE_GITHUB_GOVERNANCE.md). O plano é gerado por
+`scripts/github_ruleset_plan.py` e aplicado pelo dono do repositório.
+
 As integrações locais em `src/apiforge/integrations/` oferecem uma boundary
 estática/read-only. Elas podem inspecionar contexto, montar plano e nomear
 requisitos; não devem publicar, executar SQL, alterar pipeline, fazer deploy,

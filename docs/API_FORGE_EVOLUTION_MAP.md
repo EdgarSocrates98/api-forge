@@ -150,7 +150,9 @@ primeiro ship.
   [guia de economia](guides/API_FORGE_ECONOMY.md);
 - **entregue:** métricas de economia — bytes medidos por run e fonte, tokens observados com
   transcript, hits de cache, ROI por papel e matriz de economia com gate de regressão;
-- **entregue (hardening de economia 1–2):** paths de origem confinados, invariantes de budget
+- **entregue (hardening de economia 1–3, programa encerrado):** baselines com identidade de
+  benchmark, política de tokens fail-closed, CODEOWNERS e plano de ruleset somente leitura
+  ([governança do GitHub](guides/API_FORGE_GITHUB_GOVERNANCE.md)); paths de origem confinados, invariantes de budget
   no contrato, contabilidade do shadow, cobertura de tokens, provas estruturadas e evals de
   certificação sobre o código de produção com piso absoluto;
 - exportar o grafo para Neptune somente por adapter aprovado, preservando o grafo local como fonte.

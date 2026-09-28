@@ -58,6 +58,8 @@ Use native project capabilities:
   `verify plan` then `verify escalate`, `runtime checkpoint` on resume
   (see `docs/guides/API_FORGE_ECONOMY.en.md`); safety and evidence never
   enter the budget;
+- GitHub governance: `.github/CODEOWNERS` and the read-only
+  `scripts/github_ruleset_plan.py` (the owner applies the ruleset);
 - economy certification: `evals economy-hardening` and `evals agentic-quality`
   (absolute floor + baseline); paths from cases or callers outside the project
   are `AF-PATH-OUTSIDE-ROOT` and are never read;

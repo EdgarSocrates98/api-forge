@@ -122,6 +122,17 @@ def plan(
     }
 
 
+def _local(value: str, field: str) -> Path:
+    """Files stay inside the working directory: no ``..``, no path outside it."""
+    base = Path.cwd().resolve()
+    target = (base / value).resolve()
+    try:
+        target.relative_to(base)
+    except ValueError as exc:
+        raise RulesetError(f"{value!r} is outside the working directory", field) from exc
+    return target
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--input", required=True, help="Ruleset JSON file, or - for stdin.")
@@ -132,8 +143,11 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         raw = (
-            sys.stdin.read() if args.input == "-" else Path(args.input).read_text(encoding="utf-8")
+            sys.stdin.read()
+            if args.input == "-"
+            else _local(args.input, "input").read_text(encoding="utf-8")
         )
+        payload_out = _local(args.payload_out, "payload_out") if args.payload_out else None
         result = plan(
             json.loads(raw),
             repository=args.repository,
@@ -146,8 +160,8 @@ def main(argv: list[str] | None = None) -> int:
             file=sys.stderr,
         )
         return 2
-    if args.payload_out:
-        Path(args.payload_out).write_text(
+    if payload_out is not None:
+        payload_out.write_text(
             json.dumps(result["payload"], sort_keys=True, indent=2) + "\n", encoding="utf-8"
         )
     print(json.dumps(result, sort_keys=True, indent=2))

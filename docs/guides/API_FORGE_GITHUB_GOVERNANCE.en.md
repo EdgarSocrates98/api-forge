@@ -25,7 +25,7 @@ mutation boundary of the project.
 
 ```bash
 gh api repos/EdgarSocrates98/api-forge/rulesets/23971496 > ruleset.json
-python scripts/github_ruleset_plan.py --input ruleset.json --payload-out plan-payload.json
+python scripts/github_ruleset_plan.py --input ruleset.json --payload-out plan-payload.json  # paths relative to the working directory
 # review "warnings" and plan-payload.json, then:
 gh api -X PUT repos/EdgarSocrates98/api-forge/rulesets/23971496 --input plan-payload.json
 ```

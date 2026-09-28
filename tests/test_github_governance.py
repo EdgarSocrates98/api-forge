@@ -84,7 +84,7 @@ def test_malformed_ruleset_is_refused(bad: object) -> None:
     assert "AF-GITHUB-RULESET-INVALID" in str(err.value)
 
 
-def test_plan_script_cannot_mutate(tmp_path: Path) -> None:
+def test_plan_script_cannot_mutate(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     tree = ast.parse(SCRIPT.read_text(encoding="utf-8"))
     imported = {
         alias.name.split(".")[0]
@@ -98,6 +98,10 @@ def test_plan_script_cannot_mutate(tmp_path: Path) -> None:
     }
     assert not imported & {"subprocess", "socket", "urllib", "http", "requests", "httpx", "os"}
     module = _plan_module()
-    out = tmp_path / "plan-payload.json"
-    assert module.main(["--input", str(FIXTURE), "--payload-out", str(out)]) == 0
-    assert json.loads(out.read_text(encoding="utf-8"))["rules"]
+    (tmp_path / "ruleset.json").write_text(FIXTURE.read_text(encoding="utf-8"), encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+    assert module.main(["--input", "ruleset.json", "--payload-out", "plan-payload.json"]) == 0
+    assert json.loads((tmp_path / "plan-payload.json").read_text(encoding="utf-8"))["rules"]
+    assert module.main(["--input", "../outside.json"]) == 2
+    assert module.main(["--input", "ruleset.json", "--payload-out", "../x.json"]) == 2
+    assert not (tmp_path.parent / "x.json").exists()

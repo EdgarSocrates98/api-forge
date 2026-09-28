@@ -24,7 +24,7 @@ GitHub.
 
 ```bash
 gh api repos/EdgarSocrates98/api-forge/rulesets/23971496 > ruleset.json
-python scripts/github_ruleset_plan.py --input ruleset.json --payload-out plan-payload.json
+python scripts/github_ruleset_plan.py --input ruleset.json --payload-out plan-payload.json  # paths relativos ao diretório de trabalho
 # revise "warnings" e plan-payload.json, então:
 gh api -X PUT repos/EdgarSocrates98/api-forge/rulesets/23971496 --input plan-payload.json
 ```

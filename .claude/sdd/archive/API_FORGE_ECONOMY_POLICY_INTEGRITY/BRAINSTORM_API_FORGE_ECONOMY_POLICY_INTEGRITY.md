@@ -7,7 +7,7 @@
 | **Feature** | API_FORGE_ECONOMY_POLICY_INTEGRITY |
 | **Date** | 2026-09-28 |
 | **Author** | brainstorm-agent |
-| **Status** | ✅ Complete (Defined) |
+| **Status** | ✅ Shipped |
 | **Source** | `prompt_evo_new_economy_final.md` (review of `main` @ `333b706`, verdict `PASS — ECONOMY ARCHITECTURE HARDENED`) |
 | **Branch** | `codex/economy-policy-integrity` |
 

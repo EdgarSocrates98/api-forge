@@ -608,6 +608,7 @@ Gateway, `evidence resolve` and `context delta` read cases only through
 | `AF-EVALS-BASELINE-INVALID` | `evals agentic-quality --baseline` is missing, not JSON, not an `apiforge/agentic-quality-eval/v1` report, has no `benchmark_identity`, misses a profile or has an accuracy outside [0, 1]; unlock: regenerate it with `apiforge evals agentic-quality > baseline.json` |
 | `AF-EVALS-BASELINE-MISMATCH` | the baseline's `BenchmarkIdentity/v1` (corpus, case ids, profiles, claim scope) differs from the current benchmark; unlock: use a baseline of the same corpus or pass `--allow-cross-corpus-baseline` (recorded as `cross_corpus`) |
 | `AF-EVALS-INPUT-INVALID` | `--min-accuracy` is outside [0, 1] |
+| `AF-GITHUB-RULESET-INVALID` | `scripts/github_ruleset_plan.py` got input that is not a ruleset JSON (object with `id`, `name` and typed `rules`); unlock: pass the JSON of `gh api repos/<owner>/<repo>/rulesets/<id>` |
 | `AF-ECONOMY-TOKEN-RULE-INVALID` | `rules/token_eligibility.yaml` has another schema, an empty prefix list, a blank or a duplicated prefix; coverage is never computed from a broken policy (fail closed); unlock: restore it |
 | `AF-ECONOMY-LEDGER-PERSIST` | an auditable ledger row (runtime role bytes) could not be written; the run's economy block and `economy stats` report it as unresolved; unlock: make `.apiforge` writable and re-run |
 

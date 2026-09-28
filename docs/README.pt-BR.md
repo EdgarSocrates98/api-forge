@@ -14,6 +14,7 @@ produto.
 - [Uso da plataforma](guides/API_FORGE_PLATFORM_USAGE.md)
 - [Experiência e interoperabilidade](guides/API_FORGE_EXPERIENCE_INTEROPERABILITY.md)
 - [Economia: gastar só o necessário, com prova](guides/API_FORGE_ECONOMY.md)
+- [Governança do GitHub: plano do ruleset e CODEOWNERS](guides/API_FORGE_GITHUB_GOVERNANCE.md)
 - [Paridade entre hosts](HOST_PARITY.pt-BR.md)
 - [Mapa de evolução](API_FORGE_EVOLUTION_MAP.md)
 

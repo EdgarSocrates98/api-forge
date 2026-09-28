@@ -9,7 +9,7 @@
 | **Author** | build-agent |
 | **DEFINE** | [DEFINE_API_FORGE_AGENT_ROSTER.md](../features/DEFINE_API_FORGE_AGENT_ROSTER.md) |
 | **DESIGN** | [DESIGN_API_FORGE_AGENT_ROSTER.md](../features/DESIGN_API_FORGE_AGENT_ROSTER.md) |
-| **Status** | Complete |
+| **Status** | ✅ Shipped |
 | **Branch** | `sdd/agent-roster` (wave 1 `ecbc870`; wave 2 + critic fixes uncommitted at report time) |
 
 ---
@@ -112,3 +112,7 @@
 ## Next Step
 
 `/ship .claude/sdd/features/DEFINE_API_FORGE_AGENT_ROSTER.md`
+
+---
+
+*Shipped and archived 2026-09-28.*

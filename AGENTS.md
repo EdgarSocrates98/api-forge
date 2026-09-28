@@ -66,6 +66,20 @@ Use native project capabilities:
 - `apiforge graph` for provenance and impact;
 - `apiforge task`, `runtime`, `sandbox`, `evidence` and `brief` for governed work.
 
+## Agent roster
+
+`agents/*.md` is the only hand-edited agent source: 25 coordinators, each with
+a nine-section contract (When you enter, When not to enter, Inputs, Method,
+Output, Done when, Refusal and escalation, Permissions, Executors), `access`
+(`read-only`, `state-writer` or `writer`) with `write_scope`, owned
+`apiforge_tools` and `replaces`. `apiforge agents sync` renders the host
+mirrors (`.claude/agents/*.md`, `.agents/agents/*.md`, `.codex/agents/*.toml`);
+never edit a mirror. Before committing agent changes run `apiforge agents lint`,
+`agents check`, `agents references` and `agents audit`, plus
+`apiforge evals agent-routing --baseline <report>` and
+`--cases evals/corpus/agent-routing/holdout.json`. Deprecated names resolve
+through `src/apiforge/rules/agent_aliases.yaml` until `roster-v2`.
+
 ## Data and messaging specializations
 
 Route by engine instead of treating every datastore or broker as generic:

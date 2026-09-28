@@ -61,6 +61,9 @@ the verifier, unresolved gaps and next human action.
 - no direct writes to the main tree during build;
 - use `apply_patch` for edits;
 - update tests and SDD artifacts together;
+- agents: edit only `agents/*.md`, then `apiforge agents sync` and
+  `apiforge agents lint` (mirrors in `.claude/agents`, `.agents/agents`,
+  `.codex/agents` are generated and gated);
 - update the relevant IR, agent routing and host mirrors when adding a new
   datastore, broker or messaging specialization;
 - for API changes tied to Git or CI/CD, preserve the read-only adapter boundary,

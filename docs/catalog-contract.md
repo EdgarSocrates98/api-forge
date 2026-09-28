@@ -447,9 +447,10 @@ record `output_sha256`, pending steps name their missing inputs, and
 `collect *` is refused inside dispatch (it touches AWS). The run record
 persists under `case/dispatch/`.
 
-`agents sync` regenerates `.agents/agents/` and `.claude/agents/` as
-byte-identical mirrors of `agents/*.md`; `agents check` and the release
-gate fail on drift.
+`agents sync` renders `.agents/agents/`, `.claude/agents/` and
+`.codex/agents/` from `agents/*.md` (see *Agent roster* below); `agents check`
+and the release gate fail on drift. A deprecated coordinator name resolves
+through `rules/agent_aliases.yaml` with `AF-AGENT-ALIAS-DEPRECATED`.
 
 | Code | Meaning |
 |---|---|

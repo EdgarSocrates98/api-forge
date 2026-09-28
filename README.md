@@ -487,8 +487,9 @@ while refusal codes and `fact_id`s survive.
 
 ## Agentic layer
 
-Twenty-three coordinator profiles in `agents/*.md` (one per specialty, each declaring
-`rule_areas` and the five executors) plus five executors in
+Twenty-five coordinator profiles in `agents/*.md` (one per specialty, each with a
+nine-section contract, `access`, owned `apiforge_tools`, `rule_areas` and
+executors) plus five executors in
 `agents/executors/*.md` (`af-inventory`, `af-extractor`, `af-judge`,
 `af-verifier`, `af-synthesizer`). `AGENT_PROTOCOL.md` is the operating
 contract every profile points at; `next-step` routes by data, `playbook`

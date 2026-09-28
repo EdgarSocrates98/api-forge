@@ -9,7 +9,7 @@
 | **Feature** | API_FORGE_AGENT_ROSTER |
 | **Date** | 2026-09-28 |
 | **Author** | define-agent |
-| **Status** | ✅ Complete (Built) |
+| **Status** | ✅ Shipped |
 | **Clarity Score** | 14/15 |
 | **Source** | `.claude/sdd/features/BRAINSTORM_API_FORGE_AGENT_ROSTER.md` |
 | **Branch** | `sdd/agent-roster` (stacked on `sdd/new-forge` @ 9cbe0fe) |
@@ -210,6 +210,7 @@ Every one of the 52 current names maps to exactly one roster entry (kept or abso
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0 | 2026-09-28 | define-agent | Initial version from BRAINSTORM |
+| 1.1 | 2026-09-28 | ship-agent | Shipped and archived |
 
 ---
 

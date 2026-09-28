@@ -10,7 +10,7 @@
 | **Date** | 2026-09-28 |
 | **Author** | design-agent |
 | **DEFINE** | [DEFINE_API_FORGE_AGENT_ROSTER.md](./DEFINE_API_FORGE_AGENT_ROSTER.md) |
-| **Status** | ✅ Complete (Built) |
+| **Status** | ✅ Shipped |
 | **Design confidence** | 0.80 (strong codebase patterns: `dispatch/mirrors.py`, `agentops/agent_audit.py`; host formats from official Codex doc; Devin schema unverified) |
 
 ---
@@ -531,6 +531,7 @@ No cycles: `dispatch/render` depends on `agent_source` only; `aliases` is a leaf
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0 | 2026-09-28 | design-agent | Initial version |
+| 1.1 | 2026-09-28 | ship-agent | Shipped and archived |
 
 ---
 

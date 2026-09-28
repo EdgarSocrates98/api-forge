@@ -389,6 +389,11 @@ while refusal codes and `fact_id`s survive.
 | `apiforge playbook api-governance-reviewer` | Render the coordinator's executor decomposition — works without dispatch |
 | `apiforge economy report [--root .]` | Measured call sizes; `detail_level_effect` shows what `summary` saves |
 | `apiforge context funnel --case .apiforge/case` | Measured bytes per case stage (api-ir → facts → findings → summary) |
+| `apiforge context capsule --target "POST /orders" [--budget-bytes N] [--level L3\|L4]` | `ContextCapsule/v1`: minimal evidence for one operation as hash-verified `ctx://sha256/…` refs under a byte budget |
+| `apiforge context expand ctx://sha256/<hex> [--run-id R]` | One ctx object, re-hashed before it is returned |
+| `apiforge economy stats [--run-id R] [--transcript T]` | Bytes attributed per run and source; tokens `unresolved` without a transcript |
+| `apiforge economy explain <run_id>` | Why each ref was spent, from recorded provenance rules (no model call) |
+| `apiforge evals economy [--record-baseline]` | 12-case benchmark: evidence recall floor + median byte reduction vs recorded baseline |
 | `apiforge-mcp` | MCP server for the read/compose verbs (needs `pip install apiforge[mcp]`; every tool takes `detail_level`) |
 | `apiforge collect lambda --function-name X --out dump/` | Fetch Lambda config into a dump (Code.Location never persisted) |
 | `apiforge collect sqs\|sns\|eventbridge\|iam-role\|cognito\|waf ... --out dump/` | Messaging/identity collectors — same offline-dump contract |

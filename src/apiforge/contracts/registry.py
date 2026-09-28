@@ -18,7 +18,13 @@ from apiforge.contracts.agentic import (
     TrajectoryEvent,
 )
 from apiforge.contracts.base import ContractError
-from apiforge.contracts.context import ContextScope
+from apiforge.contracts.context import (
+    CapsuleBudget,
+    CapsuleRefusal,
+    ContextCapsule,
+    ContextRef,
+    ContextScope,
+)
 from apiforge.contracts.core import (
     ActionPlan,
     ActionStep,
@@ -28,6 +34,7 @@ from apiforge.contracts.core import (
 )
 from apiforge.contracts.devin import DevinCheck, DevinCliProbe, DevinLaunch, DevinPayload
 from apiforge.contracts.distribution import DistributionDoctor
+from apiforge.contracts.economy import CostVector, LedgerRef, RunLedgerEntry
 from apiforge.contracts.evidence import EvidenceRef
 from apiforge.contracts.graph import GraphEdge, GraphExport, GraphNode
 from apiforge.contracts.graph_impact import (
@@ -290,6 +297,13 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "WorkspaceManifest/v1": WorkspaceManifest,
     "ArchitectureGraph/v1": WorkspaceGraph,
     "ContextScope/v1": ContextScope,
+    "ContextRef/v1": ContextRef,
+    "CapsuleBudget/v1": CapsuleBudget,
+    "CapsuleRefusal/v1": CapsuleRefusal,
+    "ContextCapsule/v1": ContextCapsule,
+    "CostVector/v1": CostVector,
+    "LedgerRef/v1": LedgerRef,
+    "RunLedgerEntry/v1": RunLedgerEntry,
 }
 
 

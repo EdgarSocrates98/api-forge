@@ -576,6 +576,72 @@ def economy_report(root: str = ".", detail_level: str = "normal") -> dict[str, A
     return out
 
 
+def economy_stats(
+    root: str = ".", run_id: str | None = None, detail_level: str = "normal"
+) -> dict[str, Any]:
+    """Bytes attributed per run and source; tokens unresolved without a transcript."""
+    from apiforge.economy.run_ledger import stats
+
+    out: dict[str, Any] = _call(
+        "economy_stats", lambda: stats(Path(root), run_id=run_id), detail_level
+    )
+    return out
+
+
+def economy_explain(run_id: str, root: str = ".", detail_level: str = "normal") -> dict[str, Any]:
+    """Why each ref of a run was spent, from recorded provenance rules only."""
+    from apiforge.economy.run_ledger import explain
+
+    out: dict[str, Any] = _call(
+        "economy_explain", lambda: explain(Path(root), run_id), detail_level
+    )
+    return out
+
+
+def context_capsule(
+    target: str,
+    root: str = ".",
+    case_dir: str | None = None,
+    budget_bytes: int = 16000,
+    level: str = "L3",
+    impact: str = "transitive",
+    run_id: str | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Minimal sufficient evidence for one operation as ctx:// refs under a byte budget."""
+    from apiforge.application.context import build_context_capsule
+
+    out: dict[str, Any] = _call(
+        "context_capsule",
+        lambda: build_context_capsule(
+            Path(root),
+            target=target,
+            case_dir=Path(case_dir) if case_dir else None,
+            budget_bytes=budget_bytes,
+            level=level,
+            impact=impact,
+            run_id=run_id,
+            verb="mcp:context_capsule",
+        ),
+        detail_level,
+    )
+    return out
+
+
+def context_expand(
+    uri: str, root: str = ".", run_id: str | None = None, detail_level: str = "normal"
+) -> dict[str, Any]:
+    """Return one ctx:// object after verifying its sha256."""
+    from apiforge.application.context import expand_context_ref
+
+    out: dict[str, Any] = _call(
+        "context_expand",
+        lambda: expand_context_ref(Path(root), uri=uri, run_id=run_id),
+        detail_level,
+    )
+    return out
+
+
 def context_funnel(case_dir: str, detail_level: str = "normal") -> dict[str, Any]:
     """Measure the context funnel of a persisted case — bytes per stage."""
     from apiforge.application.funnel import measure_funnel
@@ -1469,7 +1535,11 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     rules_lookup,
     playbook,
     economy_report,
+    economy_stats,
+    economy_explain,
     context_funnel,
+    context_capsule,
+    context_expand,
     graph_query,
     graph_impact,
     graph_trace,

@@ -23,6 +23,23 @@ Carregue nesta ordem:
 
 Use cache por hash, deduplicação e `detail_level`. Nunca leia o repositório inteiro se API-IR, facts ou Graphify resolverem a pergunta.
 
+## Context Gateway (verbo antes de Read)
+
+Para uma pergunta sobre uma operação, com o caso já analisado:
+
+```text
+apiforge context capsule --target "POST /payments" [--budget-bytes N] [--level L3|L4]
+apiforge context expand ctx://sha256/<hex> --run-id <run_id>
+apiforge economy stats --run-id <run_id>
+apiforge economy explain <run_id>
+```
+
+- O capsule traz refs `ctx://` (operação, schemas, handler, model em `parity`/`delta`, findings, testes); expanda só o que a pergunta exige.
+- `status: unresolved` + `AF-CONTEXT-BUDGET-EXHAUSTED` é resultado parcial explícito: aumente o orçamento ou baixe o nível; nunca complete lendo o repositório inteiro em silêncio.
+- `status: degraded` + `AF-CTX-GRAPH-UNAVAILABLE`: rode `apiforge analyze` antes.
+- `unresolved: code-route-missing:*` indica drift contrato↔código, não falha do gateway.
+- Tokens só existem com transcript (`economy stats --transcript`); bytes não são tokens.
+
 ## Graphify
 
 Relacione artefatos, operações, handlers, bancos, regras, findings, tasks, testes, traces, decisões e releases por edges de dependência, implementação, evidência, impacto, violação e verificação.

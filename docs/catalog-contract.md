@@ -511,6 +511,29 @@ never presented as counted (`counted: false`). Dollar cost requires
 | `AF-ECONOMY-TRANSCRIPT-MISSING` | no transcript file, or `--cost-basis` without `--transcript` |
 | `AF-ECONOMY-COST-BASIS-MISSING` | basis file absent or not a model→rates mapping |
 
+## Context Gateway (`context capsule`, `context expand`, `economy stats|explain`, `evals economy`)
+
+`context capsule` emits `ContextCapsule/v1`: evidence for one operation as
+`ctx://sha256/<hex>` refs selected from the persisted case graph (L0 intent →
+L1 fingerprint → L2 impact → L3 refs → L4 inline focused code) under a byte
+budget. Objects live in `<root>/.apiforge/ctx/` and are hash-verified on
+`context expand`. Budget exhaustion and a missing case are partial results
+(exit 0, explicit `status` + refusal inside the capsule); integrity and
+reference errors are refusals (exit 2). Attribution rows in `economy.jsonl`
+carry `payload_bytes: 0` so `economy report` totals are unchanged.
+
+| Code | Meaning |
+|---|---|
+| `AF-CONTEXT-TARGET-INVALID` | `--target` is not `<METHOD> /path` (or `<METHOD>:/path`); unlock: pass an operation such as `POST /orders` |
+| `AF-CONTEXT-BUDGET-EXHAUSTED` | not every selected ref fits `--budget-bytes`; capsule returned with `status: unresolved` and whole refs only; unlock: raise the budget or lower `--level` |
+| `AF-CTX-GRAPH-UNAVAILABLE` | no `case.json` under the case dir; capsule degraded to L0/L1; unlock: `apiforge analyze --out-dir <case>` |
+| `AF-CTX-REF-INVALID` | ref is not `ctx://sha256/<64 hex>`; unlock: pass a ref exactly as emitted |
+| `AF-CTX-REF-NOT-FOUND` | ref absent from `<root>/.apiforge/ctx`; unlock: rebuild the capsule in the same root |
+| `AF-CTX-HASH-MISMATCH` | stored object no longer hashes to its ref; content is never returned; unlock: delete the object and rebuild |
+| `AF-ECONOMY-RUN-NOT-FOUND` | `economy explain` has no attribution rows for the run id; unlock: pass a `run_id` printed by `context capsule` |
+| `AF-EVALS-ECONOMY-BASELINE-MISSING` | corpus case has no recorded baseline; unlock: `apiforge evals economy --record-baseline` |
+| `AF-EVALS-ECONOMY-BASELINE-STALE` | fixture digest differs from the recorded baseline; unlock: re-record and commit the baseline |
+
 ## Canonical contracts (`contract`)
 
 `contract list` enumerates the registered `<Name>/v1` contracts;

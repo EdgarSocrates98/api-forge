@@ -8,7 +8,15 @@ from apiforge.contracts.adapter import (
     EvidenceLevel,
 )
 from apiforge.contracts.compatibility import CompatibilityCell, CompatibilityMatrix, RuntimeReceipt
-from apiforge.contracts.context import ContextResult, ContextScope, ContextTarget
+from apiforge.contracts.context import (
+    CapsuleBudget,
+    CapsuleRefusal,
+    ContextCapsule,
+    ContextRef,
+    ContextResult,
+    ContextScope,
+    ContextTarget,
+)
 from apiforge.contracts.data_runtime import DataProvider, DataReadReceipt, DataReadRequest
 from apiforge.contracts.debate import (
     AdaptivePlan,
@@ -33,6 +41,7 @@ from apiforge.contracts.distribution import (
     DistributionRefusal,
     ForgePaths,
 )
+from apiforge.contracts.economy import CostVector, LedgerRef, RunLedgerEntry
 from apiforge.contracts.evidence import EvidenceKind, EvidenceRecord, EvidenceRef
 from apiforge.contracts.experience import ExperienceAction, ExperienceSnapshot, ExperienceView
 from apiforge.contracts.graph_impact import (
@@ -122,11 +131,16 @@ __all__ = [
     "CapabilityRecord",
     "CapabilityRequest",
     "CapabilityResult",
+    "CapsuleBudget",
+    "CapsuleRefusal",
     "CompatibilityCell",
     "CompatibilityMatrix",
+    "ContextCapsule",
+    "ContextRef",
     "ContextResult",
     "ContextScope",
     "ContextTarget",
+    "CostVector",
     "DataProvider",
     "DataReadReceipt",
     "DataReadRequest",
@@ -168,6 +182,7 @@ __all__ = [
     "HostDeclaration",
     "HostResolution",
     "KnowledgeObservation",
+    "LedgerRef",
     "ObservedSignal",
     "PackFreshness",
     "ParticipantDeclaration",
@@ -185,6 +200,7 @@ __all__ = [
     "RoutingPlan",
     "RoutingPolicy",
     "RoutingRequest",
+    "RunLedgerEntry",
     "RuntimeReceipt",
     "SandboxCommand",
     "SandboxCommandResult",

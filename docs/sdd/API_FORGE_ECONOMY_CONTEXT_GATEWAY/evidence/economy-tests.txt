@@ -1,0 +1,2 @@
+command: pytest tests/contracts/test_context_capsule.py tests/context tests/economy tests/evals/test_economy_eval.py tests/mcp/test_economy_context_tools.py tests/mcp/test_tools.py
+result: 55 passed, 1 skipped in 4.37s

@@ -265,6 +265,7 @@ platform_app = typer.Typer(
 app.add_typer(platform_app)
 from apiforge.cli_context import register as _register_context
 from apiforge.cli_distribution import register as _register_distribution
+from apiforge.cli_economy import register as _register_economy
 from apiforge.cli_tui import tui_app
 from apiforge.cli_workspace import register as _register_workspace
 
@@ -272,6 +273,7 @@ app.add_typer(tui_app, name="tui")
 _register_distribution(app)
 _register_workspace(app)
 _register_context(context_app)
+_register_economy(economy_app)
 
 
 @app.callback()
@@ -3583,6 +3585,28 @@ def evals_validate(
     except (KeyError, OSError, TypeError, ValueError) as exc:
         raise AnalysisError("AF-EVALS-INVALID", str(exc)) from exc
     _echo_json(result, detail_level)
+
+
+@evals_app.command("economy")
+def evals_economy(
+    corpus: Path = typer.Option(Path("evals/corpus/economy"), "--corpus"),
+    repo_root: Path = typer.Option(Path("."), "--repo-root", help="Where fixture paths resolve."),
+    record: bool = typer.Option(
+        False, "--record-baseline", help="Measure and persist the no-gateway baseline only."
+    ),
+    min_reduction: float = typer.Option(0.40, "--min-reduction", min=0.0, max=1.0),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Capsule bytes and evidence recall vs the recorded baseline; exit 1 when a gate fails."""
+    from apiforge.evals.economy import record_baseline, run_economy
+
+    if record:
+        _echo_json(_run(lambda: record_baseline(corpus, repo_root)), detail_level)
+        return
+    result = _run(lambda: run_economy(corpus, repo_root, min_reduction=min_reduction))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
 
 
 @contract_intel_app.command("impact")

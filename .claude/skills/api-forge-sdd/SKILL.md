@@ -30,3 +30,6 @@ Evidence unlocks phase gates. Flags, texto do agente e intenção não substitue
 
 Entregue artefatos SDD, plano atômico, ADRs, estado dos gates, provas, gaps e próximo passo.
 
+## Field validation
+
+Roadmap themes come from `apiforge field report` over pre-registered real tasks (`docs/field/README.md`). Nunca abra SDD de feature estrutural sem tema qualificado (≥5 tarefas verificadas em ≥2 repos) ou veredito `inconclusive` registrado. Baseline nunca usa `workspace graph --infer`; `AF-FIELD-FLAG-CONTAMINATION` recusa.

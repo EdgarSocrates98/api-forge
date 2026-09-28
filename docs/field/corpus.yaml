@@ -1,0 +1,16 @@
+schema: apiforge/field-corpus/v1
+cycle_started_at: null
+gate:
+  max_runs: 30
+  max_weeks: 4
+  min_tasks_per_theme: 5
+  min_repos_per_theme: 2
+  min_tasks_per_scenario: 5
+hypothesis:
+  id: H1
+  category: graph_gap
+  refutation: graph_gap is not qualified while another exit_reason qualifies, or graph_gap qualifies but is not the most frequent qualified theme
+repos:
+- ref: oss:open-telemetry/opentelemetry-demo@UNPINNED
+  kind: oss
+tasks: []

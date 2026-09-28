@@ -65,6 +65,24 @@ def workspace_status(
     _emit(status(root), detail_level)
 
 
+@workspace_app.command("graph")
+def workspace_graph(
+    root: Path = typer.Option(Path("."), "--root"),
+    infer: bool = typer.Option(
+        False, "--infer", help="Add static cross-repo inferred relations (opt-in, audited)."
+    ),
+    run_id: str | None = typer.Option(
+        None, "--run-id", help="Attribute inference to a run; field records detect it."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level"),
+) -> None:
+    """Workspace graph; declared relations only unless --infer is passed."""
+    from apiforge.application.workspace import graph
+    from apiforge.cli import _echo_json, _run
+
+    _echo_json(_run(lambda: graph(root, infer=infer, run_id=run_id)), detail_level)
+
+
 def register(app: typer.Typer) -> None:
     app.add_typer(workspace_app, name="workspace")
 

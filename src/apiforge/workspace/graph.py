@@ -13,7 +13,16 @@ def _node_id(kind: str, value: str) -> str:
     return f"{kind}:{hashlib.sha256(value.encode('utf-8')).hexdigest()[:16]}"
 
 
-def build_graph(manifest: WorkspaceManifest) -> WorkspaceGraph:
+def repository_node_id(repository_id: str) -> str:
+    return _node_id("repository", repository_id)
+
+
+def build_graph(
+    manifest: WorkspaceManifest,
+    *,
+    inferred: tuple[WorkspaceRelation, ...] = (),
+    inferred_unresolved: tuple[str, ...] = (),
+) -> WorkspaceGraph:
     nodes: list[dict[str, object]] = [
         {
             "id": _node_id("workspace", manifest.workspace_id),
@@ -64,19 +73,20 @@ def build_graph(manifest: WorkspaceManifest) -> WorkspaceGraph:
                 )
             )
     edges.extend(manifest.relations)
-    unresolved = tuple(
-        sorted(
-            f"repository {item.name} root is missing: {item.root}"
-            for item in manifest.repositories
-            if not Path(item.root).is_dir()
-        )
+    edges.extend(inferred)
+    missing = tuple(
+        f"repository {item.name} root is missing: {item.root}"
+        for item in manifest.repositories
+        if not Path(item.root).is_dir()
     )
+    unresolved = tuple(sorted(missing))
+    all_unresolved = tuple(sorted(missing + inferred_unresolved))
     return WorkspaceGraph(
         workspace_id=manifest.workspace_id,
         nodes=tuple(sorted(nodes, key=lambda item: str(item["id"]))),
         edges=tuple(sorted(edges, key=lambda item: (item.from_id, item.to_id, item.relation))),
-        unresolved=unresolved,
-        evidence_level="declared" if not unresolved else "unknown",
+        unresolved=all_unresolved,
+        evidence_level="unknown" if unresolved else ("inferred" if inferred else "declared"),
     )
 
 

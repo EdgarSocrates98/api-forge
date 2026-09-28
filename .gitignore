@@ -13,3 +13,4 @@ __pycache__/
 prompt_evo*.md
 .tmp
 .tmp*
+docs/field/repos.local.yaml

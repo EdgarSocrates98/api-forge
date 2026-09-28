@@ -17,7 +17,9 @@ RepositoryType = Literal[
     "frontend",
     "unknown",
 ]
-RelationKind = Literal["contains", "depends_on", "client_of", "calls", "deploys"]
+RelationKind = Literal[
+    "contains", "depends_on", "client_of", "calls", "deploys", "publishes_to_consumer"
+]
 
 
 def _sorted_unique(value: tuple[str, ...]) -> tuple[str, ...]:

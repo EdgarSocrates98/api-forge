@@ -422,6 +422,8 @@ while refusal codes and `fact_id`s survive.
 | `apiforge economy providers`, `apiforge economy tier --capability C --risk R` | `ProviderCapability/v1`, `TierDecision/v1`: T0–T3, cheaper only with benchmark evidence |
 | `apiforge agentops prompt --capability C` | `PromptEnvelope/v1`: stable hashed prefix + run suffix |
 | `apiforge workspace locality --target <repo> [--transitive]` | `LocalityPlan/v1`: target, direct neighbors, transitive deferred |
+| `apiforge workspace graph [--infer --run-id R]` | `WorkspaceGraph/v1`: declared relations; `--infer` adds static cross-repo `calls`/`publishes_to_consumer` edges (`inferred`, confidence, file:line) and an audited `workspace.infer` ledger row |
+| `apiforge field record\|annotate\|verify\|report\|export` | `FieldRun/v1`, `FieldReport/v1`: pre-registered field validation joined from existing run artifacts; Wilson 95% CI, theme qualification, H1 verdict, A/B deltas (`docs/field/README.md`) |
 | `apiforge evals economy-extras` | 15 cases across the seven wave-7 verbs |
 | `apiforge knowledge watch --manifest upstream.json --now T` | `FreshnessWatch/v1`: packs whose upstream fingerprint, version, expiry or window says `refresh_needed`; never fetches |
 | `apiforge evidence gate --question Q [--offline]` | `LiveEvidenceDecision/v1`: static questions stay local; `live_read_only` only for runtime questions; `live_mutation` refused |

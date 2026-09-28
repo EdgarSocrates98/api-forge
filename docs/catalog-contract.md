@@ -761,6 +761,28 @@ triggers. Partial outcomes keep `final_status: REVIEW` and report
 | `AF-SDD-PROFILE-BELOW-RISK` | a feature's `intent.md` carries `risk_class` and declares an SDD profile below its minimum; unlock: declare the required profile or higher |
 | `AF-SDD-RISK-UNRESOLVED` | `sdd classify` found no classifying signal (defaults to `medium`) or got only one of `--baseline`/`--candidate` |
 
+## Field validation (`field record|annotate|verify|report|export`, `workspace graph --infer`)
+
+Field records join existing run artifacts (economy ledger, `summary.json`,
+`economy_checkpoint.json`); a missing source leaves the value `null` with an
+`unresolved` reason. Inference is opt-in and audited: `workspace graph --infer
+--run-id <id>` appends a `workspace.infer` ledger row, which `field record
+--phase baseline` treats as contamination.
+
+| Code | Meaning |
+|---|---|
+| `AF-FIELD-CORPUS-INVALID` | `docs/field/corpus.yaml` or `hypothesis.md` missing, malformed, duplicate task id, unknown repo ref, or own repo ref not `sha256:` |
+| `AF-FIELD-TASK-UNREGISTERED` | task id is not pre-registered in the corpus |
+| `AF-FIELD-LATE-REGISTRATION` | task `registered_at` is after the cycle start |
+| `AF-FIELD-ENUM` | `exit_reason`, `phase`, `verdict` or a count is outside its closed set |
+| `AF-FIELD-TIME-ORDER` | `--ended` precedes `--started`, a timestamp is not RFC3339, or a linked run checkpoint lies outside the task window (±60s) |
+| `AF-FIELD-RUN-MISSING` | no field record for task/phase, or a run id has neither run directory nor ledger rows |
+| `AF-FIELD-FLAG-CONTAMINATION` | a baseline task's linked runs used `workspace.infer` |
+| `AF-FIELD-EXPORT-LEAK` | export would expose a private repo name/path or an absolute path |
+| `AF-WORKSPACE-INFER-AMBIGUOUS` | unresolved: an outbound call matches routes in more than one repository; edges capped at 0.45 |
+| `AF-WORKSPACE-INFER-UNATTRIBUTED` | unresolved: `--infer` ran without `--run-id`, so field records cannot see it |
+| `AF-WORKSPACE-INFER-EXTRACT` | unresolved: a route extractor failed on one repository |
+
 ## Canonical contracts (`contract`)
 
 `contract list` enumerates the registered `<Name>/v1` contracts;

@@ -18,6 +18,9 @@ class PackFreshness(VersionedContract):
     window_days: int | None = Field(default=None, ge=0)
     source_hash: str | None = None
     authority: str | None = None
+    source_version: str | None = None
+    expires_at: str | None = None
+    upstream: str | None = None
 
 
 class SourceObservation(VersionedContract):

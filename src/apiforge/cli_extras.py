@@ -15,7 +15,7 @@ def register(
     economy_app: typer.Typer,
     agentops_app: typer.Typer,
     workspace_app: typer.Typer,
-) -> None:
+) -> typer.Typer:
     verify_app = typer.Typer(
         name="verify", help="Targeted verification plans (never executes).", no_args_is_help=True
     )
@@ -133,6 +133,8 @@ def register(
         from apiforge.workspace.locality import plan_locality
 
         _echo_json(_run(lambda: plan_locality(root, target, transitive=transitive)), detail_level)
+
+    return verify_app
 
 
 __all__ = ["register"]

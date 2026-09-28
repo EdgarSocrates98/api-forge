@@ -930,6 +930,85 @@ def economy_tier(
     return out
 
 
+def knowledge_watch(
+    manifest: str, now: str, root: str | None = None, detail_level: str = "normal"
+) -> dict[str, Any]:
+    """Packs whose upstream fingerprint, version or expiry needs a refresh (never fetches)."""
+    from apiforge.knowledge.watch import watch_packs
+
+    out: dict[str, Any] = _call(
+        "knowledge_watch",
+        lambda: watch_packs(Path(manifest), now=now, root=Path(root) if root else None),
+        detail_level,
+    )
+    return out
+
+
+def evidence_gate(
+    question: str, mode: str | None = None, offline: bool = False, detail_level: str = "normal"
+) -> dict[str, Any]:
+    """Cheapest evidence mode for a question; live_read_only only for runtime questions."""
+    from apiforge.evidence.live_gate import gate
+
+    out: dict[str, Any] = _call(
+        "evidence_gate", lambda: gate(question, requested=mode, offline=offline), detail_level
+    )
+    return out
+
+
+def verify_escalate(
+    static: str = "missing",
+    test: str | None = None,
+    runtime: str = "missing",
+    test_slice: str | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Next verification step: static, test, then read-only runtime only when inconclusive."""
+    from apiforge.verification.progressive import escalate
+
+    out: dict[str, Any] = _call(
+        "verify_escalate",
+        lambda: escalate(
+            static=static,
+            test=test,
+            runtime=runtime,
+            test_slice=Path(test_slice) if test_slice else None,
+        ),
+        detail_level,
+    )
+    return out
+
+
+def economy_phase_budget(
+    profile: str = "balanced", usage: str | None = None, detail_level: str = "normal"
+) -> dict[str, Any]:
+    """Profile envelope split across SDD phases; protected phases are never cut."""
+    from apiforge.economy.phase_budget import load_usage, plan_phase_budgets
+
+    out: dict[str, Any] = _call(
+        "economy_phase_budget",
+        lambda: plan_phase_budgets(
+            profile, usage=load_usage(Path(usage)) if usage is not None else None
+        ),
+        detail_level,
+    )
+    return out
+
+
+def runtime_checkpoint(
+    task_id: str, run_id: str, root: str = ".", detail_level: str = "normal"
+) -> dict[str, Any]:
+    """Budget a run already spent, as a resume will continue it."""
+    from apiforge.runtime.economy_checkpoint import show_checkpoint
+
+    out: dict[str, Any] = _call(
+        "runtime_checkpoint",
+        lambda: show_checkpoint(Path(root), task_id, run_id),
+        detail_level,
+    )
+    return out
+
+
 def context_expand(
     uri: str, root: str = ".", run_id: str | None = None, detail_level: str = "normal"
 ) -> dict[str, Any]:
@@ -1872,6 +1951,11 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     evidence_resolve,
     economy_doctor,
     economy_tier,
+    knowledge_watch,
+    evidence_gate,
+    verify_escalate,
+    economy_phase_budget,
+    runtime_checkpoint,
     graph_query,
     graph_impact,
     graph_trace,

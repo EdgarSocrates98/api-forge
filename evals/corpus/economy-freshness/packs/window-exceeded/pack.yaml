@@ -1,0 +1,8 @@
+domain: window-exceeded
+version: 1
+summary: fixture pack for the freshness watch eval
+verified: "2026-06-01"
+freshness:
+  upstream: spec-a
+  source_hash: "sha-a1"
+  window_days: 30

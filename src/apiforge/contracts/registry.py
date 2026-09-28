@@ -61,6 +61,13 @@ from apiforge.contracts.economy_extras import (
     TierDecision,
     VerificationPlan,
 )
+from apiforge.contracts.economy_resume import (
+    EconomyCheckpoint,
+    FreshnessWatch,
+    LiveEvidenceDecision,
+    PhaseBudgetPlan,
+    VerificationEscalation,
+)
 from apiforge.contracts.evidence import EvidenceRef
 from apiforge.contracts.graph import GraphEdge, GraphExport, GraphNode
 from apiforge.contracts.graph_impact import (
@@ -375,6 +382,11 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "TierDecision/v1": TierDecision,
     "PromptEnvelope/v1": PromptEnvelope,
     "LocalityPlan/v1": LocalityPlan,
+    "FreshnessWatch/v1": FreshnessWatch,
+    "LiveEvidenceDecision/v1": LiveEvidenceDecision,
+    "VerificationEscalation/v1": VerificationEscalation,
+    "PhaseBudgetPlan/v1": PhaseBudgetPlan,
+    "EconomyCheckpoint/v1": EconomyCheckpoint,
 }
 
 

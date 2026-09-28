@@ -42,6 +42,12 @@ from apiforge.runtime.economy import (
     reserve_calls,
     validate_profile,
 )
+from apiforge.runtime.economy_checkpoint import (
+    build_checkpoint,
+    load_checkpoint,
+    pin_profile,
+    save_checkpoint,
+)
 from apiforge.runtime.guardrails import validate_agent_payload
 from apiforge.runtime.information_gain import assess as assess_gain
 from apiforge.runtime.policy import (
@@ -314,6 +320,14 @@ def _economy_block(
         "status": "unresolved" if gaps else "ok",
         "codes": sorted(codes),
     }
+
+
+def economy_gaps_codes(block: dict[str, object]) -> tuple[str, ...]:
+    """Codes of an unresolved economy block; an ok block carries none into the checkpoint."""
+    codes = block.get("codes")
+    if block.get("status") != "unresolved" or not isinstance(codes, list):
+        return ()
+    return tuple(str(code) for code in codes)
 
 
 def _economy_stop(
@@ -1199,6 +1213,20 @@ async def execute_run(
             "errors": errors,
         },
     )
+    if economy_plan is not None and economy_block is not None:
+        save_checkpoint(
+            storage.directory,
+            build_checkpoint(
+                run_id=run_id,
+                task_id=task_id,
+                plan=economy_plan,
+                max_calls=policy.max_calls,
+                calls_used=control.get(control_run.run_id).calls_used,
+                stopped_at=str(economy_block["stopped_at"]),
+                now=timestamp,
+                codes=tuple(str(code) for code in economy_gaps_codes(economy_block)),
+            ),
+        )
     storage.json("replay.json", storage.replay())
     task_store.record_agentic_run(root, run)
     task_store.record_event(
@@ -1253,6 +1281,8 @@ async def resume_existing_run(
     previous = storage.load_run()
     if previous is None:
         raise ContractError("AF-RUNTIME-NOT-FOUND", f"no runtime run {run_id!r}")
+    checkpoint = load_checkpoint(storage.directory)
+    profile, pin_notes = pin_profile(checkpoint, profile)
     control = ControlPlane(root)
     control_run = control.get(run_id)
     if control_run.task_id != task_id:
@@ -1461,6 +1491,19 @@ async def resume_existing_run(
         }
     )
     storage.save_run(resumed)
+    calls_used = control.get(run_id).calls_used
+    resume_checkpoint = build_checkpoint(
+        run_id=run_id,
+        task_id=task_id,
+        plan=economy_plan,
+        max_calls=policy.max_calls,
+        calls_used=calls_used,
+        stopped_at=checkpoint.stopped_at if checkpoint is not None else None,
+        now=timestamp,
+        resumes=(checkpoint.resumes + 1) if checkpoint is not None else 1,
+        codes=tuple(note.split(":", 1)[0] for note in pin_notes),
+    )
+    save_checkpoint(storage.directory, resume_checkpoint)
     storage.json("replay.json", storage.replay())
     task_store.record_agentic_run(root, resumed)
     return {
@@ -1469,5 +1512,10 @@ async def resume_existing_run(
         "status": final_status,
         "resumed": True,
         "reused_invocations": len(previous.invocation_ids),
+        "economy": {
+            "checkpoint": resume_checkpoint.model_dump(mode="json"),
+            "previous_calls_used": checkpoint.calls_used if checkpoint is not None else None,
+            "diagnostics": list(pin_notes),
+        },
         "run_dir": str(storage.directory),
     }

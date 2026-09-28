@@ -586,6 +586,40 @@ the prompt prefix contains nothing run-specific.
 | `AF-ECONOMY-DOCTOR-ESCALATION-HEAVY` | doctor: more than half of the runs escalated to L3 |
 | `AF-ECONOMY-DOCTOR-REPEATED-PARSING` | doctor: extractor cache misses exceed hits |
 
+## Freshness, live gating and resume (`knowledge watch`, `evidence gate`, `verify escalate`, `economy phase-budget`, `runtime checkpoint`, `evals economy-freshness`)
+
+`knowledge watch` compares every pack's declared `freshness.upstream`,
+`source_hash`, `source_version`, `expires_at` and `window_days` with a local
+upstream manifest written by the separate refresh workflow; only stale packs
+are `refresh_needed` and nothing is fetched. `evidence gate` sends static
+questions to local artifacts and allows `live_read_only` only for questions
+that name a runtime effect (`rules/live_evidence_triggers.yaml`).
+`verify escalate` stops once a test is conclusive and escalates to read-only
+runtime evidence only after an inconclusive test. `economy phase-budget`
+splits the profile envelope across SDD phases; contract, verify and secure
+are protected — an overrun is reported, never cut. `runtime run` writes
+`economy_checkpoint.json`; `runtime resume` keeps at least its profile and
+carries the calls already spent.
+
+| Code | Meaning |
+|---|---|
+| `AF-KNOW-WATCH-MANIFEST` | the upstream manifest is missing, not JSON or has no `sources` mapping; unlock: record fingerprints with the refresh workflow |
+| `AF-KNOW-WATCH-CLOCK` | `--now` is not ISO8601 |
+| `AF-EVIDENCE-TRIGGERS-INVALID` | `rules/live_evidence_triggers.yaml` is malformed |
+| `AF-EVIDENCE-QUESTION-EMPTY` | `evidence gate` got an empty question |
+| `AF-EVIDENCE-MODE-INVALID` | `--mode` is not `static`, `fixture`, `live_read_only` or `live_mutation` |
+| `AF-EVIDENCE-MUTATION-REFUSED` | `live_mutation` is never granted to answer a question; unlock: use `live_read_only`; a mutation needs a separate approved change |
+| `AF-VERIFY-ESCALATE-INPUT` | a verdict is unknown, both `--test` and `--test-slice` were passed, or the slice is not `TestSlice/v1` |
+| `AF-VERIFY-ESCALATE-EXHAUSTED` | unresolved note: test and read-only runtime evidence are both inconclusive; unlock: add a targeted test or a human review |
+| `AF-BUDGET-PHASE-POLICY` | `rules/phase_budgets.yaml` is malformed or its shares do not sum to 1.0 |
+| `AF-BUDGET-PHASE-USAGE` | `--usage` is not a JSON object of `{phase: {calls, context_bytes}}` |
+| `AF-BUDGET-PHASE-UNKNOWN` | usage names a phase outside the SDD chain |
+| `AF-BUDGET-PHASE-EXCEEDED` | a non-protected phase used more than its share; plan is unresolved; unlock: raise the profile or narrow the phase |
+| `AF-BUDGET-PHASE-PROTECTED` | diagnostic: a protected phase overran its share; reported, never cut |
+| `AF-ECONOMY-CHECKPOINT-INVALID` | `economy_checkpoint.json` is unreadable; unlock: restore the run directory or delete the checkpoint |
+| `AF-ECONOMY-CHECKPOINT-NOT-FOUND` | the run has no economy checkpoint |
+| `AF-ECONOMY-RESUME-PINNED` | diagnostic: a resume requested a profile below the checkpoint; the checkpoint profile is kept |
+
 ## Economy evals (`evals economy-matrix`, `evals gate`, `evals replay`, `economy roi`)
 
 The matrix runs canonical contract changes under the three profiles and keeps

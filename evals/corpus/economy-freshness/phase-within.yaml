@@ -1,0 +1,6 @@
+id: phase-within
+kind: phase
+profile: balanced
+usage:
+  build: {calls: 1, context_bytes: 1000}
+expect_status: ok

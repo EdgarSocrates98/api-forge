@@ -559,6 +559,33 @@ arrays only (`diff --name-status`, `show`) and never mutates.
 | `AF-DELTA-REF-INVALID` | `git diff` refused `--base`/`--head`; unlock: pass refs that exist (`git rev-parse <ref>`) |
 | `AF-EVALS-INVALID` | an eval corpus is empty, has duplicate ids or a mutation that does not apply; unlock: fix the corpus yaml |
 
+## Verification, retrieval, evidence and providers (`verify plan`, `knowledge search`, `evidence resolve`, `economy doctor`, `economy tier`, `agentops prompt`, `workspace locality`, `evals economy-extras`)
+
+All read-only: `verify plan` names the ladder level and impacted tests but
+never runs them; retrieval expands queries from a declared table and ranks
+passages with explicit signals; `evidence://` refs resolve one hop at a time;
+the doctor only reports; tiers need benchmark evidence before going cheaper;
+the prompt prefix contains nothing run-specific.
+
+| Code | Meaning |
+|---|---|
+| `AF-VERIFY-RISK-INVALID` | `--risk` is not micro, low, medium or high; unlock: use `apiforge sdd classify` |
+| `AF-RETRIEVAL-TIER-INVALID` | `--tier` is not 1, 2 or 3 |
+| `AF-RETRIEVAL-EXPANSION-INVALID` | `rules/query_expansion.yaml` is malformed |
+| `AF-EVIDENCE-REF-INVALID` | ref is not `evidence://<operation, fact, finding or rule>/<id>` |
+| `AF-EVIDENCE-NOT-FOUND` | no case, or the node is not in the case graph; unlock: resolve a listed neighbor or run `analyze` |
+| `AF-PROVIDER-POLICY-INVALID` | `rules/providers.yaml` is malformed |
+| `AF-WORKSPACE-TARGET-UNKNOWN` | `--target` is not a repository of the workspace |
+| `AF-ECONOMY-DOCTOR-CACHE-OFF` | doctor: `APIFORGE_CACHE` disables the caches |
+| `AF-ECONOMY-DOCTOR-DEEP-DEFAULT` | doctor: default profile is deep |
+| `AF-ECONOMY-DOCTOR-NO-CAPSULE` | doctor: repository-scope context used, no capsule ever built |
+| `AF-ECONOMY-DOCTOR-VERBOSE-OUTPUT` | doctor: `APIFORGE_OUTPUT` is not compact |
+| `AF-ECONOMY-DOCTOR-NO-SHARED-CACHE` | doctor: no shared cache tier configured |
+| `AF-ECONOMY-DOCTOR-STALE-KNOWLEDGE` | doctor: packs verified more than 180 days ago |
+| `AF-ECONOMY-DOCTOR-TOKENS-UNRESOLVED` | doctor: no run carries observed tokens |
+| `AF-ECONOMY-DOCTOR-ESCALATION-HEAVY` | doctor: more than half of the runs escalated to L3 |
+| `AF-ECONOMY-DOCTOR-REPEATED-PARSING` | doctor: extractor cache misses exceed hits |
+
 ## Economy evals (`evals economy-matrix`, `evals gate`, `evals replay`, `economy roi`)
 
 The matrix runs canonical contract changes under the three profiles and keeps

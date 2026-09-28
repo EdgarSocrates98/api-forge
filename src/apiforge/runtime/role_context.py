@@ -9,6 +9,7 @@ it never silently falls back to shipping the whole repository.
 
 from __future__ import annotations
 
+import hashlib
 from collections.abc import Iterable, Mapping
 from functools import lru_cache
 from pathlib import Path
@@ -104,6 +105,7 @@ def plan_roles(
 ) -> RoleContextPlan:
     """``roles`` is ``(capability, kind)``; ``artifacts`` maps capability → artifact id."""
     from apiforge.knowledge.selector import select_expertise
+    from apiforge.runtime.prompting import prefix_for
 
     policy = load_role_policy()
     target, case = task_target(spec)
@@ -158,6 +160,11 @@ def plan_roles(
                 bytes=used,
                 budget_bytes=budget,
                 trimmed=tuple(trimmed),
+                prompt_prefix_sha256=hashlib.sha256(
+                    prefix_for(
+                        root, capability, (item.pack_id for item in expertise.selected)
+                    ).encode("utf-8")
+                ).hexdigest(),
             )
         )
     full = sum(ref.size_bytes for ref in refs)

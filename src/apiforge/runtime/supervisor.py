@@ -488,6 +488,7 @@ def _role_fields(row: RoleContext | None, extra_refs: tuple[str, ...] = ()) -> d
         "context_class": row.context_class,
         "context_refs": (*row.refs, *row.artifact_refs, *extra_refs),
         "expertise": row.expertise,
+        "prompt_prefix_sha256": row.prompt_prefix_sha256,
     }
 
 

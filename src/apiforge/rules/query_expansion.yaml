@@ -1,0 +1,32 @@
+# Deterministic query expansion (economy wave 7, prompt §56). When any cue of a
+# group appears in the query, every term of the group joins the search. No
+# model generates search terms.
+schema: apiforge/query-expansion/v1
+groups:
+  - id: compatibility
+    cues: [breaking, compatib, backward, deprecat, remove field, rename]
+    terms: [breaking change, compatibility, versioning, deprecation, consumer]
+  - id: contract
+    cues: [openapi, swagger, schema, contract, nullable]
+    terms: [openapi, json schema, contract, required]
+  - id: idempotency
+    cues: [idempoten, retry, duplicate]
+    terms: [idempotency, idempotency-key, retry, duplicate]
+  - id: pagination
+    cues: [paginat, cursor, page]
+    terms: [pagination, cursor, limit]
+  - id: errors
+    cues: [error, problem, status code]
+    terms: [problem details, error, status code]
+  - id: security
+    cues: [auth, bola, owasp, token, scope, permission]
+    terms: [authorization, authentication, bola, scope]
+  - id: resilience
+    cues: [timeout, circuit, backoff, latency]
+    terms: [timeout, retry, circuit breaker, backoff]
+  - id: messaging
+    cues: [kafka, sqs, event, queue, consumer]
+    terms: [event, consumer, dead letter, ordering]
+  - id: versioning
+    cues: [version, v2, migration]
+    terms: [versioning, migration, deprecation]

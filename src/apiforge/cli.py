@@ -267,10 +267,12 @@ from apiforge.cli_cache import register as _register_cache
 from apiforge.cli_context import register as _register_context
 from apiforge.cli_distribution import register as _register_distribution
 from apiforge.cli_economy import register as _register_economy
+from apiforge.cli_extras import register as _register_extras
 from apiforge.cli_selective import register as _register_selective
 from apiforge.cli_tool_host import register as _register_tool_host
 from apiforge.cli_tui import tui_app
 from apiforge.cli_workspace import register as _register_workspace
+from apiforge.cli_workspace import workspace_app as _workspace_app
 
 app.add_typer(tui_app, name="tui")
 _register_distribution(app)
@@ -279,6 +281,14 @@ _register_context(context_app)
 _register_cache(app)
 _register_selective(knowledge_app, debate_app, agents_app)
 _register_tool_host(app, agentops_app)
+_register_extras(
+    app,
+    knowledge_app=knowledge_app,
+    evidence_app=evidence_app,
+    economy_app=economy_app,
+    agentops_app=agentops_app,
+    workspace_app=_workspace_app,
+)
 _register_economy(economy_app)
 
 
@@ -412,12 +422,18 @@ def runtime_doctor(
         None, help="TaskSpec id, or omit for installation doctor."
     ),
     root: Path = typer.Option(Path("."), "--root"),
+    economy: bool = typer.Option(False, "--economy", help="Economy diagnostics instead."),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
     """Inspect runtime state, or the local installation when no task is supplied."""
     from apiforge.application.portable import doctor as portable_doctor
     from apiforge.application.runtime_experience import doctor
 
+    if economy:
+        from apiforge.economy.doctor import diagnose
+
+        _echo_json(_run(lambda: diagnose(root)), detail_level)
+        return
     result = portable_doctor(root) if task_id is None else doctor(root, task_id)
     _echo_json(_run(lambda: result), detail_level)
 
@@ -3756,6 +3772,21 @@ def evals_replay_cmd(
     result = _run(lambda: replay(root=root, corpus=corpus, profile=profile))
     _echo_json(result, detail_level)
     if not getattr(result, "passed", False):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("economy-extras")
+def evals_economy_extras(
+    corpus: Path = typer.Option(Path("evals/corpus/economy-extras"), "--corpus"),
+    repo_root: Path = typer.Option(Path("."), "--repo-root", help="Where fixture paths resolve."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Verification plans, retrieval, evidence refs, doctor, tiers, prefixes and locality gates."""
+    from apiforge.evals.extras import run_extras
+
+    result = _run(lambda: run_extras(corpus, repo_root))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
         raise typer.Exit(code=1)
 
 

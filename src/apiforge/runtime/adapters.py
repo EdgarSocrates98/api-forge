@@ -24,6 +24,7 @@ class AgentRequest(BaseModel):
     context_class: str | None = None
     context_refs: tuple[str, ...] = ()
     expertise: tuple[str, ...] = ()
+    prompt_prefix_sha256: str | None = None
 
 
 class AgentResponse(BaseModel):

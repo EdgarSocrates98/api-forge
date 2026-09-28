@@ -413,6 +413,14 @@ while refusal codes and `fact_id`s survive.
 | `apiforge evals gate --baseline A --candidate B` | `EvaluationGate/v1`: ship only with zero safety regression and quality regressions within the tolerance |
 | `apiforge evals replay --corpus evals/corpus/economy-replay [--profile P]` | `ReplayReport/v1`: stored decisions re-planned under the current policy, no provider calls |
 | `apiforge economy roi --root R` | `RoleROI/v1`: calls, facts added and outcome changes of each extra capability |
+| `apiforge verify plan --changed F --risk R [--breaking]` | `VerificationPlan/v1`: ladder V0–V5 by risk and the impacted tests with reasons; never executes |
+| `apiforge knowledge search --query Q [--tier 1/2/3]` | `RetrievalResult/v1`: declared query expansion, ranked passages with signals, top 3 then top 5 |
+| `apiforge evidence resolve evidence://finding/<id>` | `EvidenceNode/v1`: one node and its one-hop neighbors as refs |
+| `apiforge economy doctor` (or `apiforge doctor --economy`) | `EconomyDoctor/v1`: what makes runs pay more than needed, with unlocks |
+| `apiforge economy providers`, `apiforge economy tier --capability C --risk R` | `ProviderCapability/v1`, `TierDecision/v1`: T0–T3, cheaper only with benchmark evidence |
+| `apiforge agentops prompt --capability C` | `PromptEnvelope/v1`: stable hashed prefix + run suffix |
+| `apiforge workspace locality --target <repo> [--transitive]` | `LocalityPlan/v1`: target, direct neighbors, transitive deferred |
+| `apiforge evals economy-extras` | 15 cases across the seven wave-7 verbs |
 | `apiforge-mcp` | MCP server for the read/compose verbs (needs `pip install apiforge[mcp]`; every tool takes `detail_level`) |
 | `apiforge collect lambda --function-name X --out dump/` | Fetch Lambda config into a dump (Code.Location never persisted) |
 | `apiforge collect sqs\|sns\|eventbridge\|iam-role\|cognito\|waf ... --out dump/` | Messaging/identity collectors — same offline-dump contract |

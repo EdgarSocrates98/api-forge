@@ -855,6 +855,81 @@ def evals_gate(
     return out
 
 
+def verify_plan(
+    changed: list[str] | None = None,
+    risk: str = "low",
+    breaking: bool = False,
+    root: str = ".",
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Ladder level for the risk plus impacted tests and commands (never executes)."""
+    from apiforge.verification.selection import plan_verification
+
+    out: dict[str, Any] = _call(
+        "verify_plan",
+        lambda: plan_verification(Path(root), tuple(changed or ()), risk=risk, breaking=breaking),
+        detail_level,
+    )
+    return out
+
+
+def knowledge_search(
+    query: str, tier: int = 1, root: str | None = None, detail_level: str = "normal"
+) -> dict[str, Any]:
+    """Deterministic expansion, ranked knowledge passages, progressive tiers."""
+    from apiforge.knowledge.retrieval import search
+
+    out: dict[str, Any] = _call(
+        "knowledge_search",
+        lambda: search(query, tier=tier, root=Path(root) if root else None),
+        detail_level,
+    )
+    return out
+
+
+def evidence_resolve(
+    ref: str, root: str = ".", case_dir: str | None = None, detail_level: str = "normal"
+) -> dict[str, Any]:
+    """One evidence:// node with one-hop neighbors."""
+    from apiforge.evidence.resolve import resolve
+
+    out: dict[str, Any] = _call(
+        "evidence_resolve",
+        lambda: resolve(Path(root), ref, case_dir=Path(case_dir) if case_dir else None),
+        detail_level,
+    )
+    return out
+
+
+def economy_doctor(root: str = ".", detail_level: str = "normal") -> dict[str, Any]:
+    """Economy diagnostics with the unlock for each finding."""
+    from apiforge.economy.doctor import diagnose
+
+    out: dict[str, Any] = _call("economy_doctor", lambda: diagnose(Path(root)), detail_level)
+    return out
+
+
+def economy_tier(
+    capability: str,
+    risk: str = "low",
+    family: str | None = None,
+    root: str = ".",
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Cheapest tier the evidence proves sufficient (T0-T3)."""
+    from apiforge.capabilities.scorecard import load_scorecards
+    from apiforge.economy.providers import decide_tier
+
+    out: dict[str, Any] = _call(
+        "economy_tier",
+        lambda: decide_tier(
+            capability, risk, family=family, scorecards=load_scorecards(Path(root))
+        ),
+        detail_level,
+    )
+    return out
+
+
 def context_expand(
     uri: str, root: str = ".", run_id: str | None = None, detail_level: str = "normal"
 ) -> dict[str, Any]:
@@ -1792,6 +1867,11 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     economy_roi,
     evals_replay,
     evals_gate,
+    verify_plan,
+    knowledge_search,
+    evidence_resolve,
+    economy_doctor,
+    economy_tier,
     graph_query,
     graph_impact,
     graph_trace,

@@ -68,6 +68,13 @@ apiforge context gc [--apply]
 - Falha de teste ou CI: `apiforge slice tests --input <log>` / `apiforge slice log --input <log>`; expanda o `log_ref` só se precisar.
 - MCP compacto: `apiforge-mcp --surface compact` expõe 6 gateways; ache a ferramenta com `apiforge_discover` e execute com `apiforge_call`.
 
+## Verificar, buscar e citar com economia
+
+- Depois de mudar arquivos: `apiforge verify plan --changed <arquivo> --risk <micro|low|medium|high>` dá o nível V0–V5 e só os testes impactados; não rode a suíte inteira salvo V5.
+- Conhecimento: `apiforge knowledge search --query "..."` devolve 3 trechos ranqueados; peça `--tier 2` só se não bastar.
+- Evidência: `apiforge evidence resolve evidence://finding/<id>` traz um salto por vez; siga os `neighbors` sob demanda.
+- `apiforge economy doctor` aponta configurações que encarecem runs; `apiforge economy tier` só barateia modelo com benchmark.
+
 ## Mudar política econômica
 
 - Antes de alterar perfis, roteamento ou cortes: `apiforge evals economy-matrix --out antes.json`, aplique a mudança, gere `depois.json` e rode `apiforge evals gate --baseline antes.json --candidate depois.json`; só siga com `ship`.

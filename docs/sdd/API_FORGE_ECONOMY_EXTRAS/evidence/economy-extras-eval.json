@@ -1,0 +1,173 @@
+{
+  "cases": 15,
+  "gates": {
+    "doctor": true,
+    "evidence": true,
+    "locality": true,
+    "prefix": true,
+    "retrieval": true,
+    "selection": true,
+    "tier": true
+  },
+  "passed": true,
+  "rows": [
+    {
+      "case_id": "doctor-cache-off",
+      "codes": [
+        "AF-ECONOMY-DOCTOR-CACHE-OFF",
+        "AF-ECONOMY-DOCTOR-NO-SHARED-CACHE",
+        "AF-ECONOMY-DOCTOR-VERBOSE-OUTPUT"
+      ],
+      "kind": "doctor",
+      "passed": true
+    },
+    {
+      "case_id": "evidence-operation",
+      "kind": "evidence",
+      "neighbors": [
+        "evidence://fact/51663976d81cb994"
+      ],
+      "passed": true
+    },
+    {
+      "case_id": "locality-direct",
+      "excluded": [
+        "billing",
+        "customers"
+      ],
+      "kind": "locality",
+      "passed": true,
+      "tiers": {
+        "direct": [
+          "contracts",
+          "sdk"
+        ],
+        "target": [
+          "payments"
+        ],
+        "transitive": [
+          "billing"
+        ]
+      }
+    },
+    {
+      "case_id": "prefix-stable",
+      "kind": "prefix",
+      "passed": true,
+      "prefix_sha256": "64065e7f065e0acc930f9062304ae0c79aff769e861db99cdbb910e2ab2ea708"
+    },
+    {
+      "added_terms": [
+        "breaking change",
+        "compatibility",
+        "versioning",
+        "deprecation",
+        "consumer"
+      ],
+      "case_id": "retrieve-breaking",
+      "kind": "retrieval",
+      "passed": true,
+      "top3": [
+        "api-lifecycle",
+        "rest-design",
+        "versioning"
+      ]
+    },
+    {
+      "added_terms": [
+        "idempotency-key",
+        "retry",
+        "duplicate"
+      ],
+      "case_id": "retrieve-idempotency",
+      "kind": "retrieval",
+      "passed": true,
+      "top3": [
+        "idempotency",
+        "rest-design",
+        "idempotency"
+      ]
+    },
+    {
+      "added_terms": [],
+      "case_id": "retrieve-pagination",
+      "kind": "retrieval",
+      "passed": true,
+      "top3": [
+        "pagination",
+        "pagination",
+        "rest-design"
+      ]
+    },
+    {
+      "case_id": "select-breaking-raises",
+      "kind": "selection",
+      "level": "V4",
+      "passed": true,
+      "tests": [
+        "proj/tests/test_payments.py"
+      ],
+      "total_tests": 1
+    },
+    {
+      "case_id": "select-customers-no-tests",
+      "kind": "selection",
+      "level": "V5",
+      "passed": true,
+      "tests": [],
+      "total_tests": 1
+    },
+    {
+      "case_id": "select-high-risk",
+      "kind": "selection",
+      "level": "V5",
+      "passed": true,
+      "tests": [
+        "proj/tests/test_payments.py"
+      ],
+      "total_tests": 1
+    },
+    {
+      "case_id": "select-models-medium",
+      "kind": "selection",
+      "level": "V4",
+      "passed": true,
+      "tests": [
+        "proj/tests/test_payments.py"
+      ],
+      "total_tests": 1
+    },
+    {
+      "case_id": "select-payments-route-low",
+      "kind": "selection",
+      "level": "V2",
+      "passed": true,
+      "tests": [
+        "proj/tests/test_payments.py"
+      ],
+      "total_tests": 1
+    },
+    {
+      "case_id": "tier-deterministic",
+      "kind": "tier",
+      "passed": true,
+      "reason": "deterministic implementation answers without a model",
+      "tier": "T0"
+    },
+    {
+      "case_id": "tier-high-risk",
+      "kind": "tier",
+      "passed": true,
+      "reason": "risk high requires the strongest tier",
+      "tier": "T3"
+    },
+    {
+      "case_id": "tier-no-evidence",
+      "kind": "tier",
+      "passed": true,
+      "reason": "no benchmark evidence for a cheaper tier in this task family",
+      "tier": "T2"
+    }
+  ],
+  "schema": "apiforge/economy-extras-eval/v1"
+}

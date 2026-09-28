@@ -51,6 +51,16 @@ from apiforge.contracts.economy_evals import (
     ReplayReport,
     RoleROI,
 )
+from apiforge.contracts.economy_extras import (
+    EconomyDoctor,
+    EvidenceNode,
+    LocalityPlan,
+    PromptEnvelope,
+    ProviderCapability,
+    RetrievalResult,
+    TierDecision,
+    VerificationPlan,
+)
 from apiforge.contracts.evidence import EvidenceRef
 from apiforge.contracts.graph import GraphEdge, GraphExport, GraphNode
 from apiforge.contracts.graph_impact import (
@@ -357,6 +367,14 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "ReplayReport/v1": ReplayReport,
     "RoleROI/v1": RoleROI,
     "InformationGain/v1": InformationGain,
+    "VerificationPlan/v1": VerificationPlan,
+    "RetrievalResult/v1": RetrievalResult,
+    "EvidenceNode/v1": EvidenceNode,
+    "EconomyDoctor/v1": EconomyDoctor,
+    "ProviderCapability/v1": ProviderCapability,
+    "TierDecision/v1": TierDecision,
+    "PromptEnvelope/v1": PromptEnvelope,
+    "LocalityPlan/v1": LocalityPlan,
 }
 
 

@@ -1,0 +1,15 @@
+# Provider descriptors (economy wave 7, prompt §61-63). The Economy Plane reasons
+# over these capabilities, never over provider names. Tiers: T0 deterministic
+# (no model), T1 cheap/local, T2 strong general, T3 strongest/reviewer.
+# A cheaper tier is chosen only when benchmark evidence proves it per task
+# family (a fresh, promoted scorecard with profile_id "<family>@T1" at or above
+# the quality floor); otherwise the strong tier stays.
+schema: apiforge/providers/v1
+quality_floor: 0.95
+providers:
+  - {provider: local-small, tier: T1, structured_output: true, tool_calling: false, deferred_tools: false, context_window: 32000, reports_usage: true, cost_tier: local, local: true}
+  - {provider: general-strong, tier: T2, structured_output: true, tool_calling: true, deferred_tools: true, context_window: 200000, reports_usage: true, cost_tier: medium}
+  - {provider: frontier-reviewer, tier: T3, structured_output: true, tool_calling: true, deferred_tools: true, context_window: 1000000, reports_usage: true, cost_tier: high}
+# Capabilities with a deterministic implementation answer at T0 (no model call).
+deterministic_capabilities: [contract.compatibility.rest, contract.compatibility.grpc, schema.parity, test.selection, log.slicing]
+high_risk: [high, critical, sensitive, irreversible, destructive, external_mutation]

@@ -49,6 +49,7 @@ class RoleContext(VersionedContract):
     bytes: int = Field(default=0, ge=0)
     budget_bytes: int = Field(default=0, ge=0)
     trimmed: tuple[str, ...] = ()
+    prompt_prefix_sha256: str | None = None
 
 
 class RoleContextPlan(VersionedContract):

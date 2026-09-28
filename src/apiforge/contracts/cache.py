@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from typing import Literal
 
-from pydantic import Field
+from pydantic import Field, field_validator
 
 from apiforge.contracts.base import VersionedContract
 
@@ -65,6 +66,15 @@ class CacheEntry(VersionedContract):
     created_at: str
     expires_at: str | None = None
     deps_files: tuple[CacheDep, ...] = ()
+
+    @field_validator("created_at", "expires_at", mode="after")
+    @classmethod
+    def iso_timestamp(cls, value: str | None) -> str | None:
+        """Tampered or corrupt timestamps make the entry invalid (a corrupt miss)."""
+        if value is not None:
+            datetime.strptime(value, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=UTC)
+        return value
+
     deps_nodes: tuple[str, ...] = ()
     neighborhood_sha: str | None = None
     symbols: tuple[str, ...] = ()

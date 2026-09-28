@@ -11,6 +11,7 @@ cited by reference.
 from __future__ import annotations
 
 import re
+import unicodedata
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -22,7 +23,12 @@ from apiforge.contracts.economy_extras import Passage, RetrievalResult
 
 EXPANSION_FILE = Path(__file__).resolve().parents[1] / "rules" / "query_expansion.yaml"
 TIER_SIZES = {1: 3, 2: 5, 3: 20}
-_WORD = re.compile(r"[a-z0-9][a-z0-9-]*")
+_WORD = re.compile(r"[^\W_][\w-]*")
+
+
+def normalize(text: str) -> str:
+    """NFKC + casefold so PT-BR terms (autenticação, migração) match as written."""
+    return unicodedata.normalize("NFKC", text).casefold()
 
 
 @lru_cache(maxsize=2)
@@ -36,8 +42,8 @@ def load_expansion(path: Path = EXPANSION_FILE) -> tuple[dict[str, Any], ...]:
     return tuple(
         {
             "id": str(row["id"]),
-            "cues": tuple(str(item).lower() for item in row.get("cues") or ()),
-            "terms": tuple(str(item).lower() for item in row.get("terms") or ()),
+            "cues": tuple(normalize(str(item)) for item in row.get("cues") or ()),
+            "terms": tuple(normalize(str(item)) for item in row.get("terms") or ()),
         }
         for row in raw.get("groups") or ()
     )
@@ -45,7 +51,7 @@ def load_expansion(path: Path = EXPANSION_FILE) -> tuple[dict[str, Any], ...]:
 
 def expand(query: str) -> tuple[tuple[str, ...], tuple[str, ...]]:
     """(all terms, terms added by expansion)."""
-    text = " ".join(query.lower().split())
+    text = " ".join(normalize(query).split())
     base = [word for word in _WORD.findall(text) if len(word) > 2]
     added: list[str] = []
     for group in load_expansion():
@@ -55,7 +61,7 @@ def expand(query: str) -> tuple[tuple[str, ...], tuple[str, ...]]:
 
 
 @lru_cache(maxsize=4)
-def _passages(root: str) -> tuple[tuple[str, str, str, str], ...]:
+def _passages(root: str, generation: str = "") -> tuple[tuple[str, str, str, str], ...]:
     rows: list[tuple[str, str, str, str]] = []
     for pack in sorted(Path(root).iterdir()):
         if not pack.is_dir() or pack.name.startswith(("_", ".")):
@@ -78,7 +84,7 @@ def _passages(root: str) -> tuple[tuple[str, str, str, str], ...]:
 
 
 def _hits(text: str, terms: tuple[str, ...]) -> int:
-    lowered = text.lower()
+    lowered = normalize(text)
     return sum(1 for term in terms if re.search(r"(?<![\w])" + re.escape(term), lowered))
 
 
@@ -90,7 +96,11 @@ def search(
     store_root: Path | None = None,
 ) -> RetrievalResult:
     from apiforge.context.gateway.refs import CtxStore
-    from apiforge.knowledge.selector import default_root, select_expertise
+    from apiforge.knowledge.selector import (
+        default_root,
+        knowledge_generation,
+        select_expertise,
+    )
 
     if tier not in TIER_SIZES:
         error = ContractError("AF-RETRIEVAL-TIER-INVALID", f"tier {tier} is not 1|2|3")
@@ -101,7 +111,8 @@ def search(
     packs_root = default_root(root)
     selected = {item.pack_id for item in select_expertise(query, root=packs_root).selected}
     scored: list[tuple[float, str, str, str, str, dict[str, float]]] = []
-    for pack, doc, heading, body in _passages(str(packs_root.resolve())):
+    resolved = packs_root.resolve()
+    for pack, doc, heading, body in _passages(str(resolved), knowledge_generation(resolved)):
         heading_hits = _hits(heading, terms)
         body_hits = _hits(body, terms)
         if not heading_hits and not body_hits:

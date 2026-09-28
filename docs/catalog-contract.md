@@ -601,6 +601,9 @@ Gateway, `evidence resolve` and `context delta` read cases only through
 | `AF-PATH-OUTSIDE-ROOT` | unresolved note: a case/fact/graph path is empty, UNC, drive-qualified, traverses `..` or resolves outside the allowed roots; unlock: keep sources inside the project or declare the repository in `.apiforge/workspace.yaml` |
 | `AF-CASE-HASH-MISMATCH` | a case artifact changed after `case.json` was written; the capsule/evidence/delta is refused; unlock: re-run `apiforge analyze` |
 | `AF-CASE-PATH-TRAVERSAL` | a case manifest artifact path escapes the case directory (also refused by `evidence emit`) |
+| `AF-ECONOMY-PROOF-UNSTRUCTURED` | diagnostic: an expected proof is only mentioned in a step, not proven by a `ProofReceipt`; the ladder reaches L1 at most (no early stop) |
+| `AF-ECONOMY-PROOF-HASH-MISMATCH` | diagnostic: a `ProofReceipt` artifact is missing or its sha256 differs; never L0 |
+| `AF-ECONOMY-PROOF-INVALID` | diagnostic: a step `proofs` entry is not a valid `ProofReceipt` or its artifact leaves the allowed roots |
 | `AF-ECONOMY-LEDGER-PERSIST` | an auditable ledger row (runtime role bytes) could not be written; the run's economy block and `economy stats` report it as unresolved; unlock: make `.apiforge` writable and re-run |
 
 `BudgetEnvelope.context_bytes` is a global budget: each context class gets a
@@ -610,6 +613,12 @@ every provider call, including shadow challengers (`calls_by_kind`), so
 checkpoints and resumes see real spend. `economy stats` reports
 `token_coverage` (`complete`, `partial`, `unresolved`); `observed_tokens` is a
 number only when coverage is complete.
+The ladder stops at L0 only on structured, re-hashed `ProofReceipt`s. The
+layered cache tries the shared tier when a local entry is stale or corrupt,
+and an entry with an invalid timestamp is a corrupt miss. In-process knowledge
+caches key on a stat-only generation of the pack files, so an edited pack is
+seen without restarting a long-lived host; retrieval normalizes with NFKC +
+casefold (PT-BR terms such as `autenticação` match as written).
 
 ## Freshness, live gating and resume (`knowledge watch`, `evidence gate`, `verify escalate`, `economy phase-budget`, `runtime checkpoint`, `evals economy-freshness`)
 

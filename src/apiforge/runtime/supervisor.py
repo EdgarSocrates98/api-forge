@@ -784,7 +784,9 @@ async def execute_run(
                 LadderStep(
                     level="L1",
                     action="deterministic evidence partial",
-                    trigger="missing=" + ",".join(proof.missing),
+                    trigger="missing="
+                    + ",".join(proof.missing)
+                    + "".join(f"; {note.split(':', 1)[0]}" for note in proof.diagnostics),
                 )
             )
     initial_names = tuple(

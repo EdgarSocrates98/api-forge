@@ -38,17 +38,34 @@ def economy_task(
 
 
 def record_deterministic_run(
-    root: Path, *, output: str, terminal: str = "awaiting_supervision"
+    root: Path,
+    *,
+    output: str,
+    terminal: str = "awaiting_supervision",
+    proof_kind: str | None = None,
+    tamper: bool = False,
 ) -> None:
+    """Record a task run; ``proof_kind`` attaches a structured, hashed ProofReceipt."""
+    import hashlib
+
     runs = root / ".apiforge" / "tasks" / TASK_ID / "runs"
     runs.mkdir(parents=True, exist_ok=True)
-    (runs / "0.json").write_text(
-        json.dumps(
+    step: dict[str, object] = {"verb": "verify", "status": "ran", "output": output}
+    if proof_kind is not None:
+        artifact = runs / "proof-artifact.json"
+        artifact.write_text(json.dumps({"verdict": "verified"}), encoding="utf-8")
+        digest = hashlib.sha256(artifact.read_bytes()).hexdigest()
+        if tamper:
+            artifact.write_text(json.dumps({"verdict": "forged"}), encoding="utf-8")
+        step["proofs"] = [
             {
-                "task_id": TASK_ID,
-                "terminal": terminal,
-                "steps": [{"verb": "verify", "status": "ran", "output": output}],
+                "proof_id": "proof-1",
+                "kind": proof_kind,
+                "sha256": digest,
+                "artifact_ref": artifact.relative_to(root).as_posix(),
             }
-        ),
+        ]
+    (runs / "0.json").write_text(
+        json.dumps({"task_id": TASK_ID, "terminal": terminal, "steps": [step]}),
         encoding="utf-8",
     )

@@ -41,6 +41,7 @@ from apiforge.contracts.economy import (
     EconomyPlan,
     LadderStep,
     LedgerRef,
+    ProofReceipt,
     RiskClassification,
     RunLedgerEntry,
 )
@@ -387,6 +388,7 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "VerificationEscalation/v1": VerificationEscalation,
     "PhaseBudgetPlan/v1": PhaseBudgetPlan,
     "EconomyCheckpoint/v1": EconomyCheckpoint,
+    "ProofReceipt/v1": ProofReceipt,
 }
 
 

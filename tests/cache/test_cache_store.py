@@ -148,3 +148,24 @@ def test_stats_report_layers_tiers_and_policies(tmp_path: Path) -> None:
     assert stats["layers"]["capsule"]["entries"] == 1
     assert stats["policies"]["model_response"]["enabled"] is False
     assert json.loads(json.dumps(stats)) == stats
+
+
+def test_stale_local_falls_through_to_fresh_shared(tmp_path: Path) -> None:
+    home = tmp_path / "home"
+    stale = CacheStore(tmp_path / "a", home=home, enabled=True)
+    stale.put("capsule", KEY, "old payload", now=now_utc() - timedelta(days=30))
+    CacheStore(tmp_path / "b", home=home, enabled=True).put("capsule", KEY, "fresh payload")
+    decision, payload = stale.lookup("capsule", KEY)
+    assert (decision.tier, payload) == ("shared", "fresh payload")
+
+
+def test_invalid_timestamp_is_a_corrupt_miss(tmp_path: Path) -> None:
+    store = CacheStore(tmp_path, enabled=True)
+    store.put("capsule", KEY, "payload")
+    entry_path = next((tmp_path / ".apiforge" / "cache" / "entries" / "capsule").glob("*.json"))
+    data = json.loads(entry_path.read_text(encoding="utf-8"))
+    data["created_at"] = "garbage"
+    entry_path.write_text(json.dumps(data), encoding="utf-8")
+    decision, payload = store.lookup("capsule", KEY)
+    assert payload is None
+    assert decision.state == "corrupt" and decision.action == "recompute"

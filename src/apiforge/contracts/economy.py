@@ -31,6 +31,15 @@ class LedgerRef(VersionedContract):
     size_bytes: int = Field(ge=0)
 
 
+class ProofReceipt(VersionedContract):
+    """A proof a deterministic step produced: identity, kind and the hashed artifact."""
+
+    proof_id: str = Field(min_length=1)
+    kind: str = Field(min_length=1)
+    sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    artifact_ref: str = Field(min_length=1)
+
+
 class RunLedgerEntry(VersionedContract):
     """Attribution row appended to economy.jsonl alongside legacy transport rows."""
 

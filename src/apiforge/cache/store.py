@@ -115,6 +115,7 @@ class CacheStore:
             return _decision(layer, key, "miss", "recompute", reason="cache disabled"), None
         moment = now or now_utc()
         corrupt: CacheDecision | None = None
+        rejected: CacheDecision | None = None
         for tier in self._tiers(policy):
             path = tier.entry_path(layer, key)
             if not path.is_file():
@@ -149,8 +150,12 @@ class CacheStore:
                 return decision, payload
             if action == "invalidate":
                 _unlink(path)
-            return decision, None
-        return corrupt or _decision(layer, key, "miss", "recompute", reason="no entry"), None
+            # A stale local entry must not hide a fresh shared one: try the next tier.
+            rejected = rejected or decision
+        return (
+            rejected or corrupt or _decision(layer, key, "miss", "recompute", reason="no entry"),
+            None,
+        )
 
     def read_object(self, uri: str) -> str | None:
         for tier in (self.local, self.shared):

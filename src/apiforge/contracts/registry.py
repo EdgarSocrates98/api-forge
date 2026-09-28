@@ -34,7 +34,15 @@ from apiforge.contracts.core import (
 )
 from apiforge.contracts.devin import DevinCheck, DevinCliProbe, DevinLaunch, DevinPayload
 from apiforge.contracts.distribution import DistributionDoctor
-from apiforge.contracts.economy import CostVector, LedgerRef, RunLedgerEntry
+from apiforge.contracts.economy import (
+    BudgetEnvelope,
+    CostVector,
+    EconomyPlan,
+    LadderStep,
+    LedgerRef,
+    RiskClassification,
+    RunLedgerEntry,
+)
 from apiforge.contracts.evidence import EvidenceRef
 from apiforge.contracts.graph import GraphEdge, GraphExport, GraphNode
 from apiforge.contracts.graph_impact import (
@@ -304,6 +312,10 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "CostVector/v1": CostVector,
     "LedgerRef/v1": LedgerRef,
     "RunLedgerEntry/v1": RunLedgerEntry,
+    "BudgetEnvelope/v1": BudgetEnvelope,
+    "EconomyPlan/v1": EconomyPlan,
+    "LadderStep/v1": LadderStep,
+    "RiskClassification/v1": RiskClassification,
 }
 
 

@@ -1,0 +1,9 @@
+id: moderate-economy
+shape: moderate
+risk: read_only
+size: M
+profile: economy
+expected:
+  effective: economy
+  minimum_roles:
+  - reviewer

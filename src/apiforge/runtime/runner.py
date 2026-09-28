@@ -22,6 +22,8 @@ def run_runtime(
     policy_id: str = "local-ci-safe",
     now: str | None = None,
     requested_debate: bool = False,
+    profile: str | None = None,
+    economy_enabled: bool = True,
 ) -> dict[str, object]:
     return asyncio.run(
         execute_run(
@@ -31,6 +33,8 @@ def run_runtime(
             policy_id=policy_id,
             now=now,
             requested_debate=requested_debate,
+            profile=profile,
+            economy_enabled=economy_enabled,
         )
     )
 
@@ -98,7 +102,11 @@ def approve_runtime(root: Path, task_id: str, run_id: str, approver: str) -> dic
 
 
 def resume_runtime(
-    root: Path, task_id: str, *, policy_id: str = "local-ci-safe"
+    root: Path,
+    task_id: str,
+    *,
+    policy_id: str = "local-ci-safe",
+    profile: str | None = None,
 ) -> dict[str, object]:
     """Resume only persisted, eligible work from the latest control run."""
     from apiforge.taskspec.store import latest_run
@@ -122,12 +130,17 @@ def resume_runtime(
             run_id,
             adapter=FakeModelAdapter(),
             policy_id=policy_id,
+            profile=profile,
         )
     )
 
 
 def debate_runtime(
-    root: Path, task_id: str, *, policy_id: str = "local-ci-safe"
+    root: Path,
+    task_id: str,
+    *,
+    policy_id: str = "local-ci-safe",
+    profile: str | None = None,
 ) -> dict[str, object]:
     """Request a human-visible debate room for the next bounded run."""
-    return run_runtime(root, task_id, policy_id=policy_id, requested_debate=True)
+    return run_runtime(root, task_id, policy_id=policy_id, requested_debate=True, profile=profile)

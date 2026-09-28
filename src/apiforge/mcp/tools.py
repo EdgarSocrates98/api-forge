@@ -1221,13 +1221,16 @@ def runtime_run(
     policy: str = "local-ci-safe",
     now: str | None = None,
     debate: bool = False,
+    profile: str | None = None,
     detail_level: str = "normal",
 ) -> dict[str, Any]:
     """Execute a bounded local runtime run for a TaskSpec."""
     from apiforge.runtime.runner import run_runtime
 
     def work() -> dict[str, Any]:
-        return run_runtime(Path(root), task_id, policy_id=policy, now=now, requested_debate=debate)
+        return run_runtime(
+            Path(root), task_id, policy_id=policy, now=now, requested_debate=debate, profile=profile
+        )
 
     return cast(dict[str, Any], _call("runtime_run", work, detail_level))
 
@@ -1243,7 +1246,11 @@ def runtime_status(task_id: str, root: str = ".", detail_level: str = "normal") 
 
 
 def runtime_resume(
-    task_id: str, root: str = ".", policy: str = "local-ci-safe", detail_level: str = "normal"
+    task_id: str,
+    root: str = ".",
+    policy: str = "local-ci-safe",
+    profile: str | None = None,
+    detail_level: str = "normal",
 ) -> dict[str, Any]:
     """Resume a bounded runtime execution."""
     from apiforge.runtime.runner import resume_runtime
@@ -1252,14 +1259,18 @@ def runtime_resume(
         dict[str, Any],
         _call(
             "runtime_resume",
-            lambda: resume_runtime(Path(root), task_id, policy_id=policy),
+            lambda: resume_runtime(Path(root), task_id, policy_id=policy, profile=profile),
             detail_level,
         ),
     )
 
 
 def runtime_debate(
-    task_id: str, root: str = ".", policy: str = "local-ci-safe", detail_level: str = "normal"
+    task_id: str,
+    root: str = ".",
+    policy: str = "local-ci-safe",
+    profile: str | None = None,
+    detail_level: str = "normal",
 ) -> dict[str, Any]:
     """Request a debate room for a bounded runtime execution."""
     from apiforge.runtime.runner import debate_runtime
@@ -1268,7 +1279,7 @@ def runtime_debate(
         dict[str, Any],
         _call(
             "runtime_debate",
-            lambda: debate_runtime(Path(root), task_id, policy_id=policy),
+            lambda: debate_runtime(Path(root), task_id, policy_id=policy, profile=profile),
             detail_level,
         ),
     )

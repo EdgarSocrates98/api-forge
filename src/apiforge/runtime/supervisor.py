@@ -19,6 +19,7 @@ from apiforge.contracts.agentic import (
     TrajectoryEvent,
 )
 from apiforge.contracts.base import ContractError
+from apiforge.contracts.economy import EconomyPlan, LadderStep
 from apiforge.contracts.graph import GraphEdge, GraphExport, GraphNode
 from apiforge.contracts.routing import RoutingDecision
 from apiforge.contracts.routing_evolution import PromotionGate
@@ -28,6 +29,18 @@ from apiforge.graph.store import read_graph
 from apiforge.runtime.adapters import AgentRequest, ModelAdapter
 from apiforge.runtime.control import ControlPlane
 from apiforge.runtime.critic import critic_findings
+from apiforge.runtime.economy import (
+    DeterministicProof,
+    allows,
+    apply_economy,
+    build_economy_plan,
+    deterministic_proof,
+    load_economy_config,
+    manifest_profile,
+    needs_escalation,
+    reserve_calls,
+    validate_profile,
+)
 from apiforge.runtime.guardrails import validate_agent_payload
 from apiforge.runtime.policy import (
     load_policy,
@@ -251,6 +264,212 @@ def _blocked_by_evolution_gate(
     }
 
 
+def _effective_policy(policy: Any, task_max_calls: int, economy: EconomyPlan) -> Any:
+    envelope = economy.envelope
+    return policy.model_copy(
+        update={
+            "max_calls": max(1, min(policy.max_calls, task_max_calls, envelope.provider_calls)),
+            "max_rounds": max(1, min(policy.max_rounds, envelope.debate_rounds or 1)),
+        }
+    )
+
+
+def _exhausted(missing: int) -> str:
+    return (
+        f"AF-BUDGET-EXHAUSTED: {missing} planned invocation(s) exceeded the economy call budget; "
+        "field=profile; unlock=rerun with --profile balanced|deep or raise TaskSpec budgets"
+    )
+
+
+def _economy_block(
+    economy: EconomyPlan,
+    ladder: list[LadderStep],
+    gaps: list[str],
+    max_calls: int,
+    reserve: int,
+    reserve_left: int,
+    calls_used: int,
+) -> dict[str, object]:
+    codes = {gap.split(":", 1)[0] for gap in gaps}
+    codes |= {item.split(":", 1)[0] for item in economy.diagnostics}
+    return {
+        "requested": economy.requested,
+        "requested_source": economy.requested_source,
+        "effective": economy.effective,
+        "escalation_reason": economy.escalation_reason,
+        "trimmed_roles": list(economy.trimmed_roles),
+        "stopped_at": ladder[-1].level if ladder else "L2",
+        "ladder": [step.model_dump(mode="json") for step in ladder],
+        "max_calls": max_calls,
+        "reserve_calls": reserve,
+        "reserve_left_at_verification": reserve_left,
+        "calls_used": calls_used,
+        "debate_rounds": economy.envelope.debate_rounds,
+        "status": "unresolved" if gaps else "ok",
+        "codes": sorted(codes),
+    }
+
+
+def _economy_stop(
+    run: AgenticRun,
+    storage: RunStore,
+    decision_id: str,
+    economy: EconomyPlan,
+    proof: DeterministicProof,
+    policy: Any,
+    timestamp: str,
+    root: Path,
+) -> dict[str, object]:
+    ladder = [
+        LadderStep(
+            level="L0",
+            action="deterministic proof",
+            trigger=f"run={proof.run_ref}; proofs={','.join(proof.proofs)}",
+        )
+    ]
+    block = _economy_block(economy, ladder, [], policy.max_calls, 0, policy.max_calls, 0)
+    stopped = run.model_copy(
+        update={
+            "state": AgenticState.AWAITING_SUPERVISION,
+            "final_status": "REVIEW",
+            "decision_ids": (decision_id,),
+            "finished_at": timestamp,
+        }
+    )
+    storage.save_run(stopped)
+    storage.json("summary.json", {"run_id": run.run_id, "economy": block, "errors": []})
+    task_store.record_agentic_run(root, stopped)
+    task_store.record_event(
+        root,
+        run.task_id,
+        {"event": "agentic_run", "run_id": run.run_id, "status": "REVIEW", "economy": "L0"},
+    )
+    return {
+        "run": stopped.model_dump(mode="json"),
+        "artifacts": [],
+        "status": "REVIEW",
+        "economy": block,
+        "run_dir": str(storage.directory),
+    }
+
+
+class _Escalation:
+    def __init__(self) -> None:
+        self.steps: list[LadderStep] = []
+        self.gaps: list[str] = []
+        self.errors: list[str] = []
+        self.artifact: AgentArtifact | None = None
+
+
+async def _escalate(
+    economy: EconomyPlan,
+    artifacts: list[AgentArtifact],
+    config: dict[str, Any],
+    remaining: int,
+    control: ControlPlane,
+    control_run_id: str,
+    control_steps: dict[str, Any],
+    capabilities_catalog: dict[str, Any],
+    adapter: ModelAdapter,
+    spec: Any,
+    run_id: str,
+    storage: RunStore,
+    policy: Any,
+) -> _Escalation:
+    outcome = _Escalation()
+    reviewer = economy.escalation_reviewer
+    threshold = float(config.get("triggers", {}).get("low_confidence", 0.7))
+    triggers = needs_escalation(
+        [item.confidence for item in artifacts if item.confidence is not None],
+        [gap for item in artifacts for gap in item.unresolved],
+        [_recommendation(item) for item in artifacts],
+        threshold,
+    )
+    step = control_steps.get(reviewer) if reviewer is not None else None
+    if not triggers or reviewer is None or step is None:
+        if step is not None:
+            control.skip(control_run_id, step.step_id, "AF-ECONOMY-ESCALATION-NOT-USED")
+        return outcome
+    if not allows(economy, "L3"):
+        control.skip(control_run_id, step.step_id, "AF-ECONOMY-CEILING")
+        outcome.gaps.append(
+            "AF-ECONOMY-CEILING: field=profile; unlock=rerun with --profile balanced|deep "
+            f"to allow an escalation review ({','.join(triggers)})"
+        )
+        return outcome
+    if remaining <= 0:
+        control.skip(control_run_id, step.step_id, "AF-BUDGET-EXHAUSTED")
+        outcome.gaps.append(_exhausted(1))
+        return outcome
+    control.start(control_run_id, step.step_id)
+    invocation = AgentInvocation(
+        invocation_id=stable_id("inv", {"run": run_id, "capability": reviewer}),
+        run_id=run_id,
+        agent=capabilities_catalog[reviewer].agent,
+        capability=reviewer,
+        adapter=adapter.name,
+        dependencies=(),
+        input_refs=spec.inputs,
+        idempotency_key=step.idempotency_key,
+    )
+
+    async def worker(item: AgentInvocation) -> object:
+        return await adapter.invoke(
+            AgentRequest(
+                invocation_id=item.invocation_id,
+                agent=item.agent,
+                capability=item.capability,
+                prompt=f"Escalation review for capability {item.capability}",
+                input_refs=item.input_refs,
+                output_contract="AgentArtifact/v1",
+            )
+        )
+
+    results = await run_bounded(
+        (invocation,),
+        worker,
+        limit=1,
+        timeout_seconds=policy.timeout_seconds,
+        max_calls=remaining,
+        max_retries=policy.max_retries,
+    )
+    outcome.steps.append(
+        LadderStep(level="L3", action="escalation review", trigger=",".join(triggers), calls=1)
+    )
+    result = results[0] if results else None
+    if result is None or result.error is not None or result.response is None:
+        error = (result.error if result else None) or "escalation review failed"
+        outcome.errors.append(f"{reviewer}: {error}")
+        control.fail(control_run_id, step.step_id, error)
+        return outcome
+    payload = _json_payload(result.response)
+    gaps = validate_agent_payload(payload)
+    if gaps:
+        outcome.errors.extend(f"{reviewer}: {gap}" for gap in gaps)
+        control.fail(control_run_id, step.step_id, "; ".join(gaps))
+        return outcome
+    artifact = AgentArtifact(
+        artifact_id=stable_id("artifact", {"run": run_id, "invocation": invocation.invocation_id}),
+        run_id=run_id,
+        invocation_id=invocation.invocation_id,
+        agent=invocation.agent,
+        capability=reviewer,
+        kind=ArtifactKind.SPECIALIST,
+        schema_name="AgentArtifact/v1",
+        payload=payload,
+        evidence=_strings(payload, "facts"),
+        assumptions=_strings(payload, "assumptions"),
+        risks=_strings(payload, "risks"),
+        unresolved=_strings(payload, "unresolved"),
+        confidence=_confidence(payload),
+        content_sha256=content_hash(payload),
+    )
+    control.complete(control_run_id, step.step_id, artifact.model_dump(mode="json"))
+    storage.artifact(artifact)
+    outcome.artifact = artifact
+    return outcome
+
+
 async def execute_run(
     root: Path,
     task_id: str,
@@ -259,9 +478,14 @@ async def execute_run(
     policy_id: str = "local-ci-safe",
     now: str | None = None,
     requested_debate: bool = False,
+    profile: str | None = None,
+    economy_enabled: bool = True,
 ) -> dict[str, object]:
     root = Path(root)
     spec = task_store.load(root, task_id)
+    economy_config = load_economy_config() if economy_enabled else None
+    if economy_enabled:
+        validate_profile(profile)
     timestamp = _now(now)
     policy = load_policy(policy_id)
     run_id = _run_id(task_id, spec.revision, timestamp)
@@ -350,6 +574,21 @@ async def execute_run(
     if routing.shadow_evaluation is not None:
         storage.save_shadow_evaluation(routing.shadow_evaluation)
     routing_plan = build_routing_plan(routing, capabilities_catalog, policy=routing_policy)
+    economy_plan: EconomyPlan | None = None
+    if economy_config is not None:
+        economy_plan = build_economy_plan(
+            routing, spec, flag=profile, manifest=manifest_profile(root), config=economy_config
+        )
+        routing_plan, economy_plan = apply_economy(
+            routing_plan,
+            economy_plan,
+            routing,
+            {name: item.kind for name, item in capabilities_catalog.items()},
+        )
+        routing = routing.model_copy(update={"economy": economy_plan})
+        storage.save_routing(routing)
+        storage.json("economy.json", economy_plan.model_dump(mode="json"))
+        policy = _effective_policy(policy, spec.budgets.max_calls, economy_plan)
     storage.save_routing_plan(routing_plan)
     storage.event(
         TrajectoryEvent(
@@ -389,6 +628,22 @@ async def execute_run(
             evolution_gate,
             timestamp,
         )
+    ladder: list[LadderStep] = []
+    economy_gaps: list[str] = []
+    if economy_plan is not None:
+        proof = deterministic_proof(root, spec)
+        if proof.level == "L0":
+            return _economy_stop(
+                run, storage, routing.decision_id, economy_plan, proof, policy, timestamp, root
+            )
+        if proof.level == "L1":
+            ladder.append(
+                LadderStep(
+                    level="L1",
+                    action="deterministic evidence partial",
+                    trigger="missing=" + ",".join(proof.missing),
+                )
+            )
     initial_names = tuple(
         name
         for name in (
@@ -400,7 +655,28 @@ async def execute_run(
         )
         if name is not None
     )
-    planned_names = tuple(dict.fromkeys((*initial_names, *routing_plan.fallbacks)))
+    if economy_plan is not None and len(initial_names) > policy.max_calls:
+        priority = tuple(
+            name
+            for name in (
+                routing_plan.primary,
+                *routing_plan.reviewers,
+                routing_plan.critic,
+                routing_plan.referee,
+                *routing_plan.parallel,
+            )
+            if name is not None
+        )
+        initial_names = priority[: policy.max_calls]
+        economy_gaps.append(_exhausted(len(priority) - len(initial_names)))
+    escalation_names = (
+        (economy_plan.escalation_reviewer,)
+        if economy_plan is not None and economy_plan.escalation_reviewer is not None
+        else ()
+    )
+    planned_names = tuple(
+        dict.fromkeys((*initial_names, *routing_plan.fallbacks, *escalation_names))
+    )
     capabilities = tuple(capabilities_catalog[name] for name in planned_names)
     initial_capabilities = tuple(capabilities_catalog[name] for name in initial_names)
     if not planned_names or not initial_capabilities:
@@ -478,12 +754,20 @@ async def execute_run(
         )
         return await adapter.invoke(request)
 
+    reserve = (
+        reserve_calls(economy_plan.envelope, policy.max_calls) if economy_plan is not None else 0
+    )
+    investigation_calls = (
+        policy.max_calls - reserve
+        if policy.max_calls - reserve >= len(invocations)
+        else policy.max_calls
+    )
     results = await run_bounded(
         invocations,
         worker,
         limit=policy.max_parallel_agents,
         timeout_seconds=policy.timeout_seconds,
-        max_calls=policy.max_calls,
+        max_calls=investigation_calls,
         max_retries=policy.max_retries,
         parallelism=lambda ready, remaining: min(
             policy.max_parallel_agents,
@@ -492,6 +776,17 @@ async def execute_run(
             else ready,
         ),
     )
+    if economy_plan is not None:
+        ladder.append(
+            LadderStep(
+                level="L2",
+                action="primary and risk-required roles",
+                trigger="start",
+                calls=len(results),
+            )
+        )
+        if len(results) < len(invocations):
+            economy_gaps.append(_exhausted(len(invocations) - len(results)))
     artifacts: list[AgentArtifact] = []
     errors: list[str] = []
     for result in results:
@@ -587,7 +882,9 @@ async def execute_run(
                 worker,
                 limit=1,
                 timeout_seconds=policy.timeout_seconds,
-                max_calls=max(0, policy.max_calls - control.get(control_run.run_id).calls_used),
+                max_calls=max(
+                    0, policy.max_calls - reserve - control.get(control_run.run_id).calls_used
+                ),
                 max_retries=policy.max_retries,
             )
             if not fallback_results:
@@ -676,6 +973,29 @@ async def execute_run(
                 )
             break
 
+    reserve_left = policy.max_calls - control.get(control_run.run_id).calls_used
+    if economy_plan is not None:
+        escalated = await _escalate(
+            economy_plan,
+            artifacts,
+            economy_config or {},
+            reserve_left,
+            control,
+            control_run.run_id,
+            control_steps,
+            capabilities_catalog,
+            adapter,
+            spec,
+            run_id,
+            storage,
+            policy,
+        )
+        ladder.extend(escalated.steps)
+        economy_gaps.extend(escalated.gaps)
+        errors.extend(escalated.errors)
+        if escalated.artifact is not None:
+            artifacts.append(escalated.artifact)
+            all_invocation_ids.append(escalated.artifact.invocation_id)
     all_unresolved = tuple(item for artifact in artifacts for item in artifact.unresolved)
     confidences = [item.confidence for item in artifacts if item.confidence is not None]
     confidence = min(confidences) if confidences else None
@@ -687,6 +1007,16 @@ async def execute_run(
         conflicting_facts=len({_recommendation(item) for item in artifacts}) > 1,
         requested_by_user=requested_debate,
     )
+    if economy_plan is not None and room:
+        forced = spec.risk.value in policy.critic_risks or economy_plan.effective == "deep"
+        if forced or (allows(economy_plan, "L4") and economy_plan.envelope.debate_rounds > 0):
+            ladder.append(LadderStep(level="L4", action="debate room", trigger=",".join(reasons)))
+        else:
+            room = False
+            economy_gaps.append(
+                "AF-ECONOMY-CEILING: field=profile; unlock=rerun with --profile balanced|deep "
+                f"to allow a debate room ({','.join(reasons)})"
+            )
     critic = critic_findings(item.model_dump(mode="json") for item in artifacts)
     critic_required = requires_critic(policy, spec.risk.value)
     gate_reasons = tuple(sorted(set(reasons + (("critic_findings",) if critic else ()))))
@@ -701,7 +1031,7 @@ async def execute_run(
             else AgenticState.BLOCKED,
             "artifact_ids": tuple(item.artifact_id for item in artifacts),
             "invocation_ids": tuple(all_invocation_ids),
-            "gaps": tuple(sorted(set(errors + list(critic) + list(all_unresolved)))),
+            "gaps": tuple(sorted(set(errors + list(critic) + list(all_unresolved) + economy_gaps))),
             "final_status": final_status,
             "finished_at": timestamp,
             "run_digest": content_hash(
@@ -709,11 +1039,27 @@ async def execute_run(
             ),
         }
     )
+    if economy_plan is not None and needs_gate:
+        ladder.append(LadderStep(level="L5", action="human gate", trigger=",".join(gate_reasons)))
+    economy_block = (
+        _economy_block(
+            economy_plan,
+            ladder,
+            economy_gaps,
+            policy.max_calls,
+            reserve,
+            reserve_left,
+            control.get(control_run.run_id).calls_used,
+        )
+        if economy_plan is not None
+        else None
+    )
     storage.save_run(run)
     storage.json(
         "summary.json",
         {
             "run_id": run_id,
+            "economy": economy_block,
             "critic_required": critic_required,
             "critic_findings": critic,
             "debate_reasons": reasons,
@@ -739,7 +1085,16 @@ async def execute_run(
         "run": run.model_dump(mode="json"),
         "artifacts": [item.model_dump(mode="json") for item in artifacts],
         "critic": {"required": critic_required, "findings": critic},
-        "debate": {"opened": room, "reasons": reasons},
+        "debate": {
+            "opened": room,
+            "reasons": reasons,
+            "max_rounds": (
+                economy_plan.envelope.debate_rounds
+                if economy_plan is not None
+                else policy.max_rounds
+            ),
+        },
+        "economy": economy_block,
         "status": final_status,
         "run_dir": str(storage.directory),
     }
@@ -753,9 +1108,11 @@ async def resume_existing_run(
     adapter: ModelAdapter,
     policy_id: str = "local-ci-safe",
     now: str | None = None,
+    profile: str | None = None,
 ) -> dict[str, object]:
     root = Path(root)
     spec = task_store.load(root, task_id)
+    validate_profile(profile)
     timestamp = _now(now)
     policy = load_policy(policy_id)
     storage = RunStore(root, task_id, run_id)
@@ -835,6 +1192,12 @@ async def resume_existing_run(
         )
     by_name = {item.name: item for item in capabilities.values()}
     routing_plan = build_routing_plan(routing, capabilities, policy=routing_policy)
+    economy_plan = build_economy_plan(
+        routing, spec, flag=profile, manifest=manifest_profile(root), config=load_economy_config()
+    )
+    routing = routing.model_copy(update={"economy": economy_plan})
+    storage.save_routing(routing)
+    policy = _effective_policy(policy, spec.budgets.max_calls, economy_plan)
     storage.save_routing_plan(routing_plan)
     selected = tuple(
         by_name[step.name]

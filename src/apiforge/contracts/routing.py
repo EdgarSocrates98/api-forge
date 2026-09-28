@@ -8,6 +8,7 @@ from typing import Literal
 from pydantic import AliasChoices, Field, model_validator
 
 from apiforge.contracts.base import VersionedContract
+from apiforge.contracts.economy import EconomyPlan
 from apiforge.contracts.graph_impact import (
     GraphImpactAssessment,
     GraphImpactMode,
@@ -135,6 +136,7 @@ class RoutingDecision(VersionedContract):
     graph_impact: GraphImpactAssessment | None = None
     scorecard_routing: ScorecardRoutingAssessment | None = None
     shadow_evaluation: ScorecardShadowEvaluation | None = None
+    economy: EconomyPlan | None = None
     evidence: tuple[str, ...] = ()
     unresolved: tuple[str, ...] = ()
 

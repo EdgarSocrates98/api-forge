@@ -1,5 +1,6 @@
 version: 1
 profiles:
+  micro: [intent, verify, ship]
   quick: [intent, plan, build, verify, ship]
   standard: [discover, intent, contract, architecture, plan, build, verify, secure, ship]
   critical: [discover, intent, contract, architecture, plan, build, verify, secure, benchmark, ship]

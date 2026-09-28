@@ -56,7 +56,8 @@ def test_phases_order_is_canonical() -> None:
 
 def test_profiles_cover_all_four() -> None:
     profiles = load_profiles()
-    assert set(profiles) == {"quick", "standard", "critical", "migration"}
+    assert set(profiles) == {"micro", "quick", "standard", "critical", "migration"}
+    assert set(profiles["micro"]) == {"intent", "verify", "ship"}
     assert set(profiles["quick"]) == {"intent", "plan", "build", "verify", "ship"}
     assert "benchmark" not in profiles["standard"]
     assert len(profiles["critical"]) == len(PHASES)

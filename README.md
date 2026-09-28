@@ -394,6 +394,9 @@ while refusal codes and `fact_id`s survive.
 | `apiforge economy stats [--run-id R] [--transcript T]` | Bytes attributed per run and source; tokens `unresolved` without a transcript |
 | `apiforge economy explain <run_id>` | Why each ref was spent, from recorded provenance rules (no model call) |
 | `apiforge evals economy [--record-baseline]` | 12-case benchmark: evidence recall floor + median byte reduction vs recorded baseline |
+| `apiforge runtime run\|resume\|debate <task> --profile economy\|balanced\|deep` | Economy Plane: profile preference with risk floor, trimmed optional roles, call cap + verification reserve, L0–L5 ladder; `economy` block in the result |
+| `apiforge sdd classify --description … --path … [--baseline … --candidate …] [--write <feature>]` | Deterministic change risk (micro/low/medium/high) → minimum SDD profile; `sdd check` refuses profiles below it |
+| `apiforge evals economy-routing` | 15-case benchmark: role invariant, effective profile, critical ⇒ deep, economy cheaper for low risk |
 | `apiforge-mcp` | MCP server for the read/compose verbs (needs `pip install apiforge[mcp]`; every tool takes `detail_level`) |
 | `apiforge collect lambda --function-name X --out dump/` | Fetch Lambda config into a dump (Code.Location never persisted) |
 | `apiforge collect sqs\|sns\|eventbridge\|iam-role\|cognito\|waf ... --out dump/` | Messaging/identity collectors — same offline-dump contract |

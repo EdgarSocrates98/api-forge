@@ -3609,6 +3609,20 @@ def evals_economy(
         raise typer.Exit(code=1)
 
 
+@evals_app.command("economy-routing")
+def evals_economy_routing(
+    corpus: Path = typer.Option(Path("evals/corpus/economy-routing"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Profiles vs pre-economy plans with the risk floor as invariant; exit 1 on gate failure."""
+    from apiforge.evals.economy_routing import run_economy_routing
+
+    result = _run(lambda: run_economy_routing(corpus))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
 @contract_intel_app.command("impact")
 def contract_intel_impact(
     protocol: str = typer.Option(..., "--protocol", help="openapi or grpc."),
@@ -3822,6 +3836,9 @@ def runtime_run(
     policy: str = typer.Option("local-ci-safe", "--policy"),
     now: str | None = typer.Option(None, "--now", help="Deterministic timestamp for replay."),
     debate: bool = typer.Option(False, "--debate", help="Request a debate room."),
+    profile: str | None = typer.Option(
+        None, "--profile", help="Economy profile: economy|balanced|deep (risk may escalate)."
+    ),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
     """Execute a sealed TaskSpec with the deterministic fake adapter."""
@@ -3829,7 +3846,9 @@ def runtime_run(
     def work() -> object:
         from apiforge.runtime.runner import run_runtime
 
-        return run_runtime(root, task_id, policy_id=policy, now=now, requested_debate=debate)
+        return run_runtime(
+            root, task_id, policy_id=policy, now=now, requested_debate=debate, profile=profile
+        )
 
     try:
         _echo_json(_run(work), detail_level)
@@ -3854,12 +3873,18 @@ def runtime_resume(
     task_id: str = typer.Argument(...),
     root: Path = typer.Option(Path("."), "--root"),
     policy: str = typer.Option("local-ci-safe", "--policy"),
+    profile: str | None = typer.Option(
+        None, "--profile", help="Economy profile: economy|balanced|deep (risk may escalate)."
+    ),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
     """Resume by replaying the TaskSpec through the bounded supervisor."""
     from apiforge.runtime.runner import resume_runtime
 
-    _echo_json(resume_runtime(root, task_id, policy_id=policy), detail_level)
+    _echo_json(
+        _run(lambda: resume_runtime(root, task_id, policy_id=policy, profile=profile)),
+        detail_level,
+    )
 
 
 @runtime_app.command("debate")
@@ -3867,12 +3892,18 @@ def runtime_debate(
     task_id: str = typer.Argument(...),
     root: Path = typer.Option(Path("."), "--root"),
     policy: str = typer.Option("local-ci-safe", "--policy"),
+    profile: str | None = typer.Option(
+        None, "--profile", help="Economy profile: economy|balanced|deep (risk may escalate)."
+    ),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
     """Request a debate room before the runtime makes a final decision."""
     from apiforge.runtime.runner import debate_runtime
 
-    _echo_json(debate_runtime(root, task_id, policy_id=policy), detail_level)
+    _echo_json(
+        _run(lambda: debate_runtime(root, task_id, policy_id=policy, profile=profile)),
+        detail_level,
+    )
 
 
 @runtime_app.command("approve")

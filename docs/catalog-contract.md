@@ -534,6 +534,28 @@ carry `payload_bytes: 0` so `economy report` totals are unchanged.
 | `AF-EVALS-ECONOMY-BASELINE-MISSING` | corpus case has no recorded baseline; unlock: `apiforge evals economy --record-baseline` |
 | `AF-EVALS-ECONOMY-BASELINE-STALE` | fixture digest differs from the recorded baseline; unlock: re-record and commit the baseline |
 
+## Economic routing (`runtime run|resume|debate --profile`, `sdd classify`, `evals economy-routing`)
+
+Profiles `economy`/`balanced`/`deep` (`rules/economy_profiles.yaml`) resolve
+`--profile` > `.apiforge/project.yaml` `economy_profile` > policy default
+`balanced`. Risk sets a floor the effective profile can never go below; trims
+touch only parallel slots, fallbacks and challengers. The supervisor caps
+calls at `min(policy, TaskSpec, envelope)`, holds a verification reserve,
+stops at L0 on deterministic proof and escalates L2→L5 only on deterministic
+triggers. Partial outcomes keep `final_status: REVIEW` and report
+`economy.status: unresolved`.
+
+| Code | Meaning |
+|---|---|
+| `AF-ECONOMY-PROFILE-INVALID` | `--profile` is not `economy`, `balanced` or `deep`; unlock: pass a valid profile |
+| `AF-ECONOMY-ESCALATED` | diagnostic: risk raised the effective profile above the requested one (never a refusal) |
+| `AF-ECONOMY-CEILING` | an escalation (L3 review or L4 debate) exceeded the profile's ladder ceiling at non-forced risk; run stays unresolved; unlock: rerun with a higher profile |
+| `AF-ECONOMY-ROLE-INVARIANT` | an economy trim would have changed a risk-required reviewer/critic/referee; the run refuses instead of proceeding |
+| `AF-ECONOMY-ESCALATION-NOT-USED` | control step note: the reserved escalation reviewer was not needed |
+| `AF-BUDGET-EXHAUSTED` | planned invocations exceeded the economy call budget; no silent downgrade; unlock: `--profile balanced\|deep` or raise TaskSpec budgets |
+| `AF-SDD-PROFILE-BELOW-RISK` | a feature's `intent.md` carries `risk_class` and declares an SDD profile below its minimum; unlock: declare the required profile or higher |
+| `AF-SDD-RISK-UNRESOLVED` | `sdd classify` found no classifying signal (defaults to `medium`) or got only one of `--baseline`/`--candidate` |
+
 ## Canonical contracts (`contract`)
 
 `contract list` enumerates the registered `<Name>/v1` contracts;

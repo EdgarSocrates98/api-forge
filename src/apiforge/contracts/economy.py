@@ -41,3 +41,60 @@ class RunLedgerEntry(VersionedContract):
     source: LedgerSource
     cost: CostVector = Field(default_factory=CostVector)
     refs: tuple[LedgerRef, ...] = ()
+
+
+EconomyProfile = Literal["economy", "balanced", "deep"]
+ProfileSource = Literal["flag", "manifest", "policy"]
+LadderLevel = Literal["L0", "L1", "L2", "L3", "L4", "L5"]
+RiskClass = Literal["micro", "low", "medium", "high"]
+
+
+class BudgetEnvelope(VersionedContract):
+    """Hard execution limits for one profile; exhaustion is unresolved, never a downgrade."""
+
+    profile: EconomyProfile
+    provider_calls: int = Field(ge=1)
+    fanout: int = Field(ge=0)
+    fallbacks: int = Field(ge=0)
+    debate_rounds: int = Field(ge=0)
+    challenger_slots: int = Field(ge=0)
+    verification_share: float = Field(ge=0.0, le=0.5)
+    ladder_ceiling: LadderLevel
+    on_exhaustion: Literal["unresolved"] = "unresolved"
+    silent_downgrade: Literal[False] = False
+
+
+class LadderStep(VersionedContract):
+    """One escalation step reached during a run and the trigger that caused it."""
+
+    level: LadderLevel
+    action: str = Field(min_length=1)
+    trigger: str = Field(min_length=1)
+    calls: int = Field(default=0, ge=0)
+
+
+class EconomyPlan(VersionedContract):
+    """Profile resolution, risk floor and envelope attached to a routing decision."""
+
+    schema: Literal["apiforge/economy-plan/v1"] = "apiforge/economy-plan/v1"  # type: ignore[assignment]
+    requested: EconomyProfile
+    requested_source: ProfileSource
+    floor: EconomyProfile
+    effective: EconomyProfile
+    escalation_reason: str | None = None
+    envelope: BudgetEnvelope
+    minimum_roles: tuple[str, ...] = ()
+    trimmed_roles: tuple[str, ...] = ()
+    escalation_reviewer: str | None = None
+    stop_when: tuple[str, ...] = ("deterministic_proof", "no_unresolved_critical")
+    diagnostics: tuple[str, ...] = ()
+
+
+class RiskClassification(VersionedContract):
+    """Deterministic change-risk class and the minimum SDD profile it requires."""
+
+    schema: Literal["apiforge/risk-classification/v1"] = "apiforge/risk-classification/v1"  # type: ignore[assignment]
+    risk_class: RiskClass
+    sdd_profile: str = Field(min_length=1)
+    signals: tuple[str, ...] = ()
+    unresolved: tuple[str, ...] = ()

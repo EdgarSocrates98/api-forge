@@ -41,7 +41,15 @@ from apiforge.contracts.distribution import (
     DistributionRefusal,
     ForgePaths,
 )
-from apiforge.contracts.economy import CostVector, LedgerRef, RunLedgerEntry
+from apiforge.contracts.economy import (
+    BudgetEnvelope,
+    CostVector,
+    EconomyPlan,
+    LadderStep,
+    LedgerRef,
+    RiskClassification,
+    RunLedgerEntry,
+)
 from apiforge.contracts.evidence import EvidenceKind, EvidenceRecord, EvidenceRef
 from apiforge.contracts.experience import ExperienceAction, ExperienceSnapshot, ExperienceView
 from apiforge.contracts.graph_impact import (
@@ -126,6 +134,7 @@ __all__ = [
     "AdaptivePlan",
     "AdaptivePolicy",
     "AssetStatus",
+    "BudgetEnvelope",
     "CandidateAssessment",
     "CapabilityDiagnostic",
     "CapabilityRecord",
@@ -155,6 +164,7 @@ __all__ = [
     "DevinTaskKind",
     "DistributionDoctor",
     "DistributionRefusal",
+    "EconomyPlan",
     "EvidenceCoverage",
     "EvidenceKind",
     "EvidenceLevel",
@@ -182,6 +192,7 @@ __all__ = [
     "HostDeclaration",
     "HostResolution",
     "KnowledgeObservation",
+    "LadderStep",
     "LedgerRef",
     "ObservedSignal",
     "PackFreshness",
@@ -191,6 +202,7 @@ __all__ = [
     "PromotionGate",
     "PromotionState",
     "RepositoryRef",
+    "RiskClassification",
     "RiskComplexityAssessment",
     "RiskComplexityEffect",
     "RiskComplexityPolicy",

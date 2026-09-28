@@ -9,7 +9,7 @@ metadata:
 
 ## Procedimento
 
-1. Escolha o perfil `quick`, `standard`, `critical` ou `migration` pela evidência de risco.
+1. Classifique o risco antes de escolher o perfil: `apiforge sdd classify --description "..." --path <p> [--baseline <c> --candidate <c>] --write docs/sdd/<FEATURE>`. O perfil declarado (`micro`, `quick`, `standard`, `critical` ou `migration`) nunca pode ficar abaixo do `risk_class`; `sdd check` recusa com `AF-SDD-PROFILE-BELOW-RISK`.
 2. Preencha `discover`, `intent`, `contract`, `architecture` e `plan` antes de construir.
 3. Toda intenção deve ter sucesso verificável, escopo fora, decisões abertas e owner.
 4. Toda task deve possuir caminho permitido, teste ou proof, dependência, risco e rollback.
@@ -17,6 +17,10 @@ metadata:
 6. Use sandbox/worktree no build.
 7. Execute verify, secure e benchmark quando o risco exigir; fases dispensadas devem ser `not_required` com justificativa.
 8. Finalize em ship apenas com evidence bundle, deviations e unresolved explícitos.
+
+## Execução econômica do runtime
+
+`apiforge runtime run|resume|debate --profile economy|balanced|deep`: o perfil é preferência, o risco é piso (critical/irreversible ⇒ `deep`). Leia `economy.status`, `economy.stopped_at` e `economy.codes` no resultado: `unresolved` + `AF-BUDGET-EXHAUSTED` ou `AF-ECONOMY-CEILING` é parcial explícito — reexecute com perfil maior, nunca complete em silêncio. `L0` significa prova determinística sem chamada de agente; aceitação continua separada.
 
 ## Gates
 

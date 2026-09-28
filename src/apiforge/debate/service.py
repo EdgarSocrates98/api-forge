@@ -184,8 +184,20 @@ def submit(
     side: str,
     position: str,
     evidence: tuple[str, ...],
+    *,
+    disagreements: tuple[tuple[str, str], ...] = (),
+    risks: tuple[str, ...] = (),
+    confidence: float | None = None,
 ) -> Debate:
-    """Append a position; every position must cite fact_id evidence."""
+    """Append a position; every position must cite fact_id evidence.
+
+    ``disagreements``/``risks``/``confidence`` make the submission a
+    ``PositionDelta/v1`` so the referee reads deltas, not essays (§32).
+    """
+    if confidence is not None and not 0.0 <= confidence <= 1.0:
+        raise DebateError("AF-DEBATE-DELTA-INVALID", "confidence must be within [0, 1]")
+    if any(not point.strip() for point, _ in disagreements):
+        raise DebateError("AF-DEBATE-DELTA-INVALID", "every disagreement needs a point")
     debate = _load(case_dir, debate_id)
     _require_open(debate)
     if side not in debate.sides:
@@ -207,6 +219,14 @@ def submit(
         "evidence": sorted(set(evidence)),
         "order": len(debate.submissions) + 1,
     }
+    if disagreements:
+        submission["disagreements"] = [
+            {"point": point.strip(), "reason": reason.strip()} for point, reason in disagreements
+        ]
+    if risks:
+        submission["risks"] = sorted(set(risks))
+    if confidence is not None:
+        submission["confidence"] = confidence
     updated = Debate(**{**debate.__dict__, "submissions": (*debate.submissions, submission)})
     _write(case_dir, updated)
     return updated

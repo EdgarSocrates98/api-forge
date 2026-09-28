@@ -130,6 +130,14 @@ from apiforge.contracts.scorecard_routing import (
     ScorecardRoutingPolicy,
 )
 from apiforge.contracts.scorecard_shadow import ScorecardShadowEvaluation
+from apiforge.contracts.selective import (
+    AgentUniqueness,
+    ExpertiseSelection,
+    PositionDelta,
+    RefereePacket,
+    RoleContextPlan,
+    ShadowDecision,
+)
 from apiforge.contracts.stubs import (
     AgenticQualityAssessment,
     AnalyticalAccessIR,
@@ -321,6 +329,12 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "CacheEntry/v1": CacheEntry,
     "CacheDecision/v1": CacheDecision,
     "DeltaSlice/v1": DeltaSlice,
+    "ExpertiseSelection/v1": ExpertiseSelection,
+    "RoleContextPlan/v1": RoleContextPlan,
+    "PositionDelta/v1": PositionDelta,
+    "RefereePacket/v1": RefereePacket,
+    "ShadowDecision/v1": ShadowDecision,
+    "AgentUniqueness/v1": AgentUniqueness,
 }
 
 

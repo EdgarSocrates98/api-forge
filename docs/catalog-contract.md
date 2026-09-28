@@ -559,6 +559,29 @@ arrays only (`diff --name-status`, `show`) and never mutates.
 | `AF-DELTA-REF-INVALID` | `git diff` refused `--base`/`--head`; unlock: pass refs that exist (`git rev-parse <ref>`) |
 | `AF-EVALS-INVALID` | an eval corpus is empty, has duplicate ids or a mutation that does not apply; unlock: fix the corpus yaml |
 
+## Selective agentics (`knowledge select`, `debate packet`, `agents audit`, `evals selective-agentics`)
+
+`knowledge select` loads only packs named by `rules/expertise_triggers.yaml`
+(intent keywords, observed frameworks, capability); no trigger selects no
+pack. Economy runs build one capsule for the TaskSpec `target=` and give each
+role a subset (`rules/role_context.yaml`): specialists `focused`, reviewers
+`evidence_plus_delta`, critics `decision_plus_evidence`, referees
+`disagreements_only`, each capped at `share × envelope.context_bytes`.
+Requests carry `context_class`, `context_refs` and `expertise`;
+`role-context.json` and ledger rows `runtime role:<kind>` record the bytes.
+Challengers run in a bounded shadow (`envelope.shadow_share`, deterministic
+sampling by run id, only from calls left after the verification reserve) and
+never enter artifacts, gaps or status. `agents audit` is report-only.
+
+| Code | Meaning |
+|---|---|
+| `AF-EXPERTISE-TRIGGERS-INVALID` | `rules/expertise_triggers.yaml` is malformed or names a pack that does not exist; unlock: restore it or name existing packs |
+| `AF-ROLE-CONTEXT-POLICY` | `rules/role_context.yaml` does not map every role kind to a declared class or shares exceed 1.0 |
+| `AF-ROLE-CONTEXT-BUDGET` | unresolved note: a role's refs exceeded its share of `context_bytes` and were trimmed (listed in `trimmed`); unlock: raise the profile |
+| `AF-ECONOMY-SHADOW-BUDGET` | shadow reason: the run was sampled but no call remained after the verification reserve |
+| `AF-DEBATE-DELTA-INVALID` | `--disagree` is not `point=reason`, a point is empty or `--confidence` is outside [0, 1] |
+| `AF-AGENTS-AUDIT-INVALID` | the agents directory is missing or an agent frontmatter is not valid YAML |
+
 ## Economic routing (`runtime run|resume|debate --profile`, `sdd classify`, `evals economy-routing`)
 
 Profiles `economy`/`balanced`/`deep` (`rules/economy_profiles.yaml`) resolve

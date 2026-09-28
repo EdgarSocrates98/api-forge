@@ -54,6 +54,13 @@ apiforge context gc [--apply]
 - O cache é consultivo: reuso só com dependências inalteradas (arquivo, span, ponteiro do contrato, vizinhança do grafo); a saída é idêntica a `--no-cache`.
 - `AF-DELTA-GIT-UNAVAILABLE` → use `--changed`; `AF-CACHE-LAYER-DISABLED` → a camada não tem chamador ainda.
 
+## Agentes seletivos
+
+- Especialista recebe só o subconjunto `focused` do capsule; revisor, crítico e referee recebem menos (`role-context.json`). Não repasse o contexto pai inteiro a subagentes.
+- Carregue expertise só pelos packs de `apiforge knowledge select --intent "..."`; `no-expertise-trigger` significa não carregar nada.
+- Em debate, submeta `--disagree point=reason`, `--risk`, `--confidence` e entregue ao referee `apiforge debate packet`, não as posições completas.
+- `apiforge agents audit` aponta agentes sem nada único; é evidência para decisão humana, não remoção automática.
+
 ## Graphify
 
 Relacione artefatos, operações, handlers, bancos, regras, findings, tasks, testes, traces, decisões e releases por edges de dependência, implementação, evidência, impacto, violação e verificação.

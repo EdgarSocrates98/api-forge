@@ -1,0 +1,17 @@
+id: roles-spring-create
+kind: roles
+fixture: tests/fixtures/economy_payments/spring
+contract: tests/fixtures/economy_payments/openapi.yaml
+target: POST /payments
+outcome: add channel to PaymentRequest
+profile: deep
+roles:
+- capability: api-contract-review
+  kind: specialist
+- capability: task-review
+  kind: reviewer
+- capability: adversarial-critic
+  kind: critic
+- capability: debate-referee
+  kind: referee
+max_total_ratio: 0.6

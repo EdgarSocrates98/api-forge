@@ -1,0 +1,27 @@
+# Context budgets per role (economy wave 4, prompt §86-87).
+# Every role receives a subset of ONE shared capsule, capped at
+# share x envelope.context_bytes. `artifacts: true` adds refs to artifacts
+# already produced in the run (the delta); `deltas: true` means the role only
+# reads debate position deltas, never capsule refs.
+schema: apiforge/role-context/v1
+classes:
+  focused:
+    kinds: [contract, schema, code, test]
+    share: 0.5
+  evidence_plus_delta:
+    kinds: [contract, schema, policy]
+    share: 0.2
+    artifacts: true
+  decision_plus_evidence:
+    kinds: [policy, contract]
+    share: 0.15
+    artifacts: true
+  disagreements_only:
+    kinds: []
+    share: 0.15
+    deltas: true
+roles:
+  specialist: focused
+  reviewer: evidence_plus_delta
+  critic: decision_plus_evidence
+  referee: disagreements_only

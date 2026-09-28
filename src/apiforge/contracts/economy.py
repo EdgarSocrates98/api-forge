@@ -60,6 +60,8 @@ class BudgetEnvelope(VersionedContract):
     challenger_slots: int = Field(ge=0)
     verification_share: float = Field(ge=0.0, le=0.5)
     ladder_ceiling: LadderLevel
+    context_bytes: int = Field(default=32000, ge=256)
+    shadow_share: float = Field(default=0.0, ge=0.0, le=0.5)
     on_exhaustion: Literal["unresolved"] = "unresolved"
     silent_downgrade: Literal[False] = False
 

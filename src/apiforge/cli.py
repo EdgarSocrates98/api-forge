@@ -267,6 +267,7 @@ from apiforge.cli_cache import register as _register_cache
 from apiforge.cli_context import register as _register_context
 from apiforge.cli_distribution import register as _register_distribution
 from apiforge.cli_economy import register as _register_economy
+from apiforge.cli_selective import register as _register_selective
 from apiforge.cli_tui import tui_app
 from apiforge.cli_workspace import register as _register_workspace
 
@@ -275,6 +276,7 @@ _register_distribution(app)
 _register_workspace(app)
 _register_context(context_app)
 _register_cache(app)
+_register_selective(knowledge_app, debate_app, agents_app)
 _register_economy(economy_app)
 
 
@@ -2388,15 +2390,30 @@ def debate_submit(
     side: str = typer.Option(..., "--side", help="Which side this position serves."),
     position: str = typer.Option(..., "--position", help="The position text."),
     evidence: str = typer.Option(..., "--evidence", help="Comma-separated fact_id citations."),
+    disagree: list[str] = typer.Option(
+        [], "--disagree", help="Position delta: 'point=reason' (repeatable)."
+    ),
+    risk: list[str] = typer.Option([], "--risk", help="Position delta risk (repeatable)."),
+    confidence: float | None = typer.Option(None, "--confidence", help="0.0-1.0."),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
     """Append a position — every position must cite fact_id evidence."""
 
     def work() -> object:
+        from apiforge.application.selective import parse_disagreements
         from apiforge.debate.service import submit
 
         ev = tuple(e.strip() for e in evidence.split(",") if e.strip())
-        d = submit(case, debate, side, position, ev)
+        d = submit(
+            case,
+            debate,
+            side,
+            position,
+            ev,
+            disagreements=parse_disagreements(disagree),
+            risks=tuple(risk),
+            confidence=confidence,
+        )
         return {"debate_id": d.debate_id, "submissions": len(d.submissions)}
 
     _echo_json(_run(work), detail_level)
@@ -3635,6 +3652,21 @@ def evals_cache(
     from apiforge.evals.cache import run_cache_eval
 
     result = _run(lambda: run_cache_eval(corpus, repo_root))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("selective-agentics")
+def evals_selective(
+    corpus: Path = typer.Option(Path("evals/corpus/selective-agentics"), "--corpus"),
+    repo_root: Path = typer.Option(Path("."), "--repo-root", help="Where fixture paths resolve."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Lazy expertise, per-role bytes, referee packets, shadow share and agent audit gates."""
+    from apiforge.evals.selective import run_selective_eval
+
+    result = _run(lambda: run_selective_eval(corpus, repo_root))
     _echo_json(result, detail_level)
     if isinstance(result, dict) and not result.get("passed"):
         raise typer.Exit(code=1)

@@ -725,6 +725,55 @@ def cache_invalidate(
     return out
 
 
+def knowledge_select(
+    intent: str,
+    capability: str | None = None,
+    frameworks: list[str] | None = None,
+    root: str | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Only the expertise packs a declared trigger names; no trigger means no packs."""
+    from apiforge.application.selective import knowledge_select as _select
+
+    out: dict[str, Any] = _call(
+        "knowledge_select",
+        lambda: _select(
+            intent,
+            capability=capability,
+            frameworks=tuple(frameworks or ()),
+            root=Path(root) if root else None,
+        ),
+        detail_level,
+    )
+    return out
+
+
+def debate_packet(
+    case: str,
+    debate: str,
+    capsule: str | None = None,
+    root: str = ".",
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Referee input: shared capsule id + one position delta per side + disagreements."""
+    from apiforge.application.selective import debate_packet as _packet
+
+    out: dict[str, Any] = _call(
+        "debate_packet",
+        lambda: _packet(Path(case), debate, capsule_id=capsule, root=Path(root)),
+        detail_level,
+    )
+    return out
+
+
+def agents_audit(root: str = ".", detail_level: str = "normal") -> dict[str, Any]:
+    """Anti-agentic-theater gate: which agents own nothing unique."""
+    from apiforge.application.selective import agents_audit as _audit
+
+    out: dict[str, Any] = _call("agents_audit", lambda: _audit(Path(root)), detail_level)
+    return out
+
+
 def context_expand(
     uri: str, root: str = ".", run_id: str | None = None, detail_level: str = "normal"
 ) -> dict[str, Any]:
@@ -1652,6 +1701,9 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     context_gc,
     cache_stats,
     cache_invalidate,
+    knowledge_select,
+    debate_packet,
+    agents_audit,
     graph_query,
     graph_impact,
     graph_trace,

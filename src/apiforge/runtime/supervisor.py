@@ -23,6 +23,7 @@ from apiforge.contracts.economy import EconomyPlan, LadderStep
 from apiforge.contracts.graph import GraphEdge, GraphExport, GraphNode
 from apiforge.contracts.routing import RoutingDecision
 from apiforge.contracts.routing_evolution import PromotionGate
+from apiforge.contracts.selective import RoleContext, RoleContextPlan, ShadowDecision
 from apiforge.core.ids import stable_id
 from apiforge.core.models import JsonValue
 from apiforge.graph.store import read_graph
@@ -51,6 +52,9 @@ from apiforge.runtime.policy import (
 from apiforge.runtime.promotion import decide_promotion, is_active, load_evolution_policy
 from apiforge.runtime.registry import load_capabilities, load_profiles
 from apiforge.runtime.review import build_runtime_review, review_task_spec
+from apiforge.runtime.role_context import plan_roles
+from apiforge.runtime.role_context import record as record_roles
+from apiforge.runtime.role_context import summary as role_summary
 from apiforge.runtime.routing import (
     available_routing_evidence,
     build_routing_plan,
@@ -59,6 +63,7 @@ from apiforge.runtime.routing import (
     route_capabilities,
 )
 from apiforge.runtime.scheduler import run_bounded
+from apiforge.runtime.shadow import decide as decide_shadow
 from apiforge.runtime.store import RunStore, content_hash
 from apiforge.taskspec import store as task_store
 
@@ -375,6 +380,7 @@ async def _escalate(
     run_id: str,
     storage: RunStore,
     policy: Any,
+    role_rows: dict[str, RoleContext] | None = None,
 ) -> _Escalation:
     outcome = _Escalation()
     reviewer = economy.escalation_reviewer
@@ -422,6 +428,10 @@ async def _escalate(
                 prompt=f"Escalation review for capability {item.capability}",
                 input_refs=item.input_refs,
                 output_contract="AgentArtifact/v1",
+                **_role_fields(
+                    (role_rows or {}).get(item.capability),
+                    tuple(f"artifact:{artifact.artifact_id}" for artifact in artifacts),
+                ),
             )
         )
 
@@ -468,6 +478,85 @@ async def _escalate(
     storage.artifact(artifact)
     outcome.artifact = artifact
     return outcome
+
+
+def _role_fields(row: RoleContext | None, extra_refs: tuple[str, ...] = ()) -> dict[str, Any]:
+    if row is None:
+        return {}
+    return {
+        "context_class": row.context_class,
+        "context_refs": (*row.refs, *row.artifact_refs, *extra_refs),
+        "expertise": row.expertise,
+    }
+
+
+async def _shadow(
+    economy: EconomyPlan,
+    challengers: tuple[str, ...],
+    calls_available: int,
+    artifacts: list[AgentArtifact],
+    primary: str | None,
+    capabilities_catalog: dict[str, Any],
+    adapter: ModelAdapter,
+    spec: Any,
+    run_id: str,
+    storage: RunStore,
+    policy: Any,
+    role_rows: dict[str, RoleContext],
+) -> ShadowDecision:
+    """Observational challenger run; never touches artifacts, gaps or status."""
+    known = tuple(name for name in challengers if name in capabilities_catalog)
+    decision = decide_shadow(run_id, economy.envelope.shadow_share, known, calls_available)
+    if decision.challenger is None or not decision.sampled or calls_available < 1:
+        return decision
+    name = decision.challenger
+    invocation = AgentInvocation(
+        invocation_id=stable_id("inv", {"run": run_id, "shadow": name}),
+        run_id=run_id,
+        agent=capabilities_catalog[name].agent,
+        capability=name,
+        adapter=adapter.name,
+        input_refs=spec.inputs,
+    )
+
+    async def worker(item: AgentInvocation) -> object:
+        return await adapter.invoke(
+            AgentRequest(
+                invocation_id=item.invocation_id,
+                agent=item.agent,
+                capability=item.capability,
+                prompt=f"Shadow challenger for capability {item.capability}",
+                input_refs=item.input_refs,
+                output_contract="AgentArtifact/v1",
+                **_role_fields(role_rows.get(primary or "")),
+            )
+        )
+
+    results = await run_bounded(
+        (invocation,),
+        worker,
+        limit=1,
+        timeout_seconds=policy.timeout_seconds,
+        max_calls=1,
+        max_retries=0,
+    )
+    result = results[0] if results else None
+    if result is None or result.error is not None or result.response is None:
+        return decision.model_copy(
+            update={"calls": len(results), "reason": "shadow challenger failed; ignored"}
+        )
+    payload = _json_payload(result.response)
+    champion = next((item for item in artifacts if item.capability == primary), None)
+    agreement = (
+        str(payload.get("recommendation", "")) == _recommendation(champion)
+        if champion is not None
+        else None
+    )
+    storage.json(
+        f"shadow-{name}.json",
+        {"capability": name, "payload": payload, "agreement": agreement, "primary": primary},
+    )
+    return decision.model_copy(update={"executed": True, "calls": 1, "agreement": agreement})
 
 
 async def execute_run(
@@ -574,6 +663,7 @@ async def execute_run(
     if routing.shadow_evaluation is not None:
         storage.save_shadow_evaluation(routing.shadow_evaluation)
     routing_plan = build_routing_plan(routing, capabilities_catalog, policy=routing_policy)
+    planned_challengers = routing_plan.challenger_order
     economy_plan: EconomyPlan | None = None
     if economy_config is not None:
         economy_plan = build_economy_plan(
@@ -712,6 +802,19 @@ async def execute_run(
         run_id=run_id,
     )
     control_steps = {step.name: step for step in control_run.steps}
+    role_rows: dict[str, RoleContext] = {}
+    role_plan: RoleContextPlan | None = None
+    if economy_plan is not None:
+        role_plan = plan_roles(
+            root,
+            spec,
+            tuple((item.name, item.kind) for item in capabilities),
+            context_bytes=economy_plan.envelope.context_bytes,
+            run_id=run_id,
+        )
+        role_rows = {row.capability: row for row in role_plan.roles}
+        storage.json("role-context.json", role_plan.model_dump(mode="json"))
+        record_roles(root, role_plan)
     invocation_ids = tuple(
         stable_id("inv", {"run": run_id, "capability": item.name}) for item in initial_capabilities
     )
@@ -751,6 +854,7 @@ async def execute_run(
             prompt=f"Review API evolution for capability {invocation.capability}",
             input_refs=invocation.input_refs,
             output_contract="AgentArtifact/v1",
+            **_role_fields(role_rows.get(invocation.capability)),
         )
         return await adapter.invoke(request)
 
@@ -989,6 +1093,7 @@ async def execute_run(
             run_id,
             storage,
             policy,
+            role_rows,
         )
         ladder.extend(escalated.steps)
         economy_gaps.extend(escalated.gaps)
@@ -1041,6 +1146,22 @@ async def execute_run(
     )
     if economy_plan is not None and needs_gate:
         ladder.append(LadderStep(level="L5", action="human gate", trigger=",".join(gate_reasons)))
+    shadow_decision: ShadowDecision | None = None
+    if economy_plan is not None:
+        shadow_decision = await _shadow(
+            economy_plan,
+            planned_challengers,
+            policy.max_calls - control.get(control_run.run_id).calls_used - reserve,
+            artifacts,
+            routing_plan.primary,
+            capabilities_catalog,
+            adapter,
+            spec,
+            run_id,
+            storage,
+            policy,
+            role_rows,
+        )
     economy_block = (
         _economy_block(
             economy_plan,
@@ -1060,6 +1181,10 @@ async def execute_run(
         {
             "run_id": run_id,
             "economy": economy_block,
+            "role_context": role_summary(role_plan) if role_plan is not None else None,
+            "shadow": (
+                shadow_decision.model_dump(mode="json") if shadow_decision is not None else None
+            ),
             "critic_required": critic_required,
             "critic_findings": critic,
             "debate_reasons": reasons,
@@ -1095,6 +1220,8 @@ async def execute_run(
             ),
         },
         "economy": economy_block,
+        "role_context": role_summary(role_plan) if role_plan is not None else None,
+        "shadow": shadow_decision.model_dump(mode="json") if shadow_decision is not None else None,
         "status": final_status,
         "run_dir": str(storage.directory),
     }

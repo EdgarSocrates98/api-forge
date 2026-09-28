@@ -400,6 +400,10 @@ while refusal codes and `fact_id`s survive.
 | `apiforge context delta --base A [--head B] \| --changed F [--invalidate]` | `DeltaSlice/v1`: changed files → graph nodes → impacted operations → capsule targets; read-only git |
 | `apiforge cache stats\|invalidate`, `apiforge context gc [--apply]` | Layered advisory cache: freshness per layer, dependency-aware invalidation, report-first gc |
 | `apiforge evals cache` | 10-case benchmark: warm hit rate 1.0, byte-identical vs `--no-cache`, zero stale reuse, invalidation precision/recall 1.0 |
+| `apiforge knowledge select --intent "..." [--capability C] [--framework F]` | `ExpertiseSelection/v1`: only packs named by a trigger; no trigger loads nothing |
+| `apiforge debate submit ... [--disagree point=reason] [--risk R] [--confidence X]`, `apiforge debate packet` | `PositionDelta/v1` submissions and a `RefereePacket/v1` over one shared capsule |
+| `apiforge agents audit` | `AgentUniqueness/v1` per agent: unique capability/expertise/validator/tool/decision role, `keep` or `merge-candidate` (report only) |
+| `apiforge evals selective-agentics` | 13 cases: exact pack selection, per-role bytes ≤ 60% of naive, referee packet ≤ 50%, shadow share ±2 pp, deterministic audit |
 | `apiforge-mcp` | MCP server for the read/compose verbs (needs `pip install apiforge[mcp]`; every tool takes `detail_level`) |
 | `apiforge collect lambda --function-name X --out dump/` | Fetch Lambda config into a dump (Code.Location never persisted) |
 | `apiforge collect sqs\|sns\|eventbridge\|iam-role\|cognito\|waf ... --out dump/` | Messaging/identity collectors — same offline-dump contract |

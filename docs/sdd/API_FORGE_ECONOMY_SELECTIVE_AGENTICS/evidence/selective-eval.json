@@ -1,0 +1,220 @@
+{
+  "agent_audit": {
+    "agents": 52,
+    "keep": 8,
+    "merge_candidates": 44
+  },
+  "cases": 13,
+  "gates": {
+    "agent_audit_deterministic": true,
+    "expertise_exact": true,
+    "no_trigger_loads_nothing": true,
+    "referee_packet": true,
+    "role_context": true,
+    "shadow_share": true
+  },
+  "passed": true,
+  "rows": [
+    {
+      "case_id": "debate-nullable",
+      "disagreements": [
+        "sdk impact"
+      ],
+      "evidence_preserved": true,
+      "kind": "debate",
+      "naive_bytes": 25320,
+      "packet_bytes": 8845,
+      "passed": true,
+      "ratio": 0.3493
+    },
+    {
+      "case_id": "debate-retry-semantics",
+      "disagreements": [
+        "backoff",
+        "retry semantics"
+      ],
+      "evidence_preserved": true,
+      "kind": "debate",
+      "naive_bytes": 38340,
+      "packet_bytes": 12915,
+      "passed": true,
+      "ratio": 0.3369
+    },
+    {
+      "case_id": "expertise-capability-framework",
+      "catalog_bytes": 218215,
+      "expected": [
+        "fastapi",
+        "openapi-31",
+        "pagination"
+      ],
+      "kind": "expertise",
+      "loaded_bytes": 10595,
+      "passed": true,
+      "selected": [
+        "fastapi",
+        "openapi-31",
+        "pagination"
+      ]
+    },
+    {
+      "case_id": "expertise-dynamodb",
+      "catalog_bytes": 218215,
+      "expected": [
+        "dynamodb"
+      ],
+      "kind": "expertise",
+      "loaded_bytes": 6469,
+      "passed": true,
+      "selected": [
+        "dynamodb"
+      ]
+    },
+    {
+      "case_id": "expertise-idempotency",
+      "catalog_bytes": 218215,
+      "expected": [
+        "idempotency",
+        "resilience"
+      ],
+      "kind": "expertise",
+      "loaded_bytes": 14225,
+      "passed": true,
+      "selected": [
+        "idempotency",
+        "resilience"
+      ]
+    },
+    {
+      "case_id": "expertise-kafka",
+      "catalog_bytes": 218215,
+      "expected": [
+        "aws-messaging"
+      ],
+      "kind": "expertise",
+      "loaded_bytes": 6751,
+      "passed": true,
+      "selected": [
+        "aws-messaging"
+      ]
+    },
+    {
+      "case_id": "expertise-no-trigger",
+      "catalog_bytes": 218215,
+      "expected": [],
+      "kind": "expertise",
+      "loaded_bytes": 0,
+      "passed": true,
+      "selected": []
+    },
+    {
+      "case_id": "expertise-nullable",
+      "catalog_bytes": 218215,
+      "expected": [
+        "api-lifecycle",
+        "json-schema",
+        "openapi-31"
+      ],
+      "kind": "expertise",
+      "loaded_bytes": 15054,
+      "passed": true,
+      "selected": [
+        "api-lifecycle",
+        "json-schema",
+        "openapi-31"
+      ]
+    },
+    {
+      "case_id": "expertise-oauth-gateway",
+      "catalog_bytes": 218215,
+      "expected": [
+        "aws-api-gateway",
+        "oauth-oidc"
+      ],
+      "kind": "expertise",
+      "loaded_bytes": 12852,
+      "passed": true,
+      "selected": [
+        "aws-api-gateway",
+        "oauth-oidc"
+      ]
+    },
+    {
+      "case_id": "expertise-owasp",
+      "catalog_bytes": 218215,
+      "expected": [
+        "owasp-api-2023"
+      ],
+      "kind": "expertise",
+      "loaded_bytes": 9345,
+      "passed": true,
+      "selected": [
+        "owasp-api-2023"
+      ]
+    },
+    {
+      "bytes_by_role": {
+        "adversarial-critic": 633,
+        "api-contract-review": 3581,
+        "debate-referee": 0,
+        "task-review": 1737
+      },
+      "case_id": "roles-fastapi-create",
+      "kind": "roles",
+      "naive_bytes": 14324,
+      "passed": true,
+      "profile": "balanced",
+      "ratio": 0.4155,
+      "total_bytes": 5951,
+      "unresolved": []
+    },
+    {
+      "bytes_by_role": {
+        "adversarial-critic": 566,
+        "api-contract-review": 3203,
+        "debate-referee": 0,
+        "task-review": 1299
+      },
+      "case_id": "roles-fastapi-refund",
+      "kind": "roles",
+      "naive_bytes": 12812,
+      "passed": true,
+      "profile": "economy",
+      "ratio": 0.3956,
+      "total_bytes": 5068,
+      "unresolved": []
+    },
+    {
+      "bytes_by_role": {
+        "adversarial-critic": 633,
+        "api-contract-review": 3166,
+        "debate-referee": 0,
+        "task-review": 1737
+      },
+      "case_id": "roles-spring-create",
+      "kind": "roles",
+      "naive_bytes": 12664,
+      "passed": true,
+      "profile": "deep",
+      "ratio": 0.4371,
+      "total_bytes": 5536,
+      "unresolved": []
+    }
+  ],
+  "schema": "apiforge/selective-eval/v1",
+  "shadow": {
+    "balanced": {
+      "rate": 0.1012,
+      "share": 0.1
+    },
+    "deep": {
+      "rate": 0.2047,
+      "share": 0.2
+    },
+    "economy": {
+      "rate": 0.0494,
+      "share": 0.05
+    }
+  },
+  "tokens": "unresolved"
+}

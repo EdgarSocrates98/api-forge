@@ -1,0 +1,119 @@
+# Lazy expertise triggers (economy wave 4, prompt §26-27).
+# A pack is loaded only when a trigger names it. Keywords match at the start of
+# a word, case-insensitively ("deprecat" matches "deprecated"). No trigger means
+# no packs and an explicit `no-expertise-trigger` unresolved — never "load all".
+schema: apiforge/expertise-triggers/v1
+keywords:
+  - id: openapi-contract
+    match: [openapi, swagger, nullable, "required field", "$ref", "components/schemas", oas]
+    packs: [openapi-31, json-schema]
+  - id: json-schema
+    match: ["json schema", jsonschema, "oneof", "anyof", "allof", enum, "additionalproperties"]
+    packs: [json-schema]
+  - id: contract-lifecycle
+    match: [breaking, deprecat, "backward compat", "backwards compat", compatib, nullable, sunset, "remove field", "rename field"]
+    packs: [api-lifecycle]
+  - id: versioning
+    match: [versioning, "api version", "v2 ", "/v2", "major version"]
+    packs: [versioning]
+  - id: migration
+    match: ["rest to grpc", "rest → grpc", strangler, "framework upgrade", "spring boot 3", "migrate the api"]
+    packs: [migration]
+  - id: runtime-migration
+    match: ["runtime migration", "python 3.12", "java 21", "go 1.2", "runtime upgrade"]
+    packs: [runtime-migration]
+  - id: idempotency
+    match: [idempoten, "retry-safe", "duplicate payment", "idempotency-key"]
+    packs: [idempotency]
+  - id: pagination
+    match: [paginat, cursor, "next_cursor", "page size", "limit/offset"]
+    packs: [pagination]
+  - id: problem-details
+    match: ["problem details", "rfc 9457", "rfc 7807", "error response", "application/problem"]
+    packs: [problem-details]
+  - id: http-semantics
+    match: ["status code", "http method", "put vs patch", etag, "cache-control", "content negotiation", "http semantics"]
+    packs: [http-semantics]
+  - id: rest-design
+    match: ["resource naming", "rest design", "resource model", hateoas, "uri design"]
+    packs: [rest-design]
+  - id: api-dx
+    match: [sdk, "developer experience", onboarding, "code sample", "api docs"]
+    packs: [api-dx]
+  - id: contract-testing
+    match: ["contract test", pact, "consumer-driven", schemathesis, "fuzz"]
+    packs: [contract-testing]
+  - id: security
+    match: [owasp, bola, bfla, "broken object", injection, ssrf, "mass assignment", authoriz, "rate limit"]
+    packs: [owasp-api-2023]
+  - id: identity
+    match: [oauth, oidc, "openid", jwt, "access token", "bearer token", authenticat, scope]
+    packs: [oauth-oidc]
+  - id: aws-identity
+    match: [cognito, "iam role", "iam policy", "sigv4", "aws identity"]
+    packs: [aws-identity]
+  - id: data-protection
+    match: [pii, encrypt, kms, "data protection", "secrets manager", masking]
+    packs: [aws-data-protection]
+  - id: api-gateway
+    match: ["api gateway", "usage plan", "throttling", "custom domain", "apigateway"]
+    packs: [aws-api-gateway]
+  - id: lambda
+    match: [lambda, "cold start", serverless]
+    packs: [aws-lambda]
+  - id: sam
+    match: [" sam ", "sam template", "template.yaml", "aws::serverless"]
+    packs: [sam-api]
+  - id: terraform
+    match: [terraform, " hcl", "aws_api_gateway"]
+    packs: [terraform-api]
+  - id: messaging
+    match: [sqs, sns, eventbridge, kinesis, "dead letter", dlq, "message queue", kafka, msk]
+    packs: [aws-messaging]
+  - id: observability
+    match: [opentelemetry, otel, tracing, "structured log", "red metrics", "correlation id", observab]
+    packs: [observability]
+  - id: aws-observability
+    match: [cloudwatch, "x-ray", xray]
+    packs: [aws-observability]
+  - id: performance
+    match: [latency, throughput, " tps", " rps", "load test", "capacity", p99, benchmark]
+    packs: [performance-methodology]
+  - id: resilience
+    match: [timeout, "circuit breaker", backoff, bulkhead, resilien, "error budget", " slo"]
+    packs: [resilience]
+  - id: database-resilience
+    match: ["connection pool", "failover", "read replica", "database resilience"]
+    packs: [database-resilience]
+  - id: data-access
+    match: ["access pattern", "n+1", "orm", repository, "query plan", transaction]
+    packs: [data-access-patterns]
+  - id: datastores
+    match: [rds, aurora, "elasticache", "aws datastore"]
+    packs: [aws-datastores]
+  - id: dynamodb
+    match: [dynamodb, "partition key", "sort key", "gsi"]
+    packs: [dynamodb]
+  - id: mongodb
+    match: [mongodb, mongo]
+    packs: [mongodb]
+  - id: documentdb
+    match: [documentdb]
+    packs: [documentdb]
+  - id: neptune
+    match: [neptune, gremlin, sparql]
+    packs: [neptune]
+  - id: redis
+    match: [redis, valkey]
+    packs: [redis-valkey]
+frameworks:
+  fastapi: [fastapi]
+  spring: [spring-boot]
+  go: [go-net-http]
+  chi: [go-chi]
+capabilities:
+  api-contract-review: [openapi-31]
+  api-security-review: [owasp-api-2023]
+  api-performance-review: [performance-methodology]
+  api-data-review: [data-access-patterns]
+  api-architecture-review: [rest-design]

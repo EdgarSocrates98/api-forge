@@ -7,7 +7,12 @@ from pathlib import Path
 from typing import Literal
 
 from apiforge.contracts.base import ContractError
-from apiforge.contracts.workspace import RepositoryRef, WorkspaceManifest, WorkspaceStatus
+from apiforge.contracts.workspace import (
+    RepositoryRef,
+    WorkspaceGraph,
+    WorkspaceManifest,
+    WorkspaceStatus,
+)
 from apiforge.workspace.discovery import Discovery, discover
 from apiforge.workspace.graph import build_graph
 from apiforge.workspace.manifests import (
@@ -88,6 +93,49 @@ class WorkspaceService:
         updated = add_repository(manifest, repository)
         write_workspace_manifest(target, updated)
         return updated
+
+    def graph(
+        self,
+        *,
+        infer: bool = False,
+        run_id: str | None = None,
+        workspace_root: Path | None = None,
+    ) -> WorkspaceGraph:
+        found = self.discovery(workspace_root=workspace_root)
+        if found.workspace_manifest is None:
+            raise ContractError("AF-ROOT-NOT-FOUND", "workspace manifest was not discovered")
+        manifest = load_workspace_manifest(found.workspace_manifest)
+        if not infer:
+            return build_graph(manifest)
+        from apiforge.workspace.inference import infer_relations
+
+        result = infer_relations(manifest)
+        gaps = list(result.unresolved)
+        gaps.extend(self._attribute_inference(run_id, len(result.relations)))
+        return build_graph(
+            manifest, inferred=result.relations, inferred_unresolved=tuple(sorted(set(gaps)))
+        )
+
+    def _attribute_inference(self, run_id: str | None, edges: int) -> list[str]:
+        if not run_id:
+            return [
+                (
+                    "AF-WORKSPACE-INFER-UNATTRIBUTED: inference ran without --run-id; "
+                    "field records cannot see it"
+                )
+            ]
+        from apiforge.contracts.economy import CostVector, RunLedgerEntry
+        from apiforge.economy.run_ledger import PERSIST_FAILURE, append
+
+        entry = RunLedgerEntry(
+            run_id=run_id,
+            verb="workspace.infer",
+            source="graph",
+            cost=CostVector(expansions=edges),
+        )
+        if append(self.root, entry, auditable=True):
+            return []
+        return [f"{PERSIST_FAILURE}: workspace.infer row for {run_id} was not persisted"]
 
 
 __all__ = ["WorkspaceService"]

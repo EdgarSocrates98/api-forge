@@ -19,6 +19,8 @@ reasoning and must keep complete artifacts available when using compact output.
 - OTel, Datadog and Dynatrace: `.claude/skills/api-forge-observability`
 - context, TokenSave and Graphify: `.claude/skills/api-forge-context`
 - SDD and release gates: `.claude/skills/api-forge-sdd`
+- field validation / dogfooding and roadmap evidence: `apiforge field` +
+  `docs/field/README.md` via `.claude/skills/api-forge-sdd`
 - API/Git/CI change governance: `apiforge change-control` with the
   `af-change-bundle/1` replay contract; use `docs/architecture/API_FORGE_API_GIT_CICD_CONTROL_PLANE.md`
   and `docs/security/api-git-cicd-control-plane.md` for the boundary.

@@ -205,6 +205,112 @@ def workspace_status(root: str = ".", detail_level: str = "normal") -> dict[str,
     return cast(dict[str, Any], _call("workspace_status", lambda: status(Path(root)), detail_level))
 
 
+def workspace_graph(
+    root: str = ".",
+    infer: bool = False,
+    run_id: str | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Workspace graph; static inferred cross-repo relations only when infer=true (audited)."""
+    from apiforge.application.workspace import graph
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "workspace_graph",
+            lambda: graph(Path(root), infer=infer, run_id=run_id),
+            detail_level,
+        ),
+    )
+
+
+def field_record(
+    task: str,
+    runs: list[str],
+    started: str,
+    ended: str,
+    phase: str = "baseline",
+    root: str = ".",
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Join ledger/summary/checkpoint of linked runs into a pre-registered field-run record."""
+    from apiforge.field.annotate import PHASES, _enum
+    from apiforge.field.record import record
+
+    def work() -> Any:
+        checked = _enum(phase, PHASES, "phase")
+        return record(
+            Path(root),
+            task_id=task,
+            run_ids=tuple(runs),
+            phase=checked,  # type: ignore[arg-type]
+            started_at=started,
+            ended_at=ended,
+        )
+
+    return cast(dict[str, Any], _call("field_record", work, detail_level))
+
+
+def field_annotate(
+    task: str,
+    phase: str = "baseline",
+    task_completed: bool | None = None,
+    exit_reason: str | None = None,
+    manual_context_required: bool | None = None,
+    human_intervention: bool | None = None,
+    false_positives: int | None = None,
+    false_negatives: int | None = None,
+    root: str = ".",
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Record human field-run labels; closed enums, refusals carry code/field/unlock."""
+    from apiforge.field.annotate import annotate
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "field_annotate",
+            lambda: annotate(
+                Path(root),
+                task_id=task,
+                phase=phase,
+                task_completed=task_completed,
+                exit_reason=exit_reason,
+                manual_context_required=manual_context_required,
+                human_intervention=human_intervention,
+                false_positives=false_positives,
+                false_negatives=false_negatives,
+            ),
+            detail_level,
+        ),
+    )
+
+
+def field_verify(
+    task: str, verdict: str, phase: str = "baseline", root: str = ".", detail_level: str = "normal"
+) -> dict[str, Any]:
+    """Blind verifier verdict (agree|disagree|unresolved); never echoes human labels."""
+    from apiforge.field.annotate import verify
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "field_verify",
+            lambda: verify(Path(root), task_id=task, phase=phase, verdict=verdict),
+            detail_level,
+        ),
+    )
+
+
+def field_report(root: str = ".", ab: bool = False, detail_level: str = "normal") -> dict[str, Any]:
+    """Gap report: Wilson 95% CI, theme qualification, H1 verdict, optional A/B deltas."""
+    from apiforge.field.report import build_report
+
+    return cast(
+        dict[str, Any], _call("field_report", lambda: build_report(Path(root), ab=ab), detail_level)
+    )
+
+
 def workspace_add(repository: str, root: str = ".", detail_level: str = "normal") -> dict[str, Any]:
     from apiforge.application.workspace import add
 
@@ -1953,6 +2059,11 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     workspace_discover,
     workspace_status,
     workspace_add,
+    workspace_graph,
+    field_record,
+    field_annotate,
+    field_verify,
+    field_report,
     context_resolve,
     change_control_run,
     change_control_collect,

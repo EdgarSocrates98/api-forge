@@ -23,4 +23,8 @@ def status(root: Path | None = None) -> object:
     return WorkspaceService(root).status()
 
 
-__all__ = ["add", "discover", "initialize", "status"]
+def graph(root: Path | None = None, *, infer: bool = False, run_id: str | None = None) -> object:
+    return WorkspaceService(root).graph(infer=infer, run_id=run_id)
+
+
+__all__ = ["add", "discover", "graph", "initialize", "status"]

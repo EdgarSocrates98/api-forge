@@ -268,6 +268,7 @@ from apiforge.cli_context import register as _register_context
 from apiforge.cli_distribution import register as _register_distribution
 from apiforge.cli_economy import register as _register_economy
 from apiforge.cli_extras import register as _register_extras
+from apiforge.cli_field import register as _register_field
 from apiforge.cli_resume import register as _register_resume
 from apiforge.cli_selective import register as _register_selective
 from apiforge.cli_tool_host import register as _register_tool_host
@@ -278,6 +279,7 @@ from apiforge.cli_workspace import workspace_app as _workspace_app
 app.add_typer(tui_app, name="tui")
 _register_distribution(app)
 _register_workspace(app)
+_register_field(app)
 _register_context(context_app)
 _register_cache(app)
 _register_selective(knowledge_app, debate_app, agents_app)

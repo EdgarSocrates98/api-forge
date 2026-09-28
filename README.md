@@ -521,6 +521,15 @@ budgets and resume checkpoints. See the
 [economy guide](docs/guides/API_FORGE_ECONOMY.en.md); safety and evidence
 never enter the budget.
 
+Two hardening rounds followed an external review: every case, fact, graph
+and caller-supplied path is confined to the project and declared workspace
+repositories; context, call and token budgets are contract invariants
+(class pools, one ControlPlane counter including shadow challengers, token
+coverage over model-facing rows); L0 early stop needs re-hashed proof
+receipts; and the certification evals fail on the bugs they certify
+against (`evals economy-hardening` runs production code, `evals
+agentic-quality` enforces an absolute floor plus baseline non-regression).
+
 Each phase has an artifact chain under `docs/sdd/`, focused tests and a
 rollback decision. External AWS, datastore, vendor and host mutations remain
 adapter-owned and approval-gated.

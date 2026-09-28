@@ -58,6 +58,9 @@ Use native project capabilities:
   `verify plan` then `verify escalate`, `runtime checkpoint` on resume
   (see `docs/guides/API_FORGE_ECONOMY.en.md`); safety and evidence never
   enter the budget;
+- economy certification: `evals economy-hardening` and `evals agentic-quality`
+  (absolute floor + baseline); paths from cases or callers outside the project
+  are `AF-PATH-OUTSIDE-ROOT` and are never read;
 - `apiforge graph` for provenance and impact;
 - `apiforge task`, `runtime`, `sandbox`, `evidence` and `brief` for governed work.
 

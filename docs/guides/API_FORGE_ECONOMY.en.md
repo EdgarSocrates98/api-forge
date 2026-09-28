@@ -2,7 +2,9 @@
 
 [Português](API_FORGE_ECONOMY.md) · [Code catalog](../catalog-contract.md) · [Platform usage](API_FORGE_PLATFORM_USAGE.en.md)
 
-The economy program (`prompt_evo_economy.md`, waves 0–8) cuts context, calls,
+The economy program (`prompt_evo_economy.md`, waves 0–8, then two hardening
+rounds from `prompt_evo_new_economy_arch.md` and `prompt_evo_new_economy.md`)
+cuts context, calls,
 tools and verification down to the smallest sufficient amount **without
 economizing on safety or evidence**. Everything is deterministic, offline and
 read-only; no verb calls a provider, executes tests or mutates infrastructure.

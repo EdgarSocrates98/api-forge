@@ -44,7 +44,9 @@ Economy (`docs/guides/API_FORGE_ECONOMY.md`): prefer `context capsule`, run
 `evidence gate` before AWS/Datadog/CloudWatch/GitHub, `verify plan` then
 `verify escalate` instead of full suites, and read `runtime checkpoint` before
 resuming. Budgets never cut contract, verify, secure, provenance or
-`unresolved` reporting.
+`unresolved` reporting. Before shipping an economy change, run
+`apiforge evals economy-hardening` and `apiforge evals agentic-quality
+--baseline <previous report>`.
 
 Claude may open a debate room only on risk, divergence, missing proof or human
 request. Every position must cite evidence. The final recommendation must name

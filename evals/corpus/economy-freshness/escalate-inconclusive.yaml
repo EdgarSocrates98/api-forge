@@ -1,0 +1,6 @@
+id: escalate-inconclusive
+kind: escalate
+static: likely
+test: inconclusive
+expect_action: escalate
+expect_next: live_read_only

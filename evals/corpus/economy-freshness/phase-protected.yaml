@@ -1,0 +1,7 @@
+id: phase-protected
+kind: phase
+profile: economy
+usage:
+  verify: {calls: 9, context_bytes: 1000}
+expect_status: ok
+expect_phase: {verify: protected_overrun}

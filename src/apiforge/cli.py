@@ -268,6 +268,7 @@ from apiforge.cli_context import register as _register_context
 from apiforge.cli_distribution import register as _register_distribution
 from apiforge.cli_economy import register as _register_economy
 from apiforge.cli_extras import register as _register_extras
+from apiforge.cli_resume import register as _register_resume
 from apiforge.cli_selective import register as _register_selective
 from apiforge.cli_tool_host import register as _register_tool_host
 from apiforge.cli_tui import tui_app
@@ -281,13 +282,20 @@ _register_context(context_app)
 _register_cache(app)
 _register_selective(knowledge_app, debate_app, agents_app)
 _register_tool_host(app, agentops_app)
-_register_extras(
+_verify_app = _register_extras(
     app,
     knowledge_app=knowledge_app,
     evidence_app=evidence_app,
     economy_app=economy_app,
     agentops_app=agentops_app,
     workspace_app=_workspace_app,
+)
+_register_resume(
+    knowledge_app=knowledge_app,
+    evidence_app=evidence_app,
+    verify_app=_verify_app,
+    economy_app=economy_app,
+    runtime_app=runtime_app,
 )
 _register_economy(economy_app)
 
@@ -3785,6 +3793,20 @@ def evals_economy_extras(
     from apiforge.evals.extras import run_extras
 
     result = _run(lambda: run_extras(corpus, repo_root))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("economy-freshness")
+def evals_economy_freshness(
+    corpus: Path = typer.Option(Path("evals/corpus/economy-freshness"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Freshness watch, live gating, escalation, phase budget and resume pinning gates."""
+    from apiforge.evals.freshness_resume import run_freshness_resume
+
+    result = _run(lambda: run_freshness_resume(corpus))
     _echo_json(result, detail_level)
     if isinstance(result, dict) and not result.get("passed"):
         raise typer.Exit(code=1)

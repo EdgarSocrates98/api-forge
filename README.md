@@ -421,6 +421,12 @@ while refusal codes and `fact_id`s survive.
 | `apiforge agentops prompt --capability C` | `PromptEnvelope/v1`: stable hashed prefix + run suffix |
 | `apiforge workspace locality --target <repo> [--transitive]` | `LocalityPlan/v1`: target, direct neighbors, transitive deferred |
 | `apiforge evals economy-extras` | 15 cases across the seven wave-7 verbs |
+| `apiforge knowledge watch --manifest upstream.json --now T` | `FreshnessWatch/v1`: packs whose upstream fingerprint, version, expiry or window says `refresh_needed`; never fetches |
+| `apiforge evidence gate --question Q [--offline]` | `LiveEvidenceDecision/v1`: static questions stay local; `live_read_only` only for runtime questions; `live_mutation` refused |
+| `apiforge verify escalate --static S --test T` (or `--test-slice`) | `VerificationEscalation/v1`: static → test → stop; read-only runtime only after an inconclusive test |
+| `apiforge economy phase-budget --profile P [--usage U]` | `PhaseBudgetPlan/v1`: envelope split across SDD phases; contract/verify/secure protected |
+| `apiforge runtime checkpoint <task> <run>` | `EconomyCheckpoint/v1`: spend a resume continues; resume never lowers the profile |
+| `apiforge evals economy-freshness` | 16 cases across the five wave-8 verbs |
 | `apiforge-mcp` | MCP server for the read/compose verbs (needs `pip install apiforge[mcp]`; every tool takes `detail_level`) |
 | `apiforge collect lambda --function-name X --out dump/` | Fetch Lambda config into a dump (Code.Location never persisted) |
 | `apiforge collect sqs\|sns\|eventbridge\|iam-role\|cognito\|waf ... --out dump/` | Messaging/identity collectors — same offline-dump contract |

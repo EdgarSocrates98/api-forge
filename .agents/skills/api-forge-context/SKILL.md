@@ -74,6 +74,10 @@ apiforge context gc [--apply]
 - Conhecimento: `apiforge knowledge search --query "..."` devolve 3 trechos ranqueados; peça `--tier 2` só se não bastar.
 - Evidência: `apiforge evidence resolve evidence://finding/<id>` traz um salto por vez; siga os `neighbors` sob demanda.
 - `apiforge economy doctor` aponta configurações que encarecem runs; `apiforge economy tier` só barateia modelo com benchmark.
+- Antes de consultar AWS/Datadog/CloudWatch/GitHub: `apiforge evidence gate --question "..."`; pergunta estática fica no OpenAPI/código local, só pergunta de efeito em runtime ganha `live_read_only` (nunca mutação).
+- Teste inconclusivo? `apiforge verify escalate --static likely --test inconclusive` diz o próximo passo; teste conclusivo encerra.
+- Knowledge vencido: `apiforge knowledge watch --manifest <upstream.json> --now <iso>` lista só os packs `refresh_needed`; o refresh é outro workflow.
+- Ao retomar: `apiforge runtime checkpoint <task> <run>` mostra o gasto já feito; o resume nunca baixa o perfil. Orçamento por fase SDD: `apiforge economy phase-budget --profile <p>`.
 
 ## Mudar política econômica
 

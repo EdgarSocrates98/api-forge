@@ -534,6 +534,31 @@ carry `payload_bytes: 0` so `economy report` totals are unchanged.
 | `AF-EVALS-ECONOMY-BASELINE-MISSING` | corpus case has no recorded baseline; unlock: `apiforge evals economy --record-baseline` |
 | `AF-EVALS-ECONOMY-BASELINE-STALE` | fixture digest differs from the recorded baseline; unlock: re-record and commit the baseline |
 
+## Cache & delta (`cache stats|invalidate`, `context delta|gc`, `evals cache`)
+
+The cache is advisory (`rules/cache_policies.yaml`): layers `parse`, `graph`,
+`impact` and `capsule` are enforced; `knowledge`, `routing` and `validation`
+are declared and disabled until a caller exists; `model_response` is disabled.
+L4 caches the capsule's evidence *selection*, never the envelope, so output is
+byte-identical with `--no-cache`. Entries carry dependency probes (file, line
+span or JSON-pointer hashes, graph neighborhood hash, model-definition and
+test-mention symbols) plus a TTL; a changed dependency always invalidates,
+an expired entry is recomputed (`on_stale: recompute`) or reused with a
+warning (`on_stale: warn`). Corrupt entries or tampered objects are misses,
+never errors. The shared tier (`APIFORGE_CACHE_HOME` / `--cache-home`) is
+opt-in and re-hashed on every read. `context delta` reads git with argument
+arrays only (`diff --name-status`, `show`) and never mutates.
+
+| Code | Meaning |
+|---|---|
+| `AF-CACHE-LAYER-UNKNOWN` | `--layer` is not one of the eight declared layers; unlock: pass a declared layer |
+| `AF-CACHE-LAYER-DISABLED` | the layer is declared but disabled (e.g. `model_response`); unlock: use an enabled layer |
+| `AF-CACHE-POLICY-INVALID` | `rules/cache_policies.yaml` does not match `apiforge/cache-policies/v1`; unlock: restore the shipped schema |
+| `AF-DELTA-INPUT-MISSING` | `context delta`/`cache invalidate` got neither `--base` nor `--changed`; unlock: pass one |
+| `AF-DELTA-GIT-UNAVAILABLE` | git cannot run or the root is not a work tree; unlock: pass `--changed <file>` instead |
+| `AF-DELTA-REF-INVALID` | `git diff` refused `--base`/`--head`; unlock: pass refs that exist (`git rev-parse <ref>`) |
+| `AF-EVALS-INVALID` | an eval corpus is empty, has duplicate ids or a mutation that does not apply; unlock: fix the corpus yaml |
+
 ## Economic routing (`runtime run|resume|debate --profile`, `sdd classify`, `evals economy-routing`)
 
 Profiles `economy`/`balanced`/`deep` (`rules/economy_profiles.yaml`) resolve

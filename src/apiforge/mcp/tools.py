@@ -606,6 +606,8 @@ def context_capsule(
     level: str = "L3",
     impact: str = "transitive",
     run_id: str | None = None,
+    no_cache: bool = False,
+    cache_home: str | None = None,
     detail_level: str = "normal",
 ) -> dict[str, Any]:
     """Minimal sufficient evidence for one operation as ctx:// refs under a byte budget."""
@@ -622,6 +624,101 @@ def context_capsule(
             impact=impact,
             run_id=run_id,
             verb="mcp:context_capsule",
+            cache=False if no_cache else None,
+            cache_home=Path(cache_home) if cache_home else None,
+        ),
+        detail_level,
+    )
+    return out
+
+
+def context_delta(
+    base: str | None = None,
+    head: str | None = None,
+    changed: list[str] | None = None,
+    root: str = ".",
+    case_dir: str | None = None,
+    invalidate: bool = False,
+    cache_home: str | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """What changed (read-only git or explicit list), impacted operations and capsule targets."""
+    from apiforge.application.cache import context_delta as _delta
+
+    out: dict[str, Any] = _call(
+        "context_delta",
+        lambda: _delta(
+            Path(root),
+            changed=tuple(changed or ()),
+            base=base,
+            head=head,
+            case_dir=Path(case_dir) if case_dir else None,
+            invalidate=invalidate,
+            cache_home=Path(cache_home) if cache_home else None,
+        ),
+        detail_level,
+    )
+    return out
+
+
+def context_gc(
+    root: str = ".",
+    apply: bool = False,
+    cache_home: str | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Report (or delete with apply) expired cache entries and orphan objects."""
+    from apiforge.application.cache import context_gc as _gc
+
+    out: dict[str, Any] = _call(
+        "context_gc",
+        lambda: _gc(Path(root), apply=apply, cache_home=Path(cache_home) if cache_home else None),
+        detail_level,
+    )
+    return out
+
+
+def cache_stats(
+    root: str = ".",
+    cache_home: str | None = None,
+    layer: str | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Cache entries/bytes/expired per layer and tier, plus layer policies."""
+    from apiforge.application.cache import cache_lookup_layer
+    from apiforge.application.cache import cache_stats as _stats
+
+    if layer is not None:
+        return dict(_call("cache_stats", lambda: cache_lookup_layer(layer), detail_level))
+    out: dict[str, Any] = _call(
+        "cache_stats",
+        lambda: _stats(Path(root), cache_home=Path(cache_home) if cache_home else None),
+        detail_level,
+    )
+    return out
+
+
+def cache_invalidate(
+    changed: list[str] | None = None,
+    base: str | None = None,
+    head: str | None = None,
+    root: str = ".",
+    case_dir: str | None = None,
+    cache_home: str | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Drop only capsule selections whose dependencies intersect the change set."""
+    from apiforge.application.cache import cache_invalidate as _invalidate
+
+    out: dict[str, Any] = _call(
+        "cache_invalidate",
+        lambda: _invalidate(
+            Path(root),
+            changed=tuple(changed or ()),
+            base=base,
+            head=head,
+            case_dir=Path(case_dir) if case_dir else None,
+            cache_home=Path(cache_home) if cache_home else None,
         ),
         detail_level,
     )
@@ -1551,6 +1648,10 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     context_funnel,
     context_capsule,
     context_expand,
+    context_delta,
+    context_gc,
+    cache_stats,
+    cache_invalidate,
     graph_query,
     graph_impact,
     graph_trace,

@@ -397,6 +397,9 @@ while refusal codes and `fact_id`s survive.
 | `apiforge runtime run\|resume\|debate <task> --profile economy\|balanced\|deep` | Economy Plane: profile preference with risk floor, trimmed optional roles, call cap + verification reserve, L0–L5 ladder; `economy` block in the result |
 | `apiforge sdd classify --description … --path … [--baseline … --candidate …] [--write <feature>]` | Deterministic change risk (micro/low/medium/high) → minimum SDD profile; `sdd check` refuses profiles below it |
 | `apiforge evals economy-routing` | 15-case benchmark: role invariant, effective profile, critical ⇒ deep, economy cheaper for low risk |
+| `apiforge context delta --base A [--head B] \| --changed F [--invalidate]` | `DeltaSlice/v1`: changed files → graph nodes → impacted operations → capsule targets; read-only git |
+| `apiforge cache stats\|invalidate`, `apiforge context gc [--apply]` | Layered advisory cache: freshness per layer, dependency-aware invalidation, report-first gc |
+| `apiforge evals cache` | 10-case benchmark: warm hit rate 1.0, byte-identical vs `--no-cache`, zero stale reuse, invalidation precision/recall 1.0 |
 | `apiforge-mcp` | MCP server for the read/compose verbs (needs `pip install apiforge[mcp]`; every tool takes `detail_level`) |
 | `apiforge collect lambda --function-name X --out dump/` | Fetch Lambda config into a dump (Code.Location never persisted) |
 | `apiforge collect sqs\|sns\|eventbridge\|iam-role\|cognito\|waf ... --out dump/` | Messaging/identity collectors — same offline-dump contract |

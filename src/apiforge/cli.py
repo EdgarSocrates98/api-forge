@@ -263,6 +263,7 @@ platform_app = typer.Typer(
     no_args_is_help=True,
 )
 app.add_typer(platform_app)
+from apiforge.cli_cache import register as _register_cache
 from apiforge.cli_context import register as _register_context
 from apiforge.cli_distribution import register as _register_distribution
 from apiforge.cli_economy import register as _register_economy
@@ -273,6 +274,7 @@ app.add_typer(tui_app, name="tui")
 _register_distribution(app)
 _register_workspace(app)
 _register_context(context_app)
+_register_cache(app)
 _register_economy(economy_app)
 
 
@@ -3618,6 +3620,21 @@ def evals_economy_routing(
     from apiforge.evals.economy_routing import run_economy_routing
 
     result = _run(lambda: run_economy_routing(corpus))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("cache")
+def evals_cache(
+    corpus: Path = typer.Option(Path("evals/corpus/economy-cache"), "--corpus"),
+    repo_root: Path = typer.Option(Path("."), "--repo-root", help="Where fixture paths resolve."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Warm/mutate/rebuild: all-hit on unchanged, precise invalidation, zero stale reuse."""
+    from apiforge.evals.cache import run_cache_eval
+
+    result = _run(lambda: run_cache_eval(corpus, repo_root))
     _echo_json(result, detail_level)
     if isinstance(result, dict) and not result.get("passed"):
         raise typer.Exit(code=1)

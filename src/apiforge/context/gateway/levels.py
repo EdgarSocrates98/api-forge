@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ast
+import hashlib
 import json
 import re
 from collections.abc import Mapping
@@ -111,7 +112,13 @@ def fingerprint(case: Mapping[str, Any], root: Path | None = None) -> dict[str, 
 
 
 def select(
-    root: Path, case_dir: Path, case: Mapping[str, Any], target: str, mode: str
+    root: Path,
+    case_dir: Path,
+    case: Mapping[str, Any],
+    target: str,
+    mode: str,
+    *,
+    cache: Any = None,
 ) -> Selection:
     method, path = parse_target(target)
     selection = Selection(fingerprint=fingerprint(case, root))
@@ -119,7 +126,7 @@ def select(
     contract_path = root / str(inputs.get("contract", ""))
     project = root / str(inputs.get("project", ""))
     target_id = f"operation:{method} {path}"
-    nodes, edges = _graph(root, case_dir, case)
+    nodes, edges, key = load_graph(root, case_dir)
     if target_id not in {node.id for node in nodes}:
         raise GatewayError(
             "AF-CONTEXT-TARGET-NOT-FOUND",
@@ -134,17 +141,15 @@ def select(
     route_facts.extend(
         sorted(
             fact_id
-            for fact_id, fact in _route_facts(case, method, path).items()
+            for fact_id, fact in route_facts_for(case, method, path).items()
             if fact_id not in via_graph
         )
     )
     findings: set[str] = set()
     for fact_id in route_facts:
-        assessment = assess_graph_impact(nodes, edges, fact_id, mode=mode)
-        findings.update(
-            item.node_id for item in assessment.impacted_nodes if item.kind is NodeKind.FINDING
-        )
-        selection.unresolved.extend(assessment.unresolved)
+        impacted, unresolved = _impact(nodes, edges, fact_id, mode, cache, key)
+        findings.update(impacted)
+        selection.unresolved.extend(unresolved)
     selection.impact = {"direct": len(forward), "transitive": len(findings)}
     if not route_facts:
         selection.unresolved.append(f"code-route-missing:{method} {path}")
@@ -239,14 +244,70 @@ def select(
     return selection
 
 
-def _graph(root: Path, case_dir: Path, case: Mapping[str, Any]) -> tuple[list[Any], list[Any]]:
-    out_dir = root / ".apiforge" / "ctx" / "graph" / digest(str(case.get("case_id", "")))[:16]
+CRLF, LF = b"\r\n", b"\n"
+CASE_FILES = ("case.json", "api-ir.json", "facts.json", "findings.json")
+
+
+def graph_key(case_dir: Path) -> str:
+    """L2 key: digest of the case artifacts the graph is derived from (not the case id)."""
+    hasher = hashlib.sha256()
+    for name in CASE_FILES:
+        path = case_dir / name
+        hasher.update(name.encode("utf-8") + bytes(1))
+        if path.is_file():
+            hasher.update(path.read_bytes().replace(CRLF, LF))
+        hasher.update(bytes(1))
+    return hasher.hexdigest()
+
+
+def load_graph(root: Path, case_dir: Path) -> tuple[list[Any], list[Any], str]:
+    key = graph_key(case_dir)
+    out_dir = root / ".apiforge" / "ctx" / "graph" / key[:16]
     if not (out_dir / NODES_FILE).is_file():
         build_graph(case_dir, out_dir)
-    return read_graph(out_dir)
+    nodes, edges = read_graph(out_dir)
+    return nodes, edges, key
 
 
-def _route_facts(case: Mapping[str, Any], method: str, path: str) -> dict[str, Mapping[str, Any]]:
+def _graph(root: Path, case_dir: Path, case: Mapping[str, Any]) -> tuple[list[Any], list[Any]]:
+    nodes, edges, _ = load_graph(root, case_dir)
+    return nodes, edges
+
+
+def _impact(
+    nodes: list[Any],
+    edges: list[Any],
+    fact_id: str,
+    mode: str,
+    cache: Any,
+    key: str,
+) -> tuple[list[str], list[str]]:
+    """L3 impact memo: the graph is content-addressed, so (graph, fact, mode) is immutable."""
+    cache_key = hashlib.sha256(f"impact/1|{key}|{fact_id}|{mode}".encode()).hexdigest()
+    if cache is not None:
+        _, payload = cache.lookup("impact", cache_key)
+        if payload is not None:
+            body = json.loads(payload)
+            return list(body["findings"]), list(body["unresolved"])
+    assessment = assess_graph_impact(nodes, edges, fact_id, mode=mode)
+    findings = sorted(
+        item.node_id for item in assessment.impacted_nodes if item.kind is NodeKind.FINDING
+    )
+    unresolved = list(assessment.unresolved)
+    if cache is not None:
+        cache.put(
+            "impact",
+            cache_key,
+            json.dumps({"findings": findings, "unresolved": unresolved}, sort_keys=True),
+            subject=fact_id,
+            inputs_sha=key,
+        )
+    return findings, unresolved
+
+
+def route_facts_for(
+    case: Mapping[str, Any], method: str, path: str
+) -> dict[str, Mapping[str, Any]]:
     matched: dict[str, Mapping[str, Any]] = {}
     for fact in case["facts.json"].get("facts") or []:
         measures = fact.get("measures") or {}
@@ -433,4 +494,15 @@ def _read_json(path: Path) -> dict[str, Any]:
     return value if isinstance(value, dict) else {}
 
 
-__all__ = ["Candidate", "Selection", "fingerprint", "load_case", "parse_target", "select"]
+__all__ = [
+    "CASE_FILES",
+    "Candidate",
+    "Selection",
+    "fingerprint",
+    "graph_key",
+    "load_case",
+    "load_graph",
+    "parse_target",
+    "route_facts_for",
+    "select",
+]

@@ -3,12 +3,25 @@
 from __future__ import annotations
 
 import time
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
+from apiforge.cache.store import CacheStore
+from apiforge.context.gateway import selection_cache
 from apiforge.context.gateway.canonical import digest, dumps, uri_for
-from apiforge.context.gateway.levels import Candidate, Selection, load_case, parse_target, select
+from apiforge.context.gateway.levels import (
+    Candidate,
+    Selection,
+    fingerprint,
+    load_case,
+    load_graph,
+    parse_target,
+    route_facts_for,
+    select,
+)
 from apiforge.context.gateway.refs import CtxStore
+from apiforge.contracts.cache import CacheDecision
 from apiforge.contracts.context import (
     CapsuleBudget,
     CapsuleLevel,
@@ -48,6 +61,9 @@ def build_capsule(
     objective: str = "",
     run_id: str | None = None,
     verb: str = "context capsule",
+    cache: bool | None = None,
+    cache_home: Path | None = None,
+    on_decision: Callable[[CacheDecision], None] | None = None,
 ) -> ContextCapsule:
     started = time.perf_counter()
     root = Path(root).resolve()
@@ -61,7 +77,12 @@ def build_capsule(
     if case is None:
         capsule = _degraded(root, intent, scope, budget, case_path)
         return _finish(root, capsule, [], verb, run_id, started)
-    selection = select(root, case_path, case, target, impact)
+    selection, decision = _selected(
+        root, case_path, case, target, impact, CacheStore(root, home=cache_home, enabled=cache)
+    )
+    if on_decision is not None and decision is not None:
+        on_decision(decision)
+    selection_hits = int(decision is not None and decision.action in {"reuse", "reuse_warn"})
     store = CtxStore(root)
     base = ContextCapsule(
         capsule_id=uri_for(""),
@@ -96,7 +117,65 @@ def build_capsule(
             "status": "unresolved" if exhausted else "ready",
         }
     )
-    return _finish(root, capsule, refs, verb, run_id, started, cache_hits=hits)
+    return _finish(root, capsule, refs, verb, run_id, started, cache_hits=hits + selection_hits)
+
+
+def _selected(
+    root: Path,
+    case_path: Path,
+    case: dict[str, Any],
+    target: str,
+    impact: str,
+    store: CacheStore,
+) -> tuple[Selection, CacheDecision | None]:
+    """L4: reuse a fresh cached selection, else select and record its dependencies."""
+    if not store.enabled:
+        return select(root, case_path, case, target, impact), None
+    inputs = case.get("inputs") or {}
+    contract_rel = _rel(root / str(inputs.get("contract", "")), root)
+    project = root / str(inputs.get("project", ""))
+    key = selection_cache.selection_key(target, impact, contract_rel, _rel(project, root))
+    nodes, edges, graph = load_graph(root, case_path)
+    probe = selection_cache.RootProbe(root, project, store, nodes, edges)
+    decision, payload = store.lookup(selection_cache.LAYER, key, probe=probe)
+    if payload is not None:
+        restored = selection_cache.restore(payload, fingerprint(case, root))
+        if restored is not None:
+            return restored, decision
+        decision = decision.model_copy(
+            update={"state": "corrupt", "action": "recompute", "reason": "unrestorable payload"}
+        )
+    selection = select(root, case_path, case, target, impact, cache=store)
+    method, path = parse_target(target)
+    target_id = f"operation:{method} {path}"
+    facts = {
+        edge.to_id
+        for edge in edges
+        if edge.from_id == target_id and edge.kind.value == "implemented_by"
+    } | set(route_facts_for(case, method, path))
+    files, dep_nodes, symbols = selection_cache.dependencies(
+        root, selection, target_id, contract_rel, facts
+    )
+    store.put(
+        selection_cache.LAYER,
+        key,
+        selection_cache.serialize(selection),
+        subject=target,
+        inputs_sha=graph,
+        deps_files=files,
+        deps_nodes=dep_nodes,
+        neighborhood_sha=selection_cache.neighborhood(nodes, edges, dep_nodes),
+        symbols=symbols,
+        manifest=selection_cache.manifest_text(root, project),
+    )
+    return selection, decision
+
+
+def _rel(path: Path, root: Path) -> str:
+    try:
+        return path.resolve().relative_to(root).as_posix()
+    except ValueError:
+        return path.as_posix()
 
 
 def expand_ref(root: Path, uri: str, *, run_id: str | None = None) -> dict[str, Any]:

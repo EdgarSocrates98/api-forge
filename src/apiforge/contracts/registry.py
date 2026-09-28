@@ -18,6 +18,7 @@ from apiforge.contracts.agentic import (
     TrajectoryEvent,
 )
 from apiforge.contracts.base import ContractError
+from apiforge.contracts.cache import CacheDecision, CacheDep, CacheEntry, DeltaSlice
 from apiforge.contracts.context import (
     CapsuleBudget,
     CapsuleRefusal,
@@ -316,6 +317,10 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "EconomyPlan/v1": EconomyPlan,
     "LadderStep/v1": LadderStep,
     "RiskClassification/v1": RiskClassification,
+    "CacheDep/v1": CacheDep,
+    "CacheEntry/v1": CacheEntry,
+    "CacheDecision/v1": CacheDecision,
+    "DeltaSlice/v1": DeltaSlice,
 }
 
 

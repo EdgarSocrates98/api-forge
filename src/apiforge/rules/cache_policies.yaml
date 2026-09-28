@@ -1,0 +1,15 @@
+# Cache layer policies (economy wave 2). Cache is advisory: a miss, a corrupt
+# entry or a stale-critical decision always recomputes. `on_stale` decides what
+# happens after `ttl_seconds`: `warn` reuses with a warning (stale_harmless),
+# `recompute` never reuses (stale_critical). Dependency changes always
+# invalidate, regardless of TTL.
+schema: apiforge/cache-policies/v1
+layers:
+  parse:          {enabled: true,  ttl_seconds: 2592000, on_stale: recompute, shared: true}
+  graph:          {enabled: true,  ttl_seconds: 2592000, on_stale: recompute, shared: false}
+  impact:         {enabled: true,  ttl_seconds: 604800,  on_stale: recompute, shared: true}
+  capsule:        {enabled: true,  ttl_seconds: 604800,  on_stale: recompute, shared: true}
+  knowledge:      {enabled: false, ttl_seconds: 86400,   on_stale: warn,      shared: true}
+  routing:        {enabled: false, ttl_seconds: 86400,   on_stale: recompute, shared: false}
+  validation:     {enabled: false, ttl_seconds: 86400,   on_stale: warn,      shared: false}
+  model_response: {enabled: false, ttl_seconds: 0,       on_stale: recompute, shared: false}

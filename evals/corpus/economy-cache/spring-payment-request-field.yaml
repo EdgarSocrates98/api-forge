@@ -1,0 +1,11 @@
+id: spring-payment-request-field
+fixture: tests/fixtures/economy_payments/spring
+contract: tests/fixtures/economy_payments/openapi.yaml
+mutation:
+  file: proj/src/main/java/com/example/payments/PaymentRequest.java
+  replace:
+    old: "    private String idempotencyKey;"
+    new: "    private String idempotencyKey;\n    private String channel;"
+reanalyze: true
+expect_invalidated:
+  - POST /payments

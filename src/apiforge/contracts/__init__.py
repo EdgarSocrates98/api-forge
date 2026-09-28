@@ -7,6 +7,13 @@ from apiforge.contracts.adapter import (
     AdapterStatus,
     EvidenceLevel,
 )
+from apiforge.contracts.cache import (
+    CacheDecision,
+    CacheDep,
+    CacheEntry,
+    ChangedFile,
+    DeltaSlice,
+)
 from apiforge.contracts.compatibility import CompatibilityCell, CompatibilityMatrix, RuntimeReceipt
 from apiforge.contracts.context import (
     CapsuleBudget,
@@ -127,6 +134,11 @@ from apiforge.contracts.workspace import (
 )
 
 __all__ = [
+    "CacheDecision",
+    "CacheDep",
+    "CacheEntry",
+    "ChangedFile",
+    "DeltaSlice",
     "AdapterCapability",
     "AdapterExecution",
     "AdapterMode",

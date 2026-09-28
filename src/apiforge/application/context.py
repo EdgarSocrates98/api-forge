@@ -31,6 +31,8 @@ def build_context_capsule(
     objective: str = "",
     run_id: str | None = None,
     verb: str = "context capsule",
+    cache: bool | None = None,
+    cache_home: Path | None = None,
 ) -> dict[str, Any]:
     from apiforge.context.gateway.capsule import (
         DEFAULT_BUDGET_BYTES,
@@ -59,6 +61,8 @@ def build_context_capsule(
         objective=objective,
         run_id=run_id,
         verb=verb,
+        cache=cache,
+        cache_home=cache_home,
     )
     return emit(capsule)
 

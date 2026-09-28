@@ -40,6 +40,20 @@ apiforge economy explain <run_id>
 - `unresolved: code-route-missing:*` indica drift contrato↔código, não falha do gateway.
 - Tokens só existem com transcript (`economy stats --transcript`); bytes não são tokens.
 
+## Delta primeiro e cache
+
+Em PR ou mudança local, comece pelo delta, não pelo repositório:
+
+```text
+apiforge context delta --base <ref> [--head <ref>]   # ou --changed <arquivo> ... sem git
+apiforge cache stats | apiforge cache invalidate --changed <arquivo>
+apiforge context gc [--apply]
+```
+
+- `capsule_targets` do delta dizem quais `context capsule` montar; `unmapped:<path>` é explícito, não ignore.
+- O cache é consultivo: reuso só com dependências inalteradas (arquivo, span, ponteiro do contrato, vizinhança do grafo); a saída é idêntica a `--no-cache`.
+- `AF-DELTA-GIT-UNAVAILABLE` → use `--changed`; `AF-CACHE-LAYER-DISABLED` → a camada não tem chamador ainda.
+
 ## Graphify
 
 Relacione artefatos, operações, handlers, bancos, regras, findings, tasks, testes, traces, decisões e releases por edges de dependência, implementação, evidência, impacto, violação e verificação.

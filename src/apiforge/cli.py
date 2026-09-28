@@ -268,6 +268,7 @@ from apiforge.cli_context import register as _register_context
 from apiforge.cli_distribution import register as _register_distribution
 from apiforge.cli_economy import register as _register_economy
 from apiforge.cli_selective import register as _register_selective
+from apiforge.cli_tool_host import register as _register_tool_host
 from apiforge.cli_tui import tui_app
 from apiforge.cli_workspace import register as _register_workspace
 
@@ -277,7 +278,11 @@ _register_workspace(app)
 _register_context(context_app)
 _register_cache(app)
 _register_selective(knowledge_app, debate_app, agents_app)
+_register_tool_host(app, agentops_app)
 _register_economy(economy_app)
+
+
+_OUTPUT_MODE: dict[str, str | None] = {"mode": None}
 
 
 @app.callback()
@@ -288,11 +293,19 @@ def main(
         help="Show the API Forge version and exit.",
         is_eager=True,
     ),
+    output: str | None = typer.Option(
+        None,
+        "--output",
+        help="Payload projection: json (default) or compact (minified, null/empty pruned).",
+    ),
 ) -> None:
     """Analyze API evolution deterministically and offline."""
     if version:
         typer.echo(f"apiforge {__version__}")
         raise typer.Exit()
+    from apiforge.output.render import resolve_mode
+
+    _OUTPUT_MODE["mode"] = _run(lambda: resolve_mode(output))  # type: ignore[assignment]
 
 
 _DETAIL_HELP = "Payload level: summary|normal|full."
@@ -310,7 +323,9 @@ def _echo_json(value: object, detail_level: str = "normal") -> None:
     value = apply_detail_level(value, detail_level)
     # JSON must remain printable on Windows hosts whose stdout is cp1252;
     # Unicode content stays lossless through JSON escapes.
-    text = json.dumps(value, sort_keys=True, ensure_ascii=True, indent=2)
+    from apiforge.output.render import render, resolve_mode
+
+    text = render(value, _OUTPUT_MODE["mode"] or resolve_mode())
     from apiforge.economy.ledger import record
 
     ctx = get_current_context(silent=True)
@@ -3667,6 +3682,21 @@ def evals_selective(
     from apiforge.evals.selective import run_selective_eval
 
     result = _run(lambda: run_selective_eval(corpus, repo_root))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("tool-economy")
+def evals_tool_economy(
+    corpus: Path = typer.Option(Path("evals/corpus/tool-economy"), "--corpus"),
+    repo_root: Path = typer.Option(Path("."), "--repo-root", help="Where fixture paths resolve."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Compact output, gateway surface, discover/call reach and slicer recall gates."""
+    from apiforge.evals.tool_economy import run_tool_economy
+
+    result = _run(lambda: run_tool_economy(corpus, repo_root))
     _echo_json(result, detail_level)
     if isinstance(result, dict) and not result.get("passed"):
         raise typer.Exit(code=1)

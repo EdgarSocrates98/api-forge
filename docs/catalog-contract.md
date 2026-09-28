@@ -559,6 +559,28 @@ arrays only (`diff --name-status`, `show`) and never mutates.
 | `AF-DELTA-REF-INVALID` | `git diff` refused `--base`/`--head`; unlock: pass refs that exist (`git rev-parse <ref>`) |
 | `AF-EVALS-INVALID` | an eval corpus is empty, has duplicate ids or a mutation that does not apply; unlock: fix the corpus yaml |
 
+## Tool/host economy (`--output`, `slice tests`, `slice log`, `mcp surface`, `agentops projection`, `apiforge-mcp --surface/--host`, `evals tool-economy`)
+
+`--output compact` (or `APIFORGE_OUTPUT=compact`) minifies payloads and drops
+only null and empty values; `--output json` (default) is unchanged. Slicers
+store the whole log in the ctx CAS and return every failing test or distinct
+error signature with spans. `apiforge-mcp --surface compact` publishes six
+gateways (`apiforge_discover`, `apiforge_call`, `apiforge_context`,
+`apiforge_expand`, `apiforge_analyze`, `apiforge_evidence`); every full tool
+stays reachable through `apiforge_call`.
+
+| Code | Meaning |
+|---|---|
+| `AF-OUTPUT-MODE-INVALID` | `--output`/`APIFORGE_OUTPUT` is not `json` or `compact` |
+| `AF-SLICE-INPUT-NOT-FOUND` | the log passed to `slice tests`/`slice log` does not exist |
+| `AF-SLICE-INPUT-INVALID` | the log is over 25 MB, not valid JUnit XML, or `--format` is unknown |
+| `AF-SLICE-XML-REFUSED` | JUnit XML declares a DOCTYPE; entities are never expanded; unlock: export without a DOCTYPE |
+| `AF-MCP-TOOL-UNKNOWN` | `apiforge_call` got a tool name that is not registered; unlock: use `apiforge_discover` |
+| `AF-MCP-TOOL-ARGS` | `apiforge_call` arguments do not bind to the tool signature |
+| `AF-MCP-SURFACE-INVALID` | surface is not `full` or `compact` |
+| `AF-HOST-UNKNOWN` | host not declared in `rules/host_projections.yaml` |
+| `AF-HOST-PROJECTION-INVALID` | `rules/host_projections.yaml` is malformed |
+
 ## Selective agentics (`knowledge select`, `debate packet`, `agents audit`, `evals selective-agentics`)
 
 `knowledge select` loads only packs named by `rules/expertise_triggers.yaml`

@@ -61,6 +61,13 @@ apiforge context gc [--apply]
 - Em debate, submeta `--disagree point=reason`, `--risk`, `--confidence` e entregue ao referee `apiforge debate packet`, não as posições completas.
 - `apiforge agents audit` aponta agentes sem nada único; é evidência para decisão humana, não remoção automática.
 
+## Saída e ferramentas econômicas
+
+- Pergunta sobre artefato → verbo do Forge antes de ler arquivos (`apiforge agentops projection --host <host>` lista o `verb_map`).
+- Use `apiforge --output compact <verbo>` (ou `APIFORGE_OUTPUT=compact`): remove só null/vazio, sem perda.
+- Falha de teste ou CI: `apiforge slice tests --input <log>` / `apiforge slice log --input <log>`; expanda o `log_ref` só se precisar.
+- MCP compacto: `apiforge-mcp --surface compact` expõe 6 gateways; ache a ferramenta com `apiforge_discover` e execute com `apiforge_call`.
+
 ## Graphify
 
 Relacione artefatos, operações, handlers, bancos, regras, findings, tasks, testes, traces, decisões e releases por edges de dependência, implementação, evidência, impacto, violação e verificação.

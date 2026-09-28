@@ -774,6 +774,42 @@ def agents_audit(root: str = ".", detail_level: str = "normal") -> dict[str, Any
     return out
 
 
+def slice_tests(
+    input: str, format: str = "auto", root: str = ".", detail_level: str = "normal"
+) -> dict[str, Any]:
+    """Counts plus every failing test (file:line, assertion); full log behind log_ref."""
+    from apiforge.agentops.slicing import slice_tests as _slice
+
+    out: dict[str, Any] = _call(
+        "slice_tests", lambda: _slice(Path(root), Path(input), format), detail_level
+    )
+    return out
+
+
+def slice_log(input: str, root: str = ".", detail_level: str = "normal") -> dict[str, Any]:
+    """Deduplicated failure signatures, frames and context; full log behind log_ref."""
+    from apiforge.agentops.slicing import slice_log as _slice
+
+    out: dict[str, Any] = _call("slice_log", lambda: _slice(Path(root), Path(input)), detail_level)
+    return out
+
+
+def mcp_surface(surface: str = "full", detail_level: str = "normal") -> dict[str, Any]:
+    """Measured name/description/schema bytes of an MCP surface."""
+    from apiforge.mcp.surface import measure_surface
+
+    out: dict[str, Any] = _call("mcp_surface", lambda: measure_surface(surface), detail_level)
+    return out
+
+
+def agentops_projection(host: str, detail_level: str = "normal") -> dict[str, Any]:
+    """Declared economical projection for a host with measured surface bytes."""
+    from apiforge.agentops.projection import project_host
+
+    out: dict[str, Any] = _call("agentops_projection", lambda: project_host(host), detail_level)
+    return out
+
+
 def context_expand(
     uri: str, root: str = ".", run_id: str | None = None, detail_level: str = "normal"
 ) -> dict[str, Any]:
@@ -1704,6 +1740,10 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     knowledge_select,
     debate_packet,
     agents_audit,
+    slice_tests,
+    slice_log,
+    mcp_surface,
+    agentops_projection,
     graph_query,
     graph_impact,
     graph_trace,

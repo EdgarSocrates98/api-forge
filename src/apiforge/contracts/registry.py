@@ -163,6 +163,12 @@ from apiforge.contracts.task import (
     TaskRevision,
     TaskSpec,
 )
+from apiforge.contracts.tool_host import (
+    ErrorSlice,
+    HostProjection,
+    TestSlice,
+    ToolSurface,
+)
 from apiforge.contracts.verification import (
     HoldoutRecord,
     VerificationCheck,
@@ -335,6 +341,10 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "RefereePacket/v1": RefereePacket,
     "ShadowDecision/v1": ShadowDecision,
     "AgentUniqueness/v1": AgentUniqueness,
+    "TestSlice/v1": TestSlice,
+    "ErrorSlice/v1": ErrorSlice,
+    "ToolSurface/v1": ToolSurface,
+    "HostProjection/v1": HostProjection,
 }
 
 

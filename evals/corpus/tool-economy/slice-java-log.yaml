@@ -1,0 +1,8 @@
+id: slice-java-log
+kind: log
+input: logs/java-ci.log
+expect_signatures:
+- IllegalStateException
+- BUILD FAILURE
+expect_count:
+  IllegalStateException: 3

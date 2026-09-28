@@ -605,6 +605,9 @@ Gateway, `evidence resolve` and `context delta` read cases only through
 | `AF-ECONOMY-PROOF-HASH-MISMATCH` | diagnostic: a `ProofReceipt` artifact is missing or its sha256 differs; never L0 |
 | `AF-ECONOMY-PROOF-INVALID` | diagnostic: a step `proofs` entry is not a valid `ProofReceipt` or its artifact leaves the allowed roots |
 | `AF-DELTA-UNMAPPED-SOURCE` | a changed source, config or contract file maps to no impacted operation; the delta is `degraded`, never `ready` |
+| `AF-EVALS-BASELINE-INVALID` | `evals agentic-quality --baseline` is missing, not JSON or not an `apiforge/agentic-quality-eval/v1` report; unlock: save a report with `apiforge evals agentic-quality > baseline.json` |
+| `AF-EVALS-INPUT-INVALID` | `--min-accuracy` is outside [0, 1] |
+| `AF-ECONOMY-TOKEN-RULE-INVALID` | `rules/token_eligibility.yaml` is malformed; unlock: restore it |
 | `AF-ECONOMY-LEDGER-PERSIST` | an auditable ledger row (runtime role bytes) could not be written; the run's economy block and `economy stats` report it as unresolved; unlock: make `.apiforge` writable and re-run |
 
 `BudgetEnvelope.context_bytes` is a global budget: each context class gets a
@@ -613,7 +616,13 @@ pool (`share × context_bytes`) split across its instances, and
 every provider call, including shadow challengers (`calls_by_kind`), so
 checkpoints and resumes see real spend. `economy stats` reports
 `token_coverage` (`complete`, `partial`, `unresolved`); `observed_tokens` is a
-number only when coverage is complete.
+number only when coverage is complete. Only token-eligible rows count
+(model-facing verbs declared in `rules/token_eligibility.yaml`, or any row
+with measured tokens). Persist failures are reported per run
+(`persist_failures_for_run`) and for the root (`persist_failures_global`);
+a run is unresolved only by its own lost rows. `evals agentic-quality`
+passes only when every profile reaches `--min-accuracy` (default 1.0) and
+none regresses versus deep or an optional `--baseline` report.
 The ladder stops at L0 only on structured, re-hashed `ProofReceipt`s. The
 layered cache tries the shared tier when a local entry is stale or corrupt,
 and an entry with an invalid timestamp is a corrupt miss. In-process knowledge

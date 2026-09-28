@@ -134,11 +134,6 @@ from apiforge.contracts.workspace import (
 )
 
 __all__ = [
-    "CacheDecision",
-    "CacheDep",
-    "CacheEntry",
-    "ChangedFile",
-    "DeltaSlice",
     "AdapterCapability",
     "AdapterExecution",
     "AdapterMode",
@@ -147,6 +142,9 @@ __all__ = [
     "AdaptivePolicy",
     "AssetStatus",
     "BudgetEnvelope",
+    "CacheDecision",
+    "CacheDep",
+    "CacheEntry",
     "CandidateAssessment",
     "CapabilityDiagnostic",
     "CapabilityRecord",
@@ -154,6 +152,7 @@ __all__ = [
     "CapabilityResult",
     "CapsuleBudget",
     "CapsuleRefusal",
+    "ChangedFile",
     "CompatibilityCell",
     "CompatibilityMatrix",
     "ContextCapsule",
@@ -166,6 +165,7 @@ __all__ = [
     "DataReadReceipt",
     "DataReadRequest",
     "DebateReplay",
+    "DeltaSlice",
     "DevinCheck",
     "DevinCliProbe",
     "DevinLaunch",

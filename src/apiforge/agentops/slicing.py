@@ -4,15 +4,16 @@ The complete log is stored once in the content-addressed ctx store and
 referenced by ``log_ref``; the slice keeps every failing test and every
 distinct error signature (with counts, evidence spans, relevant frames and a
 little preceding context). Only context lines are bounded — failures never
-are. JUnit XML with a DOCTYPE is refused, so no entity is ever expanded.
+are. JUnit XML is tokenized for its testcase subset only — no XML parser
+runs, and a DOCTYPE or entity declaration is refused outright.
 """
 
 from __future__ import annotations
 
+import html
 import re
 from pathlib import Path
 from typing import Any
-from xml.etree import ElementTree as ET
 
 from apiforge.contracts.base import ContractError
 from apiforge.contracts.tool_host import ErrorSignature, ErrorSlice, TestFailure, TestSlice
@@ -151,47 +152,62 @@ def _preceding_e_line(lines: list[str], index: int) -> str:
     return ""
 
 
+_TESTCASE = re.compile(r"<testcase\b([^>]*?)(?:/>|>(.*?)</testcase>)", re.DOTALL)
+_ATTR = re.compile(r'([\w:.-]+)\s*=\s*"([^"]*)"')
+_CHILD = re.compile(r"<(failure|error|skipped)\b([^>]*?)(?:/>|>(.*?)</\1>)", re.DOTALL)
+
+
+def _attrs(text: str) -> dict[str, str]:
+    return {key: html.unescape(value) for key, value in _ATTR.findall(text)}
+
+
 def slice_junit(root: Path, path: Path) -> TestSlice:
+    """Tokenize the JUnit subset (testcase + failure/error/skipped) — no XML parser, no entities."""
     text = _read(path)
-    if "<!DOCTYPE" in text.upper():
+    if "<!DOCTYPE" in text.upper() or "<!ENTITY" in text.upper():
         raise _error(
             "AF-SLICE-XML-REFUSED",
-            f"{path} declares a DOCTYPE; entity expansion is never processed",
+            f"{path} declares a DOCTYPE or entity; entity expansion is never processed",
             "input",
             "export JUnit XML without a DOCTYPE",
         )
-    try:
-        tree = ET.fromstring(text)
-    except ET.ParseError as exc:
+    if not re.search(r"<testsuites?\b", text):
         raise _error(
-            "AF-SLICE-INPUT-INVALID", f"{path}: {exc}", "input", "pass a valid JUnit XML report"
-        ) from exc
+            "AF-SLICE-INPUT-INVALID",
+            f"{path}: no <testsuite> element",
+            "input",
+            "pass a valid JUnit XML report",
+        )
     counts: dict[str, Any] = {"passed": 0, "failed": 0, "errors": 0, "skipped": 0}
     failures: list[TestFailure] = []
-    for case in tree.iter("testcase"):
+    for case_attrs, body in _TESTCASE.findall(text):
+        case = _attrs(case_attrs)
         name = f"{case.get('classname', '')}::{case.get('name', '')}".strip(":")
-        failure = case.find("failure")
-        error = case.find("error")
-        if case.find("skipped") is not None:
+        children = {
+            kind: (_attrs(attrs), inner) for kind, attrs, inner in _CHILD.findall(body or "")
+        }
+        if "skipped" in children:
             counts["skipped"] += 1
-        elif failure is not None or error is not None:
-            node = failure if failure is not None else error
-            assert node is not None
-            counts["failed" if failure is not None else "errors"] += 1
-            message = node.get("message") or (node.text or "").strip().splitlines()[0:1] or [""]
-            first = message if isinstance(message, str) else message[0]
-            failures.append(
-                TestFailure(
-                    test=name or "unnamed",
-                    outcome="failed" if failure is not None else "error",
-                    file=case.get("file"),
-                    line=int(str(case.get("line"))) if (case.get("line") or "").isdigit() else None,
-                    assertion=first[:300],
-                    signature=normalize_signature(first or name),
-                )
-            )
-        else:
+            continue
+        kind = "failure" if "failure" in children else "error" if "error" in children else None
+        if kind is None:
             counts["passed"] += 1
+            continue
+        attrs, inner = children[kind]
+        counts["failed" if kind == "failure" else "errors"] += 1
+        lines = html.unescape(re.sub(r"<[^>]+>", "", inner or "")).strip().splitlines()
+        first = attrs.get("message") or (lines[0] if lines else "")
+        line_attr = case.get("line", "")
+        failures.append(
+            TestFailure(
+                test=name or "unnamed",
+                outcome="failed" if kind == "failure" else "error",
+                file=case.get("file"),
+                line=int(line_attr) if line_attr.isdigit() else None,
+                assertion=first[:300],
+                signature=normalize_signature(first or name),
+            )
+        )
     return _finish(
         TestSlice(
             format="junit",

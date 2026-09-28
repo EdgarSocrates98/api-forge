@@ -51,7 +51,7 @@ def register(
         ),
         detail_level: str = typer.Option("normal", "--detail-level"),
     ) -> None:
-        """Next verification step: static → test → stop; runtime read-only only if inconclusive."""
+        """Next verification step: static -> test -> stop; runtime read-only only if inconclusive."""
         from apiforge.cli import _echo_json, _run
         from apiforge.verification.progressive import escalate
 

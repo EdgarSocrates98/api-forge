@@ -3217,7 +3217,7 @@ def economy_report(
         False, "--estimate", help="Add a labeled chars/4 estimate (never counted)."
     ),
     cost_basis: Path | None = typer.Option(
-        None, "--cost-basis", help="YAML model→rates; unlocks dollar cost."
+        None, "--cost-basis", help="YAML model->rates; unlocks dollar cost."
     ),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:

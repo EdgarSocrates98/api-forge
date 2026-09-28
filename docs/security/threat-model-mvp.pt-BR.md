@@ -36,6 +36,11 @@ suas mitigações estão abaixo.
 | Conclusões fabricadas | Diagnósticos `unresolved` nomeiam incerteza; `confirmed` exige `fact_ids` de evidência |
 | Task spec/histórico adulterado | Selo Ed25519 vincula bytes exatos; revisão altera o selo e `task accept` exige ator distinto e evidência |
 | Poisoning de cache stale | Chave é `sha256(extractor_version|framework|source_digest)`; corrupção vira miss e o extractor continua fonte da verdade |
+| Poisoning do cache econômico em camadas (local ou tier compartilhado `APIFORGE_CACHE_HOME`) | todo objeto é re-hasheado na leitura; divergência ou entrada ilegível vira miss corrompido e é recalculada; probes de dependência decidem frescor antes do TTL; saída com `--no-cache` é idêntica byte a byte |
+| Evidência live usada quando a prova local basta, ou para mutar | `evidence gate` concede `live_read_only` só para perguntas sobre efeito em runtime e recusa `live_mutation` (`AF-EVIDENCE-MUTATION-REFUSED`); `verify escalate` nunca passa de `live_read_only` |
+| Expansão de entidades em JUnit XML (XXE / billion laughs) | `slice tests` tokeniza só o subconjunto de testcase sem parser XML e recusa qualquer DOCTYPE ou ENTITY (`AF-SLICE-XML-REFUSED`) |
+| Manifest de frescor upstream forjado | `knowledge watch` só lê o manifest local, registra seu sha256, nunca busca nem reescreve pack; entrada ausente é `unresolved`, não fresh |
+| Burla do orçamento no resume | `economy_checkpoint.json` é contrato validado (`AF-ECONOMY-CHECKPOINT-INVALID` se adulterado); o teto de chamadas usa o `calls_used` persistido pelo control plane; o resume nunca baixa o perfil do checkpoint |
 | Adulteração de grafo | Cada linha carrega hash de `{id,kind,props}`; load recusa `AF-GRAPH-HASH-MISMATCH` |
 | Claim falso de `DONE` | `brief show` deriva status da máquina de estados; `DONE` exige aceitação por ator distinto e evidência |
 

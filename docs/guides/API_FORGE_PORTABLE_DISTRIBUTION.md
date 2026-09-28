@@ -61,6 +61,12 @@ apiforge doctor
 `inspect` and `doctor` show the resolved package, executable, state, config and
 cache paths. No path is created during inspection.
 
+`APIFORGE_CACHE` is also the economy cache switch: `off` (or `0`, `false`,
+`no`) disables the cache layers and is not treated as a directory; any other
+value is the cache directory. To share cache across repositories, set
+`APIFORGE_CACHE_HOME`; objects are re-hashed on read. See the
+[economy guide](API_FORGE_ECONOMY.en.md).
+
 ## Hostless first run
 
 ```text

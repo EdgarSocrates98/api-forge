@@ -34,7 +34,7 @@ Devin e Copilot.
 | `api-forge-performance` | Carga, TPS e capacidade |
 | `api-forge-observability` | Telemetria e operação |
 | `api-forge-sdd` | SDD, tasks e gates |
-| `api-forge-context` | TokenSave, Graphify e handoff |
+| `api-forge-context` | TokenSave, Graphify, handoff e economia (cápsulas, gate de evidência live, verificação direcionada, checkpoint no resume) |
 
 ## Compatibilidade
 

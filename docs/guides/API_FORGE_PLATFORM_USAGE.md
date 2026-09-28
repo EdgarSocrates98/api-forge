@@ -343,6 +343,29 @@ Consulte [`GraphImpactAssessment/v1`](../contracts/GraphImpactAssessment-v1.md),
 [`GraphImpactPolicy/v1`](../contracts/GraphImpactPolicy-v1.md) e o
 [arquivo SDD de C](../../.claude/sdd/archive/GRAPH_AWARE_IMPACT/SHIPPED_2026-09-25.md).
 
+### 7.3 Economia com prova
+
+Antes de gastar contexto, chamadas ou fontes externas, use os verbos de
+economia. Todos são determinísticos e read-only; segurança, proveniência e
+`unresolved` nunca entram no orçamento.
+
+```bash
+apiforge sdd classify --description "renomear campo" --path openapi.yaml
+apiforge context capsule --target "POST /orders"
+apiforge evidence gate --question "isso causou erros em produção?"
+apiforge verify plan --changed src/app.py --risk low
+apiforge verify escalate --static likely --test inconclusive
+apiforge runtime run <task> --profile economy
+apiforge runtime checkpoint <task> <run>
+apiforge economy phase-budget --profile balanced
+apiforge knowledge watch --manifest upstream.json --now 2026-09-28T00:00:00+00:00
+```
+
+Pergunta sobre o artefato fica local; só efeito em runtime ganha
+`live_read_only`, nunca mutação. O resume mantém ao menos o perfil do
+checkpoint e soma as chamadas já gastas. Referência completa:
+[guia de economia](API_FORGE_ECONOMY.md).
+
 ## 8. Verificação antes de commit/release
 
 ```bash

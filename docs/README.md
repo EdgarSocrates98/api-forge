@@ -12,6 +12,7 @@ technical format and are intentionally not duplicated as product guides.
 - [Portable distribution and workspace](guides/API_FORGE_PORTABLE_DISTRIBUTION.md)
 - [Platform usage](guides/API_FORGE_PLATFORM_USAGE.en.md)
 - [Experience and interoperability](guides/API_FORGE_EXPERIENCE_INTEROPERABILITY.en.md)
+- [Economy: spend only what is needed, with proof](guides/API_FORGE_ECONOMY.en.md)
 - [Host parity](HOST_PARITY.md)
 - [Evolution map](API_FORGE_EVOLUTION_MAP.en.md)
 

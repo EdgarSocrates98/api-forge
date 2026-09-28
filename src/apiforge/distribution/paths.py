@@ -12,6 +12,8 @@ from apiforge.contracts.base import ContractError
 from apiforge.contracts.distribution import ForgePaths as ForgePathsContract
 from apiforge.contracts.distribution import PathSource
 
+_CACHE_SWITCH_VALUES = frozenset({"on", "off", "0", "1", "true", "false", "yes", "no"})
+
 
 @dataclass(frozen=True, slots=True)
 class ForgePaths:
@@ -85,6 +87,9 @@ def resolve_paths(
         sources.append(("config_path", "environment"))
 
     cache_raw = values.get("APIFORGE_CACHE")
+    # "off"/"on" and friends are the economy cache switch, not a directory.
+    if cache_raw and cache_raw.strip().lower() in _CACHE_SWITCH_VALUES:
+        cache_raw = None
     if cache_raw:
         cache = _path(cache_raw, cwd=base, field="APIFORGE_CACHE")
         sources.append(("cache_root", "environment"))

@@ -39,6 +39,12 @@ declarações, o resolver usa o layout estático conservador e preserva as
 limitações conhecidas. O resultado publica apenas interseções comprovadas; ele
 nunca transforma ausência de evidência em equivalência entre hosts.
 
+A superfície de tools por host é declarada em `rules/host_projections.yaml`:
+`apiforge agentops projection --host <host>` a exibe e
+`apiforge-mcp --surface compact` (ou `--host claude`) publica seis tools
+gateway em vez da lista completa; toda tool continua acessível por
+`apiforge_call`. `apiforge mcp surface` mede os bytes de cada superfície.
+
 ## Assets, conflitos e segurança
 
 Os templates pertencem ao pacote instalado. Adapters gerados são pequenos,

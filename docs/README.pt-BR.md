@@ -13,6 +13,7 @@ produto.
 - [Distribuição portátil e workspace](guides/API_FORGE_PORTABLE_DISTRIBUTION.pt-BR.md)
 - [Uso da plataforma](guides/API_FORGE_PLATFORM_USAGE.md)
 - [Experiência e interoperabilidade](guides/API_FORGE_EXPERIENCE_INTEROPERABILITY.md)
+- [Economia: gastar só o necessário, com prova](guides/API_FORGE_ECONOMY.md)
 - [Paridade entre hosts](HOST_PARITY.pt-BR.md)
 - [Mapa de evolução](API_FORGE_EVOLUTION_MAP.md)
 

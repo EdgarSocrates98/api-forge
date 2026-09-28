@@ -51,6 +51,8 @@ guides. Start with the step-by-step guide for your language:
 - [Uso da plataforma — PT-BR](docs/guides/API_FORGE_PLATFORM_USAGE.md)
 - [Experience and interoperability — English](docs/guides/API_FORGE_EXPERIENCE_INTEROPERABILITY.en.md)
 - [Experiência e interoperabilidade — PT-BR](docs/guides/API_FORGE_EXPERIENCE_INTEROPERABILITY.md)
+- [Economy guide — English](docs/guides/API_FORGE_ECONOMY.en.md)
+- [Guia de economia — PT-BR](docs/guides/API_FORGE_ECONOMY.md)
 - [Host parity — English](docs/HOST_PARITY.md)
 - [Paridade entre hosts — PT-BR](docs/HOST_PARITY.pt-BR.md)
 - [Evolution map — English](docs/API_FORGE_EVOLUTION_MAP.en.md)
@@ -508,6 +510,14 @@ The data-specialist profiles include `api-relational-data-architect`,
 The specialization sequence is also complete: relational/RDS, Kafka/MSK,
 AWS messaging, Redis/DynamoDB profiles, OpenSearch/Redshift, RabbitMQ/NATS/
 Pulsar and advanced MongoDB/Neptune profiles.
+
+The economy program (waves 0–8) is complete: measured ledger, context
+capsules, economy profiles with risk floors, layered cache and deltas,
+selective agentics, compact tool output, economy evals, targeted
+verification, live-evidence gating, knowledge freshness watch, per-SDD-phase
+budgets and resume checkpoints. See the
+[economy guide](docs/guides/API_FORGE_ECONOMY.en.md); safety and evidence
+never enter the budget.
 
 Each phase has an artifact chain under `docs/sdd/`, focused tests and a
 rollback decision. External AWS, datastore, vendor and host mutations remain

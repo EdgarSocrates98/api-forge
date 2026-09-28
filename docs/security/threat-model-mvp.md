@@ -37,6 +37,11 @@ with their mitigations.
 | Fabricated conclusions | `unresolved` diagnostics and findings name the uncertainty; `confirmed` requires evidence fact_ids by construction |
 | Tampered task spec/history | the Ed25519 seal binds the exact revision bytes — amending a sealed task writes a new unsealed revision, so a stale seal can never ride along; `history.jsonl` is append-only and `task accept` requires `accepted_by != executed_by` plus named evidence |
 | Stale extractor cache poisoning | cache keys are `sha256(extractor_version|framework|source_digest)` — a changed file yields a new key (stale entries are unreachable, never wrong); a corrupt or schema-invalid cache file self-heals as a miss and is rewritten; the extractor stays the source of truth |
+| Layered economy cache poisoning (local or shared `APIFORGE_CACHE_HOME` tier) | every object is re-hashed on read; a mismatch or unreadable entry is a corrupt miss and recomputed; dependency probes decide freshness before TTL; `--no-cache` output is byte-identical |
+| Live evidence used where local proof suffices, or used to mutate | `evidence gate` grants `live_read_only` only for questions naming a runtime effect and refuses `live_mutation` (`AF-EVIDENCE-MUTATION-REFUSED`); `verify escalate` never goes past `live_read_only` |
+| JUnit XML entity expansion (XXE / billion laughs) | `slice tests` tokenizes the testcase subset without an XML parser and refuses any DOCTYPE or ENTITY (`AF-SLICE-XML-REFUSED`) |
+| Forged upstream freshness manifest | `knowledge watch` only reads the local manifest, records its sha256, never fetches or rewrites a pack; a missing entry is `unresolved`, not fresh |
+| Resume budget bypass | `economy_checkpoint.json` is a validated contract (`AF-ECONOMY-CHECKPOINT-INVALID` on tampering); the call cap uses the control plane's persisted `calls_used`; a resume never lowers the checkpoint profile |
 | Graph line tampering | every `nodes.jsonl` line carries a `sha256` over its `{id,kind,props}` payload — load refuses `AF-GRAPH-HASH-MISMATCH`; files are sorted canonically so byte drift is diff-visible |
 | False `DONE` claim | `brief show` derives status from the task state machine — `DONE` exists only after `awaiting_supervision -> accepted` by a distinct actor with evidence; gaps, pending human action and open items are fields, not prose |
 

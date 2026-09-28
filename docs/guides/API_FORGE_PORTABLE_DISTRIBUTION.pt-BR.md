@@ -58,6 +58,12 @@ Esses valores são resolvidos sem escrever nada. `inspect` e `doctor` exibem o
 package root, executável, state root, configuração, cache e as fontes de cada
 path.
 
+`APIFORGE_CACHE` também é o interruptor do cache econômico: `off` (ou `0`,
+`false`, `no`) desliga as camadas de cache e não é tratado como diretório;
+qualquer outro valor é o diretório de cache. Para compartilhar cache entre
+repositórios, use `APIFORGE_CACHE_HOME`; objetos são re-hasheados na leitura.
+Veja o [guia de economia](API_FORGE_ECONOMY.md).
+
 ## 3. Faça a inspeção inicial
 
 Execute a sequência abaixo no repositório consumidor:

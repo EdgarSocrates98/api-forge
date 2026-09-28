@@ -11,3 +11,5 @@ __pycache__/
 .superpowers/
 .apiforge/
 prompt_evo*.md
+.tmp
+.tmp*

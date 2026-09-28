@@ -506,6 +506,13 @@ def _role_fields(row: RoleContext | None, extra_refs: tuple[str, ...] = ()) -> d
     }
 
 
+def _shadow_mode(spec: Any) -> str:
+    for item in getattr(spec, "inputs", ()) or ():
+        if str(item).strip() == "shadow_mode=capability_eval":
+            return "capability_eval"
+    return "paired_ab"
+
+
 async def _shadow(
     economy: EconomyPlan,
     challengers: tuple[str, ...],
@@ -519,13 +526,43 @@ async def _shadow(
     storage: RunStore,
     policy: Any,
     role_rows: dict[str, RoleContext],
+    *,
+    control: ControlPlane,
+    control_run_id: str,
 ) -> ShadowDecision:
-    """Observational challenger run; never touches artifacts, gaps or status."""
+    """Observational challenger run; never touches artifacts, gaps or status.
+
+    The call is accounted by the ControlPlane like any step, so ``calls_used``
+    and the economy checkpoint match real adapter invocations. ``paired_ab``
+    (default) gives the challenger the primary's context; ``capability_eval``
+    (TaskSpec input ``shadow_mode=capability_eval``) builds its own.
+    """
     known = tuple(name for name in challengers if name in capabilities_catalog)
-    decision = decide_shadow(run_id, economy.envelope.shadow_share, known, calls_available)
+    mode = _shadow_mode(spec)
+    decision = decide_shadow(
+        run_id, economy.envelope.shadow_share, known, calls_available
+    ).model_copy(update={"mode": mode})
     if decision.challenger is None or not decision.sampled or calls_available < 1:
         return decision
     name = decision.challenger
+    try:
+        control.record_call(control_run_id, "shadow")
+    except ContractError as exc:
+        return decision.model_copy(update={"reason": f"{exc.code}: shadow call not accounted"})
+    context_row = role_rows.get(primary or "")
+    if mode == "capability_eval":
+        from apiforge.runtime.role_context import plan_roles
+
+        own = plan_roles(
+            storage.root,
+            spec,
+            ((name, "specialist"),),
+            context_bytes=max(
+                256, int(economy.envelope.context_bytes * economy.envelope.shadow_share)
+            ),
+            run_id=run_id,
+        )
+        context_row = own.roles[0] if own.roles else None
     invocation = AgentInvocation(
         invocation_id=stable_id("inv", {"run": run_id, "shadow": name}),
         run_id=run_id,
@@ -544,7 +581,7 @@ async def _shadow(
                 prompt=f"Shadow challenger for capability {item.capability}",
                 input_refs=item.input_refs,
                 output_contract="AgentArtifact/v1",
-                **_role_fields(role_rows.get(primary or "")),
+                **_role_fields(context_row),
             )
         )
 
@@ -747,7 +784,9 @@ async def execute_run(
                 LadderStep(
                     level="L1",
                     action="deterministic evidence partial",
-                    trigger="missing=" + ",".join(proof.missing),
+                    trigger="missing="
+                    + ",".join(proof.missing)
+                    + "".join(f"; {note.split(':', 1)[0]}" for note in proof.diagnostics),
                 )
             )
     initial_names = tuple(
@@ -830,7 +869,7 @@ async def execute_run(
         )
         role_rows = {row.capability: row for row in role_plan.roles}
         storage.json("role-context.json", role_plan.model_dump(mode="json"))
-        record_roles(root, role_plan)
+        economy_gaps.extend(record_roles(root, role_plan))
     invocation_ids = tuple(
         stable_id("inv", {"run": run_id, "capability": item.name}) for item in initial_capabilities
     )
@@ -1180,6 +1219,8 @@ async def execute_run(
             storage,
             policy,
             role_rows,
+            control=control,
+            control_run_id=control_run.run_id,
         )
     economy_block = (
         _economy_block(
@@ -1211,6 +1252,7 @@ async def execute_run(
             "debate_reasons": reasons,
             "human_gate": needs_gate,
             "errors": errors,
+            "unresolved": {"routing": list(routing.unresolved)},
         },
     )
     if economy_plan is not None and economy_block is not None:
@@ -1257,6 +1299,7 @@ async def execute_run(
         "economy": economy_block,
         "role_context": role_summary(role_plan) if role_plan is not None else None,
         "shadow": shadow_decision.model_dump(mode="json") if shadow_decision is not None else None,
+        "unresolved": {"routing": list(routing.unresolved)},
         "status": final_status,
         "run_dir": str(storage.directory),
     }

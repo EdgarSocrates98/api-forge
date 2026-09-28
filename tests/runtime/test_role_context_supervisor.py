@@ -90,3 +90,61 @@ def test_shadow_runs_outside_the_result(tmp_path: Path, monkeypatch) -> None:
     assert shadowed["status"] == baseline["status"]
     assert len(shadowed["artifacts"]) == len(baseline["artifacts"])
     assert (Path(str(shadowed["run_dir"])) / "shadow-api-architecture-review.json").is_file()
+
+
+def _with_shadow(monkeypatch) -> None:
+    original = supervisor_module.build_routing_plan
+
+    def with_challenger(*args, **kwargs):
+        plan = original(*args, **kwargs)
+        return plan.model_copy(
+            update={"challenger_order": ("api-architecture-review",), "challenger_slots": 1}
+        )
+
+    monkeypatch.setattr(supervisor_module, "build_routing_plan", with_challenger)
+    monkeypatch.setattr(shadow_module, "sampled", lambda run_id, share: True)
+
+
+def test_shadow_call_is_accounted_by_the_control_plane(tmp_path: Path, monkeypatch) -> None:
+    root = analyzed_root(tmp_path, "fastapi")
+    _task(root)
+    _with_shadow(monkeypatch)
+    adapter = FakeModelAdapter()
+    result = _run(root, adapter)
+    assert result["shadow"]["mode"] == "paired_ab"
+    run_dir = Path(str(result["run_dir"]))
+    checkpoint = json.loads((run_dir / "economy_checkpoint.json").read_text("utf-8"))
+    assert checkpoint["calls_used"] == len(adapter.calls)
+    control_runs = list((root / ".apiforge" / "control").glob("*/run.json"))
+    control = json.loads(control_runs[0].read_text("utf-8"))
+    assert control["calls_by_kind"].get("shadow") == 1
+    assert control["calls_used"] == len(adapter.calls)
+
+
+def test_capability_eval_shadow_gets_its_own_context(tmp_path: Path, monkeypatch) -> None:
+    root = analyzed_root(tmp_path, "fastapi")
+    inputs = [f"project={root / 'proj'}", "target=POST /payments", "shadow_mode=capability_eval"]
+    create(
+        root,
+        TaskSpec(
+            id=TASK,
+            outcome="make POST /payments idempotent",
+            size=TaskSize.M,
+            inputs=tuple(inputs),
+            expected_proofs=("specialist artifact",),
+            acceptance_criteria=("findings are evidence bound",),
+            rollback="discard local run artifacts",
+            risk=TaskRisk.READ_ONLY,
+            state=TaskState.SEALED,
+            revision=1,
+            budgets={"max_calls": 20},
+        ),
+    )
+    _with_shadow(monkeypatch)
+    adapter = FakeModelAdapter()
+    result = _run(root, adapter)
+    assert result["shadow"]["mode"] == "capability_eval"
+    challenger = next(
+        call for call in adapter.calls if call.capability == "api-architecture-review"
+    )
+    assert challenger.context_class == "focused"

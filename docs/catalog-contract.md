@@ -586,6 +586,52 @@ the prompt prefix contains nothing run-specific.
 | `AF-ECONOMY-DOCTOR-ESCALATION-HEAVY` | doctor: more than half of the runs escalated to L3 |
 | `AF-ECONOMY-DOCTOR-REPEATED-PARSING` | doctor: extractor cache misses exceed hits |
 
+## Economy hardening (trust boundary, budget invariants, accounting, proof semantics)
+
+Every path read from case, fact or graph data goes through one resolver
+(`security/source_paths.py`): it must stay inside the project root or a
+repository declared in `.apiforge/workspace.yaml` after symlinks are
+followed. A refused ref is reported as unresolved and never read nor stored
+in `ctx://`; the rest of the capsule or evidence node is served. The Context
+Gateway, `evidence resolve` and `context delta` read cases only through
+`case.service.load_verified_case` (containment + sha256 per artifact).
+
+| Code | Meaning |
+|---|---|
+| `AF-PATH-OUTSIDE-ROOT` | unresolved note: a case/fact/graph path is empty, UNC, drive-qualified, traverses `..` or resolves outside the allowed roots; unlock: keep sources inside the project or declare the repository in `.apiforge/workspace.yaml` |
+| `AF-CASE-HASH-MISMATCH` | a case artifact changed after `case.json` was written; the capsule/evidence/delta is refused; unlock: re-run `apiforge analyze` |
+| `AF-CASE-PATH-TRAVERSAL` | a case manifest artifact path escapes the case directory (also refused by `evidence emit`) |
+| `AF-ECONOMY-PROOF-UNSTRUCTURED` | diagnostic: an expected proof is only mentioned in a step, not proven by a `ProofReceipt`; the ladder reaches L1 at most (no early stop) |
+| `AF-ECONOMY-PROOF-HASH-MISMATCH` | diagnostic: a `ProofReceipt` artifact is missing or its sha256 differs; never L0 |
+| `AF-ECONOMY-PROOF-INVALID` | diagnostic: a step `proofs` entry is not a valid `ProofReceipt` or its artifact leaves the allowed roots |
+| `AF-DELTA-UNMAPPED-SOURCE` | a changed source, config or contract file maps to no impacted operation; the delta is `degraded`, never `ready` |
+| `AF-ECONOMY-LEDGER-PERSIST` | an auditable ledger row (runtime role bytes) could not be written; the run's economy block and `economy stats` report it as unresolved; unlock: make `.apiforge` writable and re-run |
+
+`BudgetEnvelope.context_bytes` is a global budget: each context class gets a
+pool (`share × context_bytes`) split across its instances, and
+`RoleContextPlan` refuses totals above the envelope. The ControlPlane counts
+every provider call, including shadow challengers (`calls_by_kind`), so
+checkpoints and resumes see real spend. `economy stats` reports
+`token_coverage` (`complete`, `partial`, `unresolved`); `observed_tokens` is a
+number only when coverage is complete.
+The ladder stops at L0 only on structured, re-hashed `ProofReceipt`s. The
+layered cache tries the shared tier when a local entry is stale or corrupt,
+and an entry with an invalid timestamp is a corrupt miss. In-process knowledge
+caches key on a stat-only generation of the pack files, so an edited pack is
+seen without restarting a long-lived host; retrieval normalizes with NFKC +
+casefold (PT-BR terms such as `autenticação` match as written).
+
+Reporting keeps outcomes honest: `PhaseBudgetPlan` separates
+`quality_status` from `budget_status` (`protected_overrun` is not `ok`), run
+results and `summary.json` carry `unresolved.routing`, and an unmapped
+runtime file degrades a delta. Evidence classes stay apart:
+`evals economy-matrix` is `claim_scope: deterministic-safety-economy`,
+`evals agentic-quality` grades recorded specialist verdicts against ground
+truth under each profile (`recorded-agentic-outputs`, `--responses-dir` for
+real recordings), and provider tokens are observed only with transcripts.
+`evals economy-hardening` pins path containment, class pools, token
+coverage, phase status and delta degradation.
+
 ## Freshness, live gating and resume (`knowledge watch`, `evidence gate`, `verify escalate`, `economy phase-budget`, `runtime checkpoint`, `evals economy-freshness`)
 
 `knowledge watch` compares every pack's declared `freshness.upstream`,

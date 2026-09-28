@@ -78,6 +78,7 @@ apiforge context gc [--apply]
 - Teste inconclusivo? `apiforge verify escalate --static likely --test inconclusive` diz o próximo passo; teste conclusivo encerra.
 - Knowledge vencido: `apiforge knowledge watch --manifest <upstream.json> --now <iso>` lista só os packs `refresh_needed`; o refresh é outro workflow.
 - Ao retomar: `apiforge runtime checkpoint <task> <run>` mostra o gasto já feito; o resume nunca baixa o perfil. Orçamento por fase SDD: `apiforge economy phase-budget --profile <p>`.
+- Evidência honesta: `economy stats` mostra `token_coverage`; `evals agentic-quality` gradua vereditos gravados; `evals economy-hardening` fixa contenção de paths e budgets. Paths de case fora do projeto viram `AF-PATH-OUTSIDE-ROOT` (nunca lidos).
 
 ## Mudar política econômica
 

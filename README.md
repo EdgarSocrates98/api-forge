@@ -429,6 +429,8 @@ while refusal codes and `fact_id`s survive.
 | `apiforge economy phase-budget --profile P [--usage U]` | `PhaseBudgetPlan/v1`: envelope split across SDD phases; contract/verify/secure protected |
 | `apiforge runtime checkpoint <task> <run>` | `EconomyCheckpoint/v1`: spend a resume continues; resume never lowers the profile |
 | `apiforge evals economy-freshness` | 16 cases across the five wave-8 verbs |
+| `apiforge evals economy-hardening` | 15 cases: path containment, class-pool context budget, token coverage, phase status, delta degradation |
+| `apiforge evals agentic-quality [--responses-dir D]` | Recorded specialist verdicts vs ground truth under each profile; `claim_scope: recorded-agentic-outputs` |
 | `apiforge-mcp` | MCP server for the read/compose verbs (needs `pip install apiforge[mcp]`; every tool takes `detail_level`) |
 | `apiforge collect lambda --function-name X --out dump/` | Fetch Lambda config into a dump (Code.Location never persisted) |
 | `apiforge collect sqs\|sns\|eventbridge\|iam-role\|cognito\|waf ... --out dump/` | Messaging/identity collectors — same offline-dump contract |

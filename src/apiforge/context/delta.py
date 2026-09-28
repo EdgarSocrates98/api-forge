@@ -116,9 +116,9 @@ def build_delta(
     mapped: set[str] = set()
     unresolved: list[str] = []
 
-    from apiforge.context.gateway.levels import load_case, load_graph
+    from apiforge.context.gateway.levels import load_graph, verified_case
 
-    case = load_case(case_path)
+    case = verified_case(case_path)
     if case is None:
         unresolved.append("graph-unavailable")
     else:
@@ -171,7 +171,13 @@ def build_delta(
         if invalidate
         else ()
     )
-    blocking = [item for item in unresolved if not item.startswith("unmapped:")]
+    runtime_unmapped = [path for path in sorted(paths - mapped) if _runtime_path(path)]
+    unresolved.extend(f"{UNMAPPED_SOURCE}:{path}" for path in runtime_unmapped)
+    blocking = [
+        item
+        for item in unresolved
+        if not item.startswith("unmapped:") and not item.startswith(UNMAPPED_SOURCE)
+    ]
     return DeltaSlice(
         source=source,  # type: ignore[arg-type]
         base=base,
@@ -182,8 +188,36 @@ def build_delta(
         capsule_targets=tuple(sorted(impacted)),
         invalidated=invalidated,
         unresolved=tuple(sorted(set(unresolved))),
-        status="unresolved" if blocking else "ready",
+        status="unresolved" if blocking else "degraded" if runtime_unmapped else "ready",
     )
+
+
+UNMAPPED_SOURCE = "AF-DELTA-UNMAPPED-SOURCE"
+_RUNTIME_SUFFIXES = {
+    ".py",
+    ".java",
+    ".kt",
+    ".go",
+    ".ts",
+    ".js",
+    ".cs",
+    ".rb",
+    ".yaml",
+    ".yml",
+    ".json",
+    ".proto",
+    ".sql",
+    ".graphql",
+    ".tf",
+}
+
+
+def _runtime_path(path: str) -> bool:
+    """Source, config or contract files: "no mapping" must not read as "no impact"."""
+    posix = path.replace("\\", "/").lower()
+    if posix.startswith(("docs/", "doc/")) or "/docs/" in posix:
+        return False
+    return Path(posix).suffix in _RUNTIME_SUFFIXES
 
 
 def _contract_changes(

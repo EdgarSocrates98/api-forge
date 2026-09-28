@@ -12,3 +12,6 @@
 
 The shadow artifact is stored as `shadow-<capability>.json`; it never enters
 the run's artifacts, gaps or final status.
+| `mode` | `paired_ab` (default: the challenger receives the primary's context) or `capability_eval` (TaskSpec input `shadow_mode=capability_eval`: the challenger receives its own role and expertise context) |
+
+The shadow call is accounted by the ControlPlane (`calls_by_kind.shadow`), so `calls_used` and `economy_checkpoint.json` match real adapter invocations; when the budget is spent the shadow is skipped with `AF-BUDGET-EXHAUSTED`.

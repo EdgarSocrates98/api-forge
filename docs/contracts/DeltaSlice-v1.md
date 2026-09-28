@@ -12,4 +12,4 @@ which capsules to build.
 | `impacted_operations` / `capsule_targets` | Operations implemented by changed facts, touched by a contract subtree change (operation plus `$ref` closure), or whose cached selection depends on a changed file |
 | `invalidated` | `CacheDecision/v1` rows when `--invalidate` dropped selections |
 | `unresolved` | `unmapped:<path>`, `graph-unavailable`, `contract-diff-unavailable:<path>` |
-| `status` | `unresolved` when anything but unmapped files is unresolved |
+| `status` | `unresolved` when anything but unmapped files is unresolved; `degraded` when a changed source, config or contract file maps to no impact (`AF-DELTA-UNMAPPED-SOURCE`); unmapped docs stay informational |

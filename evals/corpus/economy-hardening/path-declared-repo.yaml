@@ -1,0 +1,4 @@
+id: path-declared-repo
+kind: path
+candidate: "{work}/declared/api.py"
+expect: allow

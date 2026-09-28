@@ -168,6 +168,16 @@ def test_deterministic_proof_levels(tmp_path: Path) -> None:
     record_deterministic_run(tmp_path, output="partial evidence only")
     assert deterministic_proof(tmp_path, spec).level is None
     record_deterministic_run(tmp_path, output="specialist artifact")
+    textual = deterministic_proof(tmp_path, spec)
+    assert textual.level == "L1"
+    assert any(note.startswith("AF-ECONOMY-PROOF-UNSTRUCTURED") for note in textual.diagnostics)
+    record_deterministic_run(tmp_path, output="done", proof_kind="specialist artifact")
     assert deterministic_proof(tmp_path, spec).level == "L0"
-    record_deterministic_run(tmp_path, output="specialist artifact", terminal="blocked")
+    record_deterministic_run(tmp_path, output="done", proof_kind="specialist artifact", tamper=True)
+    forged = deterministic_proof(tmp_path, spec)
+    assert forged.level != "L0"
+    assert any(note.startswith("AF-ECONOMY-PROOF-HASH-MISMATCH") for note in forged.diagnostics)
+    record_deterministic_run(
+        tmp_path, output="done", proof_kind="specialist artifact", terminal="blocked"
+    )
     assert deterministic_proof(tmp_path, spec).level == "L1"

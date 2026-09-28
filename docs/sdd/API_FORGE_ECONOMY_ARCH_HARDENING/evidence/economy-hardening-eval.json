@@ -1,0 +1,104 @@
+{
+  "cases": 15,
+  "gates": {
+    "budget": true,
+    "delta": true,
+    "path": true,
+    "phase": true,
+    "tokens": true
+  },
+  "passed": true,
+  "rows": [
+    {
+      "budget_total": 16000,
+      "case_id": "budget-five-specialists",
+      "kind": "budget",
+      "passed": true
+    },
+    {
+      "budget_total": 22400,
+      "case_id": "budget-two-specialists",
+      "kind": "budget",
+      "passed": true
+    },
+    {
+      "case_id": "delta-docs",
+      "degraded": false,
+      "kind": "delta",
+      "passed": true
+    },
+    {
+      "case_id": "delta-source",
+      "degraded": true,
+      "kind": "delta",
+      "passed": true
+    },
+    {
+      "case_id": "path-absolute",
+      "kind": "path",
+      "outcome": "refuse",
+      "passed": true
+    },
+    {
+      "case_id": "path-declared-repo",
+      "kind": "path",
+      "outcome": "allow",
+      "passed": true
+    },
+    {
+      "case_id": "path-nested",
+      "kind": "path",
+      "outcome": "allow",
+      "passed": true
+    },
+    {
+      "case_id": "path-parent",
+      "kind": "path",
+      "outcome": "refuse",
+      "passed": true
+    },
+    {
+      "case_id": "path-unc",
+      "kind": "path",
+      "outcome": "refuse",
+      "passed": true
+    },
+    {
+      "case_id": "path-undeclared-repo",
+      "kind": "path",
+      "outcome": "refuse",
+      "passed": true
+    },
+    {
+      "budget_status": "exceeded",
+      "case_id": "phase-exceeded",
+      "kind": "phase",
+      "passed": true
+    },
+    {
+      "budget_status": "protected_overrun",
+      "case_id": "phase-protected",
+      "kind": "phase",
+      "passed": true
+    },
+    {
+      "case_id": "tokens-complete",
+      "coverage": "complete",
+      "kind": "tokens",
+      "passed": true
+    },
+    {
+      "case_id": "tokens-partial",
+      "coverage": "partial",
+      "kind": "tokens",
+      "passed": true
+    },
+    {
+      "case_id": "tokens-unresolved",
+      "coverage": "unresolved",
+      "kind": "tokens",
+      "passed": true
+    }
+  ],
+  "schema": "apiforge/economy-hardening-eval/v1"
+}

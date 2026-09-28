@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from apiforge.contracts.base import VersionedContract
 
@@ -48,8 +48,17 @@ class RoleContext(VersionedContract):
     expertise: tuple[str, ...] = ()
     bytes: int = Field(default=0, ge=0)
     budget_bytes: int = Field(default=0, ge=0)
+    pool_bytes: int | None = Field(default=None, ge=0)
     trimmed: tuple[str, ...] = ()
     prompt_prefix_sha256: str | None = None
+
+    @model_validator(mode="after")
+    def bytes_within_budget(self) -> RoleContext:
+        if self.bytes > self.budget_bytes:
+            raise ValueError("role bytes exceed its budget_bytes")
+        if self.pool_bytes is not None and self.budget_bytes > self.pool_bytes:
+            raise ValueError("role budget_bytes exceed its class pool")
+        return self
 
 
 class RoleContextPlan(VersionedContract):
@@ -64,6 +73,21 @@ class RoleContextPlan(VersionedContract):
     total_bytes: int = Field(default=0, ge=0)
     naive_bytes: int = Field(default=0, ge=0)
     unresolved: tuple[str, ...] = ()
+
+    @model_validator(mode="after")
+    def within_envelope(self) -> RoleContextPlan:
+        """``BudgetEnvelope.context_bytes`` is a hard global budget, not a per-role hint."""
+        if self.total_bytes != sum(row.bytes for row in self.roles):
+            raise ValueError("total_bytes must equal the sum of role bytes")
+        if self.total_bytes > self.context_bytes:
+            raise ValueError("total_bytes exceeds BudgetEnvelope.context_bytes")
+        pools: dict[str, int] = {}
+        for row in self.roles:
+            if row.pool_bytes is not None:
+                pools[row.context_class] = pools.get(row.context_class, 0) + row.budget_bytes
+                if pools[row.context_class] > row.pool_bytes:
+                    raise ValueError(f"class {row.context_class} budgets exceed its pool")
+        return self
 
 
 class Disagreement(VersionedContract):
@@ -101,6 +125,7 @@ class ShadowDecision(VersionedContract):
 
     schema: Literal["apiforge/shadow-decision/v1"] = "apiforge/shadow-decision/v1"  # type: ignore[assignment]
     share: float = Field(ge=0.0, le=0.5)
+    mode: Literal["paired_ab", "capability_eval"] = "paired_ab"
     sampled: bool = False
     executed: bool = False
     challenger: str | None = None

@@ -93,6 +93,8 @@ class PhaseBudgetPlan(VersionedContract):
     total_context_bytes: int = Field(ge=0)
     phases: tuple[PhaseBudget, ...] = ()
     status: Literal["ok", "unresolved"] = "ok"
+    quality_status: Literal["ok", "unresolved"] = "ok"
+    budget_status: Literal["ok", "protected_overrun", "exceeded"] = "ok"
     codes: tuple[str, ...] = ()
 
 

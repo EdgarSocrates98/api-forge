@@ -1,0 +1,6 @@
+id: phase-protected
+kind: phase
+profile: economy
+usage:
+  verify: {calls: 9}
+expect: protected_overrun

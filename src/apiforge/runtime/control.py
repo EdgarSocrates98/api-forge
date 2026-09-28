@@ -7,7 +7,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Literal
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from apiforge.contracts.base import ContractError, VersionedContract
 from apiforge.core.ids import stable_id
@@ -44,10 +44,26 @@ class ControlRun(VersionedContract):
     max_parallel: int = Field(default=4, ge=1, le=64)
     max_calls: int = Field(default=20, ge=1)
     calls_used: int = 0
+    calls_by_kind: dict[str, int] = Field(default_factory=dict)
     reviewer: str | None = None
     review_verdict: Literal["approved", "rejected", "review"] | None = None
     cancellation_actor: str | None = None
     state_revision: int = Field(default=0, ge=0)
+
+    @model_validator(mode="after")
+    def calls_are_accounted(self) -> ControlRun:
+        """One counter for every provider call: steps, fallbacks and shadow challengers."""
+        if sum(self.calls_by_kind.values()) > self.calls_used:
+            raise ValueError("calls_by_kind exceeds calls_used")
+        if self.calls_used > self.max_calls:
+            raise ValueError("calls_used exceeds max_calls")
+        return self
+
+
+def _count(run: ControlRun, kind: str) -> dict[str, int]:
+    counts = dict(run.calls_by_kind)
+    counts[kind] = counts.get(kind, 0) + 1
+    return counts
 
 
 class ControlPlane:
@@ -178,11 +194,34 @@ class ControlPlane:
                 "status": "running",
                 "steps": steps,
                 "calls_used": run.calls_used + 1,
+                "calls_by_kind": _count(run, "step"),
                 "state_revision": run.state_revision + 1,
             }
         )
         self._save(result)
         self._event(result, "step_started", step_id=step_id, attempt=updated.attempts)
+        return result
+
+    def record_call(self, run_id: str, kind: str) -> ControlRun:
+        """Account a provider call that is not a control step (e.g. a shadow challenger)."""
+        run = self._load(run_id)
+        if run.calls_used >= run.max_calls:
+            error = ContractError(
+                "AF-BUDGET-EXHAUSTED",
+                f"run {run_id} used {run.calls_used}/{run.max_calls} calls; {kind} call refused",
+            )
+            error.field = "max_calls"  # type: ignore[attr-defined]
+            error.unlock = "raise the profile or TaskSpec budget"  # type: ignore[attr-defined]
+            raise error
+        result = run.model_copy(
+            update={
+                "calls_used": run.calls_used + 1,
+                "calls_by_kind": _count(run, kind),
+                "state_revision": run.state_revision + 1,
+            }
+        )
+        self._save(result)
+        self._event(result, "call_recorded", kind=kind)
         return result
 
     def claim(

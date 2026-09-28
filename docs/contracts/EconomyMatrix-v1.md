@@ -15,3 +15,4 @@ score).
 Quality is grounded offline: the deterministic verdict (OpenAPI diff or gRPC
 compatibility) against ground truth, plus the safety invariant that every
 risk-required role survives the economy trims.
+| `claim_scope` | Always `deterministic-safety-economy`: the matrix proves deterministic contract correctness and mandatory role coverage per profile, not end-to-end agentic answer quality (see `evals agentic-quality`) |

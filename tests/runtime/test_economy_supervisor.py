@@ -72,7 +72,7 @@ def test_task_budget_caps_calls_and_reports_exhaustion(tmp_path: Path) -> None:
 
 def test_deterministic_proof_stops_before_any_agent_call(tmp_path: Path) -> None:
     economy_task(tmp_path)
-    record_deterministic_run(tmp_path, output="specialist artifact")
+    record_deterministic_run(tmp_path, output="done", proof_kind="specialist artifact")
     result = _run(tmp_path, "deep")
     assert result["economy"]["stopped_at"] == "L0"
     assert result["run"]["invocation_ids"] == []

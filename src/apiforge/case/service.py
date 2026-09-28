@@ -145,3 +145,25 @@ def load_case(out_dir: Path) -> CaseManifest:
         if sha256_file(target) != ref.sha256:
             raise CaseIntegrityError("AF-CASE-HASH-MISMATCH", ref.path)
     return manifest
+
+
+def load_verified_case(out_dir: Path) -> dict[str, Any] | None:
+    """The only reader of case artifacts for downstream consumers.
+
+    Returns ``case.json`` plus each declared artifact keyed by its file name
+    (``api-ir.json``, ``facts.json``, ...), read only after ``load_case``
+    verified containment and every sha256. ``None`` when no manifest exists;
+    tampering raises ``CaseIntegrityError``.
+    """
+    out = Path(out_dir)
+    if not (out / "case.json").is_file():
+        return None
+    manifest = load_case(out)
+    data: Any = read_json(out / "case.json")
+    case: dict[str, Any] = dict(data) if isinstance(data, dict) else {}
+    for name in ("api-ir.json", "facts.json", "findings.json"):
+        case[name] = {}
+    for ref in manifest.artifacts.values():
+        payload: Any = read_json(_artifact_path(out, ref))
+        case[Path(ref.path).name] = payload if isinstance(payload, dict) else {}
+    return case

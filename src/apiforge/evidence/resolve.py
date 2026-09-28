@@ -34,7 +34,7 @@ def to_ref(node_id: str) -> str | None:
 
 
 def resolve(root: Path, ref: str, *, case_dir: Path | None = None) -> EvidenceNode:
-    from apiforge.context.gateway.levels import load_case, load_graph
+    from apiforge.context.gateway.levels import load_graph, safe_input, safe_source, verified_case
     from apiforge.context.gateway.refs import CtxStore
 
     match = _REF.match(ref.strip())
@@ -45,9 +45,10 @@ def resolve(root: Path, ref: str, *, case_dir: Path | None = None) -> EvidenceNo
             "pass a ref such as evidence://finding/<id> or one returned as a neighbor",
         )
     kind, value = match.groups()
+    refused: list[str] = []
     root = Path(root).resolve()
     case_path = Path(case_dir).resolve() if case_dir else root / ".apiforge" / "case"
-    case = load_case(case_path)
+    case = verified_case(case_path)
     if case is None:
         raise _refusal(
             "AF-EVIDENCE-NOT-FOUND",
@@ -77,9 +78,11 @@ def resolve(root: Path, ref: str, *, case_dir: Path | None = None) -> EvidenceNo
     path, line = props.get("path"), props.get("line")
     if kind == "fact" and isinstance(path, str) and isinstance(line, int):
         inputs = case.get("inputs") or {}
-        project = root / str(inputs.get("project", ""))
-        file = project / path if (project / path).is_file() else root / path
-        if file.is_file():
+        project = safe_input(root, inputs.get("project", ""), refused)
+        file = safe_source(root, project, path, refused)
+        if file is not None and not file.is_file():
+            file = safe_source(root, root, path, refused)
+        if file is not None and file.is_file():
             lines = file.read_text(encoding="utf-8", errors="replace").splitlines()
             start = max(1, line - _SLICE)
             text = chr(10).join(lines[start - 1 : line + _SLICE])
@@ -91,6 +94,7 @@ def resolve(root: Path, ref: str, *, case_dir: Path | None = None) -> EvidenceNo
         props=props,
         neighbors=tuple(neighbors),
         source_ref=source_ref,
+        unresolved=tuple(sorted(set(refused))),
     )
 
 

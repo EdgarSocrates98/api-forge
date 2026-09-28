@@ -43,6 +43,11 @@ suas mitigações estão abaixo.
 | Burla do orçamento no resume | `economy_checkpoint.json` é contrato validado (`AF-ECONOMY-CHECKPOINT-INVALID` se adulterado); o teto de chamadas usa o `calls_used` persistido pelo control plane; o resume nunca baixa o perfil do checkpoint |
 | Adulteração de grafo | Cada linha carrega hash de `{id,kind,props}`; load recusa `AF-GRAPH-HASH-MISMATCH` |
 | Claim falso de `DONE` | `brief show` deriva status da máquina de estados; `DONE` exige aceitação por ator distinto e evidência |
+| Context Gateway contornando a integridade do case | gateway, `evidence resolve` e `context delta` leem cases apenas via `case.service.load_verified_case` (manifest, contenção, sha256 por artefato); artefato adulterado recusa com `AF-CASE-HASH-MISMATCH` |
+| Leitura fora da raiz para `ctx://` (`../`, absoluto, drive/UNC, fuga por symlink, repo não declarado) | um único resolver (`security/source_paths.py`) confina todo path de case/fact/graph à raiz do projeto e aos repositórios declarados no workspace após seguir symlinks; ref recusado é `AF-PATH-OUTSIDE-ROOT`, nunca aberto nem armazenado |
+| Chamadas de shadow não contadas gastando além do budget no resume | shadow challengers são contados por `ControlPlane.record_call` (`calls_by_kind.shadow`); `calls_used <= max_calls` é invariante do contrato; o checkpoint copia a contagem do control plane |
+| Medição parcial de tokens apresentada como observada | `economy stats` reporta `token_coverage` (`complete`/`partial`/`unresolved`); `observed_tokens` só é número quando toda linha elegível foi medida; linhas auditáveis perdidas viram `AF-ECONOMY-LEDGER-PERSIST` |
+| Parada antecipada por prova apenas mencionada | L0 exige `ProofReceipt` cujo artefato está nas raízes permitidas e re-hasheia; menção textual chega no máximo a L1 |
 
 ## Limitações conhecidas
 

@@ -9,4 +9,6 @@
 | `phases[]` | `{phase, share, calls, context_bytes, protected, used_calls, used_context_bytes, status}`; calls sum to the envelope and protected phases (contract, verify, secure) get at least one |
 | `phases[].status` | `within`, `exceeded`, `protected_overrun` (reported, never cut) or `unmeasured` |
 | `status` | `unresolved` when a non-protected phase exceeded its budget |
+| `quality_status` | `ok` or `unresolved` (a non-protected phase exceeded) |
+| `budget_status` | `ok`, `protected_overrun` (only protected phases overran: preserved, never cut, never reported as plain ok) or `exceeded` |
 | `codes` | `AF-BUDGET-PHASE-EXCEEDED`, `AF-BUDGET-PHASE-PROTECTED` |

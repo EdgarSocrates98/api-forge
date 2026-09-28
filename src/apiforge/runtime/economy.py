@@ -24,6 +24,7 @@ from apiforge.contracts.economy import (
     EconomyProfile,
     LadderLevel,
     ProfileSource,
+    ProofReceipt,
 )
 from apiforge.contracts.routing import RoutingDecision, RoutingPlan
 from apiforge.contracts.task import TaskSpec
@@ -47,6 +48,7 @@ class DeterministicProof:
     proofs: tuple[str, ...]
     missing: tuple[str, ...]
     run_ref: str | None = None
+    diagnostics: tuple[str, ...] = ()
 
 
 def _config_path() -> Path:
@@ -244,7 +246,50 @@ def needs_escalation(
     return tuple(triggers)
 
 
+PROOF_UNSTRUCTURED = "AF-ECONOMY-PROOF-UNSTRUCTURED"
+PROOF_HASH_MISMATCH = "AF-ECONOMY-PROOF-HASH-MISMATCH"
+PROOF_INVALID = "AF-ECONOMY-PROOF-INVALID"
+
+
+def _verified_receipts(
+    root: Path, steps: list[dict[str, Any]], diagnostics: list[str]
+) -> list[ProofReceipt]:
+    """Receipts whose artifact lies inside the allowed roots and re-hashes to its sha256."""
+    from pydantic import ValidationError
+
+    from apiforge.core.io import sha256_file
+    from apiforge.security.source_paths import (
+        AllowedRoots,
+        SourcePathError,
+        resolve_allowed_source,
+    )
+
+    roots = AllowedRoots.for_project(root)
+    verified: list[ProofReceipt] = []
+    for step in steps:
+        for raw in step.get("proofs") or ():
+            try:
+                receipt = ProofReceipt.model_validate(raw)
+                artifact = resolve_allowed_source(receipt.artifact_ref, roots, base=Path(root))
+            except (ValidationError, SourcePathError, TypeError) as exc:
+                diagnostics.append(f"{PROOF_INVALID}: {str(exc).splitlines()[0]}")
+                continue
+            if not artifact.is_file() or sha256_file(artifact) != receipt.sha256:
+                diagnostics.append(
+                    f"{PROOF_HASH_MISMATCH}: {receipt.proof_id} ({receipt.artifact_ref})"
+                )
+                continue
+            verified.append(receipt)
+    return verified
+
+
 def deterministic_proof(root: Path, spec: TaskSpec) -> DeterministicProof:
+    """L0 only on structured, re-hashed proof receipts; a textual mention is at most L1.
+
+    A step proves an ``expected_proofs`` entry when it carries a
+    ``ProofReceipt`` whose ``kind`` or ``proof_id`` equals the entry and whose
+    artifact exists inside the allowed roots with the declared sha256.
+    """
     expected = tuple(spec.expected_proofs)
     runs_dir = Path(root) / ".apiforge" / "tasks" / spec.id / "runs"
     if not expected or not runs_dir.is_dir():
@@ -261,16 +306,29 @@ def deterministic_proof(root: Path, spec: TaskSpec) -> DeterministicProof:
         if not isinstance(payload, dict) or "steps" not in payload or "run_id" in payload:
             continue
         steps = [item for item in payload.get("steps") or [] if isinstance(item, dict)]
-        ran = [json.dumps(item, sort_keys=True) for item in steps if item.get("status") == "ran"]
-        found = tuple(item for item in expected if any(item in text for text in ran))
+        ran = [item for item in steps if item.get("status") == "ran"]
+        diagnostics: list[str] = []
+        receipts = _verified_receipts(Path(root), ran, diagnostics)
+        identities = {receipt.kind for receipt in receipts} | {
+            receipt.proof_id for receipt in receipts
+        }
+        found = tuple(item for item in expected if item in identities)
         missing = tuple(item for item in expected if item not in found)
+        texts = [json.dumps(item, sort_keys=True) for item in ran]
+        mentioned = tuple(item for item in missing if any(item in text for text in texts))
+        diagnostics.extend(
+            f"{PROOF_UNSTRUCTURED}: {item!r} is only mentioned, not proven by a receipt"
+            for item in mentioned
+        )
         complete = (
             bool(steps)
             and len(ran) == len(steps)
             and payload.get("terminal") == "awaiting_supervision"
         )
-        level: LadderLevel | None = "L0" if complete and not missing else "L1" if found else None
-        return DeterministicProof(level, found, missing, path.name)
+        level: LadderLevel | None = (
+            "L0" if complete and not missing else "L1" if found or mentioned else None
+        )
+        return DeterministicProof(level, found, missing, path.name, tuple(diagnostics))
     return DeterministicProof(None, (), expected)
 
 

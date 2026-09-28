@@ -14,11 +14,12 @@ from apiforge.context.gateway.levels import (
     Candidate,
     Selection,
     fingerprint,
-    load_case,
     load_graph,
     parse_target,
     route_facts_for,
+    safe_input,
     select,
+    verified_case,
 )
 from apiforge.context.gateway.refs import CtxStore
 from apiforge.contracts.cache import CacheDecision
@@ -73,7 +74,7 @@ def build_capsule(
     intent = {"action": action, "target": target, **({"objective": objective} if objective else {})}
     scope = ContextScope(scope="target", root=".", target=target, impact=impact)
     budget = CapsuleBudget(context_bytes=budget_bytes, max_level=max_level)
-    case = load_case(case_path)
+    case = verified_case(case_path)
     if case is None:
         capsule = _degraded(root, intent, scope, budget, case_path)
         return _finish(root, capsule, [], verb, run_id, started)
@@ -132,8 +133,9 @@ def _selected(
     if not store.enabled:
         return select(root, case_path, case, target, impact), None
     inputs = case.get("inputs") or {}
-    contract_rel = _rel(root / str(inputs.get("contract", "")), root)
-    project = root / str(inputs.get("project", ""))
+    refused: list[str] = []
+    contract_rel = _rel(safe_input(root, inputs.get("contract", ""), refused), root)
+    project = safe_input(root, inputs.get("project", ""), refused)
     key = selection_cache.selection_key(target, impact, contract_rel, _rel(project, root))
     nodes, edges, graph = load_graph(root, case_path)
     probe = selection_cache.RootProbe(root, project, store, nodes, edges)

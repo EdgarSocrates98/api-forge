@@ -80,15 +80,58 @@ def parse_target(target: str) -> tuple[str, str]:
     return parts[0].upper(), parts[1]
 
 
-def load_case(case_dir: Path) -> dict[str, Any] | None:
-    manifest = case_dir / "case.json"
-    if not manifest.is_file():
+REFUSED_INPUT = Path(".apiforge") / "ctx" / "refused-input"
+
+
+def safe_input(root: Path, value: object, unresolved: list[str]) -> Path:
+    """Resolve a case input (``inputs.project``/``inputs.contract``) inside the allowed roots.
+
+    An empty value is the root itself. A refused value is reported and replaced
+    by a path that never exists, so nothing outside the roots is ever read.
+    """
+    from apiforge.security.source_paths import (
+        AllowedRoots,
+        SourcePathError,
+        resolve_allowed_source,
+    )
+
+    if not str(value or "").strip():
+        return Path(root)
+    try:
+        return resolve_allowed_source(value, AllowedRoots.for_project(root), base=Path(root))
+    except SourcePathError as exc:
+        unresolved.append(exc.note())
+        return Path(root) / REFUSED_INPUT
+
+
+def safe_source(root: Path, project: Path, value: object, unresolved: list[str]) -> Path | None:
+    """Resolve a fact ``source.path`` relative to the project, inside the allowed roots."""
+    from apiforge.security.source_paths import (
+        AllowedRoots,
+        SourcePathError,
+        resolve_allowed_source,
+    )
+
+    try:
+        return resolve_allowed_source(value, AllowedRoots.for_project(root), base=project)
+    except SourcePathError as exc:
+        unresolved.append(exc.note())
         return None
-    case = _read_json(manifest)
-    for name in ("api-ir.json", "facts.json", "findings.json"):
-        path = case_dir / name
-        case[name] = _read_json(path) if path.is_file() else {}
-    return case
+
+
+def verified_case(case_dir: Path) -> dict[str, Any] | None:
+    """Case artifacts through the case service only (containment + sha256 per artifact)."""
+    from apiforge.case.service import CaseIntegrityError, load_verified_case
+
+    try:
+        return load_verified_case(case_dir)
+    except CaseIntegrityError as exc:
+        raise GatewayError(
+            exc.code,
+            f"case {case_dir} failed integrity: {exc.path}",
+            field="case",
+            unlock="re-run `apiforge analyze` to rebuild the case; never edit case artifacts",
+        ) from exc
 
 
 def fingerprint(case: Mapping[str, Any], root: Path | None = None) -> dict[str, object]:
@@ -123,8 +166,8 @@ def select(
     method, path = parse_target(target)
     selection = Selection(fingerprint=fingerprint(case, root))
     inputs = case.get("inputs") or {}
-    contract_path = root / str(inputs.get("contract", ""))
-    project = root / str(inputs.get("project", ""))
+    contract_path = safe_input(root, inputs.get("contract", ""), selection.unresolved)
+    project = safe_input(root, inputs.get("project", ""), selection.unresolved)
     target_id = f"operation:{method} {path}"
     nodes, edges, key = load_graph(root, case_dir)
     if target_id not in {node.id for node in nodes}:
@@ -261,6 +304,7 @@ def graph_key(case_dir: Path) -> str:
 
 
 def load_graph(root: Path, case_dir: Path) -> tuple[list[Any], list[Any], str]:
+    verified_case(case_dir)
     key = graph_key(case_dir)
     out_dir = root / ".apiforge" / "ctx" / "graph" / key[:16]
     if not (out_dir / NODES_FILE).is_file():
@@ -376,9 +420,9 @@ def _handler(
     source = fact.get("source") or {}
     attrs = fact.get("attrs") or {}
     handler = str(attrs.get("function") or attrs.get("handler") or "").split(".")[-1]
-    file = project / str(source.get("path", ""))
     line = int(source.get("line") or 0)
-    if not file.is_file() or line < 1:
+    file = safe_source(root, project, source.get("path", ""), unresolved)
+    if file is None or not file.is_file() or line < 1:
         unresolved.append(f"handler-source-missing:{fact.get('fact_id')}")
         return None, handler
     located = _locate(project, file, line, handler)
@@ -500,9 +544,11 @@ __all__ = [
     "Selection",
     "fingerprint",
     "graph_key",
-    "load_case",
     "load_graph",
     "parse_target",
     "route_facts_for",
+    "safe_input",
+    "safe_source",
     "select",
+    "verified_case",
 ]

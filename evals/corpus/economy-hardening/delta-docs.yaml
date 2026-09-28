@@ -1,0 +1,4 @@
+id: delta-docs
+kind: delta
+path: docs/guide.md
+expect_degraded: false

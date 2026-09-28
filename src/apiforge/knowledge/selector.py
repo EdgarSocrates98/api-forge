@@ -9,6 +9,7 @@ falls back to the whole catalog.
 
 from __future__ import annotations
 
+import hashlib
 import re
 from collections.abc import Iterable
 from functools import lru_cache
@@ -79,6 +80,24 @@ def referenced_packs(triggers: dict[str, Any] | None = None) -> set[str]:
     return names
 
 
+def knowledge_generation(root: Path) -> str:
+    """Stat-only digest of every pack file; a pack edited on disk changes it.
+
+    In-process caches key on it, so a long-lived host (MCP server) never keeps
+    serving a catalog or passages that a knowledge refresh replaced.
+    """
+    hasher = hashlib.sha256()
+    base = Path(root)
+    if base.is_dir():
+        for path in sorted(base.rglob("*")):
+            if path.is_file() and path.suffix in {".md", ".yaml", ".yml"}:
+                stat = path.stat()
+                hasher.update(
+                    f"{path.relative_to(base).as_posix()}|{stat.st_mtime_ns}|{stat.st_size}\n".encode()
+                )
+    return hasher.hexdigest()
+
+
 def default_root(root: Path | None = None) -> Path:
     if root is not None:
         return Path(root)
@@ -91,7 +110,7 @@ def default_root(root: Path | None = None) -> Path:
 
 
 @lru_cache(maxsize=8)
-def _catalog(root: str) -> tuple[dict[str, Pack], dict[str, int]]:
+def _catalog(root: str, generation: str = "") -> tuple[dict[str, Pack], dict[str, int]]:
     packs = load_packs(Path(root))
     sizes = {
         name: sum(item.stat().st_size for item in (Path(root) / name).rglob("*") if item.is_file())
@@ -114,7 +133,8 @@ def select_expertise(
     root: Path | None = None,
 ) -> ExpertiseSelection:
     table = load_triggers()
-    packs, sizes = _catalog(str(default_root(root).resolve()))
+    resolved = default_root(root).resolve()
+    packs, sizes = _catalog(str(resolved), knowledge_generation(resolved))
     missing = sorted(referenced_packs(table) - set(packs))
     if missing:
         raise _invalid(f"triggers name packs that do not exist: {missing}")

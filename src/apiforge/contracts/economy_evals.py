@@ -55,6 +55,7 @@ class EconomyMatrix(VersionedContract):
     gates: dict[str, bool] = Field(default_factory=dict)
     passed: bool = False
     tokens: Literal["unresolved"] = "unresolved"
+    claim_scope: Literal["deterministic-safety-economy"] = "deterministic-safety-economy"
 
 
 class EvaluationGate(VersionedContract):

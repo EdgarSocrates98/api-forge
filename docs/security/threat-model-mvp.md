@@ -46,6 +46,9 @@ with their mitigations.
 | False `DONE` claim | `brief show` derives status from the task state machine — `DONE` exists only after `awaiting_supervision -> accepted` by a distinct actor with evidence; gaps, pending human action and open items are fields, not prose |
 | Context Gateway bypassing case integrity | the gateway, `evidence resolve` and `context delta` read cases only through `case.service.load_verified_case` (manifest, containment, sha256 per artifact); a tampered artifact refuses with `AF-CASE-HASH-MISMATCH` |
 | Out-of-root source read into `ctx://` (`../`, absolute, drive/UNC, symlink escape, undeclared repo) | one resolver (`security/source_paths.py`) confines every case/fact/graph path to the project root and declared workspace repositories after following symlinks; a refused ref is `AF-PATH-OUTSIDE-ROOT`, never opened or stored |
+| Uncounted shadow calls overspending across resume | shadow challengers are accounted by `ControlPlane.record_call` (`calls_by_kind.shadow`); `calls_used <= max_calls` is a contract invariant; the checkpoint copies the control plane count |
+| Partial token measurement claimed as observed | `economy stats` reports `token_coverage` (`complete`/`partial`/`unresolved`); `observed_tokens` is a number only when every eligible row is measured; lost auditable rows surface as `AF-ECONOMY-LEDGER-PERSIST` |
+| Early stop on a proof that was only mentioned | L0 requires a `ProofReceipt` whose artifact is inside the allowed roots and re-hashes; substring mentions reach L1 at most |
 
 ## Known limitations
 

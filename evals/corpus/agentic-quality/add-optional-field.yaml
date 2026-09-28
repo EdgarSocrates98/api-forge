@@ -1,0 +1,5 @@
+id: add-optional-field
+outcome: add an optional note field to the Order response
+risk: read_only
+ground_truth: compatible
+default_verdict: compatible

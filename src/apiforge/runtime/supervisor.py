@@ -1252,6 +1252,7 @@ async def execute_run(
             "debate_reasons": reasons,
             "human_gate": needs_gate,
             "errors": errors,
+            "unresolved": {"routing": list(routing.unresolved)},
         },
     )
     if economy_plan is not None and economy_block is not None:
@@ -1298,6 +1299,7 @@ async def execute_run(
         "economy": economy_block,
         "role_context": role_summary(role_plan) if role_plan is not None else None,
         "shadow": shadow_decision.model_dump(mode="json") if shadow_decision is not None else None,
+        "unresolved": {"routing": list(routing.unresolved)},
         "status": final_status,
         "run_dir": str(storage.directory),
     }

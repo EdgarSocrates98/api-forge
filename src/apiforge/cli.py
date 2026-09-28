@@ -3798,6 +3798,37 @@ def evals_economy_extras(
         raise typer.Exit(code=1)
 
 
+@evals_app.command("economy-hardening")
+def evals_economy_hardening(
+    corpus: Path = typer.Option(Path("evals/corpus/economy-hardening"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Path containment, global context budget, token coverage, phase and delta gates."""
+    from apiforge.evals.hardening import run_hardening
+
+    result = _run(lambda: run_hardening(corpus))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("agentic-quality")
+def evals_agentic_quality(
+    corpus: Path = typer.Option(Path("evals/corpus/agentic-quality"), "--corpus"),
+    responses_dir: Path | None = typer.Option(
+        None, "--responses-dir", help="Recorded outputs: <case_id>.json capability -> payload."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Recorded specialist verdicts vs ground truth under each profile (no model calls)."""
+    from apiforge.evals.agentic_quality import run_agentic_quality
+
+    result = _run(lambda: run_agentic_quality(corpus, responses_dir))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
 @evals_app.command("economy-freshness")
 def evals_economy_freshness(
     corpus: Path = typer.Option(Path("evals/corpus/economy-freshness"), "--corpus"),

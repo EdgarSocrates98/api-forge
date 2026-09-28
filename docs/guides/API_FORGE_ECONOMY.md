@@ -72,6 +72,27 @@ diretório de cache); `--no-cache` faz o mesmo por comando e produz saída
 idêntica. `APIFORGE_CACHE_HOME` habilita o tier compartilhado entre
 repositórios; todo objeto é re-hasheado na leitura.
 
+## Três classes de evidência
+
+Mantenha cada afirmação na sua classe:
+
+| Classe | Onde | O que prova |
+|---|---|---|
+| Benchmark determinístico | `evals economy`, `economy-routing`, `cache`, `economy-matrix` (`claim_scope: deterministic-safety-economy`), `economy-hardening` | correção de contrato, papéis obrigatórios, bytes e invariantes neste corpus |
+| Provider/tokens | `economy stats` com `token_coverage`, `economy report --transcript` | tokens só onde medidos; `partial` nunca é total observado |
+| Qualidade agentic end-to-end | `evals agentic-quality` (`recorded-agentic-outputs`, `--responses-dir`) | veredito gravado do especialista contra o ground truth em cada perfil |
+
+## Invariantes rígidas
+
+- Paths de case, fact e grafo ficam restritos ao projeto e aos repositórios
+  declarados no workspace (`AF-PATH-OUTSIDE-ROOT` por ref); cases são lidos só
+  por artefatos verificados (`AF-CASE-HASH-MISMATCH`).
+- `context_bytes` é global: pools por classe divididos entre instâncias; um
+  plano acima do envelope não pode ser construído.
+- Toda chamada ao provider, inclusive shadow challengers, é contada pelo
+  ControlPlane; checkpoint e resume veem o gasto real.
+- Parada L0 exige `ProofReceipt` estruturado e re-hasheado.
+
 ## Mudar política econômica
 
 Antes de alterar perfis, roteamento ou cortes:

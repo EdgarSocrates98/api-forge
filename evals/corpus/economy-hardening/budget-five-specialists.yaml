@@ -1,0 +1,4 @@
+id: budget-five-specialists
+kind: budget
+context_bytes: 16000
+roles: [specialist, specialist, specialist, specialist, specialist, reviewer, critic, referee]

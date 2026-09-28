@@ -7,7 +7,7 @@
 | **Feature** | API_FORGE_ECONOMY_ARCH_HARDENING |
 | **Date** | 2026-09-28 |
 | **Author** | define-agent |
-| **Status** | ✅ Complete (Designed) |
+| **Status** | ✅ Shipped |
 | **Clarity Score** | 14/15 |
 | **Source** | [BRAINSTORM](./BRAINSTORM_API_FORGE_ECONOMY_ARCH_HARDENING.md) · `prompt_evo_new_economy_arch.md` |
 | **Branch** | `codex/new-economy-arch` |

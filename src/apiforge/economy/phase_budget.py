@@ -131,12 +131,21 @@ def plan_phase_budgets(
                 status=status,  # type: ignore[arg-type]
             )
         )
+    exceeded = "AF-BUDGET-PHASE-EXCEEDED" in codes
     return PhaseBudgetPlan(
         profile=effective,
         total_calls=envelope.provider_calls,
         total_context_bytes=envelope.context_bytes,
         phases=tuple(rows),
-        status="unresolved" if "AF-BUDGET-PHASE-EXCEEDED" in codes else "ok",
+        status="unresolved" if exceeded else "ok",
+        quality_status="unresolved" if exceeded else "ok",
+        budget_status=(
+            "exceeded"
+            if exceeded
+            else "protected_overrun"
+            if "AF-BUDGET-PHASE-PROTECTED" in codes
+            else "ok"
+        ),
         codes=tuple(sorted(codes)),
     )
 

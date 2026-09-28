@@ -7,7 +7,7 @@
 | **Feature** | API_FORGE_ECONOMY_ARCH_HARDENING |
 | **Date** | 2026-09-28 |
 | **Author** | brainstorm-agent |
-| **Status** | ✅ Complete (Defined) |
+| **Status** | ✅ Shipped |
 | **Source** | `prompt_evo_new_economy_arch.md` (external review of `main`, verdict `REVIEW`) |
 | **Branch** | `codex/new-economy-arch` |
 

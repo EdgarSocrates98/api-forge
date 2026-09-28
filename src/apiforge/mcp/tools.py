@@ -855,6 +855,34 @@ def evals_gate(
     return out
 
 
+def evals_economy_hardening(
+    corpus: str = "evals/corpus/economy-hardening", detail_level: str = "normal"
+) -> dict[str, Any]:
+    """Path containment, global context budget, token coverage, phase and delta gates."""
+    from apiforge.evals.hardening import run_hardening
+
+    out: dict[str, Any] = _call(
+        "evals_economy_hardening", lambda: run_hardening(Path(corpus)), detail_level
+    )
+    return out
+
+
+def evals_agentic_quality(
+    corpus: str = "evals/corpus/agentic-quality",
+    responses_dir: str | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Recorded specialist verdicts vs ground truth under each profile (no model calls)."""
+    from apiforge.evals.agentic_quality import run_agentic_quality
+
+    out: dict[str, Any] = _call(
+        "evals_agentic_quality",
+        lambda: run_agentic_quality(Path(corpus), Path(responses_dir) if responses_dir else None),
+        detail_level,
+    )
+    return out
+
+
 def verify_plan(
     changed: list[str] | None = None,
     risk: str = "low",
@@ -1946,6 +1974,8 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     economy_roi,
     evals_replay,
     evals_gate,
+    evals_economy_hardening,
+    evals_agentic_quality,
     verify_plan,
     knowledge_search,
     evidence_resolve,

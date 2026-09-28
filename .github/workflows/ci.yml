@@ -5,6 +5,10 @@ on:
   pull_request:
     branches:
       - main
+  # Backstop: squash commits merged into main by auto-merge enabled with the
+  # workflow token do not start workflows, so main is validated daily as well.
+  schedule:
+    - cron: "17 3 * * *"
   workflow_dispatch:
 
 permissions:
@@ -166,10 +170,19 @@ jobs:
 
       - name: Request GitHub auto-merge
         env:
-          GH_TOKEN: ${{ github.token }}
+          PR_TOKEN: ${{ secrets.APIFORGE_PR_TOKEN }}
+          WORKFLOW_TOKEN: ${{ github.token }}
           APIFORGE_HOST_APPROVED: "true"
         run: |
           set -euo pipefail
+          # A merge enabled with the workflow token does not trigger CI on main;
+          # the least-privilege PR token (when configured) does.
+          if [ -n "${PR_TOKEN:-}" ]; then
+            export GH_TOKEN="$PR_TOKEN"
+          else
+            export GH_TOKEN="$WORKFLOW_TOKEN"
+            echo "::warning::APIFORGE_PR_TOKEN is not set; the merged commit will only be validated by the scheduled run"
+          fi
           python scripts/github_pr_host.py \
             --operation enable_auto_merge \
             --repository "${GITHUB_REPOSITORY}" \

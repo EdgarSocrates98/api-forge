@@ -8,7 +8,7 @@
 | **Date** | 2026-09-28 |
 | **Author** | design-agent |
 | **DEFINE** | [DEFINE_API_FORGE_ECONOMY_ARCH_HARDENING.md](./DEFINE_API_FORGE_ECONOMY_ARCH_HARDENING.md) |
-| **Status** | Ready for Build |
+| **Status** | ✅ Shipped |
 | **Branch** | `codex/new-economy-arch` |
 
 ---

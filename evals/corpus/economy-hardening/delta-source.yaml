@@ -1,0 +1,4 @@
+id: delta-source
+kind: delta
+path: src/payment/service.py
+expect_degraded: true

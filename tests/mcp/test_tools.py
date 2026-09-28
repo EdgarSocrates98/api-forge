@@ -63,6 +63,8 @@ def test_tools_export_all_expected_verbs() -> None:
         "economy_roi",
         "evals_replay",
         "evals_gate",
+        "evals_economy_hardening",
+        "evals_agentic_quality",
         "verify_plan",
         "knowledge_search",
         "evidence_resolve",

@@ -113,7 +113,7 @@ class DeltaSlice(VersionedContract):
     capsule_targets: tuple[str, ...] = ()
     invalidated: tuple[CacheDecision, ...] = ()
     unresolved: tuple[str, ...] = ()
-    status: Literal["ready", "unresolved"] = "ready"
+    status: Literal["ready", "degraded", "unresolved"] = "ready"
 
 
 __all__ = [

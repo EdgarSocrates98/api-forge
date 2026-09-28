@@ -65,6 +65,9 @@ the verifier, unresolved gaps and next human action.
   recommendation fields, metrics, receipt and unresolved provider limitations;
 - every refusal must preserve an `AF-*` code, `field` and `unlock` in CLI/MCP
   output and the code must be cataloged;
+- GitHub ruleset changes are planned with `scripts/github_ruleset_plan.py`
+  (read-only) and applied by the owner; see
+  `docs/guides/API_FORGE_GITHUB_GOVERNANCE.en.md`;
 - the CI `open-green-pr` job is the only PR-creation boundary; it requires an
   explicitly configured least-privilege token and never merges or deploys;
 - validate JUnit/Markdown publisher output and the local IDE/UI host when the

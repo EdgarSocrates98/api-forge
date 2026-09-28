@@ -228,6 +228,12 @@ workspace repositories (`AF-PATH-OUTSIDE-ROOT`). Certification evals run
 production code and pass only above an absolute floor. Full reference:
 [economy guide](API_FORGE_ECONOMY.en.md).
 
+### 7.4 GitHub governance
+
+Merge governance (the `protect` ruleset, required checks and CODEOWNERS):
+[GitHub governance](API_FORGE_GITHUB_GOVERNANCE.en.md). The plan comes from
+`scripts/github_ruleset_plan.py` and is applied by the repository owner.
+
 ## 8. Capabilities and external evidence
 
 ```bash

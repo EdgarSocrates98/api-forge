@@ -135,7 +135,9 @@ external systems must be accessed through explicit adapters and receipts.
 - **delivered:** economy metrics — measured bytes per run and source, tokens
   observed with a transcript, cache hits, per-role ROI and an economy matrix
   with a regression gate;
-- **delivered (economy hardening 1–2):** confined source paths, contract
+- **delivered (economy hardening 1–3, program closed):** benchmark-identity
+  baselines, fail-closed token policy, CODEOWNERS and a read-only ruleset plan
+  ([GitHub governance](guides/API_FORGE_GITHUB_GOVERNANCE.en.md)); confined source paths, contract
   budget invariants, shadow call accounting, token coverage, structured proofs
   and certification evals that run production code with absolute floors;
 - export to Neptune only through an approved adapter, keeping the local graph

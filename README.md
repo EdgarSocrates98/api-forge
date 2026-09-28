@@ -409,6 +409,10 @@ while refusal codes and `fact_id`s survive.
 | `apiforge mcp surface [--surface full/compact]`, `apiforge-mcp --surface compact` or `--host claude` | `ToolSurface/v1`: measured tool bytes; compact MCP = six gateways, all tools reachable |
 | `apiforge agentops projection --host <host>` | `HostProjection/v1`: declared surface/output per host plus a verb-first map |
 | `apiforge evals tool-economy` | 10 cases: compact output lossless ≤ 65%, slicers recall 1.0 ≤ 20%, compact surface ≤ 25%, discover top-5 |
+| `apiforge evals economy-matrix [--out report.json]` | `EconomyMatrix/v1`: 16 canonical contract changes × 3 profiles; quality, evidence, cost, context and latency kept apart; mutants and holdout gated |
+| `apiforge evals gate --baseline A --candidate B` | `EvaluationGate/v1`: ship only with zero safety regression and quality regressions within the tolerance |
+| `apiforge evals replay --corpus evals/corpus/economy-replay [--profile P]` | `ReplayReport/v1`: stored decisions re-planned under the current policy, no provider calls |
+| `apiforge economy roi --root R` | `RoleROI/v1`: calls, facts added and outcome changes of each extra capability |
 | `apiforge-mcp` | MCP server for the read/compose verbs (needs `pip install apiforge[mcp]`; every tool takes `detail_level`) |
 | `apiforge collect lambda --function-name X --out dump/` | Fetch Lambda config into a dump (Code.Location never persisted) |
 | `apiforge collect sqs\|sns\|eventbridge\|iam-role\|cognito\|waf ... --out dump/` | Messaging/identity collectors — same offline-dump contract |

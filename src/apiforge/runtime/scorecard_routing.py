@@ -37,6 +37,9 @@ def classify_lane(
         return "unresolved", (f"scorecard-{scorecard.freshness_state}",)
     if scorecard.freshness_state != "fresh":
         return "challenger", ("scorecard-freshness-unknown",)
+    if policy.quality_floor is not None and scorecard.quality_score < policy.quality_floor:
+        # §35: quality is a constraint — below the floor a candidate does not compete on cost.
+        return "unresolved", ("quality-below-floor",)
     if policy.require_quality_promoted and not scorecard.quality_promoted:
         return "challenger", ("quality-not-promoted",)
     if scorecard.evaluation_count < policy.min_evaluations:
@@ -91,6 +94,14 @@ def assess_scorecard_routing(
             if scorecard is not None and scorecard.freshness_state in {"stale", "unresolved"}:
                 unresolved.add(f"{candidate.capability}:scorecard-{scorecard.freshness_state}")
 
+    if policy.quality_floor is not None:
+        # §34: among candidates that satisfy the floor, cost is the optimization.
+        costs: dict[str, float | None] = {}
+        for item in candidates:
+            card = _scorecard_for(item, scorecards)
+            costs[item.capability] = card.observed_cost if card is not None else None
+        position = {name: index for index, name in enumerate(champions)}
+        champions.sort(key=lambda name: (costs[name] is None, costs[name] or 0.0, position[name]))
     selected_challengers = tuple(challengers[: policy.challenger_slots])
     selected_set = set(selected_challengers)
     ordered = tuple(

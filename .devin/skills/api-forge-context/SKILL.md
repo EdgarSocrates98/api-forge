@@ -68,6 +68,11 @@ apiforge context gc [--apply]
 - Falha de teste ou CI: `apiforge slice tests --input <log>` / `apiforge slice log --input <log>`; expanda o `log_ref` só se precisar.
 - MCP compacto: `apiforge-mcp --surface compact` expõe 6 gateways; ache a ferramenta com `apiforge_discover` e execute com `apiforge_call`.
 
+## Mudar política econômica
+
+- Antes de alterar perfis, roteamento ou cortes: `apiforge evals economy-matrix --out antes.json`, aplique a mudança, gere `depois.json` e rode `apiforge evals gate --baseline antes.json --candidate depois.json`; só siga com `ship`.
+- `apiforge evals replay --corpus evals/corpus/economy-replay` mostra o efeito em runs guardados sem chamar provedor; `apiforge economy roi` mostra se agentes extras mudam o resultado.
+
 ## Graphify
 
 Relacione artefatos, operações, handlers, bancos, regras, findings, tasks, testes, traces, decisões e releases por edges de dependência, implementação, evidência, impacto, violação e verificação.

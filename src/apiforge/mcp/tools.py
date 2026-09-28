@@ -810,6 +810,51 @@ def agentops_projection(host: str, detail_level: str = "normal") -> dict[str, An
     return out
 
 
+def economy_roi(root: str = ".", detail_level: str = "normal") -> dict[str, Any]:
+    """Per extra capability: calls, facts and unresolved added, outcome changed vs primary."""
+    from apiforge.economy.roi import role_roi
+
+    out: dict[str, Any] = _call("economy_roi", lambda: role_roi(Path(root)), detail_level)
+    return out
+
+
+def evals_replay(
+    root: str | None = None,
+    corpus: str | None = None,
+    profile: str | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Re-plan stored runs under the current policy, without providers."""
+    from apiforge.evals.replay import replay
+
+    out: dict[str, Any] = _call(
+        "evals_replay",
+        lambda: replay(
+            root=Path(root) if root else None,
+            corpus=Path(corpus) if corpus else None,
+            profile=profile,
+        ),
+        detail_level,
+    )
+    return out
+
+
+def evals_gate(
+    baseline: str, candidate: str, max_quality_regression: int = 0, detail_level: str = "normal"
+) -> dict[str, Any]:
+    """Ship/reject an economy change from two EconomyMatrix/v1 reports."""
+    from apiforge.evals.gate import gate_files
+
+    out: dict[str, Any] = _call(
+        "evals_gate",
+        lambda: gate_files(
+            Path(baseline), Path(candidate), max_quality_regression=max_quality_regression
+        ),
+        detail_level,
+    )
+    return out
+
+
 def context_expand(
     uri: str, root: str = ".", run_id: str | None = None, detail_level: str = "normal"
 ) -> dict[str, Any]:
@@ -1744,6 +1789,9 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     slice_log,
     mcp_surface,
     agentops_projection,
+    economy_roi,
+    evals_replay,
+    evals_gate,
     graph_query,
     graph_impact,
     graph_trace,

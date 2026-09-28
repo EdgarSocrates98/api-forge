@@ -44,6 +44,13 @@ from apiforge.contracts.economy import (
     RiskClassification,
     RunLedgerEntry,
 )
+from apiforge.contracts.economy_evals import (
+    EconomyMatrix,
+    EvaluationGate,
+    InformationGain,
+    ReplayReport,
+    RoleROI,
+)
 from apiforge.contracts.evidence import EvidenceRef
 from apiforge.contracts.graph import GraphEdge, GraphExport, GraphNode
 from apiforge.contracts.graph_impact import (
@@ -345,6 +352,11 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "ErrorSlice/v1": ErrorSlice,
     "ToolSurface/v1": ToolSurface,
     "HostProjection/v1": HostProjection,
+    "EconomyMatrix/v1": EconomyMatrix,
+    "EvaluationGate/v1": EvaluationGate,
+    "ReplayReport/v1": ReplayReport,
+    "RoleROI/v1": RoleROI,
+    "InformationGain/v1": InformationGain,
 }
 
 

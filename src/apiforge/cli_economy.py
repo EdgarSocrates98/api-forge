@@ -35,6 +35,17 @@ def register(economy_app: typer.Typer) -> None:
 
         _echo_json(_run(lambda: explain(root, run_id)), detail_level)
 
+    @economy_app.command("roi")
+    def economy_roi(
+        root: Path = typer.Option(Path("."), "--root"),
+        detail_level: str = typer.Option("normal", "--detail-level"),
+    ) -> None:
+        """Per extra capability: calls, facts and unresolved added, outcome changed vs primary."""
+        from apiforge.cli import _echo_json, _run
+        from apiforge.economy.roi import role_roi
+
+        _echo_json(_run(lambda: role_roi(root)), detail_level)
+
 
 def _with_tokens(payload: dict[str, object], transcript: Path | None) -> dict[str, object]:
     if transcript is None:

@@ -559,6 +559,23 @@ arrays only (`diff --name-status`, `show`) and never mutates.
 | `AF-DELTA-REF-INVALID` | `git diff` refused `--base`/`--head`; unlock: pass refs that exist (`git rev-parse <ref>`) |
 | `AF-EVALS-INVALID` | an eval corpus is empty, has duplicate ids or a mutation that does not apply; unlock: fix the corpus yaml |
 
+## Economy evals (`evals economy-matrix`, `evals gate`, `evals replay`, `economy roi`)
+
+The matrix runs canonical contract changes under the three profiles and keeps
+quality, evidence, cost, context and latency on separate axes. An economy
+change ships only through `evals gate`: any safety regression rejects,
+quality regressions are tolerated only up to `--max-quality-regression`
+(default 0), and holdout or mutation regressions reject. `evals replay`
+re-plans stored decisions under the current policy without providers.
+`ScorecardRoutingPolicy.quality_floor` (opt-in) excludes candidates below the
+floor (`quality-below-floor`) and orders champions by observed cost.
+
+| Code | Meaning |
+|---|---|
+| `AF-EVALS-GATE-INVALID` | a report passed to `evals gate` is not `EconomyMatrix/v1`; unlock: use `evals economy-matrix --out` |
+| `AF-EVALS-GATE-MISMATCH` | the two reports cover different case × profile rows; unlock: run both on the same corpus |
+| `AF-REPLAY-RUN-INCOMPLETE` | replay reason: a stored run lacks its decision, economy plan or task spec; reported unresolved, never guessed |
+
 ## Tool/host economy (`--output`, `slice tests`, `slice log`, `mcp surface`, `agentops projection`, `apiforge-mcp --surface/--host`, `evals tool-economy`)
 
 `--output compact` (or `APIFORGE_OUTPUT=compact`) minifies payloads and drops

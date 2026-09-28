@@ -43,6 +43,7 @@ from apiforge.runtime.economy import (
     validate_profile,
 )
 from apiforge.runtime.guardrails import validate_agent_payload
+from apiforge.runtime.information_gain import assess as assess_gain
 from apiforge.runtime.policy import (
     load_policy,
     requires_critic,
@@ -1078,6 +1079,9 @@ async def execute_run(
             break
 
     reserve_left = policy.max_calls - control.get(control_run.run_id).calls_used
+    gain = assess_gain(
+        artifacts, float((economy_config or {}).get("triggers", {}).get("low_confidence", 0.7))
+    )
     if economy_plan is not None:
         escalated = await _escalate(
             economy_plan,
@@ -1175,6 +1179,8 @@ async def execute_run(
         if economy_plan is not None
         else None
     )
+    if economy_block is not None:
+        economy_block["information_gain"] = gain.model_dump(mode="json")
     storage.save_run(run)
     storage.json(
         "summary.json",

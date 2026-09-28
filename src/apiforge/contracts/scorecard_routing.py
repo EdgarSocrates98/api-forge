@@ -22,6 +22,7 @@ class ScorecardRoutingPolicy(VersionedContract):
     challenger_slots: int = Field(default=1, ge=0, le=8)
     require_quality_promoted: bool = True
     stale_behavior: StaleScorecardBehavior = "unresolved"
+    quality_floor: float | None = Field(default=None, ge=0, le=1)
 
 
 class ScorecardCandidateAssessment(VersionedContract):

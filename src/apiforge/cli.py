@@ -3702,6 +3702,63 @@ def evals_tool_economy(
         raise typer.Exit(code=1)
 
 
+@evals_app.command("economy-matrix")
+def evals_economy_matrix(
+    corpus: Path = typer.Option(Path("evals/corpus/economy-matrix"), "--corpus"),
+    repo_root: Path = typer.Option(Path("."), "--repo-root", help="Where fixture paths resolve."),
+    out: Path | None = typer.Option(None, "--out", help="Write the EconomyMatrix/v1 report."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Canonical tasks x economy/balanced/deep with quality, evidence, cost, context, latency apart."""
+    from apiforge.evals.matrix import run_matrix
+
+    def work() -> dict[str, object]:
+        report = run_matrix(corpus, repo_root)
+        if out is not None:
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_bytes((report.model_dump_json(indent=2) + "\n").encode("utf-8"))
+        return report.model_dump(mode="json")
+
+    result = _run(work)
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("gate")
+def evals_gate_cmd(
+    baseline: Path = typer.Option(..., "--baseline", help="EconomyMatrix/v1 before the change."),
+    candidate: Path = typer.Option(..., "--candidate", help="EconomyMatrix/v1 after the change."),
+    max_quality_regression: int = typer.Option(0, "--max-quality-regression", min=0),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Ship only without quality, safety, holdout or mutation regression; exit 1 on reject."""
+    from apiforge.evals.gate import gate_files
+
+    result = _run(
+        lambda: gate_files(baseline, candidate, max_quality_regression=max_quality_regression)
+    )
+    _echo_json(result, detail_level)
+    if getattr(result, "decision", "reject") != "ship":
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("replay")
+def evals_replay_cmd(
+    root: Path | None = typer.Option(None, "--root", help="Replay stored runs under a root."),
+    corpus: Path | None = typer.Option(None, "--corpus", help="Replay stored run bundles."),
+    profile: str | None = typer.Option(None, "--profile", help="Re-plan under this profile."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Re-plan stored decisions under the current policy; exit 1 if a required role is removed."""
+    from apiforge.evals.replay import replay
+
+    result = _run(lambda: replay(root=root, corpus=corpus, profile=profile))
+    _echo_json(result, detail_level)
+    if not getattr(result, "passed", False):
+        raise typer.Exit(code=1)
+
+
 @contract_intel_app.command("impact")
 def contract_intel_impact(
     protocol: str = typer.Option(..., "--protocol", help="openapi or grpc."),

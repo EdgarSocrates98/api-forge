@@ -856,13 +856,17 @@ def evals_gate(
 
 
 def evals_economy_hardening(
-    corpus: str = "evals/corpus/economy-hardening", detail_level: str = "normal"
+    corpus: str = "evals/corpus/economy-hardening",
+    repo_root: str = ".",
+    detail_level: str = "normal",
 ) -> dict[str, Any]:
-    """Path containment, global context budget, token coverage, phase and delta gates."""
+    """Path containment, class-pool budget, tokens, phase and delta gates on production code."""
     from apiforge.evals.hardening import run_hardening
 
     out: dict[str, Any] = _call(
-        "evals_economy_hardening", lambda: run_hardening(Path(corpus)), detail_level
+        "evals_economy_hardening",
+        lambda: run_hardening(Path(corpus), Path(repo_root)),
+        detail_level,
     )
     return out
 
@@ -870,14 +874,21 @@ def evals_economy_hardening(
 def evals_agentic_quality(
     corpus: str = "evals/corpus/agentic-quality",
     responses_dir: str | None = None,
+    min_accuracy: float = 1.0,
+    baseline: str | None = None,
     detail_level: str = "normal",
 ) -> dict[str, Any]:
-    """Recorded specialist verdicts vs ground truth under each profile (no model calls)."""
+    """Recorded specialist verdicts vs ground truth: absolute floor + non-regression gates."""
     from apiforge.evals.agentic_quality import run_agentic_quality
 
     out: dict[str, Any] = _call(
         "evals_agentic_quality",
-        lambda: run_agentic_quality(Path(corpus), Path(responses_dir) if responses_dir else None),
+        lambda: run_agentic_quality(
+            Path(corpus),
+            Path(responses_dir) if responses_dir else None,
+            min_accuracy=min_accuracy,
+            baseline=Path(baseline) if baseline else None,
+        ),
         detail_level,
     )
     return out

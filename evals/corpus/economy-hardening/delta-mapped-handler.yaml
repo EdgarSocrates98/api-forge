@@ -1,5 +1,5 @@
-id: delta-docs
+id: delta-mapped-handler
 kind: delta
-path: docs/guide.md
+path: proj/app/routes/payments.py
 expect_status: ready
 expect_unmapped_source: false

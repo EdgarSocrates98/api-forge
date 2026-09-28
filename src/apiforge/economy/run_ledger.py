@@ -10,8 +10,11 @@ from __future__ import annotations
 
 import json
 from collections.abc import Iterator
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
+
+import yaml
 
 from apiforge.contracts.base import ContractError
 from apiforge.contracts.economy import RunLedgerEntry
@@ -62,18 +65,56 @@ def append(root: Path, entry: RunLedgerEntry, *, auditable: bool = False) -> boo
     return True
 
 
-def persist_failures(root: Path) -> int:
+def persist_failures(root: Path, run_id: str | None = None) -> int:
+    """Lost auditable rows, for one run when ``run_id`` is given, else for the whole root."""
     marker = ledger_path(root).parent / FAILURES_NAME
     try:
-        return sum(1 for line in marker.read_text(encoding="utf-8").splitlines() if line.strip())
+        lines = [line for line in marker.read_text(encoding="utf-8").splitlines() if line.strip()]
     except OSError:
         return 0
+    if run_id is None:
+        return len(lines)
+    count = 0
+    for line in lines:
+        try:
+            row = json.loads(line)
+        except ValueError:
+            continue
+        if isinstance(row, dict) and row.get("run_id") == run_id:
+            count += 1
+    return count
+
+
+ELIGIBILITY_FILE = Path(__file__).resolve().parents[1] / "rules" / "token_eligibility.yaml"
+
+
+@lru_cache(maxsize=2)
+def eligible_prefixes(path: str = str(ELIGIBILITY_FILE)) -> tuple[str, ...]:
+    try:
+        raw = yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}
+        prefixes = raw.get("verb_prefixes")
+        if not isinstance(prefixes, list) or not all(isinstance(item, str) for item in prefixes):
+            raise ValueError("verb_prefixes must be a list of strings")
+    except (OSError, yaml.YAMLError, ValueError, AttributeError) as exc:
+        raise EconomyError(
+            "AF-ECONOMY-TOKEN-RULE-INVALID",
+            f"{path}: {exc}",
+            field="rules",
+            unlock="restore rules/token_eligibility.yaml",
+        ) from exc
+    return tuple(prefixes)
+
+
+def is_token_eligible(row: RunLedgerEntry) -> bool:
+    """Model-facing rows (declared verb prefixes) or any row that carries measured tokens."""
+    return row.cost.observed_tokens is not None or row.verb.startswith(eligible_prefixes())
 
 
 def token_coverage(rows: list[RunLedgerEntry]) -> dict[str, Any]:
-    """Every attribution row is eligible; a total is ``observed`` only when all are measured."""
-    eligible = len(rows)
-    observed = sum(1 for row in rows if row.cost.observed_tokens is not None)
+    """Only token-eligible rows count; a total is ``observed`` only when all of them are measured."""
+    eligible_rows = [row for row in rows if is_token_eligible(row)]
+    eligible = len(eligible_rows)
+    observed = sum(1 for row in eligible_rows if row.cost.observed_tokens is not None)
     if observed == 0:
         status = "unresolved"
     elif observed == eligible:
@@ -119,7 +160,8 @@ def stats(root: Path, *, run_id: str | None = None) -> dict[str, Any]:
             _add(bucket, row)
     attributed = total["context_bytes"] + total["tool_result_bytes"]
     coverage = token_coverage(rows)
-    failures = persist_failures(root)
+    failures_global = persist_failures(root)
+    failures = persist_failures(root, run_id) if run_id is not None else failures_global
     return {
         "schema": "apiforge/economy-stats/v1",
         "runs": len(by_run),
@@ -136,6 +178,8 @@ def stats(root: Path, *, run_id: str | None = None) -> dict[str, Any]:
         "token_coverage": coverage,
         "tokens_unresolved": coverage["status"] != "complete",
         "persist_failures": failures,
+        "persist_failures_for_run": failures if run_id is not None else None,
+        "persist_failures_global": failures_global,
         "unresolved": [PERSIST_FAILURE] if failures else [],
         "diagnostics": {"malformed_lines": legacy["malformed_lines"]},
         "ledger": str(ledger_path(root)),

@@ -15,6 +15,7 @@ routed through each profile, not live model quality.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import tempfile
 from collections.abc import Mapping
@@ -143,7 +144,50 @@ def _run_case(
     }
 
 
-def run_agentic_quality(corpus: Path, responses_dir: Path | None = None) -> dict[str, Any]:
+def _refusal(code: str, detail: str, field: str, unlock: str) -> ContractError:
+    error = ContractError(code, detail)
+    error.field = field  # type: ignore[attr-defined]
+    error.unlock = unlock  # type: ignore[attr-defined]
+    return error
+
+
+def load_baseline(path: Path) -> tuple[dict[str, float], str]:
+    """A previous agentic-quality report: its per-profile accuracy and sha256."""
+    try:
+        raw = Path(path).read_bytes()
+        data = json.loads(raw.decode("utf-8"))
+        if not isinstance(data, dict) or data.get("schema") != "apiforge/agentic-quality-eval/v1":
+            raise ValueError("not an apiforge/agentic-quality-eval/v1 report")
+        accuracy = {str(key): float(value) for key, value in dict(data["accuracy"]).items()}
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        raise _refusal(
+            "AF-EVALS-BASELINE-INVALID",
+            f"{path}: {exc}",
+            "baseline",
+            "pass a report saved from `apiforge evals agentic-quality > baseline.json`",
+        ) from exc
+    return accuracy, hashlib.sha256(raw).hexdigest()
+
+
+def run_agentic_quality(
+    corpus: Path,
+    responses_dir: Path | None = None,
+    *,
+    min_accuracy: float = 1.0,
+    baseline: Path | None = None,
+) -> dict[str, Any]:
+    """Gate = absolute floor per profile AND non-regression (vs deep, vs a baseline).
+
+    Relative gates alone would pass when every profile is equally wrong.
+    """
+    if not 0.0 <= float(min_accuracy) <= 1.0:
+        raise _refusal(
+            "AF-EVALS-INPUT-INVALID",
+            f"min_accuracy {min_accuracy} is outside [0, 1]",
+            "min_accuracy",
+            "pass a value between 0 and 1 (1.0 for the canonical corpus)",
+        )
+    baseline_accuracy, baseline_sha = load_baseline(baseline) if baseline else ({}, None)
     cases = load_cases(Path(corpus))
     rows: list[dict[str, Any]] = []
     with tempfile.TemporaryDirectory(prefix="af-agentic-quality-") as tmp:
@@ -159,16 +203,23 @@ def run_agentic_quality(corpus: Path, responses_dir: Path | None = None) -> dict
             round(sum(row["correct"] for row in mine) / len(mine), 4) if mine else 0.0
         )
     blocked = [row for row in rows if row["status"] == "BLOCKED"]
-    gates = {
-        "economy_not_below_deep": accuracy["economy"] >= accuracy["deep"],
-        "balanced_not_below_deep": accuracy["balanced"] >= accuracy["deep"],
-        "every_case_answered": all(row["answered"] for row in rows),
-        "no_blocked_runs": not blocked,
+    gates: dict[str, bool] = {
+        f"{profile}_quality_floor": accuracy[profile] >= min_accuracy for profile in PROFILES
     }
+    gates["economy_not_below_deep"] = accuracy["economy"] >= accuracy["deep"]
+    gates["balanced_not_below_deep"] = accuracy["balanced"] >= accuracy["deep"]
+    for profile in PROFILES:
+        if profile in baseline_accuracy:
+            gates[f"{profile}_not_below_baseline"] = accuracy[profile] >= baseline_accuracy[profile]
+    gates["every_case_answered"] = all(row["answered"] for row in rows)
+    gates["no_blocked_runs"] = not blocked
     return {
         "schema": "apiforge/agentic-quality-eval/v1",
         "claim_scope": CLAIM_SCOPE,
         "cases": len(cases),
+        "min_accuracy": min_accuracy,
+        "baseline_sha256": baseline_sha,
+        "baseline_accuracy": baseline_accuracy or None,
         "accuracy": accuracy,
         "gates": gates,
         "passed": all(gates.values()),
@@ -176,4 +227,4 @@ def run_agentic_quality(corpus: Path, responses_dir: Path | None = None) -> dict
     }
 
 
-__all__ = ["CLAIM_SCOPE", "load_cases", "run_agentic_quality"]
+__all__ = ["CLAIM_SCOPE", "load_baseline", "load_cases", "run_agentic_quality"]

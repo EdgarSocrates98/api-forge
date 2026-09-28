@@ -79,8 +79,8 @@ Mantenha cada afirmação na sua classe:
 | Classe | Onde | O que prova |
 |---|---|---|
 | Benchmark determinístico | `evals economy`, `economy-routing`, `cache`, `economy-matrix` (`claim_scope: deterministic-safety-economy`), `economy-hardening` | correção de contrato, papéis obrigatórios, bytes e invariantes neste corpus |
-| Provider/tokens | `economy stats` com `token_coverage`, `economy report --transcript` | tokens só onde medidos; `partial` nunca é total observado |
-| Qualidade agentic end-to-end | `evals agentic-quality` (`recorded-agentic-outputs`, `--responses-dir`) | veredito gravado do especialista contra o ground truth em cada perfil |
+| Provider/tokens | `economy stats` com `token_coverage`, `economy report --transcript` | tokens só onde medidos; só linhas que falam com modelo (`rules/token_eligibility.yaml`) são elegíveis; `partial` nunca é total observado |
+| Qualidade agentic end-to-end | `evals agentic-quality` (`recorded-agentic-outputs`, `--responses-dir`, `--min-accuracy`, `--baseline`) | veredito gravado do especialista contra o ground truth em cada perfil; só passa acima de um piso absoluto e sem regredir em relação ao deep ou a um baseline |
 
 ## Invariantes rígidas
 
@@ -92,6 +92,8 @@ Mantenha cada afirmação na sua classe:
 - Toda chamada ao provider, inclusive shadow challengers, é contada pelo
   ControlPlane; checkpoint e resume veem o gasto real.
 - Parada L0 exige `ProofReceipt` estruturado e re-hasheado.
+- Os evals de hardening executam o código de produção (`plan_roles`,
+  `build_delta`); um oracle nunca reimplementa a lógica que protege.
 
 ## Mudar política econômica
 

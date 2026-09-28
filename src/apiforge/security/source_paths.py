@@ -84,4 +84,23 @@ def resolve_allowed_source(candidate: object, roots: AllowedRoots, *, base: Path
     raise SourcePathError(raw, "outside allowed roots (symlinks are followed)")
 
 
-__all__ = ["OUTSIDE_ROOT", "AllowedRoots", "SourcePathError", "resolve_allowed_source"]
+def confine_dir(root: Path, value: object, *, field: str = "case_dir") -> Path:
+    """Caller-supplied directories (``--case-dir``, ``--case``) obey the same trust boundary.
+
+    Agents and MCP hosts pass these paths too; outside the allowed roots the
+    command is refused (a case is required input, so there is nothing to serve).
+    """
+    try:
+        return resolve_allowed_source(value, AllowedRoots.for_project(root), base=Path(root))
+    except SourcePathError as exc:
+        exc.field = field
+        raise
+
+
+__all__ = [
+    "OUTSIDE_ROOT",
+    "AllowedRoots",
+    "SourcePathError",
+    "confine_dir",
+    "resolve_allowed_source",
+]

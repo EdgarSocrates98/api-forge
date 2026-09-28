@@ -3801,12 +3801,13 @@ def evals_economy_extras(
 @evals_app.command("economy-hardening")
 def evals_economy_hardening(
     corpus: Path = typer.Option(Path("evals/corpus/economy-hardening"), "--corpus"),
+    repo_root: Path = typer.Option(Path("."), "--repo-root", help="Where fixture paths resolve."),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
-    """Path containment, global context budget, token coverage, phase and delta gates."""
+    """Path containment, class-pool budget, tokens, phase and delta gates on production code."""
     from apiforge.evals.hardening import run_hardening
 
-    result = _run(lambda: run_hardening(corpus))
+    result = _run(lambda: run_hardening(corpus, repo_root))
     _echo_json(result, detail_level)
     if isinstance(result, dict) and not result.get("passed"):
         raise typer.Exit(code=1)
@@ -3818,12 +3819,22 @@ def evals_agentic_quality(
     responses_dir: Path | None = typer.Option(
         None, "--responses-dir", help="Recorded outputs: <case_id>.json capability -> payload."
     ),
+    min_accuracy: float = typer.Option(
+        1.0, "--min-accuracy", help="Absolute accuracy floor every profile must reach."
+    ),
+    baseline: Path | None = typer.Option(
+        None, "--baseline", help="Previous agentic-quality report; no profile may regress."
+    ),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
     """Recorded specialist verdicts vs ground truth under each profile (no model calls)."""
     from apiforge.evals.agentic_quality import run_agentic_quality
 
-    result = _run(lambda: run_agentic_quality(corpus, responses_dir))
+    result = _run(
+        lambda: run_agentic_quality(
+            corpus, responses_dir, min_accuracy=min_accuracy, baseline=baseline
+        )
+    )
     _echo_json(result, detail_level)
     if isinstance(result, dict) and not result.get("passed"):
         raise typer.Exit(code=1)

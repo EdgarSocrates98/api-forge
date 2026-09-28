@@ -79,8 +79,8 @@ Keep claims in their own class:
 | Class | Where | What it proves |
 |---|---|---|
 | Deterministic benchmark | `evals economy`, `economy-routing`, `cache`, `economy-matrix` (`claim_scope: deterministic-safety-economy`), `economy-hardening` | contract correctness, mandatory roles, bytes and invariants on this corpus |
-| Provider/token | `economy stats` with `token_coverage`, `economy report --transcript` | tokens only where measured; `partial` is never an observed total |
-| End-to-end agentic quality | `evals agentic-quality` (`recorded-agentic-outputs`, `--responses-dir`) | recorded specialist verdicts against ground truth under each profile |
+| Provider/token | `economy stats` with `token_coverage`, `economy report --transcript` | tokens only where measured; only model-facing rows (`rules/token_eligibility.yaml`) are eligible; `partial` is never an observed total |
+| End-to-end agentic quality | `evals agentic-quality` (`recorded-agentic-outputs`, `--responses-dir`, `--min-accuracy`, `--baseline`) | recorded specialist verdicts against ground truth under each profile; passes only above an absolute floor and without regressing vs deep or a baseline |
 
 ## Hard invariants
 
@@ -92,6 +92,8 @@ Keep claims in their own class:
 - Every provider call, including shadow challengers, is counted by the
   ControlPlane, so checkpoints and resumes see real spend.
 - L0 early stop needs a structured, re-hashed `ProofReceipt`.
+- Hardening evals run production code (`plan_roles`, `build_delta`); an oracle
+  never re-implements the logic it guards.
 
 ## Changing economic policy
 

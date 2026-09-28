@@ -35,6 +35,7 @@ class ProjectManifest(VersionedContract):
     target: str | None = None
     hosts: tuple[str, ...] = Field(default_factory=tuple)
     evidence_refs: tuple[str, ...] = Field(default_factory=tuple)
+    economy_profile: Literal["economy", "balanced", "deep"] | None = None
 
     @field_validator("hosts", "evidence_refs", mode="after")
     @classmethod

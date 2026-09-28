@@ -36,6 +36,7 @@ def test_runtime_experience_resume_executes_only_pending_step(tmp_path: Path) ->
         "evolve-orders-api",
         adapter=adapter,
         now="2026-09-23T12:32:00+00:00",
+        economy_enabled=False,
     )
     assert first["status"] == "REVIEW"
     resumed = resume(tmp_path, "evolve-orders-api")

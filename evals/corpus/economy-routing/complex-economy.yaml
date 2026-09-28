@@ -1,0 +1,10 @@
+id: complex-economy
+shape: complex
+risk: read_only
+size: L
+profile: economy
+expected:
+  effective: balanced
+  minimum_roles:
+  - critic
+  - reviewer

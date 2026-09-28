@@ -389,6 +389,38 @@ while refusal codes and `fact_id`s survive.
 | `apiforge playbook api-governance-reviewer` | Render the coordinator's executor decomposition — works without dispatch |
 | `apiforge economy report [--root .]` | Measured call sizes; `detail_level_effect` shows what `summary` saves |
 | `apiforge context funnel --case .apiforge/case` | Measured bytes per case stage (api-ir → facts → findings → summary) |
+| `apiforge context capsule --target "POST /orders" [--budget-bytes N] [--level L3\|L4]` | `ContextCapsule/v1`: minimal evidence for one operation as hash-verified `ctx://sha256/…` refs under a byte budget |
+| `apiforge context expand ctx://sha256/<hex> [--run-id R]` | One ctx object, re-hashed before it is returned |
+| `apiforge economy stats [--run-id R] [--transcript T]` | Bytes attributed per run and source; tokens `unresolved` without a transcript |
+| `apiforge economy explain <run_id>` | Why each ref was spent, from recorded provenance rules (no model call) |
+| `apiforge evals economy [--record-baseline]` | 12-case benchmark: evidence recall floor + median byte reduction vs recorded baseline |
+| `apiforge runtime run\|resume\|debate <task> --profile economy\|balanced\|deep` | Economy Plane: profile preference with risk floor, trimmed optional roles, call cap + verification reserve, L0–L5 ladder; `economy` block in the result |
+| `apiforge sdd classify --description … --path … [--baseline … --candidate …] [--write <feature>]` | Deterministic change risk (micro/low/medium/high) → minimum SDD profile; `sdd check` refuses profiles below it |
+| `apiforge evals economy-routing` | 15-case benchmark: role invariant, effective profile, critical ⇒ deep, economy cheaper for low risk |
+| `apiforge context delta --base A [--head B] \| --changed F [--invalidate]` | `DeltaSlice/v1`: changed files → graph nodes → impacted operations → capsule targets; read-only git |
+| `apiforge cache stats\|invalidate`, `apiforge context gc [--apply]` | Layered advisory cache: freshness per layer, dependency-aware invalidation, report-first gc |
+| `apiforge evals cache` | 10-case benchmark: warm hit rate 1.0, byte-identical vs `--no-cache`, zero stale reuse, invalidation precision/recall 1.0 |
+| `apiforge knowledge select --intent "..." [--capability C] [--framework F]` | `ExpertiseSelection/v1`: only packs named by a trigger; no trigger loads nothing |
+| `apiforge debate submit ... [--disagree point=reason] [--risk R] [--confidence X]`, `apiforge debate packet` | `PositionDelta/v1` submissions and a `RefereePacket/v1` over one shared capsule |
+| `apiforge agents audit` | `AgentUniqueness/v1` per agent: unique capability/expertise/validator/tool/decision role, `keep` or `merge-candidate` (report only) |
+| `apiforge evals selective-agentics` | 13 cases: exact pack selection, per-role bytes ≤ 60% of naive, referee packet ≤ 50%, shadow share ±2 pp, deterministic audit |
+| `apiforge --output compact <verb>` | Minified payload with null/empty pruned; lossless by rule (`APIFORGE_OUTPUT`) |
+| `apiforge slice tests --input <pytest.log or junit.xml>`, `apiforge slice log --input <ci.log>` | `TestSlice/v1` / `ErrorSlice/v1`: every failure or signature, full log behind `ctx://` |
+| `apiforge mcp surface [--surface full/compact]`, `apiforge-mcp --surface compact` or `--host claude` | `ToolSurface/v1`: measured tool bytes; compact MCP = six gateways, all tools reachable |
+| `apiforge agentops projection --host <host>` | `HostProjection/v1`: declared surface/output per host plus a verb-first map |
+| `apiforge evals tool-economy` | 10 cases: compact output lossless ≤ 65%, slicers recall 1.0 ≤ 20%, compact surface ≤ 25%, discover top-5 |
+| `apiforge evals economy-matrix [--out report.json]` | `EconomyMatrix/v1`: 16 canonical contract changes × 3 profiles; quality, evidence, cost, context and latency kept apart; mutants and holdout gated |
+| `apiforge evals gate --baseline A --candidate B` | `EvaluationGate/v1`: ship only with zero safety regression and quality regressions within the tolerance |
+| `apiforge evals replay --corpus evals/corpus/economy-replay [--profile P]` | `ReplayReport/v1`: stored decisions re-planned under the current policy, no provider calls |
+| `apiforge economy roi --root R` | `RoleROI/v1`: calls, facts added and outcome changes of each extra capability |
+| `apiforge verify plan --changed F --risk R [--breaking]` | `VerificationPlan/v1`: ladder V0–V5 by risk and the impacted tests with reasons; never executes |
+| `apiforge knowledge search --query Q [--tier 1/2/3]` | `RetrievalResult/v1`: declared query expansion, ranked passages with signals, top 3 then top 5 |
+| `apiforge evidence resolve evidence://finding/<id>` | `EvidenceNode/v1`: one node and its one-hop neighbors as refs |
+| `apiforge economy doctor` (or `apiforge doctor --economy`) | `EconomyDoctor/v1`: what makes runs pay more than needed, with unlocks |
+| `apiforge economy providers`, `apiforge economy tier --capability C --risk R` | `ProviderCapability/v1`, `TierDecision/v1`: T0–T3, cheaper only with benchmark evidence |
+| `apiforge agentops prompt --capability C` | `PromptEnvelope/v1`: stable hashed prefix + run suffix |
+| `apiforge workspace locality --target <repo> [--transitive]` | `LocalityPlan/v1`: target, direct neighbors, transitive deferred |
+| `apiforge evals economy-extras` | 15 cases across the seven wave-7 verbs |
 | `apiforge-mcp` | MCP server for the read/compose verbs (needs `pip install apiforge[mcp]`; every tool takes `detail_level`) |
 | `apiforge collect lambda --function-name X --out dump/` | Fetch Lambda config into a dump (Code.Location never persisted) |
 | `apiforge collect sqs\|sns\|eventbridge\|iam-role\|cognito\|waf ... --out dump/` | Messaging/identity collectors — same offline-dump contract |

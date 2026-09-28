@@ -1,0 +1,7 @@
+id: expertise-nullable
+kind: expertise
+intent: make PaymentRequest.description nullable in OpenAPI
+expect_packs:
+- api-lifecycle
+- json-schema
+- openapi-31

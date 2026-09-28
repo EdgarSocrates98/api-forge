@@ -1,0 +1,9 @@
+id: small-balanced
+shape: small
+risk: read_only
+size: S
+profile: balanced
+expected:
+  effective: balanced
+  minimum_roles:
+  - reviewer

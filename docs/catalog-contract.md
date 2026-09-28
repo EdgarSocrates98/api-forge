@@ -511,6 +511,165 @@ never presented as counted (`counted: false`). Dollar cost requires
 | `AF-ECONOMY-TRANSCRIPT-MISSING` | no transcript file, or `--cost-basis` without `--transcript` |
 | `AF-ECONOMY-COST-BASIS-MISSING` | basis file absent or not a model→rates mapping |
 
+## Context Gateway (`context capsule`, `context expand`, `economy stats|explain`, `evals economy`)
+
+`context capsule` emits `ContextCapsule/v1`: evidence for one operation as
+`ctx://sha256/<hex>` refs selected from the persisted case graph (L0 intent →
+L1 fingerprint → L2 impact → L3 refs → L4 inline focused code) under a byte
+budget. Objects live in `<root>/.apiforge/ctx/` and are hash-verified on
+`context expand`. Budget exhaustion and a missing case are partial results
+(exit 0, explicit `status` + refusal inside the capsule); integrity and
+reference errors are refusals (exit 2). Attribution rows in `economy.jsonl`
+carry `payload_bytes: 0` so `economy report` totals are unchanged.
+
+| Code | Meaning |
+|---|---|
+| `AF-CONTEXT-TARGET-INVALID` | `--target` is not `<METHOD> /path` (or `<METHOD>:/path`); unlock: pass an operation such as `POST /orders` |
+| `AF-CONTEXT-BUDGET-EXHAUSTED` | not every selected ref fits `--budget-bytes`; capsule returned with `status: unresolved` and whole refs only; unlock: raise the budget or lower `--level` |
+| `AF-CTX-GRAPH-UNAVAILABLE` | no `case.json` under the case dir; capsule degraded to L0/L1; unlock: `apiforge analyze --out-dir <case>` |
+| `AF-CTX-REF-INVALID` | ref is not `ctx://sha256/<64 hex>`; unlock: pass a ref exactly as emitted |
+| `AF-CTX-REF-NOT-FOUND` | ref absent from `<root>/.apiforge/ctx`; unlock: rebuild the capsule in the same root |
+| `AF-CTX-HASH-MISMATCH` | stored object no longer hashes to its ref; content is never returned; unlock: delete the object and rebuild |
+| `AF-ECONOMY-RUN-NOT-FOUND` | `economy explain` has no attribution rows for the run id; unlock: pass a `run_id` printed by `context capsule` |
+| `AF-EVALS-ECONOMY-BASELINE-MISSING` | corpus case has no recorded baseline; unlock: `apiforge evals economy --record-baseline` |
+| `AF-EVALS-ECONOMY-BASELINE-STALE` | fixture digest differs from the recorded baseline; unlock: re-record and commit the baseline |
+
+## Cache & delta (`cache stats|invalidate`, `context delta|gc`, `evals cache`)
+
+The cache is advisory (`rules/cache_policies.yaml`): layers `parse`, `graph`,
+`impact` and `capsule` are enforced; `knowledge`, `routing` and `validation`
+are declared and disabled until a caller exists; `model_response` is disabled.
+L4 caches the capsule's evidence *selection*, never the envelope, so output is
+byte-identical with `--no-cache`. Entries carry dependency probes (file, line
+span or JSON-pointer hashes, graph neighborhood hash, model-definition and
+test-mention symbols) plus a TTL; a changed dependency always invalidates,
+an expired entry is recomputed (`on_stale: recompute`) or reused with a
+warning (`on_stale: warn`). Corrupt entries or tampered objects are misses,
+never errors. The shared tier (`APIFORGE_CACHE_HOME` / `--cache-home`) is
+opt-in and re-hashed on every read. `context delta` reads git with argument
+arrays only (`diff --name-status`, `show`) and never mutates.
+
+| Code | Meaning |
+|---|---|
+| `AF-CACHE-LAYER-UNKNOWN` | `--layer` is not one of the eight declared layers; unlock: pass a declared layer |
+| `AF-CACHE-LAYER-DISABLED` | the layer is declared but disabled (e.g. `model_response`); unlock: use an enabled layer |
+| `AF-CACHE-POLICY-INVALID` | `rules/cache_policies.yaml` does not match `apiforge/cache-policies/v1`; unlock: restore the shipped schema |
+| `AF-DELTA-INPUT-MISSING` | `context delta`/`cache invalidate` got neither `--base` nor `--changed`; unlock: pass one |
+| `AF-DELTA-GIT-UNAVAILABLE` | git cannot run or the root is not a work tree; unlock: pass `--changed <file>` instead |
+| `AF-DELTA-REF-INVALID` | `git diff` refused `--base`/`--head`; unlock: pass refs that exist (`git rev-parse <ref>`) |
+| `AF-EVALS-INVALID` | an eval corpus is empty, has duplicate ids or a mutation that does not apply; unlock: fix the corpus yaml |
+
+## Verification, retrieval, evidence and providers (`verify plan`, `knowledge search`, `evidence resolve`, `economy doctor`, `economy tier`, `agentops prompt`, `workspace locality`, `evals economy-extras`)
+
+All read-only: `verify plan` names the ladder level and impacted tests but
+never runs them; retrieval expands queries from a declared table and ranks
+passages with explicit signals; `evidence://` refs resolve one hop at a time;
+the doctor only reports; tiers need benchmark evidence before going cheaper;
+the prompt prefix contains nothing run-specific.
+
+| Code | Meaning |
+|---|---|
+| `AF-VERIFY-RISK-INVALID` | `--risk` is not micro, low, medium or high; unlock: use `apiforge sdd classify` |
+| `AF-RETRIEVAL-TIER-INVALID` | `--tier` is not 1, 2 or 3 |
+| `AF-RETRIEVAL-EXPANSION-INVALID` | `rules/query_expansion.yaml` is malformed |
+| `AF-EVIDENCE-REF-INVALID` | ref is not `evidence://<operation, fact, finding or rule>/<id>` |
+| `AF-EVIDENCE-NOT-FOUND` | no case, or the node is not in the case graph; unlock: resolve a listed neighbor or run `analyze` |
+| `AF-PROVIDER-POLICY-INVALID` | `rules/providers.yaml` is malformed |
+| `AF-WORKSPACE-TARGET-UNKNOWN` | `--target` is not a repository of the workspace |
+| `AF-ECONOMY-DOCTOR-CACHE-OFF` | doctor: `APIFORGE_CACHE` disables the caches |
+| `AF-ECONOMY-DOCTOR-DEEP-DEFAULT` | doctor: default profile is deep |
+| `AF-ECONOMY-DOCTOR-NO-CAPSULE` | doctor: repository-scope context used, no capsule ever built |
+| `AF-ECONOMY-DOCTOR-VERBOSE-OUTPUT` | doctor: `APIFORGE_OUTPUT` is not compact |
+| `AF-ECONOMY-DOCTOR-NO-SHARED-CACHE` | doctor: no shared cache tier configured |
+| `AF-ECONOMY-DOCTOR-STALE-KNOWLEDGE` | doctor: packs verified more than 180 days ago |
+| `AF-ECONOMY-DOCTOR-TOKENS-UNRESOLVED` | doctor: no run carries observed tokens |
+| `AF-ECONOMY-DOCTOR-ESCALATION-HEAVY` | doctor: more than half of the runs escalated to L3 |
+| `AF-ECONOMY-DOCTOR-REPEATED-PARSING` | doctor: extractor cache misses exceed hits |
+
+## Economy evals (`evals economy-matrix`, `evals gate`, `evals replay`, `economy roi`)
+
+The matrix runs canonical contract changes under the three profiles and keeps
+quality, evidence, cost, context and latency on separate axes. An economy
+change ships only through `evals gate`: any safety regression rejects,
+quality regressions are tolerated only up to `--max-quality-regression`
+(default 0), and holdout or mutation regressions reject. `evals replay`
+re-plans stored decisions under the current policy without providers.
+`ScorecardRoutingPolicy.quality_floor` (opt-in) excludes candidates below the
+floor (`quality-below-floor`) and orders champions by observed cost.
+
+| Code | Meaning |
+|---|---|
+| `AF-EVALS-GATE-INVALID` | a report passed to `evals gate` is not `EconomyMatrix/v1`; unlock: use `evals economy-matrix --out` |
+| `AF-EVALS-GATE-MISMATCH` | the two reports cover different case × profile rows; unlock: run both on the same corpus |
+| `AF-REPLAY-RUN-INCOMPLETE` | replay reason: a stored run lacks its decision, economy plan or task spec; reported unresolved, never guessed |
+
+## Tool/host economy (`--output`, `slice tests`, `slice log`, `mcp surface`, `agentops projection`, `apiforge-mcp --surface/--host`, `evals tool-economy`)
+
+`--output compact` (or `APIFORGE_OUTPUT=compact`) minifies payloads and drops
+only null and empty values; `--output json` (default) is unchanged. Slicers
+store the whole log in the ctx CAS and return every failing test or distinct
+error signature with spans. `apiforge-mcp --surface compact` publishes six
+gateways (`apiforge_discover`, `apiforge_call`, `apiforge_context`,
+`apiforge_expand`, `apiforge_analyze`, `apiforge_evidence`); every full tool
+stays reachable through `apiforge_call`.
+
+| Code | Meaning |
+|---|---|
+| `AF-OUTPUT-MODE-INVALID` | `--output`/`APIFORGE_OUTPUT` is not `json` or `compact` |
+| `AF-SLICE-INPUT-NOT-FOUND` | the log passed to `slice tests`/`slice log` does not exist |
+| `AF-SLICE-INPUT-INVALID` | the log is over 25 MB, not valid JUnit XML, or `--format` is unknown |
+| `AF-SLICE-XML-REFUSED` | JUnit XML declares a DOCTYPE; entities are never expanded; unlock: export without a DOCTYPE |
+| `AF-MCP-TOOL-UNKNOWN` | `apiforge_call` got a tool name that is not registered; unlock: use `apiforge_discover` |
+| `AF-MCP-TOOL-ARGS` | `apiforge_call` arguments do not bind to the tool signature |
+| `AF-MCP-SURFACE-INVALID` | surface is not `full` or `compact` |
+| `AF-HOST-UNKNOWN` | host not declared in `rules/host_projections.yaml` |
+| `AF-HOST-PROJECTION-INVALID` | `rules/host_projections.yaml` is malformed |
+
+## Selective agentics (`knowledge select`, `debate packet`, `agents audit`, `evals selective-agentics`)
+
+`knowledge select` loads only packs named by `rules/expertise_triggers.yaml`
+(intent keywords, observed frameworks, capability); no trigger selects no
+pack. Economy runs build one capsule for the TaskSpec `target=` and give each
+role a subset (`rules/role_context.yaml`): specialists `focused`, reviewers
+`evidence_plus_delta`, critics `decision_plus_evidence`, referees
+`disagreements_only`, each capped at `share × envelope.context_bytes`.
+Requests carry `context_class`, `context_refs` and `expertise`;
+`role-context.json` and ledger rows `runtime role:<kind>` record the bytes.
+Challengers run in a bounded shadow (`envelope.shadow_share`, deterministic
+sampling by run id, only from calls left after the verification reserve) and
+never enter artifacts, gaps or status. `agents audit` is report-only.
+
+| Code | Meaning |
+|---|---|
+| `AF-EXPERTISE-TRIGGERS-INVALID` | `rules/expertise_triggers.yaml` is malformed or names a pack that does not exist; unlock: restore it or name existing packs |
+| `AF-ROLE-CONTEXT-POLICY` | `rules/role_context.yaml` does not map every role kind to a declared class or shares exceed 1.0 |
+| `AF-ROLE-CONTEXT-BUDGET` | unresolved note: a role's refs exceeded its share of `context_bytes` and were trimmed (listed in `trimmed`); unlock: raise the profile |
+| `AF-ECONOMY-SHADOW-BUDGET` | shadow reason: the run was sampled but no call remained after the verification reserve |
+| `AF-DEBATE-DELTA-INVALID` | `--disagree` is not `point=reason`, a point is empty or `--confidence` is outside [0, 1] |
+| `AF-AGENTS-AUDIT-INVALID` | the agents directory is missing or an agent frontmatter is not valid YAML |
+
+## Economic routing (`runtime run|resume|debate --profile`, `sdd classify`, `evals economy-routing`)
+
+Profiles `economy`/`balanced`/`deep` (`rules/economy_profiles.yaml`) resolve
+`--profile` > `.apiforge/project.yaml` `economy_profile` > policy default
+`balanced`. Risk sets a floor the effective profile can never go below; trims
+touch only parallel slots, fallbacks and challengers. The supervisor caps
+calls at `min(policy, TaskSpec, envelope)`, holds a verification reserve,
+stops at L0 on deterministic proof and escalates L2→L5 only on deterministic
+triggers. Partial outcomes keep `final_status: REVIEW` and report
+`economy.status: unresolved`.
+
+| Code | Meaning |
+|---|---|
+| `AF-ECONOMY-PROFILE-INVALID` | `--profile` is not `economy`, `balanced` or `deep`; unlock: pass a valid profile |
+| `AF-ECONOMY-ESCALATED` | diagnostic: risk raised the effective profile above the requested one (never a refusal) |
+| `AF-ECONOMY-CEILING` | an escalation (L3 review or L4 debate) exceeded the profile's ladder ceiling at non-forced risk; run stays unresolved; unlock: rerun with a higher profile |
+| `AF-ECONOMY-ROLE-INVARIANT` | an economy trim would have changed a risk-required reviewer/critic/referee; the run refuses instead of proceeding |
+| `AF-ECONOMY-ESCALATION-NOT-USED` | control step note: the reserved escalation reviewer was not needed |
+| `AF-BUDGET-EXHAUSTED` | planned invocations exceeded the economy call budget; no silent downgrade; unlock: `--profile balanced\|deep` or raise TaskSpec budgets |
+| `AF-SDD-PROFILE-BELOW-RISK` | a feature's `intent.md` carries `risk_class` and declares an SDD profile below its minimum; unlock: declare the required profile or higher |
+| `AF-SDD-RISK-UNRESOLVED` | `sdd classify` found no classifying signal (defaults to `medium`) or got only one of `--baseline`/`--candidate` |
+
 ## Canonical contracts (`contract`)
 
 `contract list` enumerates the registered `<Name>/v1` contracts;

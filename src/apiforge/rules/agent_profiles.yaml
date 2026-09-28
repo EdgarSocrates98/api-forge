@@ -47,7 +47,9 @@ profiles:
     capabilities: [task-review]
     required_evidence: [task_spec]
     quality_axes: [outcome, evidence]
-    accepted_risks: [read_only]
+    # The only reviewer must accept sensitive work: risk requires a reviewer there
+    # (economy matrix safety invariant, wave 6).
+    accepted_risks: [read_only, sensitive]
     adapter: fake
   debate-referee:
     agent: api-debate-referee

@@ -23,6 +23,7 @@ from apiforge.sdd.models import (
     load_profiles,
 )
 from apiforge.sdd.phases import _check_meta, _check_upstream, _issue
+from apiforge.sdd.risk import REQUIRED_PROFILE, profile_below_risk
 
 
 def _check_feature(
@@ -93,6 +94,19 @@ def _check_feature(
         required = ()
     else:
         required = profiles[profile]
+        intent = valid.get("intent")
+        risk_class = intent.meta.get("risk_class") if intent is not None else None
+        if isinstance(risk_class, str) and profile_below_risk(profile, risk_class):
+            refused.append(
+                _issue(
+                    "AF-SDD-PROFILE-BELOW-RISK",
+                    name,
+                    f"profile {profile!r} is below the minimum for risk_class {risk_class!r}",
+                    phase="intent",
+                    field="profile",
+                    unlock=f"declare profile {REQUIRED_PROFILE[risk_class]!r} or higher",  # type: ignore[index]
+                )
+            )
     for phase in required:
         if phase not in files:
             refused.append(

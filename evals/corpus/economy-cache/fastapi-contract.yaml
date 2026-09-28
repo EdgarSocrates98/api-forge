@@ -1,0 +1,8 @@
+id: fastapi-contract
+fixture: tests/fixtures/economy_payments/fastapi
+contract: tests/fixtures/economy_payments/openapi.yaml
+mutation:
+  file: openapi.yaml
+  append: "# reviewed contract\n"
+reanalyze: true
+expect_invalidated: []

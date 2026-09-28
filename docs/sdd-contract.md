@@ -57,6 +57,8 @@ Refusals (`refused[]`) block `ok`; named gaps (`unresolved[]`) are reported at
 | Code | Meaning |
 |---|---|
 | `AF-SDD-SCHEMA-INVALID` | frontmatter violates the schema (status, version, required field) |
+| `AF-SDD-PROFILE-BELOW-RISK` | `intent.md` carries `risk_class` (from `sdd classify --write`) and the declared profile is below its minimum (micro→`micro`, low→`quick`, medium→`standard`, high→`critical`/`migration`) |
+| `AF-SDD-RISK-UNRESOLVED` | `sdd classify` had no classifying signal (class defaults to `medium`, never lower) or received only one of `--baseline`/`--candidate` |
 | `AF-SDD-FRONTMATTER` | artifact frontmatter fails to parse or is absent |
 | `AF-SDD-PHASE-ORDER` | `upstream.path` does not point to an earlier phase |
 | `AF-SDD-UPSTREAM-MISSING` | upstream declaration absent or file missing |

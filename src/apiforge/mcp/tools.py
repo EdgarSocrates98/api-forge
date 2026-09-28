@@ -576,6 +576,374 @@ def economy_report(root: str = ".", detail_level: str = "normal") -> dict[str, A
     return out
 
 
+def economy_stats(
+    root: str = ".", run_id: str | None = None, detail_level: str = "normal"
+) -> dict[str, Any]:
+    """Bytes attributed per run and source; tokens unresolved without a transcript."""
+    from apiforge.economy.run_ledger import stats
+
+    out: dict[str, Any] = _call(
+        "economy_stats", lambda: stats(Path(root), run_id=run_id), detail_level
+    )
+    return out
+
+
+def economy_explain(run_id: str, root: str = ".", detail_level: str = "normal") -> dict[str, Any]:
+    """Why each ref of a run was spent, from recorded provenance rules only."""
+    from apiforge.economy.run_ledger import explain
+
+    out: dict[str, Any] = _call(
+        "economy_explain", lambda: explain(Path(root), run_id), detail_level
+    )
+    return out
+
+
+def context_capsule(
+    target: str,
+    root: str = ".",
+    case_dir: str | None = None,
+    budget_bytes: int = 16000,
+    level: str = "L3",
+    impact: str = "transitive",
+    run_id: str | None = None,
+    no_cache: bool = False,
+    cache_home: str | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Minimal sufficient evidence for one operation as ctx:// refs under a byte budget."""
+    from apiforge.application.context import build_context_capsule
+
+    out: dict[str, Any] = _call(
+        "context_capsule",
+        lambda: build_context_capsule(
+            Path(root),
+            target=target,
+            case_dir=Path(case_dir) if case_dir else None,
+            budget_bytes=budget_bytes,
+            level=level,
+            impact=impact,
+            run_id=run_id,
+            verb="mcp:context_capsule",
+            cache=False if no_cache else None,
+            cache_home=Path(cache_home) if cache_home else None,
+        ),
+        detail_level,
+    )
+    return out
+
+
+def context_delta(
+    base: str | None = None,
+    head: str | None = None,
+    changed: list[str] | None = None,
+    root: str = ".",
+    case_dir: str | None = None,
+    invalidate: bool = False,
+    cache_home: str | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """What changed (read-only git or explicit list), impacted operations and capsule targets."""
+    from apiforge.application.cache import context_delta as _delta
+
+    out: dict[str, Any] = _call(
+        "context_delta",
+        lambda: _delta(
+            Path(root),
+            changed=tuple(changed or ()),
+            base=base,
+            head=head,
+            case_dir=Path(case_dir) if case_dir else None,
+            invalidate=invalidate,
+            cache_home=Path(cache_home) if cache_home else None,
+        ),
+        detail_level,
+    )
+    return out
+
+
+def context_gc(
+    root: str = ".",
+    apply: bool = False,
+    cache_home: str | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Report (or delete with apply) expired cache entries and orphan objects."""
+    from apiforge.application.cache import context_gc as _gc
+
+    out: dict[str, Any] = _call(
+        "context_gc",
+        lambda: _gc(Path(root), apply=apply, cache_home=Path(cache_home) if cache_home else None),
+        detail_level,
+    )
+    return out
+
+
+def cache_stats(
+    root: str = ".",
+    cache_home: str | None = None,
+    layer: str | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Cache entries/bytes/expired per layer and tier, plus layer policies."""
+    from apiforge.application.cache import cache_lookup_layer
+    from apiforge.application.cache import cache_stats as _stats
+
+    if layer is not None:
+        return dict(_call("cache_stats", lambda: cache_lookup_layer(layer), detail_level))
+    out: dict[str, Any] = _call(
+        "cache_stats",
+        lambda: _stats(Path(root), cache_home=Path(cache_home) if cache_home else None),
+        detail_level,
+    )
+    return out
+
+
+def cache_invalidate(
+    changed: list[str] | None = None,
+    base: str | None = None,
+    head: str | None = None,
+    root: str = ".",
+    case_dir: str | None = None,
+    cache_home: str | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Drop only capsule selections whose dependencies intersect the change set."""
+    from apiforge.application.cache import cache_invalidate as _invalidate
+
+    out: dict[str, Any] = _call(
+        "cache_invalidate",
+        lambda: _invalidate(
+            Path(root),
+            changed=tuple(changed or ()),
+            base=base,
+            head=head,
+            case_dir=Path(case_dir) if case_dir else None,
+            cache_home=Path(cache_home) if cache_home else None,
+        ),
+        detail_level,
+    )
+    return out
+
+
+def knowledge_select(
+    intent: str,
+    capability: str | None = None,
+    frameworks: list[str] | None = None,
+    root: str | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Only the expertise packs a declared trigger names; no trigger means no packs."""
+    from apiforge.application.selective import knowledge_select as _select
+
+    out: dict[str, Any] = _call(
+        "knowledge_select",
+        lambda: _select(
+            intent,
+            capability=capability,
+            frameworks=tuple(frameworks or ()),
+            root=Path(root) if root else None,
+        ),
+        detail_level,
+    )
+    return out
+
+
+def debate_packet(
+    case: str,
+    debate: str,
+    capsule: str | None = None,
+    root: str = ".",
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Referee input: shared capsule id + one position delta per side + disagreements."""
+    from apiforge.application.selective import debate_packet as _packet
+
+    out: dict[str, Any] = _call(
+        "debate_packet",
+        lambda: _packet(Path(case), debate, capsule_id=capsule, root=Path(root)),
+        detail_level,
+    )
+    return out
+
+
+def agents_audit(root: str = ".", detail_level: str = "normal") -> dict[str, Any]:
+    """Anti-agentic-theater gate: which agents own nothing unique."""
+    from apiforge.application.selective import agents_audit as _audit
+
+    out: dict[str, Any] = _call("agents_audit", lambda: _audit(Path(root)), detail_level)
+    return out
+
+
+def slice_tests(
+    input: str, format: str = "auto", root: str = ".", detail_level: str = "normal"
+) -> dict[str, Any]:
+    """Counts plus every failing test (file:line, assertion); full log behind log_ref."""
+    from apiforge.agentops.slicing import slice_tests as _slice
+
+    out: dict[str, Any] = _call(
+        "slice_tests", lambda: _slice(Path(root), Path(input), format), detail_level
+    )
+    return out
+
+
+def slice_log(input: str, root: str = ".", detail_level: str = "normal") -> dict[str, Any]:
+    """Deduplicated failure signatures, frames and context; full log behind log_ref."""
+    from apiforge.agentops.slicing import slice_log as _slice
+
+    out: dict[str, Any] = _call("slice_log", lambda: _slice(Path(root), Path(input)), detail_level)
+    return out
+
+
+def mcp_surface(surface: str = "full", detail_level: str = "normal") -> dict[str, Any]:
+    """Measured name/description/schema bytes of an MCP surface."""
+    from apiforge.mcp.surface import measure_surface
+
+    out: dict[str, Any] = _call("mcp_surface", lambda: measure_surface(surface), detail_level)
+    return out
+
+
+def agentops_projection(host: str, detail_level: str = "normal") -> dict[str, Any]:
+    """Declared economical projection for a host with measured surface bytes."""
+    from apiforge.agentops.projection import project_host
+
+    out: dict[str, Any] = _call("agentops_projection", lambda: project_host(host), detail_level)
+    return out
+
+
+def economy_roi(root: str = ".", detail_level: str = "normal") -> dict[str, Any]:
+    """Per extra capability: calls, facts and unresolved added, outcome changed vs primary."""
+    from apiforge.economy.roi import role_roi
+
+    out: dict[str, Any] = _call("economy_roi", lambda: role_roi(Path(root)), detail_level)
+    return out
+
+
+def evals_replay(
+    root: str | None = None,
+    corpus: str | None = None,
+    profile: str | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Re-plan stored runs under the current policy, without providers."""
+    from apiforge.evals.replay import replay
+
+    out: dict[str, Any] = _call(
+        "evals_replay",
+        lambda: replay(
+            root=Path(root) if root else None,
+            corpus=Path(corpus) if corpus else None,
+            profile=profile,
+        ),
+        detail_level,
+    )
+    return out
+
+
+def evals_gate(
+    baseline: str, candidate: str, max_quality_regression: int = 0, detail_level: str = "normal"
+) -> dict[str, Any]:
+    """Ship/reject an economy change from two EconomyMatrix/v1 reports."""
+    from apiforge.evals.gate import gate_files
+
+    out: dict[str, Any] = _call(
+        "evals_gate",
+        lambda: gate_files(
+            Path(baseline), Path(candidate), max_quality_regression=max_quality_regression
+        ),
+        detail_level,
+    )
+    return out
+
+
+def verify_plan(
+    changed: list[str] | None = None,
+    risk: str = "low",
+    breaking: bool = False,
+    root: str = ".",
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Ladder level for the risk plus impacted tests and commands (never executes)."""
+    from apiforge.verification.selection import plan_verification
+
+    out: dict[str, Any] = _call(
+        "verify_plan",
+        lambda: plan_verification(Path(root), tuple(changed or ()), risk=risk, breaking=breaking),
+        detail_level,
+    )
+    return out
+
+
+def knowledge_search(
+    query: str, tier: int = 1, root: str | None = None, detail_level: str = "normal"
+) -> dict[str, Any]:
+    """Deterministic expansion, ranked knowledge passages, progressive tiers."""
+    from apiforge.knowledge.retrieval import search
+
+    out: dict[str, Any] = _call(
+        "knowledge_search",
+        lambda: search(query, tier=tier, root=Path(root) if root else None),
+        detail_level,
+    )
+    return out
+
+
+def evidence_resolve(
+    ref: str, root: str = ".", case_dir: str | None = None, detail_level: str = "normal"
+) -> dict[str, Any]:
+    """One evidence:// node with one-hop neighbors."""
+    from apiforge.evidence.resolve import resolve
+
+    out: dict[str, Any] = _call(
+        "evidence_resolve",
+        lambda: resolve(Path(root), ref, case_dir=Path(case_dir) if case_dir else None),
+        detail_level,
+    )
+    return out
+
+
+def economy_doctor(root: str = ".", detail_level: str = "normal") -> dict[str, Any]:
+    """Economy diagnostics with the unlock for each finding."""
+    from apiforge.economy.doctor import diagnose
+
+    out: dict[str, Any] = _call("economy_doctor", lambda: diagnose(Path(root)), detail_level)
+    return out
+
+
+def economy_tier(
+    capability: str,
+    risk: str = "low",
+    family: str | None = None,
+    root: str = ".",
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Cheapest tier the evidence proves sufficient (T0-T3)."""
+    from apiforge.capabilities.scorecard import load_scorecards
+    from apiforge.economy.providers import decide_tier
+
+    out: dict[str, Any] = _call(
+        "economy_tier",
+        lambda: decide_tier(
+            capability, risk, family=family, scorecards=load_scorecards(Path(root))
+        ),
+        detail_level,
+    )
+    return out
+
+
+def context_expand(
+    uri: str, root: str = ".", run_id: str | None = None, detail_level: str = "normal"
+) -> dict[str, Any]:
+    """Return one ctx:// object after verifying its sha256."""
+    from apiforge.application.context import expand_context_ref
+
+    out: dict[str, Any] = _call(
+        "context_expand",
+        lambda: expand_context_ref(Path(root), uri=uri, run_id=run_id),
+        detail_level,
+    )
+    return out
+
+
 def context_funnel(case_dir: str, detail_level: str = "normal") -> dict[str, Any]:
     """Measure the context funnel of a persisted case — bytes per stage."""
     from apiforge.application.funnel import measure_funnel
@@ -1155,13 +1523,16 @@ def runtime_run(
     policy: str = "local-ci-safe",
     now: str | None = None,
     debate: bool = False,
+    profile: str | None = None,
     detail_level: str = "normal",
 ) -> dict[str, Any]:
     """Execute a bounded local runtime run for a TaskSpec."""
     from apiforge.runtime.runner import run_runtime
 
     def work() -> dict[str, Any]:
-        return run_runtime(Path(root), task_id, policy_id=policy, now=now, requested_debate=debate)
+        return run_runtime(
+            Path(root), task_id, policy_id=policy, now=now, requested_debate=debate, profile=profile
+        )
 
     return cast(dict[str, Any], _call("runtime_run", work, detail_level))
 
@@ -1177,7 +1548,11 @@ def runtime_status(task_id: str, root: str = ".", detail_level: str = "normal") 
 
 
 def runtime_resume(
-    task_id: str, root: str = ".", policy: str = "local-ci-safe", detail_level: str = "normal"
+    task_id: str,
+    root: str = ".",
+    policy: str = "local-ci-safe",
+    profile: str | None = None,
+    detail_level: str = "normal",
 ) -> dict[str, Any]:
     """Resume a bounded runtime execution."""
     from apiforge.runtime.runner import resume_runtime
@@ -1186,14 +1561,18 @@ def runtime_resume(
         dict[str, Any],
         _call(
             "runtime_resume",
-            lambda: resume_runtime(Path(root), task_id, policy_id=policy),
+            lambda: resume_runtime(Path(root), task_id, policy_id=policy, profile=profile),
             detail_level,
         ),
     )
 
 
 def runtime_debate(
-    task_id: str, root: str = ".", policy: str = "local-ci-safe", detail_level: str = "normal"
+    task_id: str,
+    root: str = ".",
+    policy: str = "local-ci-safe",
+    profile: str | None = None,
+    detail_level: str = "normal",
 ) -> dict[str, Any]:
     """Request a debate room for a bounded runtime execution."""
     from apiforge.runtime.runner import debate_runtime
@@ -1202,7 +1581,7 @@ def runtime_debate(
         dict[str, Any],
         _call(
             "runtime_debate",
-            lambda: debate_runtime(Path(root), task_id, policy_id=policy),
+            lambda: debate_runtime(Path(root), task_id, policy_id=policy, profile=profile),
             detail_level,
         ),
     )
@@ -1469,7 +1848,30 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     rules_lookup,
     playbook,
     economy_report,
+    economy_stats,
+    economy_explain,
     context_funnel,
+    context_capsule,
+    context_expand,
+    context_delta,
+    context_gc,
+    cache_stats,
+    cache_invalidate,
+    knowledge_select,
+    debate_packet,
+    agents_audit,
+    slice_tests,
+    slice_log,
+    mcp_surface,
+    agentops_projection,
+    economy_roi,
+    evals_replay,
+    evals_gate,
+    verify_plan,
+    knowledge_search,
+    evidence_resolve,
+    economy_doctor,
+    economy_tier,
     graph_query,
     graph_impact,
     graph_trace,

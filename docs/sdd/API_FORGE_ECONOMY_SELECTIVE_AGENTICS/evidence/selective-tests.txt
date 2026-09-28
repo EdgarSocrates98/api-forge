@@ -1,0 +1,2 @@
+command: pytest tests/economy tests/runtime tests/mcp/test_selective_tools.py tests/mcp/test_tools.py tests/contracts
+result: 209 passed, 1 skipped in 9.13s

@@ -1,0 +1,25 @@
+id: fastapi-payments-create
+fixture: tests/fixtures/economy_payments/fastapi
+contract: tests/fixtures/economy_payments/openapi.yaml
+target: POST /payments
+level: L3
+budget_bytes: 16000
+required_refs:
+- path: openapi.yaml
+  symbol: createPayment
+  kind: contract
+- path: openapi.yaml
+  symbol: idempotency_key
+  kind: schema
+- path: openapi.yaml
+  symbol: currency
+  kind: schema
+- path: proj/app/routes/payments.py
+  symbol: idempotency conflict
+  kind: code
+- path: proj/app/models.py
+  symbol: class PaymentRequest
+  kind: code
+- path: proj/tests/test_payments.py
+  symbol: test_create_payment_is_idempotent
+  kind: test

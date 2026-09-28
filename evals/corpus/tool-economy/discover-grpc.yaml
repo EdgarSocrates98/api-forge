@@ -1,0 +1,4 @@
+id: discover-grpc
+kind: discover
+query: grpc breaking diff
+expect_tool: grpc_diff

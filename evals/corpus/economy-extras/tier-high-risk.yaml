@@ -1,0 +1,5 @@
+id: tier-high-risk
+kind: tier
+capability: api-security-review
+risk: high
+expect_tier: T3

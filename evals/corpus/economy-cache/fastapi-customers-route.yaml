@@ -1,0 +1,11 @@
+id: fastapi-customers-route
+fixture: tests/fixtures/economy_payments/fastapi
+contract: tests/fixtures/economy_payments/openapi.yaml
+mutation:
+  file: proj/app/routes/customers.py
+  replace:
+    old: 'detail="customer not found"'
+    new: 'detail="customer missing"'
+reanalyze: true
+expect_invalidated:
+  - GET /customers/{customer_id}

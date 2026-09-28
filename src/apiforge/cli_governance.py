@@ -106,6 +106,48 @@ def sdd_stamp_cmd(
     _echo(stamp(artifact, upstream), detail_level)
 
 
+@sdd_app.command("classify")
+def sdd_classify_cmd(
+    description: str = typer.Option("", "--description", help="Change description."),
+    path: list[str] = typer.Option([], "--path", help="Touched path (repeatable)."),
+    baseline: Path | None = typer.Option(None, "--baseline", help="Baseline contract."),
+    candidate: Path | None = typer.Option(None, "--candidate", help="Candidate contract."),
+    protocol: str = typer.Option("openapi", "--protocol", help="openapi or grpc."),
+    repositories: int = typer.Option(1, "--repositories", min=1, help="Repos touched."),
+    write: Path | None = typer.Option(
+        None, "--write", help="Feature dir: record risk_class in intent.md frontmatter."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help="Payload level."),
+) -> None:
+    """Classify change risk deterministically and name the minimum SDD profile."""
+    from apiforge.cli import _run
+    from apiforge.sdd.risk import RISK_UNRESOLVED, classify, write_classification
+
+    def work() -> dict[str, object]:
+        verdict = None
+        if (baseline is None) != (candidate is None):
+            raise ValueError(f"{RISK_UNRESOLVED}: --baseline and --candidate go together")
+        if baseline is not None and candidate is not None:
+            from apiforge.contract_intel.models import ContractProtocol
+            from apiforge.contract_intel.service import analyze_contract
+
+            verdict = analyze_contract(
+                ContractProtocol(protocol), baseline, candidate
+            ).verdict.value
+        result = classify(
+            description=description,
+            paths=tuple(path),
+            contract_verdict=verdict,
+            repositories=repositories,
+        )
+        payload: dict[str, object] = result.model_dump(mode="json")
+        if write is not None:
+            payload["written"] = str(write_classification(write, result))
+        return payload
+
+    _echo(_run(work), detail_level)
+
+
 @sdd_app.command("set-phase")
 def sdd_set_phase_cmd(
     root: Path = typer.Option(..., "--root", help="SDD artifacts root."),

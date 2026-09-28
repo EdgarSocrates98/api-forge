@@ -18,7 +18,14 @@ from apiforge.contracts.agentic import (
     TrajectoryEvent,
 )
 from apiforge.contracts.base import ContractError
-from apiforge.contracts.context import ContextScope
+from apiforge.contracts.cache import CacheDecision, CacheDep, CacheEntry, DeltaSlice
+from apiforge.contracts.context import (
+    CapsuleBudget,
+    CapsuleRefusal,
+    ContextCapsule,
+    ContextRef,
+    ContextScope,
+)
 from apiforge.contracts.core import (
     ActionPlan,
     ActionStep,
@@ -28,6 +35,32 @@ from apiforge.contracts.core import (
 )
 from apiforge.contracts.devin import DevinCheck, DevinCliProbe, DevinLaunch, DevinPayload
 from apiforge.contracts.distribution import DistributionDoctor
+from apiforge.contracts.economy import (
+    BudgetEnvelope,
+    CostVector,
+    EconomyPlan,
+    LadderStep,
+    LedgerRef,
+    RiskClassification,
+    RunLedgerEntry,
+)
+from apiforge.contracts.economy_evals import (
+    EconomyMatrix,
+    EvaluationGate,
+    InformationGain,
+    ReplayReport,
+    RoleROI,
+)
+from apiforge.contracts.economy_extras import (
+    EconomyDoctor,
+    EvidenceNode,
+    LocalityPlan,
+    PromptEnvelope,
+    ProviderCapability,
+    RetrievalResult,
+    TierDecision,
+    VerificationPlan,
+)
 from apiforge.contracts.evidence import EvidenceRef
 from apiforge.contracts.graph import GraphEdge, GraphExport, GraphNode
 from apiforge.contracts.graph_impact import (
@@ -114,6 +147,14 @@ from apiforge.contracts.scorecard_routing import (
     ScorecardRoutingPolicy,
 )
 from apiforge.contracts.scorecard_shadow import ScorecardShadowEvaluation
+from apiforge.contracts.selective import (
+    AgentUniqueness,
+    ExpertiseSelection,
+    PositionDelta,
+    RefereePacket,
+    RoleContextPlan,
+    ShadowDecision,
+)
 from apiforge.contracts.stubs import (
     AgenticQualityAssessment,
     AnalyticalAccessIR,
@@ -138,6 +179,12 @@ from apiforge.contracts.task import (
     TaskPlan,
     TaskRevision,
     TaskSpec,
+)
+from apiforge.contracts.tool_host import (
+    ErrorSlice,
+    HostProjection,
+    TestSlice,
+    ToolSurface,
 )
 from apiforge.contracts.verification import (
     HoldoutRecord,
@@ -290,6 +337,44 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "WorkspaceManifest/v1": WorkspaceManifest,
     "ArchitectureGraph/v1": WorkspaceGraph,
     "ContextScope/v1": ContextScope,
+    "ContextRef/v1": ContextRef,
+    "CapsuleBudget/v1": CapsuleBudget,
+    "CapsuleRefusal/v1": CapsuleRefusal,
+    "ContextCapsule/v1": ContextCapsule,
+    "CostVector/v1": CostVector,
+    "LedgerRef/v1": LedgerRef,
+    "RunLedgerEntry/v1": RunLedgerEntry,
+    "BudgetEnvelope/v1": BudgetEnvelope,
+    "EconomyPlan/v1": EconomyPlan,
+    "LadderStep/v1": LadderStep,
+    "RiskClassification/v1": RiskClassification,
+    "CacheDep/v1": CacheDep,
+    "CacheEntry/v1": CacheEntry,
+    "CacheDecision/v1": CacheDecision,
+    "DeltaSlice/v1": DeltaSlice,
+    "ExpertiseSelection/v1": ExpertiseSelection,
+    "RoleContextPlan/v1": RoleContextPlan,
+    "PositionDelta/v1": PositionDelta,
+    "RefereePacket/v1": RefereePacket,
+    "ShadowDecision/v1": ShadowDecision,
+    "AgentUniqueness/v1": AgentUniqueness,
+    "TestSlice/v1": TestSlice,
+    "ErrorSlice/v1": ErrorSlice,
+    "ToolSurface/v1": ToolSurface,
+    "HostProjection/v1": HostProjection,
+    "EconomyMatrix/v1": EconomyMatrix,
+    "EvaluationGate/v1": EvaluationGate,
+    "ReplayReport/v1": ReplayReport,
+    "RoleROI/v1": RoleROI,
+    "InformationGain/v1": InformationGain,
+    "VerificationPlan/v1": VerificationPlan,
+    "RetrievalResult/v1": RetrievalResult,
+    "EvidenceNode/v1": EvidenceNode,
+    "EconomyDoctor/v1": EconomyDoctor,
+    "ProviderCapability/v1": ProviderCapability,
+    "TierDecision/v1": TierDecision,
+    "PromptEnvelope/v1": PromptEnvelope,
+    "LocalityPlan/v1": LocalityPlan,
 }
 
 

@@ -1,0 +1,10 @@
+id: sensitive-deep
+shape: sensitive
+risk: sensitive
+size: M
+profile: deep
+expected:
+  effective: deep
+  minimum_roles:
+  - critic
+  - reviewer

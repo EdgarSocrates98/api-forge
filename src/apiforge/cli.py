@@ -263,15 +263,36 @@ platform_app = typer.Typer(
     no_args_is_help=True,
 )
 app.add_typer(platform_app)
+from apiforge.cli_cache import register as _register_cache
 from apiforge.cli_context import register as _register_context
 from apiforge.cli_distribution import register as _register_distribution
+from apiforge.cli_economy import register as _register_economy
+from apiforge.cli_extras import register as _register_extras
+from apiforge.cli_selective import register as _register_selective
+from apiforge.cli_tool_host import register as _register_tool_host
 from apiforge.cli_tui import tui_app
 from apiforge.cli_workspace import register as _register_workspace
+from apiforge.cli_workspace import workspace_app as _workspace_app
 
 app.add_typer(tui_app, name="tui")
 _register_distribution(app)
 _register_workspace(app)
 _register_context(context_app)
+_register_cache(app)
+_register_selective(knowledge_app, debate_app, agents_app)
+_register_tool_host(app, agentops_app)
+_register_extras(
+    app,
+    knowledge_app=knowledge_app,
+    evidence_app=evidence_app,
+    economy_app=economy_app,
+    agentops_app=agentops_app,
+    workspace_app=_workspace_app,
+)
+_register_economy(economy_app)
+
+
+_OUTPUT_MODE: dict[str, str | None] = {"mode": None}
 
 
 @app.callback()
@@ -282,11 +303,19 @@ def main(
         help="Show the API Forge version and exit.",
         is_eager=True,
     ),
+    output: str | None = typer.Option(
+        None,
+        "--output",
+        help="Payload projection: json (default) or compact (minified, null/empty pruned).",
+    ),
 ) -> None:
     """Analyze API evolution deterministically and offline."""
     if version:
         typer.echo(f"apiforge {__version__}")
         raise typer.Exit()
+    from apiforge.output.render import resolve_mode
+
+    _OUTPUT_MODE["mode"] = _run(lambda: resolve_mode(output))  # type: ignore[assignment]
 
 
 _DETAIL_HELP = "Payload level: summary|normal|full."
@@ -304,7 +333,9 @@ def _echo_json(value: object, detail_level: str = "normal") -> None:
     value = apply_detail_level(value, detail_level)
     # JSON must remain printable on Windows hosts whose stdout is cp1252;
     # Unicode content stays lossless through JSON escapes.
-    text = json.dumps(value, sort_keys=True, ensure_ascii=True, indent=2)
+    from apiforge.output.render import render, resolve_mode
+
+    text = render(value, _OUTPUT_MODE["mode"] or resolve_mode())
     from apiforge.economy.ledger import record
 
     ctx = get_current_context(silent=True)
@@ -391,12 +422,18 @@ def runtime_doctor(
         None, help="TaskSpec id, or omit for installation doctor."
     ),
     root: Path = typer.Option(Path("."), "--root"),
+    economy: bool = typer.Option(False, "--economy", help="Economy diagnostics instead."),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
     """Inspect runtime state, or the local installation when no task is supplied."""
     from apiforge.application.portable import doctor as portable_doctor
     from apiforge.application.runtime_experience import doctor
 
+    if economy:
+        from apiforge.economy.doctor import diagnose
+
+        _echo_json(_run(lambda: diagnose(root)), detail_level)
+        return
     result = portable_doctor(root) if task_id is None else doctor(root, task_id)
     _echo_json(_run(lambda: result), detail_level)
 
@@ -2384,15 +2421,30 @@ def debate_submit(
     side: str = typer.Option(..., "--side", help="Which side this position serves."),
     position: str = typer.Option(..., "--position", help="The position text."),
     evidence: str = typer.Option(..., "--evidence", help="Comma-separated fact_id citations."),
+    disagree: list[str] = typer.Option(
+        [], "--disagree", help="Position delta: 'point=reason' (repeatable)."
+    ),
+    risk: list[str] = typer.Option([], "--risk", help="Position delta risk (repeatable)."),
+    confidence: float | None = typer.Option(None, "--confidence", help="0.0-1.0."),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
     """Append a position — every position must cite fact_id evidence."""
 
     def work() -> object:
+        from apiforge.application.selective import parse_disagreements
         from apiforge.debate.service import submit
 
         ev = tuple(e.strip() for e in evidence.split(",") if e.strip())
-        d = submit(case, debate, side, position, ev)
+        d = submit(
+            case,
+            debate,
+            side,
+            position,
+            ev,
+            disagreements=parse_disagreements(disagree),
+            risks=tuple(risk),
+            confidence=confidence,
+        )
         return {"debate_id": d.debate_id, "submissions": len(d.submissions)}
 
     _echo_json(_run(work), detail_level)
@@ -3585,6 +3637,159 @@ def evals_validate(
     _echo_json(result, detail_level)
 
 
+@evals_app.command("economy")
+def evals_economy(
+    corpus: Path = typer.Option(Path("evals/corpus/economy"), "--corpus"),
+    repo_root: Path = typer.Option(Path("."), "--repo-root", help="Where fixture paths resolve."),
+    record: bool = typer.Option(
+        False, "--record-baseline", help="Measure and persist the no-gateway baseline only."
+    ),
+    min_reduction: float = typer.Option(0.40, "--min-reduction", min=0.0, max=1.0),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Capsule bytes and evidence recall vs the recorded baseline; exit 1 when a gate fails."""
+    from apiforge.evals.economy import record_baseline, run_economy
+
+    if record:
+        _echo_json(_run(lambda: record_baseline(corpus, repo_root)), detail_level)
+        return
+    result = _run(lambda: run_economy(corpus, repo_root, min_reduction=min_reduction))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("economy-routing")
+def evals_economy_routing(
+    corpus: Path = typer.Option(Path("evals/corpus/economy-routing"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Profiles vs pre-economy plans with the risk floor as invariant; exit 1 on gate failure."""
+    from apiforge.evals.economy_routing import run_economy_routing
+
+    result = _run(lambda: run_economy_routing(corpus))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("cache")
+def evals_cache(
+    corpus: Path = typer.Option(Path("evals/corpus/economy-cache"), "--corpus"),
+    repo_root: Path = typer.Option(Path("."), "--repo-root", help="Where fixture paths resolve."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Warm/mutate/rebuild: all-hit on unchanged, precise invalidation, zero stale reuse."""
+    from apiforge.evals.cache import run_cache_eval
+
+    result = _run(lambda: run_cache_eval(corpus, repo_root))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("selective-agentics")
+def evals_selective(
+    corpus: Path = typer.Option(Path("evals/corpus/selective-agentics"), "--corpus"),
+    repo_root: Path = typer.Option(Path("."), "--repo-root", help="Where fixture paths resolve."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Lazy expertise, per-role bytes, referee packets, shadow share and agent audit gates."""
+    from apiforge.evals.selective import run_selective_eval
+
+    result = _run(lambda: run_selective_eval(corpus, repo_root))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("tool-economy")
+def evals_tool_economy(
+    corpus: Path = typer.Option(Path("evals/corpus/tool-economy"), "--corpus"),
+    repo_root: Path = typer.Option(Path("."), "--repo-root", help="Where fixture paths resolve."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Compact output, gateway surface, discover/call reach and slicer recall gates."""
+    from apiforge.evals.tool_economy import run_tool_economy
+
+    result = _run(lambda: run_tool_economy(corpus, repo_root))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("economy-matrix")
+def evals_economy_matrix(
+    corpus: Path = typer.Option(Path("evals/corpus/economy-matrix"), "--corpus"),
+    repo_root: Path = typer.Option(Path("."), "--repo-root", help="Where fixture paths resolve."),
+    out: Path | None = typer.Option(None, "--out", help="Write the EconomyMatrix/v1 report."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Canonical tasks x economy/balanced/deep with quality, evidence, cost, context, latency apart."""
+    from apiforge.evals.matrix import run_matrix
+
+    def work() -> dict[str, object]:
+        report = run_matrix(corpus, repo_root)
+        if out is not None:
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_bytes((report.model_dump_json(indent=2) + "\n").encode("utf-8"))
+        return report.model_dump(mode="json")
+
+    result = _run(work)
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("gate")
+def evals_gate_cmd(
+    baseline: Path = typer.Option(..., "--baseline", help="EconomyMatrix/v1 before the change."),
+    candidate: Path = typer.Option(..., "--candidate", help="EconomyMatrix/v1 after the change."),
+    max_quality_regression: int = typer.Option(0, "--max-quality-regression", min=0),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Ship only without quality, safety, holdout or mutation regression; exit 1 on reject."""
+    from apiforge.evals.gate import gate_files
+
+    result = _run(
+        lambda: gate_files(baseline, candidate, max_quality_regression=max_quality_regression)
+    )
+    _echo_json(result, detail_level)
+    if getattr(result, "decision", "reject") != "ship":
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("replay")
+def evals_replay_cmd(
+    root: Path | None = typer.Option(None, "--root", help="Replay stored runs under a root."),
+    corpus: Path | None = typer.Option(None, "--corpus", help="Replay stored run bundles."),
+    profile: str | None = typer.Option(None, "--profile", help="Re-plan under this profile."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Re-plan stored decisions under the current policy; exit 1 if a required role is removed."""
+    from apiforge.evals.replay import replay
+
+    result = _run(lambda: replay(root=root, corpus=corpus, profile=profile))
+    _echo_json(result, detail_level)
+    if not getattr(result, "passed", False):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("economy-extras")
+def evals_economy_extras(
+    corpus: Path = typer.Option(Path("evals/corpus/economy-extras"), "--corpus"),
+    repo_root: Path = typer.Option(Path("."), "--repo-root", help="Where fixture paths resolve."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Verification plans, retrieval, evidence refs, doctor, tiers, prefixes and locality gates."""
+    from apiforge.evals.extras import run_extras
+
+    result = _run(lambda: run_extras(corpus, repo_root))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
 @contract_intel_app.command("impact")
 def contract_intel_impact(
     protocol: str = typer.Option(..., "--protocol", help="openapi or grpc."),
@@ -3798,6 +4003,9 @@ def runtime_run(
     policy: str = typer.Option("local-ci-safe", "--policy"),
     now: str | None = typer.Option(None, "--now", help="Deterministic timestamp for replay."),
     debate: bool = typer.Option(False, "--debate", help="Request a debate room."),
+    profile: str | None = typer.Option(
+        None, "--profile", help="Economy profile: economy|balanced|deep (risk may escalate)."
+    ),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
     """Execute a sealed TaskSpec with the deterministic fake adapter."""
@@ -3805,7 +4013,9 @@ def runtime_run(
     def work() -> object:
         from apiforge.runtime.runner import run_runtime
 
-        return run_runtime(root, task_id, policy_id=policy, now=now, requested_debate=debate)
+        return run_runtime(
+            root, task_id, policy_id=policy, now=now, requested_debate=debate, profile=profile
+        )
 
     try:
         _echo_json(_run(work), detail_level)
@@ -3830,12 +4040,18 @@ def runtime_resume(
     task_id: str = typer.Argument(...),
     root: Path = typer.Option(Path("."), "--root"),
     policy: str = typer.Option("local-ci-safe", "--policy"),
+    profile: str | None = typer.Option(
+        None, "--profile", help="Economy profile: economy|balanced|deep (risk may escalate)."
+    ),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
     """Resume by replaying the TaskSpec through the bounded supervisor."""
     from apiforge.runtime.runner import resume_runtime
 
-    _echo_json(resume_runtime(root, task_id, policy_id=policy), detail_level)
+    _echo_json(
+        _run(lambda: resume_runtime(root, task_id, policy_id=policy, profile=profile)),
+        detail_level,
+    )
 
 
 @runtime_app.command("debate")
@@ -3843,12 +4059,18 @@ def runtime_debate(
     task_id: str = typer.Argument(...),
     root: Path = typer.Option(Path("."), "--root"),
     policy: str = typer.Option("local-ci-safe", "--policy"),
+    profile: str | None = typer.Option(
+        None, "--profile", help="Economy profile: economy|balanced|deep (risk may escalate)."
+    ),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
     """Request a debate room before the runtime makes a final decision."""
     from apiforge.runtime.runner import debate_runtime
 
-    _echo_json(debate_runtime(root, task_id, policy_id=policy), detail_level)
+    _echo_json(
+        _run(lambda: debate_runtime(root, task_id, policy_id=policy, profile=profile)),
+        detail_level,
+    )
 
 
 @runtime_app.command("approve")

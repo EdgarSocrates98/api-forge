@@ -7,8 +7,23 @@ from apiforge.contracts.adapter import (
     AdapterStatus,
     EvidenceLevel,
 )
+from apiforge.contracts.cache import (
+    CacheDecision,
+    CacheDep,
+    CacheEntry,
+    ChangedFile,
+    DeltaSlice,
+)
 from apiforge.contracts.compatibility import CompatibilityCell, CompatibilityMatrix, RuntimeReceipt
-from apiforge.contracts.context import ContextResult, ContextScope, ContextTarget
+from apiforge.contracts.context import (
+    CapsuleBudget,
+    CapsuleRefusal,
+    ContextCapsule,
+    ContextRef,
+    ContextResult,
+    ContextScope,
+    ContextTarget,
+)
 from apiforge.contracts.data_runtime import DataProvider, DataReadReceipt, DataReadRequest
 from apiforge.contracts.debate import (
     AdaptivePlan,
@@ -32,6 +47,15 @@ from apiforge.contracts.distribution import (
     DistributionDoctor,
     DistributionRefusal,
     ForgePaths,
+)
+from apiforge.contracts.economy import (
+    BudgetEnvelope,
+    CostVector,
+    EconomyPlan,
+    LadderStep,
+    LedgerRef,
+    RiskClassification,
+    RunLedgerEntry,
 )
 from apiforge.contracts.evidence import EvidenceKind, EvidenceRecord, EvidenceRef
 from apiforge.contracts.experience import ExperienceAction, ExperienceSnapshot, ExperienceView
@@ -117,20 +141,31 @@ __all__ = [
     "AdaptivePlan",
     "AdaptivePolicy",
     "AssetStatus",
+    "BudgetEnvelope",
+    "CacheDecision",
+    "CacheDep",
+    "CacheEntry",
     "CandidateAssessment",
     "CapabilityDiagnostic",
     "CapabilityRecord",
     "CapabilityRequest",
     "CapabilityResult",
+    "CapsuleBudget",
+    "CapsuleRefusal",
+    "ChangedFile",
     "CompatibilityCell",
     "CompatibilityMatrix",
+    "ContextCapsule",
+    "ContextRef",
     "ContextResult",
     "ContextScope",
     "ContextTarget",
+    "CostVector",
     "DataProvider",
     "DataReadReceipt",
     "DataReadRequest",
     "DebateReplay",
+    "DeltaSlice",
     "DevinCheck",
     "DevinCliProbe",
     "DevinLaunch",
@@ -141,6 +176,7 @@ __all__ = [
     "DevinTaskKind",
     "DistributionDoctor",
     "DistributionRefusal",
+    "EconomyPlan",
     "EvidenceCoverage",
     "EvidenceKind",
     "EvidenceLevel",
@@ -168,6 +204,8 @@ __all__ = [
     "HostDeclaration",
     "HostResolution",
     "KnowledgeObservation",
+    "LadderStep",
+    "LedgerRef",
     "ObservedSignal",
     "PackFreshness",
     "ParticipantDeclaration",
@@ -176,6 +214,7 @@ __all__ = [
     "PromotionGate",
     "PromotionState",
     "RepositoryRef",
+    "RiskClassification",
     "RiskComplexityAssessment",
     "RiskComplexityEffect",
     "RiskComplexityPolicy",
@@ -185,6 +224,7 @@ __all__ = [
     "RoutingPlan",
     "RoutingPolicy",
     "RoutingRequest",
+    "RunLedgerEntry",
     "RuntimeReceipt",
     "SandboxCommand",
     "SandboxCommandResult",

@@ -1,0 +1,44 @@
+version: 1
+default_profile: balanced
+order: [economy, balanced, deep]
+profiles:
+  economy:
+    provider_calls: 4
+    fanout: 0
+    fallbacks: 0
+    debate_rounds: 0
+    challenger_slots: 0
+    verification_share: 0.25
+    ladder_ceiling: L3
+    context_bytes: 16000
+    shadow_share: 0.05
+  balanced:
+    provider_calls: 8
+    fanout: 1
+    fallbacks: 1
+    debate_rounds: 1
+    challenger_slots: 1
+    verification_share: 0.25
+    ladder_ceiling: L4
+    context_bytes: 32000
+    shadow_share: 0.1
+  deep:
+    provider_calls: 20
+    fanout: 2
+    fallbacks: 2
+    debate_rounds: 2
+    challenger_slots: 2
+    verification_share: 0.3
+    ladder_ceiling: L5
+    context_bytes: 64000
+    shadow_share: 0.2
+floors:
+  deep:
+    complexity: [critical]
+    risk: [irreversible, destructive, external_mutation]
+    gate: [blocked]
+  balanced:
+    complexity: [complex]
+    risk: [sensitive]
+triggers:
+  low_confidence: 0.7

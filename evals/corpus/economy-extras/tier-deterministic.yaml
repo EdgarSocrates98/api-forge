@@ -1,0 +1,5 @@
+id: tier-deterministic
+kind: tier
+capability: contract.compatibility.rest
+risk: high
+expect_tier: T0

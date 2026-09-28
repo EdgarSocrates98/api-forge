@@ -1,0 +1,11 @@
+id: critical-economy
+shape: critical
+risk: irreversible
+size: S
+profile: economy
+expected:
+  effective: deep
+  minimum_roles:
+  - critic
+  - referee
+  - reviewer

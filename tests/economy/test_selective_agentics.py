@@ -140,3 +140,46 @@ def test_agent_audit_is_deterministic_and_complete() -> None:
     for row in first["rows"]:
         if row["verdict"] == "merge-candidate":
             assert not any(value for key, value in row.items() if key.startswith("unique_"))
+
+
+def test_role_context_plan_cannot_exceed_the_envelope() -> None:
+    import pytest
+    from pydantic import ValidationError
+
+    from apiforge.contracts.selective import RoleContext, RoleContextPlan
+
+    rows = tuple(
+        RoleContext(
+            role="specialist",
+            capability=f"spec-{index}",
+            context_class="focused",
+            bytes=16000,
+            budget_bytes=16000,
+        )
+        for index in range(2)
+    )
+    with pytest.raises(ValidationError):
+        RoleContextPlan(run_id="r", context_bytes=32000, roles=(*rows, rows[0]), total_bytes=48000)
+    with pytest.raises(ValidationError):
+        RoleContextPlan(run_id="r", context_bytes=32000, roles=rows, total_bytes=1)
+
+
+def test_specialists_share_one_class_pool(tmp_path) -> None:
+    from apiforge.runtime.role_context import plan_roles
+    from tests.context.gateway_support import analyzed_root
+    from tests.runtime.test_role_context_supervisor import TASK, _task
+
+    root = analyzed_root(tmp_path, "fastapi")
+    _task(root)
+    from apiforge.taskspec.store import load
+
+    plan = plan_roles(
+        root,
+        load(root, TASK),
+        (("a", "specialist"), ("b", "specialist"), ("c", "reviewer")),
+        context_bytes=32000,
+        run_id="run-pool",
+    )
+    specialists = [row for row in plan.roles if row.role == "specialist"]
+    assert sum(row.budget_bytes for row in specialists) <= specialists[0].pool_bytes
+    assert plan.total_bytes <= 32000

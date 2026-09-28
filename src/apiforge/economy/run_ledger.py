@@ -27,8 +27,18 @@ class EconomyError(ContractError):
         self.unlock = unlock
 
 
-def append(root: Path, entry: RunLedgerEntry) -> None:
-    """Append one attribution row; swallow I/O failure like the legacy recorder."""
+PERSIST_FAILURE = "AF-ECONOMY-LEDGER-PERSIST"
+FAILURES_NAME = "economy.persist-failures"
+
+
+def append(root: Path, entry: RunLedgerEntry, *, auditable: bool = False) -> bool:
+    """Append one attribution row and report whether it was persisted.
+
+    Best-effort telemetry (``auditable=False``) swallows I/O failure like the
+    legacy recorder. An auditable row that cannot be written is recorded in
+    ``economy.persist-failures`` (when possible) and the caller must surface
+    ``AF-ECONOMY-LEDGER-PERSIST`` as unresolved; a lost row is never silent.
+    """
     row = {
         "verb": entry.verb,
         "detail_level": entry.detail_level,
@@ -41,7 +51,36 @@ def append(root: Path, entry: RunLedgerEntry) -> None:
         with path.open("a", encoding="utf-8") as fh:
             fh.write(json.dumps(row, sort_keys=True) + "\n")
     except OSError:
-        return
+        if auditable:
+            try:
+                marker = ledger_path(root).parent / FAILURES_NAME
+                with marker.open("a", encoding="utf-8") as fh:
+                    fh.write(json.dumps({"run_id": entry.run_id, "verb": entry.verb}) + "\n")
+            except OSError:
+                pass
+        return False
+    return True
+
+
+def persist_failures(root: Path) -> int:
+    marker = ledger_path(root).parent / FAILURES_NAME
+    try:
+        return sum(1 for line in marker.read_text(encoding="utf-8").splitlines() if line.strip())
+    except OSError:
+        return 0
+
+
+def token_coverage(rows: list[RunLedgerEntry]) -> dict[str, Any]:
+    """Every attribution row is eligible; a total is ``observed`` only when all are measured."""
+    eligible = len(rows)
+    observed = sum(1 for row in rows if row.cost.observed_tokens is not None)
+    if observed == 0:
+        status = "unresolved"
+    elif observed == eligible:
+        status = "complete"
+    else:
+        status = "partial"
+    return {"status": status, "observed_rows": observed, "eligible_rows": eligible}
 
 
 def entries(root: Path) -> tuple[list[RunLedgerEntry], dict[str, int]]:
@@ -71,7 +110,6 @@ def stats(root: Path, *, run_id: str | None = None) -> dict[str, Any]:
     by_source: dict[str, dict[str, int]] = {}
     by_run: dict[str, dict[str, int]] = {}
     total = _zero()
-    tokens_seen = False
     for row in rows:
         for bucket in (
             by_source.setdefault(row.source, _zero()),
@@ -79,8 +117,9 @@ def stats(root: Path, *, run_id: str | None = None) -> dict[str, Any]:
             total,
         ):
             _add(bucket, row)
-        tokens_seen = tokens_seen or row.cost.observed_tokens is not None
     attributed = total["context_bytes"] + total["tool_result_bytes"]
+    coverage = token_coverage(rows)
+    failures = persist_failures(root)
     return {
         "schema": "apiforge/economy-stats/v1",
         "runs": len(by_run),
@@ -90,8 +129,14 @@ def stats(root: Path, *, run_id: str | None = None) -> dict[str, Any]:
         "by_source": dict(sorted(by_source.items())),
         "by_run": dict(sorted(by_run.items())),
         "legacy": {key: legacy[key] for key in ("calls", "payload_bytes")},
-        "observed_tokens": total["observed_tokens"] if tokens_seen else "unresolved",
-        "tokens_unresolved": not tokens_seen,
+        "observed_tokens": (
+            total["observed_tokens"] if coverage["status"] == "complete" else coverage["status"]
+        ),
+        "observed_tokens_measured": total["observed_tokens"],
+        "token_coverage": coverage,
+        "tokens_unresolved": coverage["status"] != "complete",
+        "persist_failures": failures,
+        "unresolved": [PERSIST_FAILURE] if failures else [],
         "diagnostics": {"malformed_lines": legacy["malformed_lines"]},
         "ledger": str(ledger_path(root)),
     }

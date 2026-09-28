@@ -5,7 +5,8 @@ Case kinds (one yaml each under the corpus):
 - ``expertise``: intent (+ capability/frameworks) → exact expected pack set;
 - ``roles``: a fixture target and profile → per-role bytes from one capsule;
   subordinate roles must not exceed the primary and the total must stay under
-  ``max_total_ratio`` of naive replication (full capsule to every role);
+  ``max_total_ratio`` of naive replication (full capsule to every role) and
+  never above the envelope's ``context_bytes`` (absolute gate);
 - ``debate``: scripted positions → referee packet ≤ ``max_packet_ratio`` of
   naive transport with every cited evidence id preserved.
 
@@ -104,8 +105,14 @@ def _roles(case: SelectiveCase, repo_root: Path, workdir: Path) -> dict[str, Any
         "total_bytes": plan.total_bytes,
         "naive_bytes": plan.naive_bytes,
         "ratio": ratio,
+        "context_bytes": plan.context_bytes,
+        "within_envelope": plan.total_bytes <= plan.context_bytes,
         "unresolved": list(plan.unresolved),
-        "passed": bool(plan.capsule_id) and subordinate_ok and ratio <= limit and primary > 0,
+        "passed": bool(plan.capsule_id)
+        and subordinate_ok
+        and ratio <= limit
+        and primary > 0
+        and plan.total_bytes <= plan.context_bytes,
     }
 
 

@@ -2,7 +2,8 @@
 
 The planner builds a single ContextCapsule for the TaskSpec target (``target=``
 or ``graph_target=operation:...`` inputs) and gives each invocation the refs
-its context class allows, capped at ``share x envelope.context_bytes``.
+its context class allows, capped at its share of its class pool: ``share x envelope.context_bytes`` is the
+*total* for every instance of the class, so the plan never exceeds the envelope.
 Without a target or case the roles get no capsule refs and the plan says so —
 it never silently falls back to shipping the whole repository.
 """
@@ -117,11 +118,22 @@ def plan_roles(
         detected = tuple(str(item) for item in found) if isinstance(found, list | tuple) else ()
     produced = dict(artifacts or {})
     rows: list[RoleContext] = []
-    for capability, raw_kind in roles:
-        kind = raw_kind if raw_kind in KINDS else "specialist"
+    resolved = [
+        (capability, raw_kind if raw_kind in KINDS else "specialist")
+        for capability, raw_kind in roles
+    ]
+    members: dict[str, int] = {}
+    for _, kind in resolved:
+        cls = str(policy["roles"][kind])
+        members[cls] = members.get(cls, 0) + 1
+    seen: dict[str, int] = {}
+    for capability, kind in resolved:
         cls = str(policy["roles"][kind])
         spec_cls = policy["classes"][cls]
-        budget = int(float(spec_cls.get("share", 0)) * context_bytes)
+        pool = int(float(spec_cls.get("share", 0)) * context_bytes)
+        index = seen.get(cls, 0)
+        seen[cls] = index + 1
+        budget = pool // members[cls] + (pool % members[cls] if index == 0 else 0)
         allowed = set(spec_cls.get("kinds") or ())
         kept: list[ContextRef] = []
         trimmed: list[str] = []
@@ -159,6 +171,7 @@ def plan_roles(
                 expertise=tuple(item.pack_id for item in expertise.selected),
                 bytes=used,
                 budget_bytes=budget,
+                pool_bytes=pool,
                 trimmed=tuple(trimmed),
                 prompt_prefix_sha256=hashlib.sha256(
                     prefix_for(
@@ -180,12 +193,17 @@ def plan_roles(
     )
 
 
-def record(root: Path, plan: RoleContextPlan) -> None:
-    """Attribute role bytes in the run ledger (payload_bytes stays 0)."""
+def record(root: Path, plan: RoleContextPlan) -> tuple[str, ...]:
+    """Attribute role bytes in the run ledger (payload_bytes stays 0).
+
+    Rows are auditable: a row that cannot be persisted comes back as an
+    ``AF-ECONOMY-LEDGER-PERSIST`` note for the run's economy gaps.
+    """
     from apiforge.economy import run_ledger
 
+    lost: list[str] = []
     for row in plan.roles:
-        run_ledger.append(
+        persisted = run_ledger.append(
             Path(root),
             RunLedgerEntry(
                 run_id=plan.run_id,
@@ -202,7 +220,14 @@ def record(root: Path, plan: RoleContextPlan) -> None:
                     for uri in row.refs
                 ),
             ),
+            auditable=True,
         )
+        if not persisted:
+            lost.append(
+                f"{run_ledger.PERSIST_FAILURE}: field=ledger; role={row.capability}; "
+                "unlock=make .apiforge writable and re-run; the role bytes were not recorded"
+            )
+    return tuple(lost)
 
 
 def summary(plan: RoleContextPlan) -> dict[str, object]:

@@ -601,6 +601,15 @@ Gateway, `evidence resolve` and `context delta` read cases only through
 | `AF-PATH-OUTSIDE-ROOT` | unresolved note: a case/fact/graph path is empty, UNC, drive-qualified, traverses `..` or resolves outside the allowed roots; unlock: keep sources inside the project or declare the repository in `.apiforge/workspace.yaml` |
 | `AF-CASE-HASH-MISMATCH` | a case artifact changed after `case.json` was written; the capsule/evidence/delta is refused; unlock: re-run `apiforge analyze` |
 | `AF-CASE-PATH-TRAVERSAL` | a case manifest artifact path escapes the case directory (also refused by `evidence emit`) |
+| `AF-ECONOMY-LEDGER-PERSIST` | an auditable ledger row (runtime role bytes) could not be written; the run's economy block and `economy stats` report it as unresolved; unlock: make `.apiforge` writable and re-run |
+
+`BudgetEnvelope.context_bytes` is a global budget: each context class gets a
+pool (`share × context_bytes`) split across its instances, and
+`RoleContextPlan` refuses totals above the envelope. The ControlPlane counts
+every provider call, including shadow challengers (`calls_by_kind`), so
+checkpoints and resumes see real spend. `economy stats` reports
+`token_coverage` (`complete`, `partial`, `unresolved`); `observed_tokens` is a
+number only when coverage is complete.
 
 ## Freshness, live gating and resume (`knowledge watch`, `evidence gate`, `verify escalate`, `economy phase-budget`, `runtime checkpoint`, `evals economy-freshness`)
 

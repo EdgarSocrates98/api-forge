@@ -6,7 +6,7 @@ from pathlib import Path
 
 _HOST_LAYOUT = {
     "claude": ("CLAUDE.md", ".claude/skills", ".claude/agents"),
-    "gpt-codex": ("AGENTS.md", ".agents/skills", ".agents/agents"),
+    "gpt-codex": ("AGENTS.md", ".agents/skills", ".codex/agents"),
     "devin": ("AGENTS.md", ".devin/skills"),
     "copilot": ("AGENTS.md", ".github/skills"),
 }

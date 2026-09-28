@@ -783,6 +783,31 @@ Field records join existing run artifacts (economy ledger, `summary.json`,
 | `AF-WORKSPACE-INFER-UNATTRIBUTED` | unresolved: `--infer` ran without `--run-id`, so field records cannot see it |
 | `AF-WORKSPACE-INFER-EXTRACT` | unresolved: a route extractor failed on one repository |
 
+## Agent roster (`agents sync|check|lint|references|audit`, `evals agent-routing`)
+
+`agents/*.md` is the only hand-edited agent source. `agents sync` renders
+`.claude/agents/*.md` (Claude Code: `tools` from `access`, `model` from
+`model_tier`), `.agents/agents/*.md` (Devin: name/description) and
+`.codex/agents/*.toml` (Codex: `sandbox_mode`, `model_reasoning_effort`,
+`developer_instructions`). Sources without `access` are legacy and mirror
+verbatim. Files in a mirror directory that are not generated agents are
+reported as `(non-agent file)` and never deleted.
+
+| Code | Meaning |
+|---|---|
+| `AF-AGENT-CONTRACT-FRONTMATTER` | missing/invalid frontmatter or field value |
+| `AF-AGENT-CONTRACT-NAME` | `name` differs from the file stem |
+| `AF-AGENT-CONTRACT-DESCRIPTION` | empty, over 300 chars, or missing `Use when` / `Not for` |
+| `AF-AGENT-CONTRACT-ACCESS` | `access` not declared, or a writer without `write_scope` |
+| `AF-AGENT-CONTRACT-SECTIONS` | a required `## <section>` is missing |
+| `AF-AGENT-CONTRACT-WORDS` | body outside 250–600 words |
+| `AF-AGENT-CONTRACT-LANGUAGE` | description/body not in English |
+| `AF-AGENT-CONTRACT-TOOLS` | no owned `apiforge_tools` |
+| `AF-AGENT-CONTRACT-TOOL-OWNER` | an `apiforge` command is owned by more than one agent |
+| `AF-AGENT-ALIAS-DEPRECATED` | warning: a deprecated agent name was resolved to its roster successor |
+| `AF-AGENT-ALIAS-INVALID` | alias table malformed, chained or self-referencing |
+| `AF-EVAL-AGENT-ROUTING` | routing golden corpus missing |
+
 ## Canonical contracts (`contract`)
 
 `contract list` enumerates the registered `<Name>/v1` contracts;

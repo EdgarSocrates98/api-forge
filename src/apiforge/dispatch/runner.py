@@ -532,8 +532,10 @@ def dispatch_step(
 
 def run_playbook(coordinator: str, ctx: DispatchContext) -> dict[str, object]:
     """Execute a coordinator's playbook; the record lands under case/dispatch."""
+    from apiforge.dispatch.aliases import canonical
     from apiforge.rules.catalog import load_playbooks
 
+    coordinator = canonical(coordinator)
     steps = load_playbooks().get(coordinator)
     if steps is None:
         raise DispatchError(

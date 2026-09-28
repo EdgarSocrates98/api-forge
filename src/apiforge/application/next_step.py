@@ -15,6 +15,7 @@ from pydantic import BaseModel, ConfigDict
 
 from apiforge.core.models import Finding, Severity
 from apiforge.core.yaml import StrictLoadError, load_yaml_strict
+from apiforge.dispatch.aliases import canonical
 from apiforge.rules.catalog import CatalogError, load_catalog
 
 
@@ -69,6 +70,8 @@ def load_routing() -> tuple[Route, ...]:
     routes: list[Route] = []
     for index, entry in enumerate(data["routes"]):
         try:
+            if isinstance(entry, Mapping) and "recommended_agent" in entry:
+                entry = {**entry, "recommended_agent": canonical(str(entry["recommended_agent"]))}
             routes.append(Route.model_validate(entry))
         except Exception as exc:
             raise RoutingError("AF-ROUTING-SCHEMA", f"routes[{index}] invalid: {exc}") from exc

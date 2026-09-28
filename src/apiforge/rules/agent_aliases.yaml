@@ -1,0 +1,37 @@
+version: 1
+active: false
+deprecated_in: roster-v2
+aliases:
+  api-agentic-orchestrator: api-orchestrator
+  api-agentic-observability-engineer: api-orchestrator
+  api-grpc-agentic-engineer: api-orchestrator
+  api-runtime-migration-planner: api-planner
+  terraform-reviewer: api-infra-reviewer
+  aws-api-infra-reviewer: api-infra-reviewer
+  api-drift-reconciliation-engineer: api-infra-reviewer
+  api-grpc-contract-engineer: api-contract-architect
+  api-grpc-parser-engineer: api-contract-architect
+  api-grpc-gateway-engineer: api-contract-architect
+  api-grpc-compatibility-engineer: api-governance-reviewer
+  api-grpc-codegen-engineer: api-codegen-engineer
+  api-grpc-toolchain-engineer: api-codegen-engineer
+  api-grpc-security-engineer: api-security-reviewer
+  api-observability-security-engineer: api-security-reviewer
+  api-relational-data-architect: api-data-access-architect
+  api-analytical-data-architect: api-data-access-architect
+  api-streaming-platform-architect: api-event-driven-architect
+  api-grpc-runtime-engineer: api-resilience-engineer
+  api-slo-reliability-engineer: api-resilience-engineer
+  api-grpc-performance-engineer: api-performance-engineer
+  api-load-test-engineer: api-load-capacity-engineer
+  api-capacity-engineer: api-load-capacity-engineer
+  api-instrumentation-engineer: api-observability-engineer
+  api-grpc-observability-engineer: api-observability-engineer
+  api-telemetry-normalization-engineer: api-observability-engineer
+  api-observability-control-plane: api-observability-integration-engineer
+  api-vendor-integration-engineer: api-observability-integration-engineer
+  api-datadog-integration-engineer: api-observability-integration-engineer
+  api-dynatrace-integration-engineer: api-observability-integration-engineer
+  api-verification-engineer: api-verifier
+  api-runtime-migration-verifier: api-verifier
+  api-platform-completion-reviewer: api-verifier

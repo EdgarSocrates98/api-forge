@@ -370,11 +370,17 @@ def _check_agents(root: Path, failures: list[str]) -> None:
         for step in steps:
             if step["executor"] not in executors:
                 failures.append(f"playbook {name!r}: unknown executor {step['executor']!r}")
-    # host-native mirrors must be byte-identical to agents/*.md
+    # host-native mirrors must equal render(agents/*.md) for Claude, Devin and Codex
     from apiforge.dispatch.mirrors import mirror_drift
+    from apiforge.dispatch.references import check as check_references
 
     for path in mirror_drift(root):
         failures.append(f"agent mirror drift: {path}")
+    references = check_references(root)
+    for item in references["unknown"]:  # type: ignore[union-attr]
+        failures.append(f"unknown agent reference: {item}")
+    for item in references["alias_problems"]:  # type: ignore[union-attr]
+        failures.append(f"agent alias: {item}")
 
 
 def _check_lab_and_boundary(root: Path, failures: list[str]) -> None:

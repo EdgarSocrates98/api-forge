@@ -84,13 +84,13 @@ routes:
       security — routed to the security reviewer.
   - phase: build
     dominant_area: STORAGE
-    recommended_agent: aws-api-infra-reviewer
+    recommended_agent: api-infra-reviewer
     rationale: >-
       Datastore posture (PITR, encryption, deletion protection) is
       infrastructure configuration — routed to the AWS infra reviewer.
   - phase: verify
     dominant_area: STORAGE
-    recommended_agent: aws-api-infra-reviewer
+    recommended_agent: api-infra-reviewer
     rationale: >-
       Storage findings at verify time are infra configuration, judged by
       the AWS infra reviewer.
@@ -138,13 +138,13 @@ routes:
       governance reviewer decides accept/version/reject.
   - phase: build
     dominant_area: GATEWAY
-    recommended_agent: aws-api-infra-reviewer
+    recommended_agent: api-infra-reviewer
     rationale: >-
       Gateway findings during build are edge infrastructure posture —
       the AWS infra reviewer's domain.
   - phase: verify
     dominant_area: GATEWAY
-    recommended_agent: aws-api-infra-reviewer
+    recommended_agent: api-infra-reviewer
     rationale: >-
       Gateway findings at verify time stay infra configuration, judged by
       the AWS infra reviewer.
@@ -192,19 +192,19 @@ routes:
       belongs in the architecture before build.
   - phase: verify
     dominant_area: PERF
-    recommended_agent: api-capacity-engineer
+    recommended_agent: api-load-capacity-engineer
     rationale: >-
       A measured run at verify time is a capacity question — verdict over
       baseline, RPS distinct from TPS.
   - phase: benchmark
     dominant_area: TESTING
-    recommended_agent: api-load-test-engineer
+    recommended_agent: api-load-capacity-engineer
     rationale: >-
       Load scenarios, tool reports and generator saturation are the load
       engineer's evidence surface.
   - phase: build
     dominant_area: IDENTITY
-    recommended_agent: terraform-reviewer
+    recommended_agent: api-infra-reviewer
     rationale: >-
       Identity declared in IaC (roles, pools, policies) is reviewed as
       code before it is reviewed as a dump.

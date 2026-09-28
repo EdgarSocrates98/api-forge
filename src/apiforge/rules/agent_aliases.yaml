@@ -1,5 +1,5 @@
 version: 1
-active: false
+active: true
 deprecated_in: roster-v2
 aliases:
   api-agentic-orchestrator: api-orchestrator

@@ -24,10 +24,15 @@ MIRROR_DIRS: tuple[str, ...] = (DEVIN_DIR, CLAUDE_DIR, CODEX_DIR)
 
 CLAUDE_TOOLS = {
     "read-only": "Read, Grep, Glob, Bash",
+    "state-writer": "Read, Grep, Glob, Bash",
     "writer": "Read, Grep, Glob, Bash, Edit, Write",
 }
 CLAUDE_MODEL = {"fast": "sonnet", "deep": "opus"}
-CODEX_SANDBOX = {"read-only": "read-only", "writer": "workspace-write"}
+CODEX_SANDBOX = {
+    "read-only": "read-only",
+    "state-writer": "workspace-write",
+    "writer": "workspace-write",
+}
 CODEX_EFFORT = {"fast": "medium", "deep": "high"}
 
 

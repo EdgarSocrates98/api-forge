@@ -113,6 +113,20 @@ class ProxyRouter:
         return [name for _, name in sorted(scores)]
 
 
+def _grams(text: str, size: int = 4) -> set[tuple[str, ...]]:
+    words = _TOKEN.findall(text.lower())
+    return {tuple(words[index : index + size]) for index in range(len(words) - size + 1)}
+
+
+def leakage(roster: tuple[AgentSource, ...], cases: tuple[AgentRoutingCase, ...]) -> float:
+    """Share of cases that copy a 4-word sequence from their expected agent's routing text."""
+    docs = {
+        agent.name: _grams(f"{agent.description} {_section(agent, _ENTER)}") for agent in roster
+    }
+    leaked = sum(1 for case in cases if _grams(case.question) & docs.get(case.expected, set()))
+    return round(leaked / len(cases), 4) if cases else 0.0
+
+
 def load_cases(path: Path) -> tuple[AgentRoutingCase, ...]:
     if not path.is_file():
         raise ContractError("AF-EVAL-AGENT-ROUTING", f"{path} is missing")
@@ -170,9 +184,11 @@ def evaluate(
         by_family=tuple(sorted(by_family.items())),
         protected_misroutes=tuple(protected),
         misses=tuple(misses),
+        leakage_4gram=leakage(roster, cases),
         alias_mapping_applied=bool(table.aliases),
         limitations=(
             "lexical proxy of the host router; hosts route with a model over the same descriptions",
+            "leakage_4gram is the share of cases sharing a 4-word sequence with the expected agent",
         ),
     )
 
@@ -215,6 +231,7 @@ __all__ = [
     "ProxyRouter",
     "compare",
     "evaluate",
+    "leakage",
     "load_cases",
     "run",
     "tokens",

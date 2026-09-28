@@ -658,17 +658,23 @@ def playbook(coordinator: str, detail_level: str = "normal") -> dict[str, Any]:
     from apiforge.rules.catalog import load_playbooks
 
     def work() -> dict[str, Any]:
+        from apiforge.dispatch.aliases import resolve_agent
+
         playbooks = load_playbooks()
-        steps = playbooks.get(coordinator)
+        resolution = resolve_agent(coordinator)
+        steps = playbooks.get(resolution.name)
         if steps is None:
             raise AnalysisError(
                 "AF-PLAYBOOK-NOT-FOUND",
                 f"no playbook for {coordinator!r}; known: {sorted(playbooks)}",
             )
-        return {
-            "coordinator": coordinator,
+        payload: dict[str, Any] = {
+            "coordinator": resolution.name,
             "steps": [dict(s, order=i) for i, s in enumerate(steps, 1)],
         }
+        if resolution.warning:
+            payload["warnings"] = [resolution.warning]
+        return payload
 
     out: dict[str, Any] = _call("playbook", work, detail_level)
     return out

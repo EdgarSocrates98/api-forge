@@ -93,3 +93,42 @@ def test_repository_references_are_consistent() -> None:
     root = Path(__file__).resolve().parents[2]
     assert unknown_references(root) == []
     assert alias_problems(root) == []
+
+
+def test_playbook_and_registry_resolve_deprecated_names(tmp_path: Path) -> None:
+    from typer.testing import CliRunner
+
+    from apiforge.cli import app
+    from apiforge.runtime.registry import load_capabilities
+
+    result = CliRunner().invoke(app, ["playbook", "aws-api-infra-reviewer"])
+    assert result.exit_code == 0, result.output
+    assert '"coordinator": "api-infra-reviewer"' in result.output
+    assert "AF-AGENT-ALIAS-DEPRECATED" in result.output
+    catalog = tmp_path / "runtime.yaml"
+    catalog.write_text(
+        "runtime:\n  capabilities:\n    orchestrate:\n"
+        "      agent: api-agentic-orchestrator\n      kind: specialist\n      risk: read_only\n",
+        encoding="utf-8",
+    )
+    assert load_capabilities(catalog)["orchestrate"].agent == "api-orchestrator"
+
+
+def test_shipped_rules_use_current_names_only() -> None:
+    root = Path(__file__).resolve().parents[2]
+    table = load_table()
+    for rel in (
+        "src/apiforge/rules/playbooks.yaml",
+        "src/apiforge/rules/catalog/routing.yaml",
+        "src/apiforge/rules/routing.yaml",
+        "src/apiforge/rules/agentic_runtime.yaml",
+        "src/apiforge/rules/agent_profiles.yaml",
+        "src/apiforge/runtime/supervisor.py",
+    ):
+        text = (root / rel).read_text(encoding="utf-8")
+        stale = [
+            old
+            for old in table.aliases
+            if f"{old}\n" in text or f"{old}:" in text or f'"{old}"' in text
+        ]
+        assert stale == [], (rel, stale)

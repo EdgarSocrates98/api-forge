@@ -381,6 +381,13 @@ def _check_agents(root: Path, failures: list[str]) -> None:
         failures.append(f"unknown agent reference: {item}")
     for item in references["alias_problems"]:  # type: ignore[union-attr]
         failures.append(f"agent alias: {item}")
+    from apiforge.agentops.agent_audit import audit_agents
+    from apiforge.dispatch.agent_source import lint as lint_agents
+
+    for finding in lint_agents(root).findings:
+        failures.append(f"agent contract: {finding.agent}: {finding.code} ({finding.detail})")
+    for name in audit_agents(root)["merge_candidates"]:
+        failures.append(f"agent audit: {name} owns nothing unique (merge-candidate)")
 
 
 def _check_lab_and_boundary(root: Path, failures: list[str]) -> None:

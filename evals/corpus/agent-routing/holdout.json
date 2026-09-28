@@ -1,0 +1,565 @@
+{
+ "schema": "apiforge/agent-routing-cases/v1",
+ "cases": [
+  {
+   "id": "haiku-H001",
+   "question": "How should I break down this microservices migration into separate workstreams?",
+   "expected": "api-orchestrator",
+   "family": "planning",
+   "source": "independent-holdout (haiku; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "haiku-H002",
+   "question": "What phases do we need for rolling out a new event processor without disrupting traffic?",
+   "expected": "api-orchestrator",
+   "family": "planning",
+   "source": "independent-holdout (haiku; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "haiku-H003",
+   "question": "What's the best sequence for transitioning from REST to gRPC?",
+   "expected": "api-planner",
+   "family": "planning",
+   "source": "independent-holdout (haiku; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "haiku-H004",
+   "question": "Should the database migration happen before or after we redesign the API?",
+   "expected": "api-planner",
+   "family": "planning",
+   "source": "independent-holdout (haiku; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "haiku-H005",
+   "question": "Does this task spec cover all the acceptance criteria for success?",
+   "expected": "api-task-spec-reviewer",
+   "family": "planning",
+   "source": "independent-holdout (haiku; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "haiku-H006",
+   "question": "For 50k messages per second, should we use SQS or Kafka?",
+   "expected": "api-platform-selector",
+   "family": "architecture",
+   "source": "independent-holdout (haiku; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "haiku-H007",
+   "question": "RDS Aurora or DocumentDB—which fits this hierarchical data model better?",
+   "expected": "api-platform-selector",
+   "family": "architecture",
+   "source": "independent-holdout (haiku; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "haiku-H008",
+   "question": "Is our event-driven architecture handling eventual consistency across services correctly?",
+   "expected": "api-architecture-reviewer",
+   "family": "architecture",
+   "source": "independent-holdout (haiku; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "haiku-H009",
+   "question": "What would happen to the dependency graph if we extract a separate auth service?",
+   "expected": "api-architecture-reviewer",
+   "family": "architecture",
+   "source": "independent-holdout (haiku; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "haiku-H010",
+   "question": "Will our infrastructure support multi-region failover for DynamoDB?",
+   "expected": "api-infra-reviewer",
+   "family": "architecture",
+   "source": "independent-holdout (haiku; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "haiku-H011",
+   "question": "How do we migrate from a monolith to microservices without breaking existing clients?",
+   "expected": "api-modernization-specialist",
+   "family": "architecture",
+   "source": "independent-holdout (haiku; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "haiku-H012",
+   "question": "How should I version this breaking change without alienating consumers?",
+   "expected": "api-contract-architect",
+   "family": "contract",
+   "source": "independent-holdout (haiku; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "haiku-H013",
+   "question": "For inter-service messaging, should we use JSON schema or protobuf?",
+   "expected": "api-contract-architect",
+   "family": "contract",
+   "source": "independent-holdout (haiku; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "haiku-H014",
+   "question": "Does this change violate our backward compatibility policy?",
+   "expected": "api-governance-reviewer",
+   "family": "contract",
+   "source": "independent-holdout (haiku; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "haiku-H015",
+   "question": "Is our gRPC service compliant with the governance requirements?",
+   "expected": "api-governance-reviewer",
+   "family": "contract",
+   "source": "independent-holdout (haiku; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "haiku-H016",
+   "question": "Generate Go client stubs from this OpenAPI 3.1 spec.",
+   "expected": "api-codegen-engineer",
+   "family": "contract",
+   "source": "independent-holdout (haiku; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "haiku-H017",
+   "question": "Our error response documentation is missing details—what should be there?",
+   "expected": "api-dx-docs-reviewer",
+   "family": "contract",
+   "source": "independent-holdout (haiku; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "haiku-H018",
+   "question": "Are we validating JWTs securely in our rate limiter?",
+   "expected": "api-security-reviewer",
+   "family": "security",
+   "source": "independent-holdout (haiku; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "haiku-H019",
+   "question": "What's the security risk of exposing internal error details in API responses?",
+   "expected": "api-security-reviewer",
+   "family": "security",
+   "source": "independent-holdout (haiku; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "haiku-H020",
+   "question": "Should we shard the orders table by customer_id or by date?",
+   "expected": "api-data-access-architect",
+   "family": "data",
+   "source": "independent-holdout (haiku; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "haiku-H021",
+   "question": "What's the best way to cache frequently accessed user profiles in Redis?",
+   "expected": "api-data-access-architect",
+   "family": "data",
+   "source": "independent-holdout (haiku; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "haiku-H022",
+   "question": "How do we handle late-arriving events in our order stream?",
+   "expected": "api-event-driven-architect",
+   "family": "data",
+   "source": "independent-holdout (haiku; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "haiku-H023",
+   "question": "How should we handle duplicate event processing in the pipeline?",
+   "expected": "api-event-driven-architect",
+   "family": "data",
+   "source": "independent-holdout (haiku; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "haiku-H024",
+   "question": "Which circuit breaker strategy fits our downstream service calls?",
+   "expected": "api-resilience-engineer",
+   "family": "runtime",
+   "source": "independent-holdout (haiku; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "haiku-H025",
+   "question": "If the payment service goes down, how do we degrade gracefully?",
+   "expected": "api-resilience-engineer",
+   "family": "runtime",
+   "source": "independent-holdout (haiku; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "haiku-H026",
+   "question": "Why is the search endpoint doing full table scans instead of using indexes?",
+   "expected": "api-performance-engineer",
+   "family": "runtime",
+   "source": "independent-holdout (haiku; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "haiku-H027",
+   "question": "The p99 latency spikes every hour—where should I start investigating?",
+   "expected": "api-performance-engineer",
+   "family": "runtime",
+   "source": "independent-holdout (haiku; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "haiku-H028",
+   "question": "Can we handle 100k concurrent connections with the current setup?",
+   "expected": "api-load-capacity-engineer",
+   "family": "runtime",
+   "source": "independent-holdout (haiku; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "haiku-H029",
+   "question": "What should I measure and track for this new batch processing endpoint?",
+   "expected": "api-observability-engineer",
+   "family": "observability",
+   "source": "independent-holdout (haiku; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "haiku-H030",
+   "question": "Which log patterns are most helpful for debugging these intermittent timeouts?",
+   "expected": "api-observability-engineer",
+   "family": "observability",
+   "source": "independent-holdout (haiku; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "haiku-H031",
+   "question": "How do I set up Datadog APM for end-to-end gRPC tracing?",
+   "expected": "api-observability-integration-engineer",
+   "family": "observability",
+   "source": "independent-holdout (haiku; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "haiku-H032",
+   "question": "Should we send traces directly to Dynatrace or use OTEL collectors?",
+   "expected": "api-observability-integration-engineer",
+   "family": "observability",
+   "source": "independent-holdout (haiku; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "haiku-H033",
+   "question": "What testing approach works best for asynchronous event-driven systems?",
+   "expected": "api-test-strategist",
+   "family": "quality",
+   "source": "independent-holdout (haiku; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "haiku-H034",
+   "question": "How many test cases do we need to cover this complex state machine?",
+   "expected": "api-test-strategist",
+   "family": "quality",
+   "source": "independent-holdout (haiku; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "haiku-H035",
+   "question": "Is this race condition fix actually correct?",
+   "expected": "api-verifier",
+   "family": "assurance",
+   "source": "independent-holdout (haiku; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "haiku-H036",
+   "question": "What edge cases might break this pagination implementation?",
+   "expected": "api-adversarial-critic",
+   "family": "assurance",
+   "source": "independent-holdout (haiku; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "haiku-H037",
+   "question": "Should we prioritize fixing the timeout issue or the memory leak first?",
+   "expected": "api-debate-referee",
+   "family": "assurance",
+   "source": "independent-holdout (haiku; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "haiku-H038",
+   "question": "Is this a production blocker or can we defer it to next sprint?",
+   "expected": "api-debate-referee",
+   "family": "assurance",
+   "source": "independent-holdout (haiku; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "haiku-H039",
+   "question": "What's the safest way to roll back this deployment if it breaks?",
+   "expected": "api-operations-engineer",
+   "family": "operations",
+   "source": "independent-holdout (haiku; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "haiku-H040",
+   "question": "Should this change go through the normal release gate or an emergency path?",
+   "expected": "api-release-guardian",
+   "family": "operations",
+   "source": "independent-holdout (haiku; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "sonnet-H001",
+   "question": "We have a big feature touching five services and three teams. Can you coordinate who does what and in what order, and keep track of progress across the workstreams?",
+   "expected": "api-orchestrator",
+   "family": "planning",
+   "source": "independent-holdout (sonnet; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "sonnet-H002",
+   "question": "who should pick up which part of the billing rewrite? need a lead to run the whole thing",
+   "expected": "api-orchestrator",
+   "family": "planning",
+   "source": "independent-holdout (sonnet; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "sonnet-H003",
+   "question": "Break the customer-export feature into ordered implementation steps with milestones, dependencies and an estimate for each.",
+   "expected": "api-planner",
+   "family": "planning",
+   "source": "independent-holdout (sonnet; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "sonnet-H004",
+   "question": "draft me a roadmap for getting the orders API to v2 in two sprints",
+   "expected": "api-planner",
+   "family": "planning",
+   "source": "independent-holdout (sonnet; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "sonnet-H005",
+   "question": "Here's the task spec for the refund endpoint. Are the acceptance criteria unambiguous and testable, and is anything missing before we start coding?",
+   "expected": "api-task-spec-reviewer",
+   "family": "planning",
+   "source": "independent-holdout (sonnet; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "sonnet-H006",
+   "question": "can you sanity check this ticket description? feels vague to me",
+   "expected": "api-task-spec-reviewer",
+   "family": "planning",
+   "source": "independent-holdout (sonnet; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "sonnet-H007",
+   "question": "Should we deploy this on Lambda, ECS Fargate or EKS given a spiky workload and a small team?",
+   "expected": "api-platform-selector",
+   "family": "architecture",
+   "source": "independent-holdout (sonnet; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "sonnet-H008",
+   "question": "gateway: Kong vs AWS API Gateway vs Envoy, which one fits us?",
+   "expected": "api-platform-selector",
+   "family": "architecture",
+   "source": "independent-holdout (sonnet; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "sonnet-H009",
+   "question": "Please review our service boundaries and layering. I suspect the payments module is tightly coupled to inventory and there are hidden circular dependencies.",
+   "expected": "api-architecture-reviewer",
+   "family": "architecture",
+   "source": "independent-holdout (sonnet; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "sonnet-H010",
+   "question": "is this design going to hold up if we triple traffic? look at the diagram",
+   "expected": "api-architecture-reviewer",
+   "family": "architecture",
+   "source": "independent-holdout (sonnet; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "sonnet-H011",
+   "question": "Review our Terraform for the VPC, subnets, security groups and ALB. Anything misconfigured or overly permissive in the cloud setup?",
+   "expected": "api-infra-reviewer",
+   "family": "architecture",
+   "source": "independent-holdout (sonnet; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "sonnet-H012",
+   "question": "k8s manifests look off, missing resource limits and probes?",
+   "expected": "api-infra-reviewer",
+   "family": "architecture",
+   "source": "independent-holdout (sonnet; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "sonnet-H013",
+   "question": "We have a 12-year-old SOAP monolith. How do we incrementally carve it into REST services with a strangler approach without a big-bang rewrite?",
+   "expected": "api-modernization-specialist",
+   "family": "architecture",
+   "source": "independent-holdout (sonnet; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "sonnet-H014",
+   "question": "legacy Java 8 service, need a path to move it off to something current",
+   "expected": "api-modernization-specialist",
+   "family": "architecture",
+   "source": "independent-holdout (sonnet; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "sonnet-H015",
+   "question": "Design the OpenAPI spec for a subscriptions resource: URIs, status codes, pagination, error envelope and idempotency keys.",
+   "expected": "api-contract-architect",
+   "family": "contract",
+   "source": "independent-holdout (sonnet; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "sonnet-H016",
+   "question": "how should I model my protobuf messages and services for the inventory API?",
+   "expected": "api-contract-architect",
+   "family": "contract",
+   "source": "independent-holdout (sonnet; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "sonnet-H017",
+   "question": "Does this API change comply with our naming standards and versioning policy, and will it break existing consumers? Check against the org rules before it merges.",
+   "expected": "api-governance-reviewer",
+   "family": "contract",
+   "source": "independent-holdout (sonnet; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "sonnet-H018",
+   "question": "lint failed on the spec, are we allowed to make this a breaking change?",
+   "expected": "api-governance-reviewer",
+   "family": "contract",
+   "source": "independent-holdout (sonnet; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "sonnet-H019",
+   "question": "Generate a typed TypeScript client and server stubs from our OpenAPI file, and keep them regenerating cleanly in CI.",
+   "expected": "api-codegen-engineer",
+   "family": "contract",
+   "source": "independent-holdout (sonnet; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "sonnet-H020",
+   "question": "my generated Go stubs from the proto are stale, how do I regen them",
+   "expected": "api-codegen-engineer",
+   "family": "contract",
+   "source": "independent-holdout (sonnet; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "sonnet-H021",
+   "question": "Is our API reference readable for new integrators? Review the getting-started guide, examples and error explanations for clarity.",
+   "expected": "api-dx-docs-reviewer",
+   "family": "contract",
+   "source": "independent-holdout (sonnet; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "sonnet-H022",
+   "question": "the sample requests in our docs don't work, can you fix the developer onboarding page",
+   "expected": "api-dx-docs-reviewer",
+   "family": "contract",
+   "source": "independent-holdout (sonnet; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "sonnet-H023",
+   "question": "Audit this endpoint for authorization flaws, injection risks, BOLA, and how we handle JWT validation and secrets.",
+   "expected": "api-security-reviewer",
+   "family": "security",
+   "source": "independent-holdout (sonnet; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "sonnet-H024",
+   "question": "is it ok to log the bearer token in debug mode? also CORS config check",
+   "expected": "api-security-reviewer",
+   "family": "security",
+   "source": "independent-holdout (sonnet; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "sonnet-H025",
+   "question": "Which access pattern and indexes should we use for a DynamoDB table serving orders by customer and by date, and how do we avoid hot partitions?",
+   "expected": "api-data-access-architect",
+   "family": "data",
+   "source": "independent-holdout (sonnet; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "sonnet-H026",
+   "question": "postgres query is doing seq scans and our ORM is causing N+1, help me fix the persistence layer",
+   "expected": "api-data-access-architect",
+   "family": "data",
+   "source": "independent-holdout (sonnet; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "sonnet-H027",
+   "question": "Design a Kafka topic layout with partitioning keys, consumer groups, schema evolution and an outbox pattern so order events are delivered exactly once in effect.",
+   "expected": "api-event-driven-architect",
+   "family": "data",
+   "source": "independent-holdout (sonnet; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "sonnet-H028",
+   "question": "should this be SNS fan-out to SQS or EventBridge? we need retries and a DLQ",
+   "expected": "api-event-driven-architect",
+   "family": "data",
+   "source": "independent-holdout (sonnet; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "sonnet-H029",
+   "question": "When the downstream pricing service times out we cascade failures. Add circuit breakers, bulkheads, retry with jitter and graceful degradation.",
+   "expected": "api-resilience-engineer",
+   "family": "runtime",
+   "source": "independent-holdout (sonnet; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "sonnet-H030",
+   "question": "what happens to our API if redis goes down? want it to keep serving",
+   "expected": "api-resilience-engineer",
+   "family": "runtime",
+   "source": "independent-holdout (sonnet; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "sonnet-H031",
+   "question": "p99 latency on the search endpoint jumped from 120ms to 900ms. Profile it and tell me where the time goes and how to optimize the hot path.",
+   "expected": "api-performance-engineer",
+   "family": "runtime",
+   "source": "independent-holdout (sonnet; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "sonnet-H032",
+   "question": "memory keeps growing in the worker, find the leak / slow spots",
+   "expected": "api-performance-engineer",
+   "family": "runtime",
+   "source": "independent-holdout (sonnet; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "sonnet-H033",
+   "question": "How many requests per second can this service sustain before it falls over, and how many pods do we need for Black Friday at 5x traffic? Build a k6 scenario to find the breaking point.",
+   "expected": "api-load-capacity-engineer",
+   "family": "runtime",
+   "source": "independent-holdout (sonnet; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "sonnet-H034",
+   "question": "size the fleet for 10k TPS please",
+   "expected": "api-load-capacity-engineer",
+   "family": "runtime",
+   "source": "independent-holdout (sonnet; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "sonnet-H035",
+   "question": "Add structured logs, RED metrics and distributed trace spans to the checkout flow, and define SLIs and alert thresholds we can actually act on.",
+   "expected": "api-observability-engineer",
+   "family": "observability",
+   "source": "independent-holdout (sonnet; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "sonnet-H036",
+   "question": "our traces lose context across the async hop, how do we propagate it?",
+   "expected": "api-observability-engineer",
+   "family": "observability",
+   "source": "independent-holdout (sonnet; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "sonnet-H037",
+   "question": "Wire our service into Datadog: set up the agent, custom dashboards, monitors and unified service tagging. Or Dynatrace if that's simpler with our setup.",
+   "expected": "api-observability-integration-engineer",
+   "family": "observability",
+   "source": "independent-holdout (sonnet; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "sonnet-H038",
+   "question": "how do I ship OTel collector data to New Relic without dropping attributes?",
+   "expected": "api-observability-integration-engineer",
+   "family": "observability",
+   "source": "independent-holdout (sonnet; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "sonnet-H039",
+   "question": "What's the right mix of unit, integration, contract and end-to-end tests for this new service, and where should the coverage focus given the risk areas?",
+   "expected": "api-test-strategist",
+   "family": "quality",
+   "source": "independent-holdout (sonnet; labels from agent names only; no repository access)"
+  },
+  {
+   "id": "sonnet-H040",
+   "question": "we keep shipping regressions, how should we structure our test pyramid and what to mock?",
+   "expected": "api-test-strategist",
+   "family": "quality",
+   "source": "independent-holdout (sonnet; labels from agent names only; no repository access)"
+  }
+ ]
+}

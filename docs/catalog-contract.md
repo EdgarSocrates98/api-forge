@@ -789,7 +789,10 @@ Field records join existing run artifacts (economy ledger, `summary.json`,
 `.claude/agents/*.md` (Claude Code: `tools` from `access`, `model` from
 `model_tier`), `.agents/agents/*.md` (Devin: name/description) and
 `.codex/agents/*.toml` (Codex: `sandbox_mode`, `model_reasoning_effort`,
-`developer_instructions`). Sources without `access` are legacy and mirror
+`developer_instructions`). `access` is `read-only` (host read tools; Codex
+`read-only`), `state-writer` (writes only through `apiforge` commands into its
+`write_scope`; no Claude Edit/Write; Codex `workspace-write`) or `writer`
+(Edit/Write within `write_scope`). Sources without `access` are legacy and mirror
 verbatim. Files in a mirror directory that are not generated agents are
 reported as `(non-agent file)` and never deleted.
 
@@ -798,12 +801,14 @@ reported as `(non-agent file)` and never deleted.
 | `AF-AGENT-CONTRACT-FRONTMATTER` | missing/invalid frontmatter or field value |
 | `AF-AGENT-CONTRACT-NAME` | `name` differs from the file stem |
 | `AF-AGENT-CONTRACT-DESCRIPTION` | empty, over 300 chars, or missing `Use when` / `Not for` |
-| `AF-AGENT-CONTRACT-ACCESS` | `access` not declared, or a writer without `write_scope` |
+| `AF-AGENT-CONTRACT-ACCESS` | `access` not declared, or a writer/state-writer without `write_scope` |
 | `AF-AGENT-CONTRACT-SECTIONS` | a required `## <section>` is missing |
 | `AF-AGENT-CONTRACT-WORDS` | body outside 250–600 words |
 | `AF-AGENT-CONTRACT-LANGUAGE` | description/body not in English |
 | `AF-AGENT-CONTRACT-TOOLS` | no owned `apiforge_tools` |
 | `AF-AGENT-CONTRACT-TOOL-OWNER` | an `apiforge` command is owned by more than one agent |
+| `AF-AGENT-CONTRACT-UNKNOWN-TOOL` | an `apiforge_tools` entry is not a command of the `apiforge` CLI |
+| `AF-AGENT-CONTRACT-PLAYBOOK` | missing playbook, playbook executor not declared in frontmatter, or playbook verb not an `apiforge` command |
 | `AF-AGENT-ALIAS-DEPRECATED` | warning: a deprecated agent name was resolved to its roster successor |
 | `AF-AGENT-ALIAS-INVALID` | alias table malformed, chained or self-referencing |
 | `AF-EVAL-AGENT-ROUTING` | routing golden corpus missing |

@@ -39,7 +39,7 @@ apiforge field verify   --task T001 --verdict agree|disagree|unresolved
   linked checkpoint must fall inside them (±60s).
 - `exit_reason`: `knowledge_gap | capability_gap | context_gap | graph_gap |
   tool_gap | ux_gap | evaluation_gap | integration_gap | none`.
-- The verifier (`api-verification-engineer` or a human other than the
+- The verifier (`api-verifier` or a human other than the
   executor) judges against `ground_truth` **without** seeing the human
   labels. `verify` never prints them.
 

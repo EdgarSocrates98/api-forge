@@ -165,13 +165,13 @@ def lint_agent(agent: AgentSource) -> list[AgentFinding]:
                 "declare access: read-only | writer",
             )
         )
-    elif agent.access == "writer" and not agent.write_scope:
+    elif agent.access in ("writer", "state-writer") and not agent.write_scope:
         found.append(
             _finding(
                 name,
                 "AF-AGENT-CONTRACT-ACCESS",
                 "write_scope",
-                "writer without write_scope",
+                f"{agent.access} without write_scope",
                 "declare write_scope (where the agent may write)",
             )
         )
@@ -221,13 +221,97 @@ def lint_agent(agent: AgentSource) -> list[AgentFinding]:
     return found
 
 
-def lint_roster(roster: tuple[AgentSource, ...]) -> AgentLintReport:
+def cli_commands() -> frozenset[str]:
+    """Every runnable ``apiforge`` command path, read from the Typer tree."""
+    import typer
+
+    from apiforge.cli import app
+
+    paths: set[str] = set()
+
+    def walk(command: Any, prefix: tuple[str, ...]) -> None:
+        subcommands = getattr(command, "commands", None)
+        if isinstance(subcommands, dict) and subcommands:
+            for name, sub in subcommands.items():
+                walk(sub, (*prefix, name))
+        elif prefix:
+            paths.add(" ".join(prefix))
+
+    walk(typer.main.get_command(app), ())
+    return frozenset(paths)
+
+
+def _command_of(verb: str, commands: frozenset[str]) -> str | None:
+    words = [word for word in verb.split() if not word.startswith("-")]
+    for size in range(min(3, len(words)), 0, -1):
+        candidate = " ".join(words[:size])
+        if candidate in commands:
+            return candidate
+    return None
+
+
+def _playbook_findings(
+    agent: AgentSource, steps: tuple[dict[str, str], ...] | None, commands: frozenset[str]
+) -> list[AgentFinding]:
+    if steps is None:
+        return [
+            _finding(
+                agent.name,
+                "AF-AGENT-CONTRACT-PLAYBOOK",
+                "playbook",
+                "coordinator has no playbook",
+                "add the agent to rules/playbooks.yaml",
+            )
+        ]
+    found: list[AgentFinding] = []
+    for step in steps:
+        if step["executor"] not in agent.executors:
+            found.append(
+                _finding(
+                    agent.name,
+                    "AF-AGENT-CONTRACT-PLAYBOOK",
+                    "executors",
+                    f"playbook uses {step['executor']} not declared in frontmatter",
+                    "declare every playbook executor in the agent frontmatter",
+                )
+            )
+        if _command_of(step["verb"], commands) is None:
+            found.append(
+                _finding(
+                    agent.name,
+                    "AF-AGENT-CONTRACT-PLAYBOOK",
+                    "verb",
+                    f"playbook verb {step['verb']!r} is not an apiforge command",
+                    "use verbs that exist in the apiforge CLI",
+                )
+            )
+    return found
+
+
+def lint_roster(
+    roster: tuple[AgentSource, ...],
+    *,
+    commands: frozenset[str] | None = None,
+    playbooks: dict[str, tuple[dict[str, str], ...]] | None = None,
+) -> AgentLintReport:
     findings: list[AgentFinding] = []
     owners: dict[str, list[str]] = defaultdict(list)
     for agent in roster:
         findings.extend(lint_agent(agent))
         for tool in agent.apiforge_tools:
             owners[tool].append(agent.name)
+            if commands is not None and tool not in commands:
+                findings.append(
+                    _finding(
+                        agent.name,
+                        "AF-AGENT-CONTRACT-UNKNOWN-TOOL",
+                        "apiforge_tools",
+                        f"{tool!r} is not an apiforge command",
+                        "list only commands that `apiforge --help` exposes",
+                    )
+                )
+        if playbooks is not None and commands is not None and not agent.legacy:
+            findings.extend(_playbook_findings(agent, playbooks.get(agent.name), commands))
     for tool, names in sorted(owners.items()):
         if len(names) > 1:
             for name in sorted(names):
@@ -249,14 +333,29 @@ def lint_roster(roster: tuple[AgentSource, ...]) -> AgentLintReport:
     )
 
 
+def _repository_playbooks(root: Path) -> dict[str, tuple[dict[str, str], ...]] | None:
+    path = Path(root) / "src" / "apiforge" / "rules" / "playbooks.yaml"
+    if not path.is_file():
+        return None
+    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    return {
+        str(name): tuple({key: str(step[key]) for key in ("executor", "verb")} for step in steps)
+        for name, steps in data.items()
+        if isinstance(steps, list)
+    }
+
+
 def lint(root: Path) -> AgentLintReport:
-    return lint_roster(load_roster(root))
+    return lint_roster(
+        load_roster(root), commands=cli_commands(), playbooks=_repository_playbooks(root)
+    )
 
 
 __all__ = [
     "MAX_DESCRIPTION",
     "MAX_WORDS",
     "MIN_WORDS",
+    "cli_commands",
     "coordinator_paths",
     "lint",
     "lint_agent",

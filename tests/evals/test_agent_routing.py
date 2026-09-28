@@ -80,3 +80,13 @@ def test_repository_corpus_is_deterministic() -> None:
     second = run(root).model_dump(mode="json")
     assert json.dumps(first, sort_keys=True) == json.dumps(second, sort_keys=True)
     assert first["cases"] >= 60
+
+
+def test_leakage_counts_copied_four_grams(tmp_path: Path) -> None:
+    from apiforge.evals.agent_routing import leakage
+
+    _roster(tmp_path)
+    roster = load_roster(tmp_path)
+    copied = _case("A", "a high-risk plan must be refuted now", "api-adversarial-critic")
+    fresh = _case("B", "who settles the argument between reviewers", "api-debate-referee")
+    assert leakage(roster, (copied, fresh)) == 0.5

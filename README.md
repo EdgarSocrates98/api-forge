@@ -494,9 +494,11 @@ Twenty-three coordinator profiles in `agents/*.md` (one per specialty, each decl
 contract every profile points at; `next-step` routes by data, `playbook`
 is the dispatch floor, and `.apiforge/economy.jsonl` measures every call.
 
-The data-specialist profiles include `api-relational-data-architect`,
-`api-streaming-platform-architect`, `api-analytical-data-architect`,
-`api-data-access-architect` and `api-event-driven-architect`.
+Data and messaging are owned by `api-data-access-architect` (relational,
+key-value, document, graph, search and analytical stores) and
+`api-event-driven-architect` (queues, topics, streams and orchestration). The
+roster has 25 agents rendered from `agents/*.md` to `.claude/agents/`,
+`.agents/agents/` and `.codex/agents/` (`apiforge agents sync|check|lint`).
 
 ## Evolution cycle status
 

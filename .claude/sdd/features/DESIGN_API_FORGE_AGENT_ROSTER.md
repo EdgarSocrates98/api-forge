@@ -10,7 +10,7 @@
 | **Date** | 2026-09-28 |
 | **Author** | design-agent |
 | **DEFINE** | [DEFINE_API_FORGE_AGENT_ROSTER.md](./DEFINE_API_FORGE_AGENT_ROSTER.md) |
-| **Status** | Ready for Build |
+| **Status** | ✅ Complete (Built) |
 | **Design confidence** | 0.80 (strong codebase patterns: `dispatch/mirrors.py`, `agentops/agent_audit.py`; host formats from official Codex doc; Devin schema unverified) |
 
 ---
@@ -536,4 +536,4 @@ No cycles: `dispatch/render` depends on `agent_source` only; `aliases` is a leaf
 
 ## Next Step
 
-**Ready for:** `/build .claude/sdd/features/DESIGN_API_FORGE_AGENT_ROSTER.md`
+**Ready for:** `/ship .claude/sdd/features/DEFINE_API_FORGE_AGENT_ROSTER.md`

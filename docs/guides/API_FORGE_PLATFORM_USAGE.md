@@ -200,7 +200,7 @@ permissão, índice, browser behavior ou garantia de entrega em produção.
 
 ## 6. Agents e recomendações
 
-O agent `api-platform-completion-reviewer` revisa:
+O agent `api-verifier` revisa:
 
 - estado, limites, docs e verifier de cada capability;
 - fixture/golden/holdout das seis verticais;

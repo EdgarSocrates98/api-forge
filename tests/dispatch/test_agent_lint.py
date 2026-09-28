@@ -58,3 +58,42 @@ def test_legacy_tools_key_is_read_as_apiforge_tools(tmp_path: Path) -> None:
     folder.mkdir()
     (folder / "old.md").write_text("---\nname: old\ntools: [perf verdict]\n---\nbody\n")
     assert load_roster(tmp_path)[0].apiforge_tools == ("perf verdict",)
+
+
+def test_unknown_tool_and_playbook_contradictions(tmp_path: Path) -> None:
+    from apiforge.dispatch.agent_source import cli_commands, lint_roster
+
+    write_agent(tmp_path, "api-h", tools=("perf verdict", "model rds"))
+    roster = load_roster(tmp_path)
+    playbooks = {
+        "api-h": (
+            {"executor": "af-verifier", "verb": "observability verify"},
+            {"executor": "af-judge", "verb": "rules list --area REST"},
+        )
+    }
+    findings = lint_roster(roster, commands=cli_commands(), playbooks=playbooks).findings
+    details = {(item.code, item.field, item.detail) for item in findings}
+    assert (
+        "AF-AGENT-CONTRACT-UNKNOWN-TOOL",
+        "apiforge_tools",
+        "'model rds' is not an apiforge command",
+    ) in details
+    assert any(
+        code == "AF-AGENT-CONTRACT-PLAYBOOK" and field == "executors" for code, field, _ in details
+    )
+    assert any(
+        code == "AF-AGENT-CONTRACT-PLAYBOOK" and field == "verb" for code, field, _ in details
+    )
+    assert not any("rules list" in detail for _, _, detail in details)
+
+
+def test_state_writer_needs_scope(tmp_path: Path) -> None:
+    write_agent(tmp_path, "api-i", access="state-writer")
+    assert ("AF-AGENT-CONTRACT-ACCESS", "write_scope") in _codes(tmp_path)
+
+
+def test_repository_roster_passes_lint() -> None:
+    root = Path(__file__).resolve().parents[2]
+    report = lint(root)
+    assert report.ok, report.findings
+    assert report.agents == 25

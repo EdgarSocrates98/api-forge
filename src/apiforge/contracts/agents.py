@@ -8,7 +8,7 @@ from pydantic import Field
 
 from apiforge.contracts.base import VersionedContract
 
-AgentAccess = Literal["read-only", "writer"]
+AgentAccess = Literal["read-only", "state-writer", "writer"]
 ModelTier = Literal["fast", "deep"]
 
 REQUIRED_SECTIONS: tuple[str, ...] = (
@@ -85,6 +85,7 @@ class AgentRoutingReport(VersionedContract):
     by_family: tuple[tuple[str, float], ...] = ()
     protected_misroutes: tuple[str, ...] = ()
     misses: tuple[AgentRoutingMiss, ...] = ()
+    leakage_4gram: float = Field(default=0.0, ge=0.0, le=1.0)
     alias_mapping_applied: bool
     limitations: tuple[str, ...] = ()
 

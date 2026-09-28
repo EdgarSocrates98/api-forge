@@ -90,3 +90,12 @@ def test_repository_mirrors_have_no_agent_drift() -> None:
     root = Path(__file__).resolve().parents[2]
     drift = [item for item in mirror_drift(root) if not item.endswith("(non-agent file)")]
     assert drift == []
+
+
+def test_state_writer_writes_only_through_apiforge(tmp_path: Path) -> None:
+    write_agent(tmp_path, "api-debate-referee", access="state-writer", write_scope="case debates")
+    rendered = render_all(tmp_path)
+    claude = _front(rendered[".claude/agents/api-debate-referee.md"].decode())
+    codex = tomllib.loads(rendered[".codex/agents/api-debate-referee.toml"].decode())
+    assert "Edit" not in claude["tools"] and "Write" not in claude["tools"]
+    assert codex["sandbox_mode"] == "workspace-write"

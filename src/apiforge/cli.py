@@ -3919,19 +3919,24 @@ def playbook_cmd(
     """
 
     def work() -> dict[str, object]:
+        from apiforge.dispatch.aliases import resolve_agent
         from apiforge.rules.catalog import load_playbooks
 
         playbooks = load_playbooks()
-        steps = playbooks.get(coordinator)
+        resolution = resolve_agent(coordinator)
+        steps = playbooks.get(resolution.name)
         if steps is None:
             raise AnalysisError(
                 "AF-PLAYBOOK-NOT-FOUND",
                 f"no playbook for {coordinator!r}; known: {sorted(playbooks)}",
             )
-        return {
-            "coordinator": coordinator,
+        payload: dict[str, object] = {
+            "coordinator": resolution.name,
             "steps": [dict(s, order=i) for i, s in enumerate(steps, 1)],
         }
+        if resolution.warning:
+            payload["warnings"] = [resolution.warning]
+        return payload
 
     _echo_json(_run(work), detail_level)
 

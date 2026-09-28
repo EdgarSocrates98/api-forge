@@ -65,6 +65,7 @@ class EvidenceNode(VersionedContract):
     props: dict[str, object] = Field(default_factory=dict)
     neighbors: tuple[str, ...] = ()
     source_ref: str | None = None
+    unresolved: tuple[str, ...] = ()
 
 
 class DoctorFinding(VersionedContract):

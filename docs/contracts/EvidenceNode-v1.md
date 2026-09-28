@@ -8,3 +8,4 @@
 | `props` | Node properties from the case graph |
 | `neighbors` | One-hop neighbors as further `evidence://` refs — never the whole chain |
 | `source_ref` | For facts with a source line: `ctx://` of a small slice of that file |
+| `unresolved` | Refused refs such as `AF-PATH-OUTSIDE-ROOT` when a fact source path leaves the allowed roots; the source slice is then omitted |

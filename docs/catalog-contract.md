@@ -586,6 +586,22 @@ the prompt prefix contains nothing run-specific.
 | `AF-ECONOMY-DOCTOR-ESCALATION-HEAVY` | doctor: more than half of the runs escalated to L3 |
 | `AF-ECONOMY-DOCTOR-REPEATED-PARSING` | doctor: extractor cache misses exceed hits |
 
+## Economy hardening (trust boundary, budget invariants, accounting, proof semantics)
+
+Every path read from case, fact or graph data goes through one resolver
+(`security/source_paths.py`): it must stay inside the project root or a
+repository declared in `.apiforge/workspace.yaml` after symlinks are
+followed. A refused ref is reported as unresolved and never read nor stored
+in `ctx://`; the rest of the capsule or evidence node is served. The Context
+Gateway, `evidence resolve` and `context delta` read cases only through
+`case.service.load_verified_case` (containment + sha256 per artifact).
+
+| Code | Meaning |
+|---|---|
+| `AF-PATH-OUTSIDE-ROOT` | unresolved note: a case/fact/graph path is empty, UNC, drive-qualified, traverses `..` or resolves outside the allowed roots; unlock: keep sources inside the project or declare the repository in `.apiforge/workspace.yaml` |
+| `AF-CASE-HASH-MISMATCH` | a case artifact changed after `case.json` was written; the capsule/evidence/delta is refused; unlock: re-run `apiforge analyze` |
+| `AF-CASE-PATH-TRAVERSAL` | a case manifest artifact path escapes the case directory (also refused by `evidence emit`) |
+
 ## Freshness, live gating and resume (`knowledge watch`, `evidence gate`, `verify escalate`, `economy phase-budget`, `runtime checkpoint`, `evals economy-freshness`)
 
 `knowledge watch` compares every pack's declared `freshness.upstream`,

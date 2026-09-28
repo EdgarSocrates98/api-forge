@@ -116,9 +116,9 @@ def build_delta(
     mapped: set[str] = set()
     unresolved: list[str] = []
 
-    from apiforge.context.gateway.levels import load_case, load_graph
+    from apiforge.context.gateway.levels import load_graph, verified_case
 
-    case = load_case(case_path)
+    case = verified_case(case_path)
     if case is None:
         unresolved.append("graph-unavailable")
     else:

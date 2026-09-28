@@ -44,6 +44,8 @@ with their mitigations.
 | Resume budget bypass | `economy_checkpoint.json` is a validated contract (`AF-ECONOMY-CHECKPOINT-INVALID` on tampering); the call cap uses the control plane's persisted `calls_used`; a resume never lowers the checkpoint profile |
 | Graph line tampering | every `nodes.jsonl` line carries a `sha256` over its `{id,kind,props}` payload — load refuses `AF-GRAPH-HASH-MISMATCH`; files are sorted canonically so byte drift is diff-visible |
 | False `DONE` claim | `brief show` derives status from the task state machine — `DONE` exists only after `awaiting_supervision -> accepted` by a distinct actor with evidence; gaps, pending human action and open items are fields, not prose |
+| Context Gateway bypassing case integrity | the gateway, `evidence resolve` and `context delta` read cases only through `case.service.load_verified_case` (manifest, containment, sha256 per artifact); a tampered artifact refuses with `AF-CASE-HASH-MISMATCH` |
+| Out-of-root source read into `ctx://` (`../`, absolute, drive/UNC, symlink escape, undeclared repo) | one resolver (`security/source_paths.py`) confines every case/fact/graph path to the project root and declared workspace repositories after following symlinks; a refused ref is `AF-PATH-OUTSIDE-ROOT`, never opened or stored |
 
 ## Known limitations
 

@@ -42,7 +42,18 @@ def emit_receipt(case_dir: Path, now: str | None = None) -> Receipt:
         if not isinstance(ref, dict):
             continue
         path = ref.get("path")
-        artifact = case_dir / str(path)
+        rel = Path(str(path))
+        artifact = case_dir / rel
+        try:
+            if rel.is_absolute() or ".." in rel.parts:
+                raise ValueError(str(path))
+            artifact.resolve().relative_to(case_dir.resolve())
+        except ValueError as exc:
+            raise EvidenceError(
+                "AF-CASE-PATH-TRAVERSAL",
+                f"manifest artifact {path} escapes {case_dir}",
+                field="artifacts",
+            ) from exc
         if not artifact.is_file():
             raise EvidenceError(
                 "AF-EVIDENCE-MISSING",

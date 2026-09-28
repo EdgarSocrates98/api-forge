@@ -92,6 +92,8 @@ Keep claims in their own class:
 - Every provider call, including shadow challengers, is counted by the
   ControlPlane, so checkpoints and resumes see real spend.
 - L0 early stop needs a structured, re-hashed `ProofReceipt`.
+- Hardening evals run production code (`plan_roles`, `build_delta`); an oracle
+  never re-implements the logic it guards.
 
 ## Changing economic policy
 

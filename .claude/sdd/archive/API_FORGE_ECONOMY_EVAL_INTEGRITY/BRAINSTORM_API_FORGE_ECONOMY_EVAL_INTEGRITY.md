@@ -7,7 +7,7 @@
 | **Feature** | API_FORGE_ECONOMY_EVAL_INTEGRITY |
 | **Date** | 2026-09-28 |
 | **Author** | brainstorm-agent |
-| **Status** | ✅ Complete (Defined) |
+| **Status** | ✅ Shipped |
 | **Source** | `prompt_evo_new_economy.md` (review of `main` @ `6d2f263`, verdict `PASS COM FOLLOW-UPS`) |
 | **Branch** | `codex/economy-eval-integrity` |
 

@@ -33,6 +33,7 @@ from apiforge.contracts.context import (
 )
 from apiforge.contracts.economy import CostVector, LedgerRef, LedgerSource, RunLedgerEntry
 from apiforge.economy import run_ledger
+from apiforge.security.source_paths import confine_dir
 
 DEFAULT_BUDGET_BYTES = 16000
 DEFAULT_LEVEL: CapsuleLevel = "L3"
@@ -68,7 +69,7 @@ def build_capsule(
 ) -> ContextCapsule:
     started = time.perf_counter()
     root = Path(root).resolve()
-    case_path = Path(case_dir).resolve() if case_dir else root / ".apiforge" / "case"
+    case_path = confine_dir(root, case_dir) if case_dir else root / ".apiforge" / "case"
     method, path = parse_target(target)
     target = f"{method} {path}"
     intent = {"action": action, "target": target, **({"objective": objective} if objective else {})}

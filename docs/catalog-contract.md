@@ -598,7 +598,7 @@ Gateway, `evidence resolve` and `context delta` read cases only through
 
 | Code | Meaning |
 |---|---|
-| `AF-PATH-OUTSIDE-ROOT` | unresolved note: a case/fact/graph path is empty, UNC, drive-qualified, traverses `..` or resolves outside the allowed roots; unlock: keep sources inside the project or declare the repository in `.apiforge/workspace.yaml` |
+| `AF-PATH-OUTSIDE-ROOT` | a case/fact/graph path or a `context delta --changed` item is empty, UNC, drive-qualified, traverses `..` or resolves outside the allowed roots (unresolved note, never read); an out-of-root `--case-dir`/`--case` refuses the command (`field=case_dir`); unlock: keep sources inside the project or declare the repository in `.apiforge/workspace.yaml` |
 | `AF-CASE-HASH-MISMATCH` | a case artifact changed after `case.json` was written; the capsule/evidence/delta is refused; unlock: re-run `apiforge analyze` |
 | `AF-CASE-PATH-TRAVERSAL` | a case manifest artifact path escapes the case directory (also refused by `evidence emit`) |
 | `AF-ECONOMY-PROOF-UNSTRUCTURED` | diagnostic: an expected proof is only mentioned in a step, not proven by a `ProofReceipt`; the ladder reaches L1 at most (no early stop) |

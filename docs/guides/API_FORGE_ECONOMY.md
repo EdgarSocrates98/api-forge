@@ -92,6 +92,8 @@ Mantenha cada afirmação na sua classe:
 - Toda chamada ao provider, inclusive shadow challengers, é contada pelo
   ControlPlane; checkpoint e resume veem o gasto real.
 - Parada L0 exige `ProofReceipt` estruturado e re-hasheado.
+- Os evals de hardening executam o código de produção (`plan_roles`,
+  `build_delta`); um oracle nunca reimplementa a lógica que protege.
 
 ## Mudar política econômica
 

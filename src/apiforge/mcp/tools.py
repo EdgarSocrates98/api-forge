@@ -856,13 +856,17 @@ def evals_gate(
 
 
 def evals_economy_hardening(
-    corpus: str = "evals/corpus/economy-hardening", detail_level: str = "normal"
+    corpus: str = "evals/corpus/economy-hardening",
+    repo_root: str = ".",
+    detail_level: str = "normal",
 ) -> dict[str, Any]:
-    """Path containment, global context budget, token coverage, phase and delta gates."""
+    """Path containment, class-pool budget, tokens, phase and delta gates on production code."""
     from apiforge.evals.hardening import run_hardening
 
     out: dict[str, Any] = _call(
-        "evals_economy_hardening", lambda: run_hardening(Path(corpus)), detail_level
+        "evals_economy_hardening",
+        lambda: run_hardening(Path(corpus), Path(repo_root)),
+        detail_level,
     )
     return out
 

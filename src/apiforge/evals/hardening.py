@@ -4,10 +4,14 @@ Deterministic, offline cases that pin the review's P1/P2 fixes:
 
 - ``path``: a candidate source path must be allowed or refused by the
   resolver (``..``, absolute, UNC, drive, undeclared repository);
-- ``budget``: a role mix must fit ``context_bytes`` through class pools;
+- ``budget``: ``plan_roles`` on an analyzed fixture must fit ``context_bytes``
+  (its contract validators run); ``budget_invariant``: the contract refuses a
+  plan above the envelope;
 - ``tokens``: measured/unmeasured ledger rows give the declared coverage;
 - ``phase``: phase usage gives the declared ``budget_status``;
-- ``delta``: an unmapped path is ``degraded`` only when it is runtime code.
+- ``delta``: ``build_delta`` on the analyzed fixture gives the declared status.
+
+The oracle never re-implements the logic it guards.
 """
 
 from __future__ import annotations
@@ -60,20 +64,66 @@ def _path(case: dict[str, Any], work: Path) -> dict[str, Any]:
     return {"outcome": outcome, "passed": outcome == case["expect"]}
 
 
-def _budget(case: dict[str, Any], work: Path) -> dict[str, Any]:
-    from apiforge.runtime.role_context import load_role_policy
+def _spec(root: Path) -> Any:
+    from apiforge.contracts.task import Budgets, TaskRisk, TaskSize, TaskSpec, TaskState
 
-    policy = load_role_policy()
+    return TaskSpec(
+        id="economy-hardening-case",
+        outcome="make POST /payments idempotent",
+        size=TaskSize.M,
+        inputs=(f"project={root / 'proj'}", "target=POST /payments"),
+        expected_proofs=("specialist artifact",),
+        acceptance_criteria=("plan stays within the envelope",),
+        rollback="discard local run artifacts",
+        risk=TaskRisk.READ_ONLY,
+        state=TaskState.SEALED,
+        revision=1,
+        budgets=Budgets(max_calls=20),
+    )
+
+
+def _budget(case: dict[str, Any], work: Path, fixture: Path) -> dict[str, Any]:
+    """Production path: ``plan_roles`` builds the plan and its contract validators run."""
+    from apiforge.runtime.role_context import plan_roles
+
     context_bytes = int(case["context_bytes"])
-    members: dict[str, int] = {}
-    for kind in case["roles"]:
-        cls = str(policy["roles"][kind])
-        members[cls] = members.get(cls, 0) + 1
-    total = 0
-    for cls, count in members.items():
-        pool = int(float(policy["classes"][cls].get("share", 0)) * context_bytes)
-        total += (pool // count) * count + pool % count
-    return {"budget_total": total, "passed": total <= context_bytes}
+    roles = tuple((f"{kind}-{index}", str(kind)) for index, kind in enumerate(case["roles"]))
+    try:
+        plan = plan_roles(
+            fixture, _spec(fixture), roles, context_bytes=context_bytes, run_id=f"eval-{case['id']}"
+        )
+    except ValueError as exc:
+        return {"error": str(exc).splitlines()[0], "passed": False}
+    return {
+        "total_bytes": plan.total_bytes,
+        "context_bytes": context_bytes,
+        "capsule": bool(plan.capsule_id),
+        "passed": bool(plan.capsule_id) and plan.total_bytes <= context_bytes,
+    }
+
+
+def _budget_invariant(case: dict[str, Any], work: Path, fixture: Path) -> dict[str, Any]:
+    """The contract itself must refuse a plan above the envelope."""
+    from pydantic import ValidationError
+
+    from apiforge.contracts.selective import RoleContext, RoleContextPlan
+
+    size = int(case["context_bytes"])
+    rows = tuple(
+        RoleContext(
+            role="specialist",
+            capability=f"spec-{index}",
+            context_class="focused",
+            bytes=size,
+            budget_bytes=size,
+        )
+        for index in range(2)
+    )
+    try:
+        RoleContextPlan(run_id="eval", context_bytes=size, roles=rows, total_bytes=2 * size)
+    except ValidationError:
+        return {"refused": True, "passed": True}
+    return {"refused": False, "passed": False}
 
 
 def _tokens(case: dict[str, Any], work: Path) -> dict[str, Any]:
@@ -102,26 +152,47 @@ def _phase(case: dict[str, Any], work: Path) -> dict[str, Any]:
     return {"budget_status": plan.budget_status, "passed": plan.budget_status == case["expect"]}
 
 
-def _delta(case: dict[str, Any], work: Path) -> dict[str, Any]:
-    from apiforge.context.delta import _runtime_path
+def _delta(case: dict[str, Any], work: Path, fixture: Path) -> dict[str, Any]:
+    """Production path: ``build_delta`` on the analyzed fixture."""
+    from apiforge.context.delta import UNMAPPED_SOURCE, build_delta
 
-    degraded = _runtime_path(str(case["path"]))
-    return {"degraded": degraded, "passed": degraded is bool(case["expect_degraded"])}
+    delta = build_delta(fixture, changed=[str(case["path"])])
+    flagged = any(item.startswith(UNMAPPED_SOURCE) for item in delta.unresolved)
+    ok = delta.status == case["expect_status"]
+    if "expect_unmapped_source" in case:
+        ok = ok and flagged is bool(case["expect_unmapped_source"])
+    return {"status": delta.status, "unmapped_source": flagged, "passed": ok}
 
 
-_KINDS = {"path": _path, "budget": _budget, "tokens": _tokens, "phase": _phase, "delta": _delta}
+_FIXTURE_KINDS = {"budget": _budget, "budget_invariant": _budget_invariant, "delta": _delta}
+_KINDS = {"path": _path, "tokens": _tokens, "phase": _phase}
 
 
-def run_hardening(corpus: Path) -> dict[str, Any]:
+def run_hardening(corpus: Path, repo_root: Path = Path(".")) -> dict[str, Any]:
+    """Budget and delta cases run the production code (never a re-implementation)."""
+    from apiforge.evals.extras import _materialize
+
     rows: list[dict[str, Any]] = []
     with tempfile.TemporaryDirectory(prefix="af-hardening-") as tmp:
+        fixture: Path | None = None
         for index, case in enumerate(load_cases(Path(corpus))):
             kind = str(case.get("kind"))
-            if kind not in _KINDS:
-                raise ContractError("AF-EVALS-INVALID", f"unknown case kind {kind!r}")
             work = Path(tmp) / str(index)
             work.mkdir()
-            rows.append({"case_id": case["id"], "kind": kind, **_KINDS[kind](case, work)})
+            if kind in _FIXTURE_KINDS:
+                if fixture is None:
+                    fixture = _materialize(
+                        Path(repo_root),
+                        Path(tmp) / "shared",
+                        "tests/fixtures/economy_payments/fastapi",
+                        "tests/fixtures/economy_payments/openapi.yaml",
+                    )
+                row = _FIXTURE_KINDS[kind](case, work, fixture)
+            elif kind in _KINDS:
+                row = _KINDS[kind](case, work)
+            else:
+                raise ContractError("AF-EVALS-INVALID", f"unknown case kind {kind!r}")
+            rows.append({"case_id": case["id"], "kind": kind, **row})
     kinds = sorted({row["kind"] for row in rows})
     gates = {kind: all(row["passed"] for row in rows if row["kind"] == kind) for kind in kinds}
     return {

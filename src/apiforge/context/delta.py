@@ -23,6 +23,12 @@ import yaml
 from apiforge.cache.errors import CacheError
 from apiforge.cache.store import CacheStore
 from apiforge.contracts.cache import ChangedFile, DeltaSlice
+from apiforge.security.source_paths import (
+    AllowedRoots,
+    SourcePathError,
+    confine_dir,
+    resolve_allowed_source,
+)
 
 _STATUS = re.compile(r"^([ACDMRTUX])\d*$")
 
@@ -92,9 +98,11 @@ def build_delta(
     cache_home: Path | None = None,
 ) -> DeltaSlice:
     root = Path(root).resolve()
+    refused: list[str] = []
     if changed:
+        normalized = {_normalize(root, item, refused) for item in changed}
         files = sorted(
-            {ChangedFile(path=_normalize(root, item)) for item in changed},
+            {ChangedFile(path=path) for path in normalized if path is not None},
             key=lambda item: item.path,
         )
         source = "explicit"
@@ -109,12 +117,13 @@ def build_delta(
             unlock="pass --base <ref> [--head <ref>] or --changed <file> ...",
         )
     paths = {item.path for item in files if not item.path.startswith(".apiforge/")}
-    case_path = Path(case_dir).resolve() if case_dir else root / ".apiforge" / "case"
+    case_path = confine_dir(root, case_dir) if case_dir else root / ".apiforge" / "case"
     store = CacheStore(root, home=cache_home)
     impacted: set[str] = set()
     changed_nodes: set[str] = set()
     mapped: set[str] = set()
-    unresolved: list[str] = []
+    # A refused --changed path is never read; its impact cannot be judged, so it blocks.
+    unresolved: list[str] = list(refused)
 
     from apiforge.context.gateway.levels import load_graph, verified_case
 
@@ -313,11 +322,17 @@ def _mentions(path: Path, symbols: Iterable[str]) -> bool:
     return bool(pattern.search(text))
 
 
-def _normalize(root: Path, item: str) -> str:
-    path = Path(item)
-    if path.is_absolute():
-        return _rel(path, root)
-    return Path(item).as_posix().removeprefix("./")
+def _normalize(root: Path, item: str, refused: list[str]) -> str | None:
+    """Root-relative posix path inside the allowed roots, or ``None`` (reported, never read)."""
+    try:
+        resolved = resolve_allowed_source(item, AllowedRoots.for_project(root), base=root)
+    except SourcePathError as exc:
+        refused.append(exc.note())
+        return None
+    try:
+        return resolved.relative_to(root).as_posix()
+    except ValueError:
+        return resolved.as_posix()
 
 
 def _join(prefix: str, path: str) -> str:

@@ -1,0 +1,5 @@
+id: delta-unmapped-source
+kind: delta
+path: src/payment/service.py
+expect_status: degraded
+expect_unmapped_source: true

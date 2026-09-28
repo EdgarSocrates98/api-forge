@@ -36,6 +36,7 @@ def to_ref(node_id: str) -> str | None:
 def resolve(root: Path, ref: str, *, case_dir: Path | None = None) -> EvidenceNode:
     from apiforge.context.gateway.levels import load_graph, safe_input, safe_source, verified_case
     from apiforge.context.gateway.refs import CtxStore
+    from apiforge.security.source_paths import confine_dir
 
     match = _REF.match(ref.strip())
     if match is None:
@@ -47,7 +48,7 @@ def resolve(root: Path, ref: str, *, case_dir: Path | None = None) -> EvidenceNo
     kind, value = match.groups()
     refused: list[str] = []
     root = Path(root).resolve()
-    case_path = Path(case_dir).resolve() if case_dir else root / ".apiforge" / "case"
+    case_path = confine_dir(root, case_dir) if case_dir else root / ".apiforge" / "case"
     case = verified_case(case_path)
     if case is None:
         raise _refusal(

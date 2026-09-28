@@ -101,3 +101,68 @@ def test_persist_failures_are_scoped_by_run(tmp_path: Path) -> None:
     stats_a = run_ledger.stats(tmp_path, run_id="run-A")
     assert stats_a["persist_failures_for_run"] == 1
     assert run_ledger.PERSIST_FAILURE in stats_a["unresolved"]
+
+
+REPO = Path(__file__).resolve().parents[2]
+HARDENING = REPO / "evals" / "corpus" / "economy-hardening"
+
+
+def test_hardening_eval_runs_production_code(monkeypatch: pytest.MonkeyPatch) -> None:
+    from types import SimpleNamespace
+
+    from apiforge.evals.hardening import run_hardening
+    from apiforge.runtime import role_context
+
+    assert run_hardening(HARDENING, REPO)["passed"] is True
+
+    def over_budget(*args: object, **kwargs: object) -> object:
+        return SimpleNamespace(capsule_id="c", total_bytes=10**9)
+
+    monkeypatch.setattr(role_context, "plan_roles", over_budget)
+    mutated = run_hardening(HARDENING, REPO)
+    assert mutated["gates"]["budget"] is False
+    assert mutated["passed"] is False
+
+
+def test_changed_path_outside_the_root_is_never_read(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from apiforge.context import delta
+    from tests.context.gateway_support import analyzed_root
+
+    root = analyzed_root(tmp_path)
+    (root.parent / "secret.py").write_text("TOKEN = 'x'\n", encoding="utf-8")
+    opened: list[Path] = []
+    original = delta._mentions
+
+    def spy(path: Path, symbols: object) -> bool:
+        opened.append(Path(path))
+        return original(path, symbols)  # type: ignore[arg-type]
+
+    monkeypatch.setattr(delta, "_mentions", spy)
+    result = delta.build_delta(root, changed=["../secret.py", str(root.parent / "secret.py")])
+    assert result.status == "unresolved"
+    assert all(item.startswith("AF-PATH-OUTSIDE-ROOT") for item in result.unresolved)
+    assert not any(path.name == "secret.py" for path in opened)
+    assert result.changed_files == ()
+
+
+def test_case_dir_outside_the_root_is_refused(tmp_path: Path) -> None:
+    from apiforge.context.delta import build_delta
+    from apiforge.context.gateway.capsule import build_capsule
+    from apiforge.evidence.resolve import resolve
+    from tests.context.gateway_support import analyzed_root
+
+    root = analyzed_root(tmp_path)
+    outside = tmp_path / "elsewhere"
+    outside.mkdir()
+    calls = (
+        lambda: build_delta(root, changed=["openapi.yaml"], case_dir=outside),
+        lambda: build_capsule(root, "POST /payments", case_dir=outside),
+        lambda: resolve(root, "evidence://operation/POST /payments", case_dir=outside),
+    )
+    for call in calls:
+        with pytest.raises(ContractError) as err:
+            call()
+        assert err.value.code == "AF-PATH-OUTSIDE-ROOT"
+        assert err.value.field == "case_dir"  # type: ignore[attr-defined]

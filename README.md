@@ -429,7 +429,7 @@ while refusal codes and `fact_id`s survive.
 | `apiforge economy phase-budget --profile P [--usage U]` | `PhaseBudgetPlan/v1`: envelope split across SDD phases; contract/verify/secure protected |
 | `apiforge runtime checkpoint <task> <run>` | `EconomyCheckpoint/v1`: spend a resume continues; resume never lowers the profile |
 | `apiforge evals economy-freshness` | 16 cases across the five wave-8 verbs |
-| `apiforge evals economy-hardening` | 15 cases: path containment, class-pool context budget, token coverage, phase status, delta degradation |
+| `apiforge evals economy-hardening [--repo-root .]` | Path containment, class-pool budget via `plan_roles`, contract envelope invariant, token coverage, phase status and `build_delta` on the analyzed fixture — the oracle runs production code |
 | `apiforge evals agentic-quality [--responses-dir D] [--min-accuracy F] [--baseline R]` | Recorded specialist verdicts vs ground truth under each profile; absolute floor per profile (default 1.0) plus non-regression vs deep and an optional baseline report; `claim_scope: recorded-agentic-outputs` |
 | `apiforge-mcp` | MCP server for the read/compose verbs (needs `pip install apiforge[mcp]`; every tool takes `detail_level`) |
 | `apiforge collect lambda --function-name X --out dump/` | Fetch Lambda config into a dump (Code.Location never persisted) |

@@ -124,11 +124,21 @@ frescor de knowledge, orçamento por fase SDD e checkpoint no resume. Segurança
 e evidência nunca entram no orçamento. Veja o
 [guia de economia](docs/guides/API_FORGE_ECONOMY.md).
 
+Duas rodadas de hardening vieram de uma revisão externa: todo path de case,
+fact, grafo ou fornecido pelo caller fica restrito ao projeto e aos
+repositórios declarados no workspace; budgets de contexto, chamadas e tokens
+são invariantes de contrato; a parada L0 exige recibos de prova re-hasheados;
+e os evals de certificação reprovam os bugs que certificam
+(`evals economy-hardening` roda o código de produção, `evals agentic-quality`
+exige piso absoluto e não-regressão contra baseline).
+
 ```bash
 apiforge evidence gate --question "isso causou erros em produção?"
 apiforge verify plan --changed src/app.py --risk low
 apiforge verify escalate --static likely --test inconclusive
 apiforge runtime checkpoint <task> <run>
+apiforge evals economy-hardening
+apiforge evals agentic-quality --min-accuracy 1.0 --baseline baseline.json
 ```
 
 ## Documentação

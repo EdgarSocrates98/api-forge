@@ -359,12 +359,17 @@ apiforge runtime run <task> --profile economy
 apiforge runtime checkpoint <task> <run>
 apiforge economy phase-budget --profile balanced
 apiforge knowledge watch --manifest upstream.json --now 2026-09-28T00:00:00+00:00
+apiforge evals economy-hardening
+apiforge evals agentic-quality --min-accuracy 1.0 --baseline baseline.json
 ```
 
 Pergunta sobre o artefato fica local; só efeito em runtime ganha
 `live_read_only`, nunca mutação. O resume mantém ao menos o perfil do
-checkpoint e soma as chamadas já gastas. Referência completa:
-[guia de economia](API_FORGE_ECONOMY.md).
+checkpoint e soma as chamadas já gastas. Paths vindos de cases, facts, grafos
+ou do caller (`--changed`, `--case-dir`) ficam restritos ao projeto e aos
+repositórios declarados no workspace (`AF-PATH-OUTSIDE-ROOT`). Os evals de
+certificação rodam o código de produção e só passam acima de um piso
+absoluto. Referência completa: [guia de economia](API_FORGE_ECONOMY.md).
 
 ## 8. Verificação antes de commit/release
 

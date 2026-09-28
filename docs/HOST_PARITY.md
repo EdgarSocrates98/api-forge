@@ -28,6 +28,12 @@ Host-owned declarations may be placed under `.apiforge/hosts/*.json`; absent
 declarations use the conservative static layout and retain host limitations.
 The resolver publishes intersections only, never host equivalence.
 
+Tool surface per host is declared in `rules/host_projections.yaml`:
+`apiforge agentops projection --host <host>` shows it and
+`apiforge-mcp --surface compact` (or `--host claude`) publishes six gateway
+tools instead of the full list; every full tool stays reachable through
+`apiforge_call`. `apiforge mcp surface` measures the bytes of each surface.
+
 The installed package owns host templates. Generated adapters are small,
 hash-labelled and preview-only. A conflict is surfaced as `AF-HOST-CONFLICT`;
 automatic synchronization, overwrite and symlink modes are intentionally not

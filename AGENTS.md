@@ -53,6 +53,11 @@ Use native project capabilities:
 - `apiforge context compact` for RTK-style output reduction;
 - `apiforge agentops workflows` for Caveman-inspired workflows;
 - `apiforge economy report` for measured bytes and transcript-backed tokens;
+- economy verbs before spending: `context capsule` instead of the whole case,
+  `knowledge select`/`search`, `evidence gate` before any live source,
+  `verify plan` then `verify escalate`, `runtime checkpoint` on resume
+  (see `docs/guides/API_FORGE_ECONOMY.en.md`); safety and evidence never
+  enter the budget;
 - `apiforge graph` for provenance and impact;
 - `apiforge task`, `runtime`, `sandbox`, `evidence` and `brief` for governed work.
 

@@ -200,6 +200,28 @@ visible evidence. See [`GraphImpactAssessment/v1`](../contracts/GraphImpactAsses
 [`GraphImpactPolicy/v1`](../contracts/GraphImpactPolicy-v1.md) and the
 [C SDD archive](../../.claude/sdd/archive/GRAPH_AWARE_IMPACT/SHIPPED_2026-09-25.md).
 
+### 7.3 Economy with proof
+
+Before spending context, calls or external sources, use the economy verbs.
+All are deterministic and read-only; safety, provenance and `unresolved`
+never enter the budget.
+
+```bash
+apiforge sdd classify --description "rename field" --path openapi.yaml
+apiforge context capsule --target "POST /orders"
+apiforge evidence gate --question "did this cause errors in production?"
+apiforge verify plan --changed src/app.py --risk low
+apiforge verify escalate --static likely --test inconclusive
+apiforge runtime run <task> --profile economy
+apiforge runtime checkpoint <task> <run>
+apiforge economy phase-budget --profile balanced
+apiforge knowledge watch --manifest upstream.json --now 2026-09-28T00:00:00+00:00
+```
+
+Artifact questions stay local; only runtime effects get `live_read_only`,
+never a mutation. Resume keeps at least the checkpoint profile and adds the
+calls already spent. Full reference: [economy guide](API_FORGE_ECONOMY.en.md).
+
 ## 8. Capabilities and external evidence
 
 ```bash

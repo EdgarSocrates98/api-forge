@@ -128,9 +128,13 @@ external systems must be accessed through explicit adapters and receipts.
 - connect facts, findings, tasks, tests, traces, decisions, commits and
   releases in the provenance graph;
 - add impact queries for endpoint, database and SLO changes;
-- consolidate hash-based caching, deduplication, compression and per-agent
-  budgets;
-- measure saved tokens, avoided bytes, cache hits and cost per result;
+- **delivered (economy, waves 0–8):** layered hash-based cache with
+  dependency invalidation, context capsules, compact output, budgets per
+  profile, role and SDD phase, resume checkpoints, live-evidence gating and
+  knowledge freshness — see the [economy guide](guides/API_FORGE_ECONOMY.en.md);
+- **delivered:** economy metrics — measured bytes per run and source, tokens
+  observed with a transcript, cache hits, per-role ROI and an economy matrix
+  with a regression gate;
 - export to Neptune only through an approved adapter, keeping the local graph
   authoritative.
 

@@ -115,9 +115,27 @@ Preserve sempre `facts`, hashes, receipts, diagnósticos e `unresolved`. Um
 receipt prova correspondência de bytes, não autoria, deploy ou saúde de
 produção.
 
+## Economia
+
+O programa de economia (ondas 0–8) está completo: ledger medido, cápsulas de
+contexto, perfis com piso de risco, cache e deltas, agentes seletivos, saída
+compacta, evals de economia, verificação direcionada, gate de evidência live,
+frescor de knowledge, orçamento por fase SDD e checkpoint no resume. Segurança
+e evidência nunca entram no orçamento. Veja o
+[guia de economia](docs/guides/API_FORGE_ECONOMY.md).
+
+```bash
+apiforge evidence gate --question "isso causou erros em produção?"
+apiforge verify plan --changed src/app.py --risk low
+apiforge verify escalate --static likely --test inconclusive
+apiforge runtime checkpoint <task> <run>
+```
+
 ## Documentação
 
 - [Uso da plataforma em português](docs/guides/API_FORGE_PLATFORM_USAGE.md)
+- [Guia de economia em português](docs/guides/API_FORGE_ECONOMY.md)
+- [Economy guide in English](docs/guides/API_FORGE_ECONOMY.en.md)
 - [Platform usage in English](docs/guides/API_FORGE_PLATFORM_USAGE.en.md)
 - [Interoperabilidade em português](docs/guides/API_FORGE_EXPERIENCE_INTEROPERABILITY.md)
 - [Interoperability in English](docs/guides/API_FORGE_EXPERIENCE_INTEROPERABILITY.en.md)

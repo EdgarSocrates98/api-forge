@@ -144,8 +144,12 @@ primeiro ship.
 - aplicar o context funnel automaticamente em todas as fases e não apenas em casos manuais;
 - conectar fatos, findings, tarefas, testes, traces, decisões, commits e releases no grafo;
 - adicionar consultas de impacto para “o que quebra se eu mudar este endpoint/banco/SLO?”;
-- consolidar cache por hash, deduplicação, compressão e orçamento por agent;
-- criar métricas de economia: tokens poupados, bytes evitados, hits de cache e custo por resultado;
+- **entregue (economia, ondas 0–8):** cache em camadas por hash com invalidação por
+  dependência, cápsulas de contexto, saída compacta, orçamento por perfil, papel e fase SDD,
+  checkpoint no resume, gate de evidência live e frescor de knowledge — ver
+  [guia de economia](guides/API_FORGE_ECONOMY.md);
+- **entregue:** métricas de economia — bytes medidos por run e fonte, tokens observados com
+  transcript, hits de cache, ROI por papel e matriz de economia com gate de regressão;
 - exportar o grafo para Neptune somente por adapter aprovado, preservando o grafo local como fonte.
 
 ### 3. Contratos e design de APIs

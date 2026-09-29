@@ -93,11 +93,12 @@ def _http(repos: tuple[RepoFacts, ...], result: MatchResult) -> None:
     for caller in repos:
         for call in caller.outbound:
             wanted = template(call.path)
-            candidates: list[tuple[RepoFacts, float]] = []
+            candidates: list[tuple[RepoFacts, float, frozenset[str]]] = []
             for callee in repos:
                 if callee.node_id == caller.node_id:
                     continue
                 best = 0.0
+                route_refs: set[str] = set()
                 for route in callee.served:
                     if template(route.path) != wanted:
                         continue
@@ -107,10 +108,11 @@ def _http(repos: tuple[RepoFacts, ...], result: MatchResult) -> None:
                     ):
                         continue
                     best = max(best, EXACT if call.method != "unknown" else PATH_ONLY)
+                    route_refs.add(route.ref)
                 if best:
                     if _hint_matches(call.base_hint, callee.name):
                         best = min(CAP, best + HINT_BONUS)
-                    candidates.append((callee, best))
+                    candidates.append((callee, best, frozenset(route_refs)))
             if not candidates:
                 continue
             hinted = [item for item in candidates if _hint_matches(call.base_hint, item[0].name)]
@@ -122,11 +124,14 @@ def _http(repos: tuple[RepoFacts, ...], result: MatchResult) -> None:
                     f"AF-WORKSPACE-INFER-AMBIGUOUS: {call.method} {wanted} from {caller.name} "
                     f"is served by {names}"
                 )
-                candidates = [(repo, min(score, AMBIGUOUS_CAP)) for repo, score in candidates]
-            for callee, score in candidates:
+                candidates = [
+                    (repo, min(score, AMBIGUOUS_CAP), matched)
+                    for repo, score, matched in candidates
+                ]
+            for callee, score, matched in candidates:
                 key = (caller.node_id, callee.node_id)
                 previous, refs = edges.get(key, (0.0, set()))
-                edges[key] = (max(previous, score), refs | {call.ref})
+                edges[key] = (max(previous, score), refs | {call.ref} | matched)
     for (from_id, to_id), (score, refs) in sorted(edges.items()):
         result.relations.append(
             _relation("calls", "http.outbound", from_id, to_id, score, tuple(refs))

@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 import yaml
 
+from apiforge.field.corpus import load_corpus
 from apiforge.field.errors import (
     CORPUS_INVALID,
     FLAG_CONTAMINATION,
@@ -12,8 +13,9 @@ from apiforge.field.errors import (
     TIME_ORDER,
     FieldError,
 )
+from apiforge.field.identity import seal
 from apiforge.field.record import record
-from tests.field.support import ENDED, STARTED, corpus, runtime_run, task
+from tests.field.support import ENDED, EXECUTOR, NOW, STARTED, corpus, runtime_run, task
 
 
 def _record(root: Path, **overrides: object):
@@ -23,6 +25,8 @@ def _record(root: Path, **overrides: object):
         "phase": "baseline",
         "started_at": STARTED,
         "ended_at": ENDED,
+        "executor": EXECUTOR,
+        "now": NOW,
     }
     args.update(overrides)
     return record(root, **args)  # type: ignore[arg-type]
@@ -43,6 +47,7 @@ def test_record_joins_existing_artifacts(tmp_path: Path) -> None:
     assert (tmp_path / "docs" / "field" / "runs" / "T001__baseline.json").is_file()
     saved = yaml.safe_load((tmp_path / "docs" / "field" / "corpus.yaml").read_text())
     assert saved["cycle_started_at"] == STARTED
+    assert run.executor.kind == "agent" and run.executor.id == "api-orchestrator"
 
 
 def test_unregistered_task_is_refused(tmp_path: Path) -> None:
@@ -56,11 +61,8 @@ def test_unregistered_task_is_refused(tmp_path: Path) -> None:
 
 
 def test_late_registration_is_refused(tmp_path: Path) -> None:
-    corpus(
-        tmp_path,
-        tasks=[task("T001"), task("T002", at="2026-10-03T00:00:00Z")],
-        cycle_started_at="2026-10-02T09:00:00Z",
-    )
+    corpus(tmp_path, tasks=[task("T001"), task("T002", at="2026-10-03T00:00:00Z")])
+    seal(tmp_path, load_corpus(tmp_path), "2026-10-02T09:00:00Z")
     runtime_run(tmp_path, "run-1", updated_at="2026-10-04T10:05:00Z")
     with pytest.raises(FieldError) as exc:
         _record(

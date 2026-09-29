@@ -3,12 +3,15 @@
 from __future__ import annotations
 
 import re
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
 from apiforge.contracts.field import CorpusManifest
 from apiforge.field.corpus import load_corpus, local_repos
 from apiforge.field.errors import EXPORT_LEAK, FieldError
+from apiforge.field.identity import ensure_cycle
+from apiforge.field.readiness import cycle_state, verification_state
 from apiforge.field.store import load_runs, write_json
 
 EXPORT_DIR = Path("evals") / "corpus" / "field"
@@ -32,7 +35,7 @@ def build_cases(root: Path, manifest: CorpusManifest) -> list[dict[str, Any]]:
     )
     cases: list[dict[str, Any]] = []
     for run in load_runs(root):
-        if run.phase != "baseline" or run.verifier_verdict != "agree":
+        if run.phase != "baseline" or verification_state(run) != "agree":
             continue
         task = tasks.get(run.task_id)
         if task is None:
@@ -70,15 +73,26 @@ def build_cases(root: Path, manifest: CorpusManifest) -> list[dict[str, Any]]:
     return cases
 
 
-def export(root: Path, *, out_dir: Path | None = None) -> dict[str, Any]:
+def export(
+    root: Path, *, out_dir: Path | None = None, now: datetime | None = None
+) -> dict[str, Any]:
     root = Path(root)
-    cases = build_cases(root, load_corpus(root))
+    manifest = load_corpus(root)
+    identity = ensure_cycle(root, manifest)
+    status, _ = cycle_state(manifest, load_runs(root), now)
+    cases = build_cases(root, manifest)
     target = Path(out_dir) if out_dir is not None else root / EXPORT_DIR
     written = [
         write_json(target / f"{case['task_id']}.json", case).name
         for case in sorted(cases, key=lambda item: str(item["task_id"]))
     ]
-    return {"exported": len(written), "files": written, "directory": EXPORT_DIR.as_posix()}
+    return {
+        "exported": len(written),
+        "files": written,
+        "directory": EXPORT_DIR.as_posix(),
+        "cycle_status": status,
+        "cycle_identity": identity.model_dump(mode="json") if identity is not None else None,
+    }
 
 
 __all__ = ["CASE_SCHEMA", "EXPORT_DIR", "build_cases", "export"]

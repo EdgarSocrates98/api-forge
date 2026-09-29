@@ -22,6 +22,11 @@ def field_record(
     phase: str = typer.Option("baseline", "--phase", help="baseline | ab_on"),
     started: str = typer.Option(..., "--started", help="RFC3339 wall-clock task start."),
     ended: str = typer.Option(..., "--ended", help="RFC3339 wall-clock task end."),
+    executor: str = typer.Option(
+        ...,
+        "--executor",
+        help="Who executed the task: human:sha256:<64 hex> or agent:<roster-name>.",
+    ),
     root: Path = typer.Option(Path("."), "--root"),
     detail_level: str = typer.Option("normal", "--detail-level"),
 ) -> None:
@@ -39,6 +44,7 @@ def field_record(
             phase=checked,  # type: ignore[arg-type]
             started_at=started,
             ended_at=ended,
+            executor=executor,
         )
 
     _echo_json(_run(work), detail_level)
@@ -85,6 +91,11 @@ def field_annotate(
 def field_verify(
     task: str = typer.Option(..., "--task"),
     verdict: str = typer.Option(..., "--verdict", help="agree | disagree | unresolved"),
+    verifier: str = typer.Option(
+        ...,
+        "--verifier",
+        help="Independent verifier: human:sha256:<64 hex> or agent:<roster-name>.",
+    ),
     phase: str = typer.Option("baseline", "--phase"),
     root: Path = typer.Option(Path("."), "--root"),
     detail_level: str = typer.Option("normal", "--detail-level"),
@@ -93,7 +104,10 @@ def field_verify(
     from apiforge.cli import _echo_json, _run
     from apiforge.field.annotate import verify
 
-    _echo_json(_run(lambda: verify(root, task_id=task, phase=phase, verdict=verdict)), detail_level)
+    _echo_json(
+        _run(lambda: verify(root, task_id=task, phase=phase, verdict=verdict, verifier=verifier)),
+        detail_level,
+    )
 
 
 @field_app.command("report")

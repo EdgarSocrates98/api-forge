@@ -10,24 +10,32 @@ from apiforge.field.errors import EXPORT_LEAK, FieldError
 from apiforge.field.export import export
 from apiforge.field.store import save_run
 from apiforge.mcp import tools
-from tests.field.support import ENDED, OWN, STARTED, corpus, runtime_run, task
+from tests.field.support import (
+    ENDED,
+    EXECUTOR,
+    HUMAN,
+    OWN,
+    STARTED,
+    VERIFIER,
+    corpus,
+    field_run,
+    runtime_run,
+    task,
+    verified,
+)
 
 runner = CliRunner()
 
 
 def _verified(task_id: str, repo_ref: str) -> FieldRun:
-    return FieldRun(
-        task_id=task_id,
-        scenario="multi_repo",
-        repo_ref=repo_ref,
-        phase="baseline",
-        run_ids=("r1",),
-        inference_flag=False,
-        started_at=STARTED,
-        ended_at=ENDED,
-        task_completed=True,
-        exit_reason="graph_gap",
-        verifier_verdict="agree",
+    return verified(
+        field_run(
+            task_id,
+            repo_ref=repo_ref,
+            run_ids=("r1",),
+            task_completed=True,
+            exit_reason="graph_gap",
+        )
     )
 
 
@@ -86,8 +94,10 @@ def test_export_refuses_absolute_paths(tmp_path: Path) -> None:
                 STARTED,
                 "--ended",
                 ENDED,
+                "--executor",
+                EXECUTOR,
             ],
-            lambda root: tools.field_record("T999", ["run-1"], STARTED, ENDED, root=root),
+            lambda root: tools.field_record("T999", ["run-1"], STARTED, ENDED, EXECUTOR, root=root),
             "AF-FIELD-TASK-UNREGISTERED",
             "task",
         ),
@@ -98,10 +108,31 @@ def test_export_refuses_absolute_paths(tmp_path: Path) -> None:
             "exit_reason",
         ),
         (
-            ["field", "verify", "--task", "T001", "--verdict", "maybe"],
-            lambda root: tools.field_verify("T001", "maybe", root=root),
+            ["field", "verify", "--task", "T001", "--verdict", "maybe", "--verifier", VERIFIER],
+            lambda root: tools.field_verify("T001", "maybe", VERIFIER, root=root),
             "AF-FIELD-ENUM",
             "verdict",
+        ),
+        (
+            ["field", "verify", "--task", "T001", "--verdict", "agree", "--verifier", EXECUTOR],
+            lambda root: tools.field_verify("T001", "agree", EXECUTOR, root=root),
+            "AF-FIELD-VERIFIER-NOT-INDEPENDENT",
+            "verifier",
+        ),
+        (
+            [
+                "field",
+                "verify",
+                "--task",
+                "T001",
+                "--verdict",
+                "agree",
+                "--verifier",
+                "human:operator-name",
+            ],
+            lambda root: tools.field_verify("T001", "agree", "human:operator-name", root=root),
+            "AF-FIELD-ACTOR-INVALID",
+            "verifier",
         ),
         (
             [
@@ -117,9 +148,11 @@ def test_export_refuses_absolute_paths(tmp_path: Path) -> None:
                 STARTED,
                 "--ended",
                 ENDED,
+                "--executor",
+                EXECUTOR,
             ],
             lambda root: tools.field_record(
-                "T001", ["run-1"], STARTED, ENDED, phase="later", root=root
+                "T001", ["run-1"], STARTED, ENDED, EXECUTOR, phase="later", root=root
             ),
             "AF-FIELD-ENUM",
             "phase",
@@ -132,7 +165,7 @@ def test_cli_and_mcp_refusals_match(
     monkeypatch.chdir(tmp_path)
     corpus(tmp_path)
     runtime_run(tmp_path, "run-1")
-    tools.field_record("T001", ["run-1"], STARTED, ENDED, root=str(tmp_path))
+    tools.field_record("T001", ["run-1"], STARTED, ENDED, EXECUTOR, root=str(tmp_path))
     result = runner.invoke(app, [*cli_args, "--root", str(tmp_path)])
     assert result.exit_code == 2, result.output
     assert code in result.output
@@ -147,9 +180,9 @@ def test_cli_and_mcp_report_payloads_match(tmp_path: Path, monkeypatch) -> None:
     monkeypatch.chdir(tmp_path)
     corpus(tmp_path)
     runtime_run(tmp_path, "run-1")
-    recorded = tools.field_record("T001", ["run-1"], STARTED, ENDED, root=str(tmp_path))
-    assert recorded["schema"] == "apiforge/field-run/v1"
-    tools.field_verify("T001", "agree", root=str(tmp_path))
+    recorded = tools.field_record("T001", ["run-1"], STARTED, ENDED, EXECUTOR, root=str(tmp_path))
+    assert recorded["schema"] == "apiforge/field-run/v2"
+    tools.field_verify("T001", "agree", HUMAN, root=str(tmp_path))
     cli = runner.invoke(app, ["field", "report", "--root", str(tmp_path)])
     assert cli.exit_code == 0, cli.output
     assert json.loads(cli.output) == tools.field_report(root=str(tmp_path))

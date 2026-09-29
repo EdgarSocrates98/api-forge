@@ -67,6 +67,7 @@ def test_http_call_infers_edge_with_provenance(tmp_path: Path) -> None:
     assert edge.evidence.level == "inferred"
     assert edge.evidence.confidence == 0.95
     assert "web:client.py:2" in edge.evidence.refs
+    assert any(ref.startswith("payment-service:") for ref in edge.evidence.refs)
 
 
 def test_topic_infers_producer_to_consumer_edge(tmp_path: Path) -> None:
@@ -179,5 +180,6 @@ def test_infer_cli_is_audited_and_blocks_baseline_record(tmp_path: Path, monkeyp
             phase="baseline",
             started_at=STARTED,
             ended_at=ENDED,
+            executor="agent:api-orchestrator",
         )
     assert exc.value.code == "AF-FIELD-FLAG-CONTAMINATION"

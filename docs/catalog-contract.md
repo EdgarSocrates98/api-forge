@@ -780,6 +780,10 @@ Field records join existing run artifacts (economy ledger, `summary.json`,
 | `AF-FIELD-RUN-MISSING` | no field record for task/phase, or a run id has neither run directory nor ledger rows |
 | `AF-FIELD-FLAG-CONTAMINATION` | a baseline task's linked runs used `workspace.infer` |
 | `AF-FIELD-EXPORT-LEAK` | export would expose a private repo name/path or an absolute path |
+| `AF-FIELD-CYCLE-MUTATED` | the sealed cycle changed: corpus, hypothesis, gate, tasks, repos or `cycle_started_at` differ from `docs/field/cycle.lock.json`, the lock is missing after the cycle started, or a lock exists without `cycle_started_at`; `field=cycle.<component>` |
+| `AF-FIELD-CYCLE-EXPIRED` | `field record` on an expired cycle (`max_runs` or `max_weeks` reached without coverage), or a new baseline record beyond `max_runs` |
+| `AF-FIELD-VERIFIER-NOT-INDEPENDENT` | `field verify` by the same actor that executed the task |
+| `AF-FIELD-ACTOR-INVALID` | `--executor`/`--verifier` is not `agent:<name>` or `human:sha256:<64 hex>` |
 | `AF-WORKSPACE-INFER-AMBIGUOUS` | unresolved: an outbound call matches routes in more than one repository; edges capped at 0.45 |
 | `AF-WORKSPACE-INFER-UNATTRIBUTED` | unresolved: `--infer` ran without `--run-id`, so field records cannot see it |
 | `AF-WORKSPACE-INFER-EXTRACT` | unresolved: a route extractor failed on one repository |

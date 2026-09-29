@@ -9,15 +9,24 @@ read from ``workspace.infer`` ledger rows, never from operator input.
 from __future__ import annotations
 
 import json
-from datetime import timedelta
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
 
 from apiforge.contracts.field import FieldPhase, FieldRun
 from apiforge.economy.ledger import ledger_path
-from apiforge.field.corpus import load_corpus, mark_cycle_started, registered_task
-from apiforge.field.errors import FLAG_CONTAMINATION, RUN_MISSING, TIME_ORDER, FieldError
-from apiforge.field.store import maybe_load_run, parse_ts, save_run
+from apiforge.field.actors import parse_actor
+from apiforge.field.corpus import load_corpus, registered_task
+from apiforge.field.errors import (
+    CYCLE_EXPIRED,
+    FLAG_CONTAMINATION,
+    RUN_MISSING,
+    TIME_ORDER,
+    FieldError,
+)
+from apiforge.field.identity import ensure_cycle, seal
+from apiforge.field.readiness import cycle_state
+from apiforge.field.store import load_runs, maybe_load_run, parse_ts, save_run
 from apiforge.taskspec.store import tasks_root
 
 INFER_VERB = "workspace.infer"
@@ -29,7 +38,7 @@ HUMAN_FIELDS = (
     "human_intervention",
     "false_positives",
     "false_negatives",
-    "verifier_verdict",
+    "verification",
 )
 
 
@@ -78,10 +87,26 @@ def record(
     phase: FieldPhase,
     started_at: str,
     ended_at: str,
+    executor: str,
+    now: datetime | None = None,
 ) -> FieldRun:
     root = Path(root)
     manifest = load_corpus(root)
+    ensure_cycle(root, manifest)
+    executor_ref = parse_actor(executor, field="executor")
     task = registered_task(manifest, task_id, started_at=started_at)
+    previous = maybe_load_run(root, task_id, phase)
+    status, coverage = cycle_state(manifest, load_runs(root), now)
+    if status == "expired" or (
+        phase == "baseline" and previous is None and coverage.runs_total >= manifest.gate.max_runs
+    ):
+        raise FieldError(
+            CYCLE_EXPIRED,
+            f"cycle expired: {coverage.runs_total}/{coverage.max_runs} baseline runs, "
+            f"deadline {coverage.deadline}",
+            field="cycle",
+            unlock="report the cycle as inconclusive; register a new cycle to continue",
+        )
     started = parse_ts(started_at, field="started_at")
     ended = parse_ts(ended_at, field="ended_at")
     if ended < started:
@@ -174,7 +199,6 @@ def record(
     else:
         unresolved.append("evidence_timestamp_missing")
 
-    previous = maybe_load_run(root, task_id, phase)
     carried = (
         {name: getattr(previous, name) for name in HUMAN_FIELDS} if previous is not None else {}
     )
@@ -183,6 +207,7 @@ def record(
         scenario=task.scenario,
         repo_ref=task.repo_ref,
         phase=phase,
+        executor=executor_ref,
         run_ids=tuple(sorted(run_ids)),
         inference_flag=inference_flag,
         started_at=started_at,
@@ -196,7 +221,8 @@ def record(
         unresolved=tuple(sorted(set(unresolved))),
         **carried,
     )
-    mark_cycle_started(root, started_at)
+    if manifest.cycle_started_at is None:
+        seal(root, manifest, started_at)
     save_run(root, run)
     return run
 

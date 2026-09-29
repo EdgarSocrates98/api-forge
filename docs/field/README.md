@@ -18,18 +18,30 @@ roadmap theme comes from measured frequencies, not intuition.
 
 2. Commit `corpus.yaml` and `hypothesis.md`. The git commit time is the
    independent proof of pre-registration in the ship evidence.
-3. Scenarios: `maintenance`, `evolution`, `security`, `multi_repo`,
+3. The first `field record` seals the cycle: it sets `cycle_started_at` and
+   writes `cycle.lock.json` (`apiforge/field-cycle-identity/v1`) with sha256
+   of the corpus (without `cycle_started_at`), the LF-normalized hypothesis,
+   the gate, the task set and the repo set, plus `git_commit` when available.
+   Commit the lock with the next run. From then on every `field` command
+   recomputes the identity; any edit, a moved `cycle_started_at` or a missing
+   lock is refused with `AF-FIELD-CYCLE-MUTATED` (`field=cycle.<component>`).
+   There is no unlock command: restore the sealed commit or start a new cycle
+   with a new corpus. The lock is tamper-evident, not tamper-proof — a
+   consistent rewrite of corpus and lock is visible only in git history.
+4. Scenarios: `maintenance`, `evolution`, `security`, `multi_repo`,
    `incident`, `performance` — at least 5 tasks each, at least 3 repos.
 
 ## Per task
 
 ```text
 apiforge field record   --task T001 --run <run_id> [--run ...] --phase baseline \
-                        --started 2026-10-02T10:00:00Z --ended 2026-10-02T10:30:00Z
+                        --started 2026-10-02T10:00:00Z --ended 2026-10-02T10:30:00Z \
+                        --executor agent:api-orchestrator
 apiforge field annotate --task T001 --completed --exit-reason graph_gap \
                         --manual-context --no-human-intervention \
                         --false-positives 0 --false-negatives 1
-apiforge field verify   --task T001 --verdict agree|disagree|unresolved
+apiforge field verify   --task T001 --verdict agree|disagree|unresolved \
+                        --verifier human:sha256:<64 hex>
 ```
 
 - `record` joins the economy ledger, `summary.json` and
@@ -39,13 +51,31 @@ apiforge field verify   --task T001 --verdict agree|disagree|unresolved
   linked checkpoint must fall inside them (±60s).
 - `exit_reason`: `knowledge_gap | capability_gap | context_gap | graph_gap |
   tool_gap | ux_gap | evaluation_gap | integration_gap | none`.
+- Actors are `agent:<roster-name>` or `human:sha256:<64 hex>`; raw human
+  names are refused with `AF-FIELD-ACTOR-INVALID`.
 - The verifier (`api-verifier` or a human other than the
   executor) judges against `ground_truth` **without** seeing the human
-  labels. `verify` never prints them.
+  labels. `verify` never prints them. A verifier equal to the executor is
+  refused with `AF-FIELD-VERIFIER-NOT-INDEPENDENT`.
+- `verify` stores a `VerificationReceipt` bound to a digest of the task,
+  phase, run ids, executor and human labels. Any later `annotate` or
+  re-`record` that changes them makes the receipt `stale`: the run leaves the
+  verified counts and appears under `stale_runs` until it is verified again.
 
 ## Cycle end
 
-Stop at `gate.max_runs` (30) or `gate.max_weeks` (4), whichever comes first.
+`field report` derives `cycle_status` from `coverage_gate`:
+
+| status | condition | H1 / recommendation |
+|---|---|---|
+| `collecting` | some scenario has fewer than `min_tasks_per_scenario` agreed runs, inside the timebox | `h1_verdict=inconclusive`; "continue collecting" |
+| `ready` | every scenario covered, `runs_total ≤ max_runs` (40) and before `cycle_started_at + max_weeks` (4) | `h1_verdict` decided; ≤2 follow-up SDDs |
+| `expired` | not ready and `runs_total ≥ max_runs` or deadline passed | `inconclusive`; extend the corpus, open no feature |
+
+`provisional_h1` always shows the verdict the current data would give, so
+progress is visible without being actionable. After `expired`, `field record`
+is refused with `AF-FIELD-CYCLE-EXPIRED`; a ready cycle at `max_runs` refuses
+new baseline records but allows re-recording existing ones.
 
 ```text
 apiforge field report            # Wilson 95% CI, qualified themes, H1 verdict

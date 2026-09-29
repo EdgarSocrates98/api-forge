@@ -1,0 +1,3 @@
+command: pytest tests/field tests/workspace/test_inference.py tests/mcp/test_tools.py -q
+commit-base: 7dc0322 (branch sdd/field-integrity)
+70 passed, 1 skipped in 5.41s

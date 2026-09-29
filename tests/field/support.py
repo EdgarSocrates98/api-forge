@@ -1,8 +1,12 @@
 import json
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
 import yaml
+
+from apiforge.contracts.field import ActorRef, FieldRun, VerificationReceipt
+from apiforge.field.readiness import annotation_digest
 
 OWN = "sha256:" + "a" * 64
 OSS = "oss:open-telemetry/opentelemetry-demo@abc123"
@@ -100,3 +104,36 @@ def runtime_run(
 
 STARTED = "2026-10-02T10:00:00Z"
 ENDED = "2026-10-02T10:30:00Z"
+
+
+EXECUTOR = "agent:api-orchestrator"
+VERIFIER = "agent:api-verifier"
+HUMAN = "human:sha256:" + "b" * 64
+NOW = datetime(2026, 10, 3, 12, 0, tzinfo=UTC)
+
+
+def field_run(task_id: str, **fields: Any) -> FieldRun:
+    base: dict[str, Any] = {
+        "task_id": task_id,
+        "scenario": "multi_repo",
+        "repo_ref": OSS,
+        "phase": "baseline",
+        "executor": {"kind": "agent", "id": "api-orchestrator"},
+        "run_ids": (f"r-{task_id}",),
+        "inference_flag": False,
+        "started_at": STARTED,
+        "ended_at": ENDED,
+        "time_to_solution_ms": 1800000,
+    }
+    base.update(fields)
+    return FieldRun.model_validate(base)
+
+
+def verified(run: FieldRun, verdict: str = "agree") -> FieldRun:
+    receipt = VerificationReceipt(
+        verdict=verdict,  # type: ignore[arg-type]
+        annotation_sha256=annotation_digest(run),
+        verifier=ActorRef(kind="agent", id="api-verifier"),
+        verified_at="2026-10-02T11:00:00Z",
+    )
+    return run.model_copy(update={"verification": receipt})

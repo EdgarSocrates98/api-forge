@@ -8,24 +8,12 @@ from apiforge.field.annotate import annotate, verify
 from apiforge.field.errors import ENUM, RUN_MISSING, FieldError
 from apiforge.field.report import build_report, wilson
 from apiforge.field.store import save_run
-from tests.field.support import OSS, OWN, corpus, task
+from tests.field.support import NOW, OSS, OWN, VERIFIER, corpus, field_run, task, verified
 
 
-def _run(task_id: str, **fields: object) -> FieldRun:
-    base = {
-        "task_id": task_id,
-        "scenario": "multi_repo",
-        "repo_ref": OSS,
-        "phase": "baseline",
-        "run_ids": (f"r-{task_id}",),
-        "inference_flag": False,
-        "started_at": "2026-10-02T10:00:00Z",
-        "ended_at": "2026-10-02T10:30:00Z",
-        "time_to_solution_ms": 1800000,
-        "verifier_verdict": "agree",
-    }
-    base.update(fields)
-    return FieldRun.model_validate(base)
+def _run(task_id: str, verdict: str | None = "agree", **fields: object) -> FieldRun:
+    run = field_run(task_id, **fields)
+    return verified(run, verdict) if verdict is not None else run
 
 
 def test_annotate_rejects_values_outside_enum(tmp_path: Path) -> None:
@@ -51,15 +39,21 @@ def test_annotate_missing_record(tmp_path: Path) -> None:
 def test_verify_never_echoes_human_labels(tmp_path: Path) -> None:
     corpus(tmp_path)
     save_run(tmp_path, _run("T001", exit_reason="graph_gap", task_completed=True))
-    out = verify(tmp_path, task_id="T001", phase="baseline", verdict="disagree")
-    assert out == {"task_id": "T001", "phase": "baseline", "verifier_verdict": "disagree"}
+    out = verify(
+        tmp_path, task_id="T001", phase="baseline", verdict="disagree", verifier=VERIFIER, now=NOW
+    )
+    assert out == {
+        "task_id": "T001",
+        "phase": "baseline",
+        "verifier_verdict": "disagree",
+        "verifier_kind": "agent",
+        "verified_at": "2026-10-03T12:00:00Z",
+    }
 
 
 def test_divergent_run_counts_as_unresolved(tmp_path: Path) -> None:
     corpus(tmp_path)
-    save_run(
-        tmp_path, _run("T001", task_completed=True, exit_reason="none", verifier_verdict="disagree")
-    )
+    save_run(tmp_path, _run("T001", verdict="disagree", task_completed=True, exit_reason="none"))
     save_run(tmp_path, _run("T002", task_completed=True, exit_reason="none"))
     report = build_report(tmp_path)
     assert report.unresolved_runs == ("T001",)
@@ -85,7 +79,10 @@ def test_theme_qualification_needs_two_repos(tmp_path: Path) -> None:
     assert themes["graph_gap"].qualified and themes["graph_gap"].repos == 2
     assert not themes["ux_gap"].qualified
     assert report.qualified_themes == ("graph_gap",)
-    assert report.h1_verdict == "confirmed"
+    assert report.provisional_h1 == "confirmed"
+    assert report.cycle_status == "collecting"
+    assert report.h1_verdict == "inconclusive"
+    assert report.recommendation.startswith("continue collecting")
     assert themes["ux_gap"].ci95 == wilson(7, 13)
 
 
@@ -96,15 +93,18 @@ def test_refuted_when_other_theme_wins(tmp_path: Path) -> None:
         tasks.append(task(f"K{index}", repo_ref=repo))
         save_run(tmp_path, _run(f"K{index}", repo_ref=repo, exit_reason="knowledge_gap"))
     corpus(tmp_path, tasks=tasks)
-    assert build_report(tmp_path).h1_verdict == "refuted"
+    report = build_report(tmp_path)
+    assert report.provisional_h1 == "refuted"
+    assert report.h1_verdict == "inconclusive"
 
 
 def test_inconclusive_without_dominant_theme(tmp_path: Path) -> None:
     _seed(tmp_path, (OSS, OSS), ux=3)
     report = build_report(tmp_path)
     assert report.h1_verdict == "inconclusive"
+    assert report.provisional_h1 == "inconclusive"
     assert report.qualified_themes == ()
-    assert report.recommendation.startswith("inconclusive")
+    assert report.recommendation.startswith("continue collecting")
     assert "maintenance" in report.scenarios_under_min
     assert "multi_repo" not in report.scenarios_under_min
 

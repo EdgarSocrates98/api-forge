@@ -229,11 +229,12 @@ def field_record(
     runs: list[str],
     started: str,
     ended: str,
+    executor: str,
     phase: str = "baseline",
     root: str = ".",
     detail_level: str = "normal",
 ) -> dict[str, Any]:
-    """Join ledger/summary/checkpoint of linked runs into a pre-registered field-run record."""
+    """Join linked runs into a pre-registered field-run record; executor is human:sha256:<hex> or agent:<name>."""
     from apiforge.field.annotate import PHASES, _enum
     from apiforge.field.record import record
 
@@ -246,6 +247,7 @@ def field_record(
             phase=checked,  # type: ignore[arg-type]
             started_at=started,
             ended_at=ended,
+            executor=executor,
         )
 
     return cast(dict[str, Any], _call("field_record", work, detail_level))
@@ -287,16 +289,23 @@ def field_annotate(
 
 
 def field_verify(
-    task: str, verdict: str, phase: str = "baseline", root: str = ".", detail_level: str = "normal"
+    task: str,
+    verdict: str,
+    verifier: str,
+    phase: str = "baseline",
+    root: str = ".",
+    detail_level: str = "normal",
 ) -> dict[str, Any]:
-    """Blind verifier verdict (agree|disagree|unresolved); never echoes human labels."""
+    """Blind verifier verdict (agree|disagree|unresolved) by a verifier independent of the executor."""
     from apiforge.field.annotate import verify
 
     return cast(
         dict[str, Any],
         _call(
             "field_verify",
-            lambda: verify(Path(root), task_id=task, phase=phase, verdict=verdict),
+            lambda: verify(
+                Path(root), task_id=task, phase=phase, verdict=verdict, verifier=verifier
+            ),
             detail_level,
         ),
     )

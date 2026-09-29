@@ -14,8 +14,8 @@ features it does not expose.
 | Host | Repository entrypoints | Current boundary |
 | --- | --- | --- |
 | Claude Code | `CLAUDE.md`, `.claude/skills`, `.claude/agents` | hooks/MCP depend on Claude installation |
-| GPT/Codex | `AGENTS.md`, `.agents/skills`, `.agents/agents` | native `.codex` hooks are host-managed |
-| Devin | `AGENTS.md`, `.devin/` | payloads are local; Desktop/CLI/Cloud/subagents/hooks depend on Devin runtime |
+| GPT/Codex | `AGENTS.md`, `.agents/skills`, `.codex/agents` | native `.codex` hooks are host-managed |
+| Devin | `AGENTS.md`, `.devin/`, `.agents/agents` | payloads are local; Desktop/CLI/Cloud/subagents/hooks depend on Devin runtime |
 | Copilot | `AGENTS.md`, `.github/skills` | no parity guarantee for MCP/subagents |
 
 All hosts can use the core CLI after the package is installed in a user-owned

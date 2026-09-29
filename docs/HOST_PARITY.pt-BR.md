@@ -13,8 +13,8 @@ suporta funções que ele não expõe.
 | Host | Entradas no repositório | Limite atual |
 |---|---|---|
 | Claude Code | `CLAUDE.md`, `.claude/skills`, `.claude/agents` | hooks/MCP dependem da instalação do Claude |
-| GPT/Codex | `AGENTS.md`, `.agents/skills`, `.agents/agents` | hooks `.codex` são gerenciados pelo host |
-| Devin | `AGENTS.md`, `.devin/` | payloads são locais; Desktop/CLI/Cloud/subagents/hooks dependem do runtime Devin |
+| GPT/Codex | `AGENTS.md`, `.agents/skills`, `.codex/agents` | hooks `.codex` são gerenciados pelo host |
+| Devin | `AGENTS.md`, `.devin/`, `.agents/agents` | payloads são locais; Desktop/CLI/Cloud/subagents/hooks dependem do runtime Devin |
 | Copilot | `AGENTS.md`, `.github/skills` | não há garantia de paridade para MCP/subagents |
 
 Todos os hosts podem usar o core CLI depois da instalação em um ambiente do

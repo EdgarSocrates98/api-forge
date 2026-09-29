@@ -1,7 +1,7 @@
 """Anti-agentic-theater gate (§29): what does each agent own that no other agent does?
 
 Sources are declarative and local: ``agents/*.md`` frontmatter (``rule_areas``,
-``executors``, optional ``tools``), the runtime capability catalog (capability
+``executors``, optional ``apiforge_tools`` — legacy ``tools``), the runtime capability catalog (capability
 and decision role per agent) and the agent profiles. An agent with no unique
 capability, rule area, executor, tool or decision role is a
 ``merge-candidate``; the report names the agents whose rule areas cover it.
@@ -73,7 +73,7 @@ def audit_agents(root: Path, agents_dir: Path | None = None) -> dict[str, Any]:
         meta = docs.get(name, {})
         area_count.update(_items(meta.get("rule_areas")))
         executor_count.update(_items(meta.get("executors")))
-        tool_count.update(_items(meta.get("tools")))
+        tool_count.update(_items(meta.get("apiforge_tools", meta.get("tools"))))
         role_count.update(set(roles.get(name, ())))
         capability_count.update(set(capabilities.get(name, ())))
     rows: list[AgentUniqueness] = []
@@ -81,7 +81,7 @@ def audit_agents(root: Path, agents_dir: Path | None = None) -> dict[str, Any]:
         meta = docs.get(name, {})
         areas = _items(meta.get("rule_areas"))
         executors = _items(meta.get("executors"))
-        tools = _items(meta.get("tools"))
+        tools = _items(meta.get("apiforge_tools", meta.get("tools")))
         owned = tuple(sorted(set(capabilities.get(name, ()))))
         decision = tuple(sorted(set(roles.get(name, ()))))
         flags: dict[str, Any] = {

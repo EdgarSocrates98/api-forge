@@ -1,0 +1,818 @@
+{
+  "agents": 25,
+  "keep": 25,
+  "merge_candidates": [],
+  "note": "report only; removal or merge is a human decision",
+  "rows": [
+    {
+      "agent": "api-adversarial-critic",
+      "capabilities": [
+        "adversarial-critic"
+      ],
+      "decision_roles": [
+        "critic"
+      ],
+      "executors": [
+        "af-inventory",
+        "af-judge",
+        "af-synthesizer",
+        "af-verifier"
+      ],
+      "overlaps": [],
+      "rule_areas": [
+        "CONTRACT",
+        "PERF",
+        "SECURITY",
+        "TESTING"
+      ],
+      "tools": [
+        "debate submit"
+      ],
+      "unique_capability": true,
+      "unique_decision_role": true,
+      "unique_expertise": false,
+      "unique_tool": true,
+      "unique_validator": false,
+      "verdict": "keep",
+      "version": 1
+    },
+    {
+      "agent": "api-architecture-reviewer",
+      "capabilities": [
+        "api-architecture-review"
+      ],
+      "decision_roles": [],
+      "executors": [
+        "af-extractor",
+        "af-inventory",
+        "af-judge",
+        "af-synthesizer"
+      ],
+      "overlaps": [],
+      "rule_areas": [
+        "GATEWAY",
+        "OBSERVE",
+        "STORAGE"
+      ],
+      "tools": [
+        "model alb",
+        "model ec2",
+        "model ecs",
+        "model eks",
+        "model elasticache",
+        "model msk",
+        "workspace graph"
+      ],
+      "unique_capability": true,
+      "unique_decision_role": false,
+      "unique_expertise": false,
+      "unique_tool": true,
+      "unique_validator": false,
+      "verdict": "keep",
+      "version": 1
+    },
+    {
+      "agent": "api-codegen-engineer",
+      "capabilities": [],
+      "decision_roles": [],
+      "executors": [
+        "af-extractor",
+        "af-inventory",
+        "af-synthesizer",
+        "af-verifier"
+      ],
+      "overlaps": [],
+      "rule_areas": [
+        "CONTRACT",
+        "TESTING"
+      ],
+      "tools": [
+        "grpc capabilities",
+        "grpc codegen",
+        "grpc gateway"
+      ],
+      "unique_capability": false,
+      "unique_decision_role": false,
+      "unique_expertise": false,
+      "unique_tool": true,
+      "unique_validator": false,
+      "verdict": "keep",
+      "version": 1
+    },
+    {
+      "agent": "api-contract-architect",
+      "capabilities": [
+        "api-contract-review"
+      ],
+      "decision_roles": [],
+      "executors": [
+        "af-extractor",
+        "af-inventory",
+        "af-judge",
+        "af-synthesizer",
+        "af-verifier"
+      ],
+      "overlaps": [],
+      "rule_areas": [
+        "BREAKING",
+        "CONTRACT",
+        "REST"
+      ],
+      "tools": [
+        "model build",
+        "model graphql",
+        "model proto"
+      ],
+      "unique_capability": true,
+      "unique_decision_role": false,
+      "unique_expertise": false,
+      "unique_tool": true,
+      "unique_validator": false,
+      "verdict": "keep",
+      "version": 1
+    },
+    {
+      "agent": "api-data-access-architect",
+      "capabilities": [
+        "api-data-review"
+      ],
+      "decision_roles": [],
+      "executors": [
+        "af-extractor",
+        "af-inventory",
+        "af-judge",
+        "af-synthesizer",
+        "af-verifier"
+      ],
+      "overlaps": [],
+      "rule_areas": [
+        "DATA",
+        "STORAGE"
+      ],
+      "tools": [
+        "model docdb",
+        "model dynamodb",
+        "model dynamodb-access",
+        "model mongo",
+        "model mysql-access",
+        "model neptune",
+        "model neptune-access",
+        "model opensearch-access",
+        "model postgres-access",
+        "model rds-access",
+        "model redis",
+        "model redshift-access"
+      ],
+      "unique_capability": true,
+      "unique_decision_role": false,
+      "unique_expertise": false,
+      "unique_tool": true,
+      "unique_validator": false,
+      "verdict": "keep",
+      "version": 1
+    },
+    {
+      "agent": "api-debate-referee",
+      "capabilities": [
+        "debate-referee"
+      ],
+      "decision_roles": [
+        "referee"
+      ],
+      "executors": [
+        "af-inventory",
+        "af-judge",
+        "af-synthesizer",
+        "af-verifier"
+      ],
+      "overlaps": [],
+      "rule_areas": [
+        "CONTRACT",
+        "SECURITY",
+        "TESTING"
+      ],
+      "tools": [
+        "debate close",
+        "debate open",
+        "debate packet"
+      ],
+      "unique_capability": true,
+      "unique_decision_role": true,
+      "unique_expertise": false,
+      "unique_tool": true,
+      "unique_validator": false,
+      "verdict": "keep",
+      "version": 1
+    },
+    {
+      "agent": "api-dx-docs-reviewer",
+      "capabilities": [],
+      "decision_roles": [],
+      "executors": [
+        "af-extractor",
+        "af-inventory",
+        "af-judge",
+        "af-synthesizer"
+      ],
+      "overlaps": [],
+      "rule_areas": [
+        "CONTRACT",
+        "REST"
+      ],
+      "tools": [
+        "contract-intel twin"
+      ],
+      "unique_capability": false,
+      "unique_decision_role": false,
+      "unique_expertise": false,
+      "unique_tool": true,
+      "unique_validator": false,
+      "verdict": "keep",
+      "version": 1
+    },
+    {
+      "agent": "api-event-driven-architect",
+      "capabilities": [],
+      "decision_roles": [],
+      "executors": [
+        "af-extractor",
+        "af-inventory",
+        "af-judge",
+        "af-synthesizer",
+        "af-verifier"
+      ],
+      "overlaps": [],
+      "rule_areas": [
+        "MESSAGING",
+        "OBSERVE"
+      ],
+      "tools": [
+        "model asyncapi",
+        "model eventbridge",
+        "model eventbridge-access",
+        "model kafka-access",
+        "model kinesis-access",
+        "model msk-access",
+        "model nats-access",
+        "model pulsar-access",
+        "model rabbitmq-access",
+        "model sns",
+        "model sns-access",
+        "model sqs",
+        "model sqs-access",
+        "model stepfunctions"
+      ],
+      "unique_capability": false,
+      "unique_decision_role": false,
+      "unique_expertise": true,
+      "unique_tool": true,
+      "unique_validator": false,
+      "verdict": "keep",
+      "version": 1
+    },
+    {
+      "agent": "api-governance-reviewer",
+      "capabilities": [],
+      "decision_roles": [],
+      "executors": [
+        "af-extractor",
+        "af-inventory",
+        "af-judge",
+        "af-synthesizer",
+        "af-verifier"
+      ],
+      "overlaps": [],
+      "rule_areas": [
+        "BREAKING",
+        "CONTRACT",
+        "REST"
+      ],
+      "tools": [
+        "analyze",
+        "change-control run",
+        "change-control verify",
+        "contract-intel impact",
+        "diff contract",
+        "grpc diff"
+      ],
+      "unique_capability": false,
+      "unique_decision_role": false,
+      "unique_expertise": false,
+      "unique_tool": true,
+      "unique_validator": false,
+      "verdict": "keep",
+      "version": 1
+    },
+    {
+      "agent": "api-infra-reviewer",
+      "capabilities": [],
+      "decision_roles": [],
+      "executors": [
+        "af-extractor",
+        "af-inventory",
+        "af-judge",
+        "af-synthesizer",
+        "af-verifier"
+      ],
+      "overlaps": [],
+      "rule_areas": [
+        "GATEWAY",
+        "IDENTITY",
+        "SECURITY",
+        "STORAGE"
+      ],
+      "tools": [
+        "model api-gateway",
+        "model cognito",
+        "model iam-role",
+        "model lambda",
+        "model sam",
+        "model terraform",
+        "model waf"
+      ],
+      "unique_capability": false,
+      "unique_decision_role": false,
+      "unique_expertise": false,
+      "unique_tool": true,
+      "unique_validator": false,
+      "verdict": "keep",
+      "version": 1
+    },
+    {
+      "agent": "api-load-capacity-engineer",
+      "capabilities": [],
+      "decision_roles": [],
+      "executors": [
+        "af-extractor",
+        "af-inventory",
+        "af-judge",
+        "af-synthesizer",
+        "af-verifier"
+      ],
+      "overlaps": [],
+      "rule_areas": [
+        "PERF",
+        "TESTING"
+      ],
+      "tools": [
+        "model gatling",
+        "model hey",
+        "model jmeter",
+        "model k6",
+        "model locust",
+        "model vegeta",
+        "model wrk",
+        "perf chaos",
+        "perf plan",
+        "perf scenario",
+        "perf verdict"
+      ],
+      "unique_capability": false,
+      "unique_decision_role": false,
+      "unique_expertise": false,
+      "unique_tool": true,
+      "unique_validator": false,
+      "verdict": "keep",
+      "version": 1
+    },
+    {
+      "agent": "api-modernization-specialist",
+      "capabilities": [],
+      "decision_roles": [],
+      "executors": [
+        "af-extractor",
+        "af-inventory",
+        "af-judge",
+        "af-synthesizer"
+      ],
+      "overlaps": [],
+      "rule_areas": [
+        "BREAKING",
+        "CONTRACT",
+        "TESTING"
+      ],
+      "tools": [
+        "evolve",
+        "migration analyze",
+        "migration matrix",
+        "plan strangler"
+      ],
+      "unique_capability": false,
+      "unique_decision_role": false,
+      "unique_expertise": false,
+      "unique_tool": true,
+      "unique_validator": false,
+      "verdict": "keep",
+      "version": 1
+    },
+    {
+      "agent": "api-observability-engineer",
+      "capabilities": [],
+      "decision_roles": [],
+      "executors": [
+        "af-extractor",
+        "af-inventory",
+        "af-judge",
+        "af-synthesizer",
+        "af-verifier"
+      ],
+      "overlaps": [],
+      "rule_areas": [
+        "OBSERVE",
+        "PERF"
+      ],
+      "tools": [
+        "model cloudwatch",
+        "model otel",
+        "observability health",
+        "observability ingest",
+        "observability instrument"
+      ],
+      "unique_capability": false,
+      "unique_decision_role": false,
+      "unique_expertise": false,
+      "unique_tool": true,
+      "unique_validator": false,
+      "verdict": "keep",
+      "version": 1
+    },
+    {
+      "agent": "api-observability-integration-engineer",
+      "capabilities": [],
+      "decision_roles": [],
+      "executors": [
+        "af-extractor",
+        "af-inventory",
+        "af-judge",
+        "af-synthesizer",
+        "af-verifier"
+      ],
+      "overlaps": [],
+      "rule_areas": [
+        "OBSERVE",
+        "SECURITY"
+      ],
+      "tools": [
+        "observability capabilities",
+        "observability credential-check",
+        "observability read-plan"
+      ],
+      "unique_capability": false,
+      "unique_decision_role": false,
+      "unique_expertise": false,
+      "unique_tool": true,
+      "unique_validator": false,
+      "verdict": "keep",
+      "version": 1
+    },
+    {
+      "agent": "api-operations-engineer",
+      "capabilities": [],
+      "decision_roles": [],
+      "executors": [
+        "af-extractor",
+        "af-inventory",
+        "af-judge",
+        "af-synthesizer"
+      ],
+      "overlaps": [],
+      "rule_areas": [
+        "OBSERVE",
+        "SECURITY"
+      ],
+      "tools": [
+        "autonomy heal",
+        "autonomy ledger",
+        "autonomy run",
+        "autonomy runbook",
+        "autonomy set",
+        "autonomy status",
+        "model xray"
+      ],
+      "unique_capability": false,
+      "unique_decision_role": false,
+      "unique_expertise": false,
+      "unique_tool": true,
+      "unique_validator": false,
+      "verdict": "keep",
+      "version": 1
+    },
+    {
+      "agent": "api-orchestrator",
+      "capabilities": [],
+      "decision_roles": [],
+      "executors": [
+        "af-extractor",
+        "af-inventory",
+        "af-judge",
+        "af-synthesizer",
+        "af-verifier"
+      ],
+      "overlaps": [],
+      "rule_areas": [
+        "CONTRACT",
+        "OBSERVE",
+        "SECURITY"
+      ],
+      "tools": [
+        "dispatch run",
+        "runtime control-plan",
+        "runtime control-start",
+        "runtime resume",
+        "runtime run"
+      ],
+      "unique_capability": false,
+      "unique_decision_role": false,
+      "unique_expertise": false,
+      "unique_tool": true,
+      "unique_validator": false,
+      "verdict": "keep",
+      "version": 1
+    },
+    {
+      "agent": "api-performance-engineer",
+      "capabilities": [
+        "api-performance-review"
+      ],
+      "decision_roles": [],
+      "executors": [
+        "af-extractor",
+        "af-inventory",
+        "af-judge",
+        "af-synthesizer",
+        "af-verifier"
+      ],
+      "overlaps": [],
+      "rule_areas": [
+        "DATA",
+        "PERF"
+      ],
+      "tools": [
+        "grpc benchmark",
+        "model jfr",
+        "model pprof",
+        "model pyroscope",
+        "model pytest-benchmark",
+        "perf compare",
+        "perf memory search",
+        "perf suggest"
+      ],
+      "unique_capability": true,
+      "unique_decision_role": false,
+      "unique_expertise": false,
+      "unique_tool": true,
+      "unique_validator": false,
+      "verdict": "keep",
+      "version": 1
+    },
+    {
+      "agent": "api-planner",
+      "capabilities": [],
+      "decision_roles": [],
+      "executors": [
+        "af-extractor",
+        "af-inventory",
+        "af-judge",
+        "af-synthesizer"
+      ],
+      "overlaps": [],
+      "rule_areas": [
+        "CONTRACT",
+        "SECURITY",
+        "TESTING"
+      ],
+      "tools": [
+        "migration plan",
+        "next-step",
+        "task compile",
+        "task create",
+        "task plan"
+      ],
+      "unique_capability": false,
+      "unique_decision_role": false,
+      "unique_expertise": false,
+      "unique_tool": true,
+      "unique_validator": false,
+      "verdict": "keep",
+      "version": 1
+    },
+    {
+      "agent": "api-platform-selector",
+      "capabilities": [],
+      "decision_roles": [],
+      "executors": [
+        "af-extractor",
+        "af-inventory",
+        "af-judge",
+        "af-synthesizer"
+      ],
+      "overlaps": [],
+      "rule_areas": [
+        "GATEWAY",
+        "PERF",
+        "STORAGE"
+      ],
+      "tools": [
+        "plan architecture"
+      ],
+      "unique_capability": false,
+      "unique_decision_role": false,
+      "unique_expertise": false,
+      "unique_tool": true,
+      "unique_validator": false,
+      "verdict": "keep",
+      "version": 1
+    },
+    {
+      "agent": "api-release-guardian",
+      "capabilities": [],
+      "decision_roles": [],
+      "executors": [
+        "af-extractor",
+        "af-inventory",
+        "af-synthesizer",
+        "af-verifier"
+      ],
+      "overlaps": [],
+      "rule_areas": [
+        "CONTRACT",
+        "SECURITY",
+        "TESTING"
+      ],
+      "tools": [
+        "report build",
+        "report keygen",
+        "report sign",
+        "report verify",
+        "sdd check",
+        "sdd evidence",
+        "sdd set-phase"
+      ],
+      "unique_capability": false,
+      "unique_decision_role": false,
+      "unique_expertise": false,
+      "unique_tool": true,
+      "unique_validator": false,
+      "verdict": "keep",
+      "version": 1
+    },
+    {
+      "agent": "api-resilience-engineer",
+      "capabilities": [],
+      "decision_roles": [],
+      "executors": [
+        "af-extractor",
+        "af-inventory",
+        "af-judge",
+        "af-synthesizer",
+        "af-verifier"
+      ],
+      "overlaps": [],
+      "rule_areas": [
+        "GATEWAY",
+        "OBSERVE",
+        "PERF"
+      ],
+      "tools": [
+        "model resilience"
+      ],
+      "unique_capability": false,
+      "unique_decision_role": false,
+      "unique_expertise": false,
+      "unique_tool": true,
+      "unique_validator": false,
+      "verdict": "keep",
+      "version": 1
+    },
+    {
+      "agent": "api-security-reviewer",
+      "capabilities": [
+        "api-security-review"
+      ],
+      "decision_roles": [],
+      "executors": [
+        "af-extractor",
+        "af-inventory",
+        "af-judge",
+        "af-synthesizer",
+        "af-verifier"
+      ],
+      "overlaps": [],
+      "rule_areas": [
+        "GATEWAY",
+        "IDENTITY",
+        "SECURITY"
+      ],
+      "tools": [
+        "model gitleaks",
+        "model kms",
+        "model secrets",
+        "model semgrep",
+        "model trivy",
+        "model zap",
+        "policy check"
+      ],
+      "unique_capability": true,
+      "unique_decision_role": false,
+      "unique_expertise": false,
+      "unique_tool": true,
+      "unique_validator": false,
+      "verdict": "keep",
+      "version": 1
+    },
+    {
+      "agent": "api-task-spec-reviewer",
+      "capabilities": [
+        "task-review"
+      ],
+      "decision_roles": [
+        "reviewer"
+      ],
+      "executors": [
+        "af-inventory",
+        "af-judge",
+        "af-synthesizer",
+        "af-verifier"
+      ],
+      "overlaps": [],
+      "rule_areas": [
+        "CONTRACT",
+        "TESTING"
+      ],
+      "tools": [
+        "task review"
+      ],
+      "unique_capability": true,
+      "unique_decision_role": true,
+      "unique_expertise": false,
+      "unique_tool": true,
+      "unique_validator": false,
+      "verdict": "keep",
+      "version": 1
+    },
+    {
+      "agent": "api-test-strategist",
+      "capabilities": [],
+      "decision_roles": [],
+      "executors": [
+        "af-extractor",
+        "af-inventory",
+        "af-judge",
+        "af-synthesizer"
+      ],
+      "overlaps": [],
+      "rule_areas": [
+        "CONTRACT",
+        "TESTING"
+      ],
+      "tools": [
+        "grpc test",
+        "model coverage",
+        "model pact",
+        "model schemathesis",
+        "slice tests"
+      ],
+      "unique_capability": false,
+      "unique_decision_role": false,
+      "unique_expertise": false,
+      "unique_tool": true,
+      "unique_validator": false,
+      "verdict": "keep",
+      "version": 1
+    },
+    {
+      "agent": "api-verifier",
+      "capabilities": [],
+      "decision_roles": [],
+      "executors": [
+        "af-extractor",
+        "af-inventory",
+        "af-synthesizer",
+        "af-verifier"
+      ],
+      "overlaps": [],
+      "rule_areas": [
+        "CONTRACT",
+        "SECURITY",
+        "TESTING"
+      ],
+      "tools": [
+        "brief show",
+        "capabilities verify",
+        "grpc verify",
+        "migration verify",
+        "platform verify-runtime",
+        "review",
+        "task verify"
+      ],
+      "unique_capability": false,
+      "unique_decision_role": false,
+      "unique_expertise": false,
+      "unique_tool": true,
+      "unique_validator": false,
+      "verdict": "keep",
+      "version": 1
+    }
+  ],
+  "schema": "apiforge/agent-audit/v1"
+}

@@ -1,231 +1,177 @@
 # Ordered executor decompositions per coordinator. `apiforge playbook <name>`
 # renders this — it is data, never judgment. Coordinator names must match
 # agents/*.md files; executors must match agents/executors/*.md (gate-checked).
-api-contract-architect:
-  - {executor: af-inventory, verb: "model build", purpose: "load the OpenAPI contract into the API-IR"}
-  - {executor: af-extractor, verb: "diff contract", purpose: "delta against a baseline contract when one exists"}
-  - {executor: af-judge, verb: "rules list --area REST", purpose: "the design rules the contract will be cited against"}
-  - {executor: af-synthesizer, verb: "rules lookup", purpose: "full guidance per rule applied in the recommendation"}
-api-governance-reviewer:
-  - {executor: af-inventory, verb: "discover", purpose: "inventory project files and confirm framework detection"}
-  - {executor: af-extractor, verb: "analyze", purpose: "extract facts + findings into a persisted case"}
-  - {executor: af-judge, verb: "judge", purpose: "classify contract/code divergence by severity and area"}
-  - {executor: af-verifier, verb: "evidence emit", purpose: "receipt over the case artifacts when results ship"}
-  - {executor: af-synthesizer, verb: "next-step", purpose: "route the dominant finding area to a specialist"}
-api-security-reviewer:
-  - {executor: af-inventory, verb: "model api-gateway", purpose: "surface served: dump facts or project discovery"}
-  - {executor: af-extractor, verb: "analyze", purpose: "route facts plus gateway method/auth facts"}
-  - {executor: af-judge, verb: "rules list --area SECURITY", purpose: "OWASP API Top 10 rules to apply"}
-  - {executor: af-judge, verb: "rules list --area GATEWAY", purpose: "edge auth/throttling rules to apply"}
-  - {executor: af-synthesizer, verb: "next-step", purpose: "route; blind spots stay named as unresolved"}
-api-performance-engineer:
-  - {executor: af-inventory, verb: "discover", purpose: "what measurement artifacts exist; baseline first"}
-  - {executor: af-extractor, verb: "analyze", purpose: "route surface the measurements must map to"}
-  - {executor: af-judge, verb: "rules list --area PERF", purpose: "performance rules over the declared surface"}
-  - {executor: af-synthesizer, verb: "economy report", purpose: "session cost in bytes; gains stay hypotheses until measured"}
-api-test-strategist:
-  - {executor: af-inventory, verb: "model build", purpose: "operations that demand proof"}
-  - {executor: af-extractor, verb: "analyze", purpose: "served routes vs declared operations"}
-  - {executor: af-judge, verb: "rules list --area TESTING", purpose: "test-layer rules to apply per operation"}
-  - {executor: af-synthesizer, verb: "rules lookup", purpose: "coverage-matrix gaps cited per rule"}
-api-resilience-engineer:
-  - {executor: af-inventory, verb: "model api-gateway", purpose: "declared timeouts and limits from the dump"}
-  - {executor: af-extractor, verb: "analyze", purpose: "route surface for the time budget"}
-  - {executor: af-judge, verb: "rules list --area GATEWAY", purpose: "timeout/throttle rules (AF-GW-003 among them)"}
-  - {executor: af-synthesizer, verb: "rules lookup", purpose: "retry/timeout guidance per rule applied"}
-aws-api-infra-reviewer:
-  - {executor: af-inventory, verb: "collect api-gateway", purpose: "the only verb that touches AWS; AF-COLLECT-AWS names the unlock"}
-  - {executor: af-extractor, verb: "model api-gateway", purpose: "offline facts per method/stage/integration"}
-  - {executor: af-judge, verb: "rules list --area GATEWAY", purpose: "AF-GW rules over the dump facts"}
-  - {executor: af-verifier, verb: "evidence emit", purpose: "receipt over the dump + findings for the record"}
-  - {executor: af-synthesizer, verb: "next-step", purpose: "route security vs reliability from the dominant area"}
-api-modernization-specialist:
-  - {executor: af-inventory, verb: "discover", purpose: "source inventory via the matching adapter"}
-  - {executor: af-extractor, verb: "analyze", purpose: "source routes; same for the target when it exists"}
-  - {executor: af-extractor, verb: "diff contract", purpose: "parity proven per operation, never asserted"}
-  - {executor: af-judge, verb: "judge", purpose: "residual divergence per route"}
-  - {executor: af-synthesizer, verb: "next-step", purpose: "Strangler cut order with the evidence that unlocks each"}
-api-observability-engineer:
-  - {executor: af-inventory, verb: "model api-gateway", purpose: "stage logs/tracing/access-log facts"}
-  - {executor: af-extractor, verb: "analyze", purpose: "operations the signal map must cover"}
-  - {executor: af-judge, verb: "rules list --area GATEWAY", purpose: "signal rules (AF-GW-004 among them)"}
-  - {executor: af-synthesizer, verb: "rules lookup", purpose: "instrument recommendation per gap, labeled recommendation"}
-api-dx-docs-reviewer:
-  - {executor: af-inventory, verb: "model build", purpose: "schema projections and declared error shapes"}
-  - {executor: af-extractor, verb: "analyze", purpose: "served routes for the consumer surface"}
-  - {executor: af-judge, verb: "rules list --area REST", purpose: "error-shape and contract-quality rules"}
-  - {executor: af-synthesizer, verb: "rules lookup", purpose: "DX gaps cited per operation"}
-api-data-access-architect:
-  - {executor: af-inventory, verb: "model redis", purpose: "data-access call sites for each declared database"}
-  - {executor: af-extractor, verb: "model mongo", purpose: "mongo/dynamo/neptune facts + DataAccessIR"}
-  - {executor: af-judge, verb: "rules list --area DATA", purpose: "AF-DATA-001..013 over the call-site facts"}
-  - {executor: af-judge, verb: "rules list --area STORAGE", purpose: "AF-STORE-001..005 over datastore dumps"}
-  - {executor: af-synthesizer, verb: "rules lookup", purpose: "access-pattern guidance per rule applied"}
-api-relational-data-architect:
-  - {executor: af-inventory, verb: "model rds-access", purpose: "extract relational access signals without executing queries"}
-  - {executor: af-extractor, verb: "model postgres-access", purpose: "normalize SQL, pools, transactions and pagination facts"}
-  - {executor: af-judge, verb: "rules list --area DATA", purpose: "data-access rules over observed relational facts"}
-  - {executor: af-verifier, verb: "evidence emit", purpose: "preserve source hashes and unresolved runtime gaps"}
-  - {executor: af-synthesizer, verb: "next-step", purpose: "route benchmark or migration work with evidence limits"}
-api-streaming-platform-architect:
-  - {executor: af-inventory, verb: "model kafka-access", purpose: "extract producers, consumers and destinations without touching brokers"}
-  - {executor: af-extractor, verb: "model msk-access", purpose: "normalize delivery, retry, ordering and group signals"}
-  - {executor: af-judge, verb: "rules list --area MESSAGING", purpose: "messaging rules over the declared async surface"}
-  - {executor: af-verifier, verb: "evidence emit", purpose: "preserve static limits and runtime gaps"}
-  - {executor: af-synthesizer, verb: "next-step", purpose: "route approved lag or throughput experiments"}
-api-analytical-data-architect:
-  - {executor: af-inventory, verb: "model opensearch-access", purpose: "extract search and aggregation access signals"}
-  - {executor: af-extractor, verb: "model redshift-access", purpose: "normalize analytical query and partition signals"}
-  - {executor: af-judge, verb: "rules list --area DATA", purpose: "analytical access rules over observed facts"}
-  - {executor: af-verifier, verb: "evidence emit", purpose: "preserve query source and unresolved runtime metrics"}
-  - {executor: af-synthesizer, verb: "next-step", purpose: "route capacity or indexing experiments without guessing"}
+api-orchestrator:
+  - {executor: af-inventory, verb: "task status", purpose: "bind the run to the current TaskSpec revision"}
+  - {executor: af-extractor, verb: "task plan", purpose: "reuse the sealed plan and declared proof axes"}
+  - {executor: af-judge, verb: "task review", purpose: "refuse incomplete scope before fan-out"}
+  - {executor: af-verifier, verb: "task verify", purpose: "preserve independent verification as a gate"}
+  - {executor: af-synthesizer, verb: "brief show", purpose: "render DONE, REVIEW or BLOCKED without guessing"}
+  - {executor: af-inventory, verb: "observability ingest", purpose: "bind run to telemetry evidence"}
+  - {executor: af-inventory, verb: "grpc analyze", purpose: "bind intention to canonical IR"}
+  - {executor: af-verifier, verb: "grpc verify", purpose: "close only with evidence-backed status"}
 api-planner:
   - {executor: af-inventory, verb: "discover", purpose: "inventory project + framework before planning"}
   - {executor: af-extractor, verb: "analyze", purpose: "facts + findings that define risk"}
   - {executor: af-judge, verb: "judge", purpose: "severity × area map the plan must answer"}
   - {executor: af-synthesizer, verb: "next-step", purpose: "route the dominant area; WorkloadProfile stays declared"}
+  - {executor: af-inventory, verb: "migration analyze", purpose: "discover runtime and manifests"}
+  - {executor: af-extractor, verb: "migration plan", purpose: "compile a bounded migration DAG"}
+  - {executor: af-judge, verb: "task review", purpose: "validate risks, proofs and rollback"}
+  - {executor: af-synthesizer, verb: "brief show", purpose: "name migration gaps and next steps"}
+api-task-spec-reviewer:
+  - {executor: af-inventory, verb: "task status", purpose: "inspect lifecycle, revision and inputs"}
+  - {executor: af-judge, verb: "task review", purpose: "check proofs, acceptance and rollback"}
+  - {executor: af-verifier, verb: "task verify", purpose: "confirm evidence requirements"}
+  - {executor: af-synthesizer, verb: "brief show", purpose: "name remaining gaps"}
+api-platform-selector:
+  - {executor: af-inventory, verb: "plan architecture", purpose: "WorkloadProfile -> ranked roles with named rejections"}
+  - {executor: af-judge, verb: "rules list --area GATEWAY", purpose: "edge rules the chosen platform must still satisfy"}
+  - {executor: af-synthesizer, verb: "next-step", purpose: "hand the decision to whoever implements"}
 api-architecture-reviewer:
   - {executor: af-inventory, verb: "model terraform", purpose: "declared infra as the review surface"}
   - {executor: af-extractor, verb: "model ecs", purpose: "compute posture facts from dumps on disk"}
   - {executor: af-judge, verb: "rules list --area GATEWAY", purpose: "edge rules applied to the posture"}
   - {executor: af-judge, verb: "rules list --area STORAGE", purpose: "datastore posture rules"}
   - {executor: af-synthesizer, verb: "next-step", purpose: "route; blind spots stay named"}
-api-platform-selector:
-  - {executor: af-inventory, verb: "plan architecture", purpose: "WorkloadProfile -> ranked roles with named rejections"}
-  - {executor: af-judge, verb: "rules list --area GATEWAY", purpose: "edge rules the chosen platform must still satisfy"}
-  - {executor: af-synthesizer, verb: "next-step", purpose: "hand the decision to whoever implements"}
-api-load-test-engineer:
-  - {executor: af-inventory, verb: "perf scenario", purpose: "generate the tool script from a declared scenario"}
-  - {executor: af-extractor, verb: "model k6", purpose: "load report -> test.* facts; readers for the other tools follow the same verb"}
-  - {executor: af-judge, verb: "rules list --area TESTING", purpose: "AF-TEST rules incl. generator saturation"}
-  - {executor: af-verifier, verb: "evidence emit", purpose: "receipt over scenario + report facts"}
-api-capacity-engineer:
-  - {executor: af-inventory, verb: "model otel", purpose: "telemetry export -> PerformanceRun"}
-  - {executor: af-extractor, verb: "perf verdict", purpose: "validity conditions named; inconclusive preserved"}
-  - {executor: af-judge, verb: "rules list --area PERF", purpose: "performance rules over the run facts"}
-  - {executor: af-synthesizer, verb: "perf compare", purpose: "regression deltas against the preserved baseline"}
+api-infra-reviewer:
+  - {executor: af-inventory, verb: "collect api-gateway", purpose: "the only verb that touches AWS; AF-COLLECT-AWS names the unlock"}
+  - {executor: af-extractor, verb: "model api-gateway", purpose: "offline facts per method/stage/integration"}
+  - {executor: af-judge, verb: "rules list --area GATEWAY", purpose: "AF-GW rules over the dump facts"}
+  - {executor: af-verifier, verb: "evidence emit", purpose: "receipt over the dump + findings for the record"}
+  - {executor: af-synthesizer, verb: "next-step", purpose: "route security vs reliability from the dominant area"}
+  - {executor: af-inventory, verb: "model terraform", purpose: "HCL resources -> infra.* facts"}
+  - {executor: af-extractor, verb: "model sam", purpose: "serverless template facts; unresolved refs named"}
+  - {executor: af-judge, verb: "rules list --area SECURITY", purpose: "IaC security posture"}
+  - {executor: af-inventory, verb: "observability ingest", purpose: "load observed state"}
+api-contract-architect:
+  - {executor: af-inventory, verb: "model build", purpose: "load the OpenAPI contract into the API-IR"}
+  - {executor: af-extractor, verb: "diff contract", purpose: "delta against a baseline contract when one exists"}
+  - {executor: af-judge, verb: "rules list --area REST", purpose: "the design rules the contract will be cited against"}
+  - {executor: af-synthesizer, verb: "rules lookup", purpose: "full guidance per rule applied in the recommendation"}
+  - {executor: af-inventory, verb: "grpc analyze", purpose: "build canonical gRPC IR"}
+  - {executor: af-verifier, verb: "grpc verify", purpose: "preserve source and compatibility evidence"}
+  - {executor: af-inventory, verb: "grpc capabilities", purpose: "inspect gateway support"}
+api-governance-reviewer:
+  - {executor: af-inventory, verb: "discover", purpose: "inventory project files and confirm framework detection"}
+  - {executor: af-extractor, verb: "analyze", purpose: "extract facts + findings into a persisted case"}
+  - {executor: af-judge, verb: "judge", purpose: "classify contract/code divergence by severity and area"}
+  - {executor: af-verifier, verb: "evidence emit", purpose: "receipt over the case artifacts when results ship"}
+  - {executor: af-synthesizer, verb: "next-step", purpose: "route the dominant finding area to a specialist"}
+  - {executor: af-inventory, verb: "grpc diff", purpose: "compare protobuf contracts"}
+  - {executor: af-verifier, verb: "grpc verify", purpose: "gate breaking changes"}
+api-codegen-engineer:
+  - {executor: af-inventory, verb: "grpc codegen", purpose: "generate reversible language artifacts"}
+  - {executor: af-verifier, verb: "grpc verify", purpose: "verify artifact evidence"}
+  - {executor: af-inventory, verb: "grpc capabilities", purpose: "discover optional toolchains"}
+api-security-reviewer:
+  - {executor: af-inventory, verb: "model api-gateway", purpose: "surface served: dump facts or project discovery"}
+  - {executor: af-extractor, verb: "analyze", purpose: "route facts plus gateway method/auth facts"}
+  - {executor: af-judge, verb: "rules list --area SECURITY", purpose: "OWASP API Top 10 rules to apply"}
+  - {executor: af-judge, verb: "rules list --area GATEWAY", purpose: "edge auth/throttling rules to apply"}
+  - {executor: af-synthesizer, verb: "next-step", purpose: "route; blind spots stay named as unresolved"}
+  - {executor: af-judge, verb: "grpc analyze", purpose: "review metadata and mutation boundaries"}
+  - {executor: af-verifier, verb: "grpc verify", purpose: "verify redaction and safety"}
+  - {executor: af-judge, verb: "observability capabilities", purpose: "review mutation and credential gates"}
+api-data-access-architect:
+  - {executor: af-inventory, verb: "model redis", purpose: "data-access call sites for each declared database"}
+  - {executor: af-extractor, verb: "model mongo", purpose: "mongo/dynamo/neptune facts + DataAccessIR"}
+  - {executor: af-judge, verb: "rules list --area DATA", purpose: "AF-DATA-001..013 over the call-site facts"}
+  - {executor: af-judge, verb: "rules list --area STORAGE", purpose: "AF-STORE-001..005 over datastore dumps"}
+  - {executor: af-synthesizer, verb: "rules lookup", purpose: "access-pattern guidance per rule applied"}
+  - {executor: af-inventory, verb: "model rds-access", purpose: "extract relational access signals without executing queries"}
+  - {executor: af-extractor, verb: "model postgres-access", purpose: "normalize SQL, pools, transactions and pagination facts"}
+  - {executor: af-verifier, verb: "evidence emit", purpose: "preserve source hashes and unresolved runtime gaps"}
+  - {executor: af-synthesizer, verb: "next-step", purpose: "route benchmark or migration work with evidence limits"}
+  - {executor: af-inventory, verb: "model opensearch-access", purpose: "extract search and aggregation access signals"}
+  - {executor: af-extractor, verb: "model redshift-access", purpose: "normalize analytical query and partition signals"}
 api-event-driven-architect:
   - {executor: af-inventory, verb: "model sqs", purpose: "queue posture from dump"}
   - {executor: af-extractor, verb: "model eventbridge", purpose: "event bus facts"}
   - {executor: af-judge, verb: "rules list --area MESSAGING", purpose: "AF-MSG rules over the async surface"}
   - {executor: af-synthesizer, verb: "next-step", purpose: "route; unmeasured lag stays a blind spot"}
-terraform-reviewer:
-  - {executor: af-inventory, verb: "model terraform", purpose: "HCL resources -> infra.* facts"}
-  - {executor: af-extractor, verb: "model sam", purpose: "serverless template facts; unresolved refs named"}
-  - {executor: af-judge, verb: "rules list --area GATEWAY", purpose: "declared edge posture"}
-  - {executor: af-judge, verb: "rules list --area SECURITY", purpose: "IaC security posture"}
-  - {executor: af-synthesizer, verb: "next-step", purpose: "route; unresolved expressions stay unresolved"}
-api-release-guardian:
-  - {executor: af-inventory, verb: "evidence emit", purpose: "evidence kinds the gate requires, with source hashes"}
-  - {executor: af-extractor, verb: "report build", purpose: "the release evidence bundle"}
-  - {executor: af-verifier, verb: "evidence emit", purpose: "receipt over the bundle for the record"}
-  - {executor: af-synthesizer, verb: "next-step", purpose: "route any blocking finding to its specialist"}
+  - {executor: af-inventory, verb: "model kafka-access", purpose: "extract producers, consumers and destinations without touching brokers"}
+  - {executor: af-extractor, verb: "model msk-access", purpose: "normalize delivery, retry, ordering and group signals"}
+  - {executor: af-verifier, verb: "evidence emit", purpose: "preserve static limits and runtime gaps"}
+api-resilience-engineer:
+  - {executor: af-inventory, verb: "model api-gateway", purpose: "declared timeouts and limits from the dump"}
+  - {executor: af-extractor, verb: "analyze", purpose: "route surface for the time budget"}
+  - {executor: af-judge, verb: "rules list --area GATEWAY", purpose: "timeout/throttle rules (AF-GW-003 among them)"}
+  - {executor: af-synthesizer, verb: "rules lookup", purpose: "retry/timeout guidance per rule applied"}
+  - {executor: af-inventory, verb: "grpc analyze", purpose: "inspect streaming and runtime surface"}
+  - {executor: af-verifier, verb: "grpc verify", purpose: "gate retry and deadline claims"}
+  - {executor: af-inventory, verb: "observability ingest", purpose: "load evidence for SLO calculation"}
+api-performance-engineer:
+  - {executor: af-inventory, verb: "discover", purpose: "what measurement artifacts exist; baseline first"}
+  - {executor: af-extractor, verb: "analyze", purpose: "route surface the measurements must map to"}
+  - {executor: af-judge, verb: "rules list --area PERF", purpose: "performance rules over the declared surface"}
+  - {executor: af-synthesizer, verb: "economy report", purpose: "session cost in bytes; gains stay hypotheses until measured"}
+  - {executor: af-inventory, verb: "grpc analyze", purpose: "bind benchmark to an IR"}
+  - {executor: af-verifier, verb: "grpc verify", purpose: "preserve inconclusive throughput"}
+api-load-capacity-engineer:
+  - {executor: af-inventory, verb: "perf scenario", purpose: "generate the tool script from a declared scenario"}
+  - {executor: af-extractor, verb: "model k6", purpose: "load report -> test.* facts; readers for the other tools follow the same verb"}
+  - {executor: af-judge, verb: "rules list --area TESTING", purpose: "AF-TEST rules incl. generator saturation"}
+  - {executor: af-verifier, verb: "evidence emit", purpose: "receipt over scenario + report facts"}
+  - {executor: af-inventory, verb: "model otel", purpose: "telemetry export -> PerformanceRun"}
+  - {executor: af-extractor, verb: "perf verdict", purpose: "validity conditions named; inconclusive preserved"}
+  - {executor: af-judge, verb: "rules list --area PERF", purpose: "performance rules over the run facts"}
+  - {executor: af-synthesizer, verb: "perf compare", purpose: "regression deltas against the preserved baseline"}
+api-observability-engineer:
+  - {executor: af-inventory, verb: "model api-gateway", purpose: "stage logs/tracing/access-log facts"}
+  - {executor: af-extractor, verb: "analyze", purpose: "operations the signal map must cover"}
+  - {executor: af-judge, verb: "rules list --area GATEWAY", purpose: "signal rules (AF-GW-004 among them)"}
+  - {executor: af-synthesizer, verb: "rules lookup", purpose: "instrument recommendation per gap, labeled recommendation"}
+  - {executor: af-inventory, verb: "observability instrument", purpose: "recommend OTel artifacts"}
+  - {executor: af-inventory, verb: "grpc analyze", purpose: "map RPC telemetry attributes"}
+  - {executor: af-verifier, verb: "grpc verify", purpose: "verify correlation and provenance"}
+  - {executor: af-inventory, verb: "observability ingest", purpose: "normalize OTel and runtime records"}
+api-observability-integration-engineer:
+  - {executor: af-inventory, verb: "observability ingest", purpose: "load source telemetry into canonical contracts"}
+  - {executor: af-judge, verb: "observability capabilities", purpose: "inspect vendor and environment support"}
+  - {executor: af-synthesizer, verb: "brief show", purpose: "render DONE, REVIEW or BLOCKED"}
+  - {executor: af-inventory, verb: "observability capabilities", purpose: "load capability matrix"}
+api-test-strategist:
+  - {executor: af-inventory, verb: "model build", purpose: "operations that demand proof"}
+  - {executor: af-extractor, verb: "analyze", purpose: "served routes vs declared operations"}
+  - {executor: af-judge, verb: "rules list --area TESTING", purpose: "test-layer rules to apply per operation"}
+  - {executor: af-synthesizer, verb: "rules lookup", purpose: "coverage-matrix gaps cited per rule"}
+api-dx-docs-reviewer:
+  - {executor: af-inventory, verb: "model build", purpose: "schema projections and declared error shapes"}
+  - {executor: af-extractor, verb: "analyze", purpose: "served routes for the consumer surface"}
+  - {executor: af-judge, verb: "rules list --area REST", purpose: "error-shape and contract-quality rules"}
+  - {executor: af-synthesizer, verb: "rules lookup", purpose: "DX gaps cited per operation"}
+api-modernization-specialist:
+  - {executor: af-inventory, verb: "discover", purpose: "source inventory via the matching adapter"}
+  - {executor: af-extractor, verb: "analyze", purpose: "source routes; same for the target when it exists"}
+  - {executor: af-extractor, verb: "diff contract", purpose: "parity proven per operation, never asserted"}
+  - {executor: af-judge, verb: "judge", purpose: "residual divergence per route"}
+  - {executor: af-synthesizer, verb: "next-step", purpose: "Strangler cut order with the evidence that unlocks each"}
 api-operations-engineer:
   - {executor: af-inventory, verb: "model cloudwatch", purpose: "telemetry posture from dump"}
   - {executor: af-extractor, verb: "model xray", purpose: "tracing posture facts"}
   - {executor: af-judge, verb: "rules list --area OBSERVE", purpose: "observability rules over the posture"}
   - {executor: af-synthesizer, verb: "next-step", purpose: "route; unobserved signals stay named"}
-api-agentic-orchestrator:
-  - {executor: af-inventory, verb: "task status", purpose: "bind the run to the current TaskSpec revision"}
-  - {executor: af-extractor, verb: "task plan", purpose: "reuse the sealed plan and declared proof axes"}
-  - {executor: af-judge, verb: "task review", purpose: "refuse incomplete scope before fan-out"}
-  - {executor: af-verifier, verb: "task verify", purpose: "preserve independent verification as a gate"}
-  - {executor: af-synthesizer, verb: "brief show", purpose: "render DONE, REVIEW or BLOCKED without guessing"}
-api-runtime-migration-planner:
-  - {executor: af-inventory, verb: "migration analyze", purpose: "discover runtime and manifests"}
-  - {executor: af-extractor, verb: "migration plan", purpose: "compile a bounded migration DAG"}
-  - {executor: af-judge, verb: "task review", purpose: "validate risks, proofs and rollback"}
-  - {executor: af-synthesizer, verb: "brief show", purpose: "name migration gaps and next steps"}
-api-runtime-migration-verifier:
+api-verifier:
+  - {executor: af-synthesizer, verb: "brief show", purpose: "name unresolved proof gaps"}
   - {executor: af-inventory, verb: "migration analyze", purpose: "re-read migration inputs independently"}
   - {executor: af-verifier, verb: "task verify", purpose: "challenge evidence and false DONE"}
-  - {executor: af-synthesizer, verb: "brief show", purpose: "render the conservative outcome"}
-api-task-spec-reviewer:
-  - {executor: af-inventory, verb: "task status", purpose: "inspect lifecycle, revision and inputs"}
-  - {executor: af-judge, verb: "task review", purpose: "check proofs, acceptance and rollback"}
-  - {executor: af-verifier, verb: "task verify", purpose: "confirm evidence requirements"}
-  - {executor: af-synthesizer, verb: "brief show", purpose: "name remaining gaps"}
+  - {executor: af-inventory, verb: "discover", purpose: "inventory the supported static surface"}
+  - {executor: af-extractor, verb: "analyze", purpose: "persist facts, findings and diagnostics"}
+  - {executor: af-verifier, verb: "evidence emit", purpose: "bind artifacts to current hashes"}
+  - {executor: af-verifier, verb: "graph coverage", purpose: "verify provenance and unresolved coverage"}
 api-adversarial-critic:
   - {executor: af-inventory, verb: "task status", purpose: "read the sealed scope and artifacts"}
   - {executor: af-judge, verb: "rules list --area SECURITY", purpose: "apply security and adversarial rules"}
   - {executor: af-verifier, verb: "task verify", purpose: "challenge evidence and holdout claims"}
   - {executor: af-synthesizer, verb: "brief show", purpose: "report unresolved risk"}
 api-debate-referee:
-  - {executor: af-inventory, verb: "debate status", purpose: "collect positions and evidence references"}
+  - {executor: af-inventory, verb: "debate packet", purpose: "collect positions and evidence references"}
   - {executor: af-judge, verb: "rules list --area CONTRACT", purpose: "evaluate competing contract interpretations"}
   - {executor: af-verifier, verb: "task verify", purpose: "ensure the decision remains evidence bound"}
   - {executor: af-synthesizer, verb: "brief show", purpose: "close only when dissent and gaps are explicit"}
-api-observability-control-plane:
-  - {executor: af-inventory, verb: "observability ingest", purpose: "load source telemetry into canonical contracts"}
-  - {executor: af-judge, verb: "observability capabilities", purpose: "inspect vendor and environment support"}
-  - {executor: af-verifier, verb: "observability verify", purpose: "verify receipts and proof axes"}
-  - {executor: af-synthesizer, verb: "brief show", purpose: "render DONE, REVIEW or BLOCKED"}
-api-telemetry-normalization-engineer:
-  - {executor: af-inventory, verb: "observability ingest", purpose: "normalize OTel and runtime records"}
-  - {executor: af-verifier, verb: "observability verify", purpose: "verify provenance and redaction"}
-api-vendor-integration-engineer:
-  - {executor: af-inventory, verb: "observability capabilities", purpose: "load capability matrix"}
-  - {executor: af-verifier, verb: "observability verify", purpose: "verify unsupported fields are explicit"}
-api-datadog-integration-engineer:
-  - {executor: af-inventory, verb: "observability capabilities", purpose: "inspect Datadog projection capabilities"}
-  - {executor: af-verifier, verb: "observability verify", purpose: "verify dry-run boundary"}
-api-dynatrace-integration-engineer:
-  - {executor: af-inventory, verb: "observability capabilities", purpose: "inspect Dynatrace projection capabilities"}
-  - {executor: af-verifier, verb: "observability verify", purpose: "verify dry-run boundary"}
-api-slo-reliability-engineer:
-  - {executor: af-inventory, verb: "observability ingest", purpose: "load evidence for SLO calculation"}
-  - {executor: af-verifier, verb: "observability verify", purpose: "preserve inconclusive state"}
-api-observability-security-engineer:
-  - {executor: af-judge, verb: "observability capabilities", purpose: "review mutation and credential gates"}
-  - {executor: af-verifier, verb: "observability verify", purpose: "verify redaction and safety evidence"}
-api-drift-reconciliation-engineer:
-  - {executor: af-inventory, verb: "observability ingest", purpose: "load observed state"}
-  - {executor: af-verifier, verb: "observability verify", purpose: "verify stable drift semantics"}
-api-instrumentation-engineer:
-  - {executor: af-inventory, verb: "observability instrument", purpose: "recommend OTel artifacts"}
-  - {executor: af-verifier, verb: "observability verify", purpose: "verify framework guidance"}
-api-agentic-observability-engineer:
-  - {executor: af-inventory, verb: "observability ingest", purpose: "bind run to telemetry evidence"}
-  - {executor: af-verifier, verb: "observability verify", purpose: "independent verification before final status"}
-api-verification-engineer:
-  - {executor: af-verifier, verb: "observability verify", purpose: "challenge receipts and evidence"}
-  - {executor: af-synthesizer, verb: "brief show", purpose: "name unresolved proof gaps"}
-api-platform-completion-reviewer:
-  - {executor: af-inventory, verb: "discover", purpose: "inventory the supported static surface"}
-  - {executor: af-extractor, verb: "analyze", purpose: "persist facts, findings and diagnostics"}
-  - {executor: af-verifier, verb: "evidence emit", purpose: "bind artifacts to current hashes"}
-  - {executor: af-verifier, verb: "graph coverage", purpose: "verify provenance and unresolved coverage"}
-  - {executor: af-synthesizer, verb: "brief show", purpose: "report proof, gaps and next action"}
-api-grpc-contract-engineer:
-  - {executor: af-inventory, verb: "grpc analyze", purpose: "build canonical gRPC IR"}
-  - {executor: af-verifier, verb: "grpc verify", purpose: "preserve source and compatibility evidence"}
-api-grpc-parser-engineer:
-  - {executor: af-inventory, verb: "grpc analyze", purpose: "parse source without executing code"}
-  - {executor: af-verifier, verb: "grpc verify", purpose: "name unresolved imports"}
-api-grpc-compatibility-engineer:
-  - {executor: af-inventory, verb: "grpc diff", purpose: "compare protobuf contracts"}
-  - {executor: af-verifier, verb: "grpc verify", purpose: "gate breaking changes"}
-api-grpc-toolchain-engineer:
-  - {executor: af-inventory, verb: "grpc capabilities", purpose: "discover optional toolchains"}
-  - {executor: af-verifier, verb: "grpc verify", purpose: "refuse false toolchain success"}
-api-grpc-codegen-engineer:
-  - {executor: af-inventory, verb: "grpc codegen", purpose: "generate reversible language artifacts"}
-  - {executor: af-verifier, verb: "grpc verify", purpose: "verify artifact evidence"}
-api-grpc-gateway-engineer:
-  - {executor: af-inventory, verb: "grpc capabilities", purpose: "inspect gateway support"}
-  - {executor: af-verifier, verb: "grpc verify", purpose: "verify projection status"}
-api-grpc-runtime-engineer:
-  - {executor: af-inventory, verb: "grpc analyze", purpose: "inspect streaming and runtime surface"}
-  - {executor: af-verifier, verb: "grpc verify", purpose: "gate retry and deadline claims"}
-api-grpc-performance-engineer:
-  - {executor: af-inventory, verb: "grpc analyze", purpose: "bind benchmark to an IR"}
-  - {executor: af-verifier, verb: "grpc verify", purpose: "preserve inconclusive throughput"}
-api-grpc-observability-engineer:
-  - {executor: af-inventory, verb: "grpc analyze", purpose: "map RPC telemetry attributes"}
-  - {executor: af-verifier, verb: "grpc verify", purpose: "verify correlation and provenance"}
-api-grpc-security-engineer:
-  - {executor: af-judge, verb: "grpc analyze", purpose: "review metadata and mutation boundaries"}
-  - {executor: af-verifier, verb: "grpc verify", purpose: "verify redaction and safety"}
-api-grpc-agentic-engineer:
-  - {executor: af-inventory, verb: "grpc analyze", purpose: "bind intention to canonical IR"}
-  - {executor: af-verifier, verb: "grpc verify", purpose: "close only with evidence-backed status"}
+api-release-guardian:
+  - {executor: af-inventory, verb: "evidence emit", purpose: "evidence kinds the gate requires, with source hashes"}
+  - {executor: af-extractor, verb: "report build", purpose: "the release evidence bundle"}
+  - {executor: af-verifier, verb: "evidence emit", purpose: "receipt over the bundle for the record"}
+  - {executor: af-synthesizer, verb: "next-step", purpose: "route any blocking finding to its specialist"}

@@ -28,7 +28,7 @@ suas mitigações estão abaixo.
 | Vazamento em dumps coletados | `collect lambda` remove `Code.Location`; `model lambda`/`model terraform` extraem apenas nomes de env vars |
 | Injeção de intrínsecos | Tags SAM são dados `{tag, value}` sob loader seguro; Terraform não avalia interpolação |
 | Escape de código gerado | `build` escreve somente em `com/apiforge/generated/`, recusa destinos existentes e promove apenas em worktree com policy |
-| Drift de perfil de agente | Gate verifica frontmatter, áreas, executors, rotas e referência a `AGENT_PROTOCOL.md` |
+| Drift de perfil de agente | Gate verifica frontmatter, áreas, executors, rotas e referência a `AGENT_PROTOCOL.md`; `agents lint` exige o contrato de nove seções, texto em inglês, `access`/`write_scope`, comandos próprios existentes na CLI e playbooks coerentes; espelhos iguais ao render de `agents/*.md` (Claude `tools`, Codex `sandbox_mode`) e nomes de agentes em regras/código/testes/evals existentes ou aliases ativos. Limite: `Bash` no Claude não é restrito por verbo e o Devin aplica permissões apenas pelo texto |
 | Falsificação de economy ledger | Ledger JSONL é append-only; `economy report` recalcula agregados e marca `tokens_unresolved` sem transcript |
 | Exfiltração por reports | Leitor gitleaks emite apenas regra/arquivo/contagem; valores e texto de match nunca são extraídos |
 | Falsificação de report | `report verify` re-hasha corpo, evidência e catálogo; assinatura prova correspondência, não autoria |

@@ -225,7 +225,7 @@ def _persist_evolution_gate(
             event_id=stable_id("event", {"run": run_id, "event": "routing_evolution_gate"}),
             run_id=run_id,
             event="routing_evolution_gate",
-            actor="api-agentic-orchestrator",
+            actor="api-orchestrator",
             subject=routing.decision_id,
             payload={
                 "mode": gate.mode,
@@ -646,7 +646,7 @@ async def execute_run(
             event_id=stable_id("event", {"run": run_id, "event": "created"}),
             run_id=run_id,
             event="created",
-            actor="api-agentic-orchestrator",
+            actor="api-orchestrator",
             created_at=timestamp,
         )
     )
@@ -740,7 +740,7 @@ async def execute_run(
             ),
             run_id=run_id,
             event="routing_decision",
-            actor="api-agentic-orchestrator",
+            actor="api-orchestrator",
             subject=routing.decision_id,
             payload={
                 "assessment": (
@@ -996,7 +996,7 @@ async def execute_run(
                 ),
                 run_id=run_id,
                 event="invocation_checkpoint",
-                actor="api-agentic-orchestrator",
+                actor="api-orchestrator",
                 subject=result.invocation.invocation_id,
                 payload={
                     "artifact_id": artifact.artifact_id,
@@ -1117,7 +1117,7 @@ async def execute_run(
                     ),
                     run_id=run_id,
                     event="fallback_checkpoint",
-                    actor="api-agentic-orchestrator",
+                    actor="api-orchestrator",
                     subject=artifact.invocation_id,
                     payload={"artifact_id": artifact.artifact_id},
                     created_at=timestamp,
@@ -1510,7 +1510,7 @@ async def resume_existing_run(
                 ),
                 run_id=run_id,
                 event="resume_checkpoint",
-                actor="api-agentic-orchestrator",
+                actor="api-orchestrator",
                 subject=artifact.invocation_id,
                 payload={"artifact_id": artifact.artifact_id},
                 created_at=timestamp,

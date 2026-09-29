@@ -487,16 +487,19 @@ while refusal codes and `fact_id`s survive.
 
 ## Agentic layer
 
-Twenty-three coordinator profiles in `agents/*.md` (one per specialty, each declaring
-`rule_areas` and the five executors) plus five executors in
+Twenty-five coordinator profiles in `agents/*.md` (one per specialty, each with a
+nine-section contract, `access`, owned `apiforge_tools`, `rule_areas` and
+executors) plus five executors in
 `agents/executors/*.md` (`af-inventory`, `af-extractor`, `af-judge`,
 `af-verifier`, `af-synthesizer`). `AGENT_PROTOCOL.md` is the operating
 contract every profile points at; `next-step` routes by data, `playbook`
 is the dispatch floor, and `.apiforge/economy.jsonl` measures every call.
 
-The data-specialist profiles include `api-relational-data-architect`,
-`api-streaming-platform-architect`, `api-analytical-data-architect`,
-`api-data-access-architect` and `api-event-driven-architect`.
+Data and messaging are owned by `api-data-access-architect` (relational,
+key-value, document, graph, search and analytical stores) and
+`api-event-driven-architect` (queues, topics, streams and orchestration). The
+roster has 25 agents rendered from `agents/*.md` to `.claude/agents/`,
+`.agents/agents/` and `.codex/agents/` (`apiforge agents sync|check|lint`).
 
 ## Evolution cycle status
 

@@ -9,6 +9,7 @@ import yaml
 
 from apiforge.contracts.agentic import AgentCapabilityProfile, AgentScorecard
 from apiforge.contracts.base import ContractError
+from apiforge.dispatch.aliases import canonical
 
 
 @dataclass(frozen=True, slots=True)
@@ -45,7 +46,7 @@ def load_capabilities(path: Path | None = None) -> dict[str, Capability]:
         try:
             capabilities[str(name)] = Capability(
                 name=str(name),
-                agent=str(raw["agent"]),
+                agent=canonical(str(raw["agent"])),
                 kind=str(raw["kind"]),
                 risk=str(raw["risk"]),
                 state=str(raw.get("state", "supported")),
@@ -73,7 +74,10 @@ def load_profiles(path: Path | None = None) -> dict[str, AgentCapabilityProfile]
         if not isinstance(raw, dict):
             raise ContractError("AF-RUNTIME-PROFILES", f"profile {profile_id!r} is not a mapping")
         try:
-            profile = AgentCapabilityProfile.model_validate({"profile_id": str(profile_id), **raw})
+            payload = {"profile_id": str(profile_id), **raw}
+            if "agent" in payload:
+                payload["agent"] = canonical(str(payload["agent"]))
+            profile = AgentCapabilityProfile.model_validate(payload)
         except (TypeError, ValueError) as exc:
             raise ContractError("AF-RUNTIME-PROFILES", f"profile {profile_id!r}: {exc}") from exc
         profiles[profile.profile_id] = profile

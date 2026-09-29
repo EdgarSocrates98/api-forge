@@ -15,7 +15,15 @@ def test_playbook_renders_ordered_steps() -> None:
     data = json.loads(result.output)
     assert data["coordinator"] == "api-governance-reviewer"
     verbs = [s["verb"] for s in data["steps"]]
-    assert verbs == ["discover", "analyze", "judge", "evidence emit", "next-step"]
+    assert verbs == [
+        "discover",
+        "analyze",
+        "judge",
+        "evidence emit",
+        "next-step",
+        "grpc diff",
+        "grpc verify",
+    ]
     executors = {s["executor"] for s in data["steps"]}
     assert executors <= {
         "af-inventory",

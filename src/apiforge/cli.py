@@ -263,6 +263,7 @@ platform_app = typer.Typer(
     no_args_is_help=True,
 )
 app.add_typer(platform_app)
+from apiforge.cli_agents import register as _register_agents
 from apiforge.cli_cache import register as _register_cache
 from apiforge.cli_context import register as _register_context
 from apiforge.cli_distribution import register as _register_distribution
@@ -283,6 +284,7 @@ _register_field(app)
 _register_context(context_app)
 _register_cache(app)
 _register_selective(knowledge_app, debate_app, agents_app)
+_register_agents(agents_app, evals_app)
 _register_tool_host(app, agentops_app)
 _verify_app = _register_extras(
     app,
@@ -2533,7 +2535,7 @@ def agents_sync(
     root: Path = typer.Option(Path("."), "--root", help="Repository root."),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
-    """Regenerate `.agents/agents/` + `.claude/agents/` from `agents/*.md`."""
+    """Render `.agents/agents/`, `.claude/agents/` and `.codex/agents/` from `agents/*.md`."""
 
     def work() -> object:
         from apiforge.dispatch.mirrors import sync_mirrors
@@ -2548,7 +2550,7 @@ def agents_check(
     root: Path = typer.Option(Path("."), "--root", help="Repository root."),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
-    """Report mirror drift — the release gate fails on the same check."""
+    """Report render drift for all three hosts — the release gate fails on the same check."""
 
     def work() -> object:
         from apiforge.dispatch.mirrors import mirror_drift
@@ -3917,19 +3919,24 @@ def playbook_cmd(
     """
 
     def work() -> dict[str, object]:
+        from apiforge.dispatch.aliases import resolve_agent
         from apiforge.rules.catalog import load_playbooks
 
         playbooks = load_playbooks()
-        steps = playbooks.get(coordinator)
+        resolution = resolve_agent(coordinator)
+        steps = playbooks.get(resolution.name)
         if steps is None:
             raise AnalysisError(
                 "AF-PLAYBOOK-NOT-FOUND",
                 f"no playbook for {coordinator!r}; known: {sorted(playbooks)}",
             )
-        return {
-            "coordinator": coordinator,
+        payload: dict[str, object] = {
+            "coordinator": resolution.name,
             "steps": [dict(s, order=i) for i, s in enumerate(steps, 1)],
         }
+        if resolution.warning:
+            payload["warnings"] = [resolution.warning]
+        return payload
 
     _echo_json(_run(work), detail_level)
 

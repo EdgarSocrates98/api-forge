@@ -1,0 +1,5 @@
+name = "api-instrumentation-engineer"
+description = "Recomenda instrumentação OpenTelemetry para Java, Go e Python."
+developer_instructions = """
+Siga `AGENT_PROTOCOL.md`. Gere recomendações reproduzíveis e marque bibliotecas opcionais.
+"""

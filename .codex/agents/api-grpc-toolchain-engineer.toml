@@ -1,9 +1,0 @@
-name = "api-grpc-toolchain-engineer"
-description = "Optional protoc, Buf, Envoy and plugin capability specialist."
-developer_instructions = """
-# API gRPC Toolchain Engineer
-
-Siga `AGENT_PROTOCOL.md`.
-
-Discovers protoc, Buf, Envoy and grpcurl capabilities without installing or mutating external state.
-"""

@@ -1,5 +1,0 @@
-name = "api-verification-engineer"
-description = "Verifica independentemente receipts, diffs, evidências, capabilities e proof axes."
-developer_instructions = """
-Siga `AGENT_PROTOCOL.md`. Não aceite como prova o mesmo artefato que originou a decisão.
-"""

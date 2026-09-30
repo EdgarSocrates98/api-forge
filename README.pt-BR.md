@@ -1,7 +1,14 @@
-# API Forge
+<p align="center">
+  <img src="docs/assets/api-forge-logo.jpg" alt="Logo do API Forge" width="420" />
+</p>
 
-Engenharia determinística, offline-first e local-first de APIs com evidência,
-contratos, graph, SDD e execução de agentes governada.
+<h1 align="center">API Forge</h1>
+
+<p align="center">Engenharia de APIs determinística, offline-first e local-first.</p>
+
+O API Forge cobre descoberta, construção, evolução, migração, contratos, gRPC,
+testes, performance, observabilidade, acesso a dados e execução governada de
+agentes — sempre com evidência, contratos e decisões reproduzíveis.
 
 [English README](README.md) · [Índice de documentação](docs/README.pt-BR.md) · [Documentation index in English](docs/README.md) · [Guia portátil em português](docs/guides/API_FORGE_PORTABLE_DISTRIBUTION.pt-BR.md) · [Portable guide in English](docs/guides/API_FORGE_PORTABLE_DISTRIBUTION.md)
 

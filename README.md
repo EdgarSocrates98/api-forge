@@ -1,4 +1,10 @@
-# API Forge
+<p align="center">
+  <img src="docs/assets/api-forge-logo.jpg" alt="API Forge logo" width="420" />
+</p>
+
+<h1 align="center">API Forge</h1>
+
+<p align="center">Deterministic, offline-first and local-first agentic API engineering.</p>
 
 [Português (Brasil)](README.pt-BR.md) · [Portable distribution in English](docs/guides/API_FORGE_PORTABLE_DISTRIBUTION.md) · [Distribuição portátil em português](docs/guides/API_FORGE_PORTABLE_DISTRIBUTION.pt-BR.md)
 
@@ -6,8 +12,7 @@
 
 [![CI](https://github.com/EdgarSocrates98/api-forge/actions/workflows/ci.yml/badge.svg)](https://github.com/EdgarSocrates98/api-forge/actions/workflows/ci.yml)
 
-Deterministic, offline, local-first agentic API engineering. API Forge covers
-discovery, construction, evolution, migration, contracts, gRPC, testing,
+API Forge covers discovery, construction, evolution, migration, contracts, gRPC, testing,
 performance, TPS validation, observability, data access and governed agentic
 execution. Given an existing project or contract, it produces provenance-backed
 IR, evidence, plans, verifiable tasks and bounded decisions instead of guesses.

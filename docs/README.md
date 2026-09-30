@@ -1,4 +1,8 @@
-# API Forge documentation
+<p align="center">
+  <img src="assets/api-forge-logo.jpg" alt="API Forge logo" width="360" />
+</p>
+
+<h1 align="center">API Forge documentation</h1>
 
 Language: [English](README.md) · [Português (Brasil)](README.pt-BR.md) · [Project README](../README.md)
 

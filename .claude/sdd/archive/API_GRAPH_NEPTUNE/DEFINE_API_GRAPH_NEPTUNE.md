@@ -9,7 +9,7 @@
 | **Feature** | API_GRAPH_NEPTUNE |
 | **Date** | 2026-10-01 |
 | **Author** | define-agent |
-| **Status** | ✅ Complete (Built) |
+| **Status** | ✅ Shipped |
 | **Clarity Score** | 14/15 |
 | **Upstream** | `.claude/sdd/features/BRAINSTORM_API_GRAPH_NEPTUNE.md` (Approach A) |
 | **Branch** | `feature/graph_evo` |
@@ -211,6 +211,7 @@ None blocking Design. Carried as tracked risks:
 |---------|------|--------|---------|
 | 1.0 | 2026-10-01 | define-agent | Initial version from BRAINSTORM_API_GRAPH_NEPTUNE (Approach A); thresholds "Rigoroso"; field cycle SHOULD + unresolved; AF-DATA-013 kept as single unbounded rule |
 | 1.1 | 2026-10-01 | design-agent | Design corrections: rule namespace AF-GDB-* (AF-GRAPH-* is system graph); collector boundary = read-only neptunedata allowlist (explain is POST; SPARQL dump-only; owner approved); vendor knowledge in knowledge/ packs; unified fact kind data.graph.query |
+| 1.2 | 2026-10-01 | ship-agent | Shipped and archived (commit 698b46b) |
 
 ---
 

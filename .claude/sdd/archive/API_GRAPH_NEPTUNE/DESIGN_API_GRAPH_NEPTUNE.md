@@ -10,7 +10,7 @@
 | **Date** | 2026-10-01 |
 | **Author** | design-agent |
 | **DEFINE** | [DEFINE_API_GRAPH_NEPTUNE.md](./DEFINE_API_GRAPH_NEPTUNE.md) |
-| **Status** | ✅ Complete (Built) |
+| **Status** | ✅ Shipped |
 | **Branch** | `feature/graph_evo` |
 | **Confidence** | 0.80 — codebase patterns found (extractor → IR → catalog → CLI/MCP; `knowledge/` packs; collectors), no agentspec KB graph domain; novel Neptune facts validated against AWS docs (2026-10-01) |
 
@@ -770,6 +770,7 @@ Unresolved carried to ship: real redacted samples (A-002), field target repo, re
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0 | 2026-10-01 | design-agent | Initial version; corrections C1-C4 (AF-GDB namespace, allowlist collector, knowledge packs, unified fact kind) |
+| 1.1 | 2026-10-01 | ship-agent | Shipped and archived (commit 698b46b) |
 
 ---
 

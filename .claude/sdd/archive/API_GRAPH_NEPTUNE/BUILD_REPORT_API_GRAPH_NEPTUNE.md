@@ -11,7 +11,7 @@
 | **Author** | build-agent |
 | **DEFINE** | [DEFINE_API_GRAPH_NEPTUNE.md](../features/DEFINE_API_GRAPH_NEPTUNE.md) |
 | **DESIGN** | [DESIGN_API_GRAPH_NEPTUNE.md](../features/DESIGN_API_GRAPH_NEPTUNE.md) |
-| **Status** | Complete (field cycle `unresolved` by design — SHOULD G13) |
+| **Status** | ✅ Shipped (field cycle `unresolved` by design — SHOULD G13) |
 | **Branch** | `feature/graph_evo` (base `4ebd286`, uncommitted) |
 
 ---

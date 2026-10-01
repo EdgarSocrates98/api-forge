@@ -1,37 +1,53 @@
 ---
 name: api-forge-platform-completion
-description: Audita a prontidão da plataforma API Forge por contracts, capability matrix, cadeia de evidências e seis verticais; use ao validar releases ou adicionar capabilities.
+description: >-
+  Audita a prontidão da própria plataforma API Forge — capability matrix,
+  estados supported/heuristic/unresolved/unsupported, cadeia analyze →
+  next-step → graph → evidence → brief, seis verticais (API, database,
+  messaging, CI/CD, cloud, front-end), paridade CLI/MCP/IDE/UI, change-control
+  API+Git+CI/CD com `af-change-bundle/1`, receipts externos e probes de
+  runtime. Use ao validar uma release do API Forge, adicionar ou promover uma
+  capability pública, revisar uma integração, governar uma mudança ligada a
+  branch/PR/CI, publicar JUnit/Markdown/SARIF/HTML ou criar/alterar agents e
+  skills do projeto. Não use para revisar a API de um cliente (→
+  api-forge-core e skills de domínio).
+compatibility: >-
+  Requer o repositório API Forge, o CLI `apiforge` e Python para `scripts/`.
+  GitHub só via adapter GET-only com credencial injetada pelo host; nenhuma
+  mutação de Git, CI ou cloud pelo core.
+metadata:
+  api-forge-skill: "true"
+  version: "1.1"
 ---
 
-# API Forge Platform Completion
+# API Forge — prontidão da plataforma
 
-Use esta skill quando a tarefa envolve validar a plataforma inteira, adicionar
-uma capability pública, revisar uma integração, preparar um agent/skill ou
-confirmar prontidão de release. O resultado deve ser uma decisão explicável,
-com fatos, premissas, riscos, limitações e um verificador independente.
+Uma capability só é "suportada" quando tem contract, evidência e verificador
+reproduzíveis. Esta skill impede que um parser novo, uma fixture ou um plano
+sejam promovidos a prova de runtime, e garante que todas as surfaces contem a
+mesma verdade.
 
 ## Limites obrigatórios
 
-- Leia `AGENT_PROTOCOL.md` e carregue o caso persistido em `.apiforge/case/`
-  antes de analisar.
-- Quando houver findings, execute `apiforge next-step` antes de escolher um
-  especialista ou uma rota.
+- Leia `AGENT_PROTOCOL.md` e carregue o caso em `.apiforge/case/` antes de
+  analisar; com findings, rode `apiforge next-step` antes de escolher rota.
 - Preserve `confirmed`, `unresolved`, `unsupported`, `refused`,
   `not_observed` e `inconclusive` como estados distintos.
-- Não transforme parser, fixture, prompt ou plano em prova de runtime.
-- Agents devem entender a necessidade, sugerir boas práticas e comparar
-  técnicas/arquiteturas; não use wizard obrigatório nem altere escopo, policy
-  ou sistema externo por conta própria.
-- Toda recomendação deve separar fatos observados, premissas, alternativas,
-  trade-offs, riscos, gaps e o próximo verificador.
-- Git, CI/CD, cloud, banco, mensageria e vendor são read-only por padrão.
-  Qualquer mutação exige adapter, policy, aprovação, rollback e receipt.
+- Parser, fixture, prompt ou plano não são prova de runtime.
+- Agents entendem a necessidade, sugerem boas práticas e comparam técnicas;
+  não impõem wizard nem alteram escopo, policy ou sistema externo por conta
+  própria.
+- Toda recomendação separa fatos, premissas, alternativas, trade-offs,
+  riscos, gaps e o próximo verificador (`docs/agents/AGENT_OUTPUT_CONTRACT.md`).
+- Git, CI/CD, cloud, banco, mensageria e vendor são read-only por padrão;
+  mutação exige adapter, policy, aprovação, rollback e receipt.
 
 ## Fluxo mínimo de verificação
 
 1. Confirme o case, seus hashes e o framework detectado.
-2. Rode a cadeia `analyze -> next-step -> graph -> evidence -> brief`.
-3. Verifique `apiforge capabilities list` e `apiforge capabilities verify`.
+2. Rode a cadeia `analyze → next-step → graph → evidence → brief`.
+3. `apiforge capabilities list` e `apiforge capabilities verify` (gate de
+   documentação, limitações, verificador e evidência).
 4. Execute os testes da vertical e confirme fixture, golden e holdout.
 5. Valide CLI/MCP/IDE/UI pela mesma `CapabilityRequest`/`CapabilityResult`.
 6. Registre limitações e evidências no case, na documentação e no Outcome
@@ -61,41 +77,39 @@ apiforge integration verify-receipt --receipt <receipt.json> --now <ISO8601>
 apiforge platform verify-runtime --out <receipt.json>
 ```
 
-`apiforge capabilities verify` é o gate de documentação, limitações,
-verificador e evidência. Se uma command line não aparece no help do CLI, não a
-documente como produção; registre-a como proposta ou `unsupported`.
+Se uma linha de comando não aparece no `--help` do CLI, não a documente como
+produção; registre-a como proposta ou `unsupported`.
 
-## API + Git + CI/CD change control
+## Change control API + Git + CI/CD
 
-Use `af-change-bundle/1` for a change tied to a branch, pull request or local
-replay. The bundle is normalized before analysis, and the supported local
-chain is `analyze -> next-step -> graph -> evidence -> brief`. Inspect
-`result.json`, `metrics.json` and `brief.json`; preserve provider freshness and
-deployment safety as unresolved unless an independent external receipt proves
-them.
-
-`GitHubReadOnlyAdapter` is a GET-only adapter behind an injected transport.
-`collect` emits a sanitized bundle and `af-change-collection-receipt/1` without
-credentials. Agents may recommend merge strategy, compatibility policy, CI
-gates or architecture, but they must not merge, push, dispatch, deploy or
-autofix. A recommendation must include facts, assumptions, alternatives,
-risks, unresolved items, evidence references, verifier and confidence.
-`publish` emits JUnit/Markdown; `surface` and `serve` expose the same canonical
-result to IDE/UI without changing status or evidence.
-
-`publish` also emits SARIF and standalone HTML. The host supports a local
-loopback deployment or an authenticated TLS remote deployment; the container
-recipe and Pages workflow are host-owned surfaces, not core mutation paths.
-External issue and health reads use `af-external-read-receipt/1`; local
-vertical probes use `af-platform-runtime-receipt/1`. Both receipts preserve
-freshness and limitations instead of turning local proof into a production
-claim.
-
-Every governed refusal exposes an `AF-*` code, rejected field and unlock;
-catalog new codes in `docs/catalog-contract.md` before exposing them publicly.
-The CI `open-green-pr` job is a separate host boundary: it may open or reuse a
-PR only with an explicitly configured least-privilege credential after all
-validation gates pass. Agents and the core never perform that mutation.
+- Use `af-change-bundle/1` para mudança ligada a branch, PR ou replay local.
+  O bundle é entrada não confiável: é normalizado antes da análise, e a cadeia
+  local é `analyze → next-step → graph → evidence → brief → verify → publish`.
+- Inspecione `result.json`, `metrics.json` e `brief.json`; freshness do
+  provider e segurança de deploy ficam `unresolved` salvo receipt externo
+  independente.
+- `collect` usa o `GitHubReadOnlyAdapter` (GET-only, transporte injetado) e
+  emite bundle sanitizado + `af-change-collection-receipt/1` sem credenciais.
+  O receipt não prova autoria, segurança de deploy nem freshness.
+- Agents podem recomendar estratégia de merge, política de compatibilidade,
+  gates de CI ou arquitetura, mas não fazem merge, push, dispatch, deploy nem
+  autofix. A recomendação inclui fatos, premissas, alternativas, riscos,
+  unresolved, evidence refs, verificador e confiança.
+- `publish` emite JUnit, Markdown, SARIF e HTML standalone; `surface` e
+  `serve` expõem o mesmo resultado canônico a IDE/UI sem mudar status ou
+  evidência. `serve` aceita loopback local ou deploy remoto autenticado com
+  TLS; container e workflow de Pages são surfaces do host, não caminhos de
+  mutação do core.
+- Leituras externas usam `af-external-read-receipt/1`; probes locais usam
+  `af-platform-runtime-receipt/1`. Ambos preservam freshness e limitações em
+  vez de transformar prova local em afirmação de produção.
+- Toda recusa expõe código `AF-*`, `field` rejeitado e `unlock`; catalogue
+  códigos novos em `docs/catalog-contract.md` antes de expô-los.
+- O job de CI `open-green-pr` é uma fronteira separada do host: abre ou
+  reusa PR só com credencial least-privilege configurada, depois de todos os
+  gates. Agents e core nunca fazem essa mutação. `scripts/github_pr_host.py`
+  é a única fronteira de mutação GitHub; mudanças de ruleset são planejadas
+  com `scripts/github_ruleset_plan.py` (read-only) e aplicadas pelo owner.
 
 ## Estados de capability
 
@@ -106,30 +120,32 @@ validation gates pass. Agents and the core never perform that mutation.
 | `unresolved` | A pergunta é válida, mas faltam evidência ou adapter seguro. |
 | `unsupported` | A fronteira atual recusa a operação explicitamente. |
 
-Uma mudança de estado exige atualizar YAML, documentação, verificador, teste e
-evidência. Nunca promova uma capability apenas porque apareceu um parser.
+Mudar estado exige atualizar YAML, documentação, verificador, teste e
+evidência. Nunca promova uma capability só porque apareceu um parser.
 
 ## Verticais e surfaces
 
 As seis verticais mínimas são API, database, messaging, CI/CD, cloud e
-front-end. Cada uma precisa de uma fixture, um golden e um holdout que preserve
-incerteza. As surfaces CLI, MCP, IDE e UI podem mudar a apresentação, mas não
-podem mudar estado, gaps, evidência ou semântica de segurança.
+front-end. Cada uma precisa de fixture, golden e holdout que preserve
+incerteza. CLI, MCP, IDE e UI podem mudar a apresentação, mas não estado,
+gaps, evidência ou semântica de segurança.
 
-Consulte o guia operacional em
-`docs/guides/API_FORGE_PLATFORM_USAGE.md`, a matriz em
-`docs/capabilities/API_FORGE_CAPABILITY_MATRIX.md` e o contract de saída em
-`docs/agents/AGENT_OUTPUT_CONTRACT.md` antes de criar artefatos novos.
+Referências antes de criar artefatos novos:
+`docs/guides/API_FORGE_PLATFORM_USAGE.md`,
+`docs/capabilities/API_FORGE_CAPABILITY_MATRIX.md`,
+`docs/agents/AGENT_OUTPUT_CONTRACT.md`.
 
-## Atualização de mirrors
+## Agents e skills do projeto
 
-`.agents/skills` é a fonte canônica. Depois de alterar esta skill, execute:
-
-```text
-python scripts/sync_skills.py --root .
-apiforge agents sync --root .
-```
-
-Valide a skill com `quick_validate.py` quando disponível e rode os gates do
-projeto. Não crie uma cópia manual divergente em `.claude`, `.github` ou
-`.devin`.
+- **Agents:** edite só `agents/*.md`, depois `apiforge agents sync` e
+  `apiforge agents lint` (e `agents check`); os mirrors em `.claude/agents`,
+  `.agents/agents` e `.codex/agents` são gerados.
+- **Skills:** `.agents/skills` é a fonte canônica. Depois de alterar uma
+  skill:
+  ```text
+  python scripts/validate_skills.py
+  python scripts/sync_skills.py --root .
+  python scripts/validate_skills.py --check-mirrors
+  ```
+  Não edite `.claude/skills`, `.github/skills` nem `.devin/skills` à mão —
+  o sync sobrescreve e a edição se perde.

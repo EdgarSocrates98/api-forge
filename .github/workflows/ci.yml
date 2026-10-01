@@ -45,7 +45,7 @@ jobs:
         run: python -m pip check
 
       - name: Validate skills
-        run: python scripts/validate_skills.py
+        run: python scripts/validate_skills.py --check-mirrors
 
       - name: Validate agent mirrors
         run: apiforge agents check --root .

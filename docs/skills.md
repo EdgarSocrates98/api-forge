@@ -23,18 +23,35 @@ Devin e Copilot.
 
 | Skill | Responsabilidade |
 |---|---|
-| `api-forge-core` | Protocolo comum e roteamento |
-| `api-forge-discovery` | Inventário e API-IR |
-| `api-forge-contract` | Contratos e compatibilidade |
-| `api-forge-architecture` | Workload e decisão de plataforma |
+| `api-forge-core` | Protocolo comum e roteamento (entrada para qualquer tarefa de API) |
+| `api-forge-discovery` | Inventário estático, API-IR, IaC e proveniência |
+| `api-forge-contract` | OpenAPI/AsyncAPI/GraphQL/protobuf, compatibilidade e gRPC |
+| `api-forge-architecture` | WorkloadProfile, decisão de plataforma, ADR, revisão AWS e migração de runtime |
 | `api-forge-data-access` | Relacionais/RDS, Redis, MongoDB, DynamoDB, Neptune, OpenSearch e Redshift |
+| `api-forge-messaging` | SQS, SNS, EventBridge e Step Functions |
 | `api-forge-streaming` | Kafka/MSK, Kinesis, RabbitMQ, NATS e Pulsar |
-| `api-forge-messaging` | SQS, SNS e EventBridge |
-| `api-forge-verification` | Testes, segurança e resiliência |
-| `api-forge-performance` | Carga, TPS e capacidade |
-| `api-forge-observability` | Telemetria e operação |
-| `api-forge-sdd` | SDD, tasks e gates |
-| `api-forge-context` | TokenSave, Graphify, handoff e economia (cápsulas, gate de evidência live, verificação direcionada, checkpoint no resume) |
+| `api-forge-verification` | Plano de verificação, scanners allowlisted, segurança e resiliência |
+| `api-forge-performance` | Plano de carga, scripts, veredito de TPS, regressão e profiling |
+| `api-forge-observability` | OTel, SLO/alertas, vendors (Datadog/Dynatrace/CloudWatch) e autonomia/runbooks |
+| `api-forge-sdd` | Risco e perfil, fases, TaskSpecs, gates por evidência e field validation |
+| `api-forge-context` | Funnel, capsules, delta, grafo, handoff e economia (detalhe em `references/economy.md`) |
+| `api-forge-platform-completion` | Prontidão da plataforma, capability matrix, change-control e manutenção de agents/skills |
+
+## Formato de uma skill
+
+Cada `SKILL.md` segue o mesmo esqueleto, para que qualquer host leia igual:
+
+- frontmatter com `name`, `description` (o que faz, quando usar com frases
+  reais e quando **não** usar, apontando a skill vizinha), `compatibility` e
+  `metadata.version`; use `>-` para textos longos (evita erro de YAML com `:`);
+- propósito em um parágrafo explicando o porquê;
+- "Antes de começar" apontando para `api-forge-core`/`AGENT_PROTOCOL.md`;
+- procedimento numerado com comandos reais do CLI;
+- guardrails com a razão de cada um;
+- entrega e especialistas típicos (`agents/*.md`).
+
+Conteúdo extenso vai para `references/` dentro da skill e é carregado sob
+demanda. Todo comando citado precisa existir no `--help` do CLI.
 
 ## Compatibilidade
 

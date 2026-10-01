@@ -1,0 +1,6 @@
+id: prefix-stable
+kind: prefix
+capability: api-contract-review
+other_capability: task-review
+expertise:
+- openapi-31

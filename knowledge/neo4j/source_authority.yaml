@@ -1,0 +1,13 @@
+sources:
+  - name: "Neo4j Cypher manual - execution plan operators"
+    url: https://neo4j.com/docs/cypher-manual/current/planning-and-tuning/operators/
+    authority: vendor-docs
+    verified: "2026-10-01"
+  - name: "Neo4j Cypher manual - variable-length patterns"
+    url: https://neo4j.com/docs/cypher-manual/current/patterns/variable-length-patterns/
+    authority: vendor-docs
+    verified: "2026-10-01"
+  - name: "Neo4j Python driver manual"
+    url: https://neo4j.com/docs/python-manual/current/
+    authority: vendor-docs
+    verified: "2026-10-01"

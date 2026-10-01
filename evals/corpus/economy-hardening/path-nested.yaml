@@ -1,0 +1,4 @@
+id: path-nested
+kind: path
+candidate: "src/app.py"
+expect: allow

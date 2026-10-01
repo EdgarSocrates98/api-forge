@@ -1,0 +1,8 @@
+{
+  "agents": 25,
+  "findings": [],
+  "ok": true,
+  "passing": 25,
+  "schema": "apiforge/agent-lint/v1",
+  "version": 1
+}

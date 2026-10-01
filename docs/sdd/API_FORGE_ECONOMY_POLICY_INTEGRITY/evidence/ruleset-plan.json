@@ -1,0 +1,79 @@
+{
+  "applies": false,
+  "command": "gh api -X PUT repos/EdgarSocrates98/api-forge/rulesets/23971496 --input plan-payload.json",
+  "payload": {
+    "bypass_actors": [],
+    "conditions": {
+      "ref_name": {
+        "exclude": [],
+        "include": [
+          "~DEFAULT_BRANCH"
+        ]
+      }
+    },
+    "enforcement": "active",
+    "name": "protect",
+    "rules": [
+      {
+        "type": "deletion"
+      },
+      {
+        "type": "non_fast_forward"
+      },
+      {
+        "type": "creation"
+      },
+      {
+        "type": "update"
+      },
+      {
+        "type": "required_linear_history"
+      },
+      {
+        "type": "required_signatures"
+      },
+      {
+        "parameters": {
+          "allowed_merge_methods": [
+            "merge",
+            "squash",
+            "rebase"
+          ],
+          "dismiss_stale_reviews_on_push": false,
+          "require_code_owner_review": true,
+          "require_extra_approval_for_unattributed_changes": true,
+          "require_last_push_approval": false,
+          "required_approving_review_count": 0,
+          "required_review_thread_resolution": false,
+          "required_reviewers": []
+        },
+        "type": "pull_request"
+      },
+      {
+        "parameters": {
+          "do_not_enforce_on_create": false,
+          "required_status_checks": [
+            {
+              "context": "Validate project"
+            },
+            {
+              "context": "Validate API/Git/CI replay control plane"
+            }
+          ],
+          "strict_required_status_checks_policy": true
+        },
+        "type": "required_status_checks"
+      }
+    ],
+    "target": "branch"
+  },
+  "plan_sha256": "faf763bda48fa045693f19618e39d967978e52b4bab5f681abc12c7ff93009ed",
+  "ruleset_id": 23971496,
+  "schema": "apiforge/github-ruleset-plan/v1",
+  "warnings": [
+    "ruleset targets no branch today; the plan targets ~DEFAULT_BRANCH",
+    "update: restricts updates: once the ruleset targets the default branch, PR merges are blocked unless a bypass actor merges (use --bypass-owner or --drop-rule update)",
+    "creation: restricts creation of matching refs (harmless for an existing default branch)",
+    "required_signatures: every commit on the branch must be signed; GitHub-made merge and squash commits are signed, local unsigned pushes are rejected"
+  ]
+}

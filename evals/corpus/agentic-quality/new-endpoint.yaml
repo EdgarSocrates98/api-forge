@@ -1,0 +1,5 @@
+id: new-endpoint
+outcome: add GET /orders/{id}/events
+risk: read_only
+ground_truth: compatible
+default_verdict: compatible

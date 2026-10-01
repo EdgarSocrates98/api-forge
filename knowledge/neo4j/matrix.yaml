@@ -1,0 +1,5 @@
+runtime: neo4j
+constraints:
+  - component: driver
+    set: ["neo4j (python)", "org.neo4j.driver", "neo4j-go-driver", "neo4j-driver (js)"]
+    note: Bolt drivers pointed at a Neptune endpoint are classified as Neptune when the file names it

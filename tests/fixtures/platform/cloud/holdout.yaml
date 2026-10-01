@@ -1,0 +1,4 @@
+vertical: cloud
+status: unresolved
+case: remote_state_missing
+reason: live posture and remote values are not available

@@ -1,0 +1,9 @@
+id: small-economy
+shape: small
+risk: read_only
+size: S
+profile: economy
+expected:
+  effective: economy
+  minimum_roles:
+  - reviewer

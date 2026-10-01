@@ -1,0 +1,9 @@
+sources:
+  - name: "DocumentDB encryption at rest"
+    url: https://docs.aws.amazon.com/documentdb/latest/developerguide/encryption-at-rest.html
+    authority: aws-docs
+    verified: "2026-09-21"
+  - name: "DocumentDB MongoDB compatibility"
+    url: https://docs.aws.amazon.com/documentdb/latest/developerguide/mongo-apis.html
+    authority: aws-docs
+    verified: "2026-09-21"

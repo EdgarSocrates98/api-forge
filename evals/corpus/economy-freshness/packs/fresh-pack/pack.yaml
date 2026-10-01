@@ -1,0 +1,9 @@
+domain: fresh-pack
+version: 1
+summary: fixture pack for the freshness watch eval
+verified: "2026-09-01"
+freshness:
+  upstream: spec-a
+  source_hash: "sha-a1"
+  source_version: "1.0"
+  window_days: 90

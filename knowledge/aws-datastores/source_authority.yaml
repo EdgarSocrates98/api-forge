@@ -1,0 +1,17 @@
+sources:
+  - name: DynamoDB point-in-time recovery
+    url: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/PointInTimeRecovery.html
+    authority: aws-docs
+    verified: "2026-09-21"
+  - name: DocumentDB encryption at rest
+    url: https://docs.aws.amazon.com/documentdb/latest/developerguide/encryption-at-rest.html
+    authority: aws-docs
+    verified: "2026-09-21"
+  - name: Neptune encryption at rest
+    url: https://docs.aws.amazon.com/neptune/latest/userguide/encrypt.html
+    authority: aws-docs
+    verified: "2026-09-21"
+  - name: Step Functions CloudWatch logging
+    url: https://docs.aws.amazon.com/step-functions/latest/dg/cw-logs.html
+    authority: aws-docs
+    verified: "2026-09-21"

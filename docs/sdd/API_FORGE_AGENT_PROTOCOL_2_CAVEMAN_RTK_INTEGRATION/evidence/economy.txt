@@ -1,0 +1,2 @@
+CompactedOutput records original_bytes, emitted_bytes, omitted_lines and source_sha256.
+The complete artifact remains authoritative; token totals remain unresolved without a provider transcript.

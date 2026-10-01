@@ -1,0 +1,5 @@
+{
+  "schema": "apiforge/workspace-graph/v1",
+  "evidence_levels": ["declared", "observed", "unknown"],
+  "unresolved": ["missing repository roots remain unresolved"]
+}

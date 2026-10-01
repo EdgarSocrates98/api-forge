@@ -1,0 +1,9 @@
+sources:
+  - name: CloudWatch alarm actions
+    url: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/AlarmThatSendsEmail.html
+    authority: aws-docs
+    verified: "2026-09-21"
+  - name: Step Functions X-Ray tracing
+    url: https://docs.aws.amazon.com/step-functions/latest/dg/concepts-xray-tracing.html
+    authority: aws-docs
+    verified: "2026-09-21"

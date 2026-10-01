@@ -1,0 +1,7 @@
+domain: terraform-api
+version: 1
+areas: [GATEWAY]
+rule_ids: []
+summary: >-
+  aws_api_gateway_* and aws_lambda_function resources from HCL - interpolation becomes AF-TF-UNRESOLVED, never guessed.
+verified: "2026-09-21"

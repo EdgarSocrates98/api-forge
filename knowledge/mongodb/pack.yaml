@@ -1,0 +1,9 @@
+domain: mongodb
+version: 1
+areas: [DATA]
+rule_ids:
+  - AF-DATA-011
+  - AF-DATA-012
+summary: >-
+  MongoDB access patterns - bounded finds, filtered writes, aggregation pipelines; the model mongo adapter measures call sites against these.
+verified: "2026-09-21"

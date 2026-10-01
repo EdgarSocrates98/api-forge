@@ -1,0 +1,10 @@
+id: complex-balanced
+shape: complex
+risk: read_only
+size: L
+profile: balanced
+expected:
+  effective: balanced
+  minimum_roles:
+  - critic
+  - reviewer

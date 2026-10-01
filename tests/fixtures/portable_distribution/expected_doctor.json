@@ -1,0 +1,5 @@
+{
+  "schema": "apiforge/doctor/v1",
+  "status": "degraded",
+  "required_capabilities": ["user-state", "network"]
+}

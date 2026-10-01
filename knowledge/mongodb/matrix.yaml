@@ -1,0 +1,5 @@
+runtime: mongodb
+constraints:
+  - component: server-version
+    set: ["4.4", "5.0", "6.0", "7.0", "8.0"]
+    note: aggregation stages and transaction behavior differ per version

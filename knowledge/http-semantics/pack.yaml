@@ -1,0 +1,11 @@
+domain: http-semantics
+version: 1
+areas: [REST]
+rule_ids:
+  - AF-REST-001
+  - AF-REST-002
+  - AF-REST-003
+  - AF-REST-008
+summary: >-
+  HTTP method/status/resource semantics per RFC 9110 and caching per RFC 9111 - the normative base the REST rules cite.
+verified: "2026-09-21"

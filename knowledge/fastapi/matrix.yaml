@@ -1,0 +1,8 @@
+runtime: fastapi
+constraints:
+  - component: pydantic
+    range: ">=2.0"
+    note: v1 models change validation semantics the rules read
+  - component: python
+    min: "3.9"
+    verified: "2026-09-21"

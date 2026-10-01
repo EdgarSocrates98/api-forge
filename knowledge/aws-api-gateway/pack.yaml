@@ -1,0 +1,8 @@
+domain: aws-api-gateway
+version: 1
+areas: [GATEWAY]
+rule_ids: [AF-GW-001, AF-GW-002, AF-GW-003, AF-GW-004, AF-GW-005, AF-GW-006, AF-GW-007]
+summary: >-
+  REST vs HTTP API differences that change findings: authorizers, payload
+  format, throttling defaults, 29s integration timeout and pricing model.
+verified: "2026-09-21"

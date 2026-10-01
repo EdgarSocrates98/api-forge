@@ -1,0 +1,9 @@
+sources:
+  - name: "k6 documentation"
+    url: https://grafana.com/docs/k6/latest/
+    authority: vendor-docs
+    verified: "2026-09-21"
+  - name: "API Forge performance rules"
+    url: docs/catalog-contract.md
+    authority: project-docs
+    verified: "2026-09-21"

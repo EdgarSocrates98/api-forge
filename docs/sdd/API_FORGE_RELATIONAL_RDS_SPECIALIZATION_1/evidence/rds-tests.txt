@@ -1,0 +1,4 @@
+ruff check src tests: PASS
+mypy src/apiforge: PASS
+pytest relational and RDS collector tests: 4 passed
+python scripts/check_release.py: PASS

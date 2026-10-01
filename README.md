@@ -1,0 +1,623 @@
+<p align="center">
+  <img src="docs/assets/api-forge-logo.jpg" alt="API Forge logo" width="420" />
+</p>
+
+<h1 align="center">API Forge</h1>
+
+<p align="center">Deterministic, offline-first and local-first agentic API engineering.</p>
+
+[Português (Brasil)](README.pt-BR.md) · [Portable distribution in English](docs/guides/API_FORGE_PORTABLE_DISTRIBUTION.md) · [Distribuição portátil em português](docs/guides/API_FORGE_PORTABLE_DISTRIBUTION.pt-BR.md)
+
+[Documentation index](docs/README.md) · [Índice de documentação em PT-BR](docs/README.pt-BR.md)
+
+[![CI](https://github.com/EdgarSocrates98/api-forge/actions/workflows/ci.yml/badge.svg)](https://github.com/EdgarSocrates98/api-forge/actions/workflows/ci.yml)
+
+API Forge covers discovery, construction, evolution, migration, contracts, gRPC, testing,
+performance, TPS validation, observability, data access and governed agentic
+execution. Given an existing project or contract, it produces provenance-backed
+IR, evidence, plans, verifiable tasks and bounded decisions instead of guesses.
+
+> Resultado correto, verificável e reproduzível por token consumido.
+
+## Install
+
+```bash
+python -m pip install -e '.[dev]'   # Python >=3.12,<3.13
+# Optional all-in-one local extras:
+python -m pip install -e '.[all]'
+# Optional visual terminal UX:
+python -m pip install -e '.[tui]'
+```
+
+The package can live in a user-selected virtual environment, prefix, mounted
+volume or container. Add its executable directory to `PATH`, or invoke it by
+absolute path. Set `APIFORGE_HOME`, `APIFORGE_CONFIG` and `APIFORGE_CACHE` when
+the default project state location is not writable. See
+[the portable distribution guide](docs/guides/API_FORGE_PORTABLE_DISTRIBUTION.md).
+
+The hostless first-run surface is:
+
+```text
+apiforge inspect
+apiforge init
+apiforge status
+apiforge doctor
+apiforge context resolve --scope repo
+```
+
+### Documentation languages and quickstart
+
+The portable/workspace feature has paired English and Brazilian Portuguese
+guides. Start with the step-by-step guide for your language:
+
+- [Portable distribution and workspace — English](docs/guides/API_FORGE_PORTABLE_DISTRIBUTION.md)
+- [Distribuição portátil e workspace — PT-BR](docs/guides/API_FORGE_PORTABLE_DISTRIBUTION.pt-BR.md)
+- [Platform usage — English](docs/guides/API_FORGE_PLATFORM_USAGE.en.md)
+- [Uso da plataforma — PT-BR](docs/guides/API_FORGE_PLATFORM_USAGE.md)
+- [Experience and interoperability — English](docs/guides/API_FORGE_EXPERIENCE_INTEROPERABILITY.en.md)
+- [Experiência e interoperabilidade — PT-BR](docs/guides/API_FORGE_EXPERIENCE_INTEROPERABILITY.md)
+- [Economy guide — English](docs/guides/API_FORGE_ECONOMY.en.md)
+- [Guia de economia — PT-BR](docs/guides/API_FORGE_ECONOMY.md)
+- [Host parity — English](docs/HOST_PARITY.md)
+- [Paridade entre hosts — PT-BR](docs/HOST_PARITY.pt-BR.md)
+- [Evolution map — English](docs/API_FORGE_EVOLUTION_MAP.en.md)
+- [Mapa de evolução — PT-BR](docs/API_FORGE_EVOLUTION_MAP.md)
+- [Security policy — English](SECURITY.md)
+- [Política de segurança — PT-BR](SECURITY.pt-BR.md)
+- [Product closure specification — English](SPEC.md)
+- [Especificação de encerramento — PT-BR](SPEC.pt-BR.md)
+- [Architecture and MVP boundaries — English](docs/architecture/API_FORGE_PLATFORM_COMPLETION.md)
+- [Arquitetura e fronteiras do MVP — PT-BR](docs/architecture/API_FORGE_PLATFORM_COMPLETION.pt-BR.md)
+- [Capability matrix — English](docs/capabilities/API_FORGE_CAPABILITY_MATRIX.md)
+- [Matriz de capacidades — PT-BR](docs/capabilities/API_FORGE_CAPABILITY_MATRIX.pt-BR.md)
+- [Change-control host — English](docs/integrations/API_FORGE_CHANGE_CONTROL_HOST.md)
+- [Host de change-control — PT-BR](docs/integrations/API_FORGE_CHANGE_CONTROL_HOST.pt-BR.md)
+- [Devin integration — English](docs/integrations/API_FORGE_DEVIN.md)
+- [Integração Devin — PT-BR](docs/integrations/API_FORGE_DEVIN.pt-BR.md)
+- [Observability integrations — English](docs/OBSERVABILITY_INTEGRATIONS.en.md)
+- [Integrações de observabilidade — PT-BR](docs/OBSERVABILITY_INTEGRATIONS.md)
+- [Priority roadmap — English](docs/roadmaps/API_FORGE_PRIORITY_EXECUTION_ROADMAP.en.md)
+- [Roadmap prioritário — PT-BR](docs/roadmaps/API_FORGE_PRIORITY_EXECUTION_ROADMAP.md)
+
+It works offline and without a configured agent host. Claude, Codex, Devin,
+Copilot and MCP are optional adapters; unavailable capabilities remain explicit
+in `doctor` and context payloads. `workspace.yaml` registers independent
+repositories without requiring a monorepo.
+
+### Adaptive routing shipped in three waves
+
+The adaptive-routing program is complete and available in the portable,
+hostless core:
+
+- Wave 1 adds `RoutingPlan/v1` with explicit primary, fallback, parallel,
+  reviewer, critic and referee roles.
+- Wave 2 adds multidimensional scorecards, freshness-aware signals, receipts
+  for observations and an optional adversarial evaluation gate.
+- Wave 3 adds versioned local expertise packs, family/implementation routing and
+  explicit refusal when required local knowledge is unavailable.
+
+Runs preserve `routing.json` for the compatible decision trace and
+`routing-plan.json` for the bounded execution plan. The three waves do not
+require a host, network, model SDK or external mutation. The evolution map
+records the post-ship items that remain deferred, including high-level
+`ask`/`improve`/`migrate`/`fix` orchestration, complete relationship inference,
+remote Knowledge Pack updates, symlink installation, automatic host-file
+overwrite, task-level precedence, distributed workspace debate and total host
+parity.
+
+The repository also carries the native Caveman/Cavekit assets under `vendor/`,
+with pinned provenance and a SHA-256 manifest. RTK project filters live under
+`.rtk/`; the optional RTK binary is not silently installed by API Forge.
+
+### Current adaptive-routing extensions: A, B and C
+
+The post-wave routing program is now closed as three additive, offline-first
+SDD shipments:
+
+- **A — Risk-Aware Routing and Task Complexity:** explicit risk and task
+  complexity govern verification depth, roles and bounded fallback behavior.
+- **B — Scorecard-Adaptive Routing:** fresh local scorecards provide bounded
+  champion/challenger/unresolved evidence without automatic promotion.
+- **C — Graph-Aware Impact:** bounded explicit graph evidence adds conservative
+  impact gates, candidate selection evidence and one explainable brief.
+
+A, B and C remain additive: C cannot weaken A's risk/complexity gate or B's
+scorecard evidence. The canonical C assessment is persisted as
+`graph-impact.json`; stale, missing and unresolved graph evidence remains
+visible and conservative. See the [GraphImpactAssessment/v1 contract](docs/contracts/GraphImpactAssessment-v1.md)
+and the [C archive](.claude/sdd/archive/GRAPH_AWARE_IMPACT/SHIPPED_2026-09-25.md).
+
+```bash
+python scripts/vendor_caveman.py --check
+apiforge agentops native
+```
+
+## Agentic platform
+
+The deterministic supervisor turns intent into sealed `TaskSpec` work, runs
+independent tasks in a sandbox, preserves full artifacts, invokes verification
+and refuses `DONE` when evidence is missing. Debate is triggered by risk,
+divergence, missing proof or explicit human request. The main building blocks
+are:
+
+- `task`, `runtime`, `sandbox`, `verification`, `brief` and `evals`;
+- native provenance graph and measured context/token accounting;
+- contract intelligence for OpenAPI and gRPC;
+- offline Digital Twin scenarios for validation, auth, timeout, 5xx, rate limit,
+  idempotent retry and contract mismatch;
+- declarative performance plans for load, stress, spike, soak and capacity;
+- OTel-first health correlation with SLO, error budget and performance signals;
+- read-only plans for OTel, Datadog, Dynatrace and CloudWatch.
+- relational access for PostgreSQL, MySQL/MariaDB and RDS/Aurora;
+- streaming IR for Kafka/MSK, Kinesis, RabbitMQ, NATS and Pulsar;
+- messaging IR for SQS, SNS, EventBridge and Kinesis;
+- analytical access for OpenSearch/Elasticsearch and Redshift;
+- advanced observed-risk profiles for Redis, DynamoDB, MongoDB/DocumentDB and Neptune.
+
+The complete gap analysis and sequencing are maintained in
+[docs/API_FORGE_EVOLUTION_MAP.md](docs/API_FORGE_EVOLUTION_MAP.md). It maps the
+remaining work across the agentic runtime, contracts, Java/Go/Python evolution,
+performance, observability, AWS, databases, security, evals and host parity.
+The next cycle is selected by dependencies and risk, not by an ad-hoc sequence
+of isolated “next steps”.
+
+The execution sequence and acceptance gates are tracked in
+[docs/roadmaps/API_FORGE_PRIORITY_EXECUTION_ROADMAP.md](docs/roadmaps/API_FORGE_PRIORITY_EXECUTION_ROADMAP.md).
+Adapters now expose an explicit execution envelope (`static`, `fixture`,
+`live_read_only` or `live_mutation`) with evidence level, input hashes,
+limitations and unresolved diagnostics. Static analysis is never reported as
+runtime proof. Local commands run through an allowlisted, shell-free sandbox;
+durable control-plane steps support worker leases, heartbeats and recovery.
+
+The first integrated evolution cycle is complete through Phase G. Runtime,
+migration, capacity, observability, data governance, security and agentic
+quality are now represented by local contracts, focused tests and SDD evidence.
+
+The next interoperability program is also implemented as an additive local
+surface: `apiforge tui TASK` opens the execution-first Textual UX, while
+`--fallback` or a host without Textual uses the same Rich/JSON projection.
+Knowledge freshness, four-host capability negotiation, observed Python matrix
+receipts, modular `experience` CLI projections and bounded adaptive debate are
+all evidence-driven; missing external receipts remain `unresolved`.
+
+## Host support
+
+The Python core and CLI are shared across Claude Code, GPT/Codex, Devin and
+Copilot. Repository mirrors expose the same skills and agents where each host
+supports them. Host hooks, MCP lifecycle, slash commands and subagent APIs are
+host-specific and are not falsely reported as identical.
+
+```bash
+apiforge agentops parity
+apiforge agentops activation-plan --host claude
+apiforge agentops activation-plan --host gpt-codex
+apiforge agentops activation-plan --host devin
+apiforge agentops activation-plan --host copilot
+```
+
+Activation plans are `plan_only` and approval-gated; they do not alter user
+configuration. Devin has an additional payload-first adapter for Desktop, CLI
+and Cloud:
+
+```bash
+apiforge devin probe
+apiforge devin capabilities
+apiforge devin payload "Review the current API evolution slice" --surface cli --task-kind review
+```
+
+See [docs/HOST_PARITY.md](docs/HOST_PARITY.md) and
+[docs/integrations/API_FORGE_DEVIN.md](docs/integrations/API_FORGE_DEVIN.md).
+
+## Platform completion workflow
+
+The platform-completion foundation provides one evidence-backed workflow for
+API, database, messaging, CI/CD, cloud and front-end work. Agents understand
+the declared need and recommend practices or architectures with facts,
+assumptions, alternatives, trade-offs, risks, limitations and a verifier. It
+does not require a guided wizard and does not turn a parser, prompt or fixture
+into runtime proof.
+
+Start with the public capability boundary:
+
+```bash
+apiforge capabilities list
+apiforge capabilities verify
+```
+
+Para governar uma mudança de API ligada a Git e CI/CD:
+
+```bash
+apiforge change-control run \
+  --bundle tests/fixtures/api_git_cicd/change_bundle.json \
+  --out-dir .apiforge/change-control
+apiforge change-control verify --run-dir .apiforge/change-control
+apiforge change-control publish --run-dir .apiforge/change-control
+apiforge change-control surface --run-dir .apiforge/change-control --surface ide \
+  --out .apiforge/change-control/ide.json
+```
+
+Esse fluxo é read-only, reproduzível por replay e termina com status `ok`,
+`review`, `blocked` ou `failed`, sem traceback governável na CLI. Merge, push,
+dispatch de workflow, deploy e autofix continuam fora da fronteira.
+`collect` escreve um bundle sanitizado e um
+`af-change-collection-receipt/1`; `publish` emite JUnit, Markdown, SARIF e HTML
+e `serve` expõe a mesma decisão através de um host UI/IDE read-only local ou
+remoto, autenticado e TLS.
+
+For a real case, use the complete chain:
+
+```text
+analyze -> next-step -> graph -> evidence -> brief
+```
+
+The detailed commands, six vertical proof cells, agent output contract and
+Git/CI/CD/IDE/UI integration limits are documented in
+[docs/guides/API_FORGE_PLATFORM_USAGE.md](docs/guides/API_FORGE_PLATFORM_USAGE.md),
+[docs/capabilities/API_FORGE_CAPABILITY_MATRIX.md](docs/capabilities/API_FORGE_CAPABILITY_MATRIX.md)
+and [docs/architecture/API_FORGE_PLATFORM_COMPLETION.md](docs/architecture/API_FORGE_PLATFORM_COMPLETION.md).
+
+The supported production boundary is explicit: local/static and authenticated
+read-only remote paths are available; provider-specific freshness, live runtime
+guarantees and production performance claims require an external receipt and
+independent verifier. The dedicated CI host can request a PR auto-merge only
+when the repository variable `APIFORGE_AUTO_MERGE=true` is explicitly set;
+agents and the core never receive that authority.
+
+## Contract, performance and observability examples
+
+```bash
+apiforge contract-intel impact \
+  --protocol openapi \
+  --baseline tests/fixtures/openapi/orders-v1.yaml \
+  --candidate tests/fixtures/openapi/orders-v2-breaking.yaml
+
+apiforge contract-intel twin \
+  --protocol openapi \
+  --contract tests/fixtures/openapi/orders-v1.yaml \
+  --scenario dependency-timeout
+
+apiforge perf plan \
+  --subject orders --endpoint 'POST /orders' --target-tps 100
+
+apiforge observability health \
+  --source telemetry.json --service orders
+
+apiforge observability read-plan \
+  --provider dynatrace --service orders \
+  --start 2026-09-22T00:00:00Z --end 2026-09-22T01:00:00Z
+```
+
+The corresponding read-only gates can also be composed by integrations:
+
+```python
+from apiforge.perf.capacity import assess_capacity
+from apiforge.observability.readiness import assess_export_readiness
+from apiforge.data_governance import assess_data_access
+from apiforge.safety import assess_api_safety
+from apiforge.quality import assess_agentic_quality
+```
+
+They produce versioned `ready`/`passed`, `review`, `blocked` or
+`inconclusive` outcomes. Missing evidence is named rather than defaulted.
+
+These commands are offline by default. Real provider reads, credentials,
+load-generator execution and external mutations remain explicit adapters and
+policy-gated phases.
+
+Specialized source models are offline and language-neutral:
+
+```bash
+apiforge model rds-access --path .
+apiforge model kafka-access --path .
+apiforge model msk-access --path .
+apiforge model sqs-access --path .
+apiforge model eventbridge-access --path .
+apiforge model rabbitmq-access --path .
+apiforge model nats-access --path .
+apiforge model pulsar-access --path .
+apiforge model opensearch-access --path .
+apiforge model redshift-access --path .
+```
+
+`collect rds` and `collect msk` produce hashed AWS posture dumps. No API Forge
+command starts consumers, publishes messages, executes database queries or
+changes broker/database topology by default.
+
+Observability integrations now have optional OTel, Datadog and Dynatrace payload
+exporters plus host-owned authentication bindings. They remain disabled unless
+an allowlisted HTTPS endpoint, available credential, explicit approval and an
+authenticated host callback are all supplied.
+
+## Analyze
+
+```bash
+apiforge analyze \
+  --contract tests/fixtures/openapi/orders-v1.yaml \
+  --project tests/fixtures/fastapi_orders \
+  --out-dir .apiforge/case
+```
+
+Prints a compact JSON summary and writes a case directory:
+
+| Artifact | Meaning |
+|---|---|
+| `api-ir.json` | Canonical API-IR: operations keyed by method+path, contract and code projections, provenance, input hashes, diagnostics |
+| `facts.json` | Immutable evidence facts (code routes, contract operations) with source path/line/sha256 |
+| `findings.json` | Rule verdicts — `confirmed` or `unresolved`, always evidence-backed |
+| `changes.json` | Contract diff results — only when `--baseline` is given |
+| `case.json` | Manifest written last; sha256 of every declared artifact |
+
+Individual stages: `apiforge discover --project .`, `apiforge model build
+--contract c.yaml --project .`, `apiforge diff contract --baseline a.yaml
+--candidate b.yaml`, `apiforge judge --contract c.yaml --project .`.
+
+Frameworks: `analyze --framework fastapi|spring|go|auto` — `auto` counts
+`.java`/`.py`/`.go` files (none → `AF-INPUT-FRAMEWORK-UNKNOWN`). The Spring adapter
+parses `*.java` with tree-sitter (`@RestController`/`@RequestMapping`/
+`@GetMapping`…, `RouterFunctions.route`, JAX-RS); non-literal annotation args
+emit `AF-SPRING-UNRESOLVED-ROUTE`, never inference. The Go adapter covers
+chi (`Route` scopes, verb calls), `net/http` (`Handle`/`HandleFunc` with Go
+1.22 `"METHOD /path"` patterns) and gin/echo verb calls; `Mount`, middleware
+and non-literal paths emit `AF-GO-UNRESOLVED-ROUTE`. Every JSON command accepts
+`--detail-level summary|normal|full`; `summary` drops verbose text fields
+while refusal codes and `fact_id`s survive.
+
+## Governance
+
+| Command | Purpose |
+|---|---|
+| `apiforge policy check --verb fs.delete --class destructive` | Evaluate an action against the policy catalog (allow/gate/deny) |
+| `apiforge sdd check --root docs/sdd [--strict]` | Validate phase frontmatter, upstream hash cascade and evidence gates |
+| `apiforge sdd status --root docs/sdd` | Per-feature phase status summary |
+| `apiforge sdd stamp --artifact f/plan.md --upstream f/contract.md` | Write the upstream sha256 into frontmatter (line surgery only) |
+| `apiforge sdd set-phase --root R --feature F --phase P --status S [--strict]` | Transition a phase; gates need evidence or a recorded override |
+| `apiforge sandbox apply --root . --diff change.diff` | Apply a diff to copied before/after trees and report the finding delta |
+| `apiforge sandbox clean --root .` | Remove `.apiforge/sandbox` only |
+| `apiforge evidence emit --case .apiforge/case --out receipt.json` | Receipt binding artifact paths to sha256 (proves correspondence, not authorship) |
+| `apiforge evidence verify --receipt receipt.json` | Re-hash every artifact the receipt lists |
+| `apiforge next-step --findings findings.json --phase verify` | Route the dominant finding area to the specialist agent |
+| `apiforge change-control run --bundle B --out-dir D` | Run the governed API/Git/CI/CD replay flow |
+| `apiforge change-control collect --repository R --base-sha S --head-sha S` | Collect GitHub context through the GET-only adapter and write a collection receipt |
+| `apiforge change-control verify --run-dir D` | Verify the local change-control artifact references |
+| `apiforge change-control publish --run-dir D` | Emit JUnit, Markdown, SARIF and HTML projections |
+| `apiforge change-control surface --run-dir D --surface ide\|ui` | Export the canonical IDE/UI projection |
+| `apiforge change-control serve --run-dir D` | Serve the local read-only IDE/UI host |
+| `apiforge integration github-issues --repository owner/repo` | Read GitHub issues with a GET-only receipt |
+| `apiforge integration health --url https://host/readyz --out receipt.json` | Record remote health and freshness |
+| `apiforge integration json --url https://tracker/api/issues --out receipt.json` | Read Jira/Linear-like JSON without mutation |
+| `apiforge integration verify-receipt --receipt receipt.json --now <ISO8601>` | Verify external receipt freshness |
+| `apiforge platform verify-runtime --out runtime-receipt.json` | Execute allowlisted local probes for six verticals |
+| `apiforge rules list [--area SECURITY]` | List catalog rules — the knowledge base every finding cites |
+| `apiforge rules lookup AF-SEC-001` | Print one rule's rationale/remediation/reference |
+| `apiforge collect api-gateway --api-id X --out dump/` | Fetch API Gateway config into an offline dump (needs `pip install apiforge[aws]`; the only family that touches AWS) |
+| `apiforge model api-gateway --path dump/` | Read the dump into facts — offline, no credentials |
+| `apiforge build endpoint --contract c.yaml --operation-id X --project .` | Synthesize a Spring skeleton, prove it in the sandbox (main tree untouched) |
+| `apiforge build endpoint ... --into-worktree NAME --approve` | Promote generated files into a policy-gated git worktree |
+| `apiforge playbook api-governance-reviewer` | Render the coordinator's executor decomposition — works without dispatch |
+| `apiforge economy report [--root .]` | Measured call sizes; `detail_level_effect` shows what `summary` saves |
+| `apiforge context funnel --case .apiforge/case` | Measured bytes per case stage (api-ir → facts → findings → summary) |
+| `apiforge context capsule --target "POST /orders" [--budget-bytes N] [--level L3\|L4]` | `ContextCapsule/v1`: minimal evidence for one operation as hash-verified `ctx://sha256/…` refs under a byte budget |
+| `apiforge context expand ctx://sha256/<hex> [--run-id R]` | One ctx object, re-hashed before it is returned |
+| `apiforge economy stats [--run-id R] [--transcript T]` | Bytes attributed per run and source; tokens `unresolved` without a transcript |
+| `apiforge economy explain <run_id>` | Why each ref was spent, from recorded provenance rules (no model call) |
+| `apiforge evals economy [--record-baseline]` | 12-case benchmark: evidence recall floor + median byte reduction vs recorded baseline |
+| `apiforge runtime run\|resume\|debate <task> --profile economy\|balanced\|deep` | Economy Plane: profile preference with risk floor, trimmed optional roles, call cap + verification reserve, L0–L5 ladder; `economy` block in the result |
+| `apiforge sdd classify --description … --path … [--baseline … --candidate …] [--write <feature>]` | Deterministic change risk (micro/low/medium/high) → minimum SDD profile; `sdd check` refuses profiles below it |
+| `apiforge evals economy-routing` | 15-case benchmark: role invariant, effective profile, critical ⇒ deep, economy cheaper for low risk |
+| `apiforge context delta --base A [--head B] \| --changed F [--invalidate]` | `DeltaSlice/v1`: changed files → graph nodes → impacted operations → capsule targets; read-only git |
+| `apiforge cache stats\|invalidate`, `apiforge context gc [--apply]` | Layered advisory cache: freshness per layer, dependency-aware invalidation, report-first gc |
+| `apiforge evals cache` | 10-case benchmark: warm hit rate 1.0, byte-identical vs `--no-cache`, zero stale reuse, invalidation precision/recall 1.0 |
+| `apiforge knowledge select --intent "..." [--capability C] [--framework F]` | `ExpertiseSelection/v1`: only packs named by a trigger; no trigger loads nothing |
+| `apiforge debate submit ... [--disagree point=reason] [--risk R] [--confidence X]`, `apiforge debate packet` | `PositionDelta/v1` submissions and a `RefereePacket/v1` over one shared capsule |
+| `apiforge agents audit` | `AgentUniqueness/v1` per agent: unique capability/expertise/validator/tool/decision role, `keep` or `merge-candidate` (report only) |
+| `apiforge evals selective-agentics` | 13 cases: exact pack selection, per-role bytes ≤ 60% of naive, referee packet ≤ 50%, shadow share ±2 pp, deterministic audit |
+| `apiforge --output compact <verb>` | Minified payload with null/empty pruned; lossless by rule (`APIFORGE_OUTPUT`) |
+| `apiforge slice tests --input <pytest.log or junit.xml>`, `apiforge slice log --input <ci.log>` | `TestSlice/v1` / `ErrorSlice/v1`: every failure or signature, full log behind `ctx://` |
+| `apiforge mcp surface [--surface full/compact]`, `apiforge-mcp --surface compact` or `--host claude` | `ToolSurface/v1`: measured tool bytes; compact MCP = six gateways, all tools reachable |
+| `apiforge agentops projection --host <host>` | `HostProjection/v1`: declared surface/output per host plus a verb-first map |
+| `apiforge evals tool-economy` | 10 cases: compact output lossless ≤ 65%, slicers recall 1.0 ≤ 20%, compact surface ≤ 25%, discover top-5 |
+| `apiforge evals economy-matrix [--out report.json]` | `EconomyMatrix/v1`: 16 canonical contract changes × 3 profiles; quality, evidence, cost, context and latency kept apart; mutants and holdout gated |
+| `apiforge evals gate --baseline A --candidate B` | `EvaluationGate/v1`: ship only with zero safety regression and quality regressions within the tolerance |
+| `apiforge evals replay --corpus evals/corpus/economy-replay [--profile P]` | `ReplayReport/v1`: stored decisions re-planned under the current policy, no provider calls |
+| `apiforge economy roi --root R` | `RoleROI/v1`: calls, facts added and outcome changes of each extra capability |
+| `apiforge verify plan --changed F --risk R [--breaking]` | `VerificationPlan/v1`: ladder V0–V5 by risk and the impacted tests with reasons; never executes |
+| `apiforge knowledge search --query Q [--tier 1/2/3]` | `RetrievalResult/v1`: declared query expansion, ranked passages with signals, top 3 then top 5 |
+| `apiforge evidence resolve evidence://finding/<id>` | `EvidenceNode/v1`: one node and its one-hop neighbors as refs |
+| `apiforge economy doctor` (or `apiforge doctor --economy`) | `EconomyDoctor/v1`: what makes runs pay more than needed, with unlocks |
+| `apiforge economy providers`, `apiforge economy tier --capability C --risk R` | `ProviderCapability/v1`, `TierDecision/v1`: T0–T3, cheaper only with benchmark evidence |
+| `apiforge agentops prompt --capability C` | `PromptEnvelope/v1`: stable hashed prefix + run suffix |
+| `apiforge workspace locality --target <repo> [--transitive]` | `LocalityPlan/v1`: target, direct neighbors, transitive deferred |
+| `apiforge workspace graph [--infer --run-id R]` | `WorkspaceGraph/v1`: declared relations; `--infer` adds static cross-repo `calls`/`publishes_to_consumer` edges (`inferred`, confidence, caller and callee file:line) and an audited `workspace.infer` ledger row |
+| `apiforge field record\|annotate\|verify\|report\|export` | `FieldRun/v2`, `FieldReport/v2`: pre-registered field validation joined from existing run artifacts; the first record seals `docs/field/cycle.lock.json` (`FieldCycleIdentity/v1`), `record --executor` and `verify --verifier` must be independent actors, receipts go stale on any later annotation, and H1 plus follow-up SDDs are decided only when the cycle is `ready` (Wilson 95% CI, theme qualification, A/B deltas; `docs/field/README.md`) |
+| `apiforge evals economy-extras` | 15 cases across the seven wave-7 verbs |
+| `apiforge knowledge watch --manifest upstream.json --now T` | `FreshnessWatch/v1`: packs whose upstream fingerprint, version, expiry or window says `refresh_needed`; never fetches |
+| `apiforge evidence gate --question Q [--offline]` | `LiveEvidenceDecision/v1`: static questions stay local; `live_read_only` only for runtime questions; `live_mutation` refused |
+| `apiforge verify escalate --static S --test T` (or `--test-slice`) | `VerificationEscalation/v1`: static → test → stop; read-only runtime only after an inconclusive test |
+| `apiforge economy phase-budget --profile P [--usage U]` | `PhaseBudgetPlan/v1`: envelope split across SDD phases; contract/verify/secure protected |
+| `apiforge runtime checkpoint <task> <run>` | `EconomyCheckpoint/v1`: spend a resume continues; resume never lowers the profile |
+| `apiforge evals economy-freshness` | 16 cases across the five wave-8 verbs |
+| `apiforge evals economy-hardening [--repo-root .]` | Path containment, class-pool budget via `plan_roles`, contract envelope invariant, token coverage, phase status and `build_delta` on the analyzed fixture — the oracle runs production code |
+| `apiforge evals agentic-quality [--responses-dir D] [--min-accuracy F] [--baseline R]` | Recorded specialist verdicts vs ground truth under each profile; absolute floor per profile (default 1.0) plus non-regression vs deep and an optional baseline report; `claim_scope: recorded-agentic-outputs` |
+| `apiforge-mcp` | MCP server for the read/compose verbs (needs `pip install apiforge[mcp]`; every tool takes `detail_level`) |
+| `apiforge collect lambda --function-name X --out dump/` | Fetch Lambda config into a dump (Code.Location never persisted) |
+| `apiforge collect sqs\|sns\|eventbridge\|iam-role\|cognito\|waf ... --out dump/` | Messaging/identity collectors — same offline-dump contract |
+| `apiforge collect dynamodb\|docdb\|neptune\|stepfunctions\|cloudwatch\|xray\|kms\|secrets\|vpc-endpoints\|s3 ... --out dump/` | Datastore/ops collectors — secrets reads metadata only, S3 posture only (objects never listed), unset S3 config recorded as measured absence |
+| `apiforge collect alb\|ecs\|eks\|ec2\|msk\|elasticache ... --out dump/` | Compute/LB collectors — describe-only posture (never user-data, console output or broker payloads) |
+| `apiforge model sqs\|sns\|eventbridge\|iam-role\|cognito\|waf --path dump/` | Dump → `aws.<svc>.*` facts; boolean measures record declared absence |
+| `apiforge model dynamodb\|docdb\|neptune\|stepfunctions\|cloudwatch\|xray\|kms\|secrets\|vpc-endpoints\|s3 --path dump/` | Same contract for the datastore/ops dumps; KMS rotation rule applies only to customer-managed keys |
+| `apiforge model alb\|ecs\|eks\|ec2\|msk\|elasticache --path dump/` | Same contract for the compute/LB dumps; plain-HTTP only flags on internet-facing ALBs |
+| `apiforge model lambda --path dump/` | Lambda facts offline — env var names only, values never read |
+| `apiforge model terraform --path infra/` | API Gateway + Lambda resources from HCL; `${...}` → `AF-TF-UNRESOLVED` |
+| `apiforge model sam --path template.yaml` | Serverless resources; `!Ref`/`!Sub` → `AF-SAM-UNRESOLVED` |
+| `apiforge model pact\|schemathesis\|k6\|coverage --path r.json` | Test-tool reports → `test.*` facts (tools never run) |
+| `apiforge model locust\|jmeter\|gatling\|vegeta\|wrk\|hey\|pytest-benchmark --path r` | Load-tool reports → `test.<tool>.summary` facts — RPS/TPS kept distinct, microbenchmarks never read as load runs |
+| `apiforge model zap\|semgrep\|trivy\|gitleaks --path r.json` | Security reports → `sec.*` facts (gitleaks never emits secrets) |
+| `apiforge report build --case .apiforge/case --out report.json` | Compose the release evidence bundle |
+| `apiforge report sign --report report.json` | Pin body/evidence/catalog hashes into the signature block |
+| `apiforge report verify --report report.json` | Name the diverged part (body\|evidence\|catalog\|signature_version); exit 4 |
+| `apiforge report keygen --name k [--keys-dir D]` | Ed25519 keypair; `report sign --key`/`verify --pubkey` prove key possession, never identity |
+| `apiforge dispatch run --coordinator C --case DIR` | Execute the playbook's dispatchable steps; missing inputs land in `pending`, never crash |
+| `apiforge run tool semgrep\|trivy\|gitleaks\|k6 --target T --out R` | Allowlisted scanner execution (fixed argv, no shell, `--dry-run` prints argv) |
+| `apiforge run list` | Tool registry — declared metadata (license, capabilities, modes, evidence producer) plus *measured* install status; import-only tools refuse `run` with `AF-RUN-IMPORT-ONLY` |
+| `apiforge debate open|submit|close` | Deterministic debate machine — positions cite `fact:` evidence, quorum of 2 sides |
+| `apiforge tui TASK --root .` | Execution-first Textual TUI with governance, evidence and debate navigation (`pip install -e '.[tui]'`) |
+| `apiforge tui TASK --root . --fallback` | Headless Rich/JSON projection with `AF-TUI-UNAVAILABLE` unlock metadata |
+| `apiforge experience status|doctor|review TASK` | Modular projection facade; legacy top-level aliases remain available |
+| `apiforge agentops negotiate --capability mcp [--host claude]` | Evidence-aware host capability intersection from local declarations |
+| `apiforge knowledge freshness DOMAIN --receipt R --now ISO8601` | Verify freshness without mutating Knowledge Packs |
+| `apiforge migration matrix --ecosystem python --receipt R` | Publish observed compatibility cells; unexecuted versions stay unresolved |
+| `apiforge plan strangler --project P --contract C` | Per-route cut plan; migrated routes name the parity evidence still due |
+| `apiforge plan architecture --profile w.json` | Decision engine: ranks AWS primitives per role over a declared `WorkloadProfile`; every rejection names its cause, cost stays `cost_to_validate` |
+| `apiforge contract list\|show <name>` | Versioned canonical contracts (JSON schema per `<Name>/v1`) |
+| `apiforge knowledge list\|show\|check` | Domain packs — source authority dates, runtime matrices, declared evals; `check` cross-validates rule ids |
+| `apiforge task create|review|seal|run|accept|reject|status` | Sealed, budgeted unit of work; executor never holds the seal key; acceptor != executor |
+| `apiforge brief show --task <id>` | OutcomeBrief — `DONE` is refused while gaps or missing acceptance remain |
+| `apiforge graph build --case D --out G` | Canonical provenance graph (nodes.jsonl/edges.jsonl) — same inputs, same bytes |
+| `apiforge graph query|impact|trace|coverage --graph G` | Closed-vocabulary queries; coverage names unverified findings and unimplemented ops |
+| `apiforge graph export --graph G --out D [--format jsonl\|neptune\|rdf]` | Byte-identical copy, Neptune Gremlin-load CSV (`vertices.csv`/`edges.csv`, all `:String`) or RDF N-Triples (`graph.nt`); projections are grammar-validated and digested in `export.json` |
+| `apiforge model redis --path P` | Static Redis/Valkey call-site scan (py/java/go) → `data.redis.*` facts + `data_access_ir`; `binding: name` is named, never proven |
+| `apiforge model elasticache-access --path P` | Same Redis-protocol scan with the inventory declared as ElastiCache — provider named, never inferred |
+| `apiforge model mongo\|dynamodb-access --path P` | MongoDB/DocDB and DynamoDB call-site scans → `data.<db>.*` facts + `data_access_ir`; composite postures (full_scan, unfiltered_write, unbounded) come only from declared arguments |
+| `apiforge model graph-access\|neptune-access\|neo4j-access --path P` | Gremlin/openCypher/SPARQL call sites (Python AST; Java/Go/TypeScript patterns) → `data.graph.query` facts + `graph_access_ir` with a DomainGraphSketch; judged by `AF-DATA-013` and `AF-GDB-001..010` |
+| `apiforge model graph-explain --path DUMP [--format F] [--synthetic]` | Neptune Gremlin explain/profile, openCypher/SPARQL explain or Neo4j EXPLAIN/PROFILE dump → `graph_plan_ir` + `data.graph.plan` fact (`AF-GDB-020..025`); a call site without a plan keeps cardinality unresolved |
+| `apiforge collect neptune-explain --endpoint E --language gremlin\|opencypher --query Q --out D [--profile --reader-endpoint E]` | Read-only `neptunedata` allowlist; default plans never run the query; `--profile` runs it only for mutation-free literal text on a declared reader |
+| `apiforge evals graph-quality` | Per rule × language precision/recall of graph rules over `evals/corpus/graph-quality`; exit 1 below `thresholds.yaml` |
+| `apiforge model otel --path export.json` | OTLP/JSON trace export → `perf.otel.*` facts + `performance_run`; incomplete spans named unresolved |
+| `apiforge perf compare --baseline A --candidate B --threshold-pct N [--repeat-baseline dir]` | `compare_runs`/`detect_regression` over two PerformanceRuns; `added`/`removed`/`insufficient_data` always named; `--repeat-baseline` measures the noise floor and suppresses deltas inside it |
+| `apiforge perf verdict --run run.json [--repeat-baseline dir]` | `passed`/`failed`/`inconclusive` per run — validity conditions (baseline, generator saturation, TPS = completed transactions) name unevaluable evidence, never guess |
+| `apiforge perf memory add --run r.json` / `perf memory search --subject S --tool T` | Append-only PerformanceRun store at `.apiforge/perf/runs.jsonl` (hash-backed); search filters declared fields, never infers |
+| `apiforge perf suggest --case C` | `suggest_fix`: composes findings + catalog remediation into an `ActionPlan` with `proposed_diff` — never writes |
+| `apiforge perf scenario --tool k6\|jmeter\|locust --scenario s.json` | Generate the tool's script for a declared scenario — deterministic template, never executes |
+| `apiforge perf chaos` | List the declared controlled failure-injection scenarios (`CHAOS-001..013`) — injection is never executed |
+| `apiforge model resilience --path <project>` | Static resilience scan (timeouts, retries, pools, breaker/shutdown/idempotency declarations) → `resilience.*` facts; heuristic, blind spots named |
+| `apiforge autonomy status|set|run|runbook|heal|ledger` | Modes observe→supervised→continuous (v1 `recommend`/`sandbox`/`approved` map via `V1_MODE_MAP`, ADR-010) over the policy engine; `set` is itself policy-gated; `heal` runs the 8-stage self-healing pipeline; every evaluation lands in `ledger.jsonl` |
+| `apiforge index build|status --project P [--findings f.json]` | Content-hash indexes — 12 kinds (files/symbols/routes/facts + 8 derived); status names added/changed/removed |
+| — | `analyze`/`discover` extractors run through `.apiforge/cache/` — hits are recorded in the ledger and named in the payload |
+
+## Agentic layer
+
+Twenty-five coordinator profiles in `agents/*.md` (one per specialty, each with a
+nine-section contract, `access`, owned `apiforge_tools`, `rule_areas` and
+executors) plus five executors in
+`agents/executors/*.md` (`af-inventory`, `af-extractor`, `af-judge`,
+`af-verifier`, `af-synthesizer`). `AGENT_PROTOCOL.md` is the operating
+contract every profile points at; `next-step` routes by data, `playbook`
+is the dispatch floor, and `.apiforge/economy.jsonl` measures every call.
+
+Data and messaging are owned by `api-data-access-architect` (relational,
+key-value, document, graph, search and analytical stores) and
+`api-event-driven-architect` (queues, topics, streams and orchestration). The
+roster has 25 agents rendered from `agents/*.md` to `.claude/agents/`,
+`.agents/agents/` and `.codex/agents/` (`apiforge agents sync|check|lint`).
+
+## Evolution cycle status
+
+| Phase | Delivered local gate | Status |
+|---|---|---|
+| A | runtime review, bounded dynamic scheduler and checkpoints | complete |
+| B | migration readiness for Java/Go/Python runtime plans | complete |
+| C | capacity envelope from validated TPS/SLO evidence | complete |
+| D | Datadog/Dynatrace/OTel export preflight | complete |
+| E | Redis/MongoDB/DynamoDB/Neptune access governance | complete |
+| F | API security and resilience control gate | complete |
+| G | golden/holdout evaluation and host-parity aggregation | complete |
+| H | product documentation and release consolidation | current |
+
+The specialization sequence is also complete: relational/RDS, Kafka/MSK,
+AWS messaging, Redis/DynamoDB profiles, OpenSearch/Redshift, RabbitMQ/NATS/
+Pulsar and advanced MongoDB/Neptune profiles.
+
+The economy program (waves 0–8) is complete: measured ledger, context
+capsules, economy profiles with risk floors, layered cache and deltas,
+selective agentics, compact tool output, economy evals, targeted
+verification, live-evidence gating, knowledge freshness watch, per-SDD-phase
+budgets and resume checkpoints. See the
+[economy guide](docs/guides/API_FORGE_ECONOMY.en.md); safety and evidence
+never enter the budget.
+
+Three hardening rounds followed an external review (the program is now
+closed; GitHub governance lives in
+[docs/guides/API_FORGE_GITHUB_GOVERNANCE.en.md](docs/guides/API_FORGE_GITHUB_GOVERNANCE.en.md)): every case, fact, graph
+and caller-supplied path is confined to the project and declared workspace
+repositories; context, call and token budgets are contract invariants
+(class pools, one ControlPlane counter including shadow challengers, token
+coverage over model-facing rows); L0 early stop needs re-hashed proof
+receipts; and the certification evals fail on the bugs they certify
+against (`evals economy-hardening` runs production code, `evals
+agentic-quality` enforces an absolute floor plus baseline non-regression).
+
+Each phase has an artifact chain under `docs/sdd/`, focused tests and a
+rollback decision. External AWS, datastore, vendor and host mutations remain
+adapter-owned and approval-gated.
+
+## Exit codes
+
+| Code | Meaning |
+|---|---|
+| 0 | success |
+| 2 | input/validation refusal (`AF-INPUT-NOT-FOUND`, `AF-OPENAPI-*`, `AF-CASE-*` storage) |
+| 3 | integrity failure or denied/blocked governance result (`AF-CASE-HASH-MISMATCH`, `AF-POLICY-DENY`, `sdd check` not ok, ...) |
+| 4 | confirmed finding at `--fail-on` severity or worse |
+
+## Guarantees
+
+- **No network.** No SDK, no model call, no `$ref` resolution over the wire.
+- **No code execution.** FastAPI sources are parsed with `ast.parse`, never
+  imported.
+- **Read-only inputs.** Analyzed files are only read; `out_dir` overlapping an
+  input is refused.
+- **Reproducible.** Two runs on the same inputs produce byte-identical
+  artifacts.
+
+## Supported / unsupported
+
+Supported: OpenAPI 3.1 (JSON or strict YAML — aliases, merge keys, duplicate
+keys and custom tags rejected); FastAPI `FastAPI`/`APIRouter` decorators with
+literal paths and `include_router`, including cross-file imports; local refs
+`#/components/schemas/...` in the contract diff.
+
+Unsupported (emits named `unresolved` diagnostics, never guesses): dynamic
+route prefixes/paths, non-literal include targets, external or cyclic `$ref`,
+arbitrary JSON Schema inference. See `docs/architecture/mvp-boundaries.md`.
+
+## Verify a case
+
+```bash
+python -c "from apiforge.case.service import load_case; print(load_case('.apiforge/case').case_id)"
+```
+
+`load_case` re-hashes every declared artifact; tampering raises
+`CaseIntegrityError` (`AF-CASE-HASH-MISMATCH`).
+
+## Development
+
+```bash
+python -m pip install -e '.[dev]'
+python scripts/vendor_caveman.py --check
+python scripts/validate_skills.py
+apiforge agents check --root .
+apiforge capabilities verify
+python -m ruff check src tests
+python -m ruff format --check src tests
+python -m mypy src/apiforge
+python -m pytest -q
+python scripts/check_release.py
+```
+
+The same commands run in [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
+on every push, every pull request targeting `main` and manual
+workflow dispatch. The workflow is read-only, uses Python 3.12, cancels stale
+runs for the same ref and uploads the JUnit test report when available. A push
+to a non-main branch that finishes every validation green opens or reuses a PR
+to `main`. A separate host-owned job may request auto-merge only when the
+repository variable `APIFORGE_AUTO_MERGE=true` is explicitly enabled; the core
+and agents cannot merge, push, deploy or dispatch.
+The repository must authorize that operation with a least-privilege
+`APIFORGE_PR_TOKEN` secret or the GitHub Actions setting that allows workflows
+to create and approve pull requests.
+
+## Security and license
+
+Security reports belong in [`SECURITY.md`](SECURITY.md), preferably through a
+private GitHub Security Advisory. API Forge is released under the
+[`MIT License`](LICENSE).

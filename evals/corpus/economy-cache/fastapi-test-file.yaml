@@ -1,0 +1,13 @@
+id: fastapi-test-file
+fixture: tests/fixtures/economy_payments/fastapi
+contract: tests/fixtures/economy_payments/openapi.yaml
+# test_payments.py is carried whole as a test ref by the three operations whose
+# handlers it exercises; list/customers/health do not reference it.
+mutation:
+  file: proj/tests/test_payments.py
+  append: "\n\ndef test_placeholder_is_stable() -> None:\n    assert True\n"
+reanalyze: true
+expect_invalidated:
+  - GET /payments/{payment_id}
+  - POST /payments
+  - POST /payments/{payment_id}/refunds

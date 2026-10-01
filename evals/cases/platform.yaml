@@ -1,0 +1,30 @@
+version: 1
+cases:
+  - id: api-contract-breaking-change
+    domain: contract
+    input: fixtures/openapi/breaking-change.yaml
+    expected: REVIEW
+    required_evidence: [api-ir, contract-diff, client-impact]
+    mutation: remove-client-impact
+    quality_axes: [evidence-recall, no-false-done]
+  - id: runtime-migration-holdout
+    domain: migration
+    input: fixtures/migration/java-11-to-21
+    expected: REVIEW
+    required_evidence: [runtime-matrix, compatibility, holdout]
+    mutation: alter-runtime-version
+    quality_axes: [version-grounding, rollback-present]
+  - id: performance-tps-boundary
+    domain: performance
+    input: fixtures/performance/tps-boundary.json
+    expected: BLOCKED
+    required_evidence: [baseline, load-run, generator-health]
+    mutation: drop-baseline
+    quality_axes: [no-tps-inference, generator-not-saturated]
+  - id: compact-output-recall
+    domain: agentops
+    input: tests/agentops/test_compact.py
+    expected: PASS
+    required_evidence: [source-sha256, critical-recall]
+    mutation: remove-critical-line
+    quality_axes: [evidence-recall, byte-savings]

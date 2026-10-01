@@ -1,0 +1,4 @@
+id: retrieve-pagination
+kind: retrieval
+query: cursor pagination limit
+expect_pack: pagination

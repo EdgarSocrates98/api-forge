@@ -1,0 +1,203 @@
+name: API Forge CI
+
+on:
+  push:
+  pull_request:
+    branches:
+      - main
+  # Backstop: squash commits merged into main by auto-merge enabled with the
+  # workflow token do not start workflows, so main is validated daily as well.
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: api-forge-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate project
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install project and development dependencies
+        run: python -m pip install -e ".[dev]"
+
+      - name: Check vendored assets
+        run: python scripts/vendor_caveman.py --check
+
+      - name: Check Python dependency consistency
+        run: python -m pip check
+
+      - name: Validate skills
+        run: python scripts/validate_skills.py --check-mirrors
+
+      - name: Validate agent mirrors
+        run: apiforge agents check --root .
+
+      - name: Verify public capability matrix
+        run: apiforge capabilities verify
+
+      - name: Execute local runtime probes for all platform verticals
+        run: >-
+          apiforge platform verify-runtime
+          --now "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          --out .apiforge/platform-runtime-receipt.json
+
+      - name: Smoke test API/Git/CI change control
+        run: >-
+          apiforge change-control run
+          --bundle tests/fixtures/api_git_cicd/change_bundle.json
+          --out-dir .apiforge/change-control
+
+      - name: Verify change-control evidence references
+        run: apiforge change-control verify --run-dir .apiforge/change-control
+
+      - name: Publish change-control reports
+        run: apiforge change-control publish --run-dir .apiforge/change-control
+
+      - name: Ruff lint
+        run: python -m ruff check src tests
+
+      - name: Ruff format
+        run: python -m ruff format --check src tests
+
+      - name: Mypy
+        run: python -m mypy src/apiforge
+
+      - name: Test suite
+        run: python -m pytest -q --junitxml=test-results.xml
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-forge-test-results
+          path: test-results.xml
+          if-no-files-found: ignore
+
+      - name: Upload governed change-control reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-forge-change-control-reports
+          path: .apiforge/change-control/reports
+          if-no-files-found: error
+
+      - name: Upload platform runtime receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-forge-platform-runtime-receipt
+          path: .apiforge/platform-runtime-receipt.json
+          if-no-files-found: error
+
+      - name: Release gate
+        run: python scripts/check_release.py
+
+  open-green-pr:
+    name: Open PR after green validation
+    if: >-
+      github.event_name == 'push' && startsWith(github.ref, 'refs/heads/') &&
+      github.ref != 'refs/heads/main' && github.repository == 'EdgarSocrates98/api-forge'
+    needs: validate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Open or reuse pull request
+        env:
+          PR_TOKEN: ${{ secrets.APIFORGE_PR_TOKEN }}
+          WORKFLOW_TOKEN: ${{ github.token }}
+          APIFORGE_HOST_APPROVED: "true"
+        run: |
+          set -euo pipefail
+          if [ -n "${PR_TOKEN:-}" ]; then
+            export GH_TOKEN="$PR_TOKEN"
+          else
+            export GH_TOKEN="$WORKFLOW_TOKEN"
+          fi
+          python scripts/github_pr_host.py \
+            --operation create_or_reuse \
+            --repository "${GITHUB_REPOSITORY}" \
+            --head "${GITHUB_REF_NAME}" \
+            --base main \
+            --title "Validate ${GITHUB_REF_NAME}" \
+            --body "Automated PR opened after all API Forge CI validations passed for commit ${GITHUB_SHA}." \
+            --receipt .apiforge/pr/pr-receipt.json
+
+      - name: Upload GitHub mutation receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-forge-github-pr-receipt
+          path: .apiforge/pr/pr-receipt.json
+          if-no-files-found: ignore
+
+  auto-merge-green:
+    name: Request auto-merge after green validation
+    if: >-
+      github.event_name == 'push' && startsWith(github.ref, 'refs/heads/') &&
+      github.ref != 'refs/heads/main' && github.repository == 'EdgarSocrates98/api-forge' &&
+      vars.APIFORGE_AUTO_MERGE == 'true'
+    needs: open-green-pr
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Request GitHub auto-merge
+        env:
+          PR_TOKEN: ${{ secrets.APIFORGE_PR_TOKEN }}
+          WORKFLOW_TOKEN: ${{ github.token }}
+          APIFORGE_HOST_APPROVED: "true"
+        run: |
+          set -euo pipefail
+          # A merge enabled with the workflow token does not trigger CI on main;
+          # the PR token does when it is allowed to enable auto-merge (it needs
+          # contents and pull-requests write). Otherwise fall back to the
+          # workflow token: the merge still happens and the scheduled run
+          # validates main.
+          request() {
+            GH_TOKEN="$1" python scripts/github_pr_host.py \
+              --operation enable_auto_merge \
+              --repository "${GITHUB_REPOSITORY}" \
+              --head "${GITHUB_REF_NAME}" \
+              --base main \
+              --receipt .apiforge/pr/auto-merge-receipt.json
+          }
+          if [ -n "${PR_TOKEN:-}" ] && request "$PR_TOKEN"; then
+            exit 0
+          fi
+          echo "::warning::auto-merge not enabled with APIFORGE_PR_TOKEN (unset or lacking contents/pull-requests write); using the workflow token, so main is validated by the scheduled run"
+          request "$WORKFLOW_TOKEN"
+
+      - name: Upload auto-merge receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-forge-github-auto-merge-receipt
+          path: .apiforge/pr/auto-merge-receipt.json
+          if-no-files-found: ignore

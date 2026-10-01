@@ -1,0 +1,8 @@
+domain: expired-pack
+version: 1
+summary: fixture pack for the freshness watch eval
+verified: "2026-09-01"
+freshness:
+  upstream: spec-a
+  source_hash: "sha-a1"
+  expires_at: "2026-09-01T00:00:00+00:00"

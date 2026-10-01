@@ -1,9 +1,16 @@
 domain: neptune
-version: 1
-areas: [DATA, STORAGE]
+version: 2
+areas: [DATA, STORAGE, GDB]
 rule_ids:
   - AF-DATA-013
   - AF-STORE-004
+  - AF-GDB-007
+  - AF-GDB-009
+  - AF-GDB-010
+  - AF-GDB-020
+  - AF-GDB-021
+  - AF-GDB-022
+  - AF-GDB-023
 summary: >-
-  Neptune gremlin/openCypher/SPARQL access - bounded traversals only - plus cluster encryption posture from dumps.
-verified: "2026-09-21"
+  Amazon Neptune Database and Neptune Analytics - Gremlin/openCypher/SPARQL access, explain/profile plans (non-native steps, unbounded estimates, all-label scans), Analytics algorithms and vector topK, plus cluster encryption posture from dumps.
+verified: "2026-10-01"

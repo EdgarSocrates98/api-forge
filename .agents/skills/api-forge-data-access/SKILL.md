@@ -2,14 +2,15 @@
 name: api-forge-data-access
 description: >-
   Analisa e projeta como uma API usa seus bancos — PostgreSQL, MySQL,
-  RDS/Aurora, Redis/Valkey/ElastiCache, MongoDB/DocumentDB, DynamoDB, Neptune,
+  RDS/Aurora, Redis/Valkey/ElastiCache, MongoDB/DocumentDB, DynamoDB,
   OpenSearch e Redshift — produzindo DataAccessIR, access patterns, índices,
   consistência, transações, TTL/cache, idempotência, pools, paginação, N+1,
   scans, hot keys e hot partitions. Use quando a pergunta for "o que este
   código faz com o banco", query lenta, índice, modelagem de chave (PK/SK,
   GSI), cache stampede, lock distribuído, pool esgotado ou revisão de
-  persistência. Não use para filas/eventos (→ api-forge-messaging ou
-  api-forge-streaming), para provar throughput sob carga (→
+  persistência. Não use para graph stores — Neptune, Neo4j, Gremlin,
+  openCypher, SPARQL (→ api-forge-graph), para filas/eventos (→
+  api-forge-messaging ou api-forge-streaming), para provar throughput sob carga (→
   api-forge-performance) nem para timeouts/retries como resiliência (→
   api-forge-verification).
 compatibility: >-
@@ -45,9 +46,12 @@ DocumentDB, PostgreSQL e Aurora PostgreSQL não são intercambiáveis.
 | ElastiCache (código) | `apiforge model elasticache-access --path <dir>` | idem |
 | MongoDB / DocumentDB | `apiforge model mongo --path <dir>` | `collect docdb --cluster-id <id>` → `model docdb --path <dump>` |
 | DynamoDB | `apiforge model dynamodb-access --path <dir>` | `collect dynamodb --table-name <t>` → `model dynamodb --path <dump>` |
-| Neptune | `apiforge model neptune-access --path <dir>` | `collect neptune --cluster-id <id>` → `model neptune --path <dump>` |
 | OpenSearch | `apiforge model opensearch-access --path <dir>` | — |
 | Redshift | `apiforge model redshift-access --path <dir>` | — |
+
+Graph stores (Neptune Database/Analytics, Neo4j; Gremlin, openCypher,
+SPARQL) não ficam aqui: use `api-forge-graph` (especialista
+`api-graph-data-architect`).
 
 Todo `collect` é opt-in, read-only, usa credencial do host e aceita
 `--out <dump-dir> --now <ISO>`; pergunte antes com
@@ -76,8 +80,6 @@ cada regra com `apiforge rules lookup <id>`.
      suportados no DocumentDB, read/write concern.
    - **Redis/Valkey:** TTL, eviction policy, stampede, locks com fencing token,
      streams, invalidação, cache hit ≠ escrita concluída.
-   - **Neptune:** property graph vs RDF, linguagem (Gremlin/openCypher/SPARQL),
-     traversals sem limite, supernós.
    - **OpenSearch/Redshift:** mapping/shards, queries sem filtro, carga
      analítica em caminho síncrono de API.
 6. **Proponha mudança** (índice, schema, padrão de acesso) só com benchmark

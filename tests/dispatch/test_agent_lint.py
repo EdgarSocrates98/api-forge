@@ -96,4 +96,4 @@ def test_repository_roster_passes_lint() -> None:
     root = Path(__file__).resolve().parents[2]
     report = lint(root)
     assert report.ok, report.findings
-    assert report.agents == 25
+    assert report.agents == 26

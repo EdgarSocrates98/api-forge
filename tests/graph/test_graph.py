@@ -105,9 +105,9 @@ def test_export_copies_canonical_bytes(built: tuple[Path, GraphExport], tmp_path
     assert (out / "export.json").is_file()
 
 
-def test_export_neptune_is_named_stub(built: tuple[Path, GraphExport], tmp_path: Path) -> None:
+def test_export_unknown_format_refuses(built: tuple[Path, GraphExport], tmp_path: Path) -> None:
     with pytest.raises(ContractError, match="AF-GRAPH-FORMAT"):
-        export_graph(built[0], tmp_path / "nep", fmt="neptune")
+        export_graph(built[0], tmp_path / "x", fmt="graphml")
 
 
 def test_tampered_node_line_refuses(built: tuple[Path, GraphExport]) -> None:

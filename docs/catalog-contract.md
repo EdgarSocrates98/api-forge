@@ -224,8 +224,29 @@ filter), `unbounded`/`unbounded_find` (no `limit=`/`.limit(`/`.range(`/
 | `AF-MONGO-HEURISTIC-BINDING` | receivers matched by name, not constructor |
 | `AF-DYNAMO-PARSE` | a `*.py` file fails to parse |
 | `AF-DYNAMO-HEURISTIC-BINDING` | receivers matched by name, not constructor |
-| `AF-NEPTUNE-PARSE` | a `*.py` file fails to parse |
-| `AF-NEPTUNE-HEURISTIC-BINDING` | receivers matched by name, not constructor |
+
+## Graph-database adapters (Neptune, Neo4j)
+
+`model graph-access|neptune-access|neo4j-access` emit `data.graph.query` facts
+(`vendor`, `language`, `bounded`, `mutation`, shape-risk booleans) and a
+`GraphAccessIR`; `model graph-explain` turns one explain/profile dump into a
+`GraphPlanIR` and a `data.graph.plan` fact. Rules live in area `GDB`
+(`AF-GDB-001..010` on call sites, `AF-GDB-020..025` on plans) plus
+`AF-DATA-013`. `AF-GRAPH-*` stays reserved for the system graph.
+
+| Code | Meaning |
+|---|---|
+| `AF-GDB-PARSE` | a `*.py` file fails to parse; the scan continues |
+| `AF-GDB-HEURISTIC` | receivers matched by name (Python) or call sites matched by pattern (Java/Go/TypeScript) |
+| `AF-GDB-DYNAMIC-QUERY` | query text is not a literal; bounds stay unresolved |
+| `AF-GDB-PLAN-FORMAT` | a dump matches no known plan format, or `--format` is outside the closed set; unlock: pass `--format` |
+| `AF-GDB-PLAN-PARSE` | a dump is missing, empty or yields no operators; unlock: pass the unmodified explain/profile output |
+| `AF-GDB-COLLECT-ARG` | `collect neptune-explain` got an unknown language, an empty query/endpoint, or both/neither of `--query`/`--query-file` |
+| `AF-GDB-COLLECT-OP` | an operation outside the read-only `neptunedata` allowlist was requested |
+| `AF-GDB-EXPLAIN-SPARQL` | SPARQL explain has no `neptunedata` operation; unlock: import a dump with `model graph-explain` |
+| `AF-GDB-PROFILE-MUTATION` | the query mutates the graph; only read queries are explained |
+| `AF-GDB-PROFILE-READER` | `--profile` executes the query and needs `--reader-endpoint` equal to `--endpoint` |
+| `AF-GDB-PROFILE-DYNAMIC` | `--profile` needs literal query text |
 
 ## API Gateway dump adapter
 
@@ -926,7 +947,10 @@ are closed-vocabulary (`--kind`, `--edge`, `--prop k=v`); `impact` traverses
 in reverse, `trace` returns the shortest directed path or names the pair
 unreachable, `coverage` names unverified findings / unimplemented
 operations / unreferenced facts. `export` copies canonical bytes plus a
-digest manifest; `--format neptune` is a named stub, not a silent no-op.
+digest manifest; `--format neptune` writes Neptune Gremlin-load CSV
+(`vertices.csv`, `edges.csv`, every property `:String`) and `--format rdf`
+writes RDF 1.1 N-Triples (`graph.nt`); both are re-validated before
+`export.json` lists their digests.
 
 | Code | Meaning |
 |---|---|
@@ -937,7 +961,8 @@ digest manifest; `--format neptune` is a named stub, not a silent no-op.
 | `AF-GRAPH-KIND` | query names an unknown node or edge kind |
 | `AF-GRAPH-NODE` | `impact`/`trace` name a node absent from the graph |
 | `AF-GRAPH-INPUT` | a source artifact is unreadable or malformed |
-| `AF-GRAPH-FORMAT` | export format named but not implemented (e.g. `neptune`) |
+| `AF-GRAPH-FORMAT` | export format outside `jsonl`, `neptune`, `rdf` |
+| `AF-GRAPH-EXPORT-INVALID` | a projection failed its loader-grammar validation; nothing is listed in `export.json` |
 
 ### Index (`index`)
 

@@ -1,4 +1,7 @@
-"""Static extraction of MongoDB/DynamoDB/Neptune data-access call sites.
+"""Static extraction of MongoDB/DynamoDB data-access call sites.
+
+Graph stores (Neptune, Neo4j) live in ``apiforge.adapters.graph_``;
+``extract_neptune_access`` stays here as a compatibility entry point.
 
 Same contract as the Redis adapter: Python files are parsed with ``ast``
 (binding by constructor when visible, ``binding: name`` heuristic
@@ -58,12 +61,6 @@ _DYNAMO_OPS = {
     "describe_table",
 }
 
-_NEPTUNE_PACKAGES = ("gremlin_python", "gremlingo", "aioboto3", "boto3")
-_NEPTUNE_QUERY_METHODS = {
-    "execute_gremlin_query": "gremlin",
-    "execute_open_cypher_query": "opencypher",
-    "execute_sparql": "sparql",
-}
 _LIMIT_RE = re.compile(r"\bLIMIT\s+\d+|\.limit\s*\(|\.range\s*\(", re.IGNORECASE)
 
 
@@ -275,58 +272,6 @@ def _scan_python_dynamo(path: Path, rel: str, digest: str) -> tuple[list[Fact], 
     return facts, diagnostics
 
 
-def _scan_python_neptune(path: Path, rel: str, digest: str) -> tuple[list[Fact], list[Diagnostic]]:
-    text = path.read_text(encoding="utf-8")
-    tree = _parse_python(path, rel, digest, "neptune")
-    if isinstance(tree, Diagnostic):
-        return [], [tree]
-    if not _imports(tree, _NEPTUNE_PACKAGES):
-        return [], []
-    lines = text.splitlines()
-    facts: list[Fact] = []
-    for node in ast.walk(tree):
-        if not isinstance(node, ast.Call) or not isinstance(node.func, ast.Attribute):
-            continue
-        method = node.func.attr
-        if method in _NEPTUNE_QUERY_METHODS:
-            query = next(
-                (_str_constant(kw.value) for kw in node.keywords if _str_constant(kw.value)),
-                None,
-            )
-            facts.append(
-                _fact(
-                    "data.neptune.query",
-                    rel,
-                    digest,
-                    node.lineno,
-                    "neptune",
-                    language=_NEPTUNE_QUERY_METHODS[method],
-                    operation=method,
-                    binding="name",
-                    unbounded=not bool(query and _LIMIT_RE.search(query)),
-                )
-            )
-        elif method in ("V", "E") and isinstance(node.func.value, ast.Name):
-            # g.V()/g.E() traversal — a same-line .limit(/.range( bounds it;
-            # multi-line chains keep unbounded=True (conservative, honest)
-            line = lines[node.lineno - 1] if node.lineno <= len(lines) else ""
-            facts.append(
-                _fact(
-                    "data.neptune.query",
-                    rel,
-                    digest,
-                    node.lineno,
-                    "neptune",
-                    language="gremlin",
-                    operation=f"traverse_{method.lower()}",
-                    binding="name",
-                    unbounded=not bool(_LIMIT_RE.search(line)),
-                )
-            )
-    diagnostics = [_heuristic_diag(rel, digest, "neptune")] if facts else []
-    return facts, diagnostics
-
-
 _JAVA_DB_RE = {
     "mongo": (
         re.compile(r"com\.mongodb|MongoCollection|MongoTemplate"),
@@ -342,11 +287,6 @@ _JAVA_DB_RE = {
             r"\.(scan|query|getItem|putItem|updateItem|deleteItem|"
             r"batchGetItem|batchWriteItem|transactWriteItems)\s*\("
         ),
-        set(),
-    ),
-    "neptune": (
-        re.compile(r"gremlin|tinkerpop|neptune"),
-        re.compile(r"\bg\s*\.\s*(V|E)\s*\("),
         set(),
     ),
 }
@@ -366,11 +306,6 @@ _GO_DB_RE = {
             r"BatchGetItem|BatchWriteItem|TransactWriteItems)"
             r"(WithContext)?\s*\("
         ),
-        set(),
-    ),
-    "neptune": (
-        re.compile(r"gremlingo|neptune"),
-        re.compile(r"\bg\s*\.\s*(V|E)\s*\("),
         set(),
     ),
 }
@@ -431,14 +366,9 @@ def _scan_by_pattern(
                         r"withKeyConditionExpression",
                         line,
                     )
-            if extractor == "neptune":
-                measures["language"] = "gremlin"
-                measures["unbounded"] = not bool(_LIMIT_RE.search(line))
             facts.append(
                 _fact(
-                    f"data.{extractor}.operation"
-                    if extractor != "neptune"
-                    else "data.neptune.query",
+                    f"data.{extractor}.operation",
                     rel,
                     digest,
                     index,
@@ -453,11 +383,6 @@ def _scan_by_pattern(
 _SCANNERS = {
     "mongo": (_scan_python_mongo, _JAVA_DB_RE["mongo"], _GO_DB_RE["mongo"]),
     "dynamo": (_scan_python_dynamo, _JAVA_DB_RE["dynamo"], _GO_DB_RE["dynamo"]),
-    "neptune": (
-        _scan_python_neptune,
-        _JAVA_DB_RE["neptune"],
-        _GO_DB_RE["neptune"],
-    ),
 }
 
 
@@ -507,5 +432,7 @@ def extract_dynamo_access(project_root: Path) -> CodeInventory:
 
 
 def extract_neptune_access(project_root: Path) -> CodeInventory:
-    """Neptune gremlin/openCypher/SPARQL call sites."""
-    return extract_data_access(project_root, "neptune")
+    """Neptune Gremlin/openCypher/SPARQL call sites — owned by ``adapters.graph_``."""
+    from apiforge.adapters.graph_.extract import extract_neptune_access as extract
+
+    return extract(project_root)

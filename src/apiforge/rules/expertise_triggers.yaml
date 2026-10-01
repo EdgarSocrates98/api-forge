@@ -101,8 +101,14 @@ keywords:
     match: [documentdb]
     packs: [documentdb]
   - id: neptune
-    match: [neptune, gremlin, sparql]
-    packs: [neptune]
+    match: [neptune, "neptune analytics"]
+    packs: [neptune, graph-databases]
+  - id: neo4j
+    match: [neo4j, "neo4j-driver"]
+    packs: [neo4j, graph-databases]
+  - id: graph-databases
+    match: [gremlin, opencypher, cypher, sparql, traversal, "property graph", rdf, "graph database"]
+    packs: [graph-databases]
   - id: redis
     match: [redis, valkey]
     packs: [redis-valkey]

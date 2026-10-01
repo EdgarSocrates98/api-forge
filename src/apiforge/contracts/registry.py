@@ -72,6 +72,7 @@ from apiforge.contracts.economy_resume import (
 )
 from apiforge.contracts.evidence import EvidenceRef
 from apiforge.contracts.graph import GraphEdge, GraphExport, GraphNode
+from apiforge.contracts.graph_access import GraphAccessIR, GraphPlanIR
 from apiforge.contracts.graph_impact import (
     GraphCandidateImpact,
     GraphImpactAssessment,
@@ -237,6 +238,8 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "GraphNode/v1": GraphNode,
     "GraphEdge/v1": GraphEdge,
     "GraphExport/v1": GraphExport,
+    "GraphAccessIR/v1": GraphAccessIR,
+    "GraphPlanIR/v1": GraphPlanIR,
     "GraphImpactPolicy/v1": GraphImpactPolicy,
     "GraphImpactEffect/v1": GraphImpactEffect,
     "GraphImpactNode/v1": GraphImpactNode,

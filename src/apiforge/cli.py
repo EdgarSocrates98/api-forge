@@ -1632,6 +1632,53 @@ def _echo_manifest(manifest: object, detail_level: str) -> None:
     )
 
 
+@collect_app.command("neptune-explain")
+def collect_neptune_explain_cmd(
+    endpoint: str = typer.Option(
+        ..., "--endpoint", help="Neptune endpoint URL (https://host:8182)."
+    ),
+    language: str = typer.Option(..., "--language", help="gremlin|opencypher (sparql: dump only)."),
+    out_dir: Path = typer.Option(..., "--out", help="Dump directory to write."),
+    query: str | None = typer.Option(None, "--query", help="Literal query text."),
+    query_file: Path | None = typer.Option(None, "--query-file", help="File holding the query."),
+    profile: bool = typer.Option(
+        False, "--profile", help="Executing plan (profile/dynamic); needs --reader-endpoint."
+    ),
+    reader_endpoint: str | None = typer.Option(
+        None, "--reader-endpoint", help="Declared reader; must equal --endpoint for --profile."
+    ),
+    now: str | None = typer.Option(None, "--now", help="Explicit ISO8601 collection timestamp."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Read-only explain/profile over the neptunedata allowlist; receipt in manifest."""
+
+    def work() -> CollectManifest:
+        from apiforge.collectors.graph_explain import collect_neptune_explain
+
+        if (query is None) == (query_file is None):
+            error = AnalysisError("AF-GDB-COLLECT-ARG", "pass exactly one of --query/--query-file")
+            error.field, error.unlock = "query", "pass --query <text> or --query-file <path>"  # type: ignore[attr-defined]
+            raise error
+        text = query if query is not None else Path(str(query_file)).read_text(encoding="utf-8")
+        try:
+            return collect_neptune_explain(
+                language,
+                text,
+                endpoint,
+                out_dir,
+                profile=profile,
+                reader_endpoint=reader_endpoint,
+                now=now,
+            )
+        except CollectError as exc:
+            error = AnalysisError(exc.code, exc.detail)
+            error.field = getattr(exc, "field", "collector")  # type: ignore[attr-defined]
+            error.unlock = getattr(exc, "unlock", "fix the collector input and rerun")  # type: ignore[attr-defined]
+            raise error from exc
+
+    _echo_manifest(_run(work), detail_level)
+
+
 @model_app.command("terraform")
 def inventory_terraform(
     path: Path = typer.Option(..., "--path", help="Directory of *.tf files."),
@@ -1871,10 +1918,16 @@ _DATA_ACCESS_READERS = {
         "Project directory to scan for DynamoDB data-plane calls.",
     ),
     "neptune-access": (
-        "apiforge.adapters.dbaccess.extract_neptune_access",
+        "apiforge.adapters.graph_.extract.extract_neptune_access",
         "neptune",
         "neptune",
         "Project directory to scan for Neptune gremlin/cypher/SPARQL calls.",
+    ),
+    "neo4j-access": (
+        "apiforge.adapters.graph_.extract.extract_neo4j_access",
+        "neo4j",
+        "neo4j",
+        "Project directory to scan for Neo4j openCypher calls.",
     ),
 }
 
@@ -1915,6 +1968,60 @@ def _register_data_access_models() -> None:
 
 
 _register_data_access_models()
+
+
+@model_app.command("graph-access")
+def model_graph_access(
+    path: Path = typer.Option(..., "--path", help="Project directory to scan."),
+    vendor: str | None = typer.Option(None, "--vendor", help="neptune|neo4j (default: both)."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Graph call sites (Gremlin/openCypher/SPARQL) + GraphAccessIR and domain sketch."""
+
+    def work() -> dict[str, object]:
+        from apiforge.adapters.graph_.extract import VENDORS, extract_graph_access
+        from apiforge.adapters.graph_.ir import build_graph_access_ir
+
+        if not path.is_dir():
+            raise AnalysisError("AF-INPUT-NOT-FOUND", str(path))
+        if vendor is not None and vendor not in VENDORS:
+            error = AnalysisError("AF-INPUT-INVALID", f"--vendor {vendor!r} not in {VENDORS}")
+            error.field, error.unlock = "vendor", "pass --vendor neptune or --vendor neo4j"  # type: ignore[attr-defined]
+            raise error
+        inventory = extract_graph_access(path, vendor)
+        return {
+            "graph_access_ir": build_graph_access_ir(inventory).model_dump(mode="json"),
+            "diagnostics": [d.model_dump(mode="json") for d in inventory.diagnostics],
+            "facts": [f.model_dump(mode="json") for f in inventory.facts],
+            "framework": inventory.framework,
+            "input_hashes": dict(inventory.input_hashes),
+        }
+
+    _echo_json(_run(work), detail_level)
+
+
+@model_app.command("graph-explain")
+def model_graph_explain(
+    path: Path = typer.Option(..., "--path", help="One explain/profile dump file."),
+    fmt: str | None = typer.Option(None, "--format", help="Plan format (auto-detected)."),
+    synthetic: bool = typer.Option(False, "--synthetic", help="Mark the plan as synthetic."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Parse a Neptune/Neo4j plan dump into GraphPlanIR + data.graph.plan facts."""
+
+    def work() -> dict[str, object]:
+        from apiforge.adapters.graph_.plans import extract_graph_plan
+
+        inventory, plan = extract_graph_plan(path, fmt, synthetic=synthetic)
+        return {
+            "graph_plan_ir": plan.model_dump(mode="json"),
+            "diagnostics": [],
+            "facts": [f.model_dump(mode="json") for f in inventory.facts],
+            "framework": inventory.framework,
+            "input_hashes": dict(inventory.input_hashes),
+        }
+
+    _echo_json(_run(work), detail_level)
 
 
 _STREAMING_READERS = {
@@ -3066,10 +3173,12 @@ def graph_coverage(
 def graph_export(
     graph: Path = typer.Option(..., "--graph", help="Graph directory."),
     out: Path = typer.Option(..., "--out", help="Export directory."),
-    fmt: str = typer.Option("jsonl", "--format", help="jsonl (neptune is a named stub)."),
+    fmt: str = typer.Option(
+        "jsonl", "--format", help="jsonl|neptune (Gremlin CSV)|rdf (N-Triples)."
+    ),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
-    """Canonical copy plus export.json digests; `neptune` refuses as a named stub."""
+    """jsonl copy, Neptune Gremlin CSV or RDF N-Triples, plus export.json digests."""
 
     def work() -> object:
         from apiforge.graph.export import export_graph, export_summary
@@ -3680,6 +3789,20 @@ def evals_economy_routing(
     from apiforge.evals.economy_routing import run_economy_routing
 
     result = _run(lambda: run_economy_routing(corpus))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("graph-quality")
+def evals_graph_quality(
+    corpus: Path = typer.Option(Path("evals/corpus/graph-quality"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Per-rule x language precision/recall of graph rules over the golden corpus."""
+    from apiforge.evals.graph_quality import run_graph_quality
+
+    result = _run(lambda: run_graph_quality(corpus))
     _echo_json(result, detail_level)
     if isinstance(result, dict) and not result.get("passed"):
         raise typer.Exit(code=1)

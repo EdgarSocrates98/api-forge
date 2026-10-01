@@ -1,0 +1,17 @@
+domain: graph-databases
+version: 1
+areas: [GDB, DATA]
+rule_ids:
+  - AF-DATA-013
+  - AF-GDB-001
+  - AF-GDB-002
+  - AF-GDB-003
+  - AF-GDB-004
+  - AF-GDB-005
+  - AF-GDB-006
+  - AF-GDB-007
+  - AF-GDB-008
+  - AF-GDB-025
+summary: >-
+  Vendor-neutral graph-database access - Gremlin, openCypher and SPARQL shapes (bounded results, stopped loops, labeled fan-out, anchored starts, bounded paths, parameterized text) measured on data.graph.query facts by model graph-access.
+verified: "2026-10-01"

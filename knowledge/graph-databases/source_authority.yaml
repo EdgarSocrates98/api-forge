@@ -1,0 +1,17 @@
+sources:
+  - name: "Apache TinkerPop reference (Gremlin steps)"
+    url: https://tinkerpop.apache.org/docs/current/reference/
+    authority: vendor-docs
+    verified: "2026-10-01"
+  - name: "openCypher variable-length patterns"
+    url: https://neo4j.com/docs/cypher-manual/current/patterns/variable-length-patterns/
+    authority: vendor-docs
+    verified: "2026-10-01"
+  - name: "SPARQL 1.1 Query Language - property paths"
+    url: https://www.w3.org/TR/sparql11-query/#propertypaths
+    authority: w3c
+    verified: "2026-10-01"
+  - name: "RDF 1.1 N-Triples"
+    url: https://www.w3.org/TR/n-triples/
+    authority: w3c
+    verified: "2026-10-01"

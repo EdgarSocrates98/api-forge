@@ -1,0 +1,23 @@
+schema: apiforge/graph-quality-thresholds/v1
+precision:
+  python: 1.00
+  java: 0.90
+  go: 0.90
+  typescript: 0.90
+recall_global: 0.90
+bounded_false_positives: 0
+min_cases_per_rule_language:
+  positive: 2
+  negative: 1
+support:
+  AF-DATA-013: [python, java, go, typescript]
+  AF-GDB-001: [python, java, go, typescript]
+  AF-GDB-002: [python, java, go, typescript]
+  AF-GDB-003: [python, java, go, typescript]
+  AF-GDB-004: [python, java, go, typescript]
+  AF-GDB-005: [python, java, go, typescript]
+  AF-GDB-006: [python, java, go, typescript]
+  AF-GDB-007: [python]
+  AF-GDB-008: [python, java, go, typescript]
+  AF-GDB-009: [python]
+  AF-GDB-010: [python]

@@ -26,8 +26,10 @@ _MUTATIONS = {
         "update_item",
         "delete_item",
     },
-    "neptune": {"addv", "adde", "drop", "addvertex", "addedge"},
+    "neptune": {"addv", "adde", "drop", "addvertex", "addedge", "mutation"},
+    "neo4j": {"mutation"},
 }
+_GRAPH_STORES = {"neptune", "neo4j"}
 
 
 def assess_data_access(
@@ -80,7 +82,7 @@ def build_data_performance_profile(
 ) -> DataPerformanceProfile:
     """Summarize only facts observed by a Redis/Dynamo scanner."""
 
-    if database not in {"redis", "dynamo", "mongo", "neptune"}:
+    if database not in {"redis", "dynamo", "mongo"} | _GRAPH_STORES:
         raise ValueError(f"unsupported database {database!r}")
     signals: set[str] = set()
     risks: set[str] = set()
@@ -105,16 +107,21 @@ def build_data_performance_profile(
             if fact.measures.get("unbounded") is True:
                 risks.add("unbounded-document-query")
         if (
-            database == "neptune"
-            and fact.kind == "data.neptune.query"
-            and fact.measures.get("unbounded") is True
+            database in _GRAPH_STORES
+            and fact.kind == "data.graph.query"
+            and fact.measures.get("vendor") == database
         ):
-            risks.add("unbounded-graph-traversal")
+            if fact.measures.get("unbounded") is True:
+                risks.add("unbounded-graph-traversal")
+            shape = fact.measures.get("shape_risks")
+            if isinstance(shape, list | tuple):
+                risks.update(str(risk) for risk in shape)
     latency_class = {
         "redis": "low_latency",
         "dynamo": "partitioned_scale",
         "mongo": "document",
         "neptune": "graph",
+        "neo4j": "graph",
     }[database]
     return DataPerformanceProfile(
         id=stable_id("data-profile", {"root": inventory.root, "database": database}),

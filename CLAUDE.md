@@ -9,8 +9,10 @@ reasoning and must keep complete artifacts available when using compact output.
 - discovery/API-IR: `.claude/skills/api-forge-discovery`
 - contracts/OpenAPI/gRPC: `.claude/skills/api-forge-contract`
 - architecture/AWS: `.claude/skills/api-forge-architecture`
-- Redis/Valkey, DynamoDB, MongoDB/DocumentDB, Neptune and RDS/Aurora:
+- Redis/Valkey, DynamoDB, MongoDB/DocumentDB and RDS/Aurora:
   `.claude/skills/api-forge-data-access`
+- graph databases (Neptune Database/Analytics, Neo4j; Gremlin, openCypher,
+  SPARQL, explain/profile plans, system-graph export): `.claude/skills/api-forge-graph`
 - PostgreSQL/MySQL, Kafka/MSK, SQS/SNS/EventBridge/Kinesis, OpenSearch/Redshift,
   RabbitMQ/NATS/Pulsar: route through the data-access and architecture skills;
   use the specialized `model *-access` commands documented in `README.md`.

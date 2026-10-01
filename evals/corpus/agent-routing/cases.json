@@ -525,6 +525,48 @@
    "expected": "api-release-guardian",
    "family": "operations",
    "source": "agents/api-release-guardian.md"
+  },
+  {
+   "id": "R076",
+   "question": "Our recommendation endpoint walks friends-of-friends in Gremlin and times out on popular users. Review the traversal.",
+   "expected": "api-graph-data-architect",
+   "family": "graph",
+   "source": "agents/api-graph-data-architect.md"
+  },
+  {
+   "id": "R077",
+   "question": "Is this openCypher MATCH with an unbounded hop count safe to ship against Neo4j?",
+   "expected": "api-graph-data-architect",
+   "family": "graph",
+   "source": "agents/api-graph-data-architect.md"
+  },
+  {
+   "id": "R078",
+   "question": "Should we model order line items as vertices or as edge properties in our Neptune property graph?",
+   "expected": "api-graph-data-architect",
+   "family": "graph",
+   "source": "agents/api-graph-data-architect.md"
+  },
+  {
+   "id": "R079",
+   "question": "Here is a Neptune explain output with steps not converted to native execution; what does it tell us?",
+   "expected": "api-graph-data-architect",
+   "family": "graph",
+   "source": "agents/api-graph-data-architect.md"
+  },
+  {
+   "id": "R080",
+   "question": "We want to load the service dependency graph produced by apiforge into Amazon Neptune as RDF.",
+   "expected": "api-graph-data-architect",
+   "family": "graph",
+   "source": "agents/api-graph-data-architect.md"
+  },
+  {
+   "id": "R081",
+   "question": "A SPARQL query with a transitive property path over our ontology is slow; where is the risk?",
+   "expected": "api-graph-data-architect",
+   "family": "graph",
+   "source": "agents/api-graph-data-architect.md"
   }
  ]
 }

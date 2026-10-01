@@ -91,9 +91,12 @@ Route by engine instead of treating every datastore or broker as generic:
 - low-latency and partitioned data: Redis/Valkey and DynamoDB profiles;
 - analytics: `model opensearch-access`, `model redshift-access`;
 - brokers: `model rabbitmq-access`, `model nats-access`, `model pulsar-access`;
-- document/graph: MongoDB/DocumentDB and Neptune profiles.
+- document: MongoDB/DocumentDB profiles;
+- graph (Neptune, Neo4j): `model graph-access`, `model neptune-access`,
+  `model neo4j-access`, plans via `model graph-explain` (owner:
+  `api-graph-data-architect`, skill `api-forge-graph`).
 
-Use the corresponding IR (`DataAccessIR`, `StreamingAccessIR`,
+Use the corresponding IR (`DataAccessIR`, `GraphAccessIR`/`GraphPlanIR`, `StreamingAccessIR`,
 `MessagingAccessIR`, `AnalyticalAccessIR`) and preserve the distinction
 between observed signals and runtime claims. Never infer indexes, hot keys,
 consumer lag, query plans, throughput or delivery guarantees without evidence.

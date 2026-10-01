@@ -119,6 +119,23 @@ EXPECTED_RULES = {
     "AF-DATA-011",
     "AF-DATA-012",
     "AF-DATA-013",
+    # Graph-database rules (Neptune/Neo4j call sites and plans)
+    "AF-GDB-001",
+    "AF-GDB-002",
+    "AF-GDB-003",
+    "AF-GDB-004",
+    "AF-GDB-005",
+    "AF-GDB-006",
+    "AF-GDB-007",
+    "AF-GDB-008",
+    "AF-GDB-009",
+    "AF-GDB-010",
+    "AF-GDB-020",
+    "AF-GDB-021",
+    "AF-GDB-022",
+    "AF-GDB-023",
+    "AF-GDB-024",
+    "AF-GDB-025",
 }
 
 
@@ -138,6 +155,7 @@ def test_areas_cover_the_specialist_team() -> None:
         "CONTRACT",
         "DATA",
         "GATEWAY",
+        "GDB",
         "IDENTITY",
         "MESSAGING",
         "OBSERVE",
@@ -163,6 +181,7 @@ def test_id_prefix_matches_area() -> None:
         "IDENTITY": "AF-IAM-",
         "OBSERVE": "AF-OBS-",
         "STORAGE": "AF-STORE-",
+        "GDB": "AF-GDB-",
     }
     for rule_id, meta in load_catalog().items():
         assert rule_id.startswith(expected[meta.area]), rule_id

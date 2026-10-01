@@ -75,8 +75,8 @@ api-security-reviewer:
   - {executor: af-judge, verb: "observability capabilities", purpose: "review mutation and credential gates"}
 api-data-access-architect:
   - {executor: af-inventory, verb: "model redis", purpose: "data-access call sites for each declared database"}
-  - {executor: af-extractor, verb: "model mongo", purpose: "mongo/dynamo/neptune facts + DataAccessIR"}
-  - {executor: af-judge, verb: "rules list --area DATA", purpose: "AF-DATA-001..013 over the call-site facts"}
+  - {executor: af-extractor, verb: "model mongo", purpose: "mongo/dynamo facts + DataAccessIR"}
+  - {executor: af-judge, verb: "rules list --area DATA", purpose: "AF-DATA-001..012 over the call-site facts"}
   - {executor: af-judge, verb: "rules list --area STORAGE", purpose: "AF-STORE-001..005 over datastore dumps"}
   - {executor: af-synthesizer, verb: "rules lookup", purpose: "access-pattern guidance per rule applied"}
   - {executor: af-inventory, verb: "model rds-access", purpose: "extract relational access signals without executing queries"}
@@ -85,6 +85,15 @@ api-data-access-architect:
   - {executor: af-synthesizer, verb: "next-step", purpose: "route benchmark or migration work with evidence limits"}
   - {executor: af-inventory, verb: "model opensearch-access", purpose: "extract search and aggregation access signals"}
   - {executor: af-extractor, verb: "model redshift-access", purpose: "normalize analytical query and partition signals"}
+api-graph-data-architect:
+  - {executor: af-inventory, verb: "model graph-access", purpose: "Gremlin/openCypher/SPARQL call sites for Neptune and Neo4j"}
+  - {executor: af-extractor, verb: "model neptune-access", purpose: "GraphAccessIR and DomainGraphSketch per vendor"}
+  - {executor: af-judge, verb: "rules list --area GDB", purpose: "AF-GDB-001..010 on call sites, AF-GDB-020..025 on plans"}
+  - {executor: af-judge, verb: "rules list --area DATA", purpose: "AF-DATA-013 unbounded graph results"}
+  - {executor: af-extractor, verb: "model graph-explain", purpose: "imported explain/profile dump into GraphPlanIR"}
+  - {executor: af-inventory, verb: "model neptune", purpose: "cluster posture from a collect neptune dump"}
+  - {executor: af-verifier, verb: "evidence emit", purpose: "keep plan sha256, synthetic flag and unresolved cardinality"}
+  - {executor: af-synthesizer, verb: "graph export", purpose: "system graph as Neptune Gremlin CSV or RDF N-Triples"}
 api-event-driven-architect:
   - {executor: af-inventory, verb: "model sqs", purpose: "queue posture from dump"}
   - {executor: af-extractor, verb: "model eventbridge", purpose: "event bus facts"}

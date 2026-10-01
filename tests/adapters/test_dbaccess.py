@@ -67,15 +67,15 @@ def test_dynamo_facts_and_rules() -> None:
 
 def test_neptune_facts_and_rules() -> None:
     inv = extract_neptune_access(FIXTURE)
-    queries = [f for f in inv.facts if f.kind == "data.neptune.query"]
+    queries = [f for f in inv.facts if f.kind == "data.graph.query"]
+    assert {f.measures["vendor"] for f in queries} == {"neptune"}
     gremlin = [f for f in queries if f.measures["language"] == "gremlin"]
     cypher = [f for f in queries if f.measures["language"] == "opencypher"]
     assert len(gremlin) == 2 and len(cypher) == 2
-    # bounded gremlin traversal on the same line
     assert sum(1 for f in gremlin if f.measures["unbounded"]) == 1
-    # cypher with LIMIT is bounded; without is not
     assert sum(1 for f in cypher if f.measures["unbounded"]) == 1
     assert len(_findings(inv, "AF-DATA-013")) == 2
+    assert len(_findings(inv, "AF-GDB-003")) == 1
 
 
 def test_java_pattern_facts() -> None:

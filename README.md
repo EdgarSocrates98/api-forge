@@ -474,10 +474,14 @@ while refusal codes and `fact_id`s survive.
 | `apiforge brief show --task <id>` | OutcomeBrief — `DONE` is refused while gaps or missing acceptance remain |
 | `apiforge graph build --case D --out G` | Canonical provenance graph (nodes.jsonl/edges.jsonl) — same inputs, same bytes |
 | `apiforge graph query|impact|trace|coverage --graph G` | Closed-vocabulary queries; coverage names unverified findings and unimplemented ops |
-| `apiforge graph export --graph G --out D` | Byte-identical copy + digest manifest; `--format neptune` is a named stub |
+| `apiforge graph export --graph G --out D [--format jsonl\|neptune\|rdf]` | Byte-identical copy, Neptune Gremlin-load CSV (`vertices.csv`/`edges.csv`, all `:String`) or RDF N-Triples (`graph.nt`); projections are grammar-validated and digested in `export.json` |
 | `apiforge model redis --path P` | Static Redis/Valkey call-site scan (py/java/go) → `data.redis.*` facts + `data_access_ir`; `binding: name` is named, never proven |
 | `apiforge model elasticache-access --path P` | Same Redis-protocol scan with the inventory declared as ElastiCache — provider named, never inferred |
-| `apiforge model mongo\|dynamodb-access\|neptune-access --path P` | MongoDB/DocDB, DynamoDB and Neptune call-site scans → `data.<db>.*` facts + `data_access_ir`; composite postures (full_scan, unfiltered_write, unbounded) come only from declared arguments |
+| `apiforge model mongo\|dynamodb-access --path P` | MongoDB/DocDB and DynamoDB call-site scans → `data.<db>.*` facts + `data_access_ir`; composite postures (full_scan, unfiltered_write, unbounded) come only from declared arguments |
+| `apiforge model graph-access\|neptune-access\|neo4j-access --path P` | Gremlin/openCypher/SPARQL call sites (Python AST; Java/Go/TypeScript patterns) → `data.graph.query` facts + `graph_access_ir` with a DomainGraphSketch; judged by `AF-DATA-013` and `AF-GDB-001..010` |
+| `apiforge model graph-explain --path DUMP [--format F] [--synthetic]` | Neptune Gremlin explain/profile, openCypher/SPARQL explain or Neo4j EXPLAIN/PROFILE dump → `graph_plan_ir` + `data.graph.plan` fact (`AF-GDB-020..025`); a call site without a plan keeps cardinality unresolved |
+| `apiforge collect neptune-explain --endpoint E --language gremlin\|opencypher --query Q --out D [--profile --reader-endpoint E]` | Read-only `neptunedata` allowlist; default plans never run the query; `--profile` runs it only for mutation-free literal text on a declared reader |
+| `apiforge evals graph-quality` | Per rule × language precision/recall of graph rules over `evals/corpus/graph-quality`; exit 1 below `thresholds.yaml` |
 | `apiforge model otel --path export.json` | OTLP/JSON trace export → `perf.otel.*` facts + `performance_run`; incomplete spans named unresolved |
 | `apiforge perf compare --baseline A --candidate B --threshold-pct N [--repeat-baseline dir]` | `compare_runs`/`detect_regression` over two PerformanceRuns; `added`/`removed`/`insufficient_data` always named; `--repeat-baseline` measures the noise floor and suppresses deltas inside it |
 | `apiforge perf verdict --run run.json [--repeat-baseline dir]` | `passed`/`failed`/`inconclusive` per run — validity conditions (baseline, generator saturation, TPS = completed transactions) name unevaluable evidence, never guess |

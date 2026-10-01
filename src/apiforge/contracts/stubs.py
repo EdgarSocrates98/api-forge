@@ -248,7 +248,7 @@ class MessagingAccessIR(_StubPayload):
 class DataPerformanceProfile(_StubPayload):
     """Observed low-latency/partitioned datastore signals."""
 
-    database: Literal["redis", "dynamo", "mongo", "neptune"]
+    database: Literal["redis", "dynamo", "mongo", "neptune", "neo4j"]
     latency_class: Literal["low_latency", "partitioned_scale", "document", "graph", "unknown"]
     observed_signals: tuple[str, ...] = ()
     risk_findings: tuple[str, ...] = ()
@@ -267,9 +267,9 @@ class AnalyticalAccessIR(_StubPayload):
 
 
 class DataAccessReadiness(_StubPayload):
-    """Governance preflight for Redis, MongoDB, DynamoDB and Neptune access."""
+    """Governance preflight for Redis, MongoDB, DynamoDB, Neptune and Neo4j access."""
 
-    database: Literal["redis", "mongo", "dynamo", "neptune"]
+    database: Literal["redis", "mongo", "dynamo", "neptune", "neo4j"]
     status: Literal["ready", "review", "blocked"]
     observed_patterns: tuple[str, ...] = ()
     mutation_patterns: tuple[str, ...] = ()

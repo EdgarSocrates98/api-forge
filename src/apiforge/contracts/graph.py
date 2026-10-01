@@ -112,4 +112,5 @@ class GraphExport(VersionedContract):
     node_count: int
     edge_count: int
     built_from: tuple[str, ...] = ()
-    format: Literal["jsonl", "neptune"] = "jsonl"
+    format: Literal["jsonl", "neptune", "rdf"] = "jsonl"
+    files: tuple[tuple[str, Sha256], ...] = ()

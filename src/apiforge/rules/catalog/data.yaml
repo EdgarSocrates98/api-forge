@@ -162,17 +162,17 @@ rules:
       op: eq
       value: true
   - id: AF-DATA-013
-    title: "Neptune traversal/query without a limit"
+    title: "Graph traversal/query without a limit"
     severity: medium
     rationale: >
-      g.V()/g.E() with no .limit()/.range() on the chain, or an
-      openCypher/SPARQL string without LIMIT, returns an unbounded graph
-      result — memory cost scales with the graph.
+      A Gremlin traversal with no limit()/range()/tail()/next()/count() on the
+      chain, or an openCypher/SPARQL read without LIMIT (Neptune or Neo4j),
+      returns an unbounded graph result — memory cost scales with the graph.
     remediation: "Bound traversals with .limit(n)/.range(a,b) and add LIMIT to query strings."
     reference: "https://docs.aws.amazon.com/neptune/latest/userguide/access-graph-gremlin.html"
-    runtime_scope: "neptune"
+    runtime_scope: "neptune|neo4j"
     check:
-      kind: data.neptune.query
+      kind: data.graph.query
       path: measures.unbounded
       op: eq
       value: true

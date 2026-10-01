@@ -188,6 +188,15 @@ def _model_verb(importer: str) -> Callable[[DispatchContext], dict[str, object]]
     return run
 
 
+def _verb_graph_explain(ctx: DispatchContext) -> dict[str, object]:
+    from apiforge.adapters.graph_.plans import extract_graph_plan
+
+    if ctx.input_path is None:
+        raise DispatchError("AF-INPUT-NOT-FOUND", "model graph-explain needs input_path")
+    inventory, plan = extract_graph_plan(ctx.input_path)
+    return {**_inventory_payload(inventory), "graph_plan_ir": plan.model_dump(mode="json")}
+
+
 def _verb_plan_strangler(ctx: DispatchContext) -> dict[str, object]:
     from apiforge.core.models import Fact
     from apiforge.plan.strangler import strangler_plan
@@ -352,8 +361,19 @@ _VERBS: tuple[tuple[str, tuple[str, ...], Callable[..., Any]], ...] = (
     (
         "model neptune-access",
         ("input_path",),
-        _model_verb("apiforge.adapters.dbaccess.extract_neptune_access"),
+        _model_verb("apiforge.adapters.graph_.extract.extract_neptune_access"),
     ),
+    (
+        "model neo4j-access",
+        ("input_path",),
+        _model_verb("apiforge.adapters.graph_.extract.extract_neo4j_access"),
+    ),
+    (
+        "model graph-access",
+        ("input_path",),
+        _model_verb("apiforge.adapters.graph_.extract.extract_graph_access"),
+    ),
+    ("model graph-explain", ("input_path",), _verb_graph_explain),
     ("model otel", ("input_path",), _model_verb("apiforge.adapters.otel.extract.extract_otel")),
     (
         "model resilience",

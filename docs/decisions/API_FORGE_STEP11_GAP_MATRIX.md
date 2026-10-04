@@ -9,6 +9,7 @@ Source: `prompt_evo_step11.md` (closure/next-generation mission)
 | Wave | Prompt phase | SDD feature | Status |
 |---|---|---|---|
 | 1 | Phase 1 — Context Quality Engine, Minimum Sufficient Context, RoleContext v2 | `API_FORGE_STEP11_CONTEXT_QUALITY` | shipped: 7 contracts, `context quality` verb, `evals context-quality` (4/4), v2 `policies:` enforced; `sdd check` ok |
+| 2 | Phase 2 — Trust Plane, taint propagation, Agentic Security v2, memory security v2 | `API_FORGE_STEP11_TRUST_PLANE` | shipped: 11 contracts (`TrustUnit`/`TrustedRef`/`TrustPropagation`/`ToolRiskProfile`/`AgentPermissionSet`/`ToolAuthorization`/`MemoryGateResult`/`MemoryQuarantine`/`MemoryInvalidationPlan`/`MemoryScore`/`MemoryRankedResult`), DATA IS NOT INSTRUCTION by validator, quarantine + ranked retrieval + advisory invalidation triggers + checkpoint parity; `sdd check` ok |
 
 ## MAIN_BASELINE — GREEN
 
@@ -74,14 +75,14 @@ provider/cloud/credentials — contract + offline proof only.
 | Capability | State | Evidence | Action |
 |---|---|---|---|
 | Governed memory store | KEEP | `memory/store.py` — append-only, candidate→persist gates, dedup, invalidation events | protect |
-| Memory security gates | EXTEND | scope/origin/evidence/model_generated/trust gates exist | add `quarantined` state + outcome gate (evidence+trust+outcome+provenance) for institutional/semantic |
-| Memory retrieval v2 | EXTEND | `query_memory` = substring match only | ranked signals: env fingerprint, runtime constraints, freshness, trust, outcome; semantic optional, never required |
-| Memory invalidation v2 | EXTEND | `invalidate_memory` | trigger classes: runtime/framework/contract/policy/source/outcome/dependency change |
-| Trust taxonomy | EXTEND | `MemoryOrigin` already covers the 11-way taxonomy; `TrustLevel`, `instruction_authority="none"` | promote to transversal `TrustUnit`; apply to capsule, blackboard, knowledge, tool results, MCP responses, handoffs, external docs |
-| Taint propagation | MISSING→EXTEND | blackboard flags `tainted:` in unresolved; no propagation rules | `trust/propagation.py`: derived taint, `instruction_authority` never escalates, reduction only via governed transformation |
+| Memory security gates | DONE (w2) | `memory/security.py::evaluate_gates` — §14 pipeline scope→origin→evidence→trust→outcome→freshness, persist/quarantine/reject + `quarantine.jsonl` + `review_quarantine` | shipped |
+| Memory retrieval v2 | DONE (w2) | `memory/retrieval.py` — 8 deterministic signals + optional semantic bonus; `query_memory` reuses ranking | shipped |
+| Memory invalidation v2 | DONE (w2) | `memory/invalidation.py::suggest_invalidations` — 8 advisory triggers (runtime/framework/contract/policy/source/evidence/outcome/dependency) | shipped |
+| Trust taxonomy | DONE (w2) | `contracts/trust.py::TrustUnit` + `trust/plane.py` — transversal annotation across all §9 boundaries; `MemoryOrigin` +`knowledge` | shipped |
+| Taint propagation | DONE (w2) | `trust/propagation.py::propagate` — union taint, weakest-source trust, 1-tier evidence lift, authority never widens | shipped |
 | Knowledge freshness | EXTEND | `knowledge/freshness.py` (fresh/stale/unresolved/unknown) | add states verified/conflicted/deprecated + source authority + version applicability |
 | Knowledge impact graph | MISSING | `graph/` is provenance-only | relation contract source→knowledge→rule→skill→agent→eval |
-| SemanticCheckpoint | KEEP→EXTEND | `runtime/semantic_checkpoint.py` | resume-parity benchmark (continuous vs checkpoint→fresh-process→resume) |
+| SemanticCheckpoint | DONE (w2) | `tests/runtime/test_checkpoint_parity.py` — continuous == checkpoint→fresh-load→resume, `equivalent()` ignores identity only | shipped |
 
 ### Economy Plane
 
@@ -124,7 +125,7 @@ provider/cloud/credentials — contract + offline proof only.
 | Capability | State | Evidence | Action |
 |---|---|---|---|
 | Tool adapter registry | KEEP | `agentops/tools.py`, `run_tools.py` | protect |
-| Tool risk classification | EXTEND | `safety_class` has 2 classes | extend to `ToolRiskProfile` taxonomy + `AgentPermissionSet` allowlists, default DENY |
+| Tool risk classification | DONE (w2) | `rules/tool_risk.yaml` + `trust/tools.py::authorize` — 8 risk classes, allowlist-first, default DENY with `AF-TOOL-*` | dispatcher wiring deferred to governor phase |
 | Dynamic tool disclosure | EXTEND | adapters carry `capabilities`/`modes` | capability→active-tool-set resolver |
 | Tool output contract | EXTEND | outputs vary | `summary/items/refs/evidence/unresolved/pagination` shape |
 | Tool token benchmark | MISSING | none | measured bytes/tokens per tool + cost ranking |

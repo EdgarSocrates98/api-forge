@@ -56,13 +56,32 @@ authorization to mutate an external system.
 | `AF-MEMORY-UNTRUSTED` | external-untrusted data cannot be persisted under the policy |
 | `AF-MEMORY-EVIDENCE-REQUIRED` | institutional/semantic memory has no verified evidence refs |
 | `AF-MEMORY-MODEL-UNVERIFIED` | model-generated data cannot be promoted automatically |
-| `AF-MEMORY-TRUST-INSUFFICIENT` | candidate trust is below the policy minimum |
+| `AF-MEMORY-TRUST-INSUFFICIENT` | candidate trust is below the policy minimum (legacy code; superseded by `AF-MEMORY-TRUST-QUARANTINED` in the §14 pipeline) |
+| `AF-MEMORY-TRUST-QUARANTINED` | candidate trust is below the policy minimum; parked in the append-only quarantine log for human review |
+| `AF-MEMORY-EXPIRED` | candidate expiry is already past at persist time |
+| `AF-MEMORY-GATE-DENIED` | a §14 gate failed without a more specific code |
+| `AF-MEMORY-QUARANTINE-NOT-FOUND` | review named a candidate with no pending quarantine row |
+| `AF-MEMORY-QUARANTINE-REJECTED` | human review rejected a quarantined candidate; nothing reaches the record log |
 | `AF-MEMORY-NOT-FOUND` | invalidation named a memory absent from the append-only store |
 | `AF-MEMORY-CANDIDATE-NOT-FOUND` | persistence named a candidate absent from the store |
 | `AF-MEMORY-FRESHNESS-UNRESOLVED` | an expiry exists but retrieval received no explicit clock |
 | `AF-MEMORY-STORE-CORRUPT` | a persisted memory row failed its closed contract |
 | `AF-BLACKBOARD-STORE-CORRUPT` | a persisted blackboard row failed its closed contract |
 | `AF-CHECKPOINT-NOT-FOUND` | the requested semantic checkpoint is absent |
+
+## Trust Plane and tool authorization
+
+The Trust Plane annotates every context-bearing surface with origin, trust
+level, taint and instruction authority; tool authorization is allowlist-first
+and defaults to deny. Every refusal carries the denied field and a safe unlock.
+
+| Code | Meaning |
+|---|---|
+| `AF-TRUST-PROPAGATION-EMPTY` | taint propagation requires at least one source unit |
+| `AF-TOOL-PROFILE-MISSING` | the tool has no declared risk profile in `rules/tool_risk.yaml` |
+| `AF-TOOL-AUTHZ-DENIED` | the role has no permission set, or the tool is not in its allowlist |
+| `AF-TOOL-DENIED` | the tool is explicitly denied for the role |
+| `AF-TOOL-RISK-DENIED` | the tool's declared risk classes exceed the role's grant |
 
 ## Decision governance
 

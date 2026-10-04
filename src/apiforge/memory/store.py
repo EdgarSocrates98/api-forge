@@ -23,13 +23,16 @@ from apiforge.contracts.agentic_memory import (
     MemoryTrust,
     TrustLevel,
 )
+from apiforge.contracts.trust import MemoryGateResult, MemoryQuarantine
 from apiforge.core.io import sha256_file
 from apiforge.core.models import JsonValue
+from apiforge.memory.security import evaluate_gates
 
 _MEMORY_DIR = Path(".apiforge") / "memory"
 _RECORDS = "records.jsonl"
 _CANDIDATES = "candidates.jsonl"
 _INVALIDATIONS = "invalidations.jsonl"
+_QUARANTINE = "quarantine.jsonl"
 _TRUST_ORDER = {
     "unknown": 0,
     "candidate": 1,
@@ -142,50 +145,56 @@ def propose_memory(
     return candidate
 
 
+def _quarantine_row(
+    candidate: MemoryCandidate, gate: MemoryGateResult, now: str
+) -> MemoryQuarantine:
+    return MemoryQuarantine(
+        quarantine_id="quarantine:" + _digest({"candidate": candidate.candidate_id})[:16],
+        candidate_id=candidate.candidate_id,
+        memory_id=candidate.record.memory_id,
+        state="quarantined",
+        reasons=gate.quarantine_reasons or (gate.reason,),
+        created_at=now,
+    )
+
+
+def _quarantine_outcome(
+    root: Path, candidate: MemoryCandidate, gate: MemoryGateResult, now: str
+) -> MemoryOutcome:
+    """Park the candidate in the append-only quarantine log (deduplicated)."""
+    directory = _directory(root)
+    row = _quarantine_row(candidate, gate, now)
+    existing = _read(directory, _QUARANTINE, MemoryQuarantine)
+    if not any(item.quarantine_id == row.quarantine_id for item in existing):
+        _append(directory, _QUARANTINE, row)
+    return MemoryOutcome(
+        action="quarantined",
+        memory_id=candidate.record.memory_id,
+        accepted=False,
+        code=gate.code,
+        field=gate.field,
+        unlock=gate.unlock,
+        reason=gate.reason,
+        evidence_refs=candidate.record.evidence_refs,
+        unresolved=(gate.code,) if gate.code else (),
+    )
+
+
 def persist_candidate(
     root: Path, candidate: MemoryCandidate, policy: MemoryPolicy, *, now: str
 ) -> MemoryOutcome:
-    """Apply policy and evidence gates, then append an immutable record."""
+    """Run the §14 gate pipeline, then persist, quarantine or reject."""
     record = candidate.record
-    if record.scope not in policy.allowed_scopes:
+    gate = evaluate_gates(candidate, policy, now=now)
+    if gate.verdict == "reject":
         return _refusal(
-            "AF-MEMORY-SCOPE-DENIED",
-            "scope",
-            "use an allowed scope or have a human revise the MemoryPolicy",
-            f"scope {record.scope!r} is not allowed by {policy.policy_id}",
+            gate.code or "AF-MEMORY-GATE-DENIED",
+            gate.field or "record",
+            gate.unlock or "resolve the gate failure and propose again",
+            gate.reason,
         )
-    if record.origin == "external_untrusted" and not policy.allow_external_untrusted:
-        return _refusal(
-            "AF-MEMORY-UNTRUSTED",
-            "origin",
-            "attach a trusted internal source and verified evidence",
-            "external_untrusted content cannot be persisted by this policy",
-        )
-    if (
-        record.scope in {"institutional", "semantic"}
-        and policy.require_evidence_for_persistent
-        and not record.evidence_refs
-    ):
-        return _refusal(
-            "AF-MEMORY-EVIDENCE-REQUIRED",
-            "evidence_refs",
-            "provide evidence_refs from an independently verified artifact",
-            "persistent cross-task memory requires evidence",
-        )
-    if record.origin == "model_generated" and not policy.allow_model_generated_persistent:
-        return _refusal(
-            "AF-MEMORY-MODEL-UNVERIFIED",
-            "origin",
-            "store as working/candidate data or attach verified evidence under policy",
-            "model_generated content cannot be promoted automatically",
-        )
-    if _TRUST_ORDER[record.trust_level] < _TRUST_ORDER[policy.minimum_trust]:
-        return _refusal(
-            "AF-MEMORY-TRUST-INSUFFICIENT",
-            "trust_level",
-            "collect a stronger observation or lower policy only with explicit review",
-            f"{record.trust_level} is below policy minimum {policy.minimum_trust}",
-        )
+    if gate.verdict == "quarantine":
+        return _quarantine_outcome(root, candidate, gate, now)
     directory = _directory(root)
     existing = _read(directory, _RECORDS, MemoryRecord)
     if any(
@@ -209,6 +218,68 @@ def persist_candidate(
         accepted=True,
         reason="policy and evidence gates passed",
         evidence_refs=persisted.evidence_refs,
+    )
+
+
+def list_quarantine(root: Path) -> tuple[MemoryQuarantine, ...]:
+    """All quarantine rows (pending and released) in append order."""
+    return tuple(_read(_directory(root), _QUARANTINE, MemoryQuarantine))
+
+
+def review_quarantine(
+    root: Path,
+    candidate_id: str,
+    policy: MemoryPolicy,
+    *,
+    verdict: str,
+    resolved_by: str,
+    now: str,
+) -> MemoryOutcome:
+    """Human review of a quarantined candidate: persist or reject.
+
+    "persist" re-runs the full gate pipeline — a reviewer can only release a
+    candidate that the gates accept under the given (possibly revised) policy.
+    The release is an append-only row; the original quarantine stays visible.
+    """
+    directory = _directory(root)
+    rows = _read(directory, _QUARANTINE, MemoryQuarantine)
+    pending = [
+        row for row in rows if row.candidate_id == candidate_id and row.state == "quarantined"
+    ]
+    released = {row.quarantine_id for row in rows if row.state == "released"}
+    pending = [row for row in pending if row.quarantine_id not in released]
+    if not pending:
+        return _refusal(
+            "AF-MEMORY-QUARANTINE-NOT-FOUND",
+            "candidate_id",
+            "list quarantine rows for a pending candidate_id",
+            f"no pending quarantine for candidate {candidate_id!r}",
+        )
+    row = pending[-1]
+    release = MemoryQuarantine(
+        quarantine_id=row.quarantine_id,
+        candidate_id=candidate_id,
+        memory_id=row.memory_id,
+        state="released",
+        verdict="persisted" if verdict == "persist" else "rejected",
+        created_at=now,
+        resolved_by=resolved_by,
+    )
+    if verdict == "persist":
+        candidate = load_candidate(root, candidate_id)
+        outcome = persist_candidate(root, candidate, policy, now=now)
+        if outcome.accepted:
+            _append(directory, _QUARANTINE, release)
+        return outcome
+    _append(directory, _QUARANTINE, release)
+    return MemoryOutcome(
+        action="rejected",
+        memory_id=row.memory_id,
+        accepted=False,
+        code="AF-MEMORY-QUARANTINE-REJECTED",
+        field="candidate_id",
+        unlock="no action needed; the candidate never reached the record log",
+        reason=f"quarantined candidate rejected by {resolved_by}",
     )
 
 
@@ -263,6 +334,10 @@ def query_memory(root: Path, query: MemoryQuery) -> MemoryRetrievalResult:
         elif _expired(record, query.now):
             stale_count += 1
         matches.append(record)
+    from apiforge.memory.retrieval import rank_records
+
+    order = {score.memory_id: index for index, score in enumerate(rank_records(matches, query))}
+    matches.sort(key=lambda item: order[item.memory_id])
     status = "ready"
     if unresolved or stale_count:
         status = "degraded"
@@ -329,9 +404,11 @@ def memory_store_digest(root: Path) -> str | None:
 
 __all__ = [
     "invalidate_memory",
+    "list_quarantine",
     "load_candidate",
     "memory_store_digest",
     "persist_candidate",
     "propose_memory",
     "query_memory",
+    "review_quarantine",
 ]

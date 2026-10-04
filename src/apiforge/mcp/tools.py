@@ -2156,6 +2156,85 @@ def memory_search(
     )
 
 
+def memory_rank(
+    terms: list[str] | None = None,
+    scopes: list[str] | None = None,
+    root: str = ".",
+    environment_fingerprint: str | None = None,
+    minimum_trust: str = "unknown",
+    now: str | None = None,
+    max_results: int = 20,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Deterministic §15 retrieval with per-record score decomposition."""
+    from apiforge.contracts.agentic_memory import MemoryQuery, MemoryScope, TrustLevel
+    from apiforge.memory.retrieval import query_memory_scored
+
+    query = MemoryQuery(
+        terms=tuple(terms or ()),
+        scopes=tuple(cast(MemoryScope, item) for item in (scopes or ())),
+        environment_fingerprint=environment_fingerprint,
+        minimum_trust=cast(TrustLevel, minimum_trust),
+        now=now,
+        max_results=max_results,
+    )
+    return cast(
+        dict[str, Any],
+        _call("memory_rank", lambda: query_memory_scored(Path(root), query), detail_level),
+    )
+
+
+def memory_quarantine_list(
+    root: str = ".",
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """List pending and released quarantine rows."""
+    from apiforge.memory.store import list_quarantine
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "memory_quarantine_list",
+            lambda: {"rows": [row.model_dump(mode="json") for row in list_quarantine(Path(root))]},
+            detail_level,
+        ),
+    )
+
+
+def memory_quarantine_resolve(
+    candidate_id: str,
+    verdict: str,
+    resolved_by: str,
+    now: str,
+    root: str = ".",
+    policy_id: str = "default",
+    minimum_trust: str = "observed",
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Human review of a quarantined candidate; persist re-runs all gates."""
+    from apiforge.contracts.agentic_memory import MemoryPolicy, TrustLevel
+    from apiforge.memory.store import review_quarantine
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "memory_quarantine_resolve",
+            lambda: review_quarantine(
+                Path(root),
+                candidate_id,
+                MemoryPolicy(
+                    policy_id=policy_id,
+                    minimum_trust=cast(TrustLevel, minimum_trust),
+                ),
+                verdict=verdict,
+                resolved_by=resolved_by,
+                now=now,
+            ),
+            detail_level,
+        ),
+    )
+
+
 def blackboard_append(
     task_id: str,
     scope: str,
@@ -2521,6 +2600,9 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     memory_propose,
     memory_persist,
     memory_search,
+    memory_rank,
+    memory_quarantine_list,
+    memory_quarantine_resolve,
     blackboard_append,
     blackboard_query,
     budget_plan,

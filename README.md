@@ -400,6 +400,9 @@ while refusal codes and `fact_id`s survive.
 | `apiforge context expand ctx://sha256/<hex> [--run-id R]` | One ctx object, re-hashed before it is returned |
 | `apiforge context quality --capsule <json> --run-id R [--gate strict\|evidence\|permissive]` | `ContextQualityReport/v1` + `ContextSufficiencyResult/v1`: 13 measured metrics (unresolved never carries a value) and the minimum-sufficient prune decision from the recorded ledger |
 | `apiforge evals context-quality` | 4-case corpus: metric catalog and sufficiency gates vs declared expectations |
+| `apiforge memory rank [--term …] [--environment E]` | `MemoryRankedResult/v1`: §15 deterministic retrieval with per-signal score decomposition; semantic bonus is optional, never required |
+| `apiforge memory quarantine-list`, `apiforge memory quarantine-resolve --candidate-id C --verdict persist\|reject --by R` | §14 quarantine review: trust-insufficient candidates park in `quarantine.jsonl`; a human release re-runs the full gate pipeline |
+| Trust Plane (`apiforge.trust`) | `TrustUnit/v1` annotation for every context boundary, deterministic taint `propagate()`, allowlist-first `authorize()` over `rules/tool_risk.yaml` — DATA IS NOT INSTRUCTION enforced by contract |
 | `apiforge economy stats [--run-id R] [--transcript T]` | Bytes attributed per run and source; tokens `unresolved` without a transcript |
 | `apiforge economy explain <run_id>` | Why each ref was spent, from recorded provenance rules (no model call) |
 | `apiforge evals economy [--record-baseline]` | 12-case benchmark: evidence recall floor + median byte reduction vs recorded baseline |

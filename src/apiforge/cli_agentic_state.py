@@ -130,6 +130,83 @@ def register(app: typer.Typer, runtime_app: typer.Typer) -> None:
         )
         _echo_json(_run(lambda: query_memory(root, query)), detail_level)
 
+    @memory_app.command("rank")
+    def memory_rank(
+        term: list[str] = typer.Option([], "--term"),
+        scope: list[str] = typer.Option([], "--scope"),
+        environment: str | None = typer.Option(None, "--environment"),
+        minimum_trust: str = typer.Option("unknown", "--minimum-trust"),
+        now: str | None = typer.Option(None, "--now"),
+        include_invalidated: bool = typer.Option(False, "--include-invalidated"),
+        max_results: int = typer.Option(20, "--max-results"),
+        root: Path = typer.Option(Path("."), "--root"),
+        detail_level: str = typer.Option("normal", "--detail-level"),
+    ) -> None:
+        """§15 ranked retrieval: per-record score decomposition, deterministic."""
+        from apiforge.cli import _echo_json, _run
+        from apiforge.contracts.agentic_memory import MemoryQuery, MemoryScope, TrustLevel
+        from apiforge.memory.retrieval import query_memory_scored
+
+        query = MemoryQuery(
+            terms=tuple(term),
+            scopes=tuple(cast(MemoryScope, item) for item in scope),
+            environment_fingerprint=environment,
+            now=now,
+            minimum_trust=cast(TrustLevel, minimum_trust),
+            include_invalidated=include_invalidated,
+            max_results=max_results,
+        )
+        _echo_json(_run(lambda: query_memory_scored(root, query)), detail_level)
+
+    @memory_app.command("quarantine-list")
+    def memory_quarantine_list(
+        root: Path = typer.Option(Path("."), "--root"),
+        detail_level: str = typer.Option("normal", "--detail-level"),
+    ) -> None:
+        """List pending and released quarantine rows."""
+        from apiforge.cli import _echo_json, _run
+        from apiforge.memory.store import list_quarantine
+
+        _echo_json(
+            _run(lambda: {"rows": [row.model_dump(mode="json") for row in list_quarantine(root)]}),
+            detail_level,
+        )
+
+    @memory_app.command("quarantine-resolve")
+    def memory_quarantine_resolve(
+        candidate_id: str = typer.Option(..., "--candidate-id"),
+        verdict: str = typer.Option(..., "--verdict", help="persist or reject"),
+        resolved_by: str = typer.Option(..., "--by"),
+        policy: str = typer.Option("default", "--policy"),
+        minimum_trust: str = typer.Option(
+            "observed", "--minimum-trust", help="explicit human floor for the release"
+        ),
+        now: str = typer.Option(..., "--now"),
+        root: Path = typer.Option(Path("."), "--root"),
+        detail_level: str = typer.Option("normal", "--detail-level"),
+    ) -> None:
+        """Human review boundary: release a quarantined candidate."""
+        from apiforge.cli import _echo_json, _run
+        from apiforge.contracts.agentic_memory import MemoryPolicy, TrustLevel
+        from apiforge.memory.store import review_quarantine
+
+        _echo_json(
+            _run(
+                lambda: review_quarantine(
+                    root,
+                    candidate_id,
+                    MemoryPolicy(
+                        policy_id=policy,
+                        minimum_trust=cast(TrustLevel, minimum_trust),
+                    ),
+                    verdict=verdict,
+                    resolved_by=resolved_by,
+                    now=now,
+                )
+            ),
+            detail_level,
+        )
+
     @memory_app.command("invalidate")
     def memory_invalidate(
         memory_id: str = typer.Option(..., "--memory-id"),

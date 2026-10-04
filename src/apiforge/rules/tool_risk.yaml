@@ -1,0 +1,111 @@
+# Tool risk profiles and agent permission sets (step11 §13).
+#
+# Every callable surface carries a declared risk profile; every agent role is
+# authorized against an explicit allowlist. Authorization is default-deny:
+# a tool not named in allowed_tools, carrying a risk class outside
+# allowed_risk_classes, or named in denied_tools is refused with an AF code.
+schema: apiforge/tool-risk/v1
+tools:
+  semgrep:
+    risk_classes: [read_only]
+    reversible: true
+    notes: local SAST scan; writes only the report artifact
+  trivy:
+    risk_classes: [read_only]
+    reversible: true
+    notes: filesystem/image scan; vulnerability db fetched by the tool itself
+  gitleaks:
+    risk_classes: [read_only, security_impact]
+    reversible: true
+    notes: secret scan output may contain partial secret material — treat as sensitive
+  k6:
+    risk_classes: [external_side_effect, production_impact]
+    reversible: false
+    notes: executes real HTTP calls against its target; gated by the load-target policy
+  context_capsule:
+    risk_classes: [read_only]
+    reversible: true
+    notes: builds a context projection; no mutation
+  context_quality:
+    risk_classes: [read_only]
+    reversible: true
+    notes: ledger-derived measurement; no mutation
+  memory_propose:
+    risk_classes: [write]
+    reversible: true
+    notes: appends a candidate row; never persists truth
+  memory_persist:
+    risk_classes: [write, security_impact]
+    reversible: true
+    notes: promotes candidate to the immutable record log through the gate pipeline
+  memory_query:
+    risk_classes: [read_only]
+    reversible: true
+    notes: bounded retrieval with freshness diagnostics
+  memory_invalidate:
+    risk_classes: [write]
+    reversible: true
+    notes: append-only invalidation event; never deletes
+  memory_quarantine_resolve:
+    risk_classes: [write, security_impact]
+    reversible: true
+    notes: human review boundary that can persist or reject a quarantined candidate
+  blackboard_append:
+    risk_classes: [write]
+    reversible: true
+    notes: append-only shared-state entry
+  blackboard_query:
+    risk_classes: [read_only]
+    reversible: true
+    notes: bounded query over one task scope
+permissions:
+  specialist:
+    allowed_tools:
+      - context_capsule
+      - context_quality
+      - memory_propose
+      - memory_query
+      - blackboard_append
+      - blackboard_query
+    allowed_risk_classes: [read_only, write]
+    denied_tools: [k6]
+    notes: reads and proposes; may append working data, never promote memory
+  reviewer:
+    allowed_tools:
+      - context_capsule
+      - context_quality
+      - memory_propose
+      - memory_query
+      - memory_invalidate
+      - memory_quarantine_resolve
+      - blackboard_append
+      - blackboard_query
+      - semgrep
+      - trivy
+      - gitleaks
+    allowed_risk_classes: [read_only, write, security_impact]
+    denied_tools: [k6]
+    notes: reviews and curates; may resolve quarantine with a named reviewer
+  critic:
+    allowed_tools:
+      - context_capsule
+      - context_quality
+      - memory_query
+      - blackboard_query
+    allowed_risk_classes: [read_only]
+    denied_tools: [memory_persist, k6]
+    notes: adversarial read-only analysis; proposes nothing, mutates nothing
+  referee:
+    allowed_tools:
+      - context_capsule
+      - context_quality
+      - memory_query
+      - blackboard_query
+    allowed_risk_classes: [read_only]
+    denied_tools: [memory_persist, memory_quarantine_resolve, k6]
+    notes: rules on disputes from evidence only; no state mutation
+  runner:
+    allowed_tools: [semgrep, trivy, gitleaks, k6]
+    allowed_risk_classes: [read_only, security_impact, external_side_effect, production_impact]
+    denied_tools: [memory_persist, memory_quarantine_resolve]
+    notes: executes allowlisted local binaries; load targets still need the policy gate

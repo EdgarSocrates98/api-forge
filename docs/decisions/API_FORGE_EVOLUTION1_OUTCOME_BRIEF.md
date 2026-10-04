@@ -19,8 +19,9 @@ regression before its commit.
 | 4 | fail-closed decision governor and approval audit | `5837cd5` | `25 passed, 1 skipped` focused; full suite `1436 passed, 2 skipped` |
 
 The final independent repository evidence is `1436 passed, 2 skipped`; Ruff,
-focused mypy, the release gate and the SDD check all passed. The host checkout
-is clean after the four commits.
+full mypy, the release gate and the SDD check all passed. Full mypy was run in
+the declared Python `3.12.13` environment with MCP `1.30.0` (`mcp>=1.12,<2`):
+`Success: no issues found in 486 source files`. The host checkout is clean.
 
 ## Independent evaluation receipts
 
@@ -52,9 +53,6 @@ or provider calls:
 
 ## Unresolved and human action
 
-- Full mypy is unresolved only in the current host environment: installed MCP
-  is 2.x, while the project contract declares `mcp<2`. Run full mypy in the
-  declared dependency environment; do not mask the incompatibility.
 - Security scanners and production performance benchmarks were not executed by
   these local waves. No throughput, token-savings, cloud posture or production
   safety claim is made.

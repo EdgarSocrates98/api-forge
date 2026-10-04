@@ -6,7 +6,12 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from apiforge.contracts.agent_telemetry import AgentSpan, AgentSpanQuery, AgentSpanResult
+from apiforge.contracts.agent_telemetry import (
+    AgentSpan,
+    AgentSpanQuery,
+    AgentSpanResult,
+    CorrelationIds,
+)
 from apiforge.contracts.agentic import (
     AgentArtifact,
     AgenticPolicy,
@@ -183,6 +188,7 @@ from apiforge.contracts.observability import (
     TelemetryRecord,
     VendorIntent,
 )
+from apiforge.contracts.otel_export import CollectorProbe, OtlpExport, OtlpValidation
 from apiforge.contracts.platform import (
     CapabilityRecord,
     CapabilityRequest,
@@ -501,6 +507,10 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "AdaptiveRetrievalResult/v1": AdaptiveRetrievalResult,
     "QueryRewrite/v1": QueryRewrite,
     "RetrievalComparison/v1": RetrievalComparison,
+    "CorrelationIds/v1": CorrelationIds,
+    "OtlpExport/v1": OtlpExport,
+    "OtlpValidation/v1": OtlpValidation,
+    "CollectorProbe/v1": CollectorProbe,
     "CostVector/v1": CostVector,
     "LedgerRef/v1": LedgerRef,
     "RunLedgerEntry/v1": RunLedgerEntry,

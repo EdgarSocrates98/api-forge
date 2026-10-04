@@ -137,6 +137,8 @@ def test_tools_export_all_expected_verbs() -> None:
         "budget_spend",
         "agent_span_append",
         "agent_span_query",
+        "telemetry_export",
+        "telemetry_validate",
         "decision_check",
     }
 

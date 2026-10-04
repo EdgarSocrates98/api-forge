@@ -144,10 +144,10 @@ provider/cloud/credentials — contract + offline proof only.
 
 | Capability | State | Evidence | Action |
 |---|---|---|---|
-| Local agent spans | KEEP | `runtime/agent_telemetry.py` `AgentSpan` | protect |
-| OTel GenAI export | MISSING→EXTEND | spans are local JSONL only | OTLP-shaped span projection + extended operation vocabulary |
-| Correlation IDs | EXTEND | `run_id`/`task_id`/`span` exist | standardized id set (task/run/trace/span/agent/model_call/tool_call/decision/memory/context) |
-| Real OTel Collector test | DEFERRED_EXTERNAL | needs docker/collector | offline OTLP acceptance test now; collector job documented |
+| Local agent spans | KEEP | `runtime/agent_telemetry.py` `AgentSpan` — extended with the 6 §51 correlation id fields | protect |
+| OTel GenAI export | DELIVERED (phase 7) | `runtime/otel_export.py` `export_otlp` → OTLP `ExportTraceServiceRequest` JSON (no SDK); `gen_ai.operation.name`/`agent.name`/`tool.name` + `apiforge.*` attributes; all 18 §50 operations in `SpanOperation` | `telemetry-export` CLI + `telemetry_export` MCP |
+| Correlation IDs | DELIVERED (phase 7) | `CorrelationIds` contract + `correlation_ids()` + W3C `traceparent` issue/parse (`AF-OTEL-TRACEPARENT-INVALID`); absent ids named in `unresolved` | `telemetry-ids` CLI |
+| Real OTel Collector test | DELIVERED (phase 7) | `scripts/otel_collector_check.py` POSTs a seeded OTLP payload to a pinned `opentelemetry-collector-contrib:0.114.0` and counts accepted span ids in the file exporter output; offline `telemetry-validate` structural acceptance (`OtlpValidation`) as the local gate; `otel-collector` job in `ci.yml` | unresolved when no collector declared — never claimed on faith |
 | Observability control plane | KEEP | `observability/` adapters + receipts | protect |
 
 ### AgentOps Plane

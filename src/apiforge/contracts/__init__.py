@@ -7,7 +7,12 @@ from apiforge.contracts.adapter import (
     AdapterStatus,
     EvidenceLevel,
 )
-from apiforge.contracts.agent_telemetry import AgentSpan, AgentSpanQuery, AgentSpanResult
+from apiforge.contracts.agent_telemetry import (
+    AgentSpan,
+    AgentSpanQuery,
+    AgentSpanResult,
+    CorrelationIds,
+)
 from apiforge.contracts.agentic_governance import (
     AgenticBudgetPlan,
     BudgetDecision,
@@ -141,6 +146,7 @@ from apiforge.contracts.model_routing import (
     RetrievalComparison,
     RetrievalStep,
 )
+from apiforge.contracts.otel_export import CollectorProbe, OtlpExport, OtlpValidation
 from apiforge.contracts.platform import (
     CapabilityRecord,
     CapabilityRequest,
@@ -245,6 +251,7 @@ __all__ = [
     "CapsuleBudget",
     "CapsuleRefusal",
     "ChangedFile",
+    "CollectorProbe",
     "CompatibilityCell",
     "CompatibilityMatrix",
     "ContextCapsule",
@@ -257,6 +264,7 @@ __all__ = [
     "ContextTarget",
     "ContextUseRecord",
     "ControlPlaneRoute",
+    "CorrelationIds",
     "CostVector",
     "DataProvider",
     "DataReadReceipt",
@@ -329,6 +337,8 @@ __all__ = [
     "ModelRouteInputs",
     "ModelScorecard",
     "ObservedSignal",
+    "OtlpExport",
+    "OtlpValidation",
     "PackFreshness",
     "ParticipantDeclaration",
     "PlatformRuntimeReceipt",

@@ -11,7 +11,25 @@ from apiforge.contracts.base import VersionedContract
 from apiforge.core.models import JsonValue, Sha256, freeze_json
 
 SpanOperation = Literal[
-    "invoke_agent", "execute_tool", "handoff", "decision", "retrieval", "checkpoint"
+    # §50 GenAI vocabulary — every roadmap operation maps to one member.
+    "task",
+    "routing",
+    "context_build",
+    "context_expansion",
+    "retrieval",
+    "memory_read",
+    "memory_write",
+    "invoke_agent",
+    "invoke_model",
+    "execute_tool",
+    "handoff",
+    "review",
+    "debate",
+    "security_decision",
+    "decision",
+    "checkpoint",
+    "resume",
+    "promotion",
 ]
 SpanStatus = Literal["unset", "ok", "error", "unresolved"]
 
@@ -37,6 +55,13 @@ class AgentSpan(VersionedContract):
     task_id: str = Field(min_length=1)
     run_id: str = Field(min_length=1)
     parent_span_id: str | None = None
+    # §51 correlation ids — all optional; absent ids stay unresolved, never invented.
+    agent_id: str | None = None
+    model_call_id: str | None = None
+    tool_call_id: str | None = None
+    decision_id: str | None = None
+    memory_id: str | None = None
+    context_id: str | None = None
     operation: SpanOperation
     agent_name: str | None = None
     tool_name: str | None = None
@@ -66,6 +91,28 @@ class AgentSpan(VersionedContract):
         return frozen
 
 
+class CorrelationIds(VersionedContract):
+    """§51 the standardized correlation identifier set for agentic traces.
+
+    Every field is optional — an id that was never issued stays ``None`` and
+    is named in ``unresolved``; ids are never synthesized to fill the set.
+    """
+
+    schema: Literal["apiforge/correlation-ids/v1"] = "apiforge/correlation-ids/v1"  # type: ignore[assignment]
+    task_id: str | None = None
+    run_id: str | None = None
+    trace_id: str | None = None
+    span_id: str | None = None
+    agent_id: str | None = None
+    model_call_id: str | None = None
+    tool_call_id: str | None = None
+    decision_id: str | None = None
+    memory_id: str | None = None
+    context_id: str | None = None
+    traceparent: str | None = None
+    unresolved: tuple[str, ...] = ()
+
+
 class AgentSpanQuery(VersionedContract):
     """Bounded local span lookup."""
 
@@ -88,4 +135,11 @@ class AgentSpanResult(VersionedContract):
     status: Literal["ready", "degraded", "unresolved"] = "ready"
 
 
-__all__ = ["AgentSpan", "AgentSpanQuery", "AgentSpanResult", "SpanOperation", "SpanStatus"]
+__all__ = [
+    "AgentSpan",
+    "AgentSpanQuery",
+    "AgentSpanResult",
+    "CorrelationIds",
+    "SpanOperation",
+    "SpanStatus",
+]

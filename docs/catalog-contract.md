@@ -1132,6 +1132,11 @@ values and `delta_pct`. Operations on only one side are named
 | `AF-OTEL-SENSITIVE-ATTRIBUTE` | local agent span contains a secret-like attribute key |
 | `AF-OTEL-STORE-CORRUPT` | local agent span row failed its closed contract |
 | `AF-OTEL-SPAN-CONFLICT` | a span id was reused with a different content hash |
+| `AF-OTEL-TRACEPARENT-INVALID` | §51 traceparent is not `00-<32hex>-<16hex>-<flags>`; unlock: pass valid W3C ids |
+| `AF-OTEL-EXPORT-INVALID` | OTLP payload failed the deterministic structural acceptance; `problems[]` names each defect |
+| `AF-OTEL-COLLECTOR-REFUSED` | §52 collector answered a non-2xx or rejected the payload; unlock: fix payload/endpoint and retry |
+| `AF-OTEL-COLLECTOR-TIMEOUT` | span ids did not reach the collector output file within the declared timeout |
+| `AF-OTEL-COLLECTOR-UNRESOLVED` | collector endpoint unreachable — acceptance stays unresolved, never claimed |
 | `AF-PERF-RUN-INVALID` | compare input is not a PerformanceRun payload |
 | `AF-PERF-MEMORY-CORRUPT` | a `runs.jsonl` line is malformed — the store refuses, never skips |
 | `AF-PERF-SUGGEST-INPUT` | `perf suggest` got neither a readable case dir nor a findings file |

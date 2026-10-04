@@ -418,6 +418,8 @@ while refusal codes and `fact_id`s survive.
 | `apiforge route promote --route model_routing --evidence <json> [--evaluations F]` | §35 promotion through the control-plane lifecycle — refuses `AF-ROUTE-PROMOTION-EVIDENCE` without min_evaluations + quality_floor real traffic |
 | `apiforge knowledge adaptive --query Q [--semantic]`, `knowledge rewrite --query Q --deterministic-hits N` | §36–§39 L0→L4 ladder (stops at first sufficient level, L3 optional via local adapter) + gated query rewriting |
 | `apiforge evals model-routing`, `evals retrieval` | 3-case router corpus (constraints, floors, insufficient evals) + §38 strategy comparison on recall/precision/latency/tokens/cost |
+| `apiforge runtime telemetry-export`, `telemetry-validate --otlp F`, `telemetry-ids`, `telemetry-collector-check --endpoint U --output-file F` | §50–§52 OTLP `ExportTraceServiceRequest` export with `gen_ai.*` semantics over all 18 operations, §51 `CorrelationIds` + W3C `traceparent`, deterministic structural acceptance, real-collector probe |
+| `apiforge evals telemetry-otlp` | 3-case corpus: full §50 operation coverage, §51 ids carried into OTLP attributes, malformed input stays unresolved |
 | `apiforge economy explain <run_id>` | Why each ref was spent, from recorded provenance rules (no model call) |
 | `apiforge evals economy [--record-baseline]` | 12-case benchmark: evidence recall floor + median byte reduction vs recorded baseline |
 | `apiforge runtime run\|resume\|debate <task> --profile economy\|balanced\|deep` | Economy Plane: profile preference with risk floor, trimmed optional roles, call cap + verification reserve, L0–L5 ladder; `economy` block in the result |

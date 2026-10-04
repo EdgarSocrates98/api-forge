@@ -4076,6 +4076,20 @@ def evals_control_plane(
         raise typer.Exit(code=1)
 
 
+@evals_app.command("telemetry-otlp")
+def evals_telemetry_otlp(
+    corpus: Path = typer.Option(Path("evals/corpus/telemetry-otlp"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§50-§52: ledger spans -> OTLP export -> structural acceptance."""
+    from apiforge.evals.otel_export import run_otel_export
+
+    result = _run(lambda: run_otel_export(corpus))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
 @evals_app.command("token-economics")
 def evals_token_economics(
     corpus: Path = typer.Option(Path("evals/corpus/token-economics"), "--corpus"),

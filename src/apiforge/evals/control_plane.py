@@ -95,9 +95,7 @@ def _run_case(case: dict[str, Any], root: Path) -> dict[str, Any]:
                         f"promote.allowed {promote_decision.allowed} != {wanted['allowed']}"
                     )
                 if "code" in wanted and promote_decision.code != wanted["code"]:
-                    failures.append(
-                        f"promote.code {promote_decision.code} != {wanted['code']}"
-                    )
+                    failures.append(f"promote.code {promote_decision.code} != {wanted['code']}")
                 if "to_mode" in wanted and promote_decision.to_mode != wanted["to_mode"]:
                     failures.append(
                         f"promote.to_mode {promote_decision.to_mode} != {wanted['to_mode']}"

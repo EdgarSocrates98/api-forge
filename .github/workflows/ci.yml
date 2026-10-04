@@ -110,6 +110,59 @@ jobs:
       - name: Release gate
         run: python scripts/check_release.py
 
+  otel-collector:
+    name: OTLP payload vs real OpenTelemetry Collector
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install project
+        run: python -m pip install -e .
+
+      - name: Start pinned OpenTelemetry Collector
+        run: |
+          set -euo pipefail
+          mkdir -p .apiforge/otel
+          docker run -d --name otelcol \
+            -p 4318:4318 \
+            -v "$PWD/scripts/otelcol/otelcol.yaml:/etc/otelcol.yaml:ro" \
+            -v "$PWD/.apiforge/otel:/out" \
+            otel/opentelemetry-collector-contrib:0.114.0 \
+            --config /etc/otelcol.yaml
+          for i in $(seq 1 40); do
+            if docker logs otelcol 2>&1 | grep -q "Everything is ready"; then
+              exit 0
+            fi
+            sleep 0.5
+          done
+          docker logs otelcol
+          echo "collector did not become ready" >&2
+          exit 1
+
+      - name: POST OTLP payload and verify collector acceptance
+        run: >-
+          python scripts/otel_collector_check.py
+          --endpoint http://127.0.0.1:4318
+          --output-file .apiforge/otel/spans.json
+          --timeout-s 30
+
+      - name: Upload collector acceptance report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-forge-otel-collector
+          path: .apiforge/otel/
+          if-no-files-found: ignore
+
   open-green-pr:
     name: Open PR after green validation
     if: >-

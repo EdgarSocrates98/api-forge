@@ -2642,6 +2642,13 @@ def agent_span_append(
     links: list[str] | None = None,
     evidence_refs: list[str] | None = None,
     unresolved: list[str] | None = None,
+    agent_id: str | None = None,
+    model_call_id: str | None = None,
+    tool_call_id: str | None = None,
+    decision_id: str | None = None,
+    memory_id: str | None = None,
+    context_id: str | None = None,
+    parent_span_id: str | None = None,
     detail_level: str = "normal",
 ) -> dict[str, Any]:
     """Append a sanitized local OTel-shaped agent/tool span."""
@@ -2669,8 +2676,50 @@ def agent_span_append(
                     links=tuple(links or ()),
                     evidence_refs=tuple(evidence_refs or ()),
                     unresolved=tuple(unresolved or ()),
+                    agent_id=agent_id,
+                    model_call_id=model_call_id,
+                    tool_call_id=tool_call_id,
+                    decision_id=decision_id,
+                    memory_id=memory_id,
+                    context_id=context_id,
+                    parent_span_id=parent_span_id,
                 ),
             ),
+            detail_level,
+        ),
+    )
+
+
+def telemetry_export(
+    root: str = ".",
+    service_name: str = "apiforge",
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """§50 project local spans as one OTLP ExportTraceServiceRequest body."""
+    from apiforge.runtime.otel_export import export_otlp
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "telemetry_export",
+            lambda: export_otlp(Path(root), service_name=service_name).model_dump(mode="json"),
+            detail_level,
+        ),
+    )
+
+
+def telemetry_validate(
+    payload: dict[str, Any],
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """§52 deterministic structural acceptance of an OTLP/JSON payload."""
+    from apiforge.runtime.otel_export import validate_otlp
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "telemetry_validate",
+            lambda: validate_otlp(payload).model_dump(mode="json"),
             detail_level,
         ),
     )
@@ -2851,6 +2900,8 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     budget_spend,
     agent_span_append,
     agent_span_query,
+    telemetry_export,
+    telemetry_validate,
     decision_check,
 )
 

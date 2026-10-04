@@ -156,3 +156,30 @@ lexical/graph/semantic/hybrid on recall, precision, latency, tokens and cost
 over a declared gold corpus; `evals model-routing` covers constraint refusal,
 quality floors and insufficient evaluations.
 
+## Telemetry export and correlation (phase 7)
+
+Local `AgentSpan` rows now cover all 18 §50 operations (`task`, `routing`,
+`context_build`, `context_expansion`, `retrieval`, `memory_read`,
+`memory_write`, `invoke_agent`, `invoke_model`, `execute_tool`, `handoff`,
+`review`, `debate`, `security_decision`, `decision`, `checkpoint`,
+`resume`, `promotion`) and carry the full §51 correlation set
+(`agent_id`, `model_call_id`, `tool_call_id`, `decision_id`, `memory_id`,
+`context_id`) beside `task_id`/`run_id`/`trace_id`/`span_id`.
+
+- `runtime telemetry-ids` emits a `CorrelationIds` record with a W3C
+  `traceparent`; `--issue-trace` mints a fresh pair. Ids never issued land
+  in `unresolved`.
+- `runtime telemetry-export` converts the append-only span ledger into one
+  OTLP `ExportTraceServiceRequest` JSON — `gen_ai.operation.name`/
+  `gen_ai.agent.name`/`gen_ai.tool.name` plus `apiforge.*` attributes, no
+  OTel SDK needed.
+- `runtime telemetry-validate --otlp F` is the deterministic structural
+  acceptance (hex ids, unix-nano timestamps, declared operation, valid
+  status code).
+- `runtime telemetry-collector-check --endpoint U --output-file F` POSTs to
+  a real collector and counts span ids accepted in its output file —
+  `accepted`, `refused` or `unresolved`, never assumed.
+- `scripts/otel_collector_check.py` drives the §52 CI job against a pinned
+  `otel/opentelemetry-collector-contrib:0.114.0`; `evals telemetry-otlp`
+  covers operation coverage, id propagation and malformed-input honesty.
+

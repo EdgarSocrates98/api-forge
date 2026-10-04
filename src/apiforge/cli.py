@@ -2347,17 +2347,19 @@ def perf_memory_search(
     tool: str | None = typer.Option(None, "--tool"),
     since: str | None = typer.Option(None, "--since", help="ISO-8601 lower bound on recorded_at."),
     root: Path = typer.Option(Path("."), "--root", help="Workspace root."),
+    limit: int | None = typer.Option(
+        None, "--limit", help="Bound carried runs; count stays the real total."
+    ),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
     """search_performance_memory — filters declared fields, never infers."""
 
     def work() -> object:
+        from apiforge.output.page import bound_collections
         from apiforge.perf.run_store import search_runs
 
-        return {
-            "count": len(search_runs(root, subject=subject, tool=tool, since=since)),
-            "runs": search_runs(root, subject=subject, tool=tool, since=since),
-        }
+        runs = search_runs(root, subject=subject, tool=tool, since=since)
+        return bound_collections({"count": len(runs), "runs": runs}, limit)
 
     _echo_json(_run(work), detail_level)
 
@@ -2457,6 +2459,7 @@ def perf_plan(
 
 @perf_app.command("chaos")
 def perf_chaos(
+    limit: int | None = typer.Option(None, "--limit", help="Bound carried scenarios."),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
     """List the declared controlled failure-injection scenarios (CHAOS-001..013).
@@ -2466,9 +2469,10 @@ def perf_chaos(
     executed by API Forge."""
 
     def work() -> object:
+        from apiforge.output.page import bound_collections
         from apiforge.perf.chaos import list_scenarios
 
-        return {"scenarios": list_scenarios()}
+        return bound_collections({"scenarios": list_scenarios()}, limit)
 
     _echo_json(_run(work), detail_level)
 
@@ -4141,6 +4145,20 @@ def evals_telemetry_otlp(
     from apiforge.evals.otel_export import run_otel_export
 
     result = _run(lambda: run_otel_export(corpus))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("tool-surface")
+def evals_tool_surface(
+    corpus: Path = typer.Option(Path("evals/corpus/tool-surface"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§40–§43: audit findings, disclosure routing, paging, benchmark honesty."""
+    from apiforge.evals.tool_surface import run_tool_surface
+
+    result = _run(lambda: run_tool_surface(corpus))
     _echo_json(result, detail_level)
     if isinstance(result, dict) and not result.get("passed"):
         raise typer.Exit(code=1)

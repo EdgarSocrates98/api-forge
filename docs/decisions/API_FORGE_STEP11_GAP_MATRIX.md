@@ -128,9 +128,10 @@ provider/cloud/credentials — contract + offline proof only.
 |---|---|---|---|
 | Tool adapter registry | KEEP | `agentops/tools.py`, `run_tools.py` | protect |
 | Tool risk classification | DONE (w2) | `rules/tool_risk.yaml` + `trust/tools.py::authorize` — 8 risk classes, allowlist-first, default DENY with `AF-TOOL-*` | dispatcher wiring deferred to governor phase |
-| Dynamic tool disclosure | EXTEND | adapters carry `capabilities`/`modes` | capability→active-tool-set resolver |
-| Tool output contract | EXTEND | outputs vary | `summary/items/refs/evidence/unresolved/pagination` shape |
-| Tool token benchmark | MISSING | none | measured bytes/tokens per tool + cost ranking |
+| Dynamic tool disclosure | DELIVERED (phase 9) | `mcp/disclosure.py` + `rules/tool_disclosure.yaml` — deterministic task→class→active tool set (`ToolDisclosure`); unclassified tasks fall back to the full surface and say so | `mcp disclose` CLI + `mcp_disclose` MCP |
+| Tool output contract | DELIVERED (phase 9) | `ToolPage`/`PageWindow` contracts + `output/page.py::paged`/`bound_collections` — `summary/items/refs/evidence/unresolved/pagination`; `limit` params on 10 list-shaped tools across CLI and MCP | adopted incrementally |
+| Tool token benchmark | DELIVERED (phase 9) | `mcp/benchmark.py` + `rules/tool_benchmark.yaml` — measured median/p95 response bytes + chars/4 token estimate (labeled `estimated`) ranked by cost | `mcp benchmark` CLI + `mcp_benchmark` MCP |
+| Tool surface audit | DELIVERED (phase 9) | `mcp/audit.py` + `rules/tool_surface.yaml` — `ToolSurfaceAudit` over the measured surface; 0 open findings after engineering, 1 declared `accepted` exception recorded with reason | `mcp audit` CLI + `mcp_audit` MCP |
 
 ### Security Plane
 
@@ -174,7 +175,7 @@ provider/cloud/credentials — contract + offline proof only.
 | Capability | State | Evidence | Action |
 |---|---|---|---|
 | MCP server + gateway | KEEP | `mcp/` | protect |
-| MCP 2026 compliance matrix | MISSING | no doc | `docs/mcp-compliance.md`; fill gaps without breaking old clients |
+| MCP 2026 compliance matrix | DELIVERED (phase 9) | `docs/mcp-compliance.md` — §44 matrix over the 12 required axes against spec revision 2025-11-25 + §45 version-compatibility section; states SUPPORTED/PARTIAL/NOT_IMPLEMENTED/NOT_APPLICABLE with evidence and gaps | resources/multi-round-trip stay NOT_IMPLEMENTED by design |
 | Forge Protocol / A2A contracts | MISSING | none | `ForgeCapabilityDescriptor/Task*/Status/Result/EvidenceBundle/Handoff/Health` contracts |
 | Forge kernel boundary | MISSING | none | `docs/architecture/forge-kernel-boundary.md` analysis, no extraction |
 

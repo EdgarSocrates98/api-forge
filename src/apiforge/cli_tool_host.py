@@ -55,6 +55,60 @@ def register(app: typer.Typer, agentops_app: typer.Typer) -> None:
 
         _echo_json(_run(lambda: measure_surface(surface)), detail_level)
 
+    @mcp_app.command("audit")
+    def mcp_audit_cmd(
+        surface: str = typer.Option("full", "--surface", help="full|compact."),
+        policy: Path | None = typer.Option(
+            None, "--policy", help="rules/tool_surface.yaml override."
+        ),
+        detail_level: str = typer.Option("normal", "--detail-level"),
+    ) -> None:
+        """§40 audit: oversized schemas/outputs, weak descriptions, unbounded lists."""
+        from apiforge.cli import _echo_json, _run
+        from apiforge.mcp.audit import _load_policy, audit_surface
+
+        def work() -> dict[str, object]:
+            thresholds = _load_policy(policy) if policy else None
+            return audit_surface(surface, policy=thresholds).model_dump(mode="json")
+
+        _echo_json(_run(work), detail_level)
+
+    @mcp_app.command("disclose")
+    def mcp_disclose_cmd(
+        task: str = typer.Option(..., "--task", help="Task text to route to a tool set."),
+        task_class: str | None = typer.Option(
+            None, "--task-class", help="Declared class override."
+        ),
+        surface: str = typer.Option("full", "--surface", help="full|compact."),
+        detail_level: str = typer.Option("normal", "--detail-level"),
+    ) -> None:
+        """§41 task -> capability router -> active tool set (advisory)."""
+        from apiforge.cli import _echo_json, _run
+        from apiforge.mcp.disclosure import disclose
+
+        _echo_json(
+            _run(
+                lambda: disclose(task, surface=surface, task_class=task_class).model_dump(
+                    mode="json"
+                )
+            ),
+            detail_level,
+        )
+
+    @mcp_app.command("benchmark")
+    def mcp_benchmark_cmd(
+        repeats: int = typer.Option(3, "--repeats", help="Invocations per sampled tool."),
+        detail_level: str = typer.Option("normal", "--detail-level"),
+    ) -> None:
+        """§43 measured response bytes + labeled token estimate per sampled tool."""
+        from apiforge.cli import _echo_json, _run
+        from apiforge.mcp.benchmark import benchmark_tools
+
+        _echo_json(
+            _run(lambda: benchmark_tools(repeats=repeats).model_dump(mode="json")),
+            detail_level,
+        )
+
     @agentops_app.command("projection")
     def agentops_projection_cmd(
         host: str = typer.Option(..., "--host", help="claude|gpt-codex|devin|copilot."),

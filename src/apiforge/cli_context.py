@@ -84,22 +84,29 @@ def register(context_app: typer.Typer) -> None:
         case_dir: Path | None = typer.Option(None, "--case"),
         invalidate: bool = typer.Option(False, "--invalidate", help="Drop affected selections."),
         cache_home: Path | None = typer.Option(None, "--cache-home"),
+        limit: int | None = typer.Option(
+            None, "--limit", help="Bound each carried collection; counts stay truthful."
+        ),
         detail_level: str = typer.Option("normal", "--detail-level"),
     ) -> None:
         """What changed, which operations it impacts and which capsules to build — delta first."""
         from apiforge.application.cache import context_delta
         from apiforge.cli import _echo_json, _run
+        from apiforge.output.page import bound_collections
 
         _echo_json(
             _run(
-                lambda: context_delta(
-                    root,
-                    changed=changed,
-                    base=base,
-                    head=head,
-                    case_dir=case_dir,
-                    invalidate=invalidate,
-                    cache_home=cache_home,
+                lambda: bound_collections(
+                    context_delta(
+                        root,
+                        changed=changed,
+                        base=base,
+                        head=head,
+                        case_dir=case_dir,
+                        invalidate=invalidate,
+                        cache_home=cache_home,
+                    ),
+                    limit,
                 )
             ),
             detail_level,
@@ -144,13 +151,24 @@ def register(context_app: typer.Typer) -> None:
         root: Path = typer.Option(Path("."), "--root"),
         apply: bool = typer.Option(False, "--apply", help="Delete; default only reports."),
         cache_home: Path | None = typer.Option(None, "--cache-home"),
+        limit: int | None = typer.Option(
+            None, "--limit", help="Bound each carried collection; counts stay truthful."
+        ),
         detail_level: str = typer.Option("normal", "--detail-level"),
     ) -> None:
         """Expired/corrupt cache entries, orphan cache objects and unreferenced ctx objects."""
         from apiforge.application.cache import context_gc
         from apiforge.cli import _echo_json, _run
+        from apiforge.output.page import bound_collections
 
-        _echo_json(_run(lambda: context_gc(root, apply=apply, cache_home=cache_home)), detail_level)
+        _echo_json(
+            _run(
+                lambda: bound_collections(
+                    context_gc(root, apply=apply, cache_home=cache_home), limit
+                )
+            ),
+            detail_level,
+        )
 
 
 __all__ = ["register"]

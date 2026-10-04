@@ -1138,6 +1138,9 @@ values and `delta_pct`. Operations on only one side are named
 | `AF-OTEL-COLLECTOR-TIMEOUT` | span ids did not reach the collector output file within the declared timeout |
 | `AF-OTEL-COLLECTOR-UNRESOLVED` | collector endpoint unreachable — acceptance stays unresolved, never claimed |
 | `AF-AGENTOPS-WASTE-POLICY` | `agentops waste` policy file unreadable or `detectors` mapping missing; unlock: restore `rules/agentops_waste.yaml` or pass `--policy` |
+| `AF-MCP-SURFACE-POLICY` | `mcp audit` policy file unreadable, `thresholds` mapping missing or `accepted` rows malformed; unlock: restore `rules/tool_surface.yaml` or pass `--policy` |
+| `AF-MCP-DISCLOSURE-POLICY` | `mcp disclose` policy file unreadable or `task_classes` mapping missing; unlock: restore `rules/tool_disclosure.yaml` |
+| `AF-MCP-BENCHMARK-POLICY` | `mcp benchmark` policy file unreadable or `samples` mapping missing; unlock: restore `rules/tool_benchmark.yaml` |
 | `AF-PERF-RUN-INVALID` | compare input is not a PerformanceRun payload |
 | `AF-PERF-MEMORY-CORRUPT` | a `runs.jsonl` line is malformed — the store refuses, never skips |
 | `AF-PERF-SUGGEST-INPUT` | `perf suggest` got neither a readable case dir nor a findings file |

@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any, Literal, TypeVar, cast, get_args
 
 from apiforge.core.detail import apply_detail_level
+from apiforge.output.page import bound_collections as _bound_lists
 
 T = TypeVar("T")
 
@@ -192,6 +193,7 @@ def portable_doctor(root: str = ".", detail_level: str = "normal") -> dict[str, 
 
 
 def workspace_discover(root: str = ".", detail_level: str = "normal") -> dict[str, Any]:
+    """Discover workspace repositories and their declared boundaries."""
     from apiforge.application.workspace import discover
 
     return cast(
@@ -200,6 +202,7 @@ def workspace_discover(root: str = ".", detail_level: str = "normal") -> dict[st
 
 
 def workspace_status(root: str = ".", detail_level: str = "normal") -> dict[str, Any]:
+    """Report workspace repository status, drift and coverage state."""
     from apiforge.application.workspace import status
 
     return cast(dict[str, Any], _call("workspace_status", lambda: status(Path(root)), detail_level))
@@ -321,6 +324,7 @@ def field_report(root: str = ".", ab: bool = False, detail_level: str = "normal"
 
 
 def workspace_add(repository: str, root: str = ".", detail_level: str = "normal") -> dict[str, Any]:
+    """Register a repository in the workspace manifest (state mutation)."""
     from apiforge.application.workspace import add
 
     return cast(
@@ -336,6 +340,7 @@ def context_resolve(
     impact: str | None = None,
     detail_level: str = "normal",
 ) -> dict[str, Any]:
+    """Resolve a context scope — repo/target files or a change impact set."""
     from apiforge.application.context import resolve_context
 
     return cast(
@@ -598,9 +603,10 @@ def platform_verify_runtime(
 
 def capabilities_list(
     capability_id: str | None = None,
+    limit: int | None = None,
     detail_level: str = "normal",
 ) -> list[Any]:
-    """List the shared evidence-backed capability records."""
+    """List the shared evidence-backed capability records; ``limit`` bounds rows."""
     from apiforge.capabilities.registry import load_capabilities
 
     def work() -> list[Any]:
@@ -608,6 +614,8 @@ def capabilities_list(
         selected = [
             item for item in records if capability_id is None or item.capability_id == capability_id
         ]
+        if limit is not None:
+            selected = selected[:limit]
         return [item.model_dump(mode="json") for item in selected]
 
     return cast(list[Any], _call("capabilities_list", work, detail_level))
@@ -628,19 +636,29 @@ def capabilities_verify(detail_level: str = "normal") -> dict[str, Any]:
     )
 
 
-def rules_list(area: str | None = None, detail_level: str = "normal") -> dict[str, Any]:
-    """List rule ids, titles and severities by area."""
+def rules_list(
+    area: str | None = None,
+    limit: int | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """List rule ids, titles and severities by area; ``limit`` bounds total rows."""
     from apiforge.rules.catalog import load_catalog
 
     def work() -> dict[str, Any]:
         by_area: dict[str, list[dict[str, str]]] = {}
+        remaining = limit
         for rule_id, meta in sorted(load_catalog().items()):
             if area is not None and meta.area.upper() != area.upper():
                 continue
+            if remaining is not None:
+                if remaining <= 0:
+                    break
+                remaining -= 1
             by_area.setdefault(meta.area, []).append(
                 {"id": rule_id, "severity": meta.severity.value, "title": meta.title}
             )
-        return {"areas": by_area, "count": sum(len(v) for v in by_area.values())}
+        total = sum(len(v) for v in by_area.values())
+        return {"areas": by_area, "count": total, "truncated": limit is not None and total >= limit}
 
     out: dict[str, Any] = _call("rules_list", work, detail_level)
     return out
@@ -761,9 +779,13 @@ def context_delta(
     case_dir: str | None = None,
     invalidate: bool = False,
     cache_home: str | None = None,
+    limit: int | None = None,
     detail_level: str = "normal",
 ) -> dict[str, Any]:
-    """What changed (read-only git or explicit list), impacted operations and capsule targets."""
+    """What changed (read-only git or explicit set), impacted operations and capsule targets.
+
+    ``limit`` bounds each carried collection; upstream counts stay truthful.
+    """
     from apiforge.application.cache import context_delta as _delta
 
     out: dict[str, Any] = _call(
@@ -779,16 +801,20 @@ def context_delta(
         ),
         detail_level,
     )
-    return out
+    return _bound_lists(out, limit)
 
 
 def context_gc(
     root: str = ".",
     apply: bool = False,
     cache_home: str | None = None,
+    limit: int | None = None,
     detail_level: str = "normal",
 ) -> dict[str, Any]:
-    """Report (or delete with apply) expired cache entries and orphan objects."""
+    """Report (or delete with apply) expired cache entries and orphan objects.
+
+    ``limit`` bounds each carried collection; upstream counts stay truthful.
+    """
     from apiforge.application.cache import context_gc as _gc
 
     out: dict[str, Any] = _call(
@@ -796,7 +822,7 @@ def context_gc(
         lambda: _gc(Path(root), apply=apply, cache_home=Path(cache_home) if cache_home else None),
         detail_level,
     )
-    return out
+    return _bound_lists(out, limit)
 
 
 def cache_stats(
@@ -805,7 +831,7 @@ def cache_stats(
     layer: str | None = None,
     detail_level: str = "normal",
 ) -> dict[str, Any]:
-    """Cache entries/bytes/expired per layer and tier, plus layer policies."""
+    """Cache totals: entry counts, bytes and expired per layer/tier, plus layer policies."""
     from apiforge.application.cache import cache_lookup_layer
     from apiforge.application.cache import cache_stats as _stats
 
@@ -961,9 +987,13 @@ def economy_ledger(
 
 def economy_pricing(
     pricing: str | None = None,
+    limit: int | None = None,
     detail_level: str = "normal",
 ) -> dict[str, Any]:
-    """List the declared pricing catalog — prices are never hardcoded."""
+    """The declared pricing catalog — prices are never hardcoded.
+
+    ``limit`` bounds the carried ``entries``; ``count`` stays the real total.
+    """
     from apiforge.economy.pricing import describe_catalog, load_pricing
 
     out: dict[str, Any] = _call(
@@ -971,7 +1001,7 @@ def economy_pricing(
         lambda: describe_catalog(load_pricing(Path(pricing)) if pricing else load_pricing()),
         detail_level,
     )
-    return out
+    return _bound_lists(out, limit)
 
 
 def economy_reconcile(
@@ -1581,12 +1611,18 @@ def brief_show(task_id: str, root: str = ".", detail_level: str = "normal") -> d
     return out
 
 
-def contract_list(detail_level: str = "normal") -> dict[str, Any]:
-    """List registered canonical contracts."""
+def contract_list(limit: int | None = None, detail_level: str = "normal") -> dict[str, Any]:
+    """List registered canonical contracts; ``limit`` bounds the name list."""
     from apiforge.contracts.registry import contract_names
 
+    names = contract_names()
     out: dict[str, Any] = _call(
-        "contract_list", lambda: {"contracts": contract_names()}, detail_level
+        "contract_list",
+        lambda: {
+            "contracts": names[:limit] if limit is not None else names,
+            "total": len(names),
+        },
+        detail_level,
     )
     return out
 
@@ -1777,9 +1813,13 @@ def perf_memory_search(
     subject: str | None = None,
     tool: str | None = None,
     since: str | None = None,
+    limit: int | None = None,
     detail_level: str = "normal",
 ) -> dict[str, Any]:
-    """search_performance_memory — filters declared fields, never infers."""
+    """search_performance_memory — filters declared fields, never infers.
+
+    ``limit`` bounds the carried ``runs``; ``count`` stays the real total.
+    """
     from apiforge.perf.run_store import search_runs
 
     def work() -> dict[str, Any]:
@@ -1787,7 +1827,7 @@ def perf_memory_search(
         return {"count": len(runs), "runs": runs}
 
     out: dict[str, Any] = _call("perf_memory_search", work, detail_level)
-    return out
+    return _bound_lists(out, limit)
 
 
 def perf_suggest(
@@ -1834,12 +1874,17 @@ def autonomy_status(root: str = ".", detail_level: str = "normal") -> dict[str, 
     return out
 
 
-def knowledge_list(root: str = "knowledge", detail_level: str = "normal") -> dict[str, Any]:
-    """List every pack with areas, rules and verification date."""
+def knowledge_list(
+    root: str = "knowledge", limit: int | None = None, detail_level: str = "normal"
+) -> dict[str, Any]:
+    """List every pack with areas, rules and verification date; ``limit`` bounds rows."""
     from apiforge.knowledge.loader import load_packs
 
     def work() -> dict[str, Any]:
         packs = load_packs(Path(root))
+        selected = list(packs.values())
+        if limit is not None:
+            selected = selected[:limit]
         return {
             "packs": [
                 {
@@ -1851,7 +1896,7 @@ def knowledge_list(root: str = "knowledge", detail_level: str = "normal") -> dic
                     "sources": len(p.sources),
                     "verified": p.verified,
                 }
-                for p in packs.values()
+                for p in selected
             ],
             "count": len(packs),
         }
@@ -1956,15 +2001,18 @@ def perf_scenario(tool: str, scenario: str, detail_level: str = "normal") -> dic
     return out
 
 
-def perf_chaos(detail_level: str = "normal") -> dict[str, Any]:
-    """List the declared controlled failure-injection scenarios (CHAOS-001..013)."""
+def perf_chaos(limit: int | None = None, detail_level: str = "normal") -> dict[str, Any]:
+    """The declared controlled failure-injection scenario set (CHAOS-001..013).
+
+    ``limit`` bounds the carried ``scenarios`` window.
+    """
     from apiforge.perf.chaos import list_scenarios
 
     def work() -> dict[str, Any]:
         return {"scenarios": list_scenarios()}
 
     out: dict[str, Any] = _call("perf_chaos", work, detail_level)
-    return out
+    return _bound_lists(out, limit)
 
 
 def model_resilience(path: str, detail_level: str = "normal") -> dict[str, Any]:
@@ -2130,6 +2178,7 @@ def grpc_diff(baseline: str, candidate: str, detail_level: str = "normal") -> di
 
 
 def grpc_capabilities(detail_level: str = "normal") -> dict[str, Any]:
+    """Report which gRPC toolchains (protoc/buf/gateway) are locally available."""
     from apiforge.grpc.capabilities import discover
 
     return cast(
@@ -2145,6 +2194,7 @@ def grpc_codegen(
     tool: str = "fake",
     detail_level: str = "normal",
 ) -> dict[str, Any]:
+    """Plan deterministic codegen stubs for a proto/OpenAPI source — writes nothing."""
     from apiforge.contracts.grpc import GrpcCodegenRequest
     from apiforge.grpc.codegen import plan_codegen
     from apiforge.grpc.source import load_source
@@ -2164,6 +2214,7 @@ def grpc_gateway(
     output_dir: str = "gateway",
     detail_level: str = "normal",
 ) -> dict[str, Any]:
+    """Plan gRPC-Gateway projection artifacts (e.g. OpenAPI) for a proto source."""
     from apiforge.contracts.grpc import GrpcGatewayRequest
     from apiforge.grpc.gateway import plan_gateway
     from apiforge.grpc.source import load_source
@@ -2181,6 +2232,7 @@ def grpc_gateway(
 def grpc_verify(
     source: str, baseline: str | None = None, detail_level: str = "normal"
 ) -> dict[str, Any]:
+    """Verify a proto source and diff it against an optional baseline."""
     from apiforge.grpc.compatibility import compare
     from apiforge.grpc.source import load_source
     from apiforge.grpc.verify import verify
@@ -2194,6 +2246,7 @@ def grpc_verify(
 
 
 def grpc_benchmark(run: dict[str, object], detail_level: str = "normal") -> dict[str, Any]:
+    """Evaluate a declared GrpcPerformanceRun — verdict against its declared SLO."""
     from apiforge.contracts.grpc import GrpcPerformanceRun
     from apiforge.grpc.performance import evaluate
 
@@ -2416,18 +2469,22 @@ def memory_rank(
 
 def memory_quarantine_list(
     root: str = ".",
+    limit: int | None = None,
     detail_level: str = "normal",
 ) -> dict[str, Any]:
-    """List pending and released quarantine rows."""
+    """List pending and released quarantine rows; ``limit`` bounds rows."""
     from apiforge.memory.store import list_quarantine
+
+    def work() -> dict[str, Any]:
+        rows = [row.model_dump(mode="json") for row in list_quarantine(Path(root))]
+        return {
+            "rows": rows[:limit] if limit is not None else rows,
+            "total": len(rows),
+        }
 
     return cast(
         dict[str, Any],
-        _call(
-            "memory_quarantine_list",
-            lambda: {"rows": [row.model_dump(mode="json") for row in list_quarantine(Path(root))]},
-            detail_level,
-        ),
+        _call("memory_quarantine_list", work, detail_level),
     )
 
 
@@ -2677,6 +2734,53 @@ def agentops_waste(
         _call(
             "agentops_waste",
             lambda: detect_waste(Path(root), run_id, risk=risk).model_dump(mode="json"),
+            detail_level,
+        ),
+    )
+
+
+def mcp_audit(surface: str = "full", detail_level: str = "normal") -> dict[str, Any]:
+    """§40 surface audit — findings labeled observed/hypothesis per detector."""
+    from apiforge.mcp.audit import audit_surface
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "mcp_audit",
+            lambda: audit_surface(surface).model_dump(mode="json"),
+            detail_level,
+        ),
+    )
+
+
+def mcp_disclose(
+    task: str,
+    task_class: str | None = None,
+    surface: str = "full",
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """§41 task -> declared capability router -> active tool set (advisory)."""
+    from apiforge.mcp.disclosure import disclose
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "mcp_disclose",
+            lambda: disclose(task, surface=surface, task_class=task_class).model_dump(mode="json"),
+            detail_level,
+        ),
+    )
+
+
+def mcp_benchmark(repeats: int = 3, detail_level: str = "normal") -> dict[str, Any]:
+    """§43 measured response bytes + labeled token estimate per sampled tool."""
+    from apiforge.mcp.benchmark import benchmark_tools
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "mcp_benchmark",
+            lambda: benchmark_tools(repeats=repeats).model_dump(mode="json"),
             detail_level,
         ),
     )
@@ -2962,6 +3066,9 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     agentops_inspect,
     agentops_compare,
     agentops_waste,
+    mcp_audit,
+    mcp_disclose,
+    mcp_benchmark,
     decision_check,
 )
 

@@ -277,6 +277,17 @@ from apiforge.contracts.tool_host import (
     TestSlice,
     ToolSurface,
 )
+from apiforge.contracts.tool_surface import (
+    DisclosurePolicy,
+    PageWindow,
+    SurfaceFinding,
+    ToolBenchmark,
+    ToolBenchmarkReport,
+    ToolBenchmarkSample,
+    ToolDisclosure,
+    ToolPage,
+    ToolSurfaceAudit,
+)
 from apiforge.contracts.trust import (
     AgentPermissionSet,
     MemoryGateResult,
@@ -527,6 +538,15 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "WasteReport/v1": WasteReport,
     "RunComparison/v1": RunComparison,
     "ComparisonAxis/v1": ComparisonAxis,
+    "ToolSurfaceAudit/v1": ToolSurfaceAudit,
+    "SurfaceFinding/v1": SurfaceFinding,
+    "ToolDisclosure/v1": ToolDisclosure,
+    "ToolPage/v1": ToolPage,
+    "PageWindow/v1": PageWindow,
+    "ToolBenchmark/v1": ToolBenchmark,
+    "ToolBenchmarkSample/v1": ToolBenchmarkSample,
+    "ToolBenchmarkReport/v1": ToolBenchmarkReport,
+    "DisclosurePolicy/v1": DisclosurePolicy,
     "CostVector/v1": CostVector,
     "LedgerRef/v1": LedgerRef,
     "RunLedgerEntry/v1": RunLedgerEntry,

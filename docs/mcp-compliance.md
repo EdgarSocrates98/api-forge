@@ -1,0 +1,57 @@
+# MCP compliance matrix — spec revision 2025-11-25
+
+Scope: `apiforge-mcp`, the local FastMCP server (`src/apiforge/mcp/server.py`)
+that exposes the API Forge read tools over stdio. Evaluated against the MCP
+specification revision **2025-11-25**, the current revision as of October 2026
+(the installed `mcp` SDK 1.30.0 negotiates `2024-11-05`, `2025-03-26`,
+`2025-06-18` and `2025-11-25`).
+
+States: `SUPPORTED` · `PARTIAL` · `NOT_IMPLEMENTED` · `NOT_APPLICABLE`.
+
+| Feature | Specification | Status | Evidence | Gap |
+|---|---|---|---|---|
+| transport | JSON-RPC 2.0 over stdio; streamable HTTP optional | `SUPPORTED` | `server.run()` uses the FastMCP default stdio transport | no streamable HTTP — deliberate: the server is local-first |
+| authorization | OAuth 2.1 for HTTP transports | `NOT_APPLICABLE` | stdio transport carries no HTTP authorization layer | n/a — revisit if an HTTP transport is ever exposed |
+| stateless core | requests complete independently | `SUPPORTED` | every tool call is a pure read over local ledgers; no per-connection state mutates results | none |
+| routing | method routing to declared handlers | `SUPPORTED` | SDK routes `tools/call` by name; `apiforge_discover` + `apiforge_call` add a semantic router; §41 `mcp_disclose` routes task → declared tool set | none |
+| multi-round-trip | elicitation / multi-step conversations | `NOT_IMPLEMENTED` | no elicitation or sampling use; tools answer in one round-trip | not needed for the read plane; the governed run stays in the runtime |
+| cacheable list responses | list results SHOULD be deterministic and bounded | `PARTIAL` | `limit` param on `rules_list`, `capabilities_list`, `contract_list`, `knowledge_list`, `memory_quarantine_list`, `context_delta`, `context_gc`, `economy_pricing`, `perf_chaos`, `perf_memory_search`; §42 `ToolPage`/`paged`/`bound_collections` standardizes windows | no `icons`/cache hints emitted; audit reports `unbounded_list: 0` |
+| extensions | protocol extensions negotiated via capabilities | `NOT_APPLICABLE` | no extensions declared or required | none |
+| capability negotiation | `initialize` handshake with `protocolVersion` | `SUPPORTED` | FastMCP/SDK performs negotiation; supported set is the SDK's `SUPPORTED_PROTOCOL_VERSIONS` | none |
+| resources | `resources/list`, `resources/read` | `NOT_IMPLEMENTED` | no `@mcp.resource` registered — the tool surface covers reads | deliberate: artifacts live behind `ctx://` refs exposed via tools, not the resources primitive |
+| tools | `tools/list`, `tools/call` with JSON-Schema args | `SUPPORTED` | 143 tools registered with pydantic-derived JSON Schema; §40 `mcp audit` measures schema/description bytes; §43 `mcp benchmark` measures response cost | none |
+| error model | JSON-RPC error objects; protocol errors | `SUPPORTED` | refusals raise `ContractError`/`AnalysisError` → SDK error; payload carries `error_code` (`AF-*`), `field` and `unlock` per the catalog | none |
+| security | spec security best practices | `SUPPORTED` | read-only tools; no provider SDK imports in `src/`; sensitive-attribute refusal; secrets never enter payloads | none |
+
+## Version compatibility (§45)
+
+The server does not pin a protocol revision — the `mcp` SDK negotiates during
+`initialize`. The SDK's declared set is `2024-11-05`, `2025-03-26`,
+`2025-06-18` and `2025-11-25`; a client speaking any of them connects without
+a migration. The tool surface itself is additive-versioned: new tools are
+appended to the `TOOLS` tuple (never renamed silently), tool names are the
+stable public contract, and `agent_aliases.yaml`-style compatibility notes
+are recorded when a name must change. Breaking tool-name changes are
+refusals with `AF-MCP-TOOL-UNKNOWN` + unlock, not silent drops.
+
+## Tool surface engineering v2 (§40–§43)
+
+- `apiforge mcp audit [--surface full|compact]` — `ToolSurfaceAudit` over the
+  measured surface: `oversized_schema`, `poor_description`,
+  `unbounded_list`, `overlapping`, `redundant`, `oversized_output` (the last
+  only when benchmark bytes are supplied), each labeled
+  `observed`/`hypothesis`; thresholds live in `rules/tool_surface.yaml`,
+  and the file's `accepted:` list declares reviewed exceptions that land in
+  the audit's `accepted` field with their reason — recorded, never dropped.
+- `apiforge mcp disclose --task "..."` — §41 advisory router: task text →
+  declared task class (`rules/tool_disclosure.yaml`) → active tool set +
+  dropped set; unclassified tasks keep the full surface and say so.
+- `apiforge mcp benchmark [--repeats N]` — §43 measured median/p95 response
+  bytes + chars/4 token estimate (always labeled `estimated`) for the
+  declared sample set in `rules/tool_benchmark.yaml`, ranked most expensive
+  first; `usefulness` compares medians against declared `max_bytes`.
+- §42 output contract — `ToolPage`/`paged()`/`bound_collections()` in
+  `output/page.py` gives the standard
+  `summary`/`items`/`refs`/`evidence`/`unresolved`/`pagination` shape;
+  adopted incrementally on list tools via `limit` parameters (CLI and MCP
+  carry the same bound — parity is contractual).

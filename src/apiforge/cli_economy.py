@@ -236,15 +236,19 @@ def register(economy_app: typer.Typer) -> None:
     @economy_app.command("pricing")
     def economy_pricing(
         pricing: Path | None = typer.Option(None, "--pricing"),
+        limit: int | None = typer.Option(
+            None, "--limit", help="Bound carried entries; count stays the real total."
+        ),
         detail_level: str = typer.Option("normal", "--detail-level"),
     ) -> None:
         """List the declared pricing catalog — prices are never hardcoded."""
         from apiforge.cli import _echo_json, _run
         from apiforge.economy.pricing import describe_catalog, load_pricing
+        from apiforge.output.page import bound_collections
 
         def work() -> dict[str, object]:
             catalog = load_pricing(pricing) if pricing is not None else load_pricing()
-            return describe_catalog(catalog)
+            return bound_collections(describe_catalog(catalog), limit)
 
         _echo_json(_run(work), detail_level)
 

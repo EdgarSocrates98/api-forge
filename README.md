@@ -422,6 +422,8 @@ while refusal codes and `fact_id`s survive.
 | `apiforge evals telemetry-otlp` | 3-case corpus: full §50 operation coverage, §51 ids carried into OTLP attributes, malformed input stays unresolved |
 | `apiforge agentops inspect <run>`, `agentops compare A B`, `agentops waste <run>` | §53–§57 AgentOps plane — `RunInspection` sectioned report, `RunComparison` over the 8-axis set, `WasteReport` from `rules/agentops_waste.yaml` with findings labeled `observed`/`estimated`/`hypothesis`; missing data stays `unresolved`, never zero-filled |
 | `apiforge evals agentops` | 4-case corpus: sections, waste detection, compare verdicts, missing-run honesty |
+| `apiforge mcp audit`, `mcp disclose --task T`, `mcp benchmark` | §40–§43 tool-surface engineering — measured audit findings, task→active-tool-set advisory router, response-byte/token ranking; `docs/mcp-compliance.md` covers §44–§45 against spec 2025-11-25 |
+| `apiforge evals tool-surface` | 4-case corpus: audit baseline, disclosure routing, paging honesty, benchmark samples |
 | `apiforge economy explain <run_id>` | Why each ref was spent, from recorded provenance rules (no model call) |
 | `apiforge evals economy [--record-baseline]` | 12-case benchmark: evidence recall floor + median byte reduction vs recorded baseline |
 | `apiforge runtime run\|resume\|debate <task> --profile economy\|balanced\|deep` | Economy Plane: profile preference with risk floor, trimmed optional roles, call cap + verification reserve, L0–L5 ladder; `economy` block in the result |

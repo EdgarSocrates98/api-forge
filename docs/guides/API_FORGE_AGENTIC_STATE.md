@@ -211,3 +211,39 @@ prerequisite (undeclared risk, empty ledgers) land in `unresolved`. MCP
 exposes the three read projections (`agentops_inspect`, `agentops_compare`,
 `agentops_waste`); `evals agentops` covers sections, detection, verdicts and
 missing-run honesty.
+
+## Tool surface engineering and MCP compliance (phase 9)
+
+`mcp audit` measures the declared surface — `oversized_schema` and
+`poor_description` findings are observed against
+`rules/tool_surface.yaml` thresholds; `unbounded_list` and `overlapping`
+stay hypothesis-level because signatures cannot prove output size;
+`oversized_output` only reports when benchmark bytes are supplied. Phase 9
+engineering cut findings from 20 to 0: docstrings were added to nine
+tools, `limit` parameters to the ten list-shaped tools (CLI and MCP carry
+the same bound via `bound_collections`), and the one remaining overlap
+hypothesis became a declared `accepted:` exception in
+`rules/tool_surface.yaml` — recorded in the audit with its reason, never
+silently dropped.
+
+`mcp disclose --task "..."` is the §41 advisory router — task text is
+classified over declared keywords in `rules/tool_disclosure.yaml` into a
+task class whose declared tool set becomes `active_tools` (everything else
+`dropped_tools`). Unclassified tasks fall back to the full surface and say
+so; disclosure never silently narrows. The host still decides what it
+loads.
+
+`mcp benchmark` runs the declared `rules/tool_benchmark.yaml` samples on an
+isolated root and ranks tools by measured median/p95 response bytes plus a
+chars/4 token estimate — always `estimated`, never counted. `usefulness`
+compares medians against a declared `max_bytes` when one is set.
+
+`ToolPage`/`paged()` in `output/page.py` is the §42 standard shape —
+`summary`/`items`/`refs`/`evidence`/`unresolved`/`pagination` with honest
+`total` and `next_offset`.
+
+`docs/mcp-compliance.md` holds the §44 matrix over the twelve required
+axes against spec revision 2025-11-25 plus the §45 version-compatibility
+notes: the SDK negotiates `2024-11-05`→`2025-11-25`, tool names are the
+stable public contract, and breaking changes refuse with
+`AF-MCP-TOOL-UNKNOWN` + unlock.

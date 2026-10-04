@@ -44,6 +44,26 @@ requires the cost of the run that never happened.
 | `AF-MCP-OPTIONAL-UNAVAILABLE` | optional MCP capability is not installed; local CLI remains available |
 | `AF-KNOW-PACKAGED-MISSING` | installed package has no bundled knowledge assets for the requested operation |
 
+## Governed agentic state
+
+Memory and blackboard are local append-only data planes. Their refusals carry
+the rejected field and a safe unlock; none is an instruction channel or an
+authorization to mutate an external system.
+
+| Code | Meaning |
+|---|---|
+| `AF-MEMORY-SCOPE-DENIED` | candidate scope is not allowed by the active MemoryPolicy |
+| `AF-MEMORY-UNTRUSTED` | external-untrusted data cannot be persisted under the policy |
+| `AF-MEMORY-EVIDENCE-REQUIRED` | institutional/semantic memory has no verified evidence refs |
+| `AF-MEMORY-MODEL-UNVERIFIED` | model-generated data cannot be promoted automatically |
+| `AF-MEMORY-TRUST-INSUFFICIENT` | candidate trust is below the policy minimum |
+| `AF-MEMORY-NOT-FOUND` | invalidation named a memory absent from the append-only store |
+| `AF-MEMORY-CANDIDATE-NOT-FOUND` | persistence named a candidate absent from the store |
+| `AF-MEMORY-FRESHNESS-UNRESOLVED` | an expiry exists but retrieval received no explicit clock |
+| `AF-MEMORY-STORE-CORRUPT` | a persisted memory row failed its closed contract |
+| `AF-BLACKBOARD-STORE-CORRUPT` | a persisted blackboard row failed its closed contract |
+| `AF-CHECKPOINT-NOT-FOUND` | the requested semantic checkpoint is absent |
+
 ## Routing
 
 `catalog/routing.yaml` maps `(phase, dominant_area)` → `recommended_agent`;

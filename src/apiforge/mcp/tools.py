@@ -2059,6 +2059,137 @@ def migration_verify(
     )
 
 
+def memory_propose(
+    scope: str,
+    origin: str,
+    payload: Any,
+    proposed_by: str,
+    reason: str,
+    created_at: str,
+    root: str = ".",
+    observed_at: str | None = None,
+    expires_at: str | None = None,
+    trust_level: str = "candidate",
+    provenance: list[str] | None = None,
+    evidence_refs: list[str] | None = None,
+    environment_fingerprint: str | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Create a candidate memory; persistence remains a separate gated verb."""
+    from apiforge.memory.store import propose_memory
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "memory_propose",
+            lambda: propose_memory(
+                Path(root), scope=scope, origin=origin, payload=payload, proposed_by=proposed_by,
+                reason=reason, created_at=created_at, observed_at=observed_at, expires_at=expires_at,
+                trust_level=trust_level, provenance=tuple(provenance or ()),
+                evidence_refs=tuple(evidence_refs or ()), environment_fingerprint=environment_fingerprint,
+            ),
+            detail_level,
+        ),
+    )
+
+
+def memory_persist(
+    candidate_id: str,
+    now: str,
+    root: str = ".",
+    policy_id: str = "default",
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Persist one candidate through the local evidence/trust policy."""
+    from apiforge.contracts.agentic_memory import MemoryPolicy
+    from apiforge.memory.store import load_candidate, persist_candidate
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "memory_persist",
+            lambda: persist_candidate(
+                Path(root), load_candidate(Path(root), candidate_id), MemoryPolicy(policy_id=policy_id), now=now
+            ),
+            detail_level,
+        ),
+    )
+
+
+def memory_search(
+    terms: list[str] | None = None,
+    scopes: list[str] | None = None,
+    root: str = ".",
+    environment_fingerprint: str | None = None,
+    minimum_trust: str = "unknown",
+    now: str | None = None,
+    max_results: int = 20,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Bounded memory lookup with freshness and contamination diagnostics."""
+    from apiforge.contracts.agentic_memory import MemoryQuery, MemoryScope, TrustLevel
+    from apiforge.memory.store import query_memory
+
+    query = MemoryQuery(
+        terms=tuple(terms or ()),
+        scopes=tuple(cast(MemoryScope, item) for item in (scopes or ())),
+        environment_fingerprint=environment_fingerprint,
+        minimum_trust=cast(TrustLevel, minimum_trust), now=now, max_results=max_results,
+    )
+    return cast(dict[str, Any], _call("memory_search", lambda: query_memory(Path(root), query), detail_level))
+
+
+def blackboard_append(
+    task_id: str,
+    scope: str,
+    kind: str,
+    origin: str,
+    payload: Any,
+    created_at: str,
+    root: str = ".",
+    trust_level: str = "unknown",
+    taint: list[str] | None = None,
+    provenance: list[str] | None = None,
+    evidence_refs: list[str] | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Append structured shared state; no entry gains instruction authority."""
+    from apiforge.blackboard.store import append_entry
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "blackboard_append",
+            lambda: append_entry(
+                Path(root), task_id=task_id, scope=scope, kind=kind, origin=origin, payload=payload,
+                created_at=created_at, trust_level=trust_level, taint=tuple(taint or ()),
+                provenance=tuple(provenance or ()), evidence_refs=tuple(evidence_refs or ()),
+            ),
+            detail_level,
+        ),
+    )
+
+
+def blackboard_query(
+    task_id: str,
+    root: str = ".",
+    kinds: list[str] | None = None,
+    scope: str | None = None,
+    terms: list[str] | None = None,
+    max_results: int = 50,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Read only the bounded task-relevant blackboard slice."""
+    from apiforge.blackboard.store import query_entries
+    from apiforge.contracts.agentic_memory import BlackboardKind, BlackboardQuery
+
+    query = BlackboardQuery(
+        task_id=task_id, kinds=tuple(cast(BlackboardKind, item) for item in (kinds or ())),
+        scope=scope, terms=tuple(terms or ()), max_results=max_results,
+    )
+    return cast(dict[str, Any], _call("blackboard_query", lambda: query_entries(Path(root), query), detail_level))
+
+
 TOOLS: tuple[Callable[..., Any], ...] = (
     discover,
     analyze,
@@ -2158,6 +2289,11 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     runtime_resume,
     runtime_debate,
     runtime_approve,
+    memory_propose,
+    memory_persist,
+    memory_search,
+    blackboard_append,
+    blackboard_query,
 )
 
 OBSERVABILITY_TOOLS: tuple[Callable[..., Any], ...] = (

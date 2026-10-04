@@ -113,6 +113,11 @@ def test_tools_export_all_expected_verbs() -> None:
         "runtime_resume",
         "runtime_debate",
         "runtime_approve",
+        "memory_propose",
+        "memory_persist",
+        "memory_search",
+        "blackboard_append",
+        "blackboard_query",
     }
 
 

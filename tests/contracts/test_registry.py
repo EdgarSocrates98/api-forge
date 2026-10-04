@@ -34,6 +34,17 @@ def test_registry_is_sorted_and_complete() -> None:
         "PerformanceRun/v1",
         "DataAccessIR/v1",
         "RuntimeMatrix/v1",
+        "MemoryRecord/v1",
+        "MemoryCandidate/v1",
+        "MemoryPolicy/v1",
+        "MemoryQuery/v1",
+        "MemoryOutcome/v1",
+        "MemoryRetrievalResult/v1",
+        "MemoryInvalidation/v1",
+        "BlackboardEntry/v1",
+        "BlackboardQuery/v1",
+        "BlackboardResult/v1",
+        "SemanticCheckpoint/v1",
     }
     assert expected <= set(names)
 

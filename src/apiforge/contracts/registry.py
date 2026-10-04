@@ -17,6 +17,20 @@ from apiforge.contracts.agentic import (
     RuntimeReview,
     TrajectoryEvent,
 )
+from apiforge.contracts.agentic_memory import (
+    BlackboardEntry,
+    BlackboardQuery,
+    BlackboardResult,
+    MemoryCandidate,
+    MemoryInvalidation,
+    MemoryOutcome,
+    MemoryPolicy,
+    MemoryQuery,
+    MemoryRecord,
+    MemoryRetrievalResult,
+    MemoryTrust,
+    SemanticCheckpoint,
+)
 from apiforge.contracts.base import ContractError
 from apiforge.contracts.cache import CacheDecision, CacheDep, CacheEntry, DeltaSlice
 from apiforge.contracts.context import (
@@ -272,6 +286,18 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "DecisionRecord/v1": DecisionRecord,
     "ApprovalGate/v1": ApprovalGate,
     "TrajectoryEvent/v1": TrajectoryEvent,
+    "MemoryTrust/v1": MemoryTrust,
+    "MemoryRecord/v1": MemoryRecord,
+    "MemoryCandidate/v1": MemoryCandidate,
+    "MemoryPolicy/v1": MemoryPolicy,
+    "MemoryQuery/v1": MemoryQuery,
+    "MemoryOutcome/v1": MemoryOutcome,
+    "MemoryRetrievalResult/v1": MemoryRetrievalResult,
+    "MemoryInvalidation/v1": MemoryInvalidation,
+    "BlackboardEntry/v1": BlackboardEntry,
+    "BlackboardQuery/v1": BlackboardQuery,
+    "BlackboardResult/v1": BlackboardResult,
+    "SemanticCheckpoint/v1": SemanticCheckpoint,
     "TelemetryRecord/v1": TelemetryRecord,
     "ObservationSnapshot/v1": ObservationSnapshot,
     "SLODefinition/v1": SLODefinition,

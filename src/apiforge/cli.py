@@ -263,6 +263,7 @@ platform_app = typer.Typer(
     no_args_is_help=True,
 )
 app.add_typer(platform_app)
+from apiforge.cli_agentic_state import register as _register_agentic_state
 from apiforge.cli_agents import register as _register_agents
 from apiforge.cli_cache import register as _register_cache
 from apiforge.cli_context import register as _register_context
@@ -302,6 +303,7 @@ _register_resume(
     runtime_app=runtime_app,
 )
 _register_economy(economy_app)
+_register_agentic_state(app, runtime_app)
 
 
 _OUTPUT_MODE: dict[str, str | None] = {"mode": None}

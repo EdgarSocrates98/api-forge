@@ -1035,9 +1035,9 @@ def governor_stop(
                 unlock="pass one of the §24 action names",
             )
         gain = expected_gain(action=cast(GainAction, action), signals=signals)
-        return decide_stop(
-            gain, mandatory_requirement=mandatory, threshold=threshold
-        ).model_dump(mode="json")
+        return decide_stop(gain, mandatory_requirement=mandatory, threshold=threshold).model_dump(
+            mode="json"
+        )
 
     out: dict[str, Any] = _call("governor_stop", work, detail_level)
     return out
@@ -1095,6 +1095,50 @@ def control_shadow(
         }
 
     out: dict[str, Any] = _call("control_shadow", work, detail_level)
+    return out
+
+
+def route_model(
+    inputs: dict[str, Any],
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """§33: rank declared model candidates; quality history is a constraint."""
+    from apiforge.contracts.model_routing import ModelRouteInputs
+    from apiforge.runtime.model_router import load_model_router_policy
+    from apiforge.runtime.model_router import route_model as _route
+
+    def work() -> dict[str, Any]:
+        rules = load_model_router_policy()
+        return _route(
+            ModelRouteInputs.model_validate(inputs), rules["candidates"], policy=rules
+        ).model_dump(mode="json")
+
+    out: dict[str, Any] = _call("route_model", work, detail_level)
+    return out
+
+
+def knowledge_adaptive(
+    query: str,
+    max_level: str = "L4",
+    semantic: bool = False,
+    root: str | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """§36: L0→L4 ladder; escalates only while the level is insufficient."""
+    from apiforge.contracts.model_routing import RetrievalLevel
+    from apiforge.knowledge.levels import adaptive_retrieve
+    from apiforge.knowledge.semantic import load_semantic_adapter
+
+    def work() -> dict[str, Any]:
+        adapter = load_semantic_adapter() if semantic else None
+        return adaptive_retrieve(
+            query,
+            root=Path(root) if root else None,
+            semantic=adapter,
+            max_level=cast(RetrievalLevel, max_level),
+        ).model_dump(mode="json")
+
+    out: dict[str, Any] = _call("knowledge_adaptive", work, detail_level)
     return out
 
 
@@ -2745,6 +2789,8 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     control_routes,
     control_shadow,
     control_triggers,
+    route_model,
+    knowledge_adaptive,
     evals_replay,
     evals_gate,
     evals_economy_hardening,

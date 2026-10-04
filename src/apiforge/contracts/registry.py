@@ -151,6 +151,18 @@ from apiforge.contracts.integration import (
     GitHubPrReceipt,
 )
 from apiforge.contracts.knowledge import ExpertisePack
+from apiforge.contracts.model_routing import (
+    AdaptiveRetrievalResult,
+    ModelCandidate,
+    ModelEvaluation,
+    ModelRouteDecision,
+    ModelRouteInputs,
+    ModelScorecard,
+    QueryRewrite,
+    RankedModel,
+    RetrievalComparison,
+    RetrievalStep,
+)
 from apiforge.contracts.observability import (
     Capability,
     CircuitBreakerEvent,
@@ -479,6 +491,16 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "PromotionDecision/v1": PromotionDecision,
     "FallbackDecision/v1": FallbackDecision,
     "RouteDecision/v1": RouteDecision,
+    "ModelRouteInputs/v1": ModelRouteInputs,
+    "ModelCandidate/v1": ModelCandidate,
+    "ModelEvaluation/v1": ModelEvaluation,
+    "ModelScorecard/v1": ModelScorecard,
+    "RankedModel/v1": RankedModel,
+    "ModelRouteDecision/v1": ModelRouteDecision,
+    "RetrievalStep/v1": RetrievalStep,
+    "AdaptiveRetrievalResult/v1": AdaptiveRetrievalResult,
+    "QueryRewrite/v1": QueryRewrite,
+    "RetrievalComparison/v1": RetrievalComparison,
     "CostVector/v1": CostVector,
     "LedgerRef/v1": LedgerRef,
     "RunLedgerEntry/v1": RunLedgerEntry,

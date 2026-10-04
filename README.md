@@ -414,6 +414,10 @@ while refusal codes and `fact_id`s survive.
 | `apiforge control routes`, `control shadow` | §28–§29 lifecycle state per route + recorded parallel-run observations (candidate vs legacy + sorted `difference`) |
 | `apiforge control eval --route R [--trigger …]`, `control promote|demote --route R` | §30–§32 who governs per mode; promotion one step at a time (active needs the five §31 requirements + approved `ApprovalGate`), degraded active routes take the declared `fallback_route` or refuse `AF-GOV-FALLBACK-MISSING` |
 | `apiforge evals control-plane` | 3-case corpus: shadow never governs, promotion gates, fallback + terminal refuse |
+| `apiforge route model --inputs <json> [--scorecards F]`, `route scorecard --evaluations F` | §33–§34 `ModelRouteDecision`: hard constraints then weighted rank over §34 scorecards segmented by task class |
+| `apiforge route promote --route model_routing --evidence <json> [--evaluations F]` | §35 promotion through the control-plane lifecycle — refuses `AF-ROUTE-PROMOTION-EVIDENCE` without min_evaluations + quality_floor real traffic |
+| `apiforge knowledge adaptive --query Q [--semantic]`, `knowledge rewrite --query Q --deterministic-hits N` | §36–§39 L0→L4 ladder (stops at first sufficient level, L3 optional via local adapter) + gated query rewriting |
+| `apiforge evals model-routing`, `evals retrieval` | 3-case router corpus (constraints, floors, insufficient evals) + §38 strategy comparison on recall/precision/latency/tokens/cost |
 | `apiforge economy explain <run_id>` | Why each ref was spent, from recorded provenance rules (no model call) |
 | `apiforge evals economy [--record-baseline]` | 12-case benchmark: evidence recall floor + median byte reduction vs recorded baseline |
 | `apiforge runtime run\|resume\|debate <task> --profile economy\|balanced\|deep` | Economy Plane: profile preference with risk floor, trimmed optional roles, call cap + verification reserve, L0–L5 ladder; `economy` block in the result |

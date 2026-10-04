@@ -215,6 +215,12 @@ control_app = typer.Typer(
     no_args_is_help=True,
 )
 app.add_typer(control_app)
+route_app = typer.Typer(
+    name="route",
+    help="Model routing: candidates, scorecards and lifecycle promotion.",
+    no_args_is_help=True,
+)
+app.add_typer(route_app)
 brief_app = typer.Typer(
     name="brief",
     help="Outcome Briefs — DONE is refused while mandatory gaps exist.",
@@ -286,6 +292,8 @@ from apiforge.cli_extras import register as _register_extras
 from apiforge.cli_field import register as _register_field
 from apiforge.cli_governor import register as _register_governor
 from apiforge.cli_resume import register as _register_resume
+from apiforge.cli_route import register as _register_route
+from apiforge.cli_route import register_retrieval as _register_retrieval
 from apiforge.cli_selective import register as _register_selective
 from apiforge.cli_tool_host import register as _register_tool_host
 from apiforge.cli_tui import tui_app
@@ -319,6 +327,8 @@ _register_resume(
 _register_economy(economy_app)
 _register_governor(governor_app)
 _register_control(control_app)
+_register_route(route_app)
+_register_retrieval(knowledge_app)
 _register_agentic_state(app, runtime_app)
 
 
@@ -4017,6 +4027,36 @@ def evals_agent_governor(
     from apiforge.evals.agent_governor import run_agent_governor
 
     result = _run(lambda: run_agent_governor(corpus))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("model-routing")
+def evals_model_routing(
+    corpus: Path = typer.Option(Path("evals/corpus/model-routing"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§33-§35 router constraints, scorecard floors and promotion evidence."""
+    from apiforge.evals.model_routing import run_model_routing
+
+    result = _run(lambda: run_model_routing(corpus))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("retrieval")
+def evals_retrieval(
+    corpus: Path = typer.Option(Path("evals/corpus/retrieval"), "--corpus"),
+    root: Path | None = typer.Option(None, "--root", help="Knowledge packs directory."),
+    cost_rate: float | None = typer.Option(None, "--cost-rate", help="Declared cost per token."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§38: lexical/graph/semantic/hybrid on recall, precision, latency, cost."""
+    from apiforge.evals.retrieval import run_retrieval
+
+    result = _run(lambda: run_retrieval(corpus, root=root, cost_rate=cost_rate))
     _echo_json(result, detail_level)
     if isinstance(result, dict) and not result.get("passed"):
         raise typer.Exit(code=1)

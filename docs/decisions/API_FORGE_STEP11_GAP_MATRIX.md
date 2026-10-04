@@ -115,11 +115,12 @@ provider/cloud/credentials — contract + offline proof only.
 |---|---|---|---|
 | TaskSpec supervisor | KEEP | `runtime/supervisor.py`, sealed tasks, bounded runs | protect |
 | Agent routing | KEEP | `runtime/routing.py`, scorecard routing | protect |
-| Model router | EXTEND | `economy/providers.py` tiers T0–T3 + `scorecard_routing.py` | `ModelScorecard` per task class + routing shadow→assisted→active |
-| Adaptive retrieval L0–L4 | EXTEND | `knowledge/retrieval.py` tiers (3/5/20) + deterministic expansion | ladder contract; escalate only on need |
-| Semantic/vector retrieval | MISSING | none (deterministic only) | optional local adapter interface; never a hard dependency |
-| Retrieval evals | EXTEND | eval corpora exist, none for retrieval | corpus comparing lexical/graph/hybrid on recall/precision/latency/tokens |
-| Query rewriting | MISSING | deterministic expansion only | gated rewrite record (deterministic failed + budget + profile allow) |
+| Model router | DELIVERED (phase 6) | `ModelRouteInputs`/`ModelCandidate`/`ModelRouteDecision`/`RankedModel` contracts + `runtime/model_router.py` + `rules/model_router.yaml` — hard constraints (tools/structured/context/reasoning/cost/latency/availability) then weighted rank; `AF-ROUTE-NO-ELIGIBLE-MODEL` honest | `route model` CLI + MCP |
+| Model scorecard + promotion | DELIVERED (phase 6) | `ModelEvaluation`/`ModelScorecard` contracts + `runtime/model_scorecard.py` — §34 metrics segmented by task class; `route promote` requires min_evaluations + quality_floor (`AF-ROUTE-PROMOTION-EVIDENCE`) feeding the phase-5 lifecycle | synthetic-only benchmarks never promote |
+| Adaptive retrieval L0–L4 | DELIVERED (phase 6) | `AdaptiveRetrievalResult`/`RetrievalStep` contracts + `knowledge/levels.py` + `rules/retrieval_levels.yaml` — L0 exact → L1 lexical → L2 structural graph → L3 hybrid semantic → L4 reranker; stops at first sufficient level | `knowledge adaptive` CLI + MCP |
+| Semantic/vector retrieval | DELIVERED (phase 6) | `knowledge/semantic.py` `SemanticAdapter` protocol + `HashEmbeddingAdapter` (deterministic local hash-embedding, no vector DB); L3 skipped with `unresolved: ["semantic"]` when undeclared | optional by contract |
+| Retrieval evals | DELIVERED (phase 6) | `evals/retrieval.py` + `evals/corpus/retrieval/` — lexical/graph/semantic/hybrid compared on recall/precision/latency/tokens/cost vs declared gold | `evals retrieval` |
+| Query rewriting | DELIVERED (phase 6) | `QueryRewrite` contract + `knowledge/rewrite.py` — gates: deterministic failed + budget + profile (economy blocks); original + rewritten both recorded | `knowledge rewrite` |
 
 ### Tool Surface
 

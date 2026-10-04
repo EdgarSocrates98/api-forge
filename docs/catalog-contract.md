@@ -619,6 +619,9 @@ carry `payload_bytes: 0` so `economy report` totals are unchanged.
 | `AF-GOV-PROMOTION-NOT-APPROVED` | active promotion without an approved `ApprovalGate` matching `evidence.approval_id` |
 | `AF-GOV-FALLBACK-MISSING` | active route degraded and no `fallback_route` declared; the route refuses (fail-closed) |
 | `AF-GOV-TRIGGER-INVALID` | `control eval` trigger name outside the §32 vocabulary; unlock: pass one of the five triggers |
+| `AF-ROUTE-POLICY-INVALID` | `rules/model_router.yaml` (or `--policy`) schema unexpected; unlock: align `version: 1` |
+| `AF-ROUTE-NO-ELIGIBLE-MODEL` | every candidate failed a declared constraint; `ranked[].reasons` names each refusal |
+| `AF-ROUTE-PROMOTION-EVIDENCE` | `route promote` without a scorecard reaching min_evaluations + quality_floor; a small synthetic benchmark never promotes |
 | `AF-EVALS-ECONOMY-BASELINE-MISSING` | corpus case has no recorded baseline; unlock: `apiforge evals economy --record-baseline` |
 | `AF-EVALS-ECONOMY-BASELINE-STALE` | fixture digest differs from the recorded baseline; unlock: re-record and commit the baseline |
 | `AF-CONTEXT-QUALITY-CAPSULE` | `context quality --capsule` is missing, unreadable or not a `ContextCapsule/v1` payload; unlock: record it with `context capsule ... > capsule.json` |

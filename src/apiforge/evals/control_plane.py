@@ -68,6 +68,7 @@ def _run_case(case: dict[str, Any], root: Path) -> dict[str, Any]:
                 )
                 wanted = step.get("expect") or {}
                 for key, value in wanted.items():
+                    actual: Any
                     if key == "fallback_action":
                         actual = decision.fallback.action if decision.fallback else None
                     elif key == "fallback_code":
@@ -85,14 +86,22 @@ def _run_case(case: dict[str, Any], root: Path) -> dict[str, Any]:
                 gate = (
                     ApprovalGate.model_validate(step["approval"]) if step.get("approval") else None
                 )
-                decision = promote(root, step["route"], evidence, approval=gate, routes=routes)
+                promote_decision = promote(
+                    root, step["route"], evidence, approval=gate, routes=routes
+                )
                 wanted = step.get("expect") or {}
-                if "allowed" in wanted and decision.allowed != wanted["allowed"]:
-                    failures.append(f"promote.allowed {decision.allowed} != {wanted['allowed']}")
-                if "code" in wanted and decision.code != wanted["code"]:
-                    failures.append(f"promote.code {decision.code} != {wanted['code']}")
-                if "to_mode" in wanted and decision.to_mode != wanted["to_mode"]:
-                    failures.append(f"promote.to_mode {decision.to_mode} != {wanted['to_mode']}")
+                if "allowed" in wanted and promote_decision.allowed != wanted["allowed"]:
+                    failures.append(
+                        f"promote.allowed {promote_decision.allowed} != {wanted['allowed']}"
+                    )
+                if "code" in wanted and promote_decision.code != wanted["code"]:
+                    failures.append(
+                        f"promote.code {promote_decision.code} != {wanted['code']}"
+                    )
+                if "to_mode" in wanted and promote_decision.to_mode != wanted["to_mode"]:
+                    failures.append(
+                        f"promote.to_mode {promote_decision.to_mode} != {wanted['to_mode']}"
+                    )
             except EconomyError as exc:
                 if step.get("expect_code") not in str(exc):
                     failures.append(f"promote raised {exc.code}, wanted {step.get('expect_code')}")

@@ -75,6 +75,8 @@ def test_tools_export_all_expected_verbs() -> None:
         "control_routes",
         "control_shadow",
         "control_triggers",
+        "route_model",
+        "knowledge_adaptive",
         "evals_replay",
         "evals_gate",
         "evals_economy_hardening",

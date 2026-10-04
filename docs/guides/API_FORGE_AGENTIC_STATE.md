@@ -126,3 +126,33 @@ decision-check` gate stays the admission boundary underneath.
 
 `control demote` steps a route back — the safe direction never needs a gate.
 
+## Model routing, scorecards and adaptive retrieval (phase 6)
+
+The `model_routing` route declared in `rules/control_plane.yaml` is served by
+`route model`: deterministic ranking over declared `ModelCandidate` rows —
+hard constraints first (tool support, structured output, context window,
+reasoning tier, declared cost/latency ceilings, availability), then a weighted
+score over quality history, latency, cost and availability. Candidates fail
+loud (`ranked[].reasons`); nothing eligible answers
+`AF-ROUTE-NO-ELIGIBLE-MODEL`.
+
+`ModelScorecard` (§34) is folded from `ModelEvaluation` rows per
+provider/model **and task class**: quality, tool selection, evidence
+correctness, structured reliability, latency p50, cost mean, failure rate and
+freshness. Below `quality_floor` with `min_evaluations` the candidate cannot
+compete on cost; missing scorecards lower the score, never block.
+`route promote` converts scorecard evidence into a phase-5 promotion attempt —
+a small synthetic benchmark refuses `AF-ROUTE-PROMOTION-EVIDENCE`.
+
+`knowledge adaptive` climbs the §36 ladder only as far as needed: `L0` exact →
+`L1` lexical (`knowledge/retrieval.py`) → `L2` structural graph refs → `L3`
+hybrid semantic → `L4` reranker over merged candidates. L3 runs only when a
+`SemanticAdapter` is declared (`HashEmbeddingAdapter` is the deterministic
+local option — no vector DB, no network); otherwise the step is skipped with
+`unresolved: ["semantic"]`. `knowledge rewrite` is §39-gated: rewriting runs
+only when deterministic retrieval failed, budget remains and the profile
+permits it — `economy` blocks. `evals retrieval` compares
+lexical/graph/semantic/hybrid on recall, precision, latency, tokens and cost
+over a declared gold corpus; `evals model-routing` covers constraint refusal,
+quality floors and insufficient evaluations.
+

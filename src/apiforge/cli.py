@@ -290,6 +290,7 @@ from apiforge.cli_distribution import register as _register_distribution
 from apiforge.cli_economy import register as _register_economy
 from apiforge.cli_extras import register as _register_extras
 from apiforge.cli_field import register as _register_field
+from apiforge.cli_forge import register as _register_forge
 from apiforge.cli_governor import register as _register_governor
 from apiforge.cli_resume import register as _register_resume
 from apiforge.cli_route import register as _register_route
@@ -325,6 +326,7 @@ _register_resume(
     runtime_app=runtime_app,
 )
 _register_economy(economy_app)
+_register_forge(app)
 _register_governor(governor_app)
 _register_control(control_app)
 _register_route(route_app)
@@ -4159,6 +4161,20 @@ def evals_tool_surface(
     from apiforge.evals.tool_surface import run_tool_surface
 
     result = _run(lambda: run_tool_surface(corpus))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("forge-protocol")
+def evals_forge_protocol(
+    corpus: Path = typer.Option(Path("evals/corpus/forge-protocol"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§46–§48: submit/attach/inspect/result/evidence/handoff/health lifecycle."""
+    from apiforge.evals.forge_protocol import run_forge_protocol
+
+    result = _run(lambda: run_forge_protocol(corpus))
     _echo_json(result, detail_level)
     if isinstance(result, dict) and not result.get("passed"):
         raise typer.Exit(code=1)

@@ -117,6 +117,16 @@ from apiforge.contracts.economy import (
 )
 from apiforge.contracts.evidence import EvidenceKind, EvidenceRecord, EvidenceRef
 from apiforge.contracts.experience import ExperienceAction, ExperienceSnapshot, ExperienceView
+from apiforge.contracts.forge_protocol import (
+    ForgeCapabilityDescriptor,
+    ForgeEvidenceArtifact,
+    ForgeEvidenceBundle,
+    ForgeHandoff,
+    ForgeHealth,
+    ForgeTaskRequest,
+    ForgeTaskResult,
+    ForgeTaskStatus,
+)
 from apiforge.contracts.graph_impact import (
     GraphCandidateImpact,
     GraphImpactAssessment,
@@ -322,7 +332,15 @@ __all__ = [
     "ExternalReadRequest",
     "ExternalReadResult",
     "FallbackDecision",
+    "ForgeCapabilityDescriptor",
+    "ForgeEvidenceArtifact",
+    "ForgeEvidenceBundle",
+    "ForgeHandoff",
+    "ForgeHealth",
     "ForgePaths",
+    "ForgeTaskRequest",
+    "ForgeTaskResult",
+    "ForgeTaskStatus",
     "FreshnessResult",
     "GitHubPrReceipt",
     "GovernorDecision",

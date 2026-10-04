@@ -176,8 +176,8 @@ provider/cloud/credentials — contract + offline proof only.
 |---|---|---|---|
 | MCP server + gateway | KEEP | `mcp/` | protect |
 | MCP 2026 compliance matrix | DELIVERED (phase 9) | `docs/mcp-compliance.md` — §44 matrix over the 12 required axes against spec revision 2025-11-25 + §45 version-compatibility section; states SUPPORTED/PARTIAL/NOT_IMPLEMENTED/NOT_APPLICABLE with evidence and gaps | resources/multi-round-trip stay NOT_IMPLEMENTED by design |
-| Forge Protocol / A2A contracts | MISSING | none | `ForgeCapabilityDescriptor/Task*/Status/Result/EvidenceBundle/Handoff/Health` contracts |
-| Forge kernel boundary | MISSING | none | `docs/architecture/forge-kernel-boundary.md` analysis, no extraction |
+| Forge Protocol / A2A contracts | DELIVERED (phase 10) | `contracts/forge_protocol.py` (8 contracts) + `forge/protocol.py` + `forge/store.py` + `rules/forge_protocol.yaml`; `forge` CLI group (capabilities/submit/status/inspect/attach/result/evidence/handoff/health) + 5 read-only MCP tools; `evals forge-protocol` 4/4 | handoff emits `ForgeHandoff` prepared records for declared peers (`spark-forge`, `the-forger`) — delivery itself is out-of-band and stays a human boundary |
+| Forge kernel boundary | DELIVERED (phase 10) | `docs/architecture/forge-kernel-boundary.md` — analysis only, no extraction, as specified | — |
 
 ### Lab / CI
 

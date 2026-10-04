@@ -271,6 +271,16 @@ from apiforge.contracts.token_economics import (
     TokenLedgerEntry,
     TokenTotals,
 )
+from apiforge.contracts.forge_protocol import (
+    ForgeCapabilityDescriptor,
+    ForgeEvidenceArtifact,
+    ForgeEvidenceBundle,
+    ForgeHandoff,
+    ForgeHealth,
+    ForgeTaskRequest,
+    ForgeTaskResult,
+    ForgeTaskStatus,
+)
 from apiforge.contracts.tool_host import (
     ErrorSlice,
     HostProjection,
@@ -547,6 +557,14 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "ToolBenchmarkSample/v1": ToolBenchmarkSample,
     "ToolBenchmarkReport/v1": ToolBenchmarkReport,
     "DisclosurePolicy/v1": DisclosurePolicy,
+    "ForgeCapabilityDescriptor/v1": ForgeCapabilityDescriptor,
+    "ForgeTaskRequest/v1": ForgeTaskRequest,
+    "ForgeTaskStatus/v1": ForgeTaskStatus,
+    "ForgeTaskResult/v1": ForgeTaskResult,
+    "ForgeEvidenceArtifact/v1": ForgeEvidenceArtifact,
+    "ForgeEvidenceBundle/v1": ForgeEvidenceBundle,
+    "ForgeHandoff/v1": ForgeHandoff,
+    "ForgeHealth/v1": ForgeHealth,
     "CostVector/v1": CostVector,
     "LedgerRef/v1": LedgerRef,
     "RunLedgerEntry/v1": RunLedgerEntry,

@@ -146,6 +146,11 @@ def test_tools_export_all_expected_verbs() -> None:
         "telemetry_export",
         "telemetry_validate",
         "decision_check",
+        "forge_capabilities",
+        "forge_inspect",
+        "forge_result",
+        "forge_evidence",
+        "forge_health",
     }
 
 

@@ -247,3 +247,37 @@ axes against spec revision 2025-11-25 plus the §45 version-compatibility
 notes: the SDK negotiates `2024-11-05`→`2025-11-25`, tool names are the
 stable public contract, and breaking changes refuse with
 `AF-MCP-TOOL-UNKNOWN` + unlock.
+
+## Forge Protocol (phase 10)
+
+`forge` is the versioned public boundary (`forge-protocol/v1`) over the
+governed runtime — a facade, not a second runtime. `forge submit`
+validates the `ForgeTaskRequest` against the declared capability matrix
+(`AF-FORGE-CAPABILITY-UNKNOWN`), applies the risk gate from
+`rules/forge_protocol.yaml` (`sensitive`/`external_mutation`/`destructive`/
+`irreversible` need `--acknowledge-risk`, else `AF-FORGE-RISK-GATE`), and
+persists the task under `.apiforge/forge/` — nothing executes and nothing
+is silently claimed.
+
+`forge attach` links a Forge task to a governed `TaskSpec`; after that
+`inspect`/`status` project the governed state (`draft`→`in_progress`,
+`accepted`→`completed`, refused states pass through). `result` returns a
+`ForgeTaskResult` whose `status` is `ok`, `review` or `unresolved` — a
+task without an attached governed spec reports `unresolved` with the gap
+named, never a fabricated outcome. `evidence` emits a
+`ForgeEvidenceBundle` of observed artifacts (request, status, ledger,
+governed spec/events) plus an explicit `unresolved` list.
+
+`forge handoff --to <engine>` prepares a `ForgeHandoff` record for an
+engine declared in `rules/forge_protocol.yaml` (`spark-forge`,
+`the-forger`); undeclared targets refuse `AF-FORGE-ENGINE-UNKNOWN` and
+re-runs refuse `AF-FORGE-HANDOFF-EXISTS`. Delivery stays out-of-band — a
+human boundary, not a network call. `health` reports the wire identity,
+protocol version, engine and task counts by state.
+
+Five read-only MCP tools (`forge_capabilities`, `forge_health`,
+`forge_inspect`, `forge_result`, `forge_evidence`) project the same
+payloads; mutation verbs stay CLI-only. `docs/architecture/
+forge-kernel-boundary.md` records the §49 kernel-boundary analysis —
+what would be extracted for a standalone kernel, and why extraction is
+deferred.

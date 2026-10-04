@@ -2938,6 +2938,76 @@ def decision_check(
     )
 
 
+def forge_capabilities(detail_level: str = "normal") -> dict[str, Any]:
+    """§46 discover: public capability descriptors other engines can call."""
+    from apiforge.forge.protocol import discover_capabilities
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "forge_capabilities",
+            lambda: {"capabilities": [row.model_dump(mode="json") for row in discover_capabilities()]},
+            detail_level,
+        ),
+    )
+
+
+def forge_inspect(task_id: str, root: str = ".", detail_level: str = "normal") -> dict[str, Any]:
+    """§47 inspect: live wire projection of a forge task's state."""
+    from apiforge.forge.protocol import inspect_task
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "forge_inspect",
+            lambda: inspect_task(Path(root), task_id).model_dump(mode="json"),
+            detail_level,
+        ),
+    )
+
+
+def forge_result(task_id: str, root: str = ".", detail_level: str = "normal") -> dict[str, Any]:
+    """§47 retrieve result: governed OutcomeBrief mapped, gaps named."""
+    from apiforge.forge.protocol import retrieve_result
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "forge_result",
+            lambda: retrieve_result(Path(root), task_id).model_dump(mode="json"),
+            detail_level,
+        ),
+    )
+
+
+def forge_evidence(task_id: str, root: str = ".", detail_level: str = "normal") -> dict[str, Any]:
+    """§47 retrieve evidence: content-addressed artifact bundle."""
+    from apiforge.forge.protocol import retrieve_evidence
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "forge_evidence",
+            lambda: retrieve_evidence(Path(root), task_id).model_dump(mode="json"),
+            detail_level,
+        ),
+    )
+
+
+def forge_health(root: str = ".", detail_level: str = "normal") -> dict[str, Any]:
+    """§47 health: engine, protocol version and declared task counts."""
+    from apiforge.forge.protocol import health
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "forge_health",
+            lambda: health(Path(root)).model_dump(mode="json"),
+            detail_level,
+        ),
+    )
+
+
 TOOLS: tuple[Callable[..., Any], ...] = (
     discover,
     analyze,
@@ -3070,6 +3140,11 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     mcp_disclose,
     mcp_benchmark,
     decision_check,
+    forge_capabilities,
+    forge_inspect,
+    forge_result,
+    forge_evidence,
+    forge_health,
 )
 
 OBSERVABILITY_TOOLS: tuple[Callable[..., Any], ...] = (

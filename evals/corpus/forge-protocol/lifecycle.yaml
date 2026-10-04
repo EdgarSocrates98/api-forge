@@ -1,0 +1,20 @@
+id: lifecycle
+setup:
+  submits:
+    - {task_id: eval-task, capability_id: api.analyze, intent: "eval lifecycle"}
+  attachments:
+    - {task_id: eval-task, governed: eval-gov}
+inspect:
+  task_id: eval-task
+  state: in_progress
+  governed_state: draft
+result:
+  task_id: eval-task
+  status: review
+evidence:
+  task_id: eval-task
+  kinds: [request, status, ledger, governed]
+health:
+  state: ok
+  capabilities_min: 20
+  tasks_by_state: {in_progress: 1}

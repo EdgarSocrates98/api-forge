@@ -1141,6 +1141,17 @@ values and `delta_pct`. Operations on only one side are named
 | `AF-MCP-SURFACE-POLICY` | `mcp audit` policy file unreadable, `thresholds` mapping missing or `accepted` rows malformed; unlock: restore `rules/tool_surface.yaml` or pass `--policy` |
 | `AF-MCP-DISCLOSURE-POLICY` | `mcp disclose` policy file unreadable or `task_classes` mapping missing; unlock: restore `rules/tool_disclosure.yaml` |
 | `AF-MCP-BENCHMARK-POLICY` | `mcp benchmark` policy file unreadable or `samples` mapping missing; unlock: restore `rules/tool_benchmark.yaml` |
+| `AF-FORGE-POLICY` | `forge_protocol.yaml` unreadable or `engine`/`protocol_version`/`risk_gate`/`engines` missing; unlock: restore the rules file |
+| `AF-FORGE-TASK-ID` | forge task id does not match `^[a-z0-9][a-z0-9-]{1,62}$` |
+| `AF-FORGE-TASK-EXISTS` | `forge submit` on an existing task id |
+| `AF-FORGE-TASK-NOT-FOUND` | `forge inspect|result|evidence|attach|handoff` on an unknown task id |
+| `AF-FORGE-CAPABILITY-UNKNOWN` | `forge submit` names a capability_id absent from the public matrix |
+| `AF-FORGE-RISK-GATE` | gated risk class submitted without `--acknowledge-risk` |
+| `AF-FORGE-STATE` | `forge attach` on a task already completed/failed/refused |
+| `AF-FORGE-ENGINE-UNKNOWN` | `forge handoff --to` an engine not declared in `rules/forge_protocol.yaml` |
+| `AF-FORGE-HANDOFF-EXISTS` | `forge handoff` re-run for the same task+engine pair |
+| `AF-FORGE-HANDOFF-NOT-FOUND` | handoff lookup on an unknown id |
+| `AF-FORGE-STORE` | persisted forge row fails contract validation or is unreadable |
 | `AF-PERF-RUN-INVALID` | compare input is not a PerformanceRun payload |
 | `AF-PERF-MEMORY-CORRUPT` | a `runs.jsonl` line is malformed — the store refuses, never skips |
 | `AF-PERF-SUGGEST-INPUT` | `perf suggest` got neither a readable case dir nor a findings file |

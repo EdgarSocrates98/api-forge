@@ -424,6 +424,8 @@ while refusal codes and `fact_id`s survive.
 | `apiforge evals agentops` | 4-case corpus: sections, waste detection, compare verdicts, missing-run honesty |
 | `apiforge mcp audit`, `mcp disclose --task T`, `mcp benchmark` | §40–§43 tool-surface engineering — measured audit findings, task→active-tool-set advisory router, response-byte/token ranking; `docs/mcp-compliance.md` covers §44–§45 against spec 2025-11-25 |
 | `apiforge evals tool-surface` | 4-case corpus: audit baseline, disclosure routing, paging honesty, benchmark samples |
+| `apiforge forge capabilities\|health\|submit\|status\|inspect\|attach\|result\|evidence\|handoff` | §46–§48 Forge Protocol — versioned public boundary (`forge-protocol/v1`) over the governed runtime; capability/engine/risk gates refuse honestly (`AF-FORGE-*`), tasks persist under `.apiforge/forge/`, `handoff` prepares `ForgeHandoff` records for declared peers; `docs/architecture/forge-kernel-boundary.md` covers §49 (analysis, no extraction) |
+| `apiforge evals forge-protocol` | 4-case corpus: lifecycle + completed-run + refusal gates + unresolved/unattached honesty |
 | `apiforge economy explain <run_id>` | Why each ref was spent, from recorded provenance rules (no model call) |
 | `apiforge evals economy [--record-baseline]` | 12-case benchmark: evidence recall floor + median byte reduction vs recorded baseline |
 | `apiforge runtime run\|resume\|debate <task> --profile economy\|balanced\|deep` | Economy Plane: profile preference with risk floor, trimmed optional roles, call cap + verification reserve, L0–L5 ladder; `economy` block in the result |

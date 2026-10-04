@@ -2190,6 +2190,82 @@ def blackboard_query(
     return cast(dict[str, Any], _call("blackboard_query", lambda: query_entries(Path(root), query), detail_level))
 
 
+def budget_plan(
+    declaration: dict[str, Any], root: str = ".", detail_level: str = "normal"
+) -> dict[str, Any]:
+    """Register a deterministic hierarchical budget declaration."""
+    from apiforge.contracts.agentic_governance import BudgetLimit
+    from apiforge.governance.budget import build_plan, persist_plan
+
+    def work() -> dict[str, Any]:
+        limits = tuple(BudgetLimit.model_validate(item) for item in declaration["limits"])
+        plan = build_plan(
+            task_id=str(declaration["task_id"]), limits=limits,
+            created_at=str(declaration["created_at"]), metadata=declaration.get("metadata"),
+        )
+        return cast(dict[str, Any], persist_plan(Path(root), plan))
+
+    return cast(dict[str, Any], _call("budget_plan", work, detail_level))
+
+
+def budget_check(
+    plan_id: str,
+    task_id: str,
+    phase: str,
+    role: str,
+    tool: str,
+    spend_id: str,
+    cost: dict[str, Any],
+    root: str = ".",
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Check one projected cost without recording it."""
+    from apiforge.contracts.economy import CostVector
+    from apiforge.governance.budget import check_budget, load_plan
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "budget_check",
+            lambda: check_budget(
+                Path(root), load_plan(Path(root), plan_id), task_id=task_id, phase=phase,
+                role=role, tool=tool, cost=CostVector.model_validate(cost), spend_id=spend_id,
+            ),
+            detail_level,
+        ),
+    )
+
+
+def budget_spend(
+    plan_id: str,
+    spend_id: str,
+    task_id: str,
+    phase: str,
+    role: str,
+    tool: str,
+    cost: dict[str, Any],
+    observed_at: str,
+    root: str = ".",
+    provenance: list[str] | None = None,
+    evidence_refs: list[str] | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Admit and append one measured spend receipt."""
+    from apiforge.contracts.agentic_governance import BudgetSpend
+    from apiforge.contracts.economy import CostVector
+    from apiforge.governance.budget import load_plan, record_spend
+
+    spend = BudgetSpend(
+        spend_id=spend_id, plan_id=plan_id, task_id=task_id, phase=phase,
+        role=role, tool=tool, cost=CostVector.model_validate(cost), observed_at=observed_at,
+        provenance=tuple(provenance or ()), evidence_refs=tuple(evidence_refs or ()),
+    )
+    return cast(
+        dict[str, Any],
+        _call("budget_spend", lambda: record_spend(Path(root), load_plan(Path(root), plan_id), spend), detail_level),
+    )
+
+
 TOOLS: tuple[Callable[..., Any], ...] = (
     discover,
     analyze,
@@ -2294,6 +2370,9 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     memory_search,
     blackboard_append,
     blackboard_query,
+    budget_plan,
+    budget_check,
+    budget_spend,
 )
 
 OBSERVABILITY_TOOLS: tuple[Callable[..., Any], ...] = (

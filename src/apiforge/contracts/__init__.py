@@ -7,6 +7,12 @@ from apiforge.contracts.adapter import (
     AdapterStatus,
     EvidenceLevel,
 )
+from apiforge.contracts.agentic_governance import (
+    AgenticBudgetPlan,
+    BudgetDecision,
+    BudgetLimit,
+    BudgetSpend,
+)
 from apiforge.contracts.agentic_memory import (
     BlackboardEntry,
     BlackboardQuery,
@@ -154,11 +160,15 @@ __all__ = [
     "AdapterStatus",
     "AdaptivePlan",
     "AdaptivePolicy",
+    "AgenticBudgetPlan",
     "AssetStatus",
     "BlackboardEntry",
     "BlackboardQuery",
     "BlackboardResult",
+    "BudgetDecision",
     "BudgetEnvelope",
+    "BudgetLimit",
+    "BudgetSpend",
     "CacheDecision",
     "CacheDep",
     "CacheEntry",

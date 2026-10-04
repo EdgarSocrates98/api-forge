@@ -17,6 +17,12 @@ from apiforge.contracts.agentic import (
     RuntimeReview,
     TrajectoryEvent,
 )
+from apiforge.contracts.agentic_governance import (
+    AgenticBudgetPlan,
+    BudgetDecision,
+    BudgetLimit,
+    BudgetSpend,
+)
 from apiforge.contracts.agentic_memory import (
     BlackboardEntry,
     BlackboardQuery,
@@ -298,6 +304,10 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "BlackboardQuery/v1": BlackboardQuery,
     "BlackboardResult/v1": BlackboardResult,
     "SemanticCheckpoint/v1": SemanticCheckpoint,
+    "BudgetLimit/v1": BudgetLimit,
+    "AgenticBudgetPlan/v1": AgenticBudgetPlan,
+    "BudgetSpend/v1": BudgetSpend,
+    "BudgetDecision/v1": BudgetDecision,
     "TelemetryRecord/v1": TelemetryRecord,
     "ObservationSnapshot/v1": ObservationSnapshot,
     "SLODefinition/v1": SLODefinition,

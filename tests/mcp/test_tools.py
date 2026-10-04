@@ -118,6 +118,9 @@ def test_tools_export_all_expected_verbs() -> None:
         "memory_search",
         "blackboard_append",
         "blackboard_query",
+        "budget_plan",
+        "budget_check",
+        "budget_spend",
     }
 
 

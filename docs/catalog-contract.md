@@ -715,6 +715,11 @@ carries the calls already spent.
 | `AF-BUDGET-PHASE-UNKNOWN` | usage names a phase outside the SDD chain |
 | `AF-BUDGET-PHASE-EXCEEDED` | a non-protected phase used more than its share; plan is unresolved; unlock: raise the profile or narrow the phase |
 | `AF-BUDGET-PHASE-PROTECTED` | diagnostic: a protected phase overran its share; reported, never cut |
+| `AF-BUDGET-STORE-CORRUPT` | an append-only hierarchical budget row failed its closed contract |
+| `AF-BUDGET-PLAN-CONFLICT` | a plan id was reused with a different content hash |
+| `AF-BUDGET-PLAN-NOT-FOUND` | a budget check named a plan absent from the local plan journal |
+| `AF-BUDGET-TASK-MISMATCH` | spend task or plan identity does not match the loaded budget plan |
+| `AF-BUDGET-TOKENS-UNRESOLVED` | token limit enforcement lacks observed token measurements |
 | `AF-ECONOMY-CHECKPOINT-INVALID` | `economy_checkpoint.json` is unreadable; unlock: restore the run directory or delete the checkpoint |
 | `AF-ECONOMY-CHECKPOINT-NOT-FOUND` | the run has no economy checkpoint |
 | `AF-ECONOMY-RESUME-PINNED` | diagnostic: a resume requested a profile below the checkpoint; the checkpoint profile is kept |

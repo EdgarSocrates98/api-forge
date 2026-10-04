@@ -1,0 +1,3 @@
+G1: AgenticBudgetPlan, BudgetSpend and BudgetDecision are registered closed
+contracts; the governor enforces exact hierarchical scope limits and refuses
+unknown observed-token accounting instead of estimating it.

@@ -45,6 +45,10 @@ def test_registry_is_sorted_and_complete() -> None:
         "BlackboardQuery/v1",
         "BlackboardResult/v1",
         "SemanticCheckpoint/v1",
+        "BudgetLimit/v1",
+        "AgenticBudgetPlan/v1",
+        "BudgetSpend/v1",
+        "BudgetDecision/v1",
     }
     assert expected <= set(names)
 

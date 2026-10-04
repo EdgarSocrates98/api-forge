@@ -156,6 +156,16 @@ from apiforge.contracts.scorecard_routing import (
     ScorecardRoutingPolicy,
 )
 from apiforge.contracts.scorecard_shadow import ScorecardShadowEvaluation
+from apiforge.contracts.token_economics import (
+    BudgetReconciliation,
+    ProviderCost,
+    ProviderPricing,
+    ReconciliationAxis,
+    TokenAccounting,
+    TokenLedger,
+    TokenLedgerEntry,
+    TokenTotals,
+)
 from apiforge.contracts.trust import (
     AgentPermissionSet,
     MemoryGateResult,
@@ -197,6 +207,7 @@ __all__ = [
     "BudgetDecision",
     "BudgetEnvelope",
     "BudgetLimit",
+    "BudgetReconciliation",
     "BudgetSpend",
     "CacheDecision",
     "CacheDep",
@@ -288,6 +299,9 @@ __all__ = [
     "ProjectManifest",
     "PromotionGate",
     "PromotionState",
+    "ProviderCost",
+    "ProviderPricing",
+    "ReconciliationAxis",
     "RepositoryRef",
     "RiskClassification",
     "RiskComplexityAssessment",
@@ -314,6 +328,10 @@ __all__ = [
     "ScorecardShadowEvaluation",
     "SemanticCheckpoint",
     "SourceObservation",
+    "TokenAccounting",
+    "TokenLedger",
+    "TokenLedgerEntry",
+    "TokenTotals",
     "ToolAuthorization",
     "ToolRiskProfile",
     "TrustPropagation",

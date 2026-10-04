@@ -3992,6 +3992,20 @@ def evals_context_quality(
         raise typer.Exit(code=1)
 
 
+@evals_app.command("token-economics")
+def evals_token_economics(
+    corpus: Path = typer.Option(Path("evals/corpus/token-economics"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Usage rows + pricing + estimate vs ledger/cost/calibration expectations."""
+    from apiforge.evals.token_economics import run_token_economics
+
+    result = _run(lambda: run_token_economics(corpus))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
 @evals_app.command("economy-freshness")
 def evals_economy_freshness(
     corpus: Path = typer.Option(Path("evals/corpus/economy-freshness"), "--corpus"),

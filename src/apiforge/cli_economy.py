@@ -143,6 +143,169 @@ def register(economy_app: typer.Typer) -> None:
 
         _echo_json(_run(work), detail_level)
 
+    @economy_app.command("ledger")
+    def economy_ledger(
+        run_id: str = typer.Option(..., "--run-id"),
+        root: Path = typer.Option(Path(".apiforge"), "--root"),
+        detail_level: str = typer.Option("normal", "--detail-level"),
+    ) -> None:
+        """Per-basis token rollup for a run — observed and estimated never mix."""
+        from apiforge.cli import _echo_json, _run
+        from apiforge.economy.token_ledger import build_ledger, load_entries
+
+        def work() -> dict[str, object]:
+            rows, unparsed = load_entries(root, run_id)
+            ledger = build_ledger(run_id, rows)
+            payload = ledger.model_dump(mode="json")
+            if unparsed:
+                payload["unparsed_rows"] = unparsed
+            return payload
+
+        _echo_json(_run(work), detail_level)
+
+    @economy_app.command("record-usage")
+    def economy_record_usage(
+        run_id: str = typer.Option(..., "--run-id"),
+        task_id: str | None = typer.Option(None, "--task-id"),
+        agent: str | None = typer.Option(None, "--agent"),
+        transcript: Path | None = typer.Option(
+            None, "--transcript", help="Host transcript JSONL; derives observed rows."
+        ),
+        estimate: int | None = typer.Option(
+            None, "--estimate", help="Declared token estimate; derives an estimated row."
+        ),
+        method: str = typer.Option("caller-declared", "--method"),
+        recorded_at: str = typer.Option(..., "--recorded-at"),
+        root: Path = typer.Option(Path(".apiforge"), "--root"),
+        detail_level: str = typer.Option("normal", "--detail-level"),
+    ) -> None:
+        """Append usage rows for a run; the file is append-only."""
+        from apiforge.cli import _echo_json, _run
+        from apiforge.contracts.token_economics import TokenLedgerEntry
+        from apiforge.economy.token_ledger import (
+            append_usage,
+            entry_id,
+            estimated_accounting,
+            transcript_accounting,
+        )
+        from apiforge.economy.tokens import read_transcript
+
+        def work() -> dict[str, object]:
+            written: list[str] = []
+            if transcript is not None:
+                observed = read_transcript(transcript)
+                for model, usage in observed["models"].items():
+                    accounting = transcript_accounting(model, usage, recorded=str(transcript))
+                    record = TokenLedgerEntry(
+                        entry_id=entry_id(run_id, accounting, recorded_at),
+                        run_id=run_id,
+                        task_id=task_id,
+                        agent=agent,
+                        accounting=accounting,
+                        recorded_at=recorded_at,
+                        provenance=(f"transcript:{transcript}",),
+                    )
+                    append_usage(root, record)
+                    written.append(record.entry_id)
+            if estimate is not None:
+                accounting = estimated_accounting(estimate, method=method)
+                record = TokenLedgerEntry(
+                    entry_id=entry_id(run_id, accounting, recorded_at),
+                    run_id=run_id,
+                    task_id=task_id,
+                    agent=agent,
+                    accounting=accounting,
+                    recorded_at=recorded_at,
+                    provenance=("caller:declared-estimate",),
+                )
+                append_usage(root, record)
+                written.append(record.entry_id)
+            if not written:
+                from apiforge.economy.run_ledger import EconomyError
+
+                raise EconomyError(
+                    "AF-ECONOMY-USAGE-EMPTY",
+                    "record-usage requires --transcript and/or --estimate",
+                    field="run_id",
+                    unlock="pass --transcript <jsonl> or --estimate <tokens>",
+                )
+            return {"written": written, "run_id": run_id}
+
+        _echo_json(_run(work), detail_level)
+
+    @economy_app.command("pricing")
+    def economy_pricing(
+        pricing: Path | None = typer.Option(None, "--pricing"),
+        detail_level: str = typer.Option("normal", "--detail-level"),
+    ) -> None:
+        """List the declared pricing catalog — prices are never hardcoded."""
+        from apiforge.cli import _echo_json, _run
+        from apiforge.economy.pricing import describe_catalog, load_pricing
+
+        def work() -> dict[str, object]:
+            catalog = load_pricing(pricing) if pricing is not None else load_pricing()
+            return describe_catalog(catalog)
+
+        _echo_json(_run(work), detail_level)
+
+    @economy_app.command("cost")
+    def economy_cost(
+        provider: str = typer.Option(..., "--provider"),
+        model: str = typer.Option(..., "--model"),
+        accounting: str = typer.Option(..., "--accounting", help="TokenAccounting JSON or file."),
+        at: str | None = typer.Option(None, "--at"),
+        pricing: Path | None = typer.Option(None, "--pricing"),
+        detail_level: str = typer.Option("normal", "--detail-level"),
+    ) -> None:
+        """Price an accounting under the declared catalog; gaps stay named."""
+        from apiforge.cli import _echo_json, _run
+        from apiforge.contracts.token_economics import TokenAccounting
+        from apiforge.economy.pricing import cost_for, load_pricing, price_for
+
+        def work() -> dict[str, object]:
+            catalog = load_pricing(pricing) if pricing is not None else load_pricing()
+            row = price_for(catalog, provider, model, at=at)
+            if row is None:
+                from apiforge.economy.run_ledger import EconomyError
+
+                raise EconomyError(
+                    "AF-ECONOMY-PRICING-MISSING",
+                    f"no pricing row for {provider}/{model}" + (f" at {at}" if at else ""),
+                    field="pricing",
+                    unlock="declare a ProviderPricing entry in the catalog yaml",
+                )
+            usage = TokenAccounting.model_validate(_json_value(accounting))
+            return cost_for(usage, row).model_dump(mode="json")
+
+        _echo_json(_run(work), detail_level)
+
+    @economy_app.command("reconcile")
+    def economy_reconcile(
+        run_id: str = typer.Option(..., "--run-id"),
+        estimate: str = typer.Option(
+            ..., "--estimate", help="Estimate JSON/yaml or file: tokens/cost/tool_calls/elapsed_ms."
+        ),
+        observed_cost: float | None = typer.Option(None, "--observed-cost"),
+        root: Path = typer.Option(Path(".apiforge"), "--root"),
+        detail_level: str = typer.Option("normal", "--detail-level"),
+    ) -> None:
+        """§22 estimated vs observed for a run, with calibration error per axis."""
+        from apiforge.cli import _echo_json, _run
+        from apiforge.economy.reconciliation import estimate_axis, reconcile, run_observed
+        from apiforge.economy.token_ledger import load_usage_estimate
+
+        def work() -> dict[str, object]:
+            path = Path(estimate)
+            raw = load_usage_estimate(path) if path.is_file() else json.loads(estimate)
+            result = reconcile(
+                f"run:{run_id}",
+                estimate_axis(raw),
+                run_observed(root, run_id, observed_cost=observed_cost),
+            )
+            return result.model_dump(mode="json")
+
+        _echo_json(_run(work), detail_level)
+
 
 def _with_tokens(payload: dict[str, object], transcript: Path | None) -> dict[str, object]:
     if transcript is None:

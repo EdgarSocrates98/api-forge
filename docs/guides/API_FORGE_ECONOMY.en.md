@@ -81,7 +81,7 @@ Keep claims in their own class:
 | Class | Where | What it proves |
 |---|---|---|
 | Deterministic benchmark | `evals economy`, `economy-routing`, `cache`, `economy-matrix` (`claim_scope: deterministic-safety-economy`), `economy-hardening` | contract correctness, mandatory roles, bytes and invariants on this corpus |
-| Provider/token | `economy stats` with `token_coverage`, `economy report --transcript` | tokens only where measured; only model-facing rows (`rules/token_eligibility.yaml`) are eligible; `partial` is never an observed total |
+| Provider/token | `economy stats` with `token_coverage`, `economy report --transcript`, `economy ledger --run-id` | tokens only where measured; only model-facing rows (`rules/token_eligibility.yaml`) are eligible; `partial` is never an observed total; rollups keep observed/estimated/unresolved apart |
 | End-to-end agentic quality | `evals agentic-quality` (`recorded-agentic-outputs`, `--responses-dir`, `--min-accuracy`, `--baseline`) | recorded specialist verdicts against ground truth under each profile; passes only above an absolute floor and without regressing vs deep or a baseline of the same benchmark (`BenchmarkIdentity/v1`) |
 
 ## Hard invariants
@@ -112,9 +112,39 @@ Any safety regression rejects. Per-wave benchmarks: `evals economy`,
 `economy-routing`, `cache`, `selective-agentics`, `tool-economy`,
 `economy-extras`, `economy-freshness`, `replay`.
 
+## Unified token economics (phase 3)
+
+Pipeline §19: Provider Usage -> Token Ledger -> Agent/Task/Run budgets ->
+Provider Cost -> Economy Report.
+
+- `economy record-usage --run-id R [--transcript t.jsonl] [--estimate N
+  --method m]` appends `TokenLedgerEntry/v1` rows (append-only) under
+  `.apiforge/economy/token_usage/<run>.jsonl`.
+- `economy ledger --run-id R` rolls the ledger up: `observed` and
+  `estimated` totals kept apart per run/task/agent; `unresolved` rows are
+  counted in `unresolved_entries`, never summed.
+- `economy pricing` lists the `rules/provider_pricing.yaml` catalog
+  (`ProviderPricing/v1`). The shipped catalog is intentionally empty —
+  the project does not assert live provider prices; callers declare
+  their own via `--pricing <yaml>`.
+- `economy cost --provider p --model m --accounting <json>` prices a
+  `TokenAccounting` under the latest effective row; missing rates land in
+  `missing_rates`, unreported fields land in `unresolved`, and a
+  provider/model outside the catalog refuses
+  `AF-ECONOMY-PRICING-MISSING`.
+- `economy reconcile --run-id R --estimate <json> [--observed-cost X]`
+  compares estimated vs observed tokens/cost/tool_calls/elapsed_ms with
+  `calibration_error` per axis; an axis missing on either side stays
+  `unresolved` — gain is never declared without measurement.
+- `evals token-economics` runs `evals/corpus/token-economics` (basis
+  rollups, pricing, calibration, unresolved axes).
+
 ## Limitations
 
 - Tokens are `observed` only with a transcript; otherwise `unresolved`.
+- `economy reconcile` compares what the ledger measured: observed `cost`
+  exists only when priced via a declared catalog; `tool_calls` counts
+  attribution rows carrying tool bytes.
 - Question classification and test selection are term/symbol-declared;
   recall first, the ladder floor bounds cost.
 - Per-SDD-phase usage is supplied as JSON; automatic attribution from the

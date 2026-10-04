@@ -222,6 +222,16 @@ from apiforge.contracts.task import (
     TaskRevision,
     TaskSpec,
 )
+from apiforge.contracts.token_economics import (
+    BudgetReconciliation,
+    ProviderCost,
+    ProviderPricing,
+    ReconciliationAxis,
+    TokenAccounting,
+    TokenLedger,
+    TokenLedgerEntry,
+    TokenTotals,
+)
 from apiforge.contracts.tool_host import (
     ErrorSlice,
     HostProjection,
@@ -437,6 +447,14 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "MemoryInvalidationPlan/v1": MemoryInvalidationPlan,
     "MemoryScore/v1": MemoryScore,
     "MemoryRankedResult/v1": MemoryRankedResult,
+    "TokenAccounting/v1": TokenAccounting,
+    "TokenLedgerEntry/v1": TokenLedgerEntry,
+    "TokenTotals/v1": TokenTotals,
+    "TokenLedger/v1": TokenLedger,
+    "ProviderPricing/v1": ProviderPricing,
+    "ProviderCost/v1": ProviderCost,
+    "ReconciliationAxis/v1": ReconciliationAxis,
+    "BudgetReconciliation/v1": BudgetReconciliation,
     "CostVector/v1": CostVector,
     "LedgerRef/v1": LedgerRef,
     "RunLedgerEntry/v1": RunLedgerEntry,

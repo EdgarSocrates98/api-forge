@@ -90,8 +90,9 @@ provider/cloud/credentials — contract + offline proof only.
 |---|---|---|---|
 | Economy ledger / run_ledger / phase_budget | KEEP | `economy/{ledger,run_ledger,phase_budget}.py` | protect |
 | Token accounting discipline | KEEP | `economy/tokens.py` — observed vs `--estimate` labeled; cost_basis_missing named | reuse pattern for unified pipeline |
-| Unified token pipeline | EXTEND | pieces exist across ledger/budget/providers | `TokenLedger`/`BudgetReconciliation` contracts; estimated vs observed calibration error |
-| ProviderPricing | MISSING | `rules/providers.yaml` has tiers, no versioned prices | `ProviderPricing` contract + catalog yaml, no hardcoded prices |
+| Unified token pipeline | DELIVERED (phase 3) | `economy/token_ledger.py` + `TokenAccounting`/`TokenLedgerEntry`/`TokenTotals`/`TokenLedger` contracts; per-basis rollups at run/task/agent level; `economy ledger`/`record-usage` verbs; observed/estimated/unresolved never mix |
+| ProviderPricing | DELIVERED (phase 3) | `ProviderPricing`/`ProviderCost` contracts + `economy/pricing.py` (`load_pricing`/`price_for`/`cost_for`) + `rules/provider_pricing.yaml` catalog; `economy pricing`/`cost` verbs; `AF-ECONOMY-PRICING-MISSING` refuses inferred prices |
+| Budget reconciliation | DELIVERED (phase 3) | `BudgetReconciliation`/`ReconciliationAxis` contracts + `economy/reconciliation.py`; `economy reconcile` compares estimated vs observed tokens/cost/tool_calls/elapsed_ms with calibration error; eval corpus `evals/corpus/token-economics` (4 cases) |
 | Agentic budgets governor | KEEP | `governance/budget.py` hierarchical admission | protect |
 | Agent Governor (holistic) | MISSING→EXTEND | supervisor + budget governor exist separately | governor contract: profile/risk/confidence/evidence/context/budget/security/complexity → max_agents/reviews/debates/retries/replans/tokens/cost/modes/tools |
 | Expected Information Gain | EXTEND | `runtime/information_gain.py` (low/med/high over artifacts) | pre-action gain check for spawn/review/debate/retrieval; thresholded STOP |

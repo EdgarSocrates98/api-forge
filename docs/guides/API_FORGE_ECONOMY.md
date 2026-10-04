@@ -82,7 +82,7 @@ Mantenha cada afirmação na sua classe:
 | Classe | Onde | O que prova |
 |---|---|---|
 | Benchmark determinístico | `evals economy`, `economy-routing`, `cache`, `economy-matrix` (`claim_scope: deterministic-safety-economy`), `economy-hardening` | correção de contrato, papéis obrigatórios, bytes e invariantes neste corpus |
-| Provider/tokens | `economy stats` com `token_coverage`, `economy report --transcript` | tokens só onde medidos; só linhas que falam com modelo (`rules/token_eligibility.yaml`) são elegíveis; `partial` nunca é total observado |
+| Provider/tokens | `economy stats` com `token_coverage`, `economy report --transcript`, `economy ledger --run-id` | tokens só onde medidos; só linhas que falam com modelo (`rules/token_eligibility.yaml`) são elegíveis; `partial` nunca é total observado; rollup por base (observed/estimated/unresolved nunca misturam) |
 | Qualidade agentic end-to-end | `evals agentic-quality` (`recorded-agentic-outputs`, `--responses-dir`, `--min-accuracy`, `--baseline`) | veredito gravado do especialista contra o ground truth em cada perfil; só passa acima de um piso absoluto e sem regredir em relação ao deep ou a um baseline do mesmo benchmark (`BenchmarkIdentity/v1`) |
 
 ## Invariantes rígidas
@@ -113,9 +113,38 @@ Qualquer regressão de segurança rejeita. Benchmarks por onda:
 `evals economy`, `economy-routing`, `cache`, `selective-agentics`,
 `tool-economy`, `economy-extras`, `economy-freshness`, `replay`.
 
+## Token economics unificado (phase 3)
+
+Pipeline §19: Provider Usage → Token Ledger → Agent/Task/Run budgets →
+Provider Cost → Economy Report.
+
+- `economy record-usage --run-id R [--transcript t.jsonl] [--estimate N --method m]`
+  appends `TokenLedgerEntry/v1` rows (append-only) under
+  `.apiforge/economy/token_usage/<run>.jsonl`.
+- `economy ledger --run-id R` rola o ledger: totais `observed` e
+  `estimated` separados por run/task/agent; linhas `unresolved` contam em
+  `unresolved_entries`, nunca somam.
+- `economy pricing` lista o catálogo `rules/provider_pricing.yaml`
+  (`ProviderPricing/v1`: provider, model, effective_at, currency, source,
+  rates por MTok). O catálogo entregue é vazio — o projeto não afirma
+  preços de providers; o chamador declara o seu com `--pricing <yaml>`.
+- `economy cost --provider p --model m --accounting <json>` precifica uma
+  `TokenAccounting` sob a linha efetiva mais recente; rate ausente vai
+  para `missing_rates`, campo não reportado vai para `unresolved`, e
+  provider/model fora do catálogo recusa `AF-ECONOMY-PRICING-MISSING`.
+- `economy reconcile --run-id R --estimate <json> [--observed-cost X]`
+  compara estimated vs observed para tokens, cost, tool_calls e
+  elapsed_ms com `calibration_error` por eixo; eixo ausente de um dos
+  lados fica `unresolved` — ganho nunca é declarado sem medição.
+- `evals token-economics` corre o corpus `evals/corpus/token-economics`
+  (rollups por base, pricing, calibração, eixos não resolvidos).
+
 ## Limitações
 
 - Tokens só são `observed` com transcript; sem ele ficam `unresolved`.
+- `economy reconcile` compara o que o ledger mediu: `cost` observado só
+  existe quando o chamador precifica via catálogo declarado; `tool_calls`
+  conta linhas de atribuição com bytes de tool.
 - Classificação de perguntas e seleção de testes são declaradas por termos e
   símbolos; recall primeiro, o piso do ladder limita o custo.
 - Uso por fase SDD é informado em JSON; atribuição automática pelo ledger é

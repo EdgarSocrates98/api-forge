@@ -604,6 +604,8 @@ carry `payload_bytes: 0` so `economy report` totals are unchanged.
 | `AF-CTX-REF-NOT-FOUND` | ref absent from `<root>/.apiforge/ctx`; unlock: rebuild the capsule in the same root |
 | `AF-CTX-HASH-MISMATCH` | stored object no longer hashes to its ref; content is never returned; unlock: delete the object and rebuild |
 | `AF-ECONOMY-RUN-NOT-FOUND` | `economy explain` has no attribution rows for the run id; unlock: pass a `run_id` printed by `context capsule` |
+| `AF-ECONOMY-USAGE-EMPTY` | `economy record-usage` called without `--transcript` or `--estimate`; unlock: pass one or both |
+| `AF-ECONOMY-PRICING-MISSING` | `economy cost` found no `ProviderPricing` row for provider/model (at the horizon); unlock: declare an entry in the pricing catalog yaml |
 | `AF-EVALS-ECONOMY-BASELINE-MISSING` | corpus case has no recorded baseline; unlock: `apiforge evals economy --record-baseline` |
 | `AF-EVALS-ECONOMY-BASELINE-STALE` | fixture digest differs from the recorded baseline; unlock: re-record and commit the baseline |
 | `AF-CONTEXT-QUALITY-CAPSULE` | `context quality --capsule` is missing, unreadable or not a `ContextCapsule/v1` payload; unlock: record it with `context capsule ... > capsule.json` |

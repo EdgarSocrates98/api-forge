@@ -404,6 +404,9 @@ while refusal codes and `fact_id`s survive.
 | `apiforge memory quarantine-list`, `apiforge memory quarantine-resolve --candidate-id C --verdict persist\|reject --by R` | §14 quarantine review: trust-insufficient candidates park in `quarantine.jsonl`; a human release re-runs the full gate pipeline |
 | Trust Plane (`apiforge.trust`) | `TrustUnit/v1` annotation for every context boundary, deterministic taint `propagate()`, allowlist-first `authorize()` over `rules/tool_risk.yaml` — DATA IS NOT INSTRUCTION enforced by contract |
 | `apiforge economy stats [--run-id R] [--transcript T]` | Bytes attributed per run and source; tokens `unresolved` without a transcript |
+| `apiforge economy record-usage --run-id R [--transcript T] [--estimate N --method M]`, `economy ledger --run-id R` | §19–§20 token ledger: per-field provider usage rolled up per basis (observed/estimated/unresolved never mix) at run/task/agent granularity |
+| `apiforge economy pricing [--pricing yaml]`, `economy cost --provider P --model M --accounting <json>` | §21 declared `ProviderPricing` catalog resolved by `effective_at`; `AF-ECONOMY-PRICING-MISSING` refuses inferred prices |
+| `apiforge economy reconcile --run-id R --estimate <json>` | §22 `BudgetReconciliation/v1`: estimated vs observed tokens/cost/tool_calls/elapsed_ms with calibration error; gaps stay `unresolved` |
 | `apiforge economy explain <run_id>` | Why each ref was spent, from recorded provenance rules (no model call) |
 | `apiforge evals economy [--record-baseline]` | 12-case benchmark: evidence recall floor + median byte reduction vs recorded baseline |
 | `apiforge runtime run\|resume\|debate <task> --profile economy\|balanced\|deep` | Economy Plane: profile preference with risk floor, trimmed optional roles, call cap + verification reserve, L0–L5 ladder; `economy` block in the result |

@@ -939,6 +939,63 @@ def economy_roi(root: str = ".", detail_level: str = "normal") -> dict[str, Any]
     return out
 
 
+def economy_ledger(
+    run_id: str,
+    root: str = ".apiforge",
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Per-basis token rollup for a run — observed and estimated never mix."""
+    from apiforge.economy.token_ledger import build_ledger, load_entries
+
+    def work() -> dict[str, Any]:
+        rows, unparsed = load_entries(Path(root), run_id)
+        ledger = build_ledger(run_id, rows)
+        payload = ledger.model_dump(mode="json")
+        if unparsed:
+            payload["unparsed_rows"] = unparsed
+        return payload
+
+    out: dict[str, Any] = _call("economy_ledger", work, detail_level)
+    return out
+
+
+def economy_pricing(
+    pricing: str | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """List the declared pricing catalog — prices are never hardcoded."""
+    from apiforge.economy.pricing import describe_catalog, load_pricing
+
+    out: dict[str, Any] = _call(
+        "economy_pricing",
+        lambda: describe_catalog(load_pricing(Path(pricing)) if pricing else load_pricing()),
+        detail_level,
+    )
+    return out
+
+
+def economy_reconcile(
+    run_id: str,
+    estimate: dict[str, Any],
+    observed_cost: float | None = None,
+    root: str = ".apiforge",
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Estimated vs observed for a run, with calibration error per axis."""
+    from apiforge.economy.reconciliation import estimate_axis, reconcile, run_observed
+
+    out: dict[str, Any] = _call(
+        "economy_reconcile",
+        lambda: reconcile(
+            f"run:{run_id}",
+            estimate_axis(estimate),
+            run_observed(Path(root), run_id, observed_cost=observed_cost),
+        ).model_dump(mode="json"),
+        detail_level,
+    )
+    return out
+
+
 def evals_replay(
     root: str | None = None,
     corpus: str | None = None,
@@ -2549,6 +2606,9 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     slice_log,
     mcp_surface,
     agentops_projection,
+    economy_ledger,
+    economy_pricing,
+    economy_reconcile,
     economy_roi,
     evals_replay,
     evals_gate,

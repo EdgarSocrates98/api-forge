@@ -1,0 +1,22 @@
+# Provider pricing catalog (step11 phase 3, prompt §21). Prices are declared
+# here — never hardcoded in source. Each row is a versioned ProviderPricing/v1
+# contract: provider, model, effective_at, currency, source and per-million-token
+# rates. A rate left null means the price is unknown; it is reported as a
+# missing rate, never inferred. Shipped entries are intentionally empty: the
+# project does not assert live provider prices; callers declare their own
+# catalog with --pricing <yaml> using the shape below.
+#
+# schema: apiforge/provider-pricing/v1
+# entries:
+#   - provider: general-strong
+#     model: example-model
+#     effective_at: "2026-01-01"
+#     currency: USD
+#     source: "declared:operator-pricing-sheet"
+#     input_per_mtok: 3.00
+#     output_per_mtok: 15.00
+#     cached_input_per_mtok: 0.30
+#     cache_creation_per_mtok: 3.75
+#     reasoning_per_mtok: null
+schema: apiforge/provider-pricing/v1
+entries: []

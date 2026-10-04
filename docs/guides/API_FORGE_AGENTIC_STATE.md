@@ -103,3 +103,26 @@ The same projections are exposed as read-only MCP tools
 (`governor_decide`, `governor_stop`, `governor_recover`). Nothing in this
 surface spawns agents or spends budget — the phase-5 control plane consumes
 the decisions.
+
+## Decision Control Plane lifecycle (phase 5)
+
+Every decision route declared in `rules/control_plane.yaml` lives under a
+`shadow → assisted → active` lifecycle; the fail-closed `governance
+decision-check` gate stays the admission boundary underneath.
+
+- **shadow** — `control eval` runs the candidate in parallel, records a
+  `ShadowRecord` (candidate vs legacy decision + sorted `difference`) in
+  `control-plane/shadow.jsonl`, and **legacy governs**.
+- **assisted** — the candidate's answer is a `recommendation`; legacy/human
+  remains authoritative.
+- **active** — the candidate governs, but only after `control promote`
+  verifies the five §31 requirements (eval thresholds, security gates,
+  complete evidence, declared rollback, approved `ApprovalGate`); each
+  promotion is one step, appended to `control-plane/modes.jsonl`.
+- **fallback** — any of the five §32 triggers (`control eval --trigger …`
+  or `control triggers` to map signals) routes to the declared
+  `fallback_route`; a degraded terminal route refuses
+  `AF-GOV-FALLBACK-MISSING` instead of continuing.
+
+`control demote` steps a route back — the safe direction never needs a gate.
+

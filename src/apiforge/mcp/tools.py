@@ -1059,6 +1059,72 @@ def governor_recover(
     return out
 
 
+def control_routes(
+    root: str | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """§28: every declared route with its effective lifecycle mode."""
+    from apiforge.governance.control_plane import all_routes
+
+    def work() -> dict[str, Any]:
+        routes = all_routes(Path(root) if root else Path("."))
+        return {
+            "schema": "apiforge/control-plane-routes/v1",
+            "routes": [route.model_dump(mode="json") for route in routes],
+        }
+
+    out: dict[str, Any] = _call("control_routes", work, detail_level)
+    return out
+
+
+def control_shadow(
+    route: str | None = None,
+    root: str | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """§29: recorded parallel-run observations for a route."""
+    from apiforge.governance.control_plane import shadow_records
+
+    def work() -> dict[str, Any]:
+        rows = shadow_records(Path(root) if root else Path("."), route)
+        return {
+            "schema": "apiforge/shadow-records/v1",
+            "route": route,
+            "records": [row.model_dump(mode="json") for row in rows],
+            "total": len(rows),
+        }
+
+    out: dict[str, Any] = _call("control_shadow", work, detail_level)
+    return out
+
+
+def control_triggers(
+    confidence: float | None = None,
+    min_confidence: float = 0.5,
+    evidence_incomplete: bool = False,
+    security_issue: bool = False,
+    provider_issue: bool = False,
+    budget_issue: bool = False,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """§32: map declared signals to the closed trigger vocabulary."""
+    from apiforge.governance.control_plane import detect_triggers
+
+    def work() -> dict[str, Any]:
+        found = detect_triggers(
+            confidence=confidence,
+            evidence_complete=not evidence_incomplete,
+            security_issue=security_issue,
+            provider_issue=provider_issue,
+            budget_issue=budget_issue,
+            min_confidence=min_confidence,
+        )
+        return {"schema": "apiforge/fallback-triggers/v1", "triggers": list(found)}
+
+    out: dict[str, Any] = _call("control_triggers", work, detail_level)
+    return out
+
+
 def evals_replay(
     root: str | None = None,
     corpus: str | None = None,
@@ -2676,6 +2742,9 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     governor_decide,
     governor_recover,
     governor_stop,
+    control_routes,
+    control_shadow,
+    control_triggers,
     evals_replay,
     evals_gate,
     evals_economy_hardening,

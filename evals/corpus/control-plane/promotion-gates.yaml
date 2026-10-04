@@ -1,0 +1,76 @@
+# §30-§31: shadow->assisted needs only evidence_complete; assisted->active
+# needs the five requirements plus a matching approved gate.
+id: promotion-gates
+routes:
+  - route: model_routing
+    mode: shadow
+    candidate: model-router-v1
+    legacy: tier-descriptor
+    fallback_route: provider_descriptor
+steps:
+  - op: promote
+    route: model_routing
+    evidence: {route: model_routing, evidence_complete: false}
+    expect:
+      allowed: false
+      code: AF-GOV-PROMOTION-INCOMPLETE
+  - op: promote
+    route: model_routing
+    evidence: {route: model_routing, evidence_complete: true}
+    expect:
+      allowed: true
+      to_mode: assisted
+  - op: eval
+    route: model_routing
+    candidate: {model: new}
+    legacy: {model: old}
+    expect:
+      governing: legacy
+      recommendation: {model: new}
+  - op: promote
+    route: model_routing
+    evidence:
+      route: model_routing
+      eval_thresholds_passed: true
+      security_gates_passed: true
+      evidence_complete: true
+      rollback_exists: false
+      approval_id: gate-1
+    expect:
+      allowed: false
+      code: AF-GOV-PROMOTION-INCOMPLETE
+  - op: promote
+    route: model_routing
+    evidence:
+      route: model_routing
+      eval_thresholds_passed: true
+      security_gates_passed: true
+      evidence_complete: true
+      rollback_exists: true
+      approval_id: gate-1
+    expect:
+      allowed: false
+      code: AF-GOV-PROMOTION-NOT-APPROVED
+  - op: promote
+    route: model_routing
+    evidence:
+      route: model_routing
+      eval_thresholds_passed: true
+      security_gates_passed: true
+      evidence_complete: true
+      rollback_exists: true
+      approval_id: gate-1
+    approval:
+      gate_id: gate-1
+      run_id: run-1
+      reason: promote model_routing to active
+      requested_action: control_promote
+      status: approved
+      requested_by: operator
+      decided_by: human
+    expect:
+      allowed: true
+      to_mode: active
+expect:
+  route: model_routing
+  final_mode: active

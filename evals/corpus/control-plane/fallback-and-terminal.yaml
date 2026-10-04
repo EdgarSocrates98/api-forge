@@ -1,0 +1,41 @@
+# §32: a triggered active route routes to its declared fallback; a terminal
+# route (no fallback declared) refuses instead of silently continuing.
+id: fallback-and-terminal
+routes:
+  - route: model_routing
+    mode: active
+    candidate: model-router-v1
+    legacy: tier-descriptor
+    fallback_route: provider_descriptor
+  - route: provider_descriptor
+    mode: active
+    candidate: tier-descriptor
+    legacy: tier-descriptor
+    fallback_route: null
+steps:
+  - op: eval
+    route: model_routing
+    candidate: {model: new}
+    triggers: [provider_issue]
+    expect:
+      governing: "none"
+      fallback_action: use_fallback
+      fallback_code: null
+  - op: eval
+    route: provider_descriptor
+    triggers: [security_issue]
+    expect:
+      governing: "none"
+      fallback_action: refuse
+      fallback_code: AF-GOV-FALLBACK-MISSING
+  - op: demote
+    route: model_routing
+  - op: eval
+    route: model_routing
+    candidate: {model: new}
+    legacy: {model: old}
+    expect:
+      governing: legacy
+expect:
+  route: model_routing
+  final_mode: assisted

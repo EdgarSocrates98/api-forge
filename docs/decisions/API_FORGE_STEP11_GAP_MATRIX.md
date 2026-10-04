@@ -105,9 +105,9 @@ provider/cloud/credentials — contract + offline proof only.
 | Capability | State | Evidence | Action |
 |---|---|---|---|
 | Fail-closed decision gate | KEEP | `governance/decision.py` + approval artifacts | protect |
-| Shadow decision records | KEEP→EXTEND | `runtime/{shadow,scorecard_shadow}.py` | unify under lifecycle |
-| Decision lifecycle shadow→assisted→active | MISSING→EXTEND | shadow exists; no lifecycle states or promotion criteria | `DecisionLifecycle` contract + fallback policy + promotion evidence gate |
-| Fallback policy | MISSING | none | fallback triggers: low confidence/missing evidence/security/provider/budget |
+| Shadow decision records | DELIVERED (phase 5) | `ShadowRecord/v1` + append-only `control-plane/shadow.jsonl`; `evaluate_route` records candidate vs legacy + sorted `difference` while legacy governs | `control eval` / `control shadow` |
+| Decision lifecycle shadow→assisted→active | DELIVERED (phase 5) | `ControlPlaneRoute`/`PromotionDecision`/`PromotionEvidence` contracts + `rules/control_plane.yaml` + modes.jsonl overlay; shadow→assisted needs evidence_complete, assisted→active needs the five §31 requirements + approved ApprovalGate; `AF-GOV-MODE-TRANSITION-INVALID` refuses skips | `control routes`/`promote`/`demote` |
+| Fallback policy | DELIVERED (phase 5) | `FallbackDecision`/`RouteDecision` contracts + closed trigger vocabulary (low_confidence/missing_evidence/security_issue/provider_issue/budget_issue); `AF-GOV-FALLBACK-MISSING` refuses degraded active routes with no declared fallback | `control eval --trigger …` / `control triggers` |
 
 ### Runtime / Agents
 

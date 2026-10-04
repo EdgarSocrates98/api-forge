@@ -256,6 +256,92 @@ class LoopDetection(VersionedContract):
     reason: str = ""
 
 
+# --- step11 phase 5: Decision Control Plane lifecycle (§28-§32)
+
+ControlPlaneMode = Literal["shadow", "assisted", "active"]
+FallbackTrigger = Literal[
+    "low_confidence", "missing_evidence", "security_issue", "provider_issue", "budget_issue"
+]
+
+
+class ControlPlaneRoute(VersionedContract):
+    """§28 a route under lifecycle governance; mode is the latest state."""
+
+    schema: Literal["apiforge/control-plane-route/v1"] = "apiforge/control-plane-route/v1"  # type: ignore[assignment]
+    route: str = Field(min_length=1)
+    mode: ControlPlaneMode = "shadow"
+    candidate: str = Field(min_length=1)
+    legacy: str = Field(min_length=1)
+    fallback_route: str | None = None
+    promoted_at: str | None = None
+    promotion_approval_id: str | None = None
+
+
+class ShadowRecord(VersionedContract):
+    """§29 parallel-run record: the candidate never governs in shadow."""
+
+    schema: Literal["apiforge/shadow-record/v1"] = "apiforge/shadow-record/v1"  # type: ignore[assignment]
+    route: str = Field(min_length=1)
+    candidate_decision: dict[str, object] = Field(default_factory=dict)
+    legacy_decision: dict[str, object] = Field(default_factory=dict)
+    difference: tuple[str, ...] = ()
+    confidence: float | None = Field(default=None, ge=0, le=1)
+    evidence_refs: tuple[str, ...] = ()
+    recorded_at: str = Field(min_length=1)
+
+
+class PromotionEvidence(VersionedContract):
+    """§31 the five promotion requirements; each is a declared fact."""
+
+    schema: Literal["apiforge/promotion-evidence/v1"] = "apiforge/promotion-evidence/v1"  # type: ignore[assignment]
+    route: str = Field(min_length=1)
+    eval_thresholds_passed: bool = False
+    security_gates_passed: bool = False
+    evidence_complete: bool = False
+    rollback_exists: bool = False
+    approval_id: str | None = None
+    evidence_refs: tuple[str, ...] = ()
+
+
+class PromotionDecision(VersionedContract):
+    """Whether a route may move one lifecycle step; never skips a stage."""
+
+    schema: Literal["apiforge/promotion-decision/v1"] = "apiforge/promotion-decision/v1"  # type: ignore[assignment]
+    route: str = Field(min_length=1)
+    from_mode: ControlPlaneMode
+    to_mode: ControlPlaneMode
+    allowed: bool = False
+    missing: tuple[str, ...] = ()
+    code: str | None = None
+    reason: str = ""
+
+
+class FallbackDecision(VersionedContract):
+    """§32 every active route needs a declared fallback when degraded."""
+
+    schema: Literal["apiforge/fallback-decision/v1"] = "apiforge/fallback-decision/v1"  # type: ignore[assignment]
+    route: str = Field(min_length=1)
+    trigger: FallbackTrigger | None = None
+    action: Literal["continue_active", "use_fallback", "refuse"]
+    fallback_route: str | None = None
+    code: str | None = None
+    reason: str = ""
+
+
+class RouteDecision(VersionedContract):
+    """Which decision stream governs an evaluation, per §29-§32 mode."""
+
+    schema: Literal["apiforge/route-decision/v1"] = "apiforge/route-decision/v1"  # type: ignore[assignment]
+    route: str = Field(min_length=1)
+    mode: ControlPlaneMode
+    governing: Literal["legacy", "candidate", "none"]
+    recommendation: dict[str, object] | None = None
+    shadow: bool = False
+    fallback: FallbackDecision | None = None
+    unresolved: tuple[str, ...] = ()
+    reason: str = ""
+
+
 __all__ = [
     "AgenticBudgetPlan",
     "BudgetAction",
@@ -264,6 +350,8 @@ __all__ = [
     "BudgetScope",
     "BudgetSpend",
     "BudgetTokenPolicy",
+    "ControlPlaneMode",
+    "ControlPlaneRoute",
     "DecisionGateResult",
     "DecisionOutcome",
     "DecisionRequest",
@@ -271,6 +359,8 @@ __all__ = [
     "ExecutionMode",
     "ExpectedInformationGain",
     "FailureClass",
+    "FallbackDecision",
+    "FallbackTrigger",
     "GainAction",
     "GovernorComplexity",
     "GovernorDecision",
@@ -278,7 +368,11 @@ __all__ = [
     "GovernorProfile",
     "GovernorSecurityState",
     "LoopDetection",
+    "PromotionDecision",
+    "PromotionEvidence",
     "RecoveryAction",
     "RecoveryDecision",
+    "RouteDecision",
+    "ShadowRecord",
     "StopDecision",
 ]

@@ -209,6 +209,12 @@ governor_app = typer.Typer(
     no_args_is_help=True,
 )
 app.add_typer(governor_app)
+control_app = typer.Typer(
+    name="control",
+    help="Decision Control Plane lifecycle: shadow, assisted, active and fallback.",
+    no_args_is_help=True,
+)
+app.add_typer(control_app)
 brief_app = typer.Typer(
     name="brief",
     help="Outcome Briefs — DONE is refused while mandatory gaps exist.",
@@ -273,6 +279,7 @@ from apiforge.cli_agentic_state import register as _register_agentic_state
 from apiforge.cli_agents import register as _register_agents
 from apiforge.cli_cache import register as _register_cache
 from apiforge.cli_context import register as _register_context
+from apiforge.cli_control import register as _register_control
 from apiforge.cli_distribution import register as _register_distribution
 from apiforge.cli_economy import register as _register_economy
 from apiforge.cli_extras import register as _register_extras
@@ -311,6 +318,7 @@ _register_resume(
 )
 _register_economy(economy_app)
 _register_governor(governor_app)
+_register_control(control_app)
 _register_agentic_state(app, runtime_app)
 
 
@@ -4009,6 +4017,20 @@ def evals_agent_governor(
     from apiforge.evals.agent_governor import run_agent_governor
 
     result = _run(lambda: run_agent_governor(corpus))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("control-plane")
+def evals_control_plane(
+    corpus: Path = typer.Option(Path("evals/corpus/control-plane"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§28-§32 lifecycle: shadow never governs, promotion gates, fallback."""
+    from apiforge.evals.control_plane import run_control_plane
+
+    result = _run(lambda: run_control_plane(corpus))
     _echo_json(result, detail_level)
     if isinstance(result, dict) and not result.get("passed"):
         raise typer.Exit(code=1)

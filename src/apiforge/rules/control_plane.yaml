@@ -1,0 +1,45 @@
+version: 1
+# §28-§32 Decision Control Plane routes. `mode` is the *initial* mode when no
+# overlay row exists; promote/demote appends to control-plane/modes.jsonl,
+# never rewrites this file. Every active route must declare fallback_route.
+routes:
+  - route: model_routing
+    mode: shadow
+    candidate: model-router-v1
+    legacy: provider-tier-descriptor
+    fallback_route: provider_descriptor
+  - route: tool_authorization
+    mode: shadow
+    candidate: governor-authorize-v1
+    legacy: trust-tools-authorize
+    fallback_route: read_only_only
+  - route: recovery
+    mode: shadow
+    candidate: recovery-ladder-v1
+    legacy: supervisor-default-retry
+    fallback_route: escalate_to_human
+  - route: context_selection
+    mode: shadow
+    candidate: sufficiency-gate-v1
+    legacy: role-context-v1-planner
+    fallback_route: budget_capsule_only
+  - route: provider_descriptor
+    mode: active
+    candidate: provider-tier-descriptor
+    legacy: provider-tier-descriptor
+    fallback_route: null
+  - route: read_only_only
+    mode: active
+    candidate: trust-tools-authorize
+    legacy: trust-tools-authorize
+    fallback_route: null
+  - route: escalate_to_human
+    mode: active
+    candidate: human-gate
+    legacy: human-gate
+    fallback_route: null
+  - route: budget_capsule_only
+    mode: active
+    candidate: context-capsule
+    legacy: context-capsule
+    fallback_route: null

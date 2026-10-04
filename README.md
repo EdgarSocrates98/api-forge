@@ -411,6 +411,9 @@ while refusal codes and `fact_id`s survive.
 | `apiforge governor gain|stop --action <name>` | §24–§25 `ExpectedInformationGain`/`StopDecision`: deterministic pre-action gain; STOP below threshold fails closed `AF-GOV-STOP-LOW-GAIN`, unmeasurable → `AF-GOV-GAIN-UNRESOLVED` |
 | `apiforge governor recover --failure-class C --attempt N`, `governor loop-check --fingerprints …` | §26–§27 `RecoveryDecision`/`LoopDetection`: closed failure-class ladder (unknown refuses `AF-GOV-FAILURE-CLASS-UNKNOWN`), repeated strategy fingerprints blocked `AF-GOV-LOOP-DETECTED` |
 | `apiforge evals agent-governor` | 4-case corpus: risk floor, security clamp, gain/stop, recovery ladder, loop block |
+| `apiforge control routes`, `control shadow` | §28–§29 lifecycle state per route + recorded parallel-run observations (candidate vs legacy + sorted `difference`) |
+| `apiforge control eval --route R [--trigger …]`, `control promote|demote --route R` | §30–§32 who governs per mode; promotion one step at a time (active needs the five §31 requirements + approved `ApprovalGate`), degraded active routes take the declared `fallback_route` or refuse `AF-GOV-FALLBACK-MISSING` |
+| `apiforge evals control-plane` | 3-case corpus: shadow never governs, promotion gates, fallback + terminal refuse |
 | `apiforge economy explain <run_id>` | Why each ref was spent, from recorded provenance rules (no model call) |
 | `apiforge evals economy [--record-baseline]` | 12-case benchmark: evidence recall floor + median byte reduction vs recorded baseline |
 | `apiforge runtime run\|resume\|debate <task> --profile economy\|balanced\|deep` | Economy Plane: profile preference with risk floor, trimmed optional roles, call cap + verification reserve, L0–L5 ladder; `economy` block in the result |

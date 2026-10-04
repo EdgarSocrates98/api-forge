@@ -22,6 +22,21 @@ The final independent repository evidence is `1436 passed, 2 skipped`; Ruff,
 focused mypy, the release gate and the SDD check all passed. The host checkout
 is clean after the four commits.
 
+## Independent evaluation receipts
+
+The repository holdout/economy evaluations also passed without external model
+or provider calls:
+
+- `evals economy-hardening --corpus evals/corpus/economy-hardening`: `18`
+  cases, all six gates passed (`budget`, `budget_invariant`, `delta`, `path`,
+  `phase`, `tokens`). The refusal, degraded, unresolved and protected-overrun
+  cases were preserved and evaluated as expected.
+- `evals agentic-quality --corpus evals/corpus/agentic-quality
+  --min-accuracy 1.0`: `6` cases, accuracy `1.0` for `economy`, `balanced` and
+  `deep`, all gates passed, every case answered and no run blocked. The
+  evaluator recorded corpus SHA-256
+  `cf30554dbb9069922d529fa93878f17150e95f857876efab892bac9effa65439`.
+
 ## Prompt coverage
 
 | Prompt concern | Result |

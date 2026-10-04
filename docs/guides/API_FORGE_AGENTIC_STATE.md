@@ -183,3 +183,31 @@ Local `AgentSpan` rows now cover all 18 §50 operations (`task`, `routing`,
   `otel/opentelemetry-collector-contrib:0.114.0`; `evals telemetry-otlp`
   covers operation coverage, id propagation and malformed-input honesty.
 
+
+## AgentOps inspect, compare and waste (phase 8)
+
+`agentops inspect <run>` joins the run ledger, token ledger, span store,
+context-quality derivation, memory store and decision-gate ledger into one
+`RunInspection` — the §54 sections (`run`, `agents`, `context`, `memory`,
+`tools`, `models`, `evidence`, `security`) plus waste findings and the
+decision path. Every metric carries `observed`/`estimated`/`unresolved`;
+absent sources are named in `unresolved`, never zero-filled. Memory rows are
+store-wide (no `run_id`), so memory metrics report `estimated` scope, and
+provider cost stays `unresolved` without declared pricing.
+
+`agentops compare RUN_A RUN_B` emits `RunComparison` over the §55 axis set —
+quality, tokens, cost, latency, context, evidence, tools, agents — with a
+deterministic direction per axis (lower-is-better for spend, higher for
+quality/evidence). An axis missing a numeric side is `unresolved`, never a
+tie by absence.
+
+`agentops waste <run>` runs the §56 detector set declared in
+`rules/agentops_waste.yaml`: all 12 `WasteKind`s (duplicate context,
+duplicate retrieval, repeated tool call, repeated rule lookup, redundant
+agent/review/debate, oversized tool output, full-file read, premium model
+misuse, repeated summary, unused context expansion). Findings are labeled
+`observed`/`estimated`/`hypothesis` per §57; detectors lacking a
+prerequisite (undeclared risk, empty ledgers) land in `unresolved`. MCP
+exposes the three read projections (`agentops_inspect`, `agentops_compare`,
+`agentops_waste`); `evals agentops` covers sections, detection, verdicts and
+missing-run honesty.

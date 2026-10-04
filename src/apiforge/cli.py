@@ -3591,6 +3591,62 @@ def agentops_workflow(
         _fail("AF-WORKFLOW-UNKNOWN", str(exc))
 
 
+@agentops_app.command("inspect")
+def agentops_inspect(
+    run_id: str = typer.Argument(..., help="Run id present in the local ledgers."),
+    risk: str | None = typer.Option(
+        None, "--risk", help="Declared run risk (micro/low/medium/high)."
+    ),
+    root: Path = typer.Option(Path("."), "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§53–§54 sectioned report for one run; sections never drop silently."""
+    from apiforge.agentops.inspect import inspect_run
+
+    _echo_json(
+        _run(lambda: inspect_run(root, run_id, risk=risk).model_dump(mode="json")),
+        detail_level,
+    )
+
+
+@agentops_app.command("compare")
+def agentops_compare(
+    run_a: str = typer.Argument(..., help="Baseline run id."),
+    run_b: str = typer.Argument(..., help="Candidate run id."),
+    root: Path = typer.Option(Path("."), "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§55 deterministic a/b over quality/tokens/cost/latency/context/evidence/tools/agents."""
+    from apiforge.agentops.compare import compare_runs
+
+    _echo_json(
+        _run(lambda: compare_runs(root, run_a, run_b).model_dump(mode="json")),
+        detail_level,
+    )
+
+
+@agentops_app.command("waste")
+def agentops_waste(
+    run_id: str = typer.Argument(..., help="Run id present in the local ledgers."),
+    risk: str | None = typer.Option(
+        None, "--risk", help="Declared run risk (micro/low/medium/high)."
+    ),
+    policy: Path | None = typer.Option(
+        None, "--policy", help="rules/agentops_waste.yaml override."
+    ),
+    root: Path = typer.Option(Path("."), "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§56–§57 waste detector; every finding labeled observed/estimated/hypothesis."""
+    from apiforge.agentops.waste import _load_policy, detect_waste
+
+    def work() -> dict[str, object]:
+        detectors = _load_policy(policy) if policy else None
+        return detect_waste(root, run_id, risk=risk, policy=detectors).model_dump(mode="json")
+
+    _echo_json(_run(work), detail_level)
+
+
 @agentops_app.command("hosts")
 def agentops_hosts(
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
@@ -4085,6 +4141,20 @@ def evals_telemetry_otlp(
     from apiforge.evals.otel_export import run_otel_export
 
     result = _run(lambda: run_otel_export(corpus))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("agentops")
+def evals_agentops(
+    corpus: Path = typer.Option(Path("evals/corpus/agentops"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§53–§57: seeded ledgers -> inspect/compare/waste verdicts."""
+    from apiforge.evals.agentops import run_agentops
+
+    result = _run(lambda: run_agentops(corpus))
     _echo_json(result, detail_level)
     if isinstance(result, dict) and not result.get("passed"):
         raise typer.Exit(code=1)

@@ -154,9 +154,9 @@ provider/cloud/credentials — contract + offline proof only.
 
 | Capability | State | Evidence | Action |
 |---|---|---|---|
-| AgentOps inspect | MISSING | run ledgers + spans exist | `agentops inspect <run>` text+JSON per §54 |
-| AgentOps compare | MISSING | none | `agentops compare RUN_A RUN_B` |
-| Token Waste Detector | MISSING | none | `agentops waste` — duplicate context/retrieval/repeat calls/redundant agents/oversized outputs; each finding labeled OBSERVED/ESTIMATED/HYPOTHESIS |
+| AgentOps inspect | DELIVERED (phase 8) | `agentops inspect <run>` emits `RunInspection` — the §54 section set (run/agents/context/memory/tools/models/evidence/security) + waste + decision path; absent sources stay `unresolved`, never zero-filled |
+| AgentOps compare | DELIVERED (phase 8) | `agentops compare RUN_A RUN_B` emits `RunComparison` over the §55 axis set (quality/tokens/cost/latency/context/evidence/tools/agents); unresolved axes never tie |
+| Token Waste Detector | DELIVERED (phase 8) | `agentops waste` runs the declared detectors in `rules/agentops_waste.yaml` — 12 `WasteKind`s, every finding labeled `observed`/`estimated`/`hypothesis` per §57; `AF-AGENTOPS-WASTE-POLICY` guards a bad policy file |
 | Self-profiling doctor | EXTEND | `economy/doctor.py`, `doctor` verb | `doctor agentic` health report across planes |
 
 ### Evals Plane

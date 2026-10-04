@@ -1137,6 +1137,7 @@ values and `delta_pct`. Operations on only one side are named
 | `AF-OTEL-COLLECTOR-REFUSED` | §52 collector answered a non-2xx or rejected the payload; unlock: fix payload/endpoint and retry |
 | `AF-OTEL-COLLECTOR-TIMEOUT` | span ids did not reach the collector output file within the declared timeout |
 | `AF-OTEL-COLLECTOR-UNRESOLVED` | collector endpoint unreachable — acceptance stays unresolved, never claimed |
+| `AF-AGENTOPS-WASTE-POLICY` | `agentops waste` policy file unreadable or `detectors` mapping missing; unlock: restore `rules/agentops_waste.yaml` or pass `--policy` |
 | `AF-PERF-RUN-INVALID` | compare input is not a PerformanceRun payload |
 | `AF-PERF-MEMORY-CORRUPT` | a `runs.jsonl` line is malformed — the store refuses, never skips |
 | `AF-PERF-SUGGEST-INPUT` | `perf suggest` got neither a readable case dir nor a findings file |

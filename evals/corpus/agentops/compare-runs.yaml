@@ -1,0 +1,27 @@
+id: compare-runs
+run_id: run-b
+ledger:
+  - run_id: run-a
+    verb: context capsule
+    source: contract
+    cost: {context_bytes: 400, duration_ms: 100, observed_tokens: 200}
+  - run_id: run-b
+    verb: context capsule
+    source: contract
+    cost: {context_bytes: 900, duration_ms: 300, observed_tokens: 400}
+usage:
+  - run_id: run-a
+    agent: builder
+    tokens: {input_tokens: 80, output_tokens: 40}
+  - run_id: run-b
+    agent: builder
+    tokens: {input_tokens: 80, output_tokens: 40}
+compare:
+  run_a: run-a
+  run_b: run-b
+  verdicts:
+    tokens: a
+    latency: a
+    context: a
+    cost: unresolved
+    quality: unresolved

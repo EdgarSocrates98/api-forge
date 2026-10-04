@@ -2625,6 +2625,63 @@ def budget_spend(
     )
 
 
+def agentops_inspect(
+    run_id: str,
+    root: str = ".",
+    risk: str | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """§53–§54 sectioned run report over the local ledgers."""
+    from apiforge.agentops.inspect import inspect_run
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "agentops_inspect",
+            lambda: inspect_run(Path(root), run_id, risk=risk).model_dump(mode="json"),
+            detail_level,
+        ),
+    )
+
+
+def agentops_compare(
+    run_a: str,
+    run_b: str,
+    root: str = ".",
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """§55 deterministic a/b comparison over the declared axis set."""
+    from apiforge.agentops.compare import compare_runs
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "agentops_compare",
+            lambda: compare_runs(Path(root), run_a, run_b).model_dump(mode="json"),
+            detail_level,
+        ),
+    )
+
+
+def agentops_waste(
+    run_id: str,
+    root: str = ".",
+    risk: str | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """§56–§57 waste detector; findings labeled by evidence basis."""
+    from apiforge.agentops.waste import detect_waste
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "agentops_waste",
+            lambda: detect_waste(Path(root), run_id, risk=risk).model_dump(mode="json"),
+            detail_level,
+        ),
+    )
+
+
 def agent_span_append(
     trace_id: str,
     task_id: str,
@@ -2902,6 +2959,9 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     agent_span_query,
     telemetry_export,
     telemetry_validate,
+    agentops_inspect,
+    agentops_compare,
+    agentops_waste,
     decision_check,
 )
 

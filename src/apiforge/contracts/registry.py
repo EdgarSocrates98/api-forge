@@ -57,6 +57,15 @@ from apiforge.contracts.agentic_memory import (
     MemoryTrust,
     SemanticCheckpoint,
 )
+from apiforge.contracts.agentops_report import (
+    ComparisonAxis,
+    InspectionMetric,
+    InspectionSection,
+    RunComparison,
+    RunInspection,
+    WasteFinding,
+    WasteReport,
+)
 from apiforge.contracts.base import ContractError
 from apiforge.contracts.cache import CacheDecision, CacheDep, CacheEntry, DeltaSlice
 from apiforge.contracts.context import (
@@ -511,6 +520,13 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "OtlpExport/v1": OtlpExport,
     "OtlpValidation/v1": OtlpValidation,
     "CollectorProbe/v1": CollectorProbe,
+    "RunInspection/v1": RunInspection,
+    "InspectionSection/v1": InspectionSection,
+    "InspectionMetric/v1": InspectionMetric,
+    "WasteFinding/v1": WasteFinding,
+    "WasteReport/v1": WasteReport,
+    "RunComparison/v1": RunComparison,
+    "ComparisonAxis/v1": ComparisonAxis,
     "CostVector/v1": CostVector,
     "LedgerRef/v1": LedgerRef,
     "RunLedgerEntry/v1": RunLedgerEntry,

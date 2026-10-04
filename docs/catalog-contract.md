@@ -1074,6 +1074,9 @@ values and `delta_pct`. Operations on only one side are named
 | `AF-OTEL-REPORT-INVALID` | export unreadable or missing `resourceSpans` |
 | `AF-OTEL-SPAN-INCOMPLETE` | spans lack usable timestamps — counted, named |
 | `AF-OTEL-SERVICE-UNKNOWN` | no `service.name` resource attribute |
+| `AF-OTEL-SENSITIVE-ATTRIBUTE` | local agent span contains a secret-like attribute key |
+| `AF-OTEL-STORE-CORRUPT` | local agent span row failed its closed contract |
+| `AF-OTEL-SPAN-CONFLICT` | a span id was reused with a different content hash |
 | `AF-PERF-RUN-INVALID` | compare input is not a PerformanceRun payload |
 | `AF-PERF-MEMORY-CORRUPT` | a `runs.jsonl` line is malformed — the store refuses, never skips |
 | `AF-PERF-SUGGEST-INPUT` | `perf suggest` got neither a readable case dir nor a findings file |

@@ -7,6 +7,7 @@ from apiforge.contracts.adapter import (
     AdapterStatus,
     EvidenceLevel,
 )
+from apiforge.contracts.agent_telemetry import AgentSpan, AgentSpanQuery, AgentSpanResult
 from apiforge.contracts.agentic_governance import (
     AgenticBudgetPlan,
     BudgetDecision,
@@ -160,6 +161,9 @@ __all__ = [
     "AdapterStatus",
     "AdaptivePlan",
     "AdaptivePolicy",
+    "AgentSpan",
+    "AgentSpanQuery",
+    "AgentSpanResult",
     "AgenticBudgetPlan",
     "AssetStatus",
     "BlackboardEntry",

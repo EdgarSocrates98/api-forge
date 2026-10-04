@@ -49,6 +49,9 @@ def test_registry_is_sorted_and_complete() -> None:
         "AgenticBudgetPlan/v1",
         "BudgetSpend/v1",
         "BudgetDecision/v1",
+        "AgentSpan/v1",
+        "AgentSpanQuery/v1",
+        "AgentSpanResult/v1",
     }
     assert expected <= set(names)
 

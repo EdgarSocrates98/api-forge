@@ -6,6 +6,7 @@ from typing import Any
 
 from pydantic import BaseModel
 
+from apiforge.contracts.agent_telemetry import AgentSpan, AgentSpanQuery, AgentSpanResult
 from apiforge.contracts.agentic import (
     AgentArtifact,
     AgenticPolicy,
@@ -308,6 +309,9 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "AgenticBudgetPlan/v1": AgenticBudgetPlan,
     "BudgetSpend/v1": BudgetSpend,
     "BudgetDecision/v1": BudgetDecision,
+    "AgentSpan/v1": AgentSpan,
+    "AgentSpanQuery/v1": AgentSpanQuery,
+    "AgentSpanResult/v1": AgentSpanResult,
     "TelemetryRecord/v1": TelemetryRecord,
     "ObservationSnapshot/v1": ObservationSnapshot,
     "SLODefinition/v1": SLODefinition,

@@ -19,6 +19,13 @@ def _payload(value: str) -> object:
     return json.loads(value)
 
 
+def _object_payload(value: str) -> dict[str, object]:
+    payload = _payload(value)
+    if not isinstance(payload, dict):
+        raise TypeError("AF-CLI-INPUT: attributes must be a JSON object")
+    return payload
+
+
 def register(app: typer.Typer, runtime_app: typer.Typer) -> None:
     app.add_typer(memory_app)
     app.add_typer(blackboard_app)
@@ -173,6 +180,65 @@ def register(app: typer.Typer, runtime_app: typer.Typer) -> None:
             return {"checkpoint": checkpoint.model_dump(mode="json"), "path": str(save_checkpoint(root, checkpoint))}
 
         _echo_json(_run(work), detail_level)
+
+    @runtime_app.command("telemetry-span")
+    def telemetry_span(
+        trace_id: str = typer.Option(..., "--trace-id"),
+        task_id: str = typer.Option(..., "--task-id"),
+        run_id: str = typer.Option(..., "--run-id"),
+        operation: str = typer.Option(..., "--operation"),
+        started_at: str = typer.Option(..., "--started-at"),
+        agent_name: str | None = typer.Option(None, "--agent"),
+        tool_name: str | None = typer.Option(None, "--tool"),
+        ended_at: str | None = typer.Option(None, "--ended-at"),
+        status: str = typer.Option("unset", "--status"),
+        status_message: str = typer.Option("", "--status-message"),
+        attributes: str = typer.Option("{}", "--attributes", help="JSON object or JSON file."),
+        event: list[str] = typer.Option([], "--event"),
+        link: list[str] = typer.Option([], "--link"),
+        evidence: list[str] = typer.Option([], "--evidence"),
+        unresolved: list[str] = typer.Option([], "--unresolved"),
+        root: Path = typer.Option(Path("."), "--root"),
+        detail_level: str = typer.Option("normal", "--detail-level"),
+    ) -> None:
+        """Append one sanitized local agent/tool span."""
+        from apiforge.cli import _echo_json, _run
+        from apiforge.runtime.agent_telemetry import append_span, build_span
+
+        _echo_json(_run(lambda: append_span(
+            root,
+            build_span(
+                trace_id=trace_id, task_id=task_id, run_id=run_id, operation=operation,
+                started_at=started_at, parent_span_id=None, agent_name=agent_name,
+                tool_name=tool_name, ended_at=ended_at, status=status,
+                status_message=status_message, attributes=_object_payload(attributes),
+                events=tuple(event), links=tuple(link), evidence_refs=tuple(evidence),
+                unresolved=tuple(unresolved),
+            ),
+        )), detail_level)
+
+    @runtime_app.command("telemetry-query")
+    def telemetry_query(
+        task_id: str | None = typer.Option(None, "--task-id"),
+        run_id: str | None = typer.Option(None, "--run-id"),
+        trace_id: str | None = typer.Option(None, "--trace-id"),
+        operation: str | None = typer.Option(None, "--operation"),
+        status: str | None = typer.Option(None, "--status"),
+        max_results: int = typer.Option(100, "--max-results"),
+        root: Path = typer.Option(Path("."), "--root"),
+        detail_level: str = typer.Option("normal", "--detail-level"),
+    ) -> None:
+        """Query local agent/tool spans without contacting an exporter."""
+        from apiforge.cli import _echo_json, _run
+        from apiforge.contracts.agent_telemetry import AgentSpanQuery, SpanOperation, SpanStatus
+        from apiforge.runtime.agent_telemetry import query_spans
+
+        query = AgentSpanQuery(
+            task_id=task_id, run_id=run_id, trace_id=trace_id,
+            operation=cast(SpanOperation, operation) if operation else None,
+            status=cast(SpanStatus, status) if status else None, max_results=max_results,
+        )
+        _echo_json(_run(lambda: query_spans(root, query)), detail_level)
 
 
 __all__ = ["blackboard_app", "memory_app", "register"]

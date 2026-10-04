@@ -121,6 +121,8 @@ def test_tools_export_all_expected_verbs() -> None:
         "budget_plan",
         "budget_check",
         "budget_spend",
+        "agent_span_append",
+        "agent_span_query",
     }
 
 

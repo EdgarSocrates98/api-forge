@@ -2266,6 +2266,69 @@ def budget_spend(
     )
 
 
+def agent_span_append(
+    trace_id: str,
+    task_id: str,
+    run_id: str,
+    operation: str,
+    started_at: str,
+    root: str = ".",
+    agent_name: str | None = None,
+    tool_name: str | None = None,
+    ended_at: str | None = None,
+    status: str = "unset",
+    status_message: str = "",
+    attributes: dict[str, Any] | None = None,
+    events: list[str] | None = None,
+    links: list[str] | None = None,
+    evidence_refs: list[str] | None = None,
+    unresolved: list[str] | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Append a sanitized local OTel-shaped agent/tool span."""
+    from apiforge.runtime.agent_telemetry import append_span, build_span
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "agent_span_append",
+            lambda: append_span(
+                Path(root),
+                build_span(
+                    trace_id=trace_id, task_id=task_id, run_id=run_id, operation=operation,
+                    started_at=started_at, agent_name=agent_name, tool_name=tool_name,
+                    ended_at=ended_at, status=status, status_message=status_message,
+                    attributes=attributes, events=tuple(events or ()), links=tuple(links or ()),
+                    evidence_refs=tuple(evidence_refs or ()), unresolved=tuple(unresolved or ()),
+                ),
+            ),
+            detail_level,
+        ),
+    )
+
+
+def agent_span_query(
+    root: str = ".",
+    task_id: str | None = None,
+    run_id: str | None = None,
+    trace_id: str | None = None,
+    operation: str | None = None,
+    status: str | None = None,
+    max_results: int = 100,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Query the bounded local agent/tool span evidence plane."""
+    from apiforge.contracts.agent_telemetry import AgentSpanQuery, SpanOperation, SpanStatus
+    from apiforge.runtime.agent_telemetry import query_spans
+
+    query = AgentSpanQuery(
+        task_id=task_id, run_id=run_id, trace_id=trace_id,
+        operation=cast(SpanOperation, operation) if operation else None,
+        status=cast(SpanStatus, status) if status else None, max_results=max_results,
+    )
+    return cast(dict[str, Any], _call("agent_span_query", lambda: query_spans(Path(root), query), detail_level))
+
+
 TOOLS: tuple[Callable[..., Any], ...] = (
     discover,
     analyze,
@@ -2373,6 +2436,8 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     budget_plan,
     budget_check,
     budget_spend,
+    agent_span_append,
+    agent_span_query,
 )
 
 OBSERVABILITY_TOOLS: tuple[Callable[..., Any], ...] = (

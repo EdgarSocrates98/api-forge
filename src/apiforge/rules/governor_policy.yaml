@@ -1,0 +1,59 @@
+# Governor policy (step11 phase 4, §23): declarative per-profile ceilings.
+# The governor picks the effective profile = max(declared profile, risk
+# floor), then applies security clamps and budget-remaining clamps. Nothing
+# here authorizes spend; ceilings only bound orchestration.
+schema: apiforge/governor-policy/v1
+profiles:
+  economy:
+    max_agents: 1
+    max_reviewers: 0
+    max_debates: 0
+    max_retries: 1
+    max_replans: 0
+    max_tokens: null
+    max_cost: null
+    allowed_execution_modes: [deterministic]
+    allowed_tools: [read_only]
+  balanced:
+    max_agents: 2
+    max_reviewers: 1
+    max_debates: 1
+    max_retries: 2
+    max_replans: 1
+    max_tokens: null
+    max_cost: null
+    allowed_execution_modes: [deterministic, sandbox]
+    allowed_tools: [read_only, local_reversible]
+  deep:
+    max_agents: 4
+    max_reviewers: 2
+    max_debates: 2
+    max_retries: 3
+    max_replans: 2
+    max_tokens: null
+    max_cost: null
+    allowed_execution_modes: [deterministic, sandbox, provider]
+    allowed_tools: [read_only, local_reversible, sensitive]
+# Risk floors: a declared profile below the floor is raised, never lowered.
+# Order: economy < balanced < deep.
+risk_floors:
+  read_only: economy
+  local_reversible: economy
+  sensitive: balanced
+  external_mutation: balanced
+  destructive: deep
+  irreversible: deep
+# Security-state clamps applied after the profile row.
+security_clamps:
+  tainted:
+    allowed_execution_modes: [deterministic, sandbox]
+    allowed_tools: [read_only]
+  quarantined:
+    allowed_execution_modes: [deterministic]
+    allowed_tools: [read_only]
+# Budget-remaining keys that clamp governor ceilings when supplied:
+#   observed_tokens -> max_tokens   cost -> max_cost   calls -> max_agents+max_reviewers
+# §27 loop detection defaults.
+loop:
+  window: 5
+  max_repeats: 2

@@ -94,11 +94,11 @@ provider/cloud/credentials — contract + offline proof only.
 | ProviderPricing | DELIVERED (phase 3) | `ProviderPricing`/`ProviderCost` contracts + `economy/pricing.py` (`load_pricing`/`price_for`/`cost_for`) + `rules/provider_pricing.yaml` catalog; `economy pricing`/`cost` verbs; `AF-ECONOMY-PRICING-MISSING` refuses inferred prices |
 | Budget reconciliation | DELIVERED (phase 3) | `BudgetReconciliation`/`ReconciliationAxis` contracts + `economy/reconciliation.py`; `economy reconcile` compares estimated vs observed tokens/cost/tool_calls/elapsed_ms with calibration error; eval corpus `evals/corpus/token-economics` (4 cases) |
 | Agentic budgets governor | KEEP | `governance/budget.py` hierarchical admission | protect |
-| Agent Governor (holistic) | MISSING→EXTEND | supervisor + budget governor exist separately | governor contract: profile/risk/confidence/evidence/context/budget/security/complexity → max_agents/reviews/debates/retries/replans/tokens/cost/modes/tools |
-| Expected Information Gain | EXTEND | `runtime/information_gain.py` (low/med/high over artifacts) | pre-action gain check for spawn/review/debate/retrieval; thresholded STOP |
-| Agent Stop Policy | MISSING | no explicit STOP decision | `StopPolicy` contract: continue only when expected gain > threshold or mandatory requirement |
-| Recovery governance | MISSING | none | `RecoveryPolicy`: RETRY/REPLAN/FALLBACK/ESCALATE/STOP over failure classes |
-| Loop detection | MISSING | none | strategy fingerprint + repeat-strategy block |
+| Agent Governor (holistic) | DELIVERED (phase 4) | `GovernorInputs`/`GovernorDecision` contracts + `governance/governor.py::govern` + `rules/governor_policy.yaml` — risk floor raises profile (never lowers), budget/security clamps named in `clamped_by`, absent inputs land in `unresolved`; `governor decide` CLI + `governor_decide` MCP |
+| Expected Information Gain | DELIVERED (phase 4) | `ExpectedInformationGain` contract + `governance/gain.py::expected_gain` — deterministic weighted mean over declared signals for the §24 named actions; absent signals dropped (never zeroed), empty set → `unresolved` |
+| Agent Stop Policy | DELIVERED (phase 4) | `StopDecision` contract + `governance/stop.py::decide_stop` — continue only when gain > threshold or a mandatory requirement holds; fails closed `AF-GOV-GAIN-UNRESOLVED` / `AF-GOV-STOP-LOW-GAIN` |
+| Recovery governance | DELIVERED (phase 4) | `RecoveryDecision` contract + `governance/recovery.py::decide_recovery` + `rules/recovery_policy.yaml` — closed failure-class vocabulary (`AF-GOV-FAILURE-CLASS-UNKNOWN`), retry/replan/fallback ladder, caps fire terminal escalate/stop (`AF-GOV-RECOVERY-EXHAUSTED`) |
+| Loop detection | DELIVERED (phase 4) | `LoopDetection` contract + `governance/loop.py` — sha256 strategy fingerprint over canonical JSON; repeats inside window blocked `AF-GOV-LOOP-DETECTED` |
 
 ### Decision / Policy Plane
 

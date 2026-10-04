@@ -78,3 +78,28 @@ The MCP functions `memory_propose`, `memory_persist`, `memory_search`,
 `blackboard_append` and `blackboard_query` call the same application services
 and return the same versioned payloads. The MCP surface remains optional and
 the compact gateway discovers these tools instead of loading every schema.
+
+## Governed decisions (phase 4)
+
+The governor surface answers *whether* to act, never *executes*: every verb is
+a pure function over declared inputs plus versioned policy yaml, so the same
+inputs always produce the same `GovernorDecision`/`StopDecision`/
+`RecoveryDecision`/`LoopDetection`.
+
+- `apiforge governor decide --profile … --risk …` — the risk floor only
+  raises the profile; `budget` and `security_state` clamps land in
+  `clamped_by`, inputs not supplied land in `unresolved`.
+- `apiforge governor gain|stop --action <name>` — expected information gain
+  for the §24 named actions; a score below threshold stops
+  (`AF-GOV-STOP-LOW-GAIN`) and an unmeasurable gain stops closed
+  (`AF-GOV-GAIN-UNRESOLVED`) unless a mandatory requirement holds.
+- `apiforge governor recover --failure-class C --attempt N` — the closed
+  §26 vocabulary (unknown classes refuse `AF-GOV-FAILURE-CLASS-UNKNOWN`);
+  exhausted caps fire the terminal escalate/stop.
+- `apiforge governor loop-check --fingerprints …` — repeated strategy
+  fingerprints inside the window block `AF-GOV-LOOP-DETECTED`.
+
+The same projections are exposed as read-only MCP tools
+(`governor_decide`, `governor_stop`, `governor_recover`). Nothing in this
+surface spawns agents or spends budget — the phase-5 control plane consumes
+the decisions.

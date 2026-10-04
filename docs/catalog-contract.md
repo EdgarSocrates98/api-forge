@@ -606,6 +606,13 @@ carry `payload_bytes: 0` so `economy report` totals are unchanged.
 | `AF-ECONOMY-RUN-NOT-FOUND` | `economy explain` has no attribution rows for the run id; unlock: pass a `run_id` printed by `context capsule` |
 | `AF-ECONOMY-USAGE-EMPTY` | `economy record-usage` called without `--transcript` or `--estimate`; unlock: pass one or both |
 | `AF-ECONOMY-PRICING-MISSING` | `economy cost` found no `ProviderPricing` row for provider/model (at the horizon); unlock: declare an entry in the pricing catalog yaml |
+| `AF-GOV-ACTION-INVALID` | `governor gain`/`stop` action outside the §24 names; unlock: pass one of the declared action names |
+| `AF-GOV-FAILURE-CLASS-UNKNOWN` | `governor recover` failure class outside the closed §26 vocabulary; unlock: classify into one of the declared classes |
+| `AF-GOV-RECOVERY-UNDECLARED` | failure class is valid but absent from the recovery policy; escalates by default |
+| `AF-GOV-RECOVERY-EXHAUSTED` | recovery attempts exhausted for the class; the ladder's terminal action fires |
+| `AF-GOV-LOOP-DETECTED` | strategy fingerprint repeated inside the declared window; the cycle is blocked |
+| `AF-GOV-GAIN-UNRESOLVED` | expected gain is unmeasurable; continuing is not justified — stop |
+| `AF-GOV-STOP-LOW-GAIN` | expected gain at or below the threshold; stop, not "budget remains" |
 | `AF-EVALS-ECONOMY-BASELINE-MISSING` | corpus case has no recorded baseline; unlock: `apiforge evals economy --record-baseline` |
 | `AF-EVALS-ECONOMY-BASELINE-STALE` | fixture digest differs from the recorded baseline; unlock: re-record and commit the baseline |
 | `AF-CONTEXT-QUALITY-CAPSULE` | `context quality --capsule` is missing, unreadable or not a `ContextCapsule/v1` payload; unlock: record it with `context capsule ... > capsule.json` |

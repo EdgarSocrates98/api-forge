@@ -407,6 +407,10 @@ while refusal codes and `fact_id`s survive.
 | `apiforge economy record-usage --run-id R [--transcript T] [--estimate N --method M]`, `economy ledger --run-id R` | §19–§20 token ledger: per-field provider usage rolled up per basis (observed/estimated/unresolved never mix) at run/task/agent granularity |
 | `apiforge economy pricing [--pricing yaml]`, `economy cost --provider P --model M --accounting <json>` | §21 declared `ProviderPricing` catalog resolved by `effective_at`; `AF-ECONOMY-PRICING-MISSING` refuses inferred prices |
 | `apiforge economy reconcile --run-id R --estimate <json>` | §22 `BudgetReconciliation/v1`: estimated vs observed tokens/cost/tool_calls/elapsed_ms with calibration error; gaps stay `unresolved` |
+| `apiforge governor decide --profile … --risk … [--budget …]` | §23 `GovernorDecision/v1`: risk floor raises the profile (never lowers), budget/security clamps named in `clamped_by`, absent inputs in `unresolved` |
+| `apiforge governor gain|stop --action <name>` | §24–§25 `ExpectedInformationGain`/`StopDecision`: deterministic pre-action gain; STOP below threshold fails closed `AF-GOV-STOP-LOW-GAIN`, unmeasurable → `AF-GOV-GAIN-UNRESOLVED` |
+| `apiforge governor recover --failure-class C --attempt N`, `governor loop-check --fingerprints …` | §26–§27 `RecoveryDecision`/`LoopDetection`: closed failure-class ladder (unknown refuses `AF-GOV-FAILURE-CLASS-UNKNOWN`), repeated strategy fingerprints blocked `AF-GOV-LOOP-DETECTED` |
+| `apiforge evals agent-governor` | 4-case corpus: risk floor, security clamp, gain/stop, recovery ladder, loop block |
 | `apiforge economy explain <run_id>` | Why each ref was spent, from recorded provenance rules (no model call) |
 | `apiforge evals economy [--record-baseline]` | 12-case benchmark: evidence recall floor + median byte reduction vs recorded baseline |
 | `apiforge runtime run\|resume\|debate <task> --profile economy\|balanced\|deep` | Economy Plane: profile preference with risk floor, trimmed optional roles, call cap + verification reserve, L0–L5 ladder; `economy` block in the result |

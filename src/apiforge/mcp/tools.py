@@ -11,7 +11,7 @@ import json
 from collections.abc import Callable
 from dataclasses import asdict, is_dataclass
 from pathlib import Path
-from typing import Any, Literal, TypeVar, cast
+from typing import Any, Literal, TypeVar, cast, get_args
 
 from apiforge.core.detail import apply_detail_level
 
@@ -991,6 +991,69 @@ def economy_reconcile(
             estimate_axis(estimate),
             run_observed(Path(root), run_id, observed_cost=observed_cost),
         ).model_dump(mode="json"),
+        detail_level,
+    )
+    return out
+
+
+def governor_decide(
+    inputs: dict[str, Any],
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """§23: profile ceilings adjusted by risk, security and budget."""
+    from apiforge.contracts.agentic_governance import GovernorInputs
+    from apiforge.governance.governor import govern
+
+    out: dict[str, Any] = _call(
+        "governor_decide",
+        lambda: govern(GovernorInputs.model_validate(inputs)).model_dump(mode="json"),
+        detail_level,
+    )
+    return out
+
+
+def governor_stop(
+    action: str,
+    signals: dict[str, float | None],
+    mandatory: bool = False,
+    threshold: float = 0.33,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """§25: explicit STOP — continue only on gain > threshold or requirement."""
+    from apiforge.contracts.agentic_governance import GainAction
+    from apiforge.governance.gain import expected_gain
+    from apiforge.governance.stop import decide_stop
+
+    def work() -> dict[str, Any]:
+        if action not in get_args(GainAction):
+            from apiforge.economy.run_ledger import EconomyError
+
+            raise EconomyError(
+                "AF-GOV-ACTION-INVALID",
+                f"unknown gain action {action!r}; allowed: {sorted(get_args(GainAction))}",
+                field="action",
+                unlock="pass one of the §24 action names",
+            )
+        gain = expected_gain(action=cast(GainAction, action), signals=signals)
+        return decide_stop(
+            gain, mandatory_requirement=mandatory, threshold=threshold
+        ).model_dump(mode="json")
+
+    out: dict[str, Any] = _call("governor_stop", work, detail_level)
+    return out
+
+
+def governor_recover(
+    failure_class: str,
+    attempt: int = 0,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """§26: governed recovery for a classified failure."""
+    from apiforge.governance.recovery import decide_recovery
+
+    out: dict[str, Any] = _call(
+        "governor_recover",
+        lambda: decide_recovery(failure_class, attempt).model_dump(mode="json"),
         detail_level,
     )
     return out
@@ -2610,6 +2673,9 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     economy_pricing,
     economy_reconcile,
     economy_roi,
+    governor_decide,
+    governor_recover,
+    governor_stop,
     evals_replay,
     evals_gate,
     evals_economy_hardening,

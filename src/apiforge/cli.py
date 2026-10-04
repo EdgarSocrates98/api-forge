@@ -203,6 +203,12 @@ runtime_app = typer.Typer(
     no_args_is_help=True,
 )
 app.add_typer(runtime_app)
+governor_app = typer.Typer(
+    name="governor",
+    help="Agent Governor decisions: ceilings, gain, stop, recovery and loop checks.",
+    no_args_is_help=True,
+)
+app.add_typer(governor_app)
 brief_app = typer.Typer(
     name="brief",
     help="Outcome Briefs — DONE is refused while mandatory gaps exist.",
@@ -271,6 +277,7 @@ from apiforge.cli_distribution import register as _register_distribution
 from apiforge.cli_economy import register as _register_economy
 from apiforge.cli_extras import register as _register_extras
 from apiforge.cli_field import register as _register_field
+from apiforge.cli_governor import register as _register_governor
 from apiforge.cli_resume import register as _register_resume
 from apiforge.cli_selective import register as _register_selective
 from apiforge.cli_tool_host import register as _register_tool_host
@@ -303,6 +310,7 @@ _register_resume(
     runtime_app=runtime_app,
 )
 _register_economy(economy_app)
+_register_governor(governor_app)
 _register_agentic_state(app, runtime_app)
 
 
@@ -3987,6 +3995,20 @@ def evals_context_quality(
     from apiforge.evals.context_quality import run_context_quality
 
     result = _run(lambda: run_context_quality(corpus))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("agent-governor")
+def evals_agent_governor(
+    corpus: Path = typer.Option(Path("evals/corpus/agent-governor"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§23-§27 governor primitives vs declared corpus expectations."""
+    from apiforge.evals.agent_governor import run_agent_governor
+
+    result = _run(lambda: run_agent_governor(corpus))
     _echo_json(result, detail_level)
     if isinstance(result, dict) and not result.get("passed"):
         raise typer.Exit(code=1)

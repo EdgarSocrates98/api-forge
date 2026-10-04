@@ -1,0 +1,9 @@
+id: clean-run
+spans:
+  - {operation: invoke_agent, started_at: "2026-10-06T00:00:00Z", agent_name: api-verifier, evidence_refs: ["ctx://run/r1/ev1"], status: ok, ended_at: "2026-10-06T00:00:01Z"}
+  - {operation: invoke_model, started_at: "2026-10-06T00:00:01Z", agent_name: api-verifier, status: ok, ended_at: "2026-10-06T00:00:02Z"}
+  - {operation: execute_tool, started_at: "2026-10-06T00:00:02Z", tool_name: contract_lint, evidence_refs: ["ctx://run/r1/ev2"], status: ok, ended_at: "2026-10-06T00:00:03Z"}
+  - {operation: review, started_at: "2026-10-06T00:00:03Z", evidence_refs: ["ctx://run/r1/ev3"], status: ok, ended_at: "2026-10-06T00:00:04Z"}
+expect:
+  verdict: pass
+  min_score: 0.9

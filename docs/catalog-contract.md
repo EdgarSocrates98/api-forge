@@ -651,6 +651,10 @@ arrays only (`diff --name-status`, `show`) and never mutates.
 | `AF-DELTA-GIT-UNAVAILABLE` | git cannot run or the root is not a work tree; unlock: pass `--changed <file>` instead |
 | `AF-DELTA-REF-INVALID` | `git diff` refused `--base`/`--head`; unlock: pass refs that exist (`git rev-parse <ref>`) |
 | `AF-EVALS-INVALID` | an eval corpus is empty, has duplicate ids or a mutation that does not apply; unlock: fix the corpus yaml |
+| `AF-EVALS-TRACE-RUBRIC` | `rules/trace_rubric.yaml` lacks version/rubric_id/dimensions or has non-positive weights; unlock: restore the declared rubric |
+| `AF-EVALS-TRACE-SPAN` | a trace-grading case span fails `build_span` or a `parent` index is out of range; unlock: fix the corpus yaml |
+| `AF-EVALS-LIVE-LAYER` | `rules/live_evals.yaml` declares an unknown eval runner; unlock: name a registered runner id |
+| `AF-EVALS-FRONTIER` | `evals frontier --report` input lacks the per-profile `accuracy` map; unlock: pass an agentic-quality report |
 
 ## Verification, retrieval, evidence and providers (`verify plan`, `knowledge search`, `evidence resolve`, `economy doctor`, `economy tier`, `agentops prompt`, `workspace locality`, `evals economy-extras`)
 

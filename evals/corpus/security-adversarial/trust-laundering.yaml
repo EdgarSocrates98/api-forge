@@ -1,0 +1,14 @@
+id: trust-laundering
+attack_class: evidence_poisoning
+vector:
+  type: trust_propagate
+  params:
+    transform: governed_verification
+    evidence_refs: ["ctx://run/r1/verified1"]
+    sources:
+      - {subject: strong-source, boundary: context_capsule, origin: governed_policy, trust_level: verified, instruction_authority: policy}
+      - {subject: weak-poisoned, boundary: external_content, origin: external_untrusted, trust_level: untrusted, taint: [external], instruction_authority: none}
+    expect_authority_none: true
+    max_trust_level: observed
+expect:
+  verdict: contained

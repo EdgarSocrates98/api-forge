@@ -1,0 +1,23 @@
+version: 1
+# §23 declared live-eval layer. The deterministic tier lists eval
+# commands the layer executes; the provider tier stays
+# deferred_external until a declared adapter + human approval exists —
+# it never gates CI.
+layer:
+  profiles: [economy, balanced, deep]
+  metrics: [correctness, evidence_quality, tool_selection, routing_accuracy,
+            handoff_quality, security_behavior, latency, tokens, cost]
+  provider_tier: deferred_external
+  deterministic_evals:
+    - id: agentic-quality
+      corpus: evals/corpus/agentic-quality
+      runner: agentic_quality
+    - id: security-adversarial
+      corpus: evals/corpus/security-adversarial
+      runner: security_adversarial
+    - id: memory-evals
+      corpus: evals/corpus/memory-evals
+      runner: memory_evals
+    - id: trace-grading
+      corpus: evals/corpus/trace-grading
+      runner: trace_grading

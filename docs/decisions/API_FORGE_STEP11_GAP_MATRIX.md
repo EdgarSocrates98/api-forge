@@ -66,9 +66,9 @@ provider/cloud/credentials — contract + offline proof only.
 | ContextCapsule / refs / CAS | KEEP | `context/gateway/capsule.py`, `refs.py` | protect per §86 |
 | Delta / dedup / levels / selection cache | KEEP | `context/gateway/{delta,dedup,levels,selection_cache}.py` | protect |
 | Context slicing / compact | KEEP | `agentops/{slicing,compact}.py` | protect |
-| RoleContextPlan | EXTEND | `contracts/selective.py:RoleContextPlan` — bytes/budget only; no required/allowed/denied kinds, memory/knowledge/artifact visibility, min trust, or per-role telemetry | v2 policy fields in `rules/role_context.yaml` + telemetry counters |
-| Context Quality Engine | MISSING | no quality metrics module | new `context/quality.py` + `ContextQualityReport`/`Metric`/`UseRecord`/`SufficiencyResult` contracts; precision/recall/density/dup/stale/reuse/cache-hit/evidence-per-token |
-| Minimum Sufficient Context | MISSING | none | deterministic pruning eval: full → remove low-value → rerun → compare quality; sufficiency gate |
+| RoleContextPlan | DELIVERED (phase 1) | `contracts/selective.py:RoleContextPlan` + `rules/role_context.yaml` — required/allowed/denied kinds, memory visibility, per-role envelopes | protect |
+| Context Quality Engine | DELIVERED (phase 1) | `context/quality.py` + `ContextQualityReport`/`Metric`/`UseRecord`/`SufficiencyResult`; `context quality` + `evals context-quality` 8-case corpus | protect |
+| Minimum Sufficient Context | DELIVERED (phase 1) | `context/sufficiency.py` — deterministic pruning + sufficiency verdicts | protect |
 
 ### Memory / Knowledge Plane
 
@@ -138,8 +138,8 @@ provider/cloud/credentials — contract + offline proof only.
 | Capability | State | Evidence | Action |
 |---|---|---|---|
 | Source path security | KEEP | `security/source_paths.py` | protect |
-| Agentic threat model | MISSING | no agentic threat doc | `docs/security/agentic-threat-model.md` covering injection classes in §12 |
-| Security adversarial evals | MISSING | none | `evals/corpus/security-adversarial` local corpus |
+| Agentic threat model | DELIVERED (phase 11) | `docs/security/agentic-threat-model.md` — §10–§11 classes mapped to defense modules + eval evidence | keep synced when defenses move |
+| Security adversarial evals | DELIVERED (phase 11) | `evals/security_adversarial.py` + `evals/corpus/security-adversarial` — 9 cases over memory_gate/tool_authorize/trust_propagate/data_promotion; `evals security-adversarial` | extend corpus per new class |
 
 ### Observability Plane
 
@@ -165,10 +165,10 @@ provider/cloud/credentials — contract + offline proof only.
 | Capability | State | Evidence | Action |
 |---|---|---|---|
 | Deterministic eval matrix | KEEP | `evals/` + corpora | protect |
-| Live-model eval architecture | MISSING→EXTEND | none; must not gate CI | layer config + corpus; provider calls DEFERRED_EXTERNAL |
-| Trace grading | MISSING | none | rubric contract over span/trace records |
-| Quality/cost frontier | EXTEND | `evals agentic-quality` exists | frontier report; cost stays UNRESOLVED without provider data |
-| Memory evals | MISSING | unit tests only | `evals/corpus/memory-evals` |
+| Live-model eval architecture | DELIVERED (phase 11) | `rules/live_evals.yaml` + `evals/live_evals.py` — declared layer (3 profiles × 9 metrics); `evals live` runs the deterministic tier; provider tier `deferred_external`, never gates CI | provider adapter remains DEFERRED_EXTERNAL |
+| Trace grading | DELIVERED (phase 11) | `rules/trace_rubric.yaml` + `evals/trace_grading.py` — 5 declared dimensions over `AgentSpan`; `evals trace-grading` 5-case corpus | extend dimensions as rubrics grow |
+| Quality/cost frontier | DELIVERED (phase 11) | `evals/frontier.py` + `evals frontier --report R [--latencies L --costs C]` — Pareto over observed axes; cost stays `unresolved` without provider-accounted data | — |
+| Memory evals | DELIVERED (phase 11) | `evals/memory_evals.py` + `evals/corpus/memory-evals` — 9 cases over the 8 §24 axes against the real governed store | — |
 
 ### Interop / MCP
 

@@ -281,3 +281,38 @@ payloads; mutation verbs stay CLI-only. `docs/architecture/
 forge-kernel-boundary.md` records the §49 kernel-boundary analysis —
 what would be extracted for a standalone kernel, and why extraction is
 deferred.
+
+## Eval plane (phase 11)
+
+§23 layers evals into a periodic surface: `evals live` runs the
+deterministic tier declared in `rules/live_evals.yaml`
+(agentic-quality + security-adversarial + memory-evals +
+trace-grading) and reports the provider tier as `deferred_external` —
+live model calls stay a human-gated external boundary, never CI. The
+`LiveEvalReport` contract refuses provider results unless the tier is
+`observed`.
+
+`evals trace-grading` grades recorded `AgentSpan` sets against
+`rules/trace_rubric.yaml` — five declared dimensions (evidence
+coverage, status honesty, unresolved reporting, operation coverage,
+retry justification) scored deterministically; empty or mixed-id
+traces are `unresolved`, never zero-scored.
+
+`evals security-adversarial` drives nine synthesized §25 attacks
+against the platform's own defenses — `evaluate_gates` (memory
+poisoning, scope violation, evidence-free persist), allowlist-first
+`authorize` (privilege escalation, unknown tool), `propagate`
+(cross-agent injection, trust laundering, authority forgery) and
+`trust_unit` (tool-output injection). Every defense verdict is
+`refused` or `contained`; `escaped` fails loudly.
+
+`evals memory-evals` covers the eight §24 axes — usefulness,
+poisoning, stale, wrong-environment, conflicting, cross-task leakage,
+retrieval, invalidation — against the real governed store on isolated
+roots; setup ingress is `persist_candidate` only.
+
+`evals frontier --report <agentic-quality.json>` computes the
+quality×cost×latency Pareto over declared profiles; latency and cost
+come from optional sidecars — absent data stays `unresolved`, never
+inferred. `docs/security/agentic-threat-model.md` maps every §10–§11
+attack class to its defense module and eval evidence.

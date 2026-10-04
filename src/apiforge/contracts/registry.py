@@ -128,7 +128,30 @@ from apiforge.contracts.economy_resume import (
     PhaseBudgetPlan,
     VerificationEscalation,
 )
+from apiforge.contracts.eval_plane import (
+    AdversarialCaseResult,
+    FrontierPoint,
+    LiveEvalLayer,
+    LiveEvalReport,
+    MemoryEvalCaseResult,
+    MemoryEvalReport,
+    QualityFrontier,
+    SecurityAdversarialReport,
+    TraceGrade,
+    TraceGradeDimension,
+    TraceGradingReport,
+)
 from apiforge.contracts.evidence import EvidenceRef
+from apiforge.contracts.forge_protocol import (
+    ForgeCapabilityDescriptor,
+    ForgeEvidenceArtifact,
+    ForgeEvidenceBundle,
+    ForgeHandoff,
+    ForgeHealth,
+    ForgeTaskRequest,
+    ForgeTaskResult,
+    ForgeTaskStatus,
+)
 from apiforge.contracts.graph import GraphEdge, GraphExport, GraphNode
 from apiforge.contracts.graph_access import GraphAccessIR, GraphPlanIR
 from apiforge.contracts.graph_impact import (
@@ -270,16 +293,6 @@ from apiforge.contracts.token_economics import (
     TokenLedger,
     TokenLedgerEntry,
     TokenTotals,
-)
-from apiforge.contracts.forge_protocol import (
-    ForgeCapabilityDescriptor,
-    ForgeEvidenceArtifact,
-    ForgeEvidenceBundle,
-    ForgeHandoff,
-    ForgeHealth,
-    ForgeTaskRequest,
-    ForgeTaskResult,
-    ForgeTaskStatus,
 )
 from apiforge.contracts.tool_host import (
     ErrorSlice,
@@ -565,6 +578,17 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "ForgeEvidenceBundle/v1": ForgeEvidenceBundle,
     "ForgeHandoff/v1": ForgeHandoff,
     "ForgeHealth/v1": ForgeHealth,
+    "TraceGradeDimension/v1": TraceGradeDimension,
+    "TraceGrade/v1": TraceGrade,
+    "TraceGradingReport/v1": TraceGradingReport,
+    "LiveEvalLayer/v1": LiveEvalLayer,
+    "LiveEvalReport/v1": LiveEvalReport,
+    "FrontierPoint/v1": FrontierPoint,
+    "QualityFrontier/v1": QualityFrontier,
+    "AdversarialCaseResult/v1": AdversarialCaseResult,
+    "SecurityAdversarialReport/v1": SecurityAdversarialReport,
+    "MemoryEvalCaseResult/v1": MemoryEvalCaseResult,
+    "MemoryEvalReport/v1": MemoryEvalReport,
     "CostVector/v1": CostVector,
     "LedgerRef/v1": LedgerRef,
     "RunLedgerEntry/v1": RunLedgerEntry,

@@ -4180,6 +4180,83 @@ def evals_forge_protocol(
         raise typer.Exit(code=1)
 
 
+@evals_app.command("trace-grading")
+def evals_trace_grading(
+    corpus: Path = typer.Option(Path("evals/corpus/trace-grading"), "--corpus"),
+    rubric: Path = typer.Option(
+        Path("src/apiforge/rules/trace_rubric.yaml"), "--rubric"
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§23: recorded traces graded against the declared rubric."""
+    from apiforge.evals.trace_grading import run_trace_grading
+
+    result = _run(lambda: run_trace_grading(corpus, rubric=rubric))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("security-adversarial")
+def evals_security_adversarial(
+    corpus: Path = typer.Option(Path("evals/corpus/security-adversarial"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§25: synthesized attacks against the platform's own defenses."""
+    from apiforge.evals.security_adversarial import run_security_adversarial
+
+    result = _run(lambda: run_security_adversarial(corpus))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("memory-evals")
+def evals_memory_evals(
+    corpus: Path = typer.Option(Path("evals/corpus/memory-evals"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§24: the eight memory axes against the real governed store."""
+    from apiforge.evals.memory_evals import run_memory_evals
+
+    result = _run(lambda: run_memory_evals(corpus))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("live")
+def evals_live(
+    layer: Path = typer.Option(
+        Path("src/apiforge/rules/live_evals.yaml"), "--layer"
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§23: deterministic tier observed; provider tier deferred_external."""
+    from apiforge.evals.live_evals import run_live_evals
+
+    result = _run(lambda: run_live_evals(layer))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("frontier")
+def evals_frontier(
+    report: Path = typer.Option(..., "--report", help="agentic-quality report JSON"),
+    latencies: Path = typer.Option(None, "--latencies", help="optional yaml {latency_ms: {profile: ms}}"),
+    costs: Path = typer.Option(None, "--costs", help="optional yaml {cost: {profile: usd}}"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§23: quality x cost x latency frontier across profiles."""
+    from apiforge.evals.frontier import run_frontier
+
+    result = _run(lambda: run_frontier(report, latencies=latencies, costs=costs))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
 @evals_app.command("agentops")
 def evals_agentops(
     corpus: Path = typer.Option(Path("evals/corpus/agentops"), "--corpus"),

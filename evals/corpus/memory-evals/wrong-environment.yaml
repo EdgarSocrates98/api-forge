@@ -1,0 +1,11 @@
+id: wrong-environment
+axis: wrong_environment_reuse
+setup:
+  records:
+    - {scope: task, origin: system, trust_level: verified, evidence_refs: ["ctx://e1"], environment_fingerprint: "linux-ci", payload: {note: "linux path notes"}}
+action:
+  type: query
+  query: {environment_fingerprint: "windows-dev"}
+expect:
+  count: 0
+  unresolved_contains: ["environment_mismatch"]

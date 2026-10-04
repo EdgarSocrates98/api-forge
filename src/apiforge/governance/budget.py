@@ -24,6 +24,8 @@ from apiforge.core.models import JsonValue
 _DIR = Path(".apiforge") / "economy" / "agentic-budget"
 _PLANS = "plans.jsonl"
 _SPENDS = "spends.jsonl"
+
+
 def _directory(root: Path) -> Path:
     resolved = Path(root).resolve()
     if resolved.name == ".apiforge":
@@ -120,13 +122,17 @@ def _matches(limit: BudgetLimit, spend: BudgetSpend, task_id: str) -> bool:
     }[limit.scope]
 
 
-def _total(spends: list[BudgetSpend], limit: BudgetLimit, task_id: str, dimension: str) -> int | None:
+def _total(
+    spends: list[BudgetSpend], limit: BudgetLimit, task_id: str, dimension: str
+) -> int | None:
     matching = [item for item in spends if _matches(limit, item, task_id)]
     if dimension == "calls":
         return len(matching)
     if dimension == "observed_tokens":
         tokens = [item.cost.observed_tokens for item in matching]
-        return None if any(value is None for value in tokens) else sum(value or 0 for value in tokens)
+        return (
+            None if any(value is None for value in tokens) else sum(value or 0 for value in tokens)
+        )
     return sum(int(getattr(item.cost, dimension)) for item in matching)
 
 
@@ -144,12 +150,18 @@ def check_budget(
     """Evaluate a proposed spend without appending it."""
     if task_id != plan.task_id:
         return BudgetDecision(
-            action="unresolved", plan_id=plan.plan_id, task_id=task_id, spend_id=spend_id,
-            code="AF-BUDGET-TASK-MISMATCH", field="task_id",
-            unlock="use the plan task_id for the spend", reason="spend task differs from plan",
+            action="unresolved",
+            plan_id=plan.plan_id,
+            task_id=task_id,
+            spend_id=spend_id,
+            code="AF-BUDGET-TASK-MISMATCH",
+            field="task_id",
+            unlock="use the plan task_id for the spend",
+            reason="spend task differs from plan",
         )
     spends = [
-        item for item in _read(_directory(root), _SPENDS, BudgetSpend)
+        item
+        for item in _read(_directory(root), _SPENDS, BudgetSpend)
         if item.plan_id == plan.plan_id and item.task_id == task_id
     ]
     exhausted: list[str] = []
@@ -175,8 +187,14 @@ def check_budget(
         if not _matches(
             limit,
             BudgetSpend(
-                spend_id=spend_id, plan_id=plan.plan_id, task_id=task_id, phase=phase,
-                role=role, tool=tool, cost=cost, observed_at="governor-check",
+                spend_id=spend_id,
+                plan_id=plan.plan_id,
+                task_id=task_id,
+                phase=phase,
+                role=role,
+                tool=tool,
+                cost=cost,
+                observed_at="governor-check",
             ),
             task_id,
         ):
@@ -197,23 +215,37 @@ def check_budget(
                 exhausted.append(key)
     if unresolved:
         return BudgetDecision(
-            action="unresolved", plan_id=plan.plan_id, task_id=task_id, spend_id=spend_id,
-            code="AF-BUDGET-TOKENS-UNRESOLVED", field="cost.observed_tokens",
+            action="unresolved",
+            plan_id=plan.plan_id,
+            task_id=task_id,
+            spend_id=spend_id,
+            code="AF-BUDGET-TOKENS-UNRESOLVED",
+            field="cost.observed_tokens",
             unlock="supply an observed token receipt before enforcing token limits",
-            reason="token budget cannot be estimated from bytes", unresolved=tuple(unresolved),
+            reason="token budget cannot be estimated from bytes",
+            unresolved=tuple(unresolved),
             remaining=remaining,
         )
     if exhausted:
         return BudgetDecision(
-            action="stop", plan_id=plan.plan_id, task_id=task_id, spend_id=spend_id,
-            code="AF-BUDGET-EXHAUSTED", field="limits",
+            action="stop",
+            plan_id=plan.plan_id,
+            task_id=task_id,
+            spend_id=spend_id,
+            code="AF-BUDGET-EXHAUSTED",
+            field="limits",
             unlock="reduce the requested spend or obtain an explicitly reviewed new plan",
             reason="one or more hierarchical limits would be exceeded",
-            exhausted=tuple(exhausted), remaining=remaining,
+            exhausted=tuple(exhausted),
+            remaining=remaining,
         )
     return BudgetDecision(
-        action="allow", plan_id=plan.plan_id, task_id=task_id, spend_id=spend_id,
-        reason="all matching hierarchical limits remain within budget", remaining=remaining,
+        action="allow",
+        plan_id=plan.plan_id,
+        task_id=task_id,
+        spend_id=spend_id,
+        reason="all matching hierarchical limits remain within budget",
+        remaining=remaining,
     )
 
 
@@ -221,19 +253,33 @@ def record_spend(root: Path, plan: AgenticBudgetPlan, spend: BudgetSpend) -> Bud
     """Check and append a spend only when admission is explicitly allowed."""
     if spend.plan_id != plan.plan_id or spend.task_id != plan.task_id:
         return BudgetDecision(
-            action="unresolved", plan_id=plan.plan_id, task_id=spend.task_id, spend_id=spend.spend_id,
-            code="AF-BUDGET-TASK-MISMATCH", field="plan_id/task_id",
-            unlock="use a spend bound to the loaded plan", reason="spend is outside plan scope",
+            action="unresolved",
+            plan_id=plan.plan_id,
+            task_id=spend.task_id,
+            spend_id=spend.spend_id,
+            code="AF-BUDGET-TASK-MISMATCH",
+            field="plan_id/task_id",
+            unlock="use a spend bound to the loaded plan",
+            reason="spend is outside plan scope",
         )
     existing = _read(_directory(root), _SPENDS, BudgetSpend)
     if any(item.spend_id == spend.spend_id for item in existing):
         return BudgetDecision(
-            action="deduplicated", plan_id=plan.plan_id, task_id=spend.task_id,
-            spend_id=spend.spend_id, reason="spend receipt already exists",
+            action="deduplicated",
+            plan_id=plan.plan_id,
+            task_id=spend.task_id,
+            spend_id=spend.spend_id,
+            reason="spend receipt already exists",
         )
     decision = check_budget(
-        root, plan, task_id=spend.task_id, phase=spend.phase, role=spend.role,
-        tool=spend.tool, cost=spend.cost, spend_id=spend.spend_id,
+        root,
+        plan,
+        task_id=spend.task_id,
+        phase=spend.phase,
+        role=spend.role,
+        tool=spend.tool,
+        cost=spend.cost,
+        spend_id=spend.spend_id,
     )
     if decision.action != "allow":
         return decision

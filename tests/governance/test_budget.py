@@ -19,11 +19,19 @@ def _plan(root: Path, *, token_limit: int | None = None):
     return plan
 
 
-def _spend(plan_id: str, spend_id: str, phase: str = "build", tokens: int | None = None) -> BudgetSpend:
+def _spend(
+    plan_id: str, spend_id: str, phase: str = "build", tokens: int | None = None
+) -> BudgetSpend:
     return BudgetSpend(
-        spend_id=spend_id, plan_id=plan_id, task_id="task-1", phase=phase,
-        role="builder", tool="compile", cost=CostVector(observed_tokens=tokens),
-        observed_at="2026-10-04T12:01:00Z", provenance=("test",),
+        spend_id=spend_id,
+        plan_id=plan_id,
+        task_id="task-1",
+        phase=phase,
+        role="builder",
+        tool="compile",
+        cost=CostVector(observed_tokens=tokens),
+        observed_at="2026-10-04T12:01:00Z",
+        provenance=("test",),
     )
 
 
@@ -32,8 +40,14 @@ def test_hierarchy_stops_phase_before_root_and_then_stops_root(tmp_path: Path) -
     first = record_spend(tmp_path, plan, _spend(plan.plan_id, "spend-1"))
     assert first.action == "allow" and first.recorded is True
     phase_stop = check_budget(
-        tmp_path, plan, task_id="task-1", phase="build", role="builder", tool="compile",
-        cost=CostVector(), spend_id="spend-2",
+        tmp_path,
+        plan,
+        task_id="task-1",
+        phase="build",
+        role="builder",
+        tool="compile",
+        cost=CostVector(),
+        spend_id="spend-2",
     )
     assert phase_stop.action == "stop"
     second = record_spend(tmp_path, plan, _spend(plan.plan_id, "spend-2", phase="verify"))
@@ -45,8 +59,14 @@ def test_hierarchy_stops_phase_before_root_and_then_stops_root(tmp_path: Path) -
 def test_token_limit_is_unresolved_without_observed_tokens(tmp_path: Path) -> None:
     plan = _plan(tmp_path, token_limit=4)
     unknown = check_budget(
-        tmp_path, plan, task_id="task-1", phase="build", role="builder", tool="compile",
-        cost=CostVector(), spend_id="spend-1",
+        tmp_path,
+        plan,
+        task_id="task-1",
+        phase="build",
+        role="builder",
+        tool="compile",
+        cost=CostVector(),
+        spend_id="spend-1",
     )
     assert unknown.action == "unresolved"
     assert unknown.code == "AF-BUDGET-TOKENS-UNRESOLVED"

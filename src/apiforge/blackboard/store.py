@@ -62,15 +62,27 @@ def append_entry(
     supersedes: tuple[str, ...] = (),
 ) -> BlackboardEntry:
     body = {
-        "task_id": task_id, "scope": scope, "kind": kind, "origin": origin,
-        "payload": payload, "created_at": created_at, "provenance": provenance,
+        "task_id": task_id,
+        "scope": scope,
+        "kind": kind,
+        "origin": origin,
+        "payload": payload,
+        "created_at": created_at,
+        "provenance": provenance,
     }
     entry = BlackboardEntry(
         entry_id="blackboard:" + _digest(body)[:16],
-        task_id=task_id, scope=scope, kind=cast(BlackboardKind, kind), origin=cast(MemoryOrigin, origin),
-        payload=cast(JsonValue, payload), created_at=created_at,
-        trust_level=cast(TrustLevel, trust_level), taint=taint,
-        provenance=provenance, evidence_refs=evidence_refs, supersedes=supersedes,
+        task_id=task_id,
+        scope=scope,
+        kind=cast(BlackboardKind, kind),
+        origin=cast(MemoryOrigin, origin),
+        payload=cast(JsonValue, payload),
+        created_at=created_at,
+        trust_level=cast(TrustLevel, trust_level),
+        taint=taint,
+        provenance=provenance,
+        evidence_refs=evidence_refs,
+        supersedes=supersedes,
         content_sha256=_digest(payload),
     )
     path = _path(root)
@@ -78,7 +90,15 @@ def append_entry(
     existing = _read(path)
     if not any(item.entry_id == entry.entry_id for item in existing):
         with path.open("a", encoding="utf-8", newline="\n") as handle:
-            handle.write(json.dumps(entry.model_dump(mode="json"), sort_keys=True, ensure_ascii=False, separators=(",", ":")) + "\n")
+            handle.write(
+                json.dumps(
+                    entry.model_dump(mode="json"),
+                    sort_keys=True,
+                    ensure_ascii=False,
+                    separators=(",", ":"),
+                )
+                + "\n"
+            )
     return entry
 
 
@@ -100,7 +120,9 @@ def query_entries(root: Path, query: BlackboardQuery) -> BlackboardResult:
             unresolved.append(f"tainted:{entry.entry_id}")
         matches.append(entry)
     return BlackboardResult(
-        query=query, entries=tuple(matches[-query.max_results:]), unresolved=tuple(unresolved),
+        query=query,
+        entries=tuple(matches[-query.max_results :]),
+        unresolved=tuple(unresolved),
         status="degraded" if unresolved else "ready",
     )
 

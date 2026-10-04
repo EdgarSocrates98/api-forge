@@ -10,7 +10,9 @@ from pydantic import Field, field_validator
 from apiforge.contracts.base import VersionedContract
 from apiforge.core.models import JsonValue, Sha256, freeze_json
 
-SpanOperation = Literal["invoke_agent", "execute_tool", "handoff", "decision", "retrieval", "checkpoint"]
+SpanOperation = Literal[
+    "invoke_agent", "execute_tool", "handoff", "decision", "retrieval", "checkpoint"
+]
 SpanStatus = Literal["unset", "ok", "error", "unresolved"]
 
 _SENSITIVE_ATTRIBUTE_MARKERS = (

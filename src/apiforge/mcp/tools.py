@@ -2083,10 +2083,19 @@ def memory_propose(
         _call(
             "memory_propose",
             lambda: propose_memory(
-                Path(root), scope=scope, origin=origin, payload=payload, proposed_by=proposed_by,
-                reason=reason, created_at=created_at, observed_at=observed_at, expires_at=expires_at,
-                trust_level=trust_level, provenance=tuple(provenance or ()),
-                evidence_refs=tuple(evidence_refs or ()), environment_fingerprint=environment_fingerprint,
+                Path(root),
+                scope=scope,
+                origin=origin,
+                payload=payload,
+                proposed_by=proposed_by,
+                reason=reason,
+                created_at=created_at,
+                observed_at=observed_at,
+                expires_at=expires_at,
+                trust_level=trust_level,
+                provenance=tuple(provenance or ()),
+                evidence_refs=tuple(evidence_refs or ()),
+                environment_fingerprint=environment_fingerprint,
             ),
             detail_level,
         ),
@@ -2109,7 +2118,10 @@ def memory_persist(
         _call(
             "memory_persist",
             lambda: persist_candidate(
-                Path(root), load_candidate(Path(root), candidate_id), MemoryPolicy(policy_id=policy_id), now=now
+                Path(root),
+                load_candidate(Path(root), candidate_id),
+                MemoryPolicy(policy_id=policy_id),
+                now=now,
             ),
             detail_level,
         ),
@@ -2134,9 +2146,14 @@ def memory_search(
         terms=tuple(terms or ()),
         scopes=tuple(cast(MemoryScope, item) for item in (scopes or ())),
         environment_fingerprint=environment_fingerprint,
-        minimum_trust=cast(TrustLevel, minimum_trust), now=now, max_results=max_results,
+        minimum_trust=cast(TrustLevel, minimum_trust),
+        now=now,
+        max_results=max_results,
     )
-    return cast(dict[str, Any], _call("memory_search", lambda: query_memory(Path(root), query), detail_level))
+    return cast(
+        dict[str, Any],
+        _call("memory_search", lambda: query_memory(Path(root), query), detail_level),
+    )
 
 
 def blackboard_append(
@@ -2161,9 +2178,17 @@ def blackboard_append(
         _call(
             "blackboard_append",
             lambda: append_entry(
-                Path(root), task_id=task_id, scope=scope, kind=kind, origin=origin, payload=payload,
-                created_at=created_at, trust_level=trust_level, taint=tuple(taint or ()),
-                provenance=tuple(provenance or ()), evidence_refs=tuple(evidence_refs or ()),
+                Path(root),
+                task_id=task_id,
+                scope=scope,
+                kind=kind,
+                origin=origin,
+                payload=payload,
+                created_at=created_at,
+                trust_level=trust_level,
+                taint=tuple(taint or ()),
+                provenance=tuple(provenance or ()),
+                evidence_refs=tuple(evidence_refs or ()),
             ),
             detail_level,
         ),
@@ -2184,10 +2209,16 @@ def blackboard_query(
     from apiforge.contracts.agentic_memory import BlackboardKind, BlackboardQuery
 
     query = BlackboardQuery(
-        task_id=task_id, kinds=tuple(cast(BlackboardKind, item) for item in (kinds or ())),
-        scope=scope, terms=tuple(terms or ()), max_results=max_results,
+        task_id=task_id,
+        kinds=tuple(cast(BlackboardKind, item) for item in (kinds or ())),
+        scope=scope,
+        terms=tuple(terms or ()),
+        max_results=max_results,
     )
-    return cast(dict[str, Any], _call("blackboard_query", lambda: query_entries(Path(root), query), detail_level))
+    return cast(
+        dict[str, Any],
+        _call("blackboard_query", lambda: query_entries(Path(root), query), detail_level),
+    )
 
 
 def budget_plan(
@@ -2200,8 +2231,10 @@ def budget_plan(
     def work() -> dict[str, Any]:
         limits = tuple(BudgetLimit.model_validate(item) for item in declaration["limits"])
         plan = build_plan(
-            task_id=str(declaration["task_id"]), limits=limits,
-            created_at=str(declaration["created_at"]), metadata=declaration.get("metadata"),
+            task_id=str(declaration["task_id"]),
+            limits=limits,
+            created_at=str(declaration["created_at"]),
+            metadata=declaration.get("metadata"),
         )
         return cast(dict[str, Any], persist_plan(Path(root), plan))
 
@@ -2228,8 +2261,14 @@ def budget_check(
         _call(
             "budget_check",
             lambda: check_budget(
-                Path(root), load_plan(Path(root), plan_id), task_id=task_id, phase=phase,
-                role=role, tool=tool, cost=CostVector.model_validate(cost), spend_id=spend_id,
+                Path(root),
+                load_plan(Path(root), plan_id),
+                task_id=task_id,
+                phase=phase,
+                role=role,
+                tool=tool,
+                cost=CostVector.model_validate(cost),
+                spend_id=spend_id,
             ),
             detail_level,
         ),
@@ -2256,13 +2295,24 @@ def budget_spend(
     from apiforge.governance.budget import load_plan, record_spend
 
     spend = BudgetSpend(
-        spend_id=spend_id, plan_id=plan_id, task_id=task_id, phase=phase,
-        role=role, tool=tool, cost=CostVector.model_validate(cost), observed_at=observed_at,
-        provenance=tuple(provenance or ()), evidence_refs=tuple(evidence_refs or ()),
+        spend_id=spend_id,
+        plan_id=plan_id,
+        task_id=task_id,
+        phase=phase,
+        role=role,
+        tool=tool,
+        cost=CostVector.model_validate(cost),
+        observed_at=observed_at,
+        provenance=tuple(provenance or ()),
+        evidence_refs=tuple(evidence_refs or ()),
     )
     return cast(
         dict[str, Any],
-        _call("budget_spend", lambda: record_spend(Path(root), load_plan(Path(root), plan_id), spend), detail_level),
+        _call(
+            "budget_spend",
+            lambda: record_spend(Path(root), load_plan(Path(root), plan_id), spend),
+            detail_level,
+        ),
     )
 
 
@@ -2295,11 +2345,21 @@ def agent_span_append(
             lambda: append_span(
                 Path(root),
                 build_span(
-                    trace_id=trace_id, task_id=task_id, run_id=run_id, operation=operation,
-                    started_at=started_at, agent_name=agent_name, tool_name=tool_name,
-                    ended_at=ended_at, status=status, status_message=status_message,
-                    attributes=attributes, events=tuple(events or ()), links=tuple(links or ()),
-                    evidence_refs=tuple(evidence_refs or ()), unresolved=tuple(unresolved or ()),
+                    trace_id=trace_id,
+                    task_id=task_id,
+                    run_id=run_id,
+                    operation=operation,
+                    started_at=started_at,
+                    agent_name=agent_name,
+                    tool_name=tool_name,
+                    ended_at=ended_at,
+                    status=status,
+                    status_message=status_message,
+                    attributes=attributes,
+                    events=tuple(events or ()),
+                    links=tuple(links or ()),
+                    evidence_refs=tuple(evidence_refs or ()),
+                    unresolved=tuple(unresolved or ()),
                 ),
             ),
             detail_level,
@@ -2322,11 +2382,17 @@ def agent_span_query(
     from apiforge.runtime.agent_telemetry import query_spans
 
     query = AgentSpanQuery(
-        task_id=task_id, run_id=run_id, trace_id=trace_id,
+        task_id=task_id,
+        run_id=run_id,
+        trace_id=trace_id,
         operation=cast(SpanOperation, operation) if operation else None,
-        status=cast(SpanStatus, status) if status else None, max_results=max_results,
+        status=cast(SpanStatus, status) if status else None,
+        max_results=max_results,
     )
-    return cast(dict[str, Any], _call("agent_span_query", lambda: query_spans(Path(root), query), detail_level))
+    return cast(
+        dict[str, Any],
+        _call("agent_span_query", lambda: query_spans(Path(root), query), detail_level),
+    )
 
 
 def decision_check(
@@ -2343,9 +2409,14 @@ def decision_check(
 
     requested = DecisionRequest.model_validate(request)
     gate = ApprovalGate.model_validate(approval) if approval else None
-    selected = AgenticPolicy.model_validate(policy) if policy else AgenticPolicy(policy_id="local-default")
+    selected = (
+        AgenticPolicy.model_validate(policy) if policy else AgenticPolicy(policy_id="local-default")
+    )
     result = evaluate_decision(requested, policy=selected, approval=gate)
-    return cast(dict[str, Any], _call("decision_check", lambda: persist_decision(Path(root), result), detail_level))
+    return cast(
+        dict[str, Any],
+        _call("decision_check", lambda: persist_decision(Path(root), result), detail_level),
+    )
 
 
 TOOLS: tuple[Callable[..., Any], ...] = (

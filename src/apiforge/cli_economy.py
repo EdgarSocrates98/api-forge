@@ -49,7 +49,9 @@ def register(economy_app: typer.Typer) -> None:
 
     @economy_app.command("budget-plan")
     def economy_budget_plan(
-        plan: Path = typer.Option(..., "--plan", help="JSON declaration with task_id, limits and created_at."),
+        plan: Path = typer.Option(
+            ..., "--plan", help="JSON declaration with task_id, limits and created_at."
+        ),
         root: Path = typer.Option(Path("."), "--root"),
         detail_level: str = typer.Option("normal", "--detail-level"),
     ) -> None:
@@ -62,8 +64,10 @@ def register(economy_app: typer.Typer) -> None:
             data = json.loads(plan.read_text(encoding="utf-8"))
             limits = tuple(BudgetLimit.model_validate(item) for item in data["limits"])
             built = build_plan(
-                task_id=str(data["task_id"]), limits=limits,
-                created_at=str(data["created_at"]), metadata=data.get("metadata"),
+                task_id=str(data["task_id"]),
+                limits=limits,
+                created_at=str(data["created_at"]),
+                metadata=data.get("metadata"),
             )
             return persist_plan(root, built)
 
@@ -89,8 +93,14 @@ def register(economy_app: typer.Typer) -> None:
         def work() -> object:
             value = _json_value(cost)
             return check_budget(
-                root, load_plan(root, plan_id), task_id=task_id, phase=phase,
-                role=role, tool=tool, cost=CostVector.model_validate(value), spend_id=spend_id,
+                root,
+                load_plan(root, plan_id),
+                task_id=task_id,
+                phase=phase,
+                role=role,
+                tool=tool,
+                cost=CostVector.model_validate(value),
+                spend_id=spend_id,
             )
 
         _echo_json(_run(work), detail_level)
@@ -118,9 +128,16 @@ def register(economy_app: typer.Typer) -> None:
 
         def work() -> object:
             spend = BudgetSpend(
-                spend_id=spend_id, plan_id=plan_id, task_id=task_id, phase=phase,
-                role=role, tool=tool, cost=CostVector.model_validate(_json_value(cost)),
-                observed_at=observed_at, provenance=tuple(provenance), evidence_refs=tuple(evidence),
+                spend_id=spend_id,
+                plan_id=plan_id,
+                task_id=task_id,
+                phase=phase,
+                role=role,
+                tool=tool,
+                cost=CostVector.model_validate(_json_value(cost)),
+                observed_at=observed_at,
+                provenance=tuple(provenance),
+                evidence_refs=tuple(evidence),
             )
             return record_spend(root, load_plan(root, plan_id), spend)
 

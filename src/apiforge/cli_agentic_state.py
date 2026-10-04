@@ -8,9 +8,15 @@ from typing import cast
 
 import typer
 
-memory_app = typer.Typer(name="memory", help="Governed append-only agent memory.", no_args_is_help=True)
-blackboard_app = typer.Typer(name="blackboard", help="Structured append-only shared state.", no_args_is_help=True)
-governance_app = typer.Typer(name="governance", help="Fail-closed agentic decision gates.", no_args_is_help=True)
+memory_app = typer.Typer(
+    name="memory", help="Governed append-only agent memory.", no_args_is_help=True
+)
+blackboard_app = typer.Typer(
+    name="blackboard", help="Structured append-only shared state.", no_args_is_help=True
+)
+governance_app = typer.Typer(
+    name="governance", help="Fail-closed agentic decision gates.", no_args_is_help=True
+)
 
 
 def _payload(value: str) -> object:
@@ -53,12 +59,23 @@ def register(app: typer.Typer, runtime_app: typer.Typer) -> None:
         from apiforge.memory.store import propose_memory
 
         _echo_json(
-            _run(lambda: propose_memory(
-                root, scope=scope, origin=origin, payload=_payload(payload), proposed_by=proposed_by,
-                reason=reason, created_at=created_at, observed_at=observed_at, expires_at=expires_at,
-                trust_level=trust_level, provenance=tuple(provenance), evidence_refs=tuple(evidence),
-                environment_fingerprint=environment,
-            )),
+            _run(
+                lambda: propose_memory(
+                    root,
+                    scope=scope,
+                    origin=origin,
+                    payload=_payload(payload),
+                    proposed_by=proposed_by,
+                    reason=reason,
+                    created_at=created_at,
+                    observed_at=observed_at,
+                    expires_at=expires_at,
+                    trust_level=trust_level,
+                    provenance=tuple(provenance),
+                    evidence_refs=tuple(evidence),
+                    environment_fingerprint=environment,
+                )
+            ),
             detail_level,
         )
 
@@ -74,9 +91,17 @@ def register(app: typer.Typer, runtime_app: typer.Typer) -> None:
         from apiforge.contracts.agentic_memory import MemoryPolicy
         from apiforge.memory.store import load_candidate, persist_candidate
 
-        _echo_json(_run(lambda: persist_candidate(
-            root, load_candidate(root, candidate_id), MemoryPolicy(policy_id=policy), now=now
-        )), detail_level)
+        _echo_json(
+            _run(
+                lambda: persist_candidate(
+                    root,
+                    load_candidate(root, candidate_id),
+                    MemoryPolicy(policy_id=policy),
+                    now=now,
+                )
+            ),
+            detail_level,
+        )
 
     @memory_app.command("search")
     def memory_search(
@@ -95,9 +120,12 @@ def register(app: typer.Typer, runtime_app: typer.Typer) -> None:
         from apiforge.memory.store import query_memory
 
         query = MemoryQuery(
-            terms=tuple(term), scopes=tuple(cast(MemoryScope, item) for item in scope),
-            environment_fingerprint=environment, now=now,
-            minimum_trust=cast(TrustLevel, minimum_trust), include_invalidated=include_invalidated,
+            terms=tuple(term),
+            scopes=tuple(cast(MemoryScope, item) for item in scope),
+            environment_fingerprint=environment,
+            now=now,
+            minimum_trust=cast(TrustLevel, minimum_trust),
+            include_invalidated=include_invalidated,
             max_results=max_results,
         )
         _echo_json(_run(lambda: query_memory(root, query)), detail_level)
@@ -115,9 +143,19 @@ def register(app: typer.Typer, runtime_app: typer.Typer) -> None:
         from apiforge.cli import _echo_json, _run
         from apiforge.memory.store import invalidate_memory
 
-        _echo_json(_run(lambda: invalidate_memory(
-            root, memory_id, reason=reason, invalidated_by=by, created_at=now, evidence_refs=tuple(evidence)
-        )), detail_level)
+        _echo_json(
+            _run(
+                lambda: invalidate_memory(
+                    root,
+                    memory_id,
+                    reason=reason,
+                    invalidated_by=by,
+                    created_at=now,
+                    evidence_refs=tuple(evidence),
+                )
+            ),
+            detail_level,
+        )
 
     @blackboard_app.command("append")
     def blackboard_append(
@@ -138,11 +176,25 @@ def register(app: typer.Typer, runtime_app: typer.Typer) -> None:
         from apiforge.blackboard.store import append_entry
         from apiforge.cli import _echo_json, _run
 
-        _echo_json(_run(lambda: append_entry(
-            root, task_id=task_id, scope=scope, kind=kind, origin=origin, payload=_payload(payload),
-            created_at=now, trust_level=trust_level, taint=tuple(taint), provenance=tuple(provenance),
-            evidence_refs=tuple(evidence), supersedes=tuple(supersedes),
-        )), detail_level)
+        _echo_json(
+            _run(
+                lambda: append_entry(
+                    root,
+                    task_id=task_id,
+                    scope=scope,
+                    kind=kind,
+                    origin=origin,
+                    payload=_payload(payload),
+                    created_at=now,
+                    trust_level=trust_level,
+                    taint=tuple(taint),
+                    provenance=tuple(provenance),
+                    evidence_refs=tuple(evidence),
+                    supersedes=tuple(supersedes),
+                )
+            ),
+            detail_level,
+        )
 
     @blackboard_app.command("query")
     def blackboard_query(
@@ -159,14 +211,19 @@ def register(app: typer.Typer, runtime_app: typer.Typer) -> None:
         from apiforge.contracts.agentic_memory import BlackboardKind, BlackboardQuery
 
         query = BlackboardQuery(
-            task_id=task_id, kinds=tuple(cast(BlackboardKind, item) for item in kind),
-            scope=scope, terms=tuple(term), max_results=max_results,
+            task_id=task_id,
+            kinds=tuple(cast(BlackboardKind, item) for item in kind),
+            scope=scope,
+            terms=tuple(term),
+            max_results=max_results,
         )
         _echo_json(_run(lambda: query_entries(root, query)), detail_level)
 
     @runtime_app.command("semantic-checkpoint")
     def semantic_checkpoint(
-        state_file: Path = typer.Option(..., "--state", help="JSON object matching SemanticCheckpoint fields."),
+        state_file: Path = typer.Option(
+            ..., "--state", help="JSON object matching SemanticCheckpoint fields."
+        ),
         task_id: str = typer.Option(..., "--task-id"),
         run_id: str = typer.Option(..., "--run-id"),
         now: str = typer.Option(..., "--now"),
@@ -179,7 +236,10 @@ def register(app: typer.Typer, runtime_app: typer.Typer) -> None:
         def work() -> dict[str, object]:
             data = json.loads(state_file.read_text(encoding="utf-8"))
             checkpoint = build_checkpoint(task_id=task_id, run_id=run_id, created_at=now, **data)
-            return {"checkpoint": checkpoint.model_dump(mode="json"), "path": str(save_checkpoint(root, checkpoint))}
+            return {
+                "checkpoint": checkpoint.model_dump(mode="json"),
+                "path": str(save_checkpoint(root, checkpoint)),
+            }
 
         _echo_json(_run(work), detail_level)
 
@@ -207,17 +267,32 @@ def register(app: typer.Typer, runtime_app: typer.Typer) -> None:
         from apiforge.cli import _echo_json, _run
         from apiforge.runtime.agent_telemetry import append_span, build_span
 
-        _echo_json(_run(lambda: append_span(
-            root,
-            build_span(
-                trace_id=trace_id, task_id=task_id, run_id=run_id, operation=operation,
-                started_at=started_at, parent_span_id=None, agent_name=agent_name,
-                tool_name=tool_name, ended_at=ended_at, status=status,
-                status_message=status_message, attributes=_object_payload(attributes),
-                events=tuple(event), links=tuple(link), evidence_refs=tuple(evidence),
-                unresolved=tuple(unresolved),
+        _echo_json(
+            _run(
+                lambda: append_span(
+                    root,
+                    build_span(
+                        trace_id=trace_id,
+                        task_id=task_id,
+                        run_id=run_id,
+                        operation=operation,
+                        started_at=started_at,
+                        parent_span_id=None,
+                        agent_name=agent_name,
+                        tool_name=tool_name,
+                        ended_at=ended_at,
+                        status=status,
+                        status_message=status_message,
+                        attributes=_object_payload(attributes),
+                        events=tuple(event),
+                        links=tuple(link),
+                        evidence_refs=tuple(evidence),
+                        unresolved=tuple(unresolved),
+                    ),
+                )
             ),
-        )), detail_level)
+            detail_level,
+        )
 
     @runtime_app.command("telemetry-query")
     def telemetry_query(
@@ -236,9 +311,12 @@ def register(app: typer.Typer, runtime_app: typer.Typer) -> None:
         from apiforge.runtime.agent_telemetry import query_spans
 
         query = AgentSpanQuery(
-            task_id=task_id, run_id=run_id, trace_id=trace_id,
+            task_id=task_id,
+            run_id=run_id,
+            trace_id=trace_id,
             operation=cast(SpanOperation, operation) if operation else None,
-            status=cast(SpanStatus, status) if status else None, max_results=max_results,
+            status=cast(SpanStatus, status) if status else None,
+            max_results=max_results,
         )
         _echo_json(_run(lambda: query_spans(root, query)), detail_level)
 
@@ -259,7 +337,11 @@ def register(app: typer.Typer, runtime_app: typer.Typer) -> None:
         def work() -> dict[str, object]:
             requested = DecisionRequest.model_validate(_payload(str(request)))
             gate = ApprovalGate.model_validate(_payload(str(approval))) if approval else None
-            selected = AgenticPolicy.model_validate(_payload(str(policy))) if policy else AgenticPolicy(policy_id="local-default")
+            selected = (
+                AgenticPolicy.model_validate(_payload(str(policy)))
+                if policy
+                else AgenticPolicy(policy_id="local-default")
+            )
             result = evaluate_decision(requested, policy=selected, approval=gate)
             return persist_decision(root, result)
 

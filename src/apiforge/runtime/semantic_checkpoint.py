@@ -21,22 +21,46 @@ def _digest(payload: object) -> str:
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
-def build_checkpoint(*, task_id: str, run_id: str, task_state: str, current_objective: str,
-                     created_at: str, decisions_accepted: tuple[str, ...] = (),
-                     decisions_rejected: tuple[str, ...] = (), facts_still_valid: tuple[str, ...] = (),
-                     assumptions: tuple[str, ...] = (), unresolved: tuple[str, ...] = (),
-                     working_set: tuple[str, ...] = (), artifact_refs: tuple[str, ...] = (),
-                     memory_refs: tuple[str, ...] = (), tool_state: dict[str, object] | None = None,
-                     routing_state: dict[str, object] | None = None, budget_state: dict[str, object] | None = None,
-                     next_actions: tuple[str, ...] = (), risk_state: dict[str, object] | None = None) -> SemanticCheckpoint:
+def build_checkpoint(
+    *,
+    task_id: str,
+    run_id: str,
+    task_state: str,
+    current_objective: str,
+    created_at: str,
+    decisions_accepted: tuple[str, ...] = (),
+    decisions_rejected: tuple[str, ...] = (),
+    facts_still_valid: tuple[str, ...] = (),
+    assumptions: tuple[str, ...] = (),
+    unresolved: tuple[str, ...] = (),
+    working_set: tuple[str, ...] = (),
+    artifact_refs: tuple[str, ...] = (),
+    memory_refs: tuple[str, ...] = (),
+    tool_state: dict[str, object] | None = None,
+    routing_state: dict[str, object] | None = None,
+    budget_state: dict[str, object] | None = None,
+    next_actions: tuple[str, ...] = (),
+    risk_state: dict[str, object] | None = None,
+) -> SemanticCheckpoint:
     body = {
-        "task_id": task_id, "run_id": run_id, "task_state": task_state,
-        "current_objective": current_objective, "decisions_accepted": decisions_accepted,
-        "decisions_rejected": decisions_rejected, "facts_still_valid": facts_still_valid,
-        "assumptions": assumptions, "unresolved": unresolved, "working_set": working_set,
-        "artifact_refs": artifact_refs, "memory_refs": memory_refs, "tool_state": tool_state or {},
-        "routing_state": routing_state or {}, "budget_state": budget_state or {},
-        "next_actions": next_actions, "risk_state": risk_state or {}, "created_at": created_at,
+        "task_id": task_id,
+        "run_id": run_id,
+        "task_state": task_state,
+        "current_objective": current_objective,
+        "decisions_accepted": decisions_accepted,
+        "decisions_rejected": decisions_rejected,
+        "facts_still_valid": facts_still_valid,
+        "assumptions": assumptions,
+        "unresolved": unresolved,
+        "working_set": working_set,
+        "artifact_refs": artifact_refs,
+        "memory_refs": memory_refs,
+        "tool_state": tool_state or {},
+        "routing_state": routing_state or {},
+        "budget_state": budget_state or {},
+        "next_actions": next_actions,
+        "risk_state": risk_state or {},
+        "created_at": created_at,
     }
     payload = body | {
         "checkpoint_id": "checkpoint:" + _digest(body)[:16],
@@ -64,7 +88,9 @@ def equivalent(left: SemanticCheckpoint, right: SemanticCheckpoint) -> bool:
     ignored = {"checkpoint_id", "content_sha256", "created_at"}
     l = left.model_dump(mode="json")
     r = right.model_dump(mode="json")
-    return {k: v for k, v in l.items() if k not in ignored} == {k: v for k, v in r.items() if k not in ignored}
+    return {k: v for k, v in l.items() if k not in ignored} == {
+        k: v for k, v in r.items() if k not in ignored
+    }
 
 
 __all__ = ["build_checkpoint", "equivalent", "load_checkpoint", "save_checkpoint"]

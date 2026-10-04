@@ -10,8 +10,12 @@ from apiforge.mcp import tools
 
 def _request(risk: str = "read_only") -> DecisionRequest:
     return DecisionRequest(
-        request_id=f"request-{risk}", task_id="task-1", run_id="run-1",
-        action="inspect", risk=risk, proposed_by="agent:test",
+        request_id=f"request-{risk}",
+        task_id="task-1",
+        run_id="run-1",
+        action="inspect",
+        risk=risk,
+        proposed_by="agent:test",
         evidence_refs=("fact:verified",) if risk != "read_only" else (),
         requested_at="2026-10-04T12:00:00Z",
     )
@@ -19,25 +23,37 @@ def _request(risk: str = "read_only") -> DecisionRequest:
 
 def _approval(status: str) -> ApprovalGate:
     return ApprovalGate(
-        gate_id="gate-1", run_id="run-1", reason="external mutation",
-        requested_action="inspect", status=status, requested_by="agent:test",
+        gate_id="gate-1",
+        run_id="run-1",
+        reason="external mutation",
+        requested_action="inspect",
+        status=status,
+        requested_by="agent:test",
     )
 
 
 def test_default_policy_blocks_external_mutation() -> None:
-    result = evaluate_decision(_request("external_mutation"), policy=AgenticPolicy(policy_id="local"))
+    result = evaluate_decision(
+        _request("external_mutation"), policy=AgenticPolicy(policy_id="local")
+    )
     assert result.outcome == "block"
     assert result.code == "AF-GOV-POLICY-DENIED"
 
 
 def test_approval_lifecycle_is_explicit() -> None:
     policy = AgenticPolicy(policy_id="reviewed", allow_external_mutation=True)
-    pending = evaluate_decision(_request("external_mutation"), policy=policy, approval=_approval("pending"))
+    pending = evaluate_decision(
+        _request("external_mutation"), policy=policy, approval=_approval("pending")
+    )
     assert pending.outcome == "review"
     assert pending.code == "AF-GOV-APPROVAL-PENDING"
-    approved = evaluate_decision(_request("external_mutation"), policy=policy, approval=_approval("approved"))
+    approved = evaluate_decision(
+        _request("external_mutation"), policy=policy, approval=_approval("approved")
+    )
     assert approved.outcome == "allow"
-    rejected = evaluate_decision(_request("external_mutation"), policy=policy, approval=_approval("rejected"))
+    rejected = evaluate_decision(
+        _request("external_mutation"), policy=policy, approval=_approval("rejected")
+    )
     assert rejected.outcome == "block"
 
 

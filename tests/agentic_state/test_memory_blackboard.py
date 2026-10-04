@@ -49,7 +49,10 @@ def test_memory_persists_filters_environment_and_reports_stale(tmp_path) -> None
         environment_fingerprint="repo:a",
     )
     outcome = persist_candidate(
-        tmp_path, candidate, MemoryPolicy(policy_id="case", minimum_trust="observed"), now="2026-10-04T10:01:00Z"
+        tmp_path,
+        candidate,
+        MemoryPolicy(policy_id="case", minimum_trust="observed"),
+        now="2026-10-04T10:01:00Z",
     )
     assert outcome.accepted is True
 
@@ -81,15 +84,23 @@ def test_invalidation_is_append_only_and_visible(tmp_path) -> None:
         created_at="2026-10-04T10:00:00Z",
         trust_level="trusted",
     )
-    outcome = persist_candidate(tmp_path, candidate, MemoryPolicy(policy_id="task"), now="2026-10-04T10:01:00Z")
+    outcome = persist_candidate(
+        tmp_path, candidate, MemoryPolicy(policy_id="task"), now="2026-10-04T10:01:00Z"
+    )
     invalidated = invalidate_memory(
-        tmp_path, outcome.memory_id or "", reason="superseded", invalidated_by="reviewer", created_at="2026-10-04T10:02:00Z"
+        tmp_path,
+        outcome.memory_id or "",
+        reason="superseded",
+        invalidated_by="reviewer",
+        created_at="2026-10-04T10:02:00Z",
     )
     assert invalidated.accepted
     result = query_memory(tmp_path, MemoryQuery(now="2026-10-04T10:03:00Z"))
     assert not result.records
     assert result.invalidated_count == 1
-    visible = query_memory(tmp_path, MemoryQuery(now="2026-10-04T10:03:00Z", include_invalidated=True))
+    visible = query_memory(
+        tmp_path, MemoryQuery(now="2026-10-04T10:03:00Z", include_invalidated=True)
+    )
     assert len(visible.records) == 1
 
 
@@ -134,5 +145,10 @@ def test_semantic_checkpoint_survives_round_trip_and_ignores_identity(tmp_path) 
     save_checkpoint(tmp_path, checkpoint)
     loaded = load_checkpoint(tmp_path, "task-1", "run-1")
     assert equivalent(checkpoint, loaded)
-    newer = loaded.model_copy(update={"checkpoint_id": "checkpoint:fedcba0987654321", "created_at": "2026-10-04T11:00:00Z"})
+    newer = loaded.model_copy(
+        update={
+            "checkpoint_id": "checkpoint:fedcba0987654321",
+            "created_at": "2026-10-04T11:00:00Z",
+        }
+    )
     assert equivalent(loaded, newer)

@@ -398,6 +398,8 @@ while refusal codes and `fact_id`s survive.
 | `apiforge context funnel --case .apiforge/case` | Measured bytes per case stage (api-ir → facts → findings → summary) |
 | `apiforge context capsule --target "POST /orders" [--budget-bytes N] [--level L3\|L4]` | `ContextCapsule/v1`: minimal evidence for one operation as hash-verified `ctx://sha256/…` refs under a byte budget |
 | `apiforge context expand ctx://sha256/<hex> [--run-id R]` | One ctx object, re-hashed before it is returned |
+| `apiforge context quality --capsule <json> --run-id R [--gate strict\|evidence\|permissive]` | `ContextQualityReport/v1` + `ContextSufficiencyResult/v1`: 13 measured metrics (unresolved never carries a value) and the minimum-sufficient prune decision from the recorded ledger |
+| `apiforge evals context-quality` | 4-case corpus: metric catalog and sufficiency gates vs declared expectations |
 | `apiforge economy stats [--run-id R] [--transcript T]` | Bytes attributed per run and source; tokens `unresolved` without a transcript |
 | `apiforge economy explain <run_id>` | Why each ref was spent, from recorded provenance rules (no model call) |
 | `apiforge evals economy [--record-baseline]` | 12-case benchmark: evidence recall floor + median byte reduction vs recorded baseline |

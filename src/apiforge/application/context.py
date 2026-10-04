@@ -75,4 +75,73 @@ def expand_context_ref(
     return expand_ref(Path(root or Path.cwd()), uri, run_id=run_id)
 
 
-__all__ = ["build_context_capsule", "expand_context_ref", "resolve_context"]
+def context_quality_report(
+    root: Path | None = None,
+    *,
+    capsule_path: Path,
+    run_id: str,
+    required_uris: tuple[str, ...] = (),
+    gate: str = "strict",
+    cache_hits: int | None = None,
+    cache_lookups: int | None = None,
+) -> dict[str, Any]:
+    """Quality report + sufficiency decision for a recorded capsule and run ledger."""
+    import json
+
+    from apiforge.context.quality import evaluate, role_telemetry, uses_from_ledger
+    from apiforge.context.sufficiency import minimum_sufficient
+    from apiforge.contracts.context import ContextCapsule
+
+    if gate not in ("strict", "evidence", "permissive"):
+        raise ContractError(
+            "AF-CONTEXT-QUALITY-GATE", f"gate {gate!r} is not strict|evidence|permissive"
+        )
+    try:
+        payload = json.loads(Path(capsule_path).read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ContractError(
+            "AF-CONTEXT-QUALITY-CAPSULE",
+            f"cannot read capsule {capsule_path}: {exc}; "
+            "unlock=record it with `context capsule ... > capsule.json`",
+        ) from exc
+    try:
+        capsule = ContextCapsule.model_validate(payload)
+    except ValueError as exc:
+        raise ContractError(
+            "AF-CONTEXT-QUALITY-CAPSULE", f"capsule {capsule_path} is not ContextCapsule/v1: {exc}"
+        ) from exc
+    uses = uses_from_ledger(Path(root or Path.cwd()), run_id)
+    report = evaluate(
+        capsule.refs,
+        uses,
+        run_id=run_id,
+        capsule_id=capsule.capsule_id,
+        required_uris=required_uris,
+        cache_hits=cache_hits,
+        cache_lookups=cache_lookups,
+    )
+    sufficiency = minimum_sufficient(
+        capsule.refs,
+        uses,
+        run_id=run_id,
+        capsule_id=capsule.capsule_id,
+        required_uris=required_uris,
+        gate=gate,  # type: ignore[arg-type]
+    )
+    return {
+        "schema": "apiforge/context-quality-run/v1",
+        "report": report.model_dump(mode="json"),
+        "sufficiency": sufficiency.model_dump(mode="json"),
+        "role_telemetry": [
+            row.model_dump(mode="json") for row in role_telemetry(capsule.refs, uses, run_id=run_id)
+        ],
+        "unresolved": list(report.unresolved) + list(sufficiency.unresolved),
+    }
+
+
+__all__ = [
+    "build_context_capsule",
+    "context_quality_report",
+    "expand_context_ref",
+    "resolve_context",
+]

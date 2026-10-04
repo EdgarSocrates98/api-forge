@@ -587,6 +587,8 @@ carry `payload_bytes: 0` so `economy report` totals are unchanged.
 | `AF-ECONOMY-RUN-NOT-FOUND` | `economy explain` has no attribution rows for the run id; unlock: pass a `run_id` printed by `context capsule` |
 | `AF-EVALS-ECONOMY-BASELINE-MISSING` | corpus case has no recorded baseline; unlock: `apiforge evals economy --record-baseline` |
 | `AF-EVALS-ECONOMY-BASELINE-STALE` | fixture digest differs from the recorded baseline; unlock: re-record and commit the baseline |
+| `AF-CONTEXT-QUALITY-CAPSULE` | `context quality --capsule` is missing, unreadable or not a `ContextCapsule/v1` payload; unlock: record it with `context capsule ... > capsule.json` |
+| `AF-CONTEXT-QUALITY-GATE` | `context quality --gate` is not `strict\|evidence\|permissive` |
 
 ## Cache & delta (`cache stats|invalidate`, `context delta|gc`, `evals cache`)
 
@@ -792,8 +794,12 @@ never enter artifacts, gaps or status. `agents audit` is report-only.
 | Code | Meaning |
 |---|---|
 | `AF-EXPERTISE-TRIGGERS-INVALID` | `rules/expertise_triggers.yaml` is malformed or names a pack that does not exist; unlock: restore it or name existing packs |
-| `AF-ROLE-CONTEXT-POLICY` | `rules/role_context.yaml` does not map every role kind to a declared class or shares exceed 1.0 |
+| `AF-ROLE-CONTEXT-POLICY` | `rules/role_context.yaml` does not map every role kind to a declared class, shares exceed 1.0 or a `policies:` row fails `RoleContextPolicy/v1` validation |
 | `AF-ROLE-CONTEXT-BUDGET` | unresolved note: a role's refs exceeded its share of `context_bytes` and were trimmed (listed in `trimmed`); unlock: raise the profile |
+| `AF-ROLE-CONTEXT-DENIED` | unresolved note: a v2 policy `denied_kinds` removed a ref the class would otherwise allow; unlock: grant the kind or route the evidence through an allowed kind |
+| `AF-ROLE-CONTEXT-TRUST` | unresolved note: a ref's provenance `origin` is below the role's `minimum_origin_rank`; unlock: attest the ref from a higher-trust origin |
+| `AF-ROLE-CONTEXT-REQUIRED` | unresolved note: a `required_kinds` ref existed in the capsule but did not fit the role budget; unlock: widen the budget or drop other kinds |
+| `AF-ROLE-CONTEXT-TOOL` | a v2 policy `tool_visibility` allowlist does not name the requested tool; unlock: add the tool to the role's allowlist |
 | `AF-ECONOMY-SHADOW-BUDGET` | shadow reason: the run was sampled but no call remained after the verification reserve |
 | `AF-DEBATE-DELTA-INVALID` | `--disagree` is not `point=reason`, a point is empty or `--confidence` is outside [0, 1] |
 | `AF-AGENTS-AUDIT-INVALID` | the agents directory is missing or an agent frontmatter is not valid YAML |

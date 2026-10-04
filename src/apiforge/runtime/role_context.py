@@ -36,7 +36,7 @@ def load_role_policy(path: Path = ROLE_FILE) -> dict[str, Any]:
     classes = raw.get("classes") if isinstance(raw, dict) else None
     roles = raw.get("roles") if isinstance(raw, dict) else None
     if (
-        raw.get("schema") != "apiforge/role-context/v1"
+        raw.get("schema") not in ("apiforge/role-context/v1", "apiforge/role-context/v2")
         or not isinstance(classes, dict)
         or not isinstance(roles, dict)
         or set(roles) != set(KINDS)
@@ -48,7 +48,15 @@ def load_role_policy(path: Path = ROLE_FILE) -> dict[str, Any]:
     total = sum(float(item.get("share", 0)) for item in classes.values())
     if total > 1.0 + 1e-9:
         raise ContractError("AF-ROLE-CONTEXT-POLICY", f"class shares sum to {total} > 1.0")
-    return {"classes": classes, "roles": roles}
+    from apiforge.context.role_policy import parse_policies
+
+    policies = parse_policies(raw.get("policies"), path=str(path))
+    unknown = set(policies) - set(KINDS)
+    if unknown:
+        raise ContractError(
+            "AF-ROLE-CONTEXT-POLICY", f"{path} policies name unknown roles {sorted(unknown)}"
+        )
+    return {"classes": classes, "roles": roles, "policies": policies}
 
 
 def task_target(spec: Any) -> tuple[str | None, str | None]:
@@ -127,6 +135,14 @@ def plan_roles(
         cls = str(policy["roles"][kind])
         members[cls] = members.get(cls, 0) + 1
     seen: dict[str, int] = {}
+    from apiforge.context.role_policy import (
+        filter_refs,
+        order_required_first,
+        policy_for,
+        required_missing,
+    )
+
+    role_policies: dict[str, Any] = policy.get("policies") or {}
     for capability, kind in resolved:
         cls = str(policy["roles"][kind])
         spec_cls = policy["classes"][cls]
@@ -134,22 +150,37 @@ def plan_roles(
         index = seen.get(cls, 0)
         seen[cls] = index + 1
         budget = pool // members[cls] + (pool % members[cls] if index == 0 else 0)
+        row_policy = policy_for(role_policies, kind)
+        if row_policy.max_context_bytes is not None:
+            budget = min(budget, row_policy.max_context_bytes)
         allowed = set(spec_cls.get("kinds") or ())
         kept: list[ContextRef] = []
         trimmed: list[str] = []
         used = 0
-        for ref in refs:
-            if ref.kind not in allowed:
-                continue
+        eligible = [ref for ref in refs if ref.kind in allowed]
+        eligible, denied, deny_notes = filter_refs(row_policy, eligible)
+        trimmed.extend(denied)
+        unresolved.extend(deny_notes)
+        eligible = order_required_first(row_policy, eligible)
+        over_budget = 0
+        for ref in eligible:
             if used + ref.size_bytes > budget:
                 trimmed.append(ref.uri)
+                over_budget += 1
                 continue
             kept.append(ref)
             used += ref.size_bytes
-        if trimmed:
+        missing = required_missing(row_policy, eligible, kept)
+        if missing:
+            unresolved.append(
+                f"AF-ROLE-CONTEXT-REQUIRED: field=required_kinds; role={capability}; "
+                f"missing={missing}; unlock=widen the role budget or lower other kinds "
+                "so required refs always fit"
+            )
+        if over_budget:
             unresolved.append(
                 f"AF-ROLE-CONTEXT-BUDGET: field=context_bytes; role={capability}; "
-                f"unlock=raise the profile to widen context ({len(trimmed)} refs trimmed)"
+                f"unlock=raise the profile to widen context ({over_budget} refs trimmed)"
             )
         artifact_refs = (
             tuple(

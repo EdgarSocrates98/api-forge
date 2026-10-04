@@ -1,0 +1,24 @@
+id: required-absent
+run_id: eval-required-absent
+refs:
+  - kind: code
+    origin: code
+    size_bytes: 150
+    label: handler
+    source: src/handler.py
+    parity: true
+uses:
+  - role: specialist
+    uri_index: 0
+    action: expanded
+    bytes: 150
+required_uris:
+  - ctx://sha256/0000000000000000000000000000000000000000000000000000000000dead
+expect:
+  status: degraded
+  metrics:
+    context_recall: {value: 0.0}
+    context_precision: {value: 1.0}
+  sufficiency:
+    sufficient: false
+    pruned_count: 0

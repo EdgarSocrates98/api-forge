@@ -3978,6 +3978,20 @@ def evals_agentic_quality(
         raise typer.Exit(code=1)
 
 
+@evals_app.command("context-quality")
+def evals_context_quality(
+    corpus: Path = typer.Option(Path("evals/corpus/context-quality"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Fixture capsule + recorded uses vs declared metrics and sufficiency gates."""
+    from apiforge.evals.context_quality import run_context_quality
+
+    result = _run(lambda: run_context_quality(corpus))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
 @evals_app.command("economy-freshness")
 def evals_economy_freshness(
     corpus: Path = typer.Option(Path("evals/corpus/economy-freshness"), "--corpus"),

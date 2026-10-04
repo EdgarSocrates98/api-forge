@@ -4,6 +4,12 @@ Date: 2026-10-04
 Branch: `evo/step11-agentic-closure`
 Source: `prompt_evo_step11.md` (closure/next-generation mission)
 
+## Delivered waves (update log)
+
+| Wave | Prompt phase | SDD feature | Status |
+|---|---|---|---|
+| 1 | Phase 1 — Context Quality Engine, Minimum Sufficient Context, RoleContext v2 | `API_FORGE_STEP11_CONTEXT_QUALITY` | shipped: 7 contracts, `context quality` verb, `evals context-quality` (4/4), v2 `policies:` enforced; `sdd check` ok |
+
 ## MAIN_BASELINE — GREEN
 
 | Item | Value |

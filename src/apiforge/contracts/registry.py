@@ -49,6 +49,15 @@ from apiforge.contracts.context import (
     ContextRef,
     ContextScope,
 )
+from apiforge.contracts.context_quality import (
+    ContextQualityMetric,
+    ContextQualityReport,
+    ContextSufficiencyResult,
+    ContextUseRecord,
+    RoleContextPolicy,
+    RoleContextQuality,
+    RoleContextTelemetry,
+)
 from apiforge.contracts.core import (
     ActionPlan,
     ActionStep,
@@ -397,6 +406,13 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "CapsuleBudget/v1": CapsuleBudget,
     "CapsuleRefusal/v1": CapsuleRefusal,
     "ContextCapsule/v1": ContextCapsule,
+    "ContextUseRecord/v1": ContextUseRecord,
+    "ContextQualityMetric/v1": ContextQualityMetric,
+    "ContextQualityReport/v1": ContextQualityReport,
+    "ContextSufficiencyResult/v1": ContextSufficiencyResult,
+    "RoleContextPolicy/v1": RoleContextPolicy,
+    "RoleContextQuality/v1": RoleContextQuality,
+    "RoleContextTelemetry/v1": RoleContextTelemetry,
     "CostVector/v1": CostVector,
     "LedgerRef/v1": LedgerRef,
     "RunLedgerEntry/v1": RunLedgerEntry,

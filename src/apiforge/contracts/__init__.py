@@ -47,6 +47,15 @@ from apiforge.contracts.context import (
     ContextScope,
     ContextTarget,
 )
+from apiforge.contracts.context_quality import (
+    ContextQualityMetric,
+    ContextQualityReport,
+    ContextSufficiencyResult,
+    ContextUseRecord,
+    RoleContextPolicy,
+    RoleContextQuality,
+    RoleContextTelemetry,
+)
 from apiforge.contracts.data_runtime import DataProvider, DataReadReceipt, DataReadRequest
 from apiforge.contracts.debate import (
     AdaptivePlan,
@@ -189,10 +198,14 @@ __all__ = [
     "CompatibilityCell",
     "CompatibilityMatrix",
     "ContextCapsule",
+    "ContextQualityMetric",
+    "ContextQualityReport",
     "ContextRef",
     "ContextResult",
     "ContextScope",
+    "ContextSufficiencyResult",
     "ContextTarget",
+    "ContextUseRecord",
     "CostVector",
     "DataProvider",
     "DataReadReceipt",
@@ -262,6 +275,9 @@ __all__ = [
     "RiskComplexityEffect",
     "RiskComplexityPolicy",
     "RiskComplexityRule",
+    "RoleContextPolicy",
+    "RoleContextQuality",
+    "RoleContextTelemetry",
     "RoutingDecision",
     "RoutingEvolution",
     "RoutingPlan",

@@ -1,0 +1,1 @@
+D2: approval status and default policy govern CLI/MCP results; no action executes.

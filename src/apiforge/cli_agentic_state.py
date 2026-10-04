@@ -10,6 +10,7 @@ import typer
 
 memory_app = typer.Typer(name="memory", help="Governed append-only agent memory.", no_args_is_help=True)
 blackboard_app = typer.Typer(name="blackboard", help="Structured append-only shared state.", no_args_is_help=True)
+governance_app = typer.Typer(name="governance", help="Fail-closed agentic decision gates.", no_args_is_help=True)
 
 
 def _payload(value: str) -> object:
@@ -29,6 +30,7 @@ def _object_payload(value: str) -> dict[str, object]:
 def register(app: typer.Typer, runtime_app: typer.Typer) -> None:
     app.add_typer(memory_app)
     app.add_typer(blackboard_app)
+    app.add_typer(governance_app)
 
     @memory_app.command("propose")
     def memory_propose(
@@ -240,5 +242,28 @@ def register(app: typer.Typer, runtime_app: typer.Typer) -> None:
         )
         _echo_json(_run(lambda: query_spans(root, query)), detail_level)
 
+    @governance_app.command("decision-check")
+    def governance_decision_check(
+        request: Path = typer.Option(..., "--request", help="DecisionRequest JSON file."),
+        approval: Path | None = typer.Option(None, "--approval", help="ApprovalGate JSON file."),
+        policy: Path | None = typer.Option(None, "--policy", help="AgenticPolicy JSON file."),
+        root: Path = typer.Option(Path("."), "--root"),
+        detail_level: str = typer.Option("normal", "--detail-level"),
+    ) -> None:
+        """Evaluate and record a proposal; never infer approval from model text."""
+        from apiforge.cli import _echo_json, _run
+        from apiforge.contracts.agentic import AgenticPolicy, ApprovalGate
+        from apiforge.contracts.agentic_governance import DecisionRequest
+        from apiforge.governance.decision import evaluate_decision, persist_decision
 
-__all__ = ["blackboard_app", "memory_app", "register"]
+        def work() -> dict[str, object]:
+            requested = DecisionRequest.model_validate(_payload(str(request)))
+            gate = ApprovalGate.model_validate(_payload(str(approval))) if approval else None
+            selected = AgenticPolicy.model_validate(_payload(str(policy))) if policy else AgenticPolicy(policy_id="local-default")
+            result = evaluate_decision(requested, policy=selected, approval=gate)
+            return persist_decision(root, result)
+
+        _echo_json(_run(work), detail_level)
+
+
+__all__ = ["blackboard_app", "governance_app", "memory_app", "register"]

@@ -13,6 +13,8 @@ from apiforge.contracts.agentic_governance import (
     BudgetDecision,
     BudgetLimit,
     BudgetSpend,
+    DecisionGateResult,
+    DecisionRequest,
 )
 from apiforge.contracts.agentic_memory import (
     BlackboardEntry,
@@ -196,6 +198,8 @@ __all__ = [
     "DataReadReceipt",
     "DataReadRequest",
     "DebateReplay",
+    "DecisionGateResult",
+    "DecisionRequest",
     "DeltaSlice",
     "DevinCheck",
     "DevinCliProbe",

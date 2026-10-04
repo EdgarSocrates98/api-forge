@@ -13,6 +13,10 @@ from apiforge.core.models import JsonValue, Sha256, freeze_json
 BudgetScope = Literal["task", "phase", "role", "tool"]
 BudgetAction = Literal["allow", "stop", "unresolved", "deduplicated"]
 BudgetTokenPolicy = Literal["observed_only"]
+DecisionRisk = Literal[
+    "read_only", "local_reversible", "sensitive", "external_mutation", "destructive", "irreversible"
+]
+DecisionOutcome = Literal["allow", "review", "block"]
 
 
 class BudgetLimit(VersionedContract):
@@ -107,6 +111,38 @@ class BudgetDecision(VersionedContract):
     remaining: dict[str, int | None] = Field(default_factory=dict)
 
 
+class DecisionRequest(VersionedContract):
+    """A proposed action; it is not authorization."""
+
+    schema: Literal["apiforge/decision-request/v1"] = "apiforge/decision-request/v1"  # type: ignore[assignment]
+    request_id: str = Field(min_length=1)
+    task_id: str = Field(min_length=1)
+    run_id: str = Field(min_length=1)
+    action: str = Field(min_length=1)
+    risk: DecisionRisk
+    proposed_by: str = Field(min_length=1)
+    evidence_refs: tuple[str, ...] = ()
+    requested_at: str = Field(min_length=1)
+
+
+class DecisionGateResult(VersionedContract):
+    """Policy/approval decision with explicit safe unlocks."""
+
+    schema: Literal["apiforge/decision-gate-result/v1"] = "apiforge/decision-gate-result/v1"  # type: ignore[assignment]
+    request_id: str
+    task_id: str
+    run_id: str
+    action: str
+    risk: DecisionRisk
+    outcome: DecisionOutcome
+    approval_id: str | None = None
+    code: str | None = None
+    field: str | None = None
+    unlock: str | None = None
+    reason: str = ""
+    evidence_refs: tuple[str, ...] = ()
+
+
 __all__ = [
     "AgenticBudgetPlan",
     "BudgetAction",
@@ -115,4 +151,8 @@ __all__ = [
     "BudgetScope",
     "BudgetSpend",
     "BudgetTokenPolicy",
+    "DecisionGateResult",
+    "DecisionOutcome",
+    "DecisionRequest",
+    "DecisionRisk",
 ]

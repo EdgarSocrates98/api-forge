@@ -2329,6 +2329,25 @@ def agent_span_query(
     return cast(dict[str, Any], _call("agent_span_query", lambda: query_spans(Path(root), query), detail_level))
 
 
+def decision_check(
+    request: dict[str, Any],
+    root: str = ".",
+    approval: dict[str, Any] | None = None,
+    policy: dict[str, Any] | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Evaluate a proposal against evidence, policy and an optional human gate."""
+    from apiforge.contracts.agentic import AgenticPolicy, ApprovalGate
+    from apiforge.contracts.agentic_governance import DecisionRequest
+    from apiforge.governance.decision import evaluate_decision, persist_decision
+
+    requested = DecisionRequest.model_validate(request)
+    gate = ApprovalGate.model_validate(approval) if approval else None
+    selected = AgenticPolicy.model_validate(policy) if policy else AgenticPolicy(policy_id="local-default")
+    result = evaluate_decision(requested, policy=selected, approval=gate)
+    return cast(dict[str, Any], _call("decision_check", lambda: persist_decision(Path(root), result), detail_level))
+
+
 TOOLS: tuple[Callable[..., Any], ...] = (
     discover,
     analyze,
@@ -2438,6 +2457,7 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     budget_spend,
     agent_span_append,
     agent_span_query,
+    decision_check,
 )
 
 OBSERVABILITY_TOOLS: tuple[Callable[..., Any], ...] = (

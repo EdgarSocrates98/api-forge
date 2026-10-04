@@ -64,6 +64,18 @@ authorization to mutate an external system.
 | `AF-BLACKBOARD-STORE-CORRUPT` | a persisted blackboard row failed its closed contract |
 | `AF-CHECKPOINT-NOT-FOUND` | the requested semantic checkpoint is absent |
 
+## Decision governance
+
+| Code | Meaning |
+|---|---|
+| `AF-GOV-APPROVAL-REQUIRED` | risky proposal has no human ApprovalGate |
+| `AF-GOV-APPROVAL-PENDING` | the human approval gate has not been decided |
+| `AF-GOV-APPROVAL-REJECTED` | the human approval gate rejected the proposal |
+| `AF-GOV-POLICY-DENIED` | selected policy disallows the proposed mutation risk |
+| `AF-GOV-EVIDENCE-REQUIRED` | non-read-only proposal lacks evidence references |
+| `AF-GOV-STORE-CORRUPT` | persisted decision result failed its closed contract |
+| `AF-GOV-DECISION-CONFLICT` | request id was reused with a different gate result |
+
 ## Routing
 
 `catalog/routing.yaml` maps `(phase, dominant_area)` → `recommended_agent`;

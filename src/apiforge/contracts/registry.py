@@ -23,6 +23,8 @@ from apiforge.contracts.agentic_governance import (
     BudgetDecision,
     BudgetLimit,
     BudgetSpend,
+    DecisionGateResult,
+    DecisionRequest,
 )
 from apiforge.contracts.agentic_memory import (
     BlackboardEntry,
@@ -312,6 +314,8 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "AgentSpan/v1": AgentSpan,
     "AgentSpanQuery/v1": AgentSpanQuery,
     "AgentSpanResult/v1": AgentSpanResult,
+    "DecisionRequest/v1": DecisionRequest,
+    "DecisionGateResult/v1": DecisionGateResult,
     "TelemetryRecord/v1": TelemetryRecord,
     "ObservationSnapshot/v1": ObservationSnapshot,
     "SLODefinition/v1": SLODefinition,

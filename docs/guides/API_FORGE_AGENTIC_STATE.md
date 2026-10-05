@@ -146,6 +146,9 @@ freshness. Below `quality_floor` with `min_evaluations` the candidate cannot
 compete on cost; missing scorecards lower the score, never block.
 `route promote` converts scorecard evidence into a phase-5 promotion attempt —
 a small synthetic benchmark refuses `AF-ROUTE-PROMOTION-EVIDENCE`.
+`route model --shadow-root <root>` records task-class-aware candidate routing
+in the existing `model_routing` Decision Plane route; candidate output remains
+non-authoritative while the route is `shadow`.
 
 `knowledge adaptive` climbs the §36 ladder only as far as needed: `L0` exact →
 `L1` lexical (`knowledge/retrieval.py`) → `L2` structural graph refs → `L3`

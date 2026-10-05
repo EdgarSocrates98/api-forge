@@ -12,3 +12,8 @@ capability and agent planes.
 
 Score = declared weighted mean over quality history, latency, cost and
 availability; terms never observed are dropped, not zeroed.
+
+When `task_class` is declared, only scorecards for that class contribute.
+Missing scorecards remain an unresolved signal and do not become a fabricated
+quality value. `route_model_shadow` records candidate-vs-legacy output through
+the Decision Control Plane; shadow mode always returns `governing=legacy`.

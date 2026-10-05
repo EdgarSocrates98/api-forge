@@ -25,6 +25,7 @@ class ModelRouteInputs(VersionedContract):
 
     schema: Literal["apiforge/model-route-inputs/v1"] = "apiforge/model-route-inputs/v1"  # type: ignore[assignment]
     task_complexity: GovernorComplexity | None = None
+    task_class: ModelTaskClass | None = None
     risk: DecisionRisk | None = None
     reasoning_needs: Literal["none", "light", "deep"] | None = None
     context_size: int | None = Field(default=None, ge=0)

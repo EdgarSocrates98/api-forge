@@ -10,7 +10,7 @@ evidence:
   - path: decisions/API_FORGE_HARDENING2_BASELINE.md
 upstream:
   path: benchmark.md
-  sha256: "2a4671159db4a0ad371bfe000032a2dfced16eeff49b2956cd607c76ba5775e4"
+  sha256: "caf87b2e8caf812977cbf1c02a754c252624e3b7468ff06b407ec91a7cb0e449"
 ---
 
 # ship

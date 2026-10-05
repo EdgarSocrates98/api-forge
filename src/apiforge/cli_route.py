@@ -30,6 +30,10 @@ def register(route_app: typer.Typer) -> None:
             None, "--scorecards", help="ModelEvaluation JSONL or scorecards JSON file."
         ),
         task_class: str | None = typer.Option(None, "--task-class"),
+        shadow_root: Path | None = typer.Option(
+            None, "--shadow-root", help="Record candidate vs legacy in Decision Plane shadow mode."
+        ),
+        legacy_selected: str | None = typer.Option(None, "--legacy-selected"),
         policy: Path | None = typer.Option(None, "--policy"),
         detail_level: str = typer.Option("normal", "--detail-level"),
     ) -> None:
@@ -39,7 +43,11 @@ def register(route_app: typer.Typer) -> None:
             ModelEvaluation,
             ModelRouteInputs,
         )
-        from apiforge.runtime.model_router import load_model_router_policy, route_model
+        from apiforge.runtime.model_router import (
+            load_model_router_policy,
+            route_model,
+            route_model_shadow,
+        )
         from apiforge.runtime.model_scorecard import aggregate_scorecards, scorecard_map
 
         def work() -> dict[str, object]:
@@ -56,6 +64,15 @@ def register(route_app: typer.Typer) -> None:
                 cards = scorecard_map(
                     aggregate_scorecards(rows),
                     task_class=task_class,  # type: ignore[arg-type]
+                )
+            if shadow_root is not None:
+                return route_model_shadow(
+                    shadow_root,
+                    declared,
+                    rules["candidates"],
+                    cards,
+                    legacy_decision={"selected": legacy_selected} if legacy_selected else {},
+                    policy=rules,
                 )
             return route_model(declared, rules["candidates"], cards, policy=rules).model_dump(
                 mode="json"

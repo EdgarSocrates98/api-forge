@@ -156,6 +156,8 @@ class AgentPermissionSet(VersionedContract):
     allowed_tools: tuple[str, ...] = ()
     allowed_risk_classes: tuple[ToolRiskClass, ...] = ()
     denied_tools: tuple[str, ...] = ()
+    allowed_targets: tuple[str, ...] = ()
+    delegates_to: tuple[str, ...] = ()
     notes: str = ""
 
 

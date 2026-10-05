@@ -107,6 +107,14 @@ The same projections are exposed as read-only MCP tools
 surface spawns agents or spends budget — the phase-5 control plane consumes
 the decisions.
 
+Runtime tool authorization uses the declared capability role (`specialist`,
+`reviewer`, `critic`, `referee` or `runner`) for named tool requests. The
+adapter crossing remains one `agent-invocation` boundary grant; it does not
+grant the requesting role every tool. Delegation requires an explicit parent
+edge and requested-tool scope. `apiforge_call` authorizes the gateway and then
+the resolved target against the MCP registry before preserving inner domain
+gates.
+
 ## Decision Control Plane lifecycle (phase 5)
 
 Every decision route declared in `rules/control_plane.yaml` lives under a

@@ -7,6 +7,7 @@ behalf of an agent role. Default is DENY.
 
 from __future__ import annotations
 
+from collections.abc import Collection
 from pathlib import Path
 from typing import Any, cast
 
@@ -41,6 +42,8 @@ def load_tool_risk(
             allowed_tools=tuple(spec.get("allowed_tools", ())),
             allowed_risk_classes=tuple(spec.get("allowed_risk_classes", ())),
             denied_tools=tuple(spec.get("denied_tools", ())),
+            allowed_targets=tuple(spec.get("allowed_targets", ())),
+            delegates_to=tuple(spec.get("delegates_to", ())),
             notes=str(spec.get("notes", "")),
         )
         for name, spec in (raw.get("permissions") or {}).items()
@@ -54,9 +57,43 @@ def authorize(
     *,
     profiles: dict[str, ToolRiskProfile],
     permissions: dict[str, AgentPermissionSet],
+    delegated_from: str | None = None,
+    delegated_scope: tuple[str, ...] = (),
+    target: bool = False,
+    known_targets: Collection[str] = (),
 ) -> ToolAuthorization:
     """Decide whether `subject` may invoke `tool`. Every refusal carries an
     AF code, the denied field and a safe unlock — never a silent block."""
+    if target:
+        if tool not in known_targets:
+            return ToolAuthorization(
+                subject=subject,
+                tool=tool,
+                decision="deny",
+                code="AF-MCP-TOOL-UNKNOWN",
+                field="target",
+                unlock="select a target returned by the declared MCP registry",
+                reason=f"target tool {tool!r} is not present in the MCP registry",
+            )
+        grants = permissions.get(subject)
+        if grants is None or "*" not in grants.allowed_targets:
+            return ToolAuthorization(
+                subject=subject,
+                tool=tool,
+                decision="deny",
+                risk_classes=("read_only",),
+                code="AF-TOOL-AUTHZ-DENIED",
+                field="target",
+                unlock="declare the target in the effective role permission set",
+                reason=f"target {tool!r} is not allowlisted for {subject!r}",
+            )
+        return ToolAuthorization(
+            subject=subject,
+            tool=tool,
+            decision="allow",
+            risk_classes=("read_only",),
+            reason="target is present in the registry and allowlisted for the role",
+        )
     profile = profiles.get(tool)
     if profile is None:
         return ToolAuthorization(
@@ -80,6 +117,30 @@ def authorize(
             unlock="declare a permission set for the role in rules/tool_risk.yaml",
             reason=f"no permission set declared for {subject!r}",
         )
+    if delegated_from is not None:
+        delegator = permissions.get(delegated_from)
+        if delegator is None or subject not in delegator.delegates_to:
+            return ToolAuthorization(
+                subject=subject,
+                tool=tool,
+                decision="deny",
+                risk_classes=profile.risk_classes,
+                code="AF-TOOL-AUTHZ-DENIED",
+                field="delegated_from",
+                unlock="declare an explicit delegation from the original authority",
+                reason=f"{delegated_from!r} may not delegate authority to {subject!r}",
+            )
+        if delegated_scope and tool not in delegated_scope:
+            return ToolAuthorization(
+                subject=subject,
+                tool=tool,
+                decision="deny",
+                risk_classes=profile.risk_classes,
+                code="AF-TOOL-AUTHZ-DENIED",
+                field="delegated_scope",
+                unlock="request only tools inside the delegated scope",
+                reason=f"{tool!r} is outside the delegated scope",
+            )
     if tool in grants.denied_tools:
         return ToolAuthorization(
             subject=subject,

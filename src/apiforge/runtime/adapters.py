@@ -20,6 +20,9 @@ class AgentRequest(BaseModel):
     prompt: str
     input_refs: tuple[str, ...] = ()
     tool_names: tuple[str, ...] = ()
+    authority_subject: str | None = None
+    delegated_from: str | None = None
+    delegated_scope: tuple[str, ...] = ()
     output_contract: str
     context_class: str | None = None
     context_refs: tuple[str, ...] = ()

@@ -9,7 +9,7 @@ Baseline: `docs/decisions/API_FORGE_HARDENING2_BASELINE.md`
 | Loop detection | yes | yes | yes | current-only | FIXED | persist bounded strategy history and enforce policy in execution |
 | Model router | yes | shadow | partial | eval regression fixed locally | CONVERGE | task-class scorecards, shadow route receipt, no active promotion |
 | Decision control plane | yes | partial | partial | yes | CONVERGE | canonicalize promotion/demotion/fallback ownership |
-| Tool authorization | yes | gateway/adapter | partial | yes | HARDEN | role/effective-authority context and target-tool authorization |
+| Tool authorization | yes | role + gateway target | yes | yes | HARDENED | role/effective-authority context and target-tool authorization |
 | Trust / taint | yes | data paths partial | partial | yes | HARDEN | preserve data-only taint through context admission and promotion |
 | Token ledger / AgentOps | yes | partial | partial | regression | FIX | unresolved/partial token coverage; calls remain correlated by `model_call_id` |
 | Context quality | yes | yes | yes | pass with unresolved metrics | KEEP + EXTEND | separate recall from utilization and preserve missing required evidence |

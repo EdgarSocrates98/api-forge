@@ -85,3 +85,40 @@ def test_every_denial_carries_code_field_unlock() -> None:
         decision = authorize(subject, tool, profiles=profiles, permissions=permissions)
         assert decision.decision == "deny"
         assert decision.code and decision.field and decision.unlock
+
+
+def test_delegation_scope_is_fail_closed() -> None:
+    profiles, permissions = _grants()
+    decision = authorize(
+        "reviewer",
+        "semgrep",
+        profiles=profiles,
+        permissions=permissions,
+        delegated_from="api-orchestrator",
+        delegated_scope=("trivy",),
+    )
+    assert decision.decision == "deny"
+    assert decision.field == "delegated_scope"
+
+
+def test_mcp_target_requires_registry_and_target_grant() -> None:
+    profiles, permissions = _grants()
+    allowed = authorize(
+        "mcp-gateway",
+        "rules_list",
+        profiles=profiles,
+        permissions=permissions,
+        target=True,
+        known_targets=("rules_list",),
+    )
+    assert allowed.decision == "allow"
+    unknown = authorize(
+        "mcp-gateway",
+        "unknown_tool",
+        profiles=profiles,
+        permissions=permissions,
+        target=True,
+        known_targets=("rules_list",),
+    )
+    assert unknown.decision == "deny"
+    assert unknown.code == "AF-MCP-TOOL-UNKNOWN"

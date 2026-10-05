@@ -537,6 +537,8 @@ async def _escalate(
                 prompt=f"Escalation review for capability {item.capability}",
                 input_refs=item.input_refs,
                 output_contract="AgentArtifact/v1",
+                authority_subject=capabilities_catalog[reviewer].kind,
+                delegated_from="api-orchestrator",
                 **_role_fields(
                     (role_rows or {}).get(item.capability),
                     tuple(f"artifact:{artifact.artifact_id}" for artifact in artifacts),
@@ -603,8 +605,22 @@ def _role_fields(row: RoleContext | None, extra_refs: tuple[str, ...] = ()) -> d
 async def _authorized_invoke(adapter: ModelAdapter, request: AgentRequest) -> object:
     """Enforce runtime tool admission before crossing the model adapter boundary."""
     profiles, permissions = load_tool_risk()
-    for tool in ("agent-invocation", *request.tool_names):
-        decision = authorize("api-orchestrator", tool, profiles=profiles, permissions=permissions)
+    boundary = authorize("api-orchestrator", "agent-invocation", profiles=profiles, permissions=permissions)
+    decisions: tuple[Any, ...] = (boundary,)
+    if boundary.decision == "allow":
+        subject = request.authority_subject or request.agent
+        decisions += tuple(
+            authorize(
+                subject,
+                tool,
+                profiles=profiles,
+                permissions=permissions,
+                delegated_from=request.delegated_from,
+                delegated_scope=request.delegated_scope or request.tool_names,
+            )
+            for tool in request.tool_names
+        )
+    for decision in decisions:
         if decision.decision != "allow":
             error = ContractError(decision.code or "AF-TOOL-AUTHZ-DENIED", decision.reason)
             error.field = decision.field or "tool"  # type: ignore[attr-defined]
@@ -689,6 +705,8 @@ async def _shadow(
                 prompt=f"Shadow challenger for capability {item.capability}",
                 input_refs=item.input_refs,
                 output_contract="AgentArtifact/v1",
+                authority_subject=capabilities_catalog[name].kind,
+                delegated_from="api-orchestrator",
                 **_role_fields(context_row),
             ),
         )
@@ -1113,6 +1131,8 @@ async def execute_run(
             prompt=f"Review API evolution for capability {invocation.capability}",
             input_refs=invocation.input_refs,
             output_contract="AgentArtifact/v1",
+            authority_subject=capabilities_catalog[invocation.capability].kind,
+            delegated_from="api-orchestrator",
             **_role_fields(role_rows.get(invocation.capability)),
         )
         return await _authorized_invoke(adapter, request)
@@ -1800,6 +1820,8 @@ async def resume_existing_run(
                 capability=invocation.capability,
                 prompt=f"Resume API evolution for capability {invocation.capability}",
                 output_contract="AgentArtifact/v1",
+                authority_subject=by_name[invocation.capability].kind,
+                delegated_from="api-orchestrator",
             ),
         )
 

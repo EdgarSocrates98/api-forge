@@ -26,7 +26,9 @@ def build_timeline(root: Path, run_id: str) -> AgentOpsTimeline:
             )
         )
     if run_rows:
-        unresolved.append("ledger rows lack timestamps; append order retained after timestamped events")
+        unresolved.append(
+            "ledger rows lack timestamps; append order retained after timestamped events"
+        )
 
     spans = [span for span in _read(_directory(root)) if span.run_id == run_id]
     for span in spans:

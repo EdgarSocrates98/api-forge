@@ -137,9 +137,7 @@ def evaluate(
         declared_evidence
         if required_evidence_uris is not None
         else {
-            uri
-            for uri in declared_evidence
-            if uri in by_uri and by_uri[uri].kind in EVIDENCE_KINDS
+            uri for uri in declared_evidence if uri in by_uri and by_uri[uri].kind in EVIDENCE_KINDS
         }
     )
     if not required_evidence:
@@ -159,9 +157,7 @@ def evaluate(
             )
         )
 
-    selected_evidence = {
-        uri for uri, ref in by_uri.items() if ref.kind in EVIDENCE_KINDS
-    }
+    selected_evidence = {uri for uri, ref in by_uri.items() if ref.kind in EVIDENCE_KINDS}
     selected_evidence_used = selected_evidence & used
     metrics.append(
         _unresolved(

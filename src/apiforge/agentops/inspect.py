@@ -133,10 +133,14 @@ def inspect_run(root: Path, run_id: str, *, risk: str | None = None) -> RunInspe
             return _unresolved(name, metric.detail)
         return _metric(name, metric.value, detail=metric.detail or metric.basis)
 
-    observed_context_tokens = [row.cost.observed_tokens for row in rows if row.cost.observed_tokens is not None]
+    observed_context_tokens = [
+        row.cost.observed_tokens for row in rows if row.cost.observed_tokens is not None
+    ]
     token_eligible_rows = len(rows)
     if not token_eligible_rows:
-        context_tokens = _unresolved("tokens", "no run-ledger rows are available for token observation")
+        context_tokens = _unresolved(
+            "tokens", "no run-ledger rows are available for token observation"
+        )
         token_coverage = _unresolved(
             "token_observation_coverage", "token-eligible row denominator is unknown"
         )
@@ -149,9 +153,7 @@ def inspect_run(root: Path, run_id: str, *, risk: str | None = None) -> RunInspe
             ),
         )
         if not observed_context_tokens:
-            context_tokens = _unresolved(
-                "tokens", "no run-ledger rows carry observed token usage"
-            )
+            context_tokens = _unresolved("tokens", "no run-ledger rows carry observed token usage")
         else:
             context_tokens = _metric(
                 "tokens",

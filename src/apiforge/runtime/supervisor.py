@@ -605,7 +605,9 @@ def _role_fields(row: RoleContext | None, extra_refs: tuple[str, ...] = ()) -> d
 async def _authorized_invoke(adapter: ModelAdapter, request: AgentRequest) -> object:
     """Enforce runtime tool admission before crossing the model adapter boundary."""
     profiles, permissions = load_tool_risk()
-    boundary = authorize("api-orchestrator", "agent-invocation", profiles=profiles, permissions=permissions)
+    boundary = authorize(
+        "api-orchestrator", "agent-invocation", profiles=profiles, permissions=permissions
+    )
     decisions: tuple[Any, ...] = (boundary,)
     if boundary.decision == "allow":
         subject = request.authority_subject or request.agent

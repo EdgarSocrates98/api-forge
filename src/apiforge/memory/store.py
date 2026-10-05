@@ -365,9 +365,7 @@ def query_memory(root: Path, query: MemoryQuery) -> MemoryRetrievalResult:
         matches.append(record)
     from apiforge.memory.retrieval import rank_records
 
-    conflicts = (
-        detect_memory_conflicts(matches, query) if query.detect_conflicts else ()
-    )
+    conflicts = detect_memory_conflicts(matches, query) if query.detect_conflicts else ()
     if conflicts:
         unresolved.extend(f"conflict:{item.conflict_id}:{item.outcome}" for item in conflicts)
         if query.risk == "destructive":

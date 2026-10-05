@@ -123,9 +123,9 @@ def detect_memory_conflicts(
         else:
             outcome = "review"
             unresolved = ("conflicting applicable memory requires review",)
-        signals = {
-            f"a_{key}": value for key, value in left_signals.items()
-        } | {f"b_{key}": value for key, value in right_signals.items()}
+        signals = {f"a_{key}": value for key, value in left_signals.items()} | {
+            f"b_{key}": value for key, value in right_signals.items()
+        }
         conflict_id = "memory-conflict:" + _digest(left.memory_id, right.memory_id, paths)
         conflicts.append(
             MemoryConflict(

@@ -95,10 +95,14 @@ def runtime_match(
     checks.extend(_constraint_matches(item, runtime) for item in constraints)
     matched = sum(checks)
     unresolved = tuple(
-        f"runtime_mismatch:{key}={value}" for (key, value), check in zip(requirements, checks) if not check
+        f"runtime_mismatch:{key}={value}"
+        for (key, value), check in zip(requirements, checks)
+        if not check
     )
     unresolved += tuple(
-        f"runtime_mismatch:{item}" for item, check in zip(constraints, checks[len(requirements) :]) if not check
+        f"runtime_mismatch:{item}"
+        for item, check in zip(constraints, checks[len(requirements) :])
+        if not check
     )
     return matched == total, matched / total, unresolved
 

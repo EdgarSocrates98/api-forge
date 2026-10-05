@@ -10,7 +10,7 @@ tasks:
   - id: p0-loop
     status: done
   - id: p0-recovery
-    status: pending
+    status: done
   - id: p0-retrieval
     status: pending
   - id: p1-routing
@@ -27,6 +27,7 @@ claims:
   - implementation is not accepted until its focused proof and independent verification are recorded
   - p0-truthfulness proof records unresolved/partial token state and model-call correlation
   - p0-loop proof records real trajectory history and blocks repeated strategy before invocation
+  - p0-recovery proof records failure classification and recovery decision before each retry
 upstream:
   path: plan.md
   sha256: "1c06b43e224fec46de6f9db25e2102a9e561a62e6863c04f9f0e22ed245fe3d4"

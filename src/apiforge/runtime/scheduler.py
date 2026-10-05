@@ -7,7 +7,9 @@ from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 
 from apiforge.contracts.agentic import AgentInvocation, InvocationStatus
+from apiforge.contracts.agentic_governance import FailureClass, RecoveryDecision
 from apiforge.contracts.base import ContractError
+from apiforge.governance.recovery import decide_recovery
 
 
 @dataclass(frozen=True, slots=True)
@@ -15,6 +17,45 @@ class InvocationResult:
     invocation: AgentInvocation
     response: object | None
     error: str | None = None
+    recovery: RecoveryDecision | None = None
+
+
+def _failure_class(error_code: str, message: str) -> FailureClass:
+    text = f"{error_code} {message}".lower()
+    if "timeout" in text:
+        return "timeout"
+    if "security" in text or "unauthor" in text or "forbidden" in text:
+        return "security_refusal"
+    if "budget" in text or "exhaust" in text:
+        return "budget_exhausted"
+    if "policy" in text or "refus" in text:
+        return "policy_conflict"
+    if "schema" in text or "invalid" in text or "contract" in text:
+        return "invalid_input"
+    if "provider" in text:
+        return "provider_failure"
+    return "tool_failure"
+
+
+def _govern_recovery(
+    error_code: str,
+    message: str,
+    attempt: int,
+    max_retries: int,
+) -> RecoveryDecision:
+    failure_class = _failure_class(error_code, message)
+    decision = decide_recovery(failure_class, attempt)
+    if decision.decision == "retry" and attempt >= max_retries:
+        return decision.model_copy(
+            update={
+                "decision": "stop",
+                "code": "AF-GOV-RECOVERY-EXHAUSTED",
+                "reason": (
+                    f"runtime retry budget exhausted for {failure_class} at attempt {attempt}"
+                ),
+            }
+        )
+    return decision
 
 
 async def run_bounded(
@@ -46,31 +87,41 @@ async def run_bounded(
                 try:
                     response = await asyncio.wait_for(worker(running), timeout=timeout_seconds)
                 except TimeoutError:
+                    error_code = "AF-RUNTIME-TIMEOUT"
+                    message = error_code
+                    recovery = _govern_recovery(error_code, message, retry_count, max_retries)
                     last_failure = InvocationResult(
                         running.model_copy(
                             update={
                                 "status": InvocationStatus.FAILED,
-                                "error_code": "AF-RUNTIME-TIMEOUT",
+                                "error_code": error_code,
                             }
                         ),
                         None,
-                        "AF-RUNTIME-TIMEOUT",
+                        message,
+                        recovery,
                     )
                 except (ContractError, RuntimeError, ValueError, TypeError) as exc:
+                    error_code = getattr(exc, "code", "AF-RUNTIME-ADAPTER")
+                    message = str(exc)
+                    recovery = _govern_recovery(error_code, message, retry_count, max_retries)
                     last_failure = InvocationResult(
                         running.model_copy(
                             update={
                                 "status": InvocationStatus.FAILED,
-                                "error_code": getattr(exc, "code", "AF-RUNTIME-ADAPTER"),
+                                "error_code": error_code,
                             }
                         ),
                         None,
-                        str(exc),
+                        message,
+                        recovery,
                     )
                 else:
                     return InvocationResult(
                         running.model_copy(update={"status": InvocationStatus.SUCCEEDED}), response
                     )
+                if last_failure.recovery is None or last_failure.recovery.decision != "retry":
+                    break
             if last_failure is None:
                 raise ContractError("AF-RUNTIME-ADAPTER", "worker failed without a result")
             return last_failure

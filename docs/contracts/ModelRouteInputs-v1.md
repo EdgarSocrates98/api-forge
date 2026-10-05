@@ -10,5 +10,6 @@ separate from capability and agent routing.
 | `needs_tool_support` / `needs_structured_output` | Hard requirements — not preferences |
 | `max_latency_ms` / `max_cost` | Declared ceilings candidates may not cross |
 | `budget_remaining` | Declared leftovers; absent values land in `unresolved` |
+| `allow_challenger` | Challenger candidates are excluded from default selection unless explicitly enabled |
 
 Absent signals are named in `ModelRouteDecision.unresolved`, never inferred.

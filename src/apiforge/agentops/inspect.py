@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 from collections import Counter
+from datetime import datetime
 from pathlib import Path
 
 from apiforge.agentops.waste import detect_waste
@@ -24,6 +25,25 @@ from apiforge.runtime.agent_telemetry import _read as read_spans
 _DECISION_GATES = Path(".apiforge") / "governance" / "decision-gates.jsonl"
 _MEMORY_DIR = Path(".apiforge") / "memory"
 _DECISION_OPS = {"decision", "security_decision", "promotion"}
+
+
+def _span_duration_ms(span: object) -> int | None:
+    """Read declared span duration; missing timestamps never become zero."""
+    attributes = getattr(span, "attributes", {})
+    declared = attributes.get("duration_ms") if hasattr(attributes, "get") else None
+    if isinstance(declared, (int, float)) and declared >= 0:
+        return round(float(declared))
+    started = getattr(span, "started_at", None)
+    ended = getattr(span, "ended_at", None)
+    if not isinstance(started, str) or not isinstance(ended, str):
+        return None
+    try:
+        start = datetime.fromisoformat(started)
+        finish = datetime.fromisoformat(ended)
+    except ValueError:
+        return None
+    duration = (finish - start).total_seconds() * 1000
+    return round(duration) if duration >= 0 else None
 
 
 def _metric(
@@ -120,8 +140,8 @@ def inspect_run(root: Path, run_id: str, *, risk: str | None = None) -> RunInspe
             _q("context_precision"),
             _q("context_recall"),
             _q("context_density"),
-            _q("context_duplicates"),
-            _q("context_stale"),
+            _q("duplicate_context_ratio"),
+            _q("stale_context_ratio"),
             _metric("cache_hits", cache_hits),
             _metric("reuse", sum(1 for use in uses if use.action in ("cited", "artifact"))),
         ),
@@ -167,7 +187,7 @@ def inspect_run(root: Path, run_id: str, *, risk: str | None = None) -> RunInspe
         ),
     )
 
-    # --- models: token usage by basis; latency/cost stay honest.
+    # --- models: calls, provider attempts, token usage and latency stay separate.
     totals: dict[str, dict[str, int]] = {"observed": {}, "estimated": {}}
     for entry in usage:
         acc = entry.accounting
@@ -178,10 +198,50 @@ def inspect_run(root: Path, run_id: str, *, risk: str | None = None) -> RunInspe
             value = getattr(acc, field)
             if value is not None:
                 bucket[field] = bucket.get(field, 0) + value
+    model_spans = [span for span in spans if span.operation == "invoke_model"]
+    model_call_ids = {entry.model_call_id for entry in usage if entry.model_call_id}
+    model_call_ids.update(span.model_call_id for span in model_spans if span.model_call_id)
+    if model_call_ids:
+        model_calls = _metric(
+            "calls",
+            len(model_call_ids),
+            detail="unique model_call_id values across token ledger and model spans",
+        )
+    elif usage or model_spans:
+        model_calls = _unresolved(
+            "calls",
+            "model_call_id is absent; token rows cannot be counted as model calls",
+        )
+        unresolved.append("model-call count unresolved — model_call_id missing")
+    else:
+        model_calls = _unresolved("calls", "no token or invoke_model evidence")
+    if model_spans:
+        provider_attempts = _metric(
+            "provider_attempts",
+            len(model_spans),
+            detail="invoke_model spans; retries remain distinct attempts",
+        )
+        durations = [_span_duration_ms(span) for span in model_spans]
+        if all(duration is not None for duration in durations):
+            model_latency = _metric(
+                "model_latency_ms",
+                sum(duration for duration in durations if duration is not None),
+                detail="sum of invoke_model span durations",
+            )
+        else:
+            model_latency = _unresolved(
+                "model_latency_ms",
+                "one or more invoke_model spans lack a valid duration",
+            )
+    else:
+        provider_attempts = _unresolved("provider_attempts", "no invoke_model spans recorded")
+        model_latency = _unresolved("model_latency_ms", "no invoke_model spans recorded")
     models_section = InspectionSection(
         name="models",
         metrics=(
-            _metric("calls", len(usage), detail="" if usage else "no token-ledger usage rows"),
+            model_calls,
+            provider_attempts,
+            _metric("token_entries", len(usage)),
             _metric(
                 "input_tokens",
                 totals["observed"].get("input_tokens"),
@@ -219,7 +279,12 @@ def inspect_run(root: Path, run_id: str, *, risk: str | None = None) -> RunInspe
                 else "no estimated token rows",
             ),
             _unresolved("cost", "provider cost requires declared pricing — use economy cost"),
-            _metric("latency_ms", sum(row.cost.duration_ms for row in rows)),
+            model_latency,
+            _metric(
+                "run_latency_ms",
+                sum(row.cost.duration_ms for row in rows),
+                detail="sum of run-ledger durations; never presented as model latency",
+            ),
         ),
     )
 
@@ -252,9 +317,10 @@ def inspect_run(root: Path, run_id: str, *, risk: str | None = None) -> RunInspe
             if gate.get("run_id") != run_id:
                 continue
             gate_runs += 1
-            if gate.get("allowed"):
+            outcome = gate.get("outcome")
+            if outcome == "allow" or (outcome is None and gate.get("allowed") is True):
                 allowed += 1
-            else:
+            elif outcome == "block" or (outcome is None and gate.get("allowed") is False):
                 blocked += 1
     else:
         unresolved.append("decision-gates ledger absent — security section unresolved")
@@ -279,6 +345,12 @@ def inspect_run(root: Path, run_id: str, *, risk: str | None = None) -> RunInspe
             _metric(
                 "blocked",
                 blocked,
+                "observed" if gates_path.is_file() else "unresolved",
+                "" if gates_path.is_file() else "decision-gates ledger absent",
+            ),
+            _metric(
+                "review",
+                gate_runs - allowed - blocked,
                 "observed" if gates_path.is_file() else "unresolved",
                 "" if gates_path.is_file() else "decision-gates ledger absent",
             ),

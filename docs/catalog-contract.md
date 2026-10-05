@@ -804,7 +804,10 @@ store the whole log in the ctx CAS and return every failing test or distinct
 error signature with spans. `apiforge-mcp --surface compact` publishes six
 gateways (`apiforge_discover`, `apiforge_call`, `apiforge_context`,
 `apiforge_expand`, `apiforge_analyze`, `apiforge_evidence`); every full tool
-stays reachable through `apiforge_call`.
+stays reachable through `apiforge_call`. Every gateway crosses
+`rules/tool_risk.yaml` under subject `mcp-gateway`; refusal preserves `AF-*`,
+denied field and safe unlock. Dynamic `apiforge_call` does not replace inner
+tool policy gates.
 
 | Code | Meaning |
 |---|---|

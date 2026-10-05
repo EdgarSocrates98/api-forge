@@ -39,10 +39,11 @@ uses:
     action: cited
     tokens: 30
 required_uris: [0]
+required_evidence_uris: [0]
 cache_hits: 3
 cache_lookups: 4
 expect:
-  status: ready
+  status: degraded
   metrics:
     context_precision: {value: 1.0}
     context_recall: {value: 1.0}
@@ -54,8 +55,8 @@ expect:
     context_reuse_rate: {min: 0.33, max: 0.34}
     cache_hit_rate: {value: 0.75}
     role_context_efficiency: {value: 1.0}
-    evidence_per_token: {min: 0.0117, max: 0.0118}
-    useful_facts_per_1k_tokens: {min: 17.6, max: 17.7}
+    evidence_per_token: {min: 0.0058, max: 0.0060}
+    useful_facts_per_1k_tokens: {basis: unresolved}
   sufficiency:
     sufficient: true
     pruned_count: 0

@@ -1,0 +1,5 @@
+kind: auth migration
+status: covered
+input: scheme=api-key,target=oauth2
+expected: migration_required=true,decision=review
+evidence: deterministic contract policy only; no provider IAM claim

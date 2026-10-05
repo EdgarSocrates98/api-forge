@@ -4124,13 +4124,18 @@ def evals_model_routing(
 def evals_retrieval(
     corpus: Path = typer.Option(Path("evals/corpus/retrieval"), "--corpus"),
     root: Path | None = typer.Option(None, "--root", help="Knowledge packs directory."),
+    graph_dir: Path | None = typer.Option(
+        None, "--graph-dir", help="Hashed graph directory for the graph strategy."
+    ),
     cost_rate: float | None = typer.Option(None, "--cost-rate", help="Declared cost per token."),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
     """§38: lexical/graph/semantic/hybrid on recall, precision, latency, cost."""
     from apiforge.evals.retrieval import run_retrieval
 
-    result = _run(lambda: run_retrieval(corpus, root=root, cost_rate=cost_rate))
+    result = _run(
+        lambda: run_retrieval(corpus, root=root, graph_dir=graph_dir, cost_rate=cost_rate)
+    )
     _echo_json(result, detail_level)
     if isinstance(result, dict) and not result.get("passed"):
         raise typer.Exit(code=1)

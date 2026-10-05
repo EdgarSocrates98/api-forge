@@ -7,7 +7,16 @@ from apiforge.memory.retrieval import query_memory_scored, rank_records
 from apiforge.memory.store import persist_candidate, propose_memory, query_memory
 
 
-def _persist(tmp_path, *, payload, trust="trusted", scope="task", env=None, constraints=()):
+def _persist(
+    tmp_path,
+    *,
+    payload,
+    trust="trusted",
+    scope="task",
+    env=None,
+    constraints=(),
+    applicability=None,
+):
     candidate = propose_memory(
         tmp_path,
         scope=scope,
@@ -19,6 +28,7 @@ def _persist(tmp_path, *, payload, trust="trusted", scope="task", env=None, cons
         trust_level=trust,
         environment_fingerprint=env,
         runtime_constraints=constraints,
+        applicability=applicability,
     )
     outcome = persist_candidate(
         tmp_path,
@@ -74,3 +84,32 @@ def test_semantic_bonus_is_optional_and_additive(tmp_path) -> None:
     assert plain[0].score < boosted[0].score
     assert "semantic" not in plain[0].signals
     assert boosted[0].signals["semantic"] == 1.0
+
+
+def test_term_coverage_is_configurable_between_or_and_all(tmp_path) -> None:
+    memory_id = _persist(tmp_path, payload={"fact": "alpha evidence"}, trust="candidate")
+    default = query_memory(tmp_path, MemoryQuery(terms=("alpha", "missing")))
+    assert [item.memory_id for item in default.records] == [memory_id]
+    strict = query_memory(tmp_path, MemoryQuery(terms=("alpha", "missing"), min_term_coverage=1.0))
+    assert strict.records == ()
+
+
+def test_structured_environment_compatibility_is_a_filter(tmp_path) -> None:
+    compatible = _persist(
+        tmp_path,
+        payload={"fact": "framework route"},
+        applicability={"language": "python", "framework": "fastapi"},
+    )
+    _persist(
+        tmp_path,
+        payload={"fact": "framework route"},
+        applicability={"language": "go", "framework": "chi"},
+    )
+    result = query_memory(
+        tmp_path,
+        MemoryQuery(
+            terms=("route",),
+            environment={"language": "python", "framework": "fastapi"},
+        ),
+    )
+    assert [item.memory_id for item in result.records] == [compatible]

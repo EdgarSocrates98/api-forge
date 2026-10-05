@@ -324,11 +324,18 @@ def query_memory(root: Path, query: MemoryQuery) -> MemoryRetrievalResult:
         ):
             unresolved.append(f"environment_mismatch:{record.memory_id}")
             continue
+        if query.environment and any(
+            record.applicability.get(key) != value for key, value in query.environment.items()
+        ):
+            unresolved.append(f"environment_mismatch:{record.memory_id}")
+            continue
         if _TRUST_ORDER[record.trust_level] < _TRUST_ORDER[query.minimum_trust]:
             continue
         searchable = json.dumps(record.payload, sort_keys=True, ensure_ascii=False).lower()
-        if any(term.lower() not in searchable for term in query.terms):
-            continue
+        if query.terms:
+            coverage = sum(term.lower() in searchable for term in query.terms) / len(query.terms)
+            if coverage < query.min_term_coverage:
+                continue
         if record.expires_at and query.now is None:
             unresolved.append(f"AF-MEMORY-FRESHNESS-UNRESOLVED:{record.memory_id}")
         elif _expired(record, query.now):

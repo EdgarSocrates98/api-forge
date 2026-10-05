@@ -1152,6 +1152,7 @@ def knowledge_adaptive(
     max_level: str = "L4",
     semantic: bool = False,
     root: str | None = None,
+    graph_dir: str | None = None,
     detail_level: str = "normal",
 ) -> dict[str, Any]:
     """§36: L0→L4 ladder; escalates only while the level is insufficient."""
@@ -1164,6 +1165,7 @@ def knowledge_adaptive(
         return adaptive_retrieve(
             query,
             root=Path(root) if root else None,
+            graph_dir=Path(graph_dir) if graph_dir else None,
             semantic=adapter,
             max_level=cast(RetrievalLevel, max_level),
         ).model_dump(mode="json")

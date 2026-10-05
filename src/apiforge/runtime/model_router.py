@@ -87,6 +87,23 @@ def _constraints(candidate: ModelCandidate, inputs: ModelRouteInputs) -> list[st
         and candidate.cost_per_1k > inputs.max_cost
     ):
         reasons.append("cost-over-max")
+    calls_left = inputs.budget_remaining.get("calls")
+    if isinstance(calls_left, (int, float)) and calls_left <= 0:
+        reasons.append("budget-calls-exhausted")
+    budget_latency = inputs.budget_remaining.get("latency_ms")
+    if (
+        isinstance(budget_latency, (int, float))
+        and candidate.latency_p50_ms is not None
+        and candidate.latency_p50_ms > budget_latency
+    ):
+        reasons.append("latency-over-budget")
+    budget_cost = inputs.budget_remaining.get("cost")
+    if (
+        isinstance(budget_cost, (int, float))
+        and candidate.cost_per_1k is not None
+        and candidate.cost_per_1k > budget_cost
+    ):
+        reasons.append("cost-over-budget")
     if candidate.availability == "unavailable":
         reasons.append("availability-unavailable")
     return reasons
@@ -125,11 +142,34 @@ def route_model(
         card = cards.get(_scorecard_key(candidate))
         if card is not None and card.freshness_state in {
             "stale",
+            "degraded",
             "unresolved",
             "conflicted",
             "deprecated",
         }:
             reasons.append(f"scorecard-{card.freshness_state}")
+        if (
+            card is not None
+            and card.freshness_state in {"cold", "warming"}
+            and inputs.risk
+            in {
+                "sensitive",
+                "external_mutation",
+                "destructive",
+                "irreversible",
+            }
+        ):
+            reasons.append("scorecard-not-mature-for-risk")
+        if inputs.risk in {
+            "sensitive",
+            "external_mutation",
+            "destructive",
+            "irreversible",
+        }:
+            if card is None:
+                reasons.append("risk-scorecard-required")
+            elif card.evidence_correctness is None:
+                reasons.append("evidence-correctness-unresolved")
         if card is not None and card.evaluation_count < rules["min_evaluations"]:
             reasons.append("insufficient-evaluations")
         if (
@@ -180,7 +220,38 @@ def route_model(
             )
         )
     eligible = [item for item in ranked if item.eligible]
-    eligible.sort(key=lambda item: (item.score or 0.0, item.model), reverse=True)
+    role_order = {"champion": 2, "fallback": 1, "challenger": 0}
+    eligible = [
+        item
+        for item in eligible
+        if inputs.allow_challenger
+        or next(
+            (
+                candidate.role != "challenger"
+                for candidate in candidates
+                if candidate.provider == item.provider and candidate.model == item.model
+            ),
+            True,
+        )
+    ]
+    eligible.sort(
+        key=lambda item: (
+            role_order.get(
+                next(
+                    (
+                        candidate.role
+                        for candidate in candidates
+                        if candidate.provider == item.provider and candidate.model == item.model
+                    ),
+                    "fallback",
+                ),
+                1,
+            ),
+            item.score or 0.0,
+            item.model,
+        ),
+        reverse=True,
+    )
     selected = f"{eligible[0].provider}/{eligible[0].model}" if eligible else None
     return ModelRouteDecision(
         selected=selected,

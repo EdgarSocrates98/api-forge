@@ -4,7 +4,7 @@
 
 | Field | Meaning |
 |---|---|
-| `name` | Metric id (`context_precision`, `cache_hits`, …) |
+| `name` | Metric id (`context_precision`, `duplicate_context_ratio`, `model_latency_ms`, …) |
 | `value` | Numeric/string value; `null` iff `state` is `unresolved` |
 | `state` | `observed` (ledger/span proves it) or `unresolved` (source absent) |
 | `detail` | Basis or reason, always human-readable |

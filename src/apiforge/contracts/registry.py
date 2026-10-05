@@ -40,6 +40,7 @@ from apiforge.contracts.agentic_governance import (
     PromotionEvidence,
     RecoveryDecision,
     RouteDecision,
+    RunGovernanceContext,
     ShadowRecord,
     StopDecision,
 )
@@ -554,6 +555,7 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "PromotionDecision/v1": PromotionDecision,
     "FallbackDecision/v1": FallbackDecision,
     "RouteDecision/v1": RouteDecision,
+    "RunGovernanceContext/v1": RunGovernanceContext,
     "ModelRouteInputs/v1": ModelRouteInputs,
     "ModelCandidate/v1": ModelCandidate,
     "ModelEvaluation/v1": ModelEvaluation,

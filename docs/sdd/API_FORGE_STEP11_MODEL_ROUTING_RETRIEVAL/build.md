@@ -33,7 +33,7 @@ claims:
   - "no provider calls, no vector DB, no network — everything offline"
 upstream:
   path: plan.md
-  sha256: "0e2df2b64cd8884622889d932189f13c58777ecd173ed76b8deacd4daf923859"
+  sha256: "c4fc4ceec4b3919fc500b0ba7a3212b2cd49534f134022d2dbaa4e3283abc190"
 ---
 
 # build

@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from pydantic import TypeAdapter
 
@@ -18,6 +18,7 @@ from apiforge.contracts.agentic import (
     ArtifactKind,
     TrajectoryEvent,
 )
+from apiforge.contracts.agentic_governance import GovernorInputs, RunGovernanceContext
 from apiforge.contracts.base import ContractError
 from apiforge.contracts.economy import EconomyPlan, LadderStep
 from apiforge.contracts.graph import GraphEdge, GraphExport, GraphNode
@@ -26,6 +27,11 @@ from apiforge.contracts.routing_evolution import PromotionGate
 from apiforge.contracts.selective import RoleContext, RoleContextPlan, ShadowDecision
 from apiforge.core.ids import stable_id
 from apiforge.core.models import JsonValue
+from apiforge.governance.gain import expected_gain
+from apiforge.governance.governor import govern
+from apiforge.governance.loop import check_loop, strategy_fingerprint
+from apiforge.governance.recovery import decide_recovery
+from apiforge.governance.stop import decide_stop
 from apiforge.graph.store import read_graph
 from apiforge.runtime.adapters import AgentRequest, ModelAdapter
 from apiforge.runtime.control import ControlPlane
@@ -73,6 +79,7 @@ from apiforge.runtime.scheduler import run_bounded
 from apiforge.runtime.shadow import decide as decide_shadow
 from apiforge.runtime.store import RunStore, content_hash
 from apiforge.taskspec import store as task_store
+from apiforge.trust.tools import authorize, load_tool_risk
 
 
 def _now(value: str | None) -> str:
@@ -286,11 +293,45 @@ def _effective_policy(policy: Any, task_max_calls: int, economy: EconomyPlan) ->
     )
 
 
+def _governed_policy(policy: Any, decision: Any) -> Any:
+    """Apply governor ceilings without widening a caller's policy."""
+    return policy.model_copy(
+        update={
+            "max_parallel_agents": min(policy.max_parallel_agents, max(1, decision.max_agents)),
+            "max_rounds": min(policy.max_rounds, max(1, decision.max_debates or 1)),
+            "max_retries": min(policy.max_retries, decision.max_retries),
+        }
+    )
+
+
+def _governor_complexity(routing: RoutingDecision) -> str | None:
+    assessment = routing.risk_complexity
+    if assessment is None:
+        return None
+    return {
+        "simple": "low",
+        "moderate": "medium",
+        "complex": "high",
+        "critical": "high",
+    }.get(assessment.complexity)
+
+
 def _exhausted(missing: int) -> str:
     return (
         f"AF-BUDGET-EXHAUSTED: {missing} planned invocation(s) exceeded the economy call budget; "
         "field=profile; unlock=rerun with --profile balanced|deep or raise TaskSpec budgets"
     )
+
+
+def _failure_class(error: str) -> str:
+    lowered = error.lower()
+    if "timeout" in lowered:
+        return "timeout"
+    if "policy" in lowered or "refus" in lowered:
+        return "policy_conflict"
+    if "invalid" in lowered or "contract" in lowered:
+        return "invalid_input"
+    return "tool_failure"
 
 
 def _economy_block(
@@ -435,7 +476,8 @@ async def _escalate(
     )
 
     async def worker(item: AgentInvocation) -> object:
-        return await adapter.invoke(
+        return await _authorized_invoke(
+            adapter,
             AgentRequest(
                 invocation_id=item.invocation_id,
                 agent=item.agent,
@@ -447,7 +489,7 @@ async def _escalate(
                     (role_rows or {}).get(item.capability),
                     tuple(f"artifact:{artifact.artifact_id}" for artifact in artifacts),
                 ),
-            )
+            ),
         )
 
     results = await run_bounded(
@@ -504,6 +546,19 @@ def _role_fields(row: RoleContext | None, extra_refs: tuple[str, ...] = ()) -> d
         "expertise": row.expertise,
         "prompt_prefix_sha256": row.prompt_prefix_sha256,
     }
+
+
+async def _authorized_invoke(adapter: ModelAdapter, request: AgentRequest) -> object:
+    """Enforce runtime tool admission before crossing the model adapter boundary."""
+    profiles, permissions = load_tool_risk()
+    for tool in ("agent-invocation", *request.tool_names):
+        decision = authorize("api-orchestrator", tool, profiles=profiles, permissions=permissions)
+        if decision.decision != "allow":
+            error = ContractError(decision.code or "AF-TOOL-AUTHZ-DENIED", decision.reason)
+            error.field = decision.field or "tool"  # type: ignore[attr-defined]
+            error.unlock = decision.unlock or "declare an explicit runtime tool grant"  # type: ignore[attr-defined]
+            raise error
+    return await adapter.invoke(request)
 
 
 def _shadow_mode(spec: Any) -> str:
@@ -573,7 +628,8 @@ async def _shadow(
     )
 
     async def worker(item: AgentInvocation) -> object:
-        return await adapter.invoke(
+        return await _authorized_invoke(
+            adapter,
             AgentRequest(
                 invocation_id=item.invocation_id,
                 agent=item.agent,
@@ -582,7 +638,7 @@ async def _shadow(
                 input_refs=item.input_refs,
                 output_contract="AgentArtifact/v1",
                 **_role_fields(context_row),
-            )
+            ),
         )
 
     results = await run_bounded(
@@ -732,6 +788,45 @@ async def execute_run(
         storage.save_routing(routing)
         storage.json("economy.json", economy_plan.model_dump(mode="json"))
         policy = _effective_policy(policy, spec.budgets.max_calls, economy_plan)
+    governor_profile = (
+        economy_plan.effective
+        if economy_plan is not None
+        else (profile if profile in {"economy", "balanced", "deep"} else "balanced")
+    )
+    governor_inputs = GovernorInputs(
+        profile=cast(Any, governor_profile),
+        risk=cast(Any, spec.risk.value),
+        budget_remaining={"calls": policy.max_calls},
+        task_complexity=cast(Any, _governor_complexity(routing)),
+    )
+    governor_decision = govern(governor_inputs)
+    governance_context = RunGovernanceContext(
+        context_id=stable_id(
+            "governance",
+            {"run": run_id, "risk": spec.risk.value, "profile": governor_decision.profile},
+        ),
+        run_id=run_id,
+        task_id=task_id,
+        inputs=governor_inputs,
+        decision=governor_decision,
+        evidence_refs=tuple(sorted(set(routing.evidence))),
+        unresolved=governor_decision.unresolved,
+    )
+    storage.json("governance-context.json", governance_context.model_dump(mode="json"))
+    storage.event(
+        TrajectoryEvent(
+            event_id=stable_id("event", {"run": run_id, "event": "governance_context"}),
+            run_id=run_id,
+            event="governance_context",
+            actor="api-orchestrator",
+            subject=governance_context.context_id,
+            payload=governance_context.model_dump(mode="json"),
+            created_at=timestamp,
+        )
+    )
+    policy = _governed_policy(policy, governor_decision)
+    run = run.model_copy(update={"governance_context_id": governance_context.context_id})
+    storage.save_run(run)
     storage.save_routing_plan(routing_plan)
     storage.event(
         TrajectoryEvent(
@@ -911,7 +1006,7 @@ async def execute_run(
             output_contract="AgentArtifact/v1",
             **_role_fields(role_rows.get(invocation.capability)),
         )
-        return await adapter.invoke(request)
+        return await _authorized_invoke(adapter, request)
 
     reserve = (
         reserve_calls(economy_plan.envelope, policy.max_calls) if economy_plan is not None else 0
@@ -1132,11 +1227,101 @@ async def execute_run(
                 )
             break
 
+    strategy = {
+        "primary": routing_plan.primary,
+        "fallbacks": routing_plan.fallbacks,
+        "execution_mode": routing_plan.execution_mode,
+        "parallel": policy.max_parallel_agents,
+    }
+    loop_detection = check_loop((strategy_fingerprint(strategy),))
+    recovery = (
+        decide_recovery(
+            _failure_class(errors[0]),
+            max(
+                (item.invocation.retry_count for item in results if item.error is not None),
+                default=0,
+            ),
+        )
+        if errors
+        else None
+    )
+    governance_unresolved = set(governance_context.unresolved)
+    governance_unresolved.update(loop_detection.code or "")
+    governance_unresolved.discard("")
+    if recovery is not None:
+        governance_unresolved.update(recovery.unresolved)
+        if recovery.code:
+            governance_unresolved.add(recovery.code)
+    governance_context = governance_context.model_copy(
+        update={
+            "recovery": recovery,
+            "loop": loop_detection,
+            "unresolved": tuple(sorted(governance_unresolved)),
+        }
+    )
+    storage.json("governance-context.json", governance_context.model_dump(mode="json"))
+    storage.event(
+        TrajectoryEvent(
+            event_id=stable_id("event", {"run": run_id, "event": "governance_postflight"}),
+            run_id=run_id,
+            event="governance_postflight",
+            actor="api-orchestrator",
+            subject=governance_context.context_id,
+            payload={
+                "recovery": recovery.model_dump(mode="json") if recovery else None,
+                "loop": loop_detection.model_dump(mode="json"),
+            },
+            created_at=timestamp,
+        )
+    )
     reserve_left = policy.max_calls - control.get(control_run.run_id).calls_used
     gain = assess_gain(
         artifacts, float((economy_config or {}).get("triggers", {}).get("low_confidence", 0.7))
     )
-    if economy_plan is not None:
+    all_unresolved = tuple(item for artifact in artifacts for item in artifact.unresolved)
+    confidences = [item.confidence for item in artifacts if item.confidence is not None]
+    confidence = min(confidences) if confidences else None
+    recommendations = {_recommendation(item) for item in artifacts}
+    review_gain = expected_gain(
+        "call_reviewer",
+        {
+            "agreement": 1.0 if len(recommendations) <= 1 and artifacts else None,
+            "unresolved_share": (
+                min(len(all_unresolved) / max(len(artifacts), 1), 1.0) if artifacts else None
+            ),
+            "confidence": confidence,
+            "remaining_budget": min(reserve_left / max(policy.max_calls, 1), 1.0),
+            "role_coverage": min(len(artifacts) / max(len(initial_capabilities), 1), 1.0),
+        },
+    )
+    review_stop = decide_stop(
+        review_gain,
+        mandatory_requirement=(
+            spec.risk.value in policy.critic_risks
+            or (
+                confidence is not None
+                and confidence
+                < float((economy_config or {}).get("triggers", {}).get("low_confidence", 0.7))
+            )
+        ),
+    )
+    governance_context = governance_context.model_copy(
+        update={
+            "gain": review_gain,
+            "stop": review_stop,
+            "unresolved": tuple(
+                sorted(
+                    set(
+                        governance_context.unresolved
+                        + review_gain.unresolved
+                        + ((review_stop.code,) if review_stop.code else ())
+                    )
+                )
+            ),
+        }
+    )
+    storage.json("governance-context.json", governance_context.model_dump(mode="json"))
+    if economy_plan is not None and review_stop.decision == "continue":
         escalated = await _escalate(
             economy_plan,
             artifacts,
@@ -1170,6 +1355,18 @@ async def execute_run(
         conflicting_facts=len({_recommendation(item) for item in artifacts}) > 1,
         requested_by_user=requested_debate,
     )
+    if economy_plan is not None and room and governor_decision.max_debates <= 0:
+        room = False
+        if not allows(economy_plan, "L4"):
+            economy_gaps.append(
+                "AF-ECONOMY-CEILING: field=profile; unlock=rerun with --profile balanced|deep "
+                f"to allow a debate room ({','.join(reasons)})"
+            )
+        else:
+            economy_gaps.append(
+                "AF-GOV-DEBATE-CEILING: field=max_debates; "
+                "unlock=use a governor profile that explicitly permits debate"
+            )
     if economy_plan is not None and room:
         forced = spec.risk.value in policy.critic_risks or economy_plan.effective == "deep"
         if forced or (allows(economy_plan, "L4") and economy_plan.envelope.debate_rounds > 0):
@@ -1243,6 +1440,7 @@ async def execute_run(
         {
             "run_id": run_id,
             "economy": economy_block,
+            "governance": governance_context.model_dump(mode="json"),
             "role_context": role_summary(role_plan) if role_plan is not None else None,
             "shadow": (
                 shadow_decision.model_dump(mode="json") if shadow_decision is not None else None
@@ -1252,7 +1450,10 @@ async def execute_run(
             "debate_reasons": reasons,
             "human_gate": needs_gate,
             "errors": errors,
-            "unresolved": {"routing": list(routing.unresolved)},
+            "unresolved": {
+                "routing": list(routing.unresolved),
+                "governance": list(governance_context.unresolved),
+            },
         },
     )
     if economy_plan is not None and economy_block is not None:
@@ -1297,9 +1498,13 @@ async def execute_run(
             ),
         },
         "economy": economy_block,
+        "governance": governance_context.model_dump(mode="json"),
         "role_context": role_summary(role_plan) if role_plan is not None else None,
         "shadow": shadow_decision.model_dump(mode="json") if shadow_decision is not None else None,
-        "unresolved": {"routing": list(routing.unresolved)},
+        "unresolved": {
+            "routing": list(routing.unresolved),
+            "governance": list(governance_context.unresolved),
+        },
         "status": final_status,
         "run_dir": str(storage.directory),
     }
@@ -1448,14 +1653,15 @@ async def resume_existing_run(
         )
 
     async def worker(invocation: AgentInvocation) -> object:
-        return await adapter.invoke(
+        return await _authorized_invoke(
+            adapter,
             AgentRequest(
                 invocation_id=invocation.invocation_id,
                 agent=invocation.agent,
                 capability=invocation.capability,
                 prompt=f"Resume API evolution for capability {invocation.capability}",
                 output_contract="AgentArtifact/v1",
-            )
+            ),
         )
 
     results = await run_bounded(

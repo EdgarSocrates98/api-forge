@@ -18,7 +18,7 @@ success: route model ranks declared candidates with hard constraints first
 out_of_scope:
   - per-request dispatcher consuming ModelRouteDecision in the runtime loop
   - live provider calls or remote embedding services — adapters stay local
-  - a vector database dependency — HashEmbeddingAdapter is deterministic
+  - a vector database dependency — HashFeatureSimilarityAdapter is deterministic
   - automatic rewrite triggers inside the retrieval engine
 upstream:
   path: discover.md

@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import pytest
 
+from apiforge.contracts.graph import GraphEdge, GraphNode
+from apiforge.graph.store import write_graph
 from apiforge.knowledge.levels import adaptive_retrieve, load_level_policy
 from apiforge.knowledge.rewrite import rewrite_query
 from apiforge.knowledge.semantic import HashEmbeddingAdapter
@@ -48,6 +50,47 @@ def test_hash_adapter_deterministic_and_bounded() -> None:
     assert 0.0 <= score_a <= 1.0
     assert adapter.score(("unrelated",), "completely different text") >= 0.0
     assert adapter.score((), "text") == 0.0
+
+
+def test_semantic_level_can_add_a_non_lexical_candidate() -> None:
+    class CandidateAdapter:
+        def score(self, query_terms: tuple[str, ...], text: str) -> float:
+            return 1.0
+
+        def candidates(
+            self, query_terms: tuple[str, ...], documents: tuple[tuple[str, str], ...]
+        ) -> tuple[tuple[str, float], ...]:
+            return ((documents[0][0], 1.0),) if documents else ()
+
+    result = adaptive_retrieve("zz-no-lexical-hit-qq", semantic=CandidateAdapter(), max_level="L3")
+    assert result.semantic_available is True
+    assert result.hits
+    assert all(
+        any("semantic-candidate" in ref for ref in refs) for refs in result.provenance.values()
+    )
+
+
+def test_graph_level_traverses_declared_graph(tmp_path) -> None:
+    graph_dir = tmp_path / "graph"
+    write_graph(
+        graph_dir,
+        [
+            GraphNode(id="service:orders", kind="service"),
+            GraphNode(id="handler:orders", kind="handler"),
+            GraphNode(id="test:orders", kind="test"),
+        ],
+        [
+            GraphEdge(from_id="service:orders", to_id="handler:orders", kind="implemented_by"),
+            GraphEdge(from_id="handler:orders", to_id="test:orders", kind="verified_by"),
+        ],
+    )
+    result = adaptive_retrieve("service orders", max_level="L2", graph_dir=graph_dir)
+    assert result.level_used == "L2"
+    assert len(result.hits) >= 3
+    assert (
+        sum(any("knowledge:graph" in ref for ref in refs) for refs in result.provenance.values())
+        >= 3
+    )
 
 
 def test_rewrite_gates() -> None:

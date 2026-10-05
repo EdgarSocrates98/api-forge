@@ -90,6 +90,7 @@ def evaluate(
     run_id: str,
     capsule_id: str | None = None,
     required_uris: Iterable[str] = (),
+    required_evidence_uris: Iterable[str] | None = None,
     cache_hits: int | None = None,
     cache_lookups: int | None = None,
 ) -> ContextQualityReport:
@@ -126,16 +127,26 @@ def evaluate(
             )
         )
 
-    evidence_refs = [ref for ref in refs if ref.kind in EVIDENCE_KINDS]
-    if not evidence_refs:
-        metrics.append(_unresolved("evidence_recall", "no evidence-kind refs in selection"))
+    declared_evidence = (
+        set(required_evidence_uris) if required_evidence_uris is not None else required
+    )
+    required_evidence = {
+        uri for uri in declared_evidence if uri in by_uri and by_uri[uri].kind in EVIDENCE_KINDS
+    }
+    if not required_evidence:
+        metrics.append(
+            _unresolved(
+                "evidence_recall",
+                "no required evidence refs declared; selected-evidence utilization is not recall",
+            )
+        )
     else:
-        ev_used = [ref for ref in evidence_refs if ref.uri in used]
+        ev_used = required_evidence & used
         metrics.append(
             _metric(
                 "evidence_recall",
-                len(ev_used) / len(evidence_refs),
-                detail=f"{len(ev_used)}/{len(evidence_refs)} evidence refs used",
+                len(ev_used) / len(required_evidence),
+                detail=f"{len(ev_used)}/{len(required_evidence)} required evidence refs used",
             )
         )
 
@@ -281,11 +292,15 @@ def evaluate(
     token_total = sum(tokens) if tokens else None
     if token_total is None or token_total == 0:
         metrics.append(_unresolved("evidence_per_token", "no observed token usage on use records"))
+    elif not required_evidence:
         metrics.append(
-            _unresolved("useful_facts_per_1k_tokens", "no observed token usage on use records")
+            _unresolved(
+                "evidence_per_token",
+                "required evidence refs are undeclared; utilization is not recall",
+            )
         )
     else:
-        ev_used_n = len([ref for ref in evidence_refs if ref.uri in used])
+        ev_used_n = len(required_evidence & used)
         metrics.append(
             _metric(
                 "evidence_per_token",
@@ -294,14 +309,12 @@ def evaluate(
                 detail=f"{ev_used_n} evidence refs over {token_total} tokens",
             )
         )
-        metrics.append(
-            _metric(
-                "useful_facts_per_1k_tokens",
-                len(used) / token_total * 1000.0,
-                unit="facts/1k tokens",
-                detail=f"{len(used)} used refs over {token_total} tokens",
-            )
+    metrics.append(
+        _unresolved(
+            "useful_facts_per_1k_tokens",
+            "fact IDs are not recorded; used refs cannot be called facts",
         )
+    )
 
     basis_unresolved = [m.name for m in metrics if m.basis == "unresolved"]
     status: Literal["ready", "degraded", "unresolved"] = (

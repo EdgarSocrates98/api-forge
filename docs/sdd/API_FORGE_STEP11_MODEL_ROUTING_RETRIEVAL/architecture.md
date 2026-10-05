@@ -37,7 +37,7 @@ decisions:
   - "the retrieval ladder is data-driven from retrieval_levels.yaml: L0
     exact, L1 lexical, L2 structural graph, L3 hybrid semantic, L4 reranker;
     it stops at the first level meeting min_hits/min_score"
-  - "L3 runs only through a declared SemanticAdapter; HashEmbeddingAdapter
+  - "L3 runs only through a declared SemanticAdapter; HashFeatureSimilarityAdapter
     is the local deterministic implementation — no vector DB, no network"
   - "query rewriting is a pure gate evaluation — deterministic failed +
     budget remaining + profile allows; economy blocks"
@@ -46,7 +46,7 @@ decisions:
     promotion plane"
 upstream:
   path: contract.md
-  sha256: "4dec29fab326d522fa3cfb4095056f8b402c1f69ed0b709385895ace78bf88cc"
+  sha256: "16e88a00a226afda7bbdefa623fc3b6635d982b4550f034ef1d8147c7ed090ed"
 ---
 
 # architecture

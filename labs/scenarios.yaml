@@ -17,11 +17,17 @@ scenarios:
     proof: tests/contract_intel/test_contract_intel.py
     note: "compat classification is the same deterministic diff path"
   - kind: latency regression
-    gap: "no replayable latency fixture — perf evals need recorded baselines"
+    fixture: tests/labs/proofs/latency-regression.yaml
+    proof: tests/labs/test_scenario_proofs.py
+    note: "deterministic baseline delta proof; production latency remains external"
   - kind: auth migration
-    gap: "no auth-migration fixture or eval declared"
+    fixture: tests/labs/proofs/auth-migration.yaml
+    proof: tests/labs/test_scenario_proofs.py
+    note: "deterministic policy transition proof; provider IAM remains external"
   - kind: rate limit
-    gap: "no rate-limit scenario fixture or eval declared"
+    fixture: tests/labs/proofs/rate-limit.yaml
+    proof: tests/labs/test_scenario_proofs.py
+    note: "deterministic admission proof; live quota remains external"
   - kind: retry storm
     fixture: tests/fixtures/resilience_app
     eval: "resilience:resilience/retry-mutating"
@@ -35,13 +41,17 @@ scenarios:
     eval: "resilience:resilience/breaker-gap"
     note: "absent breaker triggers AF-PERF-105"
   - kind: event contract
-    gap: "no AsyncAPI/event-contract fixture or eval declared"
+    fixture: tests/labs/proofs/event-contract.yaml
+    proof: tests/labs/test_scenario_proofs.py
+    note: "deterministic message envelope proof; broker delivery remains external"
   - kind: idempotency
     eval: "economy-extras:retrieve-idempotency"
     fixture: evals/corpus/economy-extras/retrieve-idempotency.yaml
     note: "idempotency retrieval semantics exercised by the economy corpus"
   - kind: pagination
-    gap: "pagination_absent cell stays a declared gap in the lab matrix"
+    fixture: tests/labs/proofs/pagination.yaml
+    proof: tests/labs/test_scenario_proofs.py
+    note: "deterministic cursor boundary proof; datastore plan remains external"
   - kind: version migration
     fixture: tests/fixtures/migrations
     proof: tests/migration

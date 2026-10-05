@@ -4,7 +4,7 @@ version: 1
 levels:
   L0: {min_hits: 1, min_score: 0.0}
   L1: {min_hits: 3, min_score: 3.0}
-  L2: {min_hits: 3, min_score: 3.0}
+  L2: {min_hits: 3, min_score: 0.5}
   L3: {min_hits: 3, min_score: 0.30}
   L4: {min_hits: 1, min_score: 0.0}
 # L3 hybrid blend and L4 reranker weights (deterministic, declared).

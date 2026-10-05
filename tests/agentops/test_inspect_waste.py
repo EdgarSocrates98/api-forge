@@ -1,5 +1,6 @@
 """Phase 8 §53–§57: inspect, compare and the waste detector over local ledgers."""
 
+import json
 from pathlib import Path
 
 import pytest
@@ -12,6 +13,7 @@ from apiforge.contracts.economy import CostVector, LedgerRef, RunLedgerEntry
 from apiforge.contracts.token_economics import TokenLedgerEntry
 from apiforge.economy import run_ledger, token_ledger
 from apiforge.economy.token_ledger import entry_id, transcript_accounting
+from apiforge.runtime.agent_telemetry import append_span, build_span
 
 
 def _ref(name: str, size: int = 10) -> LedgerRef:
@@ -40,7 +42,13 @@ def _row(
     )
 
 
-def _usage(root: Path, run_id: str, agent: str = "builder", model: str = "m1") -> None:
+def _usage(
+    root: Path,
+    run_id: str,
+    agent: str = "builder",
+    model: str = "m1",
+    model_call_id: str | None = "model-call-1",
+) -> None:
     accounting = transcript_accounting(
         model, {"input_tokens": 100, "output_tokens": 50}, recorded="t0"
     )
@@ -52,6 +60,7 @@ def _usage(root: Path, run_id: str, agent: str = "builder", model: str = "m1") -
             accounting=accounting,
             entry_id=entry_id(run_id, accounting, "t0"),
             recorded_at="t0",
+            model_call_id=model_call_id,
         ),
     )
 
@@ -130,6 +139,71 @@ def test_inspect_deterministic(tmp_path: Path) -> None:
     first = inspect_run(tmp_path, "run-1")
     second = inspect_run(tmp_path, "run-1")
     assert first.model_dump(mode="json") == second.model_dump(mode="json")
+
+
+def test_inspect_separates_model_calls_attempts_and_latencies(tmp_path: Path) -> None:
+    _usage(tmp_path, "run-1", model_call_id="model-call-1")
+    second = transcript_accounting("m1", {"input_tokens": 20}, recorded="t1")
+    token_ledger.append_usage(
+        tmp_path,
+        TokenLedgerEntry(
+            run_id="run-1",
+            entry_id=entry_id("run-1", second, "t1", model_call_id="model-call-1"),
+            recorded_at="t1",
+            model_call_id="model-call-1",
+            accounting=second,
+        ),
+    )
+    append_span(
+        tmp_path,
+        build_span(
+            trace_id="trace-1",
+            task_id="task-1",
+            run_id="run-1",
+            operation="invoke_model",
+            model_call_id="model-call-1",
+            started_at="2026-10-05T12:00:00Z",
+            ended_at="2026-10-05T12:00:00.125Z",
+        ),
+    )
+    models = next(
+        section for section in inspect_run(tmp_path, "run-1").sections if section.name == "models"
+    )
+    values = {metric.name: metric for metric in models.metrics}
+    assert values["calls"].value == 1
+    assert values["provider_attempts"].value == 1
+    assert values["token_entries"].value == 2
+    assert values["model_latency_ms"].value == 125
+    assert values["run_latency_ms"].value == 0
+
+
+def test_inspect_gate_outcomes_keep_review_distinct_from_block(tmp_path: Path) -> None:
+    gate_path = tmp_path / ".apiforge" / "governance" / "decision-gates.jsonl"
+    gate_path.parent.mkdir(parents=True)
+    rows = [
+        {"run_id": "run-1", "outcome": "allow"},
+        {"run_id": "run-1", "outcome": "review"},
+        {"run_id": "run-1", "outcome": "block"},
+    ]
+    gate_path.write_text("".join(json.dumps(row) + "\n" for row in rows), encoding="utf-8")
+    security = next(
+        section for section in inspect_run(tmp_path, "run-1").sections if section.name == "security"
+    )
+    values = {metric.name: metric.value for metric in security.metrics}
+    assert values["decisions"] == 3
+    assert values["allowed"] == 1
+    assert values["review"] == 1
+    assert values["blocked"] == 1
+
+
+def test_inspect_missing_model_correlation_is_unresolved(tmp_path: Path) -> None:
+    _usage(tmp_path, "run-1", model_call_id=None)
+    models = next(
+        section for section in inspect_run(tmp_path, "run-1").sections if section.name == "models"
+    )
+    calls = next(metric for metric in models.metrics if metric.name == "calls")
+    assert calls.value is None
+    assert calls.state == "unresolved"
 
 
 # --- compare ---------------------------------------------------------------

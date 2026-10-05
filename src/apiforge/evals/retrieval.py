@@ -17,7 +17,7 @@ from apiforge.contracts.base import ContractError
 from apiforge.contracts.economy_extras import Passage
 from apiforge.contracts.model_routing import RetrievalComparison
 from apiforge.knowledge.levels import _graph, _hybrid, _lexical, _rerank, load_level_policy
-from apiforge.knowledge.semantic import HashEmbeddingAdapter
+from apiforge.knowledge.semantic import HashFeatureSimilarityAdapter
 
 _STRATEGIES = ("lexical", "graph", "semantic", "hybrid")
 
@@ -36,42 +36,49 @@ def load_cases(corpus: Path) -> list[dict[str, Any]]:
 def _strategy(
     name: str,
     query: str,
-    semantic: HashEmbeddingAdapter | None,
+    semantic: HashFeatureSimilarityAdapter | None,
     weights: dict[str, float],
     rerank: dict[str, float],
     root: Path | None,
-) -> tuple[Passage, ...]:
+    graph_dir: Path | None,
+) -> tuple[tuple[Passage, ...], tuple[str, ...]]:
     if name == "lexical":
-        return _lexical(query, root=root, store_root=None)
+        return _lexical(query, root=root, store_root=None), ()
     hits = _lexical(query, root=root, store_root=None)
     if name == "graph":
-        return _graph(hits, query, root=root, store_root=None)
+        if graph_dir is None or not (graph_dir / "nodes.jsonl").is_file():
+            return hits, ("graph",)
+        return _graph(hits, query, root=root, store_root=None, graph_dir=graph_dir), ()
     if name == "semantic":
-        adapter = semantic or HashEmbeddingAdapter()
-        return _hybrid(hits, query, adapter, weights)
-    adapter = semantic or HashEmbeddingAdapter()
-    return _rerank(hits, query, adapter, rerank)
+        adapter = semantic or HashFeatureSimilarityAdapter()
+        return _hybrid(hits, query, adapter, weights, root=root, store_root=None), ()
+    adapter = semantic or HashFeatureSimilarityAdapter()
+    return _rerank(hits, query, adapter, rerank), ()
 
 
 def _measure(
     name: str,
     query: str,
     gold: set[str],
-    semantic: HashEmbeddingAdapter | None,
+    semantic: HashFeatureSimilarityAdapter | None,
     weights: dict[str, float],
     rerank: dict[str, float],
     root: Path | None,
+    graph_dir: Path | None,
     cost_rate: float | None,
 ) -> RetrievalComparison:
     started = time.perf_counter()
-    hits = _strategy(name, query, semantic, weights, rerank, root)[:5]
+    strategy_hits, strategy_unresolved = _strategy(
+        name, query, semantic, weights, rerank, root, graph_dir
+    )
+    hits = strategy_hits[:5]
     latency_ms = (time.perf_counter() - started) * 1000
     keys = {item.heading for item in hits} | {item.pack_id for item in hits}
     covered = gold & keys
     recall = len(covered) / len(gold) if gold else None
     precision = len(covered) / len(keys) if keys else 0.0
     tokens = sum(item.bytes for item in hits) / 4
-    unresolved: list[str] = []
+    unresolved: list[str] = list(strategy_unresolved)
     cost = None
     if cost_rate is not None:
         cost = tokens * cost_rate
@@ -89,7 +96,11 @@ def _measure(
 
 
 def run_retrieval(
-    corpus: Path, *, root: Path | None = None, cost_rate: float | None = None
+    corpus: Path,
+    *,
+    root: Path | None = None,
+    graph_dir: Path | None = None,
+    cost_rate: float | None = None,
 ) -> dict[str, Any]:
     cases = load_cases(corpus)
     policy = load_level_policy()
@@ -102,10 +113,11 @@ def run_retrieval(
                 name,
                 case["query"],
                 gold,
-                HashEmbeddingAdapter() if case.get("semantic", True) else None,
+                HashFeatureSimilarityAdapter() if case.get("semantic", True) else None,
                 policy["hybrid"],
                 policy["rerank"],
                 root,
+                graph_dir,
                 cost_rate,
             )
             for name in strategies

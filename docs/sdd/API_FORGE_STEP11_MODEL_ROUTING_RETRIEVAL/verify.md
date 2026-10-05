@@ -13,7 +13,7 @@ results:
   - "mypy strict over 9 new modules: no issues"
 upstream:
   path: build.md
-  sha256: "f385daeb159f4755eb65d1bebaf05dc2920384a077357200043a8bac8381d659"
+  sha256: "934db11814688ed63c9499054bb1d49b8b14c9848637705d1db6be3084142eaa"
 ---
 
 # verify

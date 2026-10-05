@@ -15,6 +15,7 @@ from typing import Any
 
 from apiforge.contracts.base import ContractError
 from apiforge.output.render import prune
+from apiforge.trust.tools import authorize, load_tool_risk
 
 _TOKEN = re.compile(r"[a-z0-9]+")
 
@@ -36,8 +37,21 @@ def _tokens(text: str) -> set[str]:
     return set(_TOKEN.findall(text.lower().replace("_", " ")))
 
 
+def _authorize_gateway(tool: str, subject: str = "mcp-gateway") -> None:
+    profiles, permissions = load_tool_risk()
+    decision = authorize(subject, tool, profiles=profiles, permissions=permissions)
+    if decision.decision != "allow":
+        raise _refusal(
+            decision.code or "AF-TOOL-AUTHZ-DENIED",
+            decision.reason,
+            decision.field or "tool",
+            decision.unlock or "declare an explicit gateway permission",
+        )
+
+
 def apiforge_discover(query: str, limit: int = 8) -> dict[str, Any]:
     """Find the full API Forge tools for a need, e.g. 'grpc breaking' or 'context capsule'."""
+    _authorize_gateway("apiforge_discover")
     wanted = _tokens(query)
     ranked = []
     for name, fn in full_tools().items():
@@ -60,8 +74,13 @@ def apiforge_discover(query: str, limit: int = 8) -> dict[str, Any]:
     return result
 
 
-def apiforge_call(tool: str, arguments: dict[str, Any] | None = None) -> Any:
+def apiforge_call(
+    tool: str,
+    arguments: dict[str, Any] | None = None,
+    subject: str = "mcp-gateway",
+) -> Any:
     """Run any full API Forge tool by name; use apiforge_discover to find it."""
+    _authorize_gateway("apiforge_call", subject)
     tools = full_tools()
     fn = tools.get(tool)
     if fn is None:
@@ -92,6 +111,7 @@ def apiforge_context(
     budget_bytes: int = 16000,
 ) -> dict[str, Any]:
     """Evidence for an operation (target='POST /x') or what a change impacts (changed/base)."""
+    _authorize_gateway("apiforge_context")
     from apiforge.mcp import tools
 
     if target:
@@ -103,6 +123,7 @@ def apiforge_context(
 
 def apiforge_expand(uri: str, root: str = ".") -> dict[str, Any]:
     """Expand one ctx:// ref after verifying its sha256."""
+    _authorize_gateway("apiforge_expand")
     from apiforge.mcp import tools
 
     return dict(prune(tools.context_expand(uri, root=root)))
@@ -112,6 +133,7 @@ def apiforge_analyze(
     contract: str, project: str, out_dir: str = ".apiforge/case"
 ) -> dict[str, Any]:
     """Run the deterministic analysis and persist a case (contract + project)."""
+    _authorize_gateway("apiforge_analyze")
     from apiforge.mcp import tools
 
     return dict(prune(tools.analyze(contract, project, out_dir=out_dir)))
@@ -119,6 +141,7 @@ def apiforge_analyze(
 
 def apiforge_evidence(run_id: str | None = None, root: str = ".") -> dict[str, Any]:
     """Bytes attributed per run and source (tokens stay unresolved without a transcript)."""
+    _authorize_gateway("apiforge_evidence")
     from apiforge.mcp import tools
 
     return dict(prune(tools.economy_stats(root=root, run_id=run_id)))

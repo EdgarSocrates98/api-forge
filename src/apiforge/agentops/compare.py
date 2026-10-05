@@ -91,8 +91,8 @@ def compare_runs(root: Path, run_a: str, run_b: str) -> RunComparison:
         ),
         _axis(
             "latency",
-            metric(inspection_a, "models", "latency_ms"),
-            metric(inspection_b, "models", "latency_ms"),
+            metric(inspection_a, "models", "run_latency_ms"),
+            metric(inspection_b, "models", "run_latency_ms"),
             lower_better=True,
         ),
         _axis(

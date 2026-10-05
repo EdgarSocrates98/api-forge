@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted — 2026-10-06.
+Superseded — 2026-10-05 by ADR-012.
 
 ## Context
 
@@ -17,8 +17,9 @@ and the offline `scripts/supply_chain_audit.py` in CI.
 
 ## Decision
 
-Keep declared ranges for library dependencies; do not introduce a
-lockfile at this stage.
+The original no-lock decision is superseded. The project now keeps bounded
+library ranges and a committed `uv.lock` for reproducible project and CI
+environments; ADR-012 defines the enforcement boundary.
 
 | option | chosen | because |
 |--------|--------|---------|

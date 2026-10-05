@@ -39,6 +39,7 @@ class Passage(VersionedContract):
     signals: dict[str, float] = Field(default_factory=dict)
     ref: str
     bytes: int = Field(ge=0)
+    provenance: tuple[str, ...] = ()
 
 
 class RetrievalResult(VersionedContract):

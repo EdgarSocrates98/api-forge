@@ -6,6 +6,7 @@ required when the server actually runs.
 
 from __future__ import annotations
 
+from importlib import import_module
 from typing import Any
 
 MCP_OPTIONAL_UNAVAILABLE = "AF-MCP-OPTIONAL-UNAVAILABLE"
@@ -13,8 +14,8 @@ MCP_OPTIONAL_UNAVAILABLE = "AF-MCP-OPTIONAL-UNAVAILABLE"
 
 def build_server(surface: str = "full") -> Any:
     try:
-        from mcp.server.fastmcp import FastMCP
-    except ImportError as exc:
+        FastMCP = import_module("mcp.server.fastmcp").FastMCP
+    except (ImportError, AttributeError) as exc:
         raise RuntimeError(
             f"{MCP_OPTIONAL_UNAVAILABLE}: install the 'mcp' extra to run local stdio"
         ) from exc

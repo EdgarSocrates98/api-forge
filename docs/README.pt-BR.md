@@ -21,6 +21,7 @@ produto.
 - [Governança do GitHub: plano do ruleset e CODEOWNERS](guides/API_FORGE_GITHUB_GOVERNANCE.md)
 - [Paridade entre hosts](HOST_PARITY.pt-BR.md)
 - [Mapa de evolução](API_FORGE_EVOLUTION_MAP.md)
+- [Outcome Brief da convergência Evo (EN)](decisions/API_FORGE_EVO_CONVERGENCE_OUTCOME_BRIEF.md)
 
 ## Arquitetura e capacidades
 

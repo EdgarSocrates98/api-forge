@@ -818,6 +818,8 @@ tool policy gates.
 | `AF-MCP-TOOL-UNKNOWN` | `apiforge_call` got a tool name that is not registered; unlock: use `apiforge_discover` |
 | `AF-MCP-TOOL-ARGS` | `apiforge_call` arguments do not bind to the tool signature |
 | `AF-MCP-SURFACE-INVALID` | surface is not `full` or `compact` |
+| `AF-MCP-MODERN-REQUEST` | modern local MCP request failed before a typed protocol error was available; unlock: inspect the request shape |
+| `AF-MCP-MODERN-METHOD` | modern local MCP method is not supported; unlock: use `server/discover`, `tools/list` or `tools/call` |
 | `AF-HOST-UNKNOWN` | host not declared in `rules/host_projections.yaml` |
 | `AF-HOST-PROJECTION-INVALID` | `rules/host_projections.yaml` is malformed |
 
@@ -1004,6 +1006,7 @@ The local runtime is provider-neutral and executes only against a sealed TaskSpe
 | `AF-RUNTIME-HASH` | runtime artifact hash could not be computed |
 | `AF-RUNTIME-NOT-FOUND` | requested runtime run is not persisted |
 | `AF-RUNTIME-ROUTING` | persisted routing decision is malformed; field=runtime.routing; unlock=regenerate the trace from the versioned routing contracts |
+| `AF-RUNTIME-LOOP-HISTORY` | persisted runtime strategy history is corrupt or unreadable; field=runtime.strategy_history; unlock=repair the append-only event ledger |
 | `AF-RUNTIME-PROFILES` | agent profile registry is missing or malformed; field=runtime.profiles_file; unlock=provide the versioned local profile registry |
 | `AF-RUNTIME-COMPATIBILITY` | legacy runtime payload lacks a proven compatible state; field=runtime.run; unlock=record a versioned migration and independent proof |
 | `AF-RUNTIME-DEPENDENCY-FAILED` | invocation dependency failed; field=invocation.dependencies; unlock=resolve the prerequisite failure and resume |

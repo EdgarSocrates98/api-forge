@@ -50,6 +50,24 @@ def test_hash_adapter_deterministic_and_bounded() -> None:
     assert adapter.score((), "text") == 0.0
 
 
+def test_semantic_level_can_add_a_non_lexical_candidate() -> None:
+    class CandidateAdapter:
+        def score(self, query_terms: tuple[str, ...], text: str) -> float:
+            return 1.0
+
+        def candidates(
+            self, query_terms: tuple[str, ...], documents: tuple[tuple[str, str], ...]
+        ) -> tuple[tuple[str, float], ...]:
+            return ((documents[0][0], 1.0),) if documents else ()
+
+    result = adaptive_retrieve("zz-no-lexical-hit-qq", semantic=CandidateAdapter(), max_level="L3")
+    assert result.semantic_available is True
+    assert result.hits
+    assert all(
+        any("semantic-candidate" in ref for ref in refs) for refs in result.provenance.values()
+    )
+
+
 def test_rewrite_gates() -> None:
     ok = rewrite_query("mystery", deterministic_hits=0, profile="balanced")
     assert ok.gate == "allowed"

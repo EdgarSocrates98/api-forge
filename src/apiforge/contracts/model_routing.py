@@ -33,6 +33,7 @@ class ModelRouteInputs(VersionedContract):
     max_latency_ms: int | None = Field(default=None, ge=0)
     max_cost: float | None = Field(default=None, ge=0)
     budget_remaining: dict[str, int | float | None] = Field(default_factory=dict)
+    allow_challenger: bool = False
 
 
 class ModelCandidate(VersionedContract):
@@ -48,6 +49,7 @@ class ModelCandidate(VersionedContract):
     availability: ModelAvailability = "unknown"
     cost_per_1k: float | None = Field(default=None, ge=0)
     latency_p50_ms: int | None = Field(default=None, ge=0)
+    role: Literal["champion", "challenger", "fallback"] = "fallback"
 
 
 class ModelEvaluation(VersionedContract):
@@ -83,7 +85,9 @@ class ModelScorecard(VersionedContract):
     latency_p50_ms: float | None = Field(default=None, ge=0)
     cost_mean: float | None = Field(default=None, ge=0)
     failure_rate: float | None = Field(default=None, ge=0, le=1)
-    freshness_state: Literal["fresh", "stale", "unresolved", "unknown"] = "unknown"
+    freshness_state: Literal[
+        "fresh", "cold", "warming", "mature", "stale", "degraded", "unresolved", "unknown"
+    ] = "unknown"
     observed_at: str | None = None
     unresolved: tuple[str, ...] = ()
 
@@ -137,6 +141,7 @@ class AdaptiveRetrievalResult(VersionedContract):
     steps: tuple[RetrievalStep, ...] = ()
     hits: tuple[str, ...] = ()
     semantic_available: bool = False
+    provenance: dict[str, tuple[str, ...]] = Field(default_factory=dict)
     unresolved: tuple[str, ...] = ()
 
 

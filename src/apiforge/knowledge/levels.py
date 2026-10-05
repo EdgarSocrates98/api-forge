@@ -20,7 +20,7 @@ from apiforge.contracts.model_routing import (
     RetrievalLevel,
     RetrievalStep,
 )
-from apiforge.knowledge.retrieval import expand, normalize, search
+from apiforge.knowledge.retrieval import corpus_passages, expand, normalize, search
 from apiforge.knowledge.semantic import SemanticAdapter
 
 RULES = Path(__file__).resolve().parent.parent / "rules" / "retrieval_levels.yaml"
@@ -82,14 +82,31 @@ def _hybrid(
     query: str,
     semantic: SemanticAdapter,
     weights: dict[str, float],
+    *,
+    root: Path | None,
+    store_root: Path | None,
 ) -> tuple[Passage, ...]:
-    """L3: lexical score blended with semantic similarity per candidate."""
+    """L3: generate semantic candidates, then blend and rank both sources."""
     terms, _ = expand(query)
+    lexical_refs = {item.ref for item in hits}
+    corpus = corpus_passages(root=root, store_root=store_root)
+    documents = tuple((item.ref, item.heading) for item in corpus)
+    candidate_fn = getattr(semantic, "candidates", None)
+    semantic_rows = candidate_fn(terms, documents) if callable(candidate_fn) else ()
+    by_ref = {item.ref: item for item in hits}
+    for ref, score in semantic_rows:
+        if ref not in by_ref:
+            item = next((candidate for candidate in corpus if candidate.ref == ref), None)
+            if item is not None:
+                by_ref[ref] = item.model_copy(
+                    update={"signals": {**item.signals, "semantic_score": score}}
+                )
+    merged = tuple(by_ref.values())
     top = max((item.score for item in hits), default=1.0) or 1.0
     rescored = sorted(
-        hits,
+        merged,
         key=lambda item: (
-            weights["lexical"] * (item.score / top)
+            weights["lexical"] * (item.score / top if item.ref in lexical_refs else 0.0)
             + weights["semantic"] * semantic.score(terms, item.heading)
         ),
         reverse=True,
@@ -137,6 +154,7 @@ def adaptive_retrieve(
     hits: tuple[Passage, ...] = ()
     used: RetrievalLevel = "L0"
     semantic_used = False
+    provenance: dict[str, tuple[str, ...]] = {}
     for index, level in enumerate(order[: ceiling + 1]):
         if level == "L0":
             hits = _exact(query, root=root, store_root=store_root)
@@ -153,10 +171,18 @@ def adaptive_retrieve(
                     )
                 )
                 continue
-            hits = _hybrid(hits, query, semantic, rules["hybrid"])
+            hits = _hybrid(
+                hits,
+                query,
+                semantic,
+                rules["hybrid"],
+                root=root,
+                store_root=store_root,
+            )
             semantic_used = True
         else:
             hits = _rerank(hits, query, semantic, rules["rerank"])
+        provenance = {item.ref: item.provenance for item in hits[:5]}
         top = max((item.score for item in hits), default=None)
         sufficient = _sufficient(level, len(hits), top, rules)
         steps.append(
@@ -179,6 +205,7 @@ def adaptive_retrieve(
         steps=tuple(steps),
         hits=tuple(item.ref for item in hits[:5]),
         semantic_available=semantic_used,
+        provenance=provenance,
         unresolved=tuple(sorted(unresolved)),
     )
 

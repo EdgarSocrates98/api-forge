@@ -136,6 +136,7 @@ def search(
             signals=signals,
             ref=store.put(f"## {heading}\n{body}"),
             bytes=len(body.encode("utf-8")),
+            provenance=("knowledge:lexical", f"pack:{pack}", f"file:{doc}"),
         )
         for score, pack, doc, heading, body, signals in scored[:size]
     )
@@ -152,4 +153,33 @@ def search(
     )
 
 
-__all__ = ["expand", "load_expansion", "search"]
+def corpus_passages(
+    *, root: Path | None = None, store_root: Path | None = None
+) -> tuple[Passage, ...]:
+    """Return every local passage as a semantic candidate pool.
+
+    Candidate generation is still offline and deterministic; unlike lexical
+    search it intentionally does not pre-filter on query terms.
+    """
+    from apiforge.context.gateway.refs import CtxStore
+    from apiforge.knowledge.selector import default_root, knowledge_generation
+
+    packs_root = default_root(root)
+    resolved = packs_root.resolve()
+    store = CtxStore(Path(store_root or Path.cwd()))
+    return tuple(
+        Passage(
+            pack_id=pack,
+            file=doc,
+            heading=heading,
+            score=0.0,
+            signals={},
+            ref=store.put(f"## {heading}\n{body}"),
+            bytes=len(body.encode("utf-8")),
+            provenance=("knowledge:semantic-candidate", f"pack:{pack}", f"file:{doc}"),
+        )
+        for pack, doc, heading, body in _passages(str(resolved), knowledge_generation(resolved))
+    )
+
+
+__all__ = ["corpus_passages", "expand", "load_expansion", "search"]

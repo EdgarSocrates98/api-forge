@@ -173,3 +173,44 @@ def test_unavailable_candidate_ineligible() -> None:
     )
     down = next(r for r in decision.ranked if r.model == "down-v1")
     assert "availability-unavailable" in down.reasons
+
+
+def test_budget_and_risk_require_declared_evidence() -> None:
+    decision = route_model(
+        ModelRouteInputs(
+            risk="sensitive",
+            needs_tool_support=True,
+            budget_remaining={"calls": 0, "cost": 0.001},
+        ),
+        _candidates(),
+    )
+    assert decision.selected is None
+    assert all("budget-calls-exhausted" in item.reasons for item in decision.ranked)
+    assert all("risk-scorecard-required" in item.reasons for item in decision.ranked)
+
+
+def test_challenger_is_opt_in_and_champion_is_preferred() -> None:
+    candidates = (
+        ModelCandidate(
+            provider="champion",
+            model="champion-v1",
+            role="champion",
+            availability="available",
+            structured_output=True,
+            cost_per_1k=0.01,
+        ),
+        ModelCandidate(
+            provider="challenger",
+            model="challenger-v1",
+            role="challenger",
+            availability="available",
+            structured_output=True,
+            cost_per_1k=0.0,
+        ),
+    )
+    default = route_model(ModelRouteInputs(needs_structured_output=True), candidates)
+    assert default.selected == "champion/champion-v1"
+    enabled = route_model(
+        ModelRouteInputs(needs_structured_output=True, allow_challenger=True), candidates
+    )
+    assert enabled.selected == "champion/champion-v1"

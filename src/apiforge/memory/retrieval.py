@@ -41,6 +41,12 @@ _WEIGHTS = {
 _SEMANTIC_BONUS = 0.05
 
 
+def _term_coverage(searchable: str, terms: tuple[str, ...]) -> float:
+    if not terms:
+        return 1.0
+    return sum(term.lower() in searchable for term in terms) / len(terms)
+
+
 def _expired(record: MemoryRecord, now: str | None) -> bool | None:
     """True expired, False fresh, None when freshness cannot be decided."""
     if not record.expires_at:
@@ -60,8 +66,12 @@ def score_record(
     searchable = json.dumps(record.payload, sort_keys=True, ensure_ascii=False).lower()
     terms = [term.lower() for term in query.terms]
     exact = 1.0 if record.memory_id in query.terms else 0.0
-    lexical = sum(1 for term in terms if term in searchable) / len(terms) if terms else 0.5
-    if not query.environment_fingerprint or record.environment_fingerprint is None:
+    lexical = _term_coverage(searchable, query.terms) if terms else 0.5
+    if query.environment:
+        env_compat = sum(
+            record.applicability.get(key) == value for key, value in query.environment.items()
+        ) / len(query.environment)
+    elif not query.environment_fingerprint or record.environment_fingerprint is None:
         env_compat = 0.5
     else:
         env_compat = float(record.environment_fingerprint == query.environment_fingerprint)
@@ -136,10 +146,15 @@ def query_memory_scored(
         ):
             unresolved.append(f"environment_mismatch:{record.memory_id}")
             continue
+        if query.environment and any(
+            record.applicability.get(key) != value for key, value in query.environment.items()
+        ):
+            unresolved.append(f"environment_mismatch:{record.memory_id}")
+            continue
         if _TRUST_ORDER[record.trust_level] < _TRUST_ORDER[query.minimum_trust]:
             continue
         searchable = json.dumps(record.payload, sort_keys=True, ensure_ascii=False).lower()
-        if any(term.lower() not in searchable for term in query.terms):
+        if _term_coverage(searchable, query.terms) < query.min_term_coverage:
             continue
         matches.append(record)
     ranked = rank_records(matches, query, semantic_scores=semantic_scores)

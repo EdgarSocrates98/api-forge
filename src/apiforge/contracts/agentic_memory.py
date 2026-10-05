@@ -120,9 +120,11 @@ class MemoryQuery(VersionedContract):
     terms: tuple[str, ...] = ()
     scopes: tuple[MemoryScope, ...] = ()
     environment_fingerprint: str | None = None
+    environment: dict[str, str] = Field(default_factory=dict)
     now: str | None = None
     minimum_trust: TrustLevel = "unknown"
     include_invalidated: bool = False
+    min_term_coverage: float = Field(default=0.5, ge=0, le=1)
     max_results: int = Field(default=20, ge=1, le=200)
 
 

@@ -35,6 +35,13 @@ states are intentionally visible. `memory rank` exposes the §15 deterministic
 signal decomposition; semantic similarity remains an optional caller-supplied
 bonus, never a dependency.
 
+Runtime requests match structured runtime requirements before scoring; query
+terms never satisfy runtime constraints. Risk-aware `stale_handling` lets
+read-only retrieval include stale state, sensitive retrieval request review,
+and destructive retrieval exclude it. Tainted rows stay outside default
+context admission. Applicable trusted fresh contradictions return
+`MemoryConflict/v1` review/quarantine outcomes.
+
 ## The four different things people call "compaction"
 
 These mechanisms are deliberately distinct; conflating them corrupts resume
@@ -97,12 +104,23 @@ inputs always produce the same `GovernorDecision`/`StopDecision`/
   §26 vocabulary (unknown classes refuse `AF-GOV-FAILURE-CLASS-UNKNOWN`);
   exhausted caps fire the terminal escalate/stop.
 - `apiforge governor loop-check --fingerprints …` — repeated strategy
-  fingerprints inside the window block `AF-GOV-LOOP-DETECTED`.
+  fingerprints inside the window block `AF-GOV-LOOP-DETECTED`. Runtime records
+  every selected strategy in `events.jsonl` before invoking capabilities; the
+  current governor policy uses `action=stop`, returning `BLOCKED` without
+  spending another call.
 
 The same projections are exposed as read-only MCP tools
 (`governor_decide`, `governor_stop`, `governor_recover`). Nothing in this
 surface spawns agents or spends budget — the phase-5 control plane consumes
 the decisions.
+
+Runtime tool authorization uses the declared capability role (`specialist`,
+`reviewer`, `critic`, `referee` or `runner`) for named tool requests. The
+adapter crossing remains one `agent-invocation` boundary grant; it does not
+grant the requesting role every tool. Delegation requires an explicit parent
+edge and requested-tool scope. `apiforge_call` authorizes the gateway and then
+the resolved target against the MCP registry before preserving inner domain
+gates.
 
 ## Decision Control Plane lifecycle (phase 5)
 
@@ -143,6 +161,9 @@ freshness. Below `quality_floor` with `min_evaluations` the candidate cannot
 compete on cost; missing scorecards lower the score, never block.
 `route promote` converts scorecard evidence into a phase-5 promotion attempt —
 a small synthetic benchmark refuses `AF-ROUTE-PROMOTION-EVIDENCE`.
+`route model --shadow-root <root>` records task-class-aware candidate routing
+in the existing `model_routing` Decision Plane route; candidate output remains
+non-authoritative while the route is `shadow`.
 
 `knowledge adaptive` climbs the §36 ladder only as far as needed: `L0` exact →
 `L1` lexical (`knowledge/retrieval.py`) → `L2` structural graph refs → `L3`
@@ -155,6 +176,11 @@ permits it — `economy` blocks. `evals retrieval` compares
 lexical/graph/semantic/hybrid on recall, precision, latency, tokens and cost
 over a declared gold corpus; `evals model-routing` covers constraint refusal,
 quality floors and insufficient evaluations.
+
+Each level writes `signals.effective_score`; ranking and sufficiency consume
+that same value. `RetrievalStep.top_score` reports effective score and
+`raw_top_score` keeps source-scale diagnostics. L2/L4 graph contribution comes
+from bounded traversal depth, never `selected_pack`.
 
 ## Telemetry export and correlation (phase 7)
 
@@ -190,12 +216,18 @@ Local `AgentSpan` rows now cover all 18 §50 operations (`task`, `routing`,
 context-quality derivation, memory store and decision-gate ledger into one
 `RunInspection` — the §54 sections (`run`, `agents`, `context`, `memory`,
 `tools`, `models`, `evidence`, `security`) plus waste findings and the
-decision path. Every metric carries `observed`/`estimated`/`unresolved`;
+decision path. Every metric carries `observed`/`partial`/`estimated`/`unresolved`;
 absent sources are named in `unresolved`, never zero-filled. Memory rows are
 store-wide (no `run_id`), so memory metrics report `estimated` scope, and
 provider cost stays `unresolved` without declared pricing.
 
-`agentops compare RUN_A RUN_B` emits `RunComparison` over the §55 axis set —
+Context token accounting is intentionally strict: no observed token row yields
+an unresolved total, and mixed measured/unmeasured rows yield a partial total
+plus `token_observation_coverage`. A missing measurement is never converted to
+an observed zero.
+
+`agentops timeline RUN` emits `AgentOpsTimeline/v1` over ledger, span and token
+events. Timestamp gaps remain unresolved. `agentops compare RUN_A RUN_B` emits `RunComparison` over the §55 axis set —
 quality, tokens, cost, latency, context, evidence, tools, agents — with a
 deterministic direction per axis (lower-is-better for spend, higher for
 quality/evidence). An axis missing a numeric side is `unresolved`, never a
@@ -208,8 +240,8 @@ agent/review/debate, oversized tool output, full-file read, premium model
 misuse, repeated summary, unused context expansion). Findings are labeled
 `observed`/`estimated`/`hypothesis` per §57; detectors lacking a
 prerequisite (undeclared risk, empty ledgers) land in `unresolved`. MCP
-exposes the three read projections (`agentops_inspect`, `agentops_compare`,
-`agentops_waste`); `evals agentops` covers sections, detection, verdicts and
+exposes the four read projections (`agentops_inspect`, `agentops_timeline`,
+`agentops_compare`, `agentops_waste`); `evals agentops` covers sections, detection, verdicts and
 missing-run honesty.
 
 ## Tool surface engineering and MCP compliance (phase 9)
@@ -332,12 +364,11 @@ emits the declared source→pack→rule→skill→eval relation graph over the
 because no declared carrier exists.
 
 §28 ships the opt-in lab catalog (`labs/scenarios.yaml` +
-`lab scenarios`): all 13 scenario kinds are declared, 8 carry real
-fixture/eval/proof pointers (timeout, retry storm, circuit breaker,
-breaking change, schema evolution, backward compatibility,
-idempotency, version migration) and 5 are honest declared gaps
-(latency regression, auth migration, rate limit, event contract,
-pagination) — a cell with neither refuses `AF-LAB-CELL-UNDECLARED`.
+`lab scenarios`): all 21 scenario kinds are declared and covered. Eight
+Runtime Convergence cells exercise recovery, loop, shadow routing, role auth,
+memory, context evidence and challenger comparison through
+`tests/labs/test_runtime_convergence.py`; local proof never claims production
+provider behavior.
 
 `doctor --agentic` emits `AgenticDoctorReport` — cross-plane health
 over case, memory (quarantine backlog), trust (policy presence+parse),

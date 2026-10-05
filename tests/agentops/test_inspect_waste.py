@@ -206,6 +206,53 @@ def test_inspect_missing_model_correlation_is_unresolved(tmp_path: Path) -> None
     assert calls.state == "unresolved"
 
 
+def test_inspect_exposes_coverage_metrics_and_timeline(tmp_path: Path) -> None:
+    _seed_basic(tmp_path, "run-1")
+    append_span(
+        tmp_path,
+        build_span(
+            trace_id="trace-1",
+            task_id="task-1",
+            run_id="run-1",
+            operation="invoke_model",
+            model_call_id="model-call-1",
+            started_at="2026-10-05T12:00:00Z",
+            ended_at="2026-10-05T12:00:00.010Z",
+        ),
+    )
+    report = inspect_run(tmp_path, "run-1")
+    models = next(section for section in report.sections if section.name == "models")
+    metrics = {metric.name: metric for metric in models.metrics}
+    assert metrics["model_call_coverage"].value == 1.0
+    assert metrics["trace_coverage"].value == 1.0
+    assert metrics["cost_coverage"].value == 1.0
+    assert report.timeline[0].source == "span"
+    assert any("ledger rows lack timestamps" in item for item in report.unresolved)
+
+
+def test_inspect_context_tokens_without_observation_are_unresolved(tmp_path: Path) -> None:
+    run_ledger.append(tmp_path, _row("run-1", cost=CostVector(context_bytes=10)))
+    context = next(
+        section for section in inspect_run(tmp_path, "run-1").sections if section.name == "context"
+    )
+    metrics = {metric.name: metric for metric in context.metrics}
+    assert metrics["tokens"].value is None
+    assert metrics["tokens"].state == "unresolved"
+    assert metrics["token_observation_coverage"].value == 0.0
+
+
+def test_inspect_context_tokens_expose_partial_coverage(tmp_path: Path) -> None:
+    run_ledger.append(tmp_path, _row("run-1", cost=CostVector(observed_tokens=300)))
+    run_ledger.append(tmp_path, _row("run-1", cost=CostVector()))
+    context = next(
+        section for section in inspect_run(tmp_path, "run-1").sections if section.name == "context"
+    )
+    metrics = {metric.name: metric for metric in context.metrics}
+    assert metrics["tokens"].value == 300
+    assert metrics["tokens"].state == "partial"
+    assert metrics["token_observation_coverage"].value == 0.5
+
+
 # --- compare ---------------------------------------------------------------
 
 

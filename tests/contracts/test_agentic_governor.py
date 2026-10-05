@@ -78,3 +78,4 @@ def test_loop_detection_blocked() -> None:
         code="AF-GOV-LOOP-DETECTED",
     )
     assert detection.blocked
+    assert detection.action == "stop"

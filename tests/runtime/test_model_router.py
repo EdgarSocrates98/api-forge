@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
+from pathlib import Path
+
 import pytest
 
 from apiforge.contracts.model_routing import (
@@ -9,7 +12,8 @@ from apiforge.contracts.model_routing import (
     ModelEvaluation,
     ModelRouteInputs,
 )
-from apiforge.runtime.model_router import load_model_router_policy, route_model
+from apiforge.governance.control_plane import shadow_records
+from apiforge.runtime.model_router import load_model_router_policy, route_model, route_model_shadow
 from apiforge.runtime.model_scorecard import aggregate_scorecards, scorecard_map
 
 
@@ -186,7 +190,51 @@ def test_budget_and_risk_require_declared_evidence() -> None:
     )
     assert decision.selected is None
     assert all("budget-calls-exhausted" in item.reasons for item in decision.ranked)
-    assert all("risk-scorecard-required" in item.reasons for item in decision.ranked)
+    assert "scorecard" in decision.unresolved
+
+
+def test_task_class_selects_matching_scorecard() -> None:
+    rows = [
+        ModelEvaluation(
+            provider="mid",
+            model="mid-v1",
+            task_class="analysis",
+            quality=0.95,
+            recorded_at="2026-10-06T00:00:00Z",
+        )
+        for _ in range(3)
+    ] + [
+        ModelEvaluation(
+            provider="mid",
+            model="mid-v1",
+            task_class="generation",
+            quality=0.20,
+            recorded_at="2026-10-06T00:00:00Z",
+        )
+        for _ in range(3)
+    ]
+    decision = route_model(
+        ModelRouteInputs(task_class="analysis", needs_tool_support=True),
+        _candidates(),
+        aggregate_scorecards(rows),
+    )
+    mid = next(item for item in decision.ranked if item.model == "mid-v1")
+    assert mid.eligible
+
+
+def test_model_router_shadow_never_governs(tmp_path: Path) -> None:
+    result = route_model_shadow(
+        tmp_path,
+        ModelRouteInputs(task_complexity="high", reasoning_needs="deep"),
+        _candidates(),
+        legacy_decision={"selected": "legacy/model"},
+        now=datetime(2026, 10, 5, tzinfo=UTC),
+    )
+    control = result["control"]
+    assert isinstance(control, dict)
+    assert control["governing"] == "legacy"
+    assert control["shadow"] is True
+    assert len(shadow_records(tmp_path, "model_routing")) == 1
 
 
 def test_challenger_is_opt_in_and_champion_is_preferred() -> None:

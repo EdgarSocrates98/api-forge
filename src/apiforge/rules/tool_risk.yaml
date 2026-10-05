@@ -96,12 +96,14 @@ permissions:
       - apiforge_analyze
       - apiforge_evidence
     allowed_risk_classes: [read_only]
+    allowed_targets: ["*"]
     denied_tools: []
     notes: compact MCP boundary; full tool policy remains explicit
   api-orchestrator:
     allowed_tools: [agent-invocation]
     allowed_risk_classes: [read_only]
     denied_tools: []
+    delegates_to: [specialist, reviewer, critic, referee, runner]
     notes: runtime adapter admission; undeclared requested tools fail closed
   specialist:
     allowed_tools:

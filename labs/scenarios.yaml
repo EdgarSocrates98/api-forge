@@ -56,3 +56,27 @@ scenarios:
     fixture: tests/fixtures/migrations
     proof: tests/migration
     note: "go/java/python/platform-data migration fixtures drive migration tests"
+  - kind: recovery timeout
+    proof: tests/labs/test_runtime_convergence.py
+    note: "governed timeout ladder chooses bounded retry/terminal action"
+  - kind: loop detection
+    proof: tests/labs/test_runtime_convergence.py
+    note: "persisted strategy fingerprint repetition blocks before another attempt"
+  - kind: model router shadow
+    proof: tests/labs/test_runtime_convergence.py
+    note: "model route remains non-authoritative under Decision Plane shadow"
+  - kind: tool authorization denial
+    proof: tests/labs/test_runtime_convergence.py
+    note: "role tool denial retains AF code, field and unlock"
+  - kind: memory stale
+    proof: tests/labs/test_runtime_convergence.py
+    note: "stale memory degrades read-only retrieval and is ineligible for destructive use"
+  - kind: memory conflict
+    proof: tests/labs/test_runtime_convergence.py
+    note: "applicable trusted fresh contradiction returns explicit review/quarantine"
+  - kind: context missing evidence
+    proof: tests/labs/test_runtime_convergence.py
+    note: "required evidence remains in denominator and marks coverage missing"
+  - kind: challenger comparison
+    proof: tests/labs/test_runtime_convergence.py
+    note: "challenger comparison records shadow delta without execution"

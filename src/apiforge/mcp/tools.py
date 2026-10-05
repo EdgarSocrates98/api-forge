@@ -2703,6 +2703,24 @@ def agentops_inspect(
     )
 
 
+def agentops_timeline(
+    run_id: str,
+    root: str = ".",
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Render ordered ledger/span/token events with missing-order evidence."""
+    from apiforge.agentops.timeline import build_timeline
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "agentops_timeline",
+            lambda: build_timeline(Path(root), run_id).model_dump(mode="json"),
+            detail_level,
+        ),
+    )
+
+
 def agentops_compare(
     run_a: str,
     run_b: str,
@@ -3200,6 +3218,7 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     telemetry_export,
     telemetry_validate,
     agentops_inspect,
+    agentops_timeline,
     agentops_compare,
     agentops_waste,
     mcp_audit,

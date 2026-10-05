@@ -90,6 +90,22 @@ def apiforge_call(
             "tool",
             "run apiforge_discover(query) and pass one of its tool names",
         )
+    profiles, permissions = load_tool_risk()
+    target_decision = authorize(
+        subject,
+        tool,
+        profiles=profiles,
+        permissions=permissions,
+        target=True,
+        known_targets=tools.keys(),
+    )
+    if target_decision.decision != "allow":
+        raise _refusal(
+            target_decision.code or "AF-TOOL-AUTHZ-DENIED",
+            target_decision.reason,
+            target_decision.field or "target",
+            target_decision.unlock or "declare an explicit target grant",
+        )
     try:
         inspect.signature(fn).bind(**(arguments or {}))
     except TypeError as exc:

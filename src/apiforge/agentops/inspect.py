@@ -12,6 +12,7 @@ from collections import Counter
 from datetime import datetime
 from pathlib import Path
 
+from apiforge.agentops.timeline import build_timeline
 from apiforge.agentops.waste import detect_waste
 from apiforge.contracts.agentops_report import (
     InspectionMetric,
@@ -132,11 +133,45 @@ def inspect_run(root: Path, run_id: str, *, risk: str | None = None) -> RunInspe
             return _unresolved(name, metric.detail)
         return _metric(name, metric.value, detail=metric.detail or metric.basis)
 
+    observed_context_tokens = [
+        row.cost.observed_tokens for row in rows if row.cost.observed_tokens is not None
+    ]
+    token_eligible_rows = len(rows)
+    if not token_eligible_rows:
+        context_tokens = _unresolved(
+            "tokens", "no run-ledger rows are available for token observation"
+        )
+        token_coverage = _unresolved(
+            "token_observation_coverage", "token-eligible row denominator is unknown"
+        )
+    else:
+        token_coverage = _metric(
+            "token_observation_coverage",
+            len(observed_context_tokens) / token_eligible_rows,
+            detail=(
+                f"{len(observed_context_tokens)}/{token_eligible_rows} run-ledger rows carry observed tokens"
+            ),
+        )
+        if not observed_context_tokens:
+            context_tokens = _unresolved("tokens", "no run-ledger rows carry observed token usage")
+        else:
+            context_tokens = _metric(
+                "tokens",
+                sum(observed_context_tokens),
+                "observed" if len(observed_context_tokens) == token_eligible_rows else "partial",
+                detail=(
+                    "all token-eligible rows carry observed tokens"
+                    if len(observed_context_tokens) == token_eligible_rows
+                    else "only a subset of token-eligible rows carry observed tokens"
+                ),
+            )
+
     context_section = InspectionSection(
         name="context",
         metrics=(
             _metric("bytes", context_bytes),
-            _metric("tokens", sum(row.cost.observed_tokens or 0 for row in rows)),
+            context_tokens,
+            token_coverage,
             _q("context_precision"),
             _q("context_recall"),
             _q("context_density"),
@@ -201,6 +236,71 @@ def inspect_run(root: Path, run_id: str, *, risk: str | None = None) -> RunInspe
     model_spans = [span for span in spans if span.operation == "invoke_model"]
     model_call_ids = {entry.model_call_id for entry in usage if entry.model_call_id}
     model_call_ids.update(span.model_call_id for span in model_spans if span.model_call_id)
+    coverage_basis = run_ledger.token_coverage(rows)
+    eligible_rows = int(coverage_basis["eligible_rows"])
+    observed_token_rows = int(coverage_basis["observed_rows"])
+    if eligible_rows:
+        token_coverage_metric = _metric(
+            "token_coverage",
+            observed_token_rows / eligible_rows,
+            "observed" if coverage_basis["status"] == "complete" else "partial",
+            f"{observed_token_rows}/{eligible_rows} token-eligible ledger rows observed",
+        )
+    else:
+        token_coverage_metric = _unresolved(
+            "token_coverage", "no token-eligible ledger rows declared for this run"
+        )
+    span_call_ids = {span.model_call_id for span in model_spans if span.model_call_id}
+    usage_call_ids = {entry.model_call_id for entry in usage if entry.model_call_id}
+    if span_call_ids:
+        matched_calls = len(span_call_ids & usage_call_ids)
+        model_call_coverage = _metric(
+            "model_call_coverage",
+            matched_calls / len(span_call_ids),
+            "observed" if matched_calls == len(span_call_ids) else "partial",
+            f"{matched_calls}/{len(span_call_ids)} model span ids have token rows",
+        )
+    elif usage_call_ids:
+        model_call_coverage = _unresolved(
+            "model_call_coverage", "token rows have model_call_id but no invoke_model spans"
+        )
+    else:
+        model_call_coverage = _unresolved(
+            "model_call_coverage", "no model_call_id evidence in spans or token rows"
+        )
+    if spans:
+        traced = sum(1 for span in spans if span.trace_id)
+        trace_coverage = _metric(
+            "trace_coverage",
+            traced / len(spans),
+            "observed" if traced == len(spans) else "partial",
+            f"{traced}/{len(spans)} spans carry trace_id",
+        )
+    else:
+        trace_coverage = _unresolved("trace_coverage", "no spans recorded for this run")
+    if rows:
+        cost_rows = sum(
+            1
+            for row in rows
+            if any(
+                value > 0
+                for value in (
+                    row.cost.context_bytes,
+                    row.cost.tool_result_bytes,
+                    row.cost.expansions,
+                    row.cost.cache_hits,
+                    row.cost.duration_ms,
+                )
+            )
+        )
+        cost_coverage = _metric(
+            "cost_coverage",
+            cost_rows / len(rows),
+            "observed" if cost_rows == len(rows) else "partial",
+            f"{cost_rows}/{len(rows)} rows carry non-zero measured cost vector fields",
+        )
+    else:
+        cost_coverage = _unresolved("cost_coverage", "no run-ledger rows available")
     if model_call_ids:
         model_calls = _metric(
             "calls",
@@ -240,8 +340,12 @@ def inspect_run(root: Path, run_id: str, *, risk: str | None = None) -> RunInspe
         name="models",
         metrics=(
             model_calls,
+            model_call_coverage,
             provider_attempts,
             _metric("token_entries", len(usage)),
+            token_coverage_metric,
+            cost_coverage,
+            trace_coverage,
             _metric(
                 "input_tokens",
                 totals["observed"].get("input_tokens"),
@@ -365,6 +469,8 @@ def inspect_run(root: Path, run_id: str, *, risk: str | None = None) -> RunInspe
 
     waste = detect_waste(root, run_id, risk=risk)
     unresolved.extend(waste.unresolved)
+    timeline = build_timeline(root, run_id)
+    unresolved.extend(timeline.unresolved)
 
     run_section = InspectionSection(
         name="run",
@@ -399,6 +505,7 @@ def inspect_run(root: Path, run_id: str, *, risk: str | None = None) -> RunInspe
         ),
         waste=waste.findings,
         decision_path=decision_path,
+        timeline=timeline.events,
         unresolved=tuple(unresolved),
     )
 

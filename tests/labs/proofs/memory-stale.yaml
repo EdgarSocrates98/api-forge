@@ -1,0 +1,5 @@
+kind: memory stale
+status: covered
+input: freshness=stale,risk=destructive
+expected: record_excluded=true,stale_count=1
+evidence: deterministic local memory fixture only; no production freshness claim

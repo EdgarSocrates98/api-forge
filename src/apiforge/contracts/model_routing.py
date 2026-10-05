@@ -25,6 +25,7 @@ class ModelRouteInputs(VersionedContract):
 
     schema: Literal["apiforge/model-route-inputs/v1"] = "apiforge/model-route-inputs/v1"  # type: ignore[assignment]
     task_complexity: GovernorComplexity | None = None
+    task_class: ModelTaskClass | None = None
     risk: DecisionRisk | None = None
     reasoning_needs: Literal["none", "light", "deep"] | None = None
     context_size: int | None = Field(default=None, ge=0)
@@ -118,14 +119,15 @@ class ModelRouteDecision(VersionedContract):
 class RetrievalStep(VersionedContract):
     """One level attempted inside an adaptive retrieval ladder.
 
-    ``top_score`` is the level's raw top score — lexical scores are unbounded,
-    semantic scores stay in ``[0, 1]``; the scale follows the level.
+    ``top_score`` is the level's effective top score after its declared
+    weighting. ``raw_top_score`` preserves the source score for diagnostics.
     """
 
     schema: Literal["apiforge/retrieval-step/v1"] = "apiforge/retrieval-step/v1"  # type: ignore[assignment]
     level: RetrievalLevel
     hits: int = Field(ge=0)
     top_score: float | None = Field(default=None, ge=0)
+    raw_top_score: float | None = Field(default=None, ge=0)
     escalated: bool = False
     reason: str = ""
 

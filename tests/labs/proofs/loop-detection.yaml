@@ -1,0 +1,5 @@
+kind: loop detection
+status: covered
+input: repeated_strategy_fingerprint=3,window=5
+expected: blocked=true,code=AF-GOV-LOOP-DETECTED
+evidence: deterministic runtime governance fixture only; no production traffic claim

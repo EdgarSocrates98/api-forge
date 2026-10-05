@@ -11,7 +11,7 @@ from apiforge.core.models import JsonValue
 
 # §57 — every quantitative claim in an inspection carries its evidence basis;
 # waste findings additionally admit "hypothesis" (plausible, unproven).
-InspectionState = Literal["observed", "estimated", "unresolved"]
+InspectionState = Literal["observed", "partial", "estimated", "unresolved"]
 
 # §56 — the closed waste taxonomy.
 WasteKind = Literal[
@@ -45,7 +45,7 @@ class InspectionMetric(VersionedContract):
         if self.state == "unresolved" and not self.detail:
             raise ValueError("unresolved metrics must name the missing basis")
         if self.state != "unresolved" and self.value is None:
-            raise ValueError("observed/estimated metrics require a value")
+            raise ValueError("observed/partial/estimated metrics require a value")
         return self
 
 
@@ -67,6 +67,26 @@ class WasteFinding(VersionedContract):
     estimated_tokens: int | None = Field(default=None, ge=0)
 
 
+class AgentOpsTimelineEvent(VersionedContract):
+    """One ordered event from a run ledger, span ledger or token ledger."""
+
+    event_id: str = Field(min_length=1)
+    source: Literal["ledger", "span", "token"]
+    operation: str = Field(min_length=1)
+    timestamp: str | None = None
+    status: str = "observed"
+    detail: str = ""
+
+
+class AgentOpsTimeline(VersionedContract):
+    """Deterministic cross-ledger timeline with explicit ordering gaps."""
+
+    schema: Literal["apiforge/agentops-timeline/v1"] = "apiforge/agentops-timeline/v1"  # type: ignore[assignment]
+    run_id: str = Field(min_length=1)
+    events: tuple[AgentOpsTimelineEvent, ...] = ()
+    unresolved: tuple[str, ...] = ()
+
+
 class RunInspection(VersionedContract):
     """§53–§54 the full single-run report, also the JSON projection."""
 
@@ -78,6 +98,7 @@ class RunInspection(VersionedContract):
     sections: tuple[InspectionSection, ...] = ()
     waste: tuple[WasteFinding, ...] = ()
     decision_path: tuple[str, ...] = ()
+    timeline: tuple[AgentOpsTimelineEvent, ...] = ()
     unresolved: tuple[str, ...] = ()
 
 
@@ -112,6 +133,8 @@ class WasteReport(VersionedContract):
 
 
 __all__ = [
+    "AgentOpsTimeline",
+    "AgentOpsTimelineEvent",
     "ComparisonAxis",
     "InspectionMetric",
     "InspectionSection",

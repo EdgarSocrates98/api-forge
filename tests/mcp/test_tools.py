@@ -66,6 +66,7 @@ def test_tools_export_all_expected_verbs() -> None:
         "mcp_surface",
         "agentops_projection",
         "agentops_inspect",
+        "agentops_timeline",
         "agentops_compare",
         "agentops_waste",
         "mcp_audit",

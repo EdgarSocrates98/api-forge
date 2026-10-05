@@ -18,7 +18,12 @@ from apiforge.contracts.agentic import (
     ArtifactKind,
     TrajectoryEvent,
 )
-from apiforge.contracts.agentic_governance import GovernorInputs, RunGovernanceContext
+from apiforge.contracts.agentic_governance import (
+    GovernorInputs,
+    LoopAction,
+    LoopDetection,
+    RunGovernanceContext,
+)
 from apiforge.contracts.base import ContractError
 from apiforge.contracts.economy import EconomyPlan, LadderStep
 from apiforge.contracts.graph import GraphEdge, GraphExport, GraphNode
@@ -29,7 +34,7 @@ from apiforge.core.ids import stable_id
 from apiforge.core.models import JsonValue
 from apiforge.governance.gain import expected_gain
 from apiforge.governance.governor import govern
-from apiforge.governance.loop import check_loop, strategy_fingerprint
+from apiforge.governance.loop import check_loop, load_loop_policy, strategy_fingerprint
 from apiforge.governance.recovery import decide_recovery
 from apiforge.governance.stop import decide_stop
 from apiforge.graph.store import read_graph
@@ -304,6 +309,53 @@ def _governed_policy(policy: Any, decision: Any) -> Any:
     )
 
 
+def _strategy_payload(routing_plan: Any, policy: Any) -> dict[str, JsonValue]:
+    return {
+        "primary": routing_plan.primary,
+        "fallbacks": routing_plan.fallbacks,
+        "execution_mode": routing_plan.execution_mode,
+        "parallel": policy.max_parallel_agents,
+    }
+
+
+def _record_strategy(
+    storage: RunStore,
+    run_id: str,
+    strategy: dict[str, JsonValue],
+    timestamp: str,
+) -> LoopDetection:
+    policy = load_loop_policy()
+    fingerprint = strategy_fingerprint(strategy)
+    history = storage.strategy_history()
+    detection = check_loop(
+        (*history, fingerprint),
+        window=int(policy["window"]),
+        max_repeats=int(policy["max_repeats"]),
+        blocked_action=cast(LoopAction, str(policy["blocked_action"])),
+    )
+    storage.event(
+        TrajectoryEvent(
+            event_id=stable_id(
+                "event",
+                {"run": run_id, "event": "strategy_selected", "fingerprint": fingerprint},
+            ),
+            run_id=run_id,
+            event="strategy_selected",
+            actor="api-orchestrator",
+            subject=fingerprint,
+            payload={
+                "fingerprint": fingerprint,
+                "strategy": strategy,
+                "history_length": len(history),
+                "loop": detection.model_dump(mode="json"),
+            },
+            created_at=timestamp,
+            evidence_level="observed",
+        )
+    )
+    return detection
+
+
 def _governor_complexity(routing: RoutingDecision) -> str | None:
     assessment = routing.risk_complexity
     if assessment is None:
@@ -485,6 +537,8 @@ async def _escalate(
                 prompt=f"Escalation review for capability {item.capability}",
                 input_refs=item.input_refs,
                 output_contract="AgentArtifact/v1",
+                authority_subject=capabilities_catalog[reviewer].kind,
+                delegated_from="api-orchestrator",
                 **_role_fields(
                     (role_rows or {}).get(item.capability),
                     tuple(f"artifact:{artifact.artifact_id}" for artifact in artifacts),
@@ -551,8 +605,24 @@ def _role_fields(row: RoleContext | None, extra_refs: tuple[str, ...] = ()) -> d
 async def _authorized_invoke(adapter: ModelAdapter, request: AgentRequest) -> object:
     """Enforce runtime tool admission before crossing the model adapter boundary."""
     profiles, permissions = load_tool_risk()
-    for tool in ("agent-invocation", *request.tool_names):
-        decision = authorize("api-orchestrator", tool, profiles=profiles, permissions=permissions)
+    boundary = authorize(
+        "api-orchestrator", "agent-invocation", profiles=profiles, permissions=permissions
+    )
+    decisions: tuple[Any, ...] = (boundary,)
+    if boundary.decision == "allow":
+        subject = request.authority_subject or request.agent
+        decisions += tuple(
+            authorize(
+                subject,
+                tool,
+                profiles=profiles,
+                permissions=permissions,
+                delegated_from=request.delegated_from,
+                delegated_scope=request.delegated_scope or request.tool_names,
+            )
+            for tool in request.tool_names
+        )
+    for decision in decisions:
         if decision.decision != "allow":
             error = ContractError(decision.code or "AF-TOOL-AUTHZ-DENIED", decision.reason)
             error.field = decision.field or "tool"  # type: ignore[attr-defined]
@@ -637,6 +707,8 @@ async def _shadow(
                 prompt=f"Shadow challenger for capability {item.capability}",
                 input_refs=item.input_refs,
                 output_contract="AgentArtifact/v1",
+                authority_subject=capabilities_catalog[name].kind,
+                delegated_from="api-orchestrator",
                 **_role_fields(context_row),
             ),
         )
@@ -812,6 +884,18 @@ async def execute_run(
         evidence_refs=tuple(sorted(set(routing.evidence))),
         unresolved=governor_decision.unresolved,
     )
+    policy = _governed_policy(policy, governor_decision)
+    strategy = _strategy_payload(routing_plan, policy)
+    loop_detection = _record_strategy(storage, run_id, strategy, timestamp)
+    governance_unresolved = set(governance_context.unresolved)
+    if loop_detection.code:
+        governance_unresolved.add(loop_detection.code)
+    governance_context = governance_context.model_copy(
+        update={
+            "loop": loop_detection,
+            "unresolved": tuple(sorted(governance_unresolved)),
+        }
+    )
     storage.json("governance-context.json", governance_context.model_dump(mode="json"))
     storage.event(
         TrajectoryEvent(
@@ -824,7 +908,6 @@ async def execute_run(
             created_at=timestamp,
         )
     )
-    policy = _governed_policy(policy, governor_decision)
     run = run.model_copy(update={"governance_context_id": governance_context.context_id})
     storage.save_run(run)
     storage.save_routing_plan(routing_plan)
@@ -857,6 +940,52 @@ async def execute_run(
             created_at=timestamp,
         )
     )
+    if loop_detection.blocked:
+        gap = (
+            "AF-GOV-LOOP-DETECTED: field=strategy_fingerprint; "
+            "unlock=change strategy or provide an approved recovery action"
+        )
+        run = run.model_copy(
+            update={
+                "state": AgenticState.BLOCKED,
+                "final_status": "BLOCKED",
+                "decision_ids": (routing.decision_id,),
+                "gaps": tuple(sorted({*run.gaps, gap})),
+                "finished_at": timestamp,
+            }
+        )
+        storage.save_run(run)
+        storage.event(
+            TrajectoryEvent(
+                event_id=stable_id("event", {"run": run_id, "event": "governance_loop_blocked"}),
+                run_id=run_id,
+                event="governance_loop_blocked",
+                actor="api-orchestrator",
+                subject=loop_detection.strategy_fingerprint,
+                payload={"loop": loop_detection.model_dump(mode="json")},
+                created_at=timestamp,
+            )
+        )
+        storage.json("replay.json", storage.replay())
+        task_store.record_agentic_run(root, run)
+        task_store.record_event(
+            root,
+            task_id,
+            {
+                "event": "agentic_run",
+                "run_id": run_id,
+                "status": "BLOCKED",
+                "reason": "AF-GOV-LOOP-DETECTED",
+            },
+        )
+        return {
+            "run": run.model_dump(mode="json"),
+            "artifacts": [],
+            "governance": governance_context.model_dump(mode="json"),
+            "status": "BLOCKED",
+            "unresolved": {"governance": list(governance_context.unresolved)},
+            "run_dir": str(storage.directory),
+        }
     evolution_gate = _persist_evolution_gate(storage, routing, run_id, timestamp)
     if not is_active(evolution_gate):
         return _blocked_by_evolution_gate(
@@ -1004,6 +1133,8 @@ async def execute_run(
             prompt=f"Review API evolution for capability {invocation.capability}",
             input_refs=invocation.input_refs,
             output_contract="AgentArtifact/v1",
+            authority_subject=capabilities_catalog[invocation.capability].kind,
+            delegated_from="api-orchestrator",
             **_role_fields(role_rows.get(invocation.capability)),
         )
         return await _authorized_invoke(adapter, request)
@@ -1227,13 +1358,6 @@ async def execute_run(
                 )
             break
 
-    strategy = {
-        "primary": routing_plan.primary,
-        "fallbacks": routing_plan.fallbacks,
-        "execution_mode": routing_plan.execution_mode,
-        "parallel": policy.max_parallel_agents,
-    }
-    loop_detection = check_loop((strategy_fingerprint(strategy),))
     recovery = (
         decide_recovery(
             _failure_class(errors[0]),
@@ -1246,8 +1370,6 @@ async def execute_run(
         else None
     )
     governance_unresolved = set(governance_context.unresolved)
-    governance_unresolved.update(loop_detection.code or "")
-    governance_unresolved.discard("")
     if recovery is not None:
         governance_unresolved.update(recovery.unresolved)
         if recovery.code:
@@ -1611,6 +1733,45 @@ async def resume_existing_run(
     storage.save_routing(routing)
     policy = _effective_policy(policy, spec.budgets.max_calls, economy_plan)
     storage.save_routing_plan(routing_plan)
+    strategy = _strategy_payload(routing_plan, policy)
+    loop_detection = _record_strategy(storage, run_id, strategy, timestamp)
+    if loop_detection.blocked:
+        gap = (
+            "AF-GOV-LOOP-DETECTED: field=strategy_fingerprint; "
+            "unlock=change strategy or provide an approved recovery action"
+        )
+        resumed = previous.model_copy(
+            update={
+                "state": AgenticState.BLOCKED,
+                "final_status": "BLOCKED",
+                "gaps": tuple(sorted({*previous.gaps, gap})),
+                "finished_at": timestamp,
+            }
+        )
+        storage.save_run(resumed)
+        storage.event(
+            TrajectoryEvent(
+                event_id=stable_id("event", {"run": run_id, "event": "governance_loop_blocked"}),
+                run_id=run_id,
+                event="governance_loop_blocked",
+                actor="api-orchestrator",
+                subject=loop_detection.strategy_fingerprint,
+                payload={"loop": loop_detection.model_dump(mode="json")},
+                created_at=timestamp,
+            )
+        )
+        storage.json("replay.json", storage.replay())
+        task_store.record_agentic_run(root, resumed)
+        return {
+            "run": resumed.model_dump(mode="json"),
+            "artifacts": [],
+            "status": "BLOCKED",
+            "resumed": True,
+            "reused_invocations": len(previous.invocation_ids),
+            "gaps": (gap,),
+            "loop": loop_detection.model_dump(mode="json"),
+            "run_dir": str(storage.directory),
+        }
     selected = tuple(
         by_name[step.name]
         for step in ready
@@ -1661,6 +1822,8 @@ async def resume_existing_run(
                 capability=invocation.capability,
                 prompt=f"Resume API evolution for capability {invocation.capability}",
                 output_contract="AgentArtifact/v1",
+                authority_subject=by_name[invocation.capability].kind,
+                delegated_from="api-orchestrator",
             ),
         )
 

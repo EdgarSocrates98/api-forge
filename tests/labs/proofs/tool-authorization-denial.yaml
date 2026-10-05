@@ -1,0 +1,5 @@
+kind: tool authorization denial
+status: covered
+input: subject=critic,tool=memory_persist
+expected: decision=deny,code=AF-TOOL-DENIED
+evidence: deterministic role policy fixture only; no host identity claim

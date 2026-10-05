@@ -33,3 +33,23 @@ def test_runtime_requested_tool_without_profile_refuses() -> None:
     with pytest.raises(ContractError) as error:
         asyncio.run(_authorized_invoke(FakeModelAdapter(), request))
     assert error.value.code == "AF-TOOL-PROFILE-MISSING"
+
+
+def test_role_authorization_uses_effective_role_and_delegated_scope() -> None:
+    allowed = AgentRequest(
+        invocation_id="inv:reviewer",
+        agent="api-task-spec-reviewer",
+        capability="capability:test",
+        prompt="test",
+        tool_names=("semgrep",),
+        authority_subject="reviewer",
+        delegated_from="api-orchestrator",
+        delegated_scope=("semgrep",),
+        output_contract="AgentArtifact/v1",
+    )
+    assert asyncio.run(_authorized_invoke(FakeModelAdapter(), allowed)) is not None
+
+    denied = allowed.model_copy(update={"authority_subject": "critic"})
+    with pytest.raises(ContractError) as error:
+        asyncio.run(_authorized_invoke(FakeModelAdapter(), denied))
+    assert error.value.code == "AF-TOOL-AUTHZ-DENIED"

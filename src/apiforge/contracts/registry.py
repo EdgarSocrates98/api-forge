@@ -50,6 +50,7 @@ from apiforge.contracts.agentic_memory import (
     BlackboardQuery,
     BlackboardResult,
     MemoryCandidate,
+    MemoryConflict,
     MemoryInvalidation,
     MemoryOutcome,
     MemoryPolicy,
@@ -60,6 +61,7 @@ from apiforge.contracts.agentic_memory import (
     SemanticCheckpoint,
 )
 from apiforge.contracts.agentops_report import (
+    AgentOpsTimeline,
     ComparisonAxis,
     InspectionMetric,
     InspectionSection,
@@ -411,6 +413,7 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "MemoryTrust/v1": MemoryTrust,
     "MemoryRecord/v1": MemoryRecord,
     "MemoryCandidate/v1": MemoryCandidate,
+    "MemoryConflict/v1": MemoryConflict,
     "MemoryPolicy/v1": MemoryPolicy,
     "MemoryQuery/v1": MemoryQuery,
     "MemoryOutcome/v1": MemoryOutcome,
@@ -571,6 +574,7 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "OtlpValidation/v1": OtlpValidation,
     "CollectorProbe/v1": CollectorProbe,
     "RunInspection/v1": RunInspection,
+    "AgentOpsTimeline/v1": AgentOpsTimeline,
     "InspectionSection/v1": InspectionSection,
     "InspectionMetric/v1": InspectionMetric,
     "WasteFinding/v1": WasteFinding,

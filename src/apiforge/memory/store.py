@@ -8,7 +8,6 @@ of silently treating it as fresh truth.
 from __future__ import annotations
 
 import json
-from datetime import datetime
 from pathlib import Path
 from typing import cast
 
@@ -26,6 +25,8 @@ from apiforge.contracts.agentic_memory import (
 from apiforge.contracts.trust import MemoryGateResult, MemoryQuarantine
 from apiforge.core.io import sha256_file
 from apiforge.core.models import JsonValue
+from apiforge.memory.conflicts import detect_memory_conflicts
+from apiforge.memory.matching import effective_freshness, runtime_match
 from apiforge.memory.security import evaluate_gates
 
 _MEMORY_DIR = Path(".apiforge") / "memory"
@@ -109,12 +110,16 @@ def propose_memory(
     created_at: str,
     observed_at: str | None = None,
     expires_at: str | None = None,
+    freshness: str = "unknown",
     trust_level: str = "candidate",
     provenance: tuple[str, ...] = (),
     evidence_refs: tuple[str, ...] = (),
+    taint: tuple[str, ...] = (),
     environment_fingerprint: str | None = None,
     applicability: dict[str, object] | None = None,
+    runtime_requirements: dict[str, str] | None = None,
     runtime_constraints: tuple[str, ...] = (),
+    policy_version: str | None = None,
 ) -> MemoryCandidate:
     """Observe a candidate; this step never makes it institutional truth."""
     normalized = MemoryRecord(
@@ -125,14 +130,19 @@ def propose_memory(
         created_at=created_at,
         observed_at=observed_at,
         expires_at=expires_at,
+        freshness=freshness,  # type: ignore[arg-type]
         trust_level=trust_level,  # type: ignore[arg-type]
         provenance=provenance,
         evidence_refs=evidence_refs,
         environment_fingerprint=environment_fingerprint,
         applicability=cast(dict[str, JsonValue], applicability or {}),
+        runtime_requirements=runtime_requirements or {},
         runtime_constraints=runtime_constraints,
+        policy_version=policy_version,
         payload=payload,  # type: ignore[arg-type]
-        trust=MemoryTrust(level=cast(TrustLevel, trust_level), evidence_refs=evidence_refs),
+        trust=MemoryTrust(
+            level=cast(TrustLevel, trust_level), taint=taint, evidence_refs=evidence_refs
+        ),
         content_sha256=_digest(payload),
     )
     candidate = MemoryCandidate(
@@ -209,7 +219,11 @@ def persist_candidate(
             evidence_refs=record.evidence_refs,
         )
     persisted = record.model_copy(
-        update={"outcome": "persisted", "freshness": "fresh", "created_at": now}
+        update={
+            "outcome": "persisted",
+            "freshness": "fresh" if record.freshness == "unknown" else record.freshness,
+            "created_at": now,
+        }
     )
     _append(directory, _RECORDS, persisted)
     return MemoryOutcome(
@@ -291,17 +305,6 @@ def load_candidate(root: Path, candidate_id: str) -> MemoryCandidate:
     raise ValueError(f"AF-MEMORY-CANDIDATE-NOT-FOUND: {candidate_id}")
 
 
-def _expired(record: MemoryRecord, now: str | None) -> bool:
-    if not record.expires_at:
-        return False
-    if not now:
-        return False
-    try:
-        return datetime.fromisoformat(record.expires_at) <= datetime.fromisoformat(now)
-    except ValueError:
-        return False
-
-
 def query_memory(root: Path, query: MemoryQuery) -> MemoryRetrievalResult:
     directory = _directory(root)
     records = _read(directory, _RECORDS, MemoryRecord)
@@ -310,6 +313,7 @@ def query_memory(root: Path, query: MemoryQuery) -> MemoryRetrievalResult:
     matches: list[MemoryRecord] = []
     stale_count = 0
     invalidated_count = 0
+    tainted_count = 0
     unresolved: list[str] = []
     for record in records:
         if record.memory_id in invalidated_ids:
@@ -329,30 +333,60 @@ def query_memory(root: Path, query: MemoryQuery) -> MemoryRetrievalResult:
         ):
             unresolved.append(f"environment_mismatch:{record.memory_id}")
             continue
+        if query.runtime:
+            runtime_ok, _, runtime_unresolved = runtime_match(record, query.runtime)
+            if not runtime_ok:
+                unresolved.extend(f"{item}:{record.memory_id}" for item in runtime_unresolved)
+                continue
         if _TRUST_ORDER[record.trust_level] < _TRUST_ORDER[query.minimum_trust]:
             continue
+        if record.trust.taint:
+            tainted_count += 1
+            unresolved.append(f"tainted:{record.memory_id}")
+            if not query.include_tainted:
+                continue
+        freshness = effective_freshness(record, query.now)
+        if freshness in {"stale", "expired"}:
+            stale_count += 1
+            if query.risk == "destructive" or query.stale_handling == "exclude":
+                unresolved.append(f"freshness_ineligible:{record.memory_id}")
+                continue
+            if query.risk == "sensitive" or query.stale_handling == "review":
+                unresolved.append(f"freshness_review:{record.memory_id}")
+        elif freshness in {"unknown", "unresolved"}:
+            unresolved.append(f"AF-MEMORY-FRESHNESS-UNRESOLVED:{record.memory_id}")
+            if query.risk == "destructive" or query.stale_handling == "exclude":
+                continue
         searchable = json.dumps(record.payload, sort_keys=True, ensure_ascii=False).lower()
         if query.terms:
             coverage = sum(term.lower() in searchable for term in query.terms) / len(query.terms)
             if coverage < query.min_term_coverage:
                 continue
-        if record.expires_at and query.now is None:
-            unresolved.append(f"AF-MEMORY-FRESHNESS-UNRESOLVED:{record.memory_id}")
-        elif _expired(record, query.now):
-            stale_count += 1
         matches.append(record)
     from apiforge.memory.retrieval import rank_records
 
+    conflicts = detect_memory_conflicts(matches, query) if query.detect_conflicts else ()
+    if conflicts:
+        unresolved.extend(f"conflict:{item.conflict_id}:{item.outcome}" for item in conflicts)
+        if query.risk == "destructive":
+            conflict_ids = {item.memory_a_id for item in conflicts} | {
+                item.memory_b_id for item in conflicts
+            }
+            matches = [item for item in matches if item.memory_id not in conflict_ids]
     order = {score.memory_id: index for index, score in enumerate(rank_records(matches, query))}
     matches.sort(key=lambda item: order[item.memory_id])
     status = "ready"
-    if unresolved or stale_count:
+    if conflicts:
+        status = "unresolved"
+    elif unresolved or stale_count or tainted_count:
         status = "degraded"
     return MemoryRetrievalResult(
         query=query,
         records=tuple(matches[: query.max_results]),
         stale_count=stale_count,
         invalidated_count=invalidated_count,
+        tainted_count=tainted_count,
+        conflicts=conflicts,
         unresolved=tuple(unresolved),
         status=status,  # type: ignore[arg-type]
     )

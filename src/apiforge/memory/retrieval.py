@@ -8,15 +8,11 @@ similarity is an optional caller-supplied bonus, never a dependency.
 from __future__ import annotations
 
 import json
-from datetime import datetime
 from pathlib import Path
 
-from apiforge.contracts.agentic_memory import (
-    MemoryInvalidation,
-    MemoryQuery,
-    MemoryRecord,
-)
+from apiforge.contracts.agentic_memory import MemoryQuery, MemoryRecord
 from apiforge.contracts.trust import MemoryRankedResult, MemoryScore
+from apiforge.memory.matching import effective_freshness, runtime_match
 
 _TRUST_ORDER = {
     "unknown": 0,
@@ -47,18 +43,6 @@ def _term_coverage(searchable: str, terms: tuple[str, ...]) -> float:
     return sum(term.lower() in searchable for term in terms) / len(terms)
 
 
-def _expired(record: MemoryRecord, now: str | None) -> bool | None:
-    """True expired, False fresh, None when freshness cannot be decided."""
-    if not record.expires_at:
-        return None
-    if not now:
-        return None
-    try:
-        return datetime.fromisoformat(record.expires_at) <= datetime.fromisoformat(now)
-    except ValueError:
-        return None
-
-
 def score_record(
     record: MemoryRecord, query: MemoryQuery, *, semantic_score: float | None = None
 ) -> MemoryScore:
@@ -75,15 +59,15 @@ def score_record(
         env_compat = 0.5
     else:
         env_compat = float(record.environment_fingerprint == query.environment_fingerprint)
-    if not record.runtime_constraints:
-        runtime_compat = 1.0
-    else:
-        haystack = " ".join(terms + [scope for scope in query.scopes])
-        runtime_compat = sum(
-            1 for item in record.runtime_constraints if item.lower() in haystack
-        ) / len(record.runtime_constraints)
-    expired = _expired(record, query.now)
-    freshness = 0.0 if expired else (1.0 if expired is False else 0.75)
+    _, runtime_compat, _ = runtime_match(record, query.runtime)
+    freshness_state = effective_freshness(record, query.now)
+    freshness = {
+        "fresh": 1.0,
+        "stale": 0.0,
+        "expired": 0.0,
+        "unknown": 0.5,
+        "unresolved": 0.25,
+    }.get(freshness_state, 0.25)
     trust = _TRUST_ORDER[record.trust_level] / 4.0
     outcome = 1.0 if record.outcome in {"persisted", "reinforced"} else 0.5
     evidence = min(1.0, len(record.evidence_refs) / 2.0)
@@ -126,42 +110,16 @@ def rank_records(
 def query_memory_scored(
     root: Path, query: MemoryQuery, *, semantic_scores: dict[str, float] | None = None
 ) -> MemoryRankedResult:
-    """Filtered retrieval (same predicates as query_memory) plus ranking."""
-    from apiforge.memory.store import _INVALIDATIONS, _RECORDS, _directory, _read
+    """Governed retrieval plus per-record score decomposition."""
+    from apiforge.memory.store import query_memory
 
-    directory = _directory(root)
-    records = _read(directory, _RECORDS, MemoryRecord)
-    invalidations = _read(directory, _INVALIDATIONS, MemoryInvalidation)
-    invalidated_ids = {item.memory_id for item in invalidations}
-    unresolved: list[str] = []
-    matches: list[MemoryRecord] = []
-    for record in records:
-        if record.memory_id in invalidated_ids and not query.include_invalidated:
-            continue
-        if query.scopes and record.scope not in query.scopes:
-            continue
-        if (
-            query.environment_fingerprint
-            and record.environment_fingerprint != query.environment_fingerprint
-        ):
-            unresolved.append(f"environment_mismatch:{record.memory_id}")
-            continue
-        if query.environment and any(
-            record.applicability.get(key) != value for key, value in query.environment.items()
-        ):
-            unresolved.append(f"environment_mismatch:{record.memory_id}")
-            continue
-        if _TRUST_ORDER[record.trust_level] < _TRUST_ORDER[query.minimum_trust]:
-            continue
-        searchable = json.dumps(record.payload, sort_keys=True, ensure_ascii=False).lower()
-        if _term_coverage(searchable, query.terms) < query.min_term_coverage:
-            continue
-        matches.append(record)
-    ranked = rank_records(matches, query, semantic_scores=semantic_scores)
+    result = query_memory(root, query)
+    ranked = rank_records(list(result.records), query, semantic_scores=semantic_scores)
     return MemoryRankedResult(
         query=query,
         ranked=ranked[: query.max_results],
-        unresolved=tuple(unresolved),
+        conflicts=result.conflicts,
+        unresolved=result.unresolved,
     )
 
 

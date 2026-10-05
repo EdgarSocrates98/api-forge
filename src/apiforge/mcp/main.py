@@ -18,6 +18,7 @@ def resolve_surface(argv: list[str] | None = None) -> str:
     parser = argparse.ArgumentParser(prog="apiforge-mcp")
     parser.add_argument("--surface", choices=("full", "compact"), default=None)
     parser.add_argument("--host", default=None)
+    parser.add_argument("--protocol", choices=("legacy", "modern"), default=None)
     args = parser.parse_args(argv)
     if args.surface:
         return str(args.surface)
@@ -29,12 +30,22 @@ def resolve_surface(argv: list[str] | None = None) -> str:
     return os.environ.get("APIFORGE_MCP_SURFACE", "full")
 
 
+def resolve_protocol(argv: list[str] | None = None) -> str:
+    parser = argparse.ArgumentParser(prog="apiforge-mcp")
+    parser.add_argument("--surface", choices=("full", "compact"), default=None)
+    parser.add_argument("--host", default=None)
+    parser.add_argument("--protocol", choices=("legacy", "modern"), default=None)
+    args = parser.parse_args(argv)
+    return str(args.protocol or os.environ.get("APIFORGE_MCP_PROTOCOL", "legacy"))
+
+
 def main(argv: list[str] | None = None) -> int:
     surface = resolve_surface(argv)
+    protocol = resolve_protocol(argv)
     try:
         from apiforge.mcp.server import build_server
 
-        server = build_server(surface)
+        server = build_server(surface, protocol=protocol)
     except ImportError:
         print(
             f"{MCP_UNAVAILABLE}: the mcp package is not installed; "

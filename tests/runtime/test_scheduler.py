@@ -82,3 +82,26 @@ def test_scheduler_retries_and_skips_dependents_after_failure() -> None:
     by_id = {item.invocation.invocation_id: item for item in result}
     assert by_id["root"].invocation.status.value == "failed"
     assert by_id["child"].invocation.status.value == "skipped"
+    assert by_id["root"].recovery is not None
+    assert by_id["root"].recovery.decision == "fallback"
+
+
+def test_scheduler_honors_replan_before_retry() -> None:
+    item = AgentInvocation(
+        invocation_id="invalid",
+        run_id="r",
+        agent="a",
+        capability="c",
+        adapter="fake",
+    )
+    calls = 0
+
+    async def worker(_: AgentInvocation) -> object:
+        nonlocal calls
+        calls += 1
+        raise ContractError("AF-RUNTIME-SCHEMA", "invalid adapter output")
+
+    result = asyncio.run(run_bounded((item,), worker, limit=1, timeout_seconds=1, max_retries=3))
+    assert calls == 1
+    assert result[0].recovery is not None
+    assert result[0].recovery.decision == "replan"

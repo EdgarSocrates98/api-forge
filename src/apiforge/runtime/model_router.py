@@ -6,6 +6,7 @@ makes a candidate ineligible; missing signals land in ``unresolved``.
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -16,9 +17,11 @@ from apiforge.contracts.model_routing import (
     ModelRouteDecision,
     ModelRouteInputs,
     ModelScorecard,
+    ModelTaskClass,
     RankedModel,
 )
 from apiforge.economy.run_ledger import EconomyError
+from apiforge.governance.control_plane import evaluate_route
 
 RULES = Path(__file__).resolve().parent.parent / "rules" / "model_router.yaml"
 
@@ -55,6 +58,22 @@ def load_model_router_policy(path: Path | None = None) -> dict[str, Any]:
 
 def _scorecard_key(candidate: ModelCandidate) -> tuple[str, str]:
     return candidate.provider, candidate.model
+
+
+def _scorecard_for(
+    candidate: ModelCandidate,
+    inputs: ModelRouteInputs,
+    scorecards: dict[tuple[str, str], ModelScorecard]
+    | dict[tuple[str, str, ModelTaskClass], ModelScorecard],
+) -> ModelScorecard | None:
+    if inputs.task_class is not None:
+        keyed = scorecards.get((candidate.provider, candidate.model, inputs.task_class))  # type: ignore[arg-type]
+        if keyed is not None:
+            return keyed
+    card = scorecards.get(_scorecard_key(candidate))  # type: ignore[arg-type]
+    if card is not None and inputs.task_class is not None and card.task_class != inputs.task_class:
+        return None
+    return card
 
 
 def _constraints(candidate: ModelCandidate, inputs: ModelRouteInputs) -> list[str]:
@@ -118,7 +137,9 @@ def _normalize(value: float | None, cap: float) -> float | None:
 def route_model(
     inputs: ModelRouteInputs,
     candidates: tuple[ModelCandidate, ...],
-    scorecards: dict[tuple[str, str], ModelScorecard] | None = None,
+    scorecards: dict[tuple[str, str], ModelScorecard]
+    | dict[tuple[str, str, ModelTaskClass], ModelScorecard]
+    | None = None,
     *,
     policy: dict[str, Any] | None = None,
 ) -> ModelRouteDecision:
@@ -127,6 +148,7 @@ def route_model(
     unresolved: list[str] = []
     for name, value in (
         ("task_complexity", inputs.task_complexity),
+        ("task_class", inputs.task_class),
         ("risk", inputs.risk),
         ("reasoning_needs", inputs.reasoning_needs),
         ("context_size", inputs.context_size),
@@ -139,7 +161,7 @@ def route_model(
     ranked: list[RankedModel] = []
     for candidate in candidates:
         reasons = _constraints(candidate, inputs)
-        card = cards.get(_scorecard_key(candidate))
+        card = _scorecard_for(candidate, inputs, cards)
         if card is not None and card.freshness_state in {
             "stale",
             "degraded",
@@ -167,7 +189,7 @@ def route_model(
             "irreversible",
         }:
             if card is None:
-                reasons.append("risk-scorecard-required")
+                unresolved.append("scorecard")
             elif card.evidence_correctness is None:
                 reasons.append("evidence-correctness-unresolved")
         if card is not None and card.evaluation_count < rules["min_evaluations"]:
@@ -266,9 +288,40 @@ def route_model(
     )
 
 
+def route_model_shadow(
+    root: Path,
+    inputs: ModelRouteInputs,
+    candidates: tuple[ModelCandidate, ...],
+    scorecards: dict[tuple[str, str], ModelScorecard]
+    | dict[tuple[str, str, ModelTaskClass], ModelScorecard]
+    | None = None,
+    *,
+    legacy_decision: dict[str, object] | None = None,
+    policy: dict[str, Any] | None = None,
+    now: datetime | None = None,
+) -> dict[str, object]:
+    """Run model routing as a non-authoritative Decision Plane shadow."""
+    candidate = route_model(inputs, candidates, scorecards, policy=policy)
+    eligible = [item for item in candidate.ranked if item.eligible]
+    control = evaluate_route(
+        root,
+        "model_routing",
+        candidate_decision=candidate.model_dump(mode="json"),
+        legacy_decision=legacy_decision or {},
+        confidence=eligible[0].score if eligible else None,
+        evidence_refs=("model-route-inputs",),
+        now=now or datetime.now(UTC),
+    )
+    return {
+        "candidate": candidate.model_dump(mode="json"),
+        "control": control.model_dump(mode="json"),
+    }
+
+
 __all__ = [
     "NO_ELIGIBLE_MODEL",
     "ROUTER_POLICY_INVALID",
     "load_model_router_policy",
     "route_model",
+    "route_model_shadow",
 ]

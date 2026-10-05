@@ -59,6 +59,16 @@ they do not claim provider or production behavior.
 - Supply-chain audit: `ok=true`, with external CVE and local `pip check`
   limitations preserved.
 
+## CI observation
+
+The push run
+[`37354008874`](https://github.com/EdgarSocrates98/api-forge/actions/runs/37354008874)
+failed twice during job startup: all four validation jobs reported no
+`runner_name` and no executed steps. The green-validation PR and auto-merge
+jobs were skipped, and the host currently reports no repository runners. No PR
+was created manually because the repository policy reserves that mutation for
+`open-green-pr`.
+
 ## Safety and evidence boundaries
 
 No provider, cloud, database, live model, deployment or external mutation was
@@ -81,8 +91,8 @@ environmental failure.
 
 ## Open items
 
-1. Push this branch and let the dedicated green-validation CI job create or
-   reuse the PR; only that job may perform the PR mutation.
+1. Restore/enable GitHub-hosted runner availability, then rerun the push CI;
+   only the dedicated green-validation job may create or reuse the PR.
 2. Observe all required CI checks and automatic merge policy.
 3. After merge, observe the main-branch validation run.
 4. Obtain external CVE/advisory, provider freshness, deployment and

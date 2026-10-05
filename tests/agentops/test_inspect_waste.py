@@ -206,6 +206,29 @@ def test_inspect_missing_model_correlation_is_unresolved(tmp_path: Path) -> None
     assert calls.state == "unresolved"
 
 
+def test_inspect_context_tokens_without_observation_are_unresolved(tmp_path: Path) -> None:
+    run_ledger.append(tmp_path, _row("run-1", cost=CostVector(context_bytes=10)))
+    context = next(
+        section for section in inspect_run(tmp_path, "run-1").sections if section.name == "context"
+    )
+    metrics = {metric.name: metric for metric in context.metrics}
+    assert metrics["tokens"].value is None
+    assert metrics["tokens"].state == "unresolved"
+    assert metrics["token_observation_coverage"].value == 0.0
+
+
+def test_inspect_context_tokens_expose_partial_coverage(tmp_path: Path) -> None:
+    run_ledger.append(tmp_path, _row("run-1", cost=CostVector(observed_tokens=300)))
+    run_ledger.append(tmp_path, _row("run-1", cost=CostVector()))
+    context = next(
+        section for section in inspect_run(tmp_path, "run-1").sections if section.name == "context"
+    )
+    metrics = {metric.name: metric for metric in context.metrics}
+    assert metrics["tokens"].value == 300
+    assert metrics["tokens"].state == "partial"
+    assert metrics["token_observation_coverage"].value == 0.5
+
+
 # --- compare ---------------------------------------------------------------
 
 

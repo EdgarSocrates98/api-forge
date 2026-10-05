@@ -11,7 +11,7 @@ from apiforge.core.models import JsonValue
 
 # §57 — every quantitative claim in an inspection carries its evidence basis;
 # waste findings additionally admit "hypothesis" (plausible, unproven).
-InspectionState = Literal["observed", "estimated", "unresolved"]
+InspectionState = Literal["observed", "partial", "estimated", "unresolved"]
 
 # §56 — the closed waste taxonomy.
 WasteKind = Literal[
@@ -45,7 +45,7 @@ class InspectionMetric(VersionedContract):
         if self.state == "unresolved" and not self.detail:
             raise ValueError("unresolved metrics must name the missing basis")
         if self.state != "unresolved" and self.value is None:
-            raise ValueError("observed/estimated metrics require a value")
+            raise ValueError("observed/partial/estimated metrics require a value")
         return self
 
 

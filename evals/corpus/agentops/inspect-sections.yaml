@@ -13,6 +13,7 @@ usage:
     agent: builder
     task_id: task-eval
     model: m1
+    model_call_id: model-call-1
     tokens: {input_tokens: 100, output_tokens: 50}
 inspect:
   metrics:

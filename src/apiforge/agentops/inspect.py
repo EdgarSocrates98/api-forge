@@ -132,11 +132,43 @@ def inspect_run(root: Path, run_id: str, *, risk: str | None = None) -> RunInspe
             return _unresolved(name, metric.detail)
         return _metric(name, metric.value, detail=metric.detail or metric.basis)
 
+    observed_context_tokens = [row.cost.observed_tokens for row in rows if row.cost.observed_tokens is not None]
+    token_eligible_rows = len(rows)
+    if not token_eligible_rows:
+        context_tokens = _unresolved("tokens", "no run-ledger rows are available for token observation")
+        token_coverage = _unresolved(
+            "token_observation_coverage", "token-eligible row denominator is unknown"
+        )
+    else:
+        token_coverage = _metric(
+            "token_observation_coverage",
+            len(observed_context_tokens) / token_eligible_rows,
+            detail=(
+                f"{len(observed_context_tokens)}/{token_eligible_rows} run-ledger rows carry observed tokens"
+            ),
+        )
+        if not observed_context_tokens:
+            context_tokens = _unresolved(
+                "tokens", "no run-ledger rows carry observed token usage"
+            )
+        else:
+            context_tokens = _metric(
+                "tokens",
+                sum(observed_context_tokens),
+                "observed" if len(observed_context_tokens) == token_eligible_rows else "partial",
+                detail=(
+                    "all token-eligible rows carry observed tokens"
+                    if len(observed_context_tokens) == token_eligible_rows
+                    else "only a subset of token-eligible rows carry observed tokens"
+                ),
+            )
+
     context_section = InspectionSection(
         name="context",
         metrics=(
             _metric("bytes", context_bytes),
-            _metric("tokens", sum(row.cost.observed_tokens or 0 for row in rows)),
+            context_tokens,
+            token_coverage,
             _q("context_precision"),
             _q("context_recall"),
             _q("context_density"),

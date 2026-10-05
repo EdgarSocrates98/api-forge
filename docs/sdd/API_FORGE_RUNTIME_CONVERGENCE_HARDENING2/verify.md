@@ -10,7 +10,7 @@ results:
     evidence: focused tests and independent task verification are pending
 upstream:
   path: build.md
-  sha256: "61f1ca76d9b216104d6ea0e0754c74c0ed5ab7966a730cdf7ca333439fbd9752"
+  sha256: "3f4647602d6496563b90e7ae7b0fba78c031390765db177784b8f8ca4d4e5555"
 ---
 
 # verify

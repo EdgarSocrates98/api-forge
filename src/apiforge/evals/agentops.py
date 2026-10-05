@@ -61,8 +61,14 @@ def _seed(root: Path, case: dict[str, Any]) -> None:
                 agent=row.get("agent"),
                 task_id=row.get("task_id"),
                 accounting=accounting,
-                entry_id=entry_id(row["run_id"], accounting, "eval"),
+                entry_id=entry_id(
+                    row["run_id"],
+                    accounting,
+                    "eval",
+                    model_call_id=row.get("model_call_id"),
+                ),
                 recorded_at="eval",
+                model_call_id=row.get("model_call_id"),
             ),
         )
 

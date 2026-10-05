@@ -14,4 +14,7 @@
 | `unresolved` | Every section or metric that stayed unresolved, with the reason |
 
 Invariant: no metric, section or finding is fabricated — missing source data is
-named in `unresolved`, not filled with zeroes.
+named in `unresolved`, not filled with zeroes. Context token totals are
+`unresolved` when no eligible row reports observed usage and `partial` when
+only some rows report it. `token_observation_coverage` gives the measured
+row/eligible-row ratio when the denominator is known.

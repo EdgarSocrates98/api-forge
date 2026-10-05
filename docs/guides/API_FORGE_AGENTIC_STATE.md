@@ -190,10 +190,15 @@ Local `AgentSpan` rows now cover all 18 §50 operations (`task`, `routing`,
 context-quality derivation, memory store and decision-gate ledger into one
 `RunInspection` — the §54 sections (`run`, `agents`, `context`, `memory`,
 `tools`, `models`, `evidence`, `security`) plus waste findings and the
-decision path. Every metric carries `observed`/`estimated`/`unresolved`;
+decision path. Every metric carries `observed`/`partial`/`estimated`/`unresolved`;
 absent sources are named in `unresolved`, never zero-filled. Memory rows are
 store-wide (no `run_id`), so memory metrics report `estimated` scope, and
 provider cost stays `unresolved` without declared pricing.
+
+Context token accounting is intentionally strict: no observed token row yields
+an unresolved total, and mixed measured/unmeasured rows yield a partial total
+plus `token_observation_coverage`. A missing measurement is never converted to
+an observed zero.
 
 `agentops compare RUN_A RUN_B` emits `RunComparison` over the §55 axis set —
 quality, tokens, cost, latency, context, evidence, tools, agents — with a

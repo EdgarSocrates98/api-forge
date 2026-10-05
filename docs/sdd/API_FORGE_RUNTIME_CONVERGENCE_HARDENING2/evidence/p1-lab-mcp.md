@@ -9,7 +9,7 @@ Proof:
 - `uv run pytest tests/mcp/test_modern_protocol.py -q --basetemp=E:/pytest-apiforge-hardening2-mcp-modern`
 - result: `2 passed`
 - unknown dynamic target preserves `AF-MCP-TOOL-UNKNOWN`
-- existing `apiforge lab scenarios`: `13/13` catalog cells covered
+- existing `apiforge lab scenarios`: `21/21` catalog cells covered
 
 Artifacts:
 

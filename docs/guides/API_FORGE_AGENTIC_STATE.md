@@ -363,12 +363,11 @@ emits the declared source→pack→rule→skill→eval relation graph over the
 because no declared carrier exists.
 
 §28 ships the opt-in lab catalog (`labs/scenarios.yaml` +
-`lab scenarios`): all 13 scenario kinds are declared, 8 carry real
-fixture/eval/proof pointers (timeout, retry storm, circuit breaker,
-breaking change, schema evolution, backward compatibility,
-idempotency, version migration) and 5 are honest declared gaps
-(latency regression, auth migration, rate limit, event contract,
-pagination) — a cell with neither refuses `AF-LAB-CELL-UNDECLARED`.
+`lab scenarios`): all 21 scenario kinds are declared and covered. Eight
+Runtime Convergence cells exercise recovery, loop, shadow routing, role auth,
+memory, context evidence and challenger comparison through
+`tests/labs/test_runtime_convergence.py`; local proof never claims production
+provider behavior.
 
 `doctor --agentic` emits `AgenticDoctorReport` — cross-plane health
 over case, memory (quarantine backlog), trust (policy presence+parse),

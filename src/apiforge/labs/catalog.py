@@ -28,6 +28,14 @@ SCENARIO_KINDS = (
     "idempotency",
     "pagination",
     "version migration",
+    "recovery timeout",
+    "loop detection",
+    "model router shadow",
+    "tool authorization denial",
+    "memory stale",
+    "memory conflict",
+    "context missing evidence",
+    "challenger comparison",
 )
 
 

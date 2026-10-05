@@ -14,7 +14,7 @@ Baseline: `docs/decisions/API_FORGE_HARDENING2_BASELINE.md`
 | Token ledger / AgentOps | yes | partial | partial | regression | FIX | unresolved/partial token coverage; calls remain correlated by `model_call_id` |
 | Context quality | yes | yes | yes | pass with unresolved metrics | KEEP + EXTEND | separate recall from utilization and preserve missing required evidence |
 | Adaptive retrieval | yes | yes | yes | pass but graph/sufficiency gap | FIXED | explicit per-level effective score and graph contribution |
-| Memory | yes | yes | partial | `9/9` local evals | HARDEN | freshness, runtime matching and conflicts remain policy-driven |
+| Memory | yes | yes | yes | `9/9` + hardening holdouts | HARDENED | freshness, explicit runtime matching, taint admission and conflict outcomes |
 | AgentOps | yes | yes | partial | one regression | EXTEND | coverage/timeline/waste outputs without zero-filling |
 | MCP | yes | static/legacy | partial | audit pass | HARDEN | modern discovery/list/call proof and target auth boundary |
 | Forge Protocol | yes | yes | yes | local contract | KEEP | preserve v1; A2A remains adapter-only |

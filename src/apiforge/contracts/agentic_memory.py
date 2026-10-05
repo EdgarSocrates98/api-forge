@@ -15,6 +15,8 @@ from apiforge.contracts.base import VersionedContract
 from apiforge.core.models import JsonValue, Sha256, freeze_json
 
 MemoryScope = Literal["working", "case", "task", "episodic", "institutional", "semantic"]
+MemoryRisk = Literal["read_only", "sensitive", "destructive"]
+MemoryStaleHandling = Literal["include", "review", "exclude"]
 #: Unified origin taxonomy (step11 §8). ``knowledge`` is curated reference
 #: material: more trusted than model output, less than verified evidence.
 MemoryOrigin = Literal[
@@ -63,7 +65,9 @@ class MemoryRecord(VersionedContract):
     evidence_refs: tuple[str, ...] = ()
     environment_fingerprint: str | None = None
     applicability: dict[str, JsonValue] = Field(default_factory=dict)
+    runtime_requirements: dict[str, str] = Field(default_factory=dict)
     runtime_constraints: tuple[str, ...] = ()
+    policy_version: str | None = None
     outcome: MemoryState = "candidate"
     confidence: float | None = Field(default=None, ge=0, le=1)
     invalidated_by: str | None = None
@@ -121,9 +125,15 @@ class MemoryQuery(VersionedContract):
     scopes: tuple[MemoryScope, ...] = ()
     environment_fingerprint: str | None = None
     environment: dict[str, str] = Field(default_factory=dict)
+    runtime: dict[str, str] = Field(default_factory=dict)
     now: str | None = None
     minimum_trust: TrustLevel = "unknown"
     include_invalidated: bool = False
+    include_tainted: bool = False
+    risk: MemoryRisk = "read_only"
+    stale_handling: MemoryStaleHandling = "include"
+    policy_version: str | None = None
+    detect_conflicts: bool = True
     min_term_coverage: float = Field(default=0.5, ge=0, le=1)
     max_results: int = Field(default=20, ge=1, le=200)
 
@@ -143,6 +153,23 @@ class MemoryOutcome(VersionedContract):
     unresolved: tuple[str, ...] = ()
 
 
+MemoryConflictOutcome = Literal["prefer_a", "prefer_b", "quarantine", "review", "unresolved"]
+
+
+class MemoryConflict(VersionedContract):
+    """Deterministic contradiction between two applicable memory records."""
+
+    schema: Literal["apiforge/memory-conflict/v1"] = "apiforge/memory-conflict/v1"  # type: ignore[assignment]
+    conflict_id: str = Field(pattern=r"^memory-conflict:[0-9a-f]{16}$")
+    memory_a_id: str = Field(pattern=r"^memory:[0-9a-f]{16}$")
+    memory_b_id: str = Field(pattern=r"^memory:[0-9a-f]{16}$")
+    outcome: MemoryConflictOutcome
+    conflicting_paths: tuple[str, ...] = ()
+    signals: dict[str, float] = Field(default_factory=dict)
+    reason: str = ""
+    unresolved: tuple[str, ...] = ()
+
+
 class MemoryRetrievalResult(VersionedContract):
     """Bounded retrieval with freshness and contamination diagnostics."""
 
@@ -151,6 +178,8 @@ class MemoryRetrievalResult(VersionedContract):
     records: tuple[MemoryRecord, ...] = ()
     stale_count: int = Field(default=0, ge=0)
     invalidated_count: int = Field(default=0, ge=0)
+    tainted_count: int = Field(default=0, ge=0)
+    conflicts: tuple[MemoryConflict, ...] = ()
     unresolved: tuple[str, ...] = ()
     status: Literal["ready", "degraded", "unresolved"] = "ready"
 
@@ -264,13 +293,17 @@ __all__ = [
     "BlackboardResult",
     "Freshness",
     "MemoryCandidate",
+    "MemoryConflict",
+    "MemoryConflictOutcome",
     "MemoryInvalidation",
     "MemoryOutcome",
     "MemoryPolicy",
     "MemoryQuery",
     "MemoryRecord",
     "MemoryRetrievalResult",
+    "MemoryRisk",
     "MemoryScope",
+    "MemoryStaleHandling",
     "MemoryTrust",
     "SemanticCheckpoint",
     "TrustLevel",

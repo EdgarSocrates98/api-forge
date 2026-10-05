@@ -15,6 +15,7 @@ from pydantic import Field, model_validator
 
 from apiforge.contracts.agentic_memory import (
     Freshness,
+    MemoryConflict,
     MemoryOrigin,
     MemoryQuery,
     TrustLevel,
@@ -260,6 +261,7 @@ class MemoryRankedResult(VersionedContract):
     schema: Literal["apiforge/memory-ranked-result/v1"] = "apiforge/memory-ranked-result/v1"  # type: ignore[assignment]
     query: MemoryQuery
     ranked: tuple[MemoryScore, ...] = ()
+    conflicts: tuple[MemoryConflict, ...] = ()
     unresolved: tuple[str, ...] = ()
 
 

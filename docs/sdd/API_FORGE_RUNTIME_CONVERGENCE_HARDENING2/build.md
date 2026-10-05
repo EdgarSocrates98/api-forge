@@ -18,7 +18,7 @@ tasks:
   - id: p1-authority
     status: done
   - id: p1-memory
-    status: pending
+    status: done
   - id: p1-lab-mcp
     status: pending
   - id: release-evidence
@@ -31,6 +31,7 @@ claims:
   - p0-retrieval proof records one effective score basis for ranking and sufficiency plus graph depth provenance
   - p1-routing proof records task-class scorecard selection and a shadow receipt whose governing side stays legacy
   - p1-authority proof records role-aware delegated tool authorization and MCP target authorization before dispatch
+  - p1-memory proof records freshness state, explicit runtime matching, taint admission and conflict outcomes
 upstream:
   path: plan.md
   sha256: "1c06b43e224fec46de6f9db25e2102a9e561a62e6863c04f9f0e22ed245fe3d4"

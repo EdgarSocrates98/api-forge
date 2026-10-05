@@ -35,6 +35,13 @@ states are intentionally visible. `memory rank` exposes the §15 deterministic
 signal decomposition; semantic similarity remains an optional caller-supplied
 bonus, never a dependency.
 
+Runtime requests match structured runtime requirements before scoring; query
+terms never satisfy runtime constraints. Risk-aware `stale_handling` lets
+read-only retrieval include stale state, sensitive retrieval request review,
+and destructive retrieval exclude it. Tainted rows stay outside default
+context admission. Applicable trusted fresh contradictions return
+`MemoryConflict/v1` review/quarantine outcomes.
+
 ## The four different things people call "compaction"
 
 These mechanisms are deliberately distinct; conflating them corrupts resume

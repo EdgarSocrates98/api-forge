@@ -11,7 +11,7 @@ threat_model:
   - unresolved evidence and token usage cannot be converted into success
 upstream:
   path: verify.md
-  sha256: "26dcb83702cb64dbd5b62c5b6d61e2ebf933d91c026d1aad2c415ffaf2911832"
+  sha256: "bbccfcb6c3c8baec263ddd7607acf9ce795862cb3c2431dc49c360fa6eaea9de"
 ---
 
 # secure

@@ -48,6 +48,22 @@ def _sufficient(
     )
 
 
+def _effective_score(item: Passage) -> float:
+    return float(item.signals.get("effective_score", item.score))
+
+
+def _with_effective_score(item: Passage, score: float, **signals: float) -> Passage:
+    return item.model_copy(
+        update={
+            "signals": {
+                **item.signals,
+                **signals,
+                "effective_score": max(0.0, float(score)),
+            }
+        }
+    )
+
+
 def _exact(query: str, *, root: Path | None, store_root: Path | None) -> tuple[Passage, ...]:
     """L0: the query *is* an identifier (ctx ref, pack:file, heading match)."""
     normalized = normalize(query)
@@ -128,7 +144,34 @@ def _graph(
         )
     by_ref = {item.ref: item for item in graph_hits}
     by_ref.update({item.ref: item for item in hits if item.ref not in by_ref})
-    return tuple(by_ref.values())
+    ranked = tuple(
+        sorted(
+            by_ref.values(),
+            key=lambda item: (
+                -(
+                    1.0 / (float(item.signals["graph_depth"]) + 1.0)
+                    if "graph_depth" in item.signals
+                    else 0.0
+                ),
+                item.heading,
+                item.ref,
+            ),
+        )
+    )
+    return tuple(
+        _with_effective_score(
+            item,
+            1.0 / (float(item.signals["graph_depth"]) + 1.0)
+            if "graph_depth" in item.signals
+            else 0.0,
+            graph_contribution=(
+                1.0 / (float(item.signals["graph_depth"]) + 1.0)
+                if "graph_depth" in item.signals
+                else 0.0
+            ),
+        )
+        for item in ranked
+    )
 
 
 def _hybrid(
@@ -157,15 +200,20 @@ def _hybrid(
                 )
     merged = tuple(by_ref.values())
     top = max((item.score for item in hits), default=1.0) or 1.0
-    rescored = sorted(
-        merged,
-        key=lambda item: (
-            weights["lexical"] * (item.score / top if item.ref in lexical_refs else 0.0)
-            + weights["semantic"] * semantic.score(terms, item.heading)
-        ),
-        reverse=True,
-    )
-    return tuple(rescored)
+    rescored = []
+    for item in merged:
+        lexical_score = item.score / top if item.ref in lexical_refs else 0.0
+        semantic_score = item.signals.get("semantic_score", semantic.score(terms, item.heading))
+        effective = weights["lexical"] * lexical_score + weights["semantic"] * semantic_score
+        rescored.append(
+            _with_effective_score(
+                item,
+                effective,
+                lexical_score=lexical_score,
+                semantic_score=semantic_score,
+            )
+        )
+    return tuple(sorted(rescored, key=lambda item: (-_effective_score(item), item.ref)))
 
 
 def _rerank(
@@ -177,17 +225,32 @@ def _rerank(
     """L4: deterministic rerank over all accumulated signals."""
     terms, _ = expand(query)
     top = max((item.score for item in hits), default=1.0) or 1.0
-
-    def score(item: Passage) -> float:
-        graph_bonus = 1.0 if item.signals.get("selected_pack") else 0.0
-        semantic_score = semantic.score(terms, item.heading) if semantic else 0.0
-        return (
-            weights["lexical"] * (item.score / top)
-            + weights["graph"] * graph_bonus
+    rescored = []
+    for item in hits:
+        lexical_score = item.score / top
+        graph_score = (
+            1.0 / (float(item.signals["graph_depth"]) + 1.0)
+            if "graph_depth" in item.signals
+            else 0.0
+        )
+        semantic_score = item.signals.get(
+            "semantic_score", semantic.score(terms, item.heading) if semantic else 0.0
+        )
+        effective = (
+            weights["lexical"] * lexical_score
+            + weights["graph"] * graph_score
             + weights["semantic"] * semantic_score
         )
-
-    return tuple(sorted(hits, key=score, reverse=True))
+        rescored.append(
+            _with_effective_score(
+                item,
+                effective,
+                lexical_score=lexical_score,
+                graph_contribution=graph_score,
+                semantic_score=semantic_score,
+            )
+        )
+    return tuple(sorted(rescored, key=lambda item: (-_effective_score(item), item.ref)))
 
 
 def adaptive_retrieve(
@@ -252,13 +315,17 @@ def adaptive_retrieve(
         else:
             hits = _rerank(hits, query, semantic, rules["rerank"])
         provenance = {item.ref: item.provenance for item in hits[:5]}
-        top = max((item.score for item in hits), default=None)
+        if level in {"L0", "L1"}:
+            hits = tuple(_with_effective_score(item, item.score) for item in hits)
+        top = max((_effective_score(item) for item in hits), default=None)
+        raw_top = max((item.score for item in hits), default=None)
         sufficient = _sufficient(level, len(hits), top, rules)
         steps.append(
             RetrievalStep(
                 level=level,
                 hits=len(hits),
                 top_score=top,
+                raw_top_score=raw_top,
                 escalated=not sufficient,
                 reason="sufficient" if sufficient else "insufficient",
             )

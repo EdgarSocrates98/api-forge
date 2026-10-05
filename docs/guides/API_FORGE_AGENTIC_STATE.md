@@ -159,6 +159,11 @@ lexical/graph/semantic/hybrid on recall, precision, latency, tokens and cost
 over a declared gold corpus; `evals model-routing` covers constraint refusal,
 quality floors and insufficient evaluations.
 
+Each level writes `signals.effective_score`; ranking and sufficiency consume
+that same value. `RetrievalStep.top_score` reports effective score and
+`raw_top_score` keeps source-scale diagnostics. L2/L4 graph contribution comes
+from bounded traversal depth, never `selected_pack`.
+
 ## Telemetry export and correlation (phase 7)
 
 Local `AgentSpan` rows now cover all 18 §50 operations (`task`, `routing`,

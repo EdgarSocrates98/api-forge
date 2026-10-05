@@ -4,9 +4,10 @@ from __future__ import annotations
 
 import pytest
 
+from apiforge.contracts.economy_extras import Passage
 from apiforge.contracts.graph import GraphEdge, GraphNode
 from apiforge.graph.store import write_graph
-from apiforge.knowledge.levels import adaptive_retrieve, load_level_policy
+from apiforge.knowledge.levels import _hybrid, _rerank, adaptive_retrieve, load_level_policy
 from apiforge.knowledge.rewrite import rewrite_query
 from apiforge.knowledge.semantic import HashEmbeddingAdapter
 
@@ -68,6 +69,74 @@ def test_semantic_level_can_add_a_non_lexical_candidate() -> None:
     assert all(
         any("semantic-candidate" in ref for ref in refs) for refs in result.provenance.values()
     )
+
+
+def test_hybrid_persists_effective_score_used_for_ordering() -> None:
+    class Semantic:
+        def score(self, _: tuple[str, ...], text: str) -> float:
+            return 1.0 if text == "semantic" else 0.0
+
+    hits = (
+        Passage(
+            pack_id="p",
+            file="a.md",
+            heading="lexical",
+            score=10.0,
+            ref="r-lexical",
+            bytes=4,
+        ),
+        Passage(
+            pack_id="p",
+            file="b.md",
+            heading="semantic",
+            score=1.0,
+            ref="r-semantic",
+            bytes=4,
+        ),
+    )
+    result = _hybrid(
+        hits,
+        "semantic",
+        Semantic(),
+        {"lexical": 0.1, "semantic": 0.9},
+        root=None,
+        store_root=None,
+    )
+    assert result[0].ref == "r-semantic"
+    assert result[0].signals["effective_score"] == pytest.approx(0.91)
+    assert result[1].signals["effective_score"] == pytest.approx(0.1)
+
+
+def test_rerank_uses_real_graph_depth_not_selected_pack() -> None:
+    hits = (
+        Passage(
+            pack_id="selected",
+            file="a.md",
+            heading="lexical",
+            score=10.0,
+            signals={"selected_pack": 1.0},
+            ref="r-lexical",
+            bytes=4,
+        ),
+        Passage(
+            pack_id="graph",
+            file="nodes.jsonl",
+            heading="graph",
+            score=5.0,
+            signals={"graph_depth": 0.0},
+            ref="r-graph",
+            bytes=4,
+        ),
+    )
+    result = _rerank(
+        hits,
+        "graph",
+        None,
+        {"lexical": 0.45, "graph": 0.25, "semantic": 0.30},
+    )
+    assert result[0].ref == "r-graph"
+    assert result[0].signals["graph_contribution"] == 1.0
+    assert result[1].signals["graph_contribution"] == 0.0
 
 
 def test_graph_level_traverses_declared_graph(tmp_path) -> None:

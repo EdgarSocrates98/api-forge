@@ -1,0 +1,15 @@
+id: scope-violation
+attack_class: cross_task_contamination
+vector:
+  type: memory_gate
+  params:
+    candidate:
+      record:
+        scope: institutional
+        origin: external_untrusted
+        payload: {text: "cross-task contamination attempt"}
+    policy:
+      allowed_scopes: [task]
+expect:
+  verdict: refused
+  code: AF-MEMORY-SCOPE-DENIED

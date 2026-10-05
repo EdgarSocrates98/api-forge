@@ -84,22 +84,63 @@ def register(context_app: typer.Typer) -> None:
         case_dir: Path | None = typer.Option(None, "--case"),
         invalidate: bool = typer.Option(False, "--invalidate", help="Drop affected selections."),
         cache_home: Path | None = typer.Option(None, "--cache-home"),
+        limit: int | None = typer.Option(
+            None, "--limit", help="Bound each carried collection; counts stay truthful."
+        ),
         detail_level: str = typer.Option("normal", "--detail-level"),
     ) -> None:
         """What changed, which operations it impacts and which capsules to build — delta first."""
         from apiforge.application.cache import context_delta
         from apiforge.cli import _echo_json, _run
+        from apiforge.output.page import bound_collections
 
         _echo_json(
             _run(
-                lambda: context_delta(
+                lambda: bound_collections(
+                    context_delta(
+                        root,
+                        changed=changed,
+                        base=base,
+                        head=head,
+                        case_dir=case_dir,
+                        invalidate=invalidate,
+                        cache_home=cache_home,
+                    ),
+                    limit,
+                )
+            ),
+            detail_level,
+        )
+
+    @context_app.command("quality")
+    def context_quality(
+        capsule: Path = typer.Option(
+            ..., "--capsule", help="Recorded capsule JSON (`context capsule ... > capsule.json`)."
+        ),
+        run_id: str = typer.Option(..., "--run-id"),
+        root: Path = typer.Option(Path("."), "--root"),
+        required: list[str] = typer.Option(
+            [], "--required", help="ctx:// uri declared required for recall (repeatable)."
+        ),
+        gate: str = typer.Option("strict", "--gate", help="strict|evidence|permissive."),
+        cache_hits: int | None = typer.Option(None, "--cache-hits"),
+        cache_lookups: int | None = typer.Option(None, "--cache-lookups"),
+        detail_level: str = typer.Option("normal", "--detail-level"),
+    ) -> None:
+        """Measured context quality + minimum-sufficient decision for one capsule."""
+        from apiforge.application.context import context_quality_report
+        from apiforge.cli import _echo_json, _run
+
+        _echo_json(
+            _run(
+                lambda: context_quality_report(
                     root,
-                    changed=changed,
-                    base=base,
-                    head=head,
-                    case_dir=case_dir,
-                    invalidate=invalidate,
-                    cache_home=cache_home,
+                    capsule_path=capsule,
+                    run_id=run_id,
+                    required_uris=tuple(required),
+                    gate=gate,
+                    cache_hits=cache_hits,
+                    cache_lookups=cache_lookups,
                 )
             ),
             detail_level,
@@ -110,13 +151,24 @@ def register(context_app: typer.Typer) -> None:
         root: Path = typer.Option(Path("."), "--root"),
         apply: bool = typer.Option(False, "--apply", help="Delete; default only reports."),
         cache_home: Path | None = typer.Option(None, "--cache-home"),
+        limit: int | None = typer.Option(
+            None, "--limit", help="Bound each carried collection; counts stay truthful."
+        ),
         detail_level: str = typer.Option("normal", "--detail-level"),
     ) -> None:
         """Expired/corrupt cache entries, orphan cache objects and unreferenced ctx objects."""
         from apiforge.application.cache import context_gc
         from apiforge.cli import _echo_json, _run
+        from apiforge.output.page import bound_collections
 
-        _echo_json(_run(lambda: context_gc(root, apply=apply, cache_home=cache_home)), detail_level)
+        _echo_json(
+            _run(
+                lambda: bound_collections(
+                    context_gc(root, apply=apply, cache_home=cache_home), limit
+                )
+            ),
+            detail_level,
+        )
 
 
 __all__ = ["register"]

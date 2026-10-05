@@ -143,6 +143,205 @@ class DecisionGateResult(VersionedContract):
     evidence_refs: tuple[str, ...] = ()
 
 
+# --- step11 phase 4: Agent Governor / gain / stop / recovery / loop (§23-§27)
+
+GovernorProfile = Literal["economy", "balanced", "deep"]
+GovernorComplexity = Literal["micro", "low", "medium", "high"]
+GovernorSecurityState = Literal["clean", "tainted", "quarantined"]
+ExecutionMode = Literal["deterministic", "sandbox", "provider"]
+GainAction = Literal[
+    "spawn_agent", "call_reviewer", "start_debate", "expand_context", "expensive_retrieval"
+]
+FailureClass = Literal[
+    "missing_evidence",
+    "invalid_input",
+    "timeout",
+    "provider_failure",
+    "tool_failure",
+    "policy_conflict",
+    "budget_exhausted",
+    "security_refusal",
+    "strategy_failure",
+    "deterministic_conflict",
+]
+RecoveryAction = Literal["retry", "replan", "fallback", "escalate", "stop"]
+
+
+class GovernorInputs(VersionedContract):
+    """§23 governor inputs; missing signals are carried, not guessed."""
+
+    schema: Literal["apiforge/governor-inputs/v1"] = "apiforge/governor-inputs/v1"  # type: ignore[assignment]
+    profile: GovernorProfile
+    risk: DecisionRisk
+    confidence: float | None = Field(default=None, ge=0, le=1)
+    evidence_completeness: float | None = Field(default=None, ge=0, le=1)
+    context_sufficiency: float | None = Field(default=None, ge=0, le=1)
+    budget_remaining: dict[str, int | float | None] = Field(default_factory=dict)
+    security_state: GovernorSecurityState = "clean"
+    task_complexity: GovernorComplexity | None = None
+
+
+class GovernorDecision(VersionedContract):
+    """§23 ceilings a run must respect; clamps and gaps are explicit."""
+
+    schema: Literal["apiforge/governor-decision/v1"] = "apiforge/governor-decision/v1"  # type: ignore[assignment]
+    profile: GovernorProfile
+    risk: DecisionRisk
+    max_agents: int = Field(ge=0)
+    max_reviewers: int = Field(ge=0)
+    max_debates: int = Field(ge=0)
+    max_retries: int = Field(ge=0)
+    max_replans: int = Field(ge=0)
+    max_tokens: int | None = Field(default=None, ge=0)
+    max_cost: float | None = Field(default=None, ge=0)
+    allowed_execution_modes: tuple[ExecutionMode, ...] = ()
+    allowed_tools: tuple[str, ...] = ()
+    clamped_by: tuple[str, ...] = ()
+    unresolved: tuple[str, ...] = ()
+
+
+class ExpectedInformationGain(VersionedContract):
+    """§24 pre-action expected gain; a scored signal bundle, never a guess.
+
+    ``score`` is the weighted mean over present signals; signals the caller
+    did not supply land in ``unresolved`` and are dropped from the mean —
+    the contract never silently treats them as zero.
+    """
+
+    schema: Literal["apiforge/expected-information-gain/v1"] = (
+        "apiforge/expected-information-gain/v1"  # type: ignore[assignment]
+    )
+    action: GainAction
+    score: float | None = Field(default=None, ge=0, le=1)
+    level: Literal["low", "medium", "high", "unresolved"]
+    signals: dict[str, float | None] = Field(default_factory=dict)
+    reason: str = ""
+    unresolved: tuple[str, ...] = ()
+
+
+class StopDecision(VersionedContract):
+    """§25 explicit STOP: continue only on expected gain or requirement."""
+
+    schema: Literal["apiforge/stop-decision/v1"] = "apiforge/stop-decision/v1"  # type: ignore[assignment]
+    decision: Literal["continue", "stop"]
+    expected_gain: float | None = Field(default=None, ge=0, le=1)
+    threshold: float = Field(ge=0, le=1)
+    mandatory_requirement: bool = False
+    reason: str = ""
+    code: str | None = None
+
+
+class RecoveryDecision(VersionedContract):
+    """§26 governed recovery for a classified failure."""
+
+    schema: Literal["apiforge/recovery-decision/v1"] = "apiforge/recovery-decision/v1"  # type: ignore[assignment]
+    failure_class: FailureClass
+    decision: RecoveryAction
+    attempt: int = Field(ge=0)
+    max_attempts: int = Field(default=0, ge=0)
+    reason: str = ""
+    code: str | None = None
+    unresolved: tuple[str, ...] = ()
+
+
+class LoopDetection(VersionedContract):
+    """§27 repeated-strategy detection over a fingerprint window."""
+
+    schema: Literal["apiforge/loop-detection/v1"] = "apiforge/loop-detection/v1"  # type: ignore[assignment]
+    strategy_fingerprint: str = Field(min_length=1)
+    repeats: int = Field(ge=0)
+    window: int = Field(ge=1)
+    blocked: bool = False
+    code: str | None = None
+    reason: str = ""
+
+
+# --- step11 phase 5: Decision Control Plane lifecycle (§28-§32)
+
+ControlPlaneMode = Literal["shadow", "assisted", "active"]
+FallbackTrigger = Literal[
+    "low_confidence", "missing_evidence", "security_issue", "provider_issue", "budget_issue"
+]
+
+
+class ControlPlaneRoute(VersionedContract):
+    """§28 a route under lifecycle governance; mode is the latest state."""
+
+    schema: Literal["apiforge/control-plane-route/v1"] = "apiforge/control-plane-route/v1"  # type: ignore[assignment]
+    route: str = Field(min_length=1)
+    mode: ControlPlaneMode = "shadow"
+    candidate: str = Field(min_length=1)
+    legacy: str = Field(min_length=1)
+    fallback_route: str | None = None
+    promoted_at: str | None = None
+    promotion_approval_id: str | None = None
+
+
+class ShadowRecord(VersionedContract):
+    """§29 parallel-run record: the candidate never governs in shadow."""
+
+    schema: Literal["apiforge/shadow-record/v1"] = "apiforge/shadow-record/v1"  # type: ignore[assignment]
+    route: str = Field(min_length=1)
+    candidate_decision: dict[str, object] = Field(default_factory=dict)
+    legacy_decision: dict[str, object] = Field(default_factory=dict)
+    difference: tuple[str, ...] = ()
+    confidence: float | None = Field(default=None, ge=0, le=1)
+    evidence_refs: tuple[str, ...] = ()
+    recorded_at: str = Field(min_length=1)
+
+
+class PromotionEvidence(VersionedContract):
+    """§31 the five promotion requirements; each is a declared fact."""
+
+    schema: Literal["apiforge/promotion-evidence/v1"] = "apiforge/promotion-evidence/v1"  # type: ignore[assignment]
+    route: str = Field(min_length=1)
+    eval_thresholds_passed: bool = False
+    security_gates_passed: bool = False
+    evidence_complete: bool = False
+    rollback_exists: bool = False
+    approval_id: str | None = None
+    evidence_refs: tuple[str, ...] = ()
+
+
+class PromotionDecision(VersionedContract):
+    """Whether a route may move one lifecycle step; never skips a stage."""
+
+    schema: Literal["apiforge/promotion-decision/v1"] = "apiforge/promotion-decision/v1"  # type: ignore[assignment]
+    route: str = Field(min_length=1)
+    from_mode: ControlPlaneMode
+    to_mode: ControlPlaneMode
+    allowed: bool = False
+    missing: tuple[str, ...] = ()
+    code: str | None = None
+    reason: str = ""
+
+
+class FallbackDecision(VersionedContract):
+    """§32 every active route needs a declared fallback when degraded."""
+
+    schema: Literal["apiforge/fallback-decision/v1"] = "apiforge/fallback-decision/v1"  # type: ignore[assignment]
+    route: str = Field(min_length=1)
+    trigger: FallbackTrigger | None = None
+    action: Literal["continue_active", "use_fallback", "refuse"]
+    fallback_route: str | None = None
+    code: str | None = None
+    reason: str = ""
+
+
+class RouteDecision(VersionedContract):
+    """Which decision stream governs an evaluation, per §29-§32 mode."""
+
+    schema: Literal["apiforge/route-decision/v1"] = "apiforge/route-decision/v1"  # type: ignore[assignment]
+    route: str = Field(min_length=1)
+    mode: ControlPlaneMode
+    governing: Literal["legacy", "candidate", "none"]
+    recommendation: dict[str, object] | None = None
+    shadow: bool = False
+    fallback: FallbackDecision | None = None
+    unresolved: tuple[str, ...] = ()
+    reason: str = ""
+
+
 __all__ = [
     "AgenticBudgetPlan",
     "BudgetAction",
@@ -151,8 +350,29 @@ __all__ = [
     "BudgetScope",
     "BudgetSpend",
     "BudgetTokenPolicy",
+    "ControlPlaneMode",
+    "ControlPlaneRoute",
     "DecisionGateResult",
     "DecisionOutcome",
     "DecisionRequest",
     "DecisionRisk",
+    "ExecutionMode",
+    "ExpectedInformationGain",
+    "FailureClass",
+    "FallbackDecision",
+    "FallbackTrigger",
+    "GainAction",
+    "GovernorComplexity",
+    "GovernorDecision",
+    "GovernorInputs",
+    "GovernorProfile",
+    "GovernorSecurityState",
+    "LoopDetection",
+    "PromotionDecision",
+    "PromotionEvidence",
+    "RecoveryAction",
+    "RecoveryDecision",
+    "RouteDecision",
+    "ShadowRecord",
+    "StopDecision",
 ]

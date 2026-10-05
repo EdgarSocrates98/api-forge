@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "totals": {
+    "cases": 4,
+    "failed": 0,
+    "failed_ids": []
+  }
+}

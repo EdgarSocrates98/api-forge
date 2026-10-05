@@ -1,0 +1,15 @@
+version: 1
+# §43 declared benchmark samples: read-only tools with fixture-safe kwargs.
+# "$root" is replaced by an isolated temp root at run time.
+
+samples:
+  rules_list: {kwargs: {}}
+  capabilities_list: {kwargs: {}}
+  agents_audit: {kwargs: {}}
+  mcp_surface: {kwargs: {surface: compact}}
+  workspace_status: {kwargs: {root: $root}}
+  economy_report: {kwargs: {root: $root}}
+  agentops_inspect: {kwargs: {run_id: bench, root: $root}}
+  agentops_compare: {kwargs: {run_a: a, run_b: b, root: $root}}
+  agentops_waste: {kwargs: {run_id: bench, root: $root}}
+  telemetry_export: {kwargs: {root: $root}}

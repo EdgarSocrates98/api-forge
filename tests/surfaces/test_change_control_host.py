@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import socket
+import time
 from pathlib import Path
 from threading import Thread
 from urllib.error import HTTPError
@@ -26,6 +28,18 @@ def test_ide_and_ui_projections_preserve_canonical_result(tmp_path: Path) -> Non
     assert "API Forge change-control" in render_ui_document(run_dir)
 
 
+def _wait_server_ready(host: str, port: int, timeout_s: float = 10.0) -> None:
+    deadline = time.monotonic() + timeout_s
+    while True:
+        try:
+            with socket.create_connection((host, port), timeout=0.5):
+                return
+        except OSError:
+            if time.monotonic() >= deadline:
+                raise
+            time.sleep(0.05)
+
+
 def test_remote_host_requires_authentication(tmp_path: Path) -> None:
     bundle = ReplayAdapter().load(Path("tests/fixtures/api_git_cicd/change_bundle.json"))
     run_dir = tmp_path / "run"
@@ -37,6 +51,7 @@ def test_remote_host_requires_authentication(tmp_path: Path) -> None:
         daemon=True,
     )
     thread.start()
+    _wait_server_ready("127.0.0.1", 18765)
     request = Request("http://127.0.0.1:18765/api/ui")
     try:
         urlopen(request, timeout=2)

@@ -15,11 +15,14 @@ from apiforge.contracts.base import VersionedContract
 from apiforge.core.models import JsonValue, Sha256, freeze_json
 
 MemoryScope = Literal["working", "case", "task", "episodic", "institutional", "semantic"]
+#: Unified origin taxonomy (step11 §8). ``knowledge`` is curated reference
+#: material: more trusted than model output, less than verified evidence.
 MemoryOrigin = Literal[
     "system",
     "governed_policy",
     "verified_evidence",
     "trusted_internal",
+    "knowledge",
     "tool_result",
     "memory",
     "model_generated",
@@ -30,8 +33,8 @@ MemoryOrigin = Literal[
 ]
 TrustLevel = Literal["unknown", "candidate", "untrusted", "observed", "trusted", "verified"]
 Freshness = Literal["fresh", "stale", "unknown", "unresolved"]
-MemoryState = Literal["candidate", "persisted", "reinforced", "invalidated"]
-MemoryAction = Literal["accepted", "rejected", "invalidated", "deduplicated"]
+MemoryState = Literal["candidate", "persisted", "reinforced", "invalidated", "quarantined"]
+MemoryAction = Literal["accepted", "rejected", "invalidated", "deduplicated", "quarantined"]
 
 
 class MemoryTrust(VersionedContract):

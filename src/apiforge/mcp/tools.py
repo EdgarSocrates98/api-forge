@@ -11,9 +11,10 @@ import json
 from collections.abc import Callable
 from dataclasses import asdict, is_dataclass
 from pathlib import Path
-from typing import Any, Literal, TypeVar, cast
+from typing import Any, Literal, TypeVar, cast, get_args
 
 from apiforge.core.detail import apply_detail_level
+from apiforge.output.page import bound_collections as _bound_lists
 
 T = TypeVar("T")
 
@@ -192,6 +193,7 @@ def portable_doctor(root: str = ".", detail_level: str = "normal") -> dict[str, 
 
 
 def workspace_discover(root: str = ".", detail_level: str = "normal") -> dict[str, Any]:
+    """Discover workspace repositories and their declared boundaries."""
     from apiforge.application.workspace import discover
 
     return cast(
@@ -200,6 +202,7 @@ def workspace_discover(root: str = ".", detail_level: str = "normal") -> dict[st
 
 
 def workspace_status(root: str = ".", detail_level: str = "normal") -> dict[str, Any]:
+    """Report workspace repository status, drift and coverage state."""
     from apiforge.application.workspace import status
 
     return cast(dict[str, Any], _call("workspace_status", lambda: status(Path(root)), detail_level))
@@ -321,6 +324,7 @@ def field_report(root: str = ".", ab: bool = False, detail_level: str = "normal"
 
 
 def workspace_add(repository: str, root: str = ".", detail_level: str = "normal") -> dict[str, Any]:
+    """Register a repository in the workspace manifest (state mutation)."""
     from apiforge.application.workspace import add
 
     return cast(
@@ -336,6 +340,7 @@ def context_resolve(
     impact: str | None = None,
     detail_level: str = "normal",
 ) -> dict[str, Any]:
+    """Resolve a context scope — repo/target files or a change impact set."""
     from apiforge.application.context import resolve_context
 
     return cast(
@@ -598,9 +603,10 @@ def platform_verify_runtime(
 
 def capabilities_list(
     capability_id: str | None = None,
+    limit: int | None = None,
     detail_level: str = "normal",
 ) -> list[Any]:
-    """List the shared evidence-backed capability records."""
+    """List the shared evidence-backed capability records; ``limit`` bounds rows."""
     from apiforge.capabilities.registry import load_capabilities
 
     def work() -> list[Any]:
@@ -608,6 +614,8 @@ def capabilities_list(
         selected = [
             item for item in records if capability_id is None or item.capability_id == capability_id
         ]
+        if limit is not None:
+            selected = selected[:limit]
         return [item.model_dump(mode="json") for item in selected]
 
     return cast(list[Any], _call("capabilities_list", work, detail_level))
@@ -628,19 +636,29 @@ def capabilities_verify(detail_level: str = "normal") -> dict[str, Any]:
     )
 
 
-def rules_list(area: str | None = None, detail_level: str = "normal") -> dict[str, Any]:
-    """List rule ids, titles and severities by area."""
+def rules_list(
+    area: str | None = None,
+    limit: int | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """List rule ids, titles and severities by area; ``limit`` bounds total rows."""
     from apiforge.rules.catalog import load_catalog
 
     def work() -> dict[str, Any]:
         by_area: dict[str, list[dict[str, str]]] = {}
+        remaining = limit
         for rule_id, meta in sorted(load_catalog().items()):
             if area is not None and meta.area.upper() != area.upper():
                 continue
+            if remaining is not None:
+                if remaining <= 0:
+                    break
+                remaining -= 1
             by_area.setdefault(meta.area, []).append(
                 {"id": rule_id, "severity": meta.severity.value, "title": meta.title}
             )
-        return {"areas": by_area, "count": sum(len(v) for v in by_area.values())}
+        total = sum(len(v) for v in by_area.values())
+        return {"areas": by_area, "count": total, "truncated": limit is not None and total >= limit}
 
     out: dict[str, Any] = _call("rules_list", work, detail_level)
     return out
@@ -761,9 +779,13 @@ def context_delta(
     case_dir: str | None = None,
     invalidate: bool = False,
     cache_home: str | None = None,
+    limit: int | None = None,
     detail_level: str = "normal",
 ) -> dict[str, Any]:
-    """What changed (read-only git or explicit list), impacted operations and capsule targets."""
+    """What changed (read-only git or explicit set), impacted operations and capsule targets.
+
+    ``limit`` bounds each carried collection; upstream counts stay truthful.
+    """
     from apiforge.application.cache import context_delta as _delta
 
     out: dict[str, Any] = _call(
@@ -779,16 +801,20 @@ def context_delta(
         ),
         detail_level,
     )
-    return out
+    return _bound_lists(out, limit)
 
 
 def context_gc(
     root: str = ".",
     apply: bool = False,
     cache_home: str | None = None,
+    limit: int | None = None,
     detail_level: str = "normal",
 ) -> dict[str, Any]:
-    """Report (or delete with apply) expired cache entries and orphan objects."""
+    """Report (or delete with apply) expired cache entries and orphan objects.
+
+    ``limit`` bounds each carried collection; upstream counts stay truthful.
+    """
     from apiforge.application.cache import context_gc as _gc
 
     out: dict[str, Any] = _call(
@@ -796,7 +822,7 @@ def context_gc(
         lambda: _gc(Path(root), apply=apply, cache_home=Path(cache_home) if cache_home else None),
         detail_level,
     )
-    return out
+    return _bound_lists(out, limit)
 
 
 def cache_stats(
@@ -805,7 +831,7 @@ def cache_stats(
     layer: str | None = None,
     detail_level: str = "normal",
 ) -> dict[str, Any]:
-    """Cache entries/bytes/expired per layer and tier, plus layer policies."""
+    """Cache totals: entry counts, bytes and expired per layer/tier, plus layer policies."""
     from apiforge.application.cache import cache_lookup_layer
     from apiforge.application.cache import cache_stats as _stats
 
@@ -936,6 +962,240 @@ def economy_roi(root: str = ".", detail_level: str = "normal") -> dict[str, Any]
     from apiforge.economy.roi import role_roi
 
     out: dict[str, Any] = _call("economy_roi", lambda: role_roi(Path(root)), detail_level)
+    return out
+
+
+def economy_ledger(
+    run_id: str,
+    root: str = ".apiforge",
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Per-basis token rollup for a run — observed and estimated never mix."""
+    from apiforge.economy.token_ledger import build_ledger, load_entries
+
+    def work() -> dict[str, Any]:
+        rows, unparsed = load_entries(Path(root), run_id)
+        ledger = build_ledger(run_id, rows)
+        payload = ledger.model_dump(mode="json")
+        if unparsed:
+            payload["unparsed_rows"] = unparsed
+        return payload
+
+    out: dict[str, Any] = _call("economy_ledger", work, detail_level)
+    return out
+
+
+def economy_pricing(
+    pricing: str | None = None,
+    limit: int | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """The declared pricing catalog — prices are never hardcoded.
+
+    ``limit`` bounds the carried ``entries``; ``count`` stays the real total.
+    """
+    from apiforge.economy.pricing import describe_catalog, load_pricing
+
+    out: dict[str, Any] = _call(
+        "economy_pricing",
+        lambda: describe_catalog(load_pricing(Path(pricing)) if pricing else load_pricing()),
+        detail_level,
+    )
+    return _bound_lists(out, limit)
+
+
+def economy_reconcile(
+    run_id: str,
+    estimate: dict[str, Any],
+    observed_cost: float | None = None,
+    root: str = ".apiforge",
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Estimated vs observed for a run, with calibration error per axis."""
+    from apiforge.economy.reconciliation import estimate_axis, reconcile, run_observed
+
+    out: dict[str, Any] = _call(
+        "economy_reconcile",
+        lambda: reconcile(
+            f"run:{run_id}",
+            estimate_axis(estimate),
+            run_observed(Path(root), run_id, observed_cost=observed_cost),
+        ).model_dump(mode="json"),
+        detail_level,
+    )
+    return out
+
+
+def governor_decide(
+    inputs: dict[str, Any],
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """§23: profile ceilings adjusted by risk, security and budget."""
+    from apiforge.contracts.agentic_governance import GovernorInputs
+    from apiforge.governance.governor import govern
+
+    out: dict[str, Any] = _call(
+        "governor_decide",
+        lambda: govern(GovernorInputs.model_validate(inputs)).model_dump(mode="json"),
+        detail_level,
+    )
+    return out
+
+
+def governor_stop(
+    action: str,
+    signals: dict[str, float | None],
+    mandatory: bool = False,
+    threshold: float = 0.33,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """§25: explicit STOP — continue only on gain > threshold or requirement."""
+    from apiforge.contracts.agentic_governance import GainAction
+    from apiforge.governance.gain import expected_gain
+    from apiforge.governance.stop import decide_stop
+
+    def work() -> dict[str, Any]:
+        if action not in get_args(GainAction):
+            from apiforge.economy.run_ledger import EconomyError
+
+            raise EconomyError(
+                "AF-GOV-ACTION-INVALID",
+                f"unknown gain action {action!r}; allowed: {sorted(get_args(GainAction))}",
+                field="action",
+                unlock="pass one of the §24 action names",
+            )
+        gain = expected_gain(action=cast(GainAction, action), signals=signals)
+        return decide_stop(gain, mandatory_requirement=mandatory, threshold=threshold).model_dump(
+            mode="json"
+        )
+
+    out: dict[str, Any] = _call("governor_stop", work, detail_level)
+    return out
+
+
+def governor_recover(
+    failure_class: str,
+    attempt: int = 0,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """§26: governed recovery for a classified failure."""
+    from apiforge.governance.recovery import decide_recovery
+
+    out: dict[str, Any] = _call(
+        "governor_recover",
+        lambda: decide_recovery(failure_class, attempt).model_dump(mode="json"),
+        detail_level,
+    )
+    return out
+
+
+def control_routes(
+    root: str | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """§28: every declared route with its effective lifecycle mode."""
+    from apiforge.governance.control_plane import all_routes
+
+    def work() -> dict[str, Any]:
+        routes = all_routes(Path(root) if root else Path("."))
+        return {
+            "schema": "apiforge/control-plane-routes/v1",
+            "routes": [route.model_dump(mode="json") for route in routes],
+        }
+
+    out: dict[str, Any] = _call("control_routes", work, detail_level)
+    return out
+
+
+def control_shadow(
+    route: str | None = None,
+    root: str | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """§29: recorded parallel-run observations for a route."""
+    from apiforge.governance.control_plane import shadow_records
+
+    def work() -> dict[str, Any]:
+        rows = shadow_records(Path(root) if root else Path("."), route)
+        return {
+            "schema": "apiforge/shadow-records/v1",
+            "route": route,
+            "records": [row.model_dump(mode="json") for row in rows],
+            "total": len(rows),
+        }
+
+    out: dict[str, Any] = _call("control_shadow", work, detail_level)
+    return out
+
+
+def route_model(
+    inputs: dict[str, Any],
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """§33: rank declared model candidates; quality history is a constraint."""
+    from apiforge.contracts.model_routing import ModelRouteInputs
+    from apiforge.runtime.model_router import load_model_router_policy
+    from apiforge.runtime.model_router import route_model as _route
+
+    def work() -> dict[str, Any]:
+        rules = load_model_router_policy()
+        return _route(
+            ModelRouteInputs.model_validate(inputs), rules["candidates"], policy=rules
+        ).model_dump(mode="json")
+
+    out: dict[str, Any] = _call("route_model", work, detail_level)
+    return out
+
+
+def knowledge_adaptive(
+    query: str,
+    max_level: str = "L4",
+    semantic: bool = False,
+    root: str | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """§36: L0→L4 ladder; escalates only while the level is insufficient."""
+    from apiforge.contracts.model_routing import RetrievalLevel
+    from apiforge.knowledge.levels import adaptive_retrieve
+    from apiforge.knowledge.semantic import load_semantic_adapter
+
+    def work() -> dict[str, Any]:
+        adapter = load_semantic_adapter() if semantic else None
+        return adaptive_retrieve(
+            query,
+            root=Path(root) if root else None,
+            semantic=adapter,
+            max_level=cast(RetrievalLevel, max_level),
+        ).model_dump(mode="json")
+
+    out: dict[str, Any] = _call("knowledge_adaptive", work, detail_level)
+    return out
+
+
+def control_triggers(
+    confidence: float | None = None,
+    min_confidence: float = 0.5,
+    evidence_incomplete: bool = False,
+    security_issue: bool = False,
+    provider_issue: bool = False,
+    budget_issue: bool = False,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """§32: map declared signals to the closed trigger vocabulary."""
+    from apiforge.governance.control_plane import detect_triggers
+
+    def work() -> dict[str, Any]:
+        found = detect_triggers(
+            confidence=confidence,
+            evidence_complete=not evidence_incomplete,
+            security_issue=security_issue,
+            provider_issue=provider_issue,
+            budget_issue=budget_issue,
+            min_confidence=min_confidence,
+        )
+        return {"schema": "apiforge/fallback-triggers/v1", "triggers": list(found)}
+
+    out: dict[str, Any] = _call("control_triggers", work, detail_level)
     return out
 
 
@@ -1351,12 +1611,18 @@ def brief_show(task_id: str, root: str = ".", detail_level: str = "normal") -> d
     return out
 
 
-def contract_list(detail_level: str = "normal") -> dict[str, Any]:
-    """List registered canonical contracts."""
+def contract_list(limit: int | None = None, detail_level: str = "normal") -> dict[str, Any]:
+    """List registered canonical contracts; ``limit`` bounds the name list."""
     from apiforge.contracts.registry import contract_names
 
+    names = contract_names()
     out: dict[str, Any] = _call(
-        "contract_list", lambda: {"contracts": contract_names()}, detail_level
+        "contract_list",
+        lambda: {
+            "contracts": names[:limit] if limit is not None else names,
+            "total": len(names),
+        },
+        detail_level,
     )
     return out
 
@@ -1547,9 +1813,13 @@ def perf_memory_search(
     subject: str | None = None,
     tool: str | None = None,
     since: str | None = None,
+    limit: int | None = None,
     detail_level: str = "normal",
 ) -> dict[str, Any]:
-    """search_performance_memory — filters declared fields, never infers."""
+    """search_performance_memory — filters declared fields, never infers.
+
+    ``limit`` bounds the carried ``runs``; ``count`` stays the real total.
+    """
     from apiforge.perf.run_store import search_runs
 
     def work() -> dict[str, Any]:
@@ -1557,7 +1827,7 @@ def perf_memory_search(
         return {"count": len(runs), "runs": runs}
 
     out: dict[str, Any] = _call("perf_memory_search", work, detail_level)
-    return out
+    return _bound_lists(out, limit)
 
 
 def perf_suggest(
@@ -1604,12 +1874,17 @@ def autonomy_status(root: str = ".", detail_level: str = "normal") -> dict[str, 
     return out
 
 
-def knowledge_list(root: str = "knowledge", detail_level: str = "normal") -> dict[str, Any]:
-    """List every pack with areas, rules and verification date."""
+def knowledge_list(
+    root: str = "knowledge", limit: int | None = None, detail_level: str = "normal"
+) -> dict[str, Any]:
+    """List every pack with areas, rules and verification date; ``limit`` bounds rows."""
     from apiforge.knowledge.loader import load_packs
 
     def work() -> dict[str, Any]:
         packs = load_packs(Path(root))
+        selected = list(packs.values())
+        if limit is not None:
+            selected = selected[:limit]
         return {
             "packs": [
                 {
@@ -1621,7 +1896,7 @@ def knowledge_list(root: str = "knowledge", detail_level: str = "normal") -> dic
                     "sources": len(p.sources),
                     "verified": p.verified,
                 }
-                for p in packs.values()
+                for p in selected
             ],
             "count": len(packs),
         }
@@ -1726,15 +2001,18 @@ def perf_scenario(tool: str, scenario: str, detail_level: str = "normal") -> dic
     return out
 
 
-def perf_chaos(detail_level: str = "normal") -> dict[str, Any]:
-    """List the declared controlled failure-injection scenarios (CHAOS-001..013)."""
+def perf_chaos(limit: int | None = None, detail_level: str = "normal") -> dict[str, Any]:
+    """The declared controlled failure-injection scenario set (CHAOS-001..013).
+
+    ``limit`` bounds the carried ``scenarios`` window.
+    """
     from apiforge.perf.chaos import list_scenarios
 
     def work() -> dict[str, Any]:
         return {"scenarios": list_scenarios()}
 
     out: dict[str, Any] = _call("perf_chaos", work, detail_level)
-    return out
+    return _bound_lists(out, limit)
 
 
 def model_resilience(path: str, detail_level: str = "normal") -> dict[str, Any]:
@@ -1900,6 +2178,7 @@ def grpc_diff(baseline: str, candidate: str, detail_level: str = "normal") -> di
 
 
 def grpc_capabilities(detail_level: str = "normal") -> dict[str, Any]:
+    """Report which gRPC toolchains (protoc/buf/gateway) are locally available."""
     from apiforge.grpc.capabilities import discover
 
     return cast(
@@ -1915,6 +2194,7 @@ def grpc_codegen(
     tool: str = "fake",
     detail_level: str = "normal",
 ) -> dict[str, Any]:
+    """Plan deterministic codegen stubs for a proto/OpenAPI source — writes nothing."""
     from apiforge.contracts.grpc import GrpcCodegenRequest
     from apiforge.grpc.codegen import plan_codegen
     from apiforge.grpc.source import load_source
@@ -1934,6 +2214,7 @@ def grpc_gateway(
     output_dir: str = "gateway",
     detail_level: str = "normal",
 ) -> dict[str, Any]:
+    """Plan gRPC-Gateway projection artifacts (e.g. OpenAPI) for a proto source."""
     from apiforge.contracts.grpc import GrpcGatewayRequest
     from apiforge.grpc.gateway import plan_gateway
     from apiforge.grpc.source import load_source
@@ -1951,6 +2232,7 @@ def grpc_gateway(
 def grpc_verify(
     source: str, baseline: str | None = None, detail_level: str = "normal"
 ) -> dict[str, Any]:
+    """Verify a proto source and diff it against an optional baseline."""
     from apiforge.grpc.compatibility import compare
     from apiforge.grpc.source import load_source
     from apiforge.grpc.verify import verify
@@ -1964,6 +2246,7 @@ def grpc_verify(
 
 
 def grpc_benchmark(run: dict[str, object], detail_level: str = "normal") -> dict[str, Any]:
+    """Evaluate a declared GrpcPerformanceRun — verdict against its declared SLO."""
     from apiforge.contracts.grpc import GrpcPerformanceRun
     from apiforge.grpc.performance import evaluate
 
@@ -2156,6 +2439,89 @@ def memory_search(
     )
 
 
+def memory_rank(
+    terms: list[str] | None = None,
+    scopes: list[str] | None = None,
+    root: str = ".",
+    environment_fingerprint: str | None = None,
+    minimum_trust: str = "unknown",
+    now: str | None = None,
+    max_results: int = 20,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Deterministic §15 retrieval with per-record score decomposition."""
+    from apiforge.contracts.agentic_memory import MemoryQuery, MemoryScope, TrustLevel
+    from apiforge.memory.retrieval import query_memory_scored
+
+    query = MemoryQuery(
+        terms=tuple(terms or ()),
+        scopes=tuple(cast(MemoryScope, item) for item in (scopes or ())),
+        environment_fingerprint=environment_fingerprint,
+        minimum_trust=cast(TrustLevel, minimum_trust),
+        now=now,
+        max_results=max_results,
+    )
+    return cast(
+        dict[str, Any],
+        _call("memory_rank", lambda: query_memory_scored(Path(root), query), detail_level),
+    )
+
+
+def memory_quarantine_list(
+    root: str = ".",
+    limit: int | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """List pending and released quarantine rows; ``limit`` bounds rows."""
+    from apiforge.memory.store import list_quarantine
+
+    def work() -> dict[str, Any]:
+        rows = [row.model_dump(mode="json") for row in list_quarantine(Path(root))]
+        return {
+            "rows": rows[:limit] if limit is not None else rows,
+            "total": len(rows),
+        }
+
+    return cast(
+        dict[str, Any],
+        _call("memory_quarantine_list", work, detail_level),
+    )
+
+
+def memory_quarantine_resolve(
+    candidate_id: str,
+    verdict: str,
+    resolved_by: str,
+    now: str,
+    root: str = ".",
+    policy_id: str = "default",
+    minimum_trust: str = "observed",
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """Human review of a quarantined candidate; persist re-runs all gates."""
+    from apiforge.contracts.agentic_memory import MemoryPolicy, TrustLevel
+    from apiforge.memory.store import review_quarantine
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "memory_quarantine_resolve",
+            lambda: review_quarantine(
+                Path(root),
+                candidate_id,
+                MemoryPolicy(
+                    policy_id=policy_id,
+                    minimum_trust=cast(TrustLevel, minimum_trust),
+                ),
+                verdict=verdict,
+                resolved_by=resolved_by,
+                now=now,
+            ),
+            detail_level,
+        ),
+    )
+
+
 def blackboard_append(
     task_id: str,
     scope: str,
@@ -2316,6 +2682,110 @@ def budget_spend(
     )
 
 
+def agentops_inspect(
+    run_id: str,
+    root: str = ".",
+    risk: str | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """§53–§54 sectioned run report over the local ledgers."""
+    from apiforge.agentops.inspect import inspect_run
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "agentops_inspect",
+            lambda: inspect_run(Path(root), run_id, risk=risk).model_dump(mode="json"),
+            detail_level,
+        ),
+    )
+
+
+def agentops_compare(
+    run_a: str,
+    run_b: str,
+    root: str = ".",
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """§55 deterministic a/b comparison over the declared axis set."""
+    from apiforge.agentops.compare import compare_runs
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "agentops_compare",
+            lambda: compare_runs(Path(root), run_a, run_b).model_dump(mode="json"),
+            detail_level,
+        ),
+    )
+
+
+def agentops_waste(
+    run_id: str,
+    root: str = ".",
+    risk: str | None = None,
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """§56–§57 waste detector; findings labeled by evidence basis."""
+    from apiforge.agentops.waste import detect_waste
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "agentops_waste",
+            lambda: detect_waste(Path(root), run_id, risk=risk).model_dump(mode="json"),
+            detail_level,
+        ),
+    )
+
+
+def mcp_audit(surface: str = "full", detail_level: str = "normal") -> dict[str, Any]:
+    """§40 surface audit — findings labeled observed/hypothesis per detector."""
+    from apiforge.mcp.audit import audit_surface
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "mcp_audit",
+            lambda: audit_surface(surface).model_dump(mode="json"),
+            detail_level,
+        ),
+    )
+
+
+def mcp_disclose(
+    task: str,
+    task_class: str | None = None,
+    surface: str = "full",
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """§41 task -> declared capability router -> active tool set (advisory)."""
+    from apiforge.mcp.disclosure import disclose
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "mcp_disclose",
+            lambda: disclose(task, surface=surface, task_class=task_class).model_dump(mode="json"),
+            detail_level,
+        ),
+    )
+
+
+def mcp_benchmark(repeats: int = 3, detail_level: str = "normal") -> dict[str, Any]:
+    """§43 measured response bytes + labeled token estimate per sampled tool."""
+    from apiforge.mcp.benchmark import benchmark_tools
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "mcp_benchmark",
+            lambda: benchmark_tools(repeats=repeats).model_dump(mode="json"),
+            detail_level,
+        ),
+    )
+
+
 def agent_span_append(
     trace_id: str,
     task_id: str,
@@ -2333,6 +2803,13 @@ def agent_span_append(
     links: list[str] | None = None,
     evidence_refs: list[str] | None = None,
     unresolved: list[str] | None = None,
+    agent_id: str | None = None,
+    model_call_id: str | None = None,
+    tool_call_id: str | None = None,
+    decision_id: str | None = None,
+    memory_id: str | None = None,
+    context_id: str | None = None,
+    parent_span_id: str | None = None,
     detail_level: str = "normal",
 ) -> dict[str, Any]:
     """Append a sanitized local OTel-shaped agent/tool span."""
@@ -2360,8 +2837,50 @@ def agent_span_append(
                     links=tuple(links or ()),
                     evidence_refs=tuple(evidence_refs or ()),
                     unresolved=tuple(unresolved or ()),
+                    agent_id=agent_id,
+                    model_call_id=model_call_id,
+                    tool_call_id=tool_call_id,
+                    decision_id=decision_id,
+                    memory_id=memory_id,
+                    context_id=context_id,
+                    parent_span_id=parent_span_id,
                 ),
             ),
+            detail_level,
+        ),
+    )
+
+
+def telemetry_export(
+    root: str = ".",
+    service_name: str = "apiforge",
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """§50 project local spans as one OTLP ExportTraceServiceRequest body."""
+    from apiforge.runtime.otel_export import export_otlp
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "telemetry_export",
+            lambda: export_otlp(Path(root), service_name=service_name).model_dump(mode="json"),
+            detail_level,
+        ),
+    )
+
+
+def telemetry_validate(
+    payload: dict[str, Any],
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """§52 deterministic structural acceptance of an OTLP/JSON payload."""
+    from apiforge.runtime.otel_export import validate_otlp
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "telemetry_validate",
+            lambda: validate_otlp(payload).model_dump(mode="json"),
             detail_level,
         ),
     )
@@ -2419,6 +2938,140 @@ def decision_check(
     )
 
 
+def forge_capabilities(detail_level: str = "normal") -> dict[str, Any]:
+    """§46 discover: public capability descriptors other engines can call."""
+    from apiforge.forge.protocol import discover_capabilities
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "forge_capabilities",
+            lambda: {
+                "capabilities": [row.model_dump(mode="json") for row in discover_capabilities()]
+            },
+            detail_level,
+        ),
+    )
+
+
+def forge_inspect(task_id: str, root: str = ".", detail_level: str = "normal") -> dict[str, Any]:
+    """§47 inspect: live wire projection of a forge task's state."""
+    from apiforge.forge.protocol import inspect_task
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "forge_inspect",
+            lambda: inspect_task(Path(root), task_id).model_dump(mode="json"),
+            detail_level,
+        ),
+    )
+
+
+def forge_result(task_id: str, root: str = ".", detail_level: str = "normal") -> dict[str, Any]:
+    """§47 retrieve result: governed OutcomeBrief mapped, gaps named."""
+    from apiforge.forge.protocol import retrieve_result
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "forge_result",
+            lambda: retrieve_result(Path(root), task_id).model_dump(mode="json"),
+            detail_level,
+        ),
+    )
+
+
+def forge_evidence(task_id: str, root: str = ".", detail_level: str = "normal") -> dict[str, Any]:
+    """§47 retrieve evidence: content-addressed artifact bundle."""
+    from apiforge.forge.protocol import retrieve_evidence
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "forge_evidence",
+            lambda: retrieve_evidence(Path(root), task_id).model_dump(mode="json"),
+            detail_level,
+        ),
+    )
+
+
+def forge_health(root: str = ".", detail_level: str = "normal") -> dict[str, Any]:
+    """§47 health: engine, protocol version and declared task counts."""
+    from apiforge.forge.protocol import health
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "forge_health",
+            lambda: health(Path(root)).model_dump(mode="json"),
+            detail_level,
+        ),
+    )
+
+
+def knowledge_drift(
+    domain: str,
+    now: str,
+    receipts: list[str] | None = None,
+    root: str = "knowledge",
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """§29 drift verdict over read-only source receipts; unresolved without receipts."""
+    from apiforge.contracts.knowledge import SourceObservation
+    from apiforge.knowledge.drift import detect_pack_drift
+    from apiforge.knowledge.loader import load_pack
+
+    def work() -> dict[str, Any]:
+        pack = load_pack(Path(root) / domain)
+        observations = tuple(
+            SourceObservation.model_validate(json.loads(Path(path).read_text(encoding="utf-8")))
+            for path in receipts or []
+        )
+        return detect_pack_drift(pack, observations, now=now).model_dump(mode="json")
+
+    return cast(dict[str, Any], _call("knowledge_drift", work, detail_level))
+
+
+def knowledge_impact(
+    root: str = "knowledge",
+    skills: str = ".claude/skills",
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """§29 source -> pack -> rule -> skill -> eval relation graph."""
+    from apiforge.knowledge.impact import build_knowledge_impact
+    from apiforge.rules.catalog import load_catalog
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "knowledge_impact",
+            lambda: build_knowledge_impact(
+                Path(root), skills_root=Path(skills), catalog=load_catalog()
+            ).model_dump(mode="json"),
+            detail_level,
+        ),
+    )
+
+
+def lab_scenarios(
+    catalog: str = "labs/scenarios.yaml",
+    root: str = ".",
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """§28 experimental scenario catalog with honest coverage states."""
+    from apiforge.labs.catalog import load_lab_report
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "lab_scenarios",
+            lambda: load_lab_report(Path(catalog), repo_root=Path(root)).model_dump(mode="json"),
+            detail_level,
+        ),
+    )
+
+
 TOOLS: tuple[Callable[..., Any], ...] = (
     discover,
     analyze,
@@ -2470,7 +3123,18 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     slice_log,
     mcp_surface,
     agentops_projection,
+    economy_ledger,
+    economy_pricing,
+    economy_reconcile,
     economy_roi,
+    governor_decide,
+    governor_recover,
+    governor_stop,
+    control_routes,
+    control_shadow,
+    control_triggers,
+    route_model,
+    knowledge_adaptive,
     evals_replay,
     evals_gate,
     evals_economy_hardening,
@@ -2521,6 +3185,9 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     memory_propose,
     memory_persist,
     memory_search,
+    memory_rank,
+    memory_quarantine_list,
+    memory_quarantine_resolve,
     blackboard_append,
     blackboard_query,
     budget_plan,
@@ -2528,7 +3195,23 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     budget_spend,
     agent_span_append,
     agent_span_query,
+    telemetry_export,
+    telemetry_validate,
+    agentops_inspect,
+    agentops_compare,
+    agentops_waste,
+    mcp_audit,
+    mcp_disclose,
+    mcp_benchmark,
     decision_check,
+    forge_capabilities,
+    forge_inspect,
+    forge_result,
+    forge_evidence,
+    forge_health,
+    knowledge_drift,
+    knowledge_impact,
+    lab_scenarios,
 )
 
 OBSERVABILITY_TOOLS: tuple[Callable[..., Any], ...] = (

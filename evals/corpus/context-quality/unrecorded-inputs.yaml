@@ -1,0 +1,28 @@
+id: unrecorded-inputs
+run_id: eval-unrecorded
+refs:
+  - kind: contract
+    origin: contract
+    size_bytes: 100
+    label: schema
+    source: openapi.yaml
+  - kind: code
+    origin: code
+    size_bytes: 100
+    label: handler
+    source: src/handler.py
+uses: []
+expect:
+  status: degraded
+  metrics:
+    context_precision: {value: 0.0}
+    irrelevant_context_ratio: {value: 1.0}
+    context_recall: {basis: unresolved}
+    stale_context_ratio: {basis: unresolved}
+    cache_hit_rate: {basis: unresolved}
+    role_context_efficiency: {basis: unresolved}
+    evidence_per_token: {basis: unresolved}
+    useful_facts_per_1k_tokens: {basis: unresolved}
+  sufficiency:
+    sufficient: true
+    pruned_count: 1

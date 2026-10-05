@@ -3,7 +3,13 @@
 # share x envelope.context_bytes. `artifacts: true` adds refs to artifacts
 # already produced in the run (the delta); `deltas: true` means the role only
 # reads debate position deltas, never capsule refs.
-schema: apiforge/role-context/v1
+#
+# v2 (step11 phase 1, prompt §7): the optional `policies:` block declares the
+# RoleContextPolicy contract per role — required/denied context kinds, memory/
+# knowledge/artifact visibility, tool allowlist, minimum provenance rank,
+# byte/token caps and required evidence. Roles without a policy row keep the
+# permissive v1 defaults; the classes/roles mapping is unchanged.
+schema: apiforge/role-context/v2
 classes:
   focused:
     kinds: [contract, schema, code, test]
@@ -25,3 +31,29 @@ roles:
   reviewer: evidence_plus_delta
   critic: decision_plus_evidence
   referee: disagreements_only
+policies:
+  specialist:
+    knowledge_visibility: full
+    artifact_visibility: none
+    minimum_origin_rank: filesystem
+  reviewer:
+    required_kinds: [policy]
+    denied_kinds: [code]
+    knowledge_visibility: full
+    artifact_visibility: summary
+    minimum_origin_rank: filesystem
+    required_evidence: true
+  critic:
+    required_kinds: [policy]
+    denied_kinds: [code, test]
+    knowledge_visibility: summary
+    artifact_visibility: full
+    minimum_origin_rank: filesystem
+    required_evidence: true
+  referee:
+    denied_kinds: [code, test, schema]
+    memory_visibility: summary
+    knowledge_visibility: summary
+    artifact_visibility: summary
+    minimum_origin_rank: filesystem
+    required_evidence: true

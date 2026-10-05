@@ -43,6 +43,9 @@ class NodeKind(StrEnum):
     AGENT = "agent"
     RELEASE = "release"
     EVIDENCE = "evidence"
+    KNOWLEDGE = "knowledge"
+    SKILL = "skill"
+    SOURCE = "source"
 
 
 class EdgeKind(StrEnum):

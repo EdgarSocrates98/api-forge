@@ -1,0 +1,4 @@
+latency_ms:
+  economy: 4200
+  balanced: 9800
+  deep: 21500

@@ -6,7 +6,12 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from apiforge.contracts.agent_telemetry import AgentSpan, AgentSpanQuery, AgentSpanResult
+from apiforge.contracts.agent_telemetry import (
+    AgentSpan,
+    AgentSpanQuery,
+    AgentSpanResult,
+    CorrelationIds,
+)
 from apiforge.contracts.agentic import (
     AgentArtifact,
     AgenticPolicy,
@@ -23,9 +28,22 @@ from apiforge.contracts.agentic_governance import (
     BudgetDecision,
     BudgetLimit,
     BudgetSpend,
+    ControlPlaneRoute,
     DecisionGateResult,
     DecisionRequest,
+    ExpectedInformationGain,
+    FallbackDecision,
+    GovernorDecision,
+    GovernorInputs,
+    LoopDetection,
+    PromotionDecision,
+    PromotionEvidence,
+    RecoveryDecision,
+    RouteDecision,
+    ShadowRecord,
+    StopDecision,
 )
+from apiforge.contracts.agentic_health import AgenticDoctorReport, AgenticDoctorSection
 from apiforge.contracts.agentic_memory import (
     BlackboardEntry,
     BlackboardQuery,
@@ -40,6 +58,15 @@ from apiforge.contracts.agentic_memory import (
     MemoryTrust,
     SemanticCheckpoint,
 )
+from apiforge.contracts.agentops_report import (
+    ComparisonAxis,
+    InspectionMetric,
+    InspectionSection,
+    RunComparison,
+    RunInspection,
+    WasteFinding,
+    WasteReport,
+)
 from apiforge.contracts.base import ContractError
 from apiforge.contracts.cache import CacheDecision, CacheDep, CacheEntry, DeltaSlice
 from apiforge.contracts.context import (
@@ -48,6 +75,15 @@ from apiforge.contracts.context import (
     ContextCapsule,
     ContextRef,
     ContextScope,
+)
+from apiforge.contracts.context_quality import (
+    ContextQualityMetric,
+    ContextQualityReport,
+    ContextSufficiencyResult,
+    ContextUseRecord,
+    RoleContextPolicy,
+    RoleContextQuality,
+    RoleContextTelemetry,
 )
 from apiforge.contracts.core import (
     ActionPlan,
@@ -93,7 +129,30 @@ from apiforge.contracts.economy_resume import (
     PhaseBudgetPlan,
     VerificationEscalation,
 )
+from apiforge.contracts.eval_plane import (
+    AdversarialCaseResult,
+    FrontierPoint,
+    LiveEvalLayer,
+    LiveEvalReport,
+    MemoryEvalCaseResult,
+    MemoryEvalReport,
+    QualityFrontier,
+    SecurityAdversarialReport,
+    TraceGrade,
+    TraceGradeDimension,
+    TraceGradingReport,
+)
 from apiforge.contracts.evidence import EvidenceRef
+from apiforge.contracts.forge_protocol import (
+    ForgeCapabilityDescriptor,
+    ForgeEvidenceArtifact,
+    ForgeEvidenceBundle,
+    ForgeHandoff,
+    ForgeHealth,
+    ForgeTaskRequest,
+    ForgeTaskResult,
+    ForgeTaskStatus,
+)
 from apiforge.contracts.graph import GraphEdge, GraphExport, GraphNode
 from apiforge.contracts.graph_access import GraphAccessIR, GraphPlanIR
 from apiforge.contracts.graph_impact import (
@@ -129,7 +188,25 @@ from apiforge.contracts.integration import (
     ExternalReadResult,
     GitHubPrReceipt,
 )
-from apiforge.contracts.knowledge import ExpertisePack
+from apiforge.contracts.knowledge import (
+    ExpertisePack,
+    KnowledgeDrift,
+    KnowledgeImpactReport,
+    PackApplicability,
+)
+from apiforge.contracts.lab import LabReport, LabScenario
+from apiforge.contracts.model_routing import (
+    AdaptiveRetrievalResult,
+    ModelCandidate,
+    ModelEvaluation,
+    ModelRouteDecision,
+    ModelRouteInputs,
+    ModelScorecard,
+    QueryRewrite,
+    RankedModel,
+    RetrievalComparison,
+    RetrievalStep,
+)
 from apiforge.contracts.observability import (
     Capability,
     CircuitBreakerEvent,
@@ -150,6 +227,7 @@ from apiforge.contracts.observability import (
     TelemetryRecord,
     VendorIntent,
 )
+from apiforge.contracts.otel_export import CollectorProbe, OtlpExport, OtlpValidation
 from apiforge.contracts.platform import (
     CapabilityRecord,
     CapabilityRequest,
@@ -213,11 +291,45 @@ from apiforge.contracts.task import (
     TaskRevision,
     TaskSpec,
 )
+from apiforge.contracts.token_economics import (
+    BudgetReconciliation,
+    ProviderCost,
+    ProviderPricing,
+    ReconciliationAxis,
+    TokenAccounting,
+    TokenLedger,
+    TokenLedgerEntry,
+    TokenTotals,
+)
 from apiforge.contracts.tool_host import (
     ErrorSlice,
     HostProjection,
     TestSlice,
     ToolSurface,
+)
+from apiforge.contracts.tool_surface import (
+    DisclosurePolicy,
+    PageWindow,
+    SurfaceFinding,
+    ToolBenchmark,
+    ToolBenchmarkReport,
+    ToolBenchmarkSample,
+    ToolDisclosure,
+    ToolPage,
+    ToolSurfaceAudit,
+)
+from apiforge.contracts.trust import (
+    AgentPermissionSet,
+    MemoryGateResult,
+    MemoryInvalidationPlan,
+    MemoryQuarantine,
+    MemoryRankedResult,
+    MemoryScore,
+    ToolAuthorization,
+    ToolRiskProfile,
+    TrustedRef,
+    TrustPropagation,
+    TrustUnit,
 )
 from apiforge.contracts.verification import (
     HoldoutRecord,
@@ -339,6 +451,13 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "ScorecardRoutingAssessment/v1": ScorecardRoutingAssessment,
     "ScorecardShadowEvaluation/v1": ScorecardShadowEvaluation,
     "ExpertisePack/v1": ExpertisePack,
+    "KnowledgeDrift/v1": KnowledgeDrift,
+    "KnowledgeImpactReport/v1": KnowledgeImpactReport,
+    "PackApplicability/v1": PackApplicability,
+    "AgenticDoctorReport/v1": AgenticDoctorReport,
+    "AgenticDoctorSection/v1": AgenticDoctorSection,
+    "LabReport/v1": LabReport,
+    "LabScenario/v1": LabScenario,
     "ScorecardFeedback/v1": ScorecardFeedback,
     "EvidenceRef/v1": EvidenceRef,
     "EvidenceCoverage/v1": EvidenceCoverage,
@@ -397,6 +516,93 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "CapsuleBudget/v1": CapsuleBudget,
     "CapsuleRefusal/v1": CapsuleRefusal,
     "ContextCapsule/v1": ContextCapsule,
+    "ContextUseRecord/v1": ContextUseRecord,
+    "ContextQualityMetric/v1": ContextQualityMetric,
+    "ContextQualityReport/v1": ContextQualityReport,
+    "ContextSufficiencyResult/v1": ContextSufficiencyResult,
+    "RoleContextPolicy/v1": RoleContextPolicy,
+    "RoleContextQuality/v1": RoleContextQuality,
+    "RoleContextTelemetry/v1": RoleContextTelemetry,
+    "TrustUnit/v1": TrustUnit,
+    "TrustedRef/v1": TrustedRef,
+    "TrustPropagation/v1": TrustPropagation,
+    "ToolRiskProfile/v1": ToolRiskProfile,
+    "AgentPermissionSet/v1": AgentPermissionSet,
+    "ToolAuthorization/v1": ToolAuthorization,
+    "MemoryGateResult/v1": MemoryGateResult,
+    "MemoryQuarantine/v1": MemoryQuarantine,
+    "MemoryInvalidationPlan/v1": MemoryInvalidationPlan,
+    "MemoryScore/v1": MemoryScore,
+    "MemoryRankedResult/v1": MemoryRankedResult,
+    "TokenAccounting/v1": TokenAccounting,
+    "TokenLedgerEntry/v1": TokenLedgerEntry,
+    "TokenTotals/v1": TokenTotals,
+    "TokenLedger/v1": TokenLedger,
+    "ProviderPricing/v1": ProviderPricing,
+    "ProviderCost/v1": ProviderCost,
+    "ReconciliationAxis/v1": ReconciliationAxis,
+    "BudgetReconciliation/v1": BudgetReconciliation,
+    "GovernorInputs/v1": GovernorInputs,
+    "GovernorDecision/v1": GovernorDecision,
+    "ExpectedInformationGain/v1": ExpectedInformationGain,
+    "StopDecision/v1": StopDecision,
+    "RecoveryDecision/v1": RecoveryDecision,
+    "LoopDetection/v1": LoopDetection,
+    "ControlPlaneRoute/v1": ControlPlaneRoute,
+    "ShadowRecord/v1": ShadowRecord,
+    "PromotionEvidence/v1": PromotionEvidence,
+    "PromotionDecision/v1": PromotionDecision,
+    "FallbackDecision/v1": FallbackDecision,
+    "RouteDecision/v1": RouteDecision,
+    "ModelRouteInputs/v1": ModelRouteInputs,
+    "ModelCandidate/v1": ModelCandidate,
+    "ModelEvaluation/v1": ModelEvaluation,
+    "ModelScorecard/v1": ModelScorecard,
+    "RankedModel/v1": RankedModel,
+    "ModelRouteDecision/v1": ModelRouteDecision,
+    "RetrievalStep/v1": RetrievalStep,
+    "AdaptiveRetrievalResult/v1": AdaptiveRetrievalResult,
+    "QueryRewrite/v1": QueryRewrite,
+    "RetrievalComparison/v1": RetrievalComparison,
+    "CorrelationIds/v1": CorrelationIds,
+    "OtlpExport/v1": OtlpExport,
+    "OtlpValidation/v1": OtlpValidation,
+    "CollectorProbe/v1": CollectorProbe,
+    "RunInspection/v1": RunInspection,
+    "InspectionSection/v1": InspectionSection,
+    "InspectionMetric/v1": InspectionMetric,
+    "WasteFinding/v1": WasteFinding,
+    "WasteReport/v1": WasteReport,
+    "RunComparison/v1": RunComparison,
+    "ComparisonAxis/v1": ComparisonAxis,
+    "ToolSurfaceAudit/v1": ToolSurfaceAudit,
+    "SurfaceFinding/v1": SurfaceFinding,
+    "ToolDisclosure/v1": ToolDisclosure,
+    "ToolPage/v1": ToolPage,
+    "PageWindow/v1": PageWindow,
+    "ToolBenchmark/v1": ToolBenchmark,
+    "ToolBenchmarkSample/v1": ToolBenchmarkSample,
+    "ToolBenchmarkReport/v1": ToolBenchmarkReport,
+    "DisclosurePolicy/v1": DisclosurePolicy,
+    "ForgeCapabilityDescriptor/v1": ForgeCapabilityDescriptor,
+    "ForgeTaskRequest/v1": ForgeTaskRequest,
+    "ForgeTaskStatus/v1": ForgeTaskStatus,
+    "ForgeTaskResult/v1": ForgeTaskResult,
+    "ForgeEvidenceArtifact/v1": ForgeEvidenceArtifact,
+    "ForgeEvidenceBundle/v1": ForgeEvidenceBundle,
+    "ForgeHandoff/v1": ForgeHandoff,
+    "ForgeHealth/v1": ForgeHealth,
+    "TraceGradeDimension/v1": TraceGradeDimension,
+    "TraceGrade/v1": TraceGrade,
+    "TraceGradingReport/v1": TraceGradingReport,
+    "LiveEvalLayer/v1": LiveEvalLayer,
+    "LiveEvalReport/v1": LiveEvalReport,
+    "FrontierPoint/v1": FrontierPoint,
+    "QualityFrontier/v1": QualityFrontier,
+    "AdversarialCaseResult/v1": AdversarialCaseResult,
+    "SecurityAdversarialReport/v1": SecurityAdversarialReport,
+    "MemoryEvalCaseResult/v1": MemoryEvalCaseResult,
+    "MemoryEvalReport/v1": MemoryEvalReport,
     "CostVector/v1": CostVector,
     "LedgerRef/v1": LedgerRef,
     "RunLedgerEntry/v1": RunLedgerEntry,

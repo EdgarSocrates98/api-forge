@@ -203,6 +203,24 @@ runtime_app = typer.Typer(
     no_args_is_help=True,
 )
 app.add_typer(runtime_app)
+governor_app = typer.Typer(
+    name="governor",
+    help="Agent Governor decisions: ceilings, gain, stop, recovery and loop checks.",
+    no_args_is_help=True,
+)
+app.add_typer(governor_app)
+control_app = typer.Typer(
+    name="control",
+    help="Decision Control Plane lifecycle: shadow, assisted, active and fallback.",
+    no_args_is_help=True,
+)
+app.add_typer(control_app)
+route_app = typer.Typer(
+    name="route",
+    help="Model routing: candidates, scorecards and lifecycle promotion.",
+    no_args_is_help=True,
+)
+app.add_typer(route_app)
 brief_app = typer.Typer(
     name="brief",
     help="Outcome Briefs — DONE is refused while mandatory gaps exist.",
@@ -245,6 +263,12 @@ migration_app = typer.Typer(
     no_args_is_help=True,
 )
 app.add_typer(migration_app)
+lab_app = typer.Typer(
+    name="lab",
+    help="Opt-in experimental scenario catalog (§28).",
+    no_args_is_help=True,
+)
+app.add_typer(lab_app)
 change_control_app = typer.Typer(
     name="change-control",
     help="Govern API, Git and CI/CD changes with read-only evidence.",
@@ -267,11 +291,16 @@ from apiforge.cli_agentic_state import register as _register_agentic_state
 from apiforge.cli_agents import register as _register_agents
 from apiforge.cli_cache import register as _register_cache
 from apiforge.cli_context import register as _register_context
+from apiforge.cli_control import register as _register_control
 from apiforge.cli_distribution import register as _register_distribution
 from apiforge.cli_economy import register as _register_economy
 from apiforge.cli_extras import register as _register_extras
 from apiforge.cli_field import register as _register_field
+from apiforge.cli_forge import register as _register_forge
+from apiforge.cli_governor import register as _register_governor
 from apiforge.cli_resume import register as _register_resume
+from apiforge.cli_route import register as _register_route
+from apiforge.cli_route import register_retrieval as _register_retrieval
 from apiforge.cli_selective import register as _register_selective
 from apiforge.cli_tool_host import register as _register_tool_host
 from apiforge.cli_tui import tui_app
@@ -303,6 +332,11 @@ _register_resume(
     runtime_app=runtime_app,
 )
 _register_economy(economy_app)
+_register_forge(app)
+_register_governor(governor_app)
+_register_control(control_app)
+_register_route(route_app)
+_register_retrieval(knowledge_app)
 _register_agentic_state(app, runtime_app)
 
 
@@ -437,12 +471,18 @@ def runtime_doctor(
     ),
     root: Path = typer.Option(Path("."), "--root"),
     economy: bool = typer.Option(False, "--economy", help="Economy diagnostics instead."),
+    agentic: bool = typer.Option(False, "--agentic", help="Cross-plane agentic health report."),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
     """Inspect runtime state, or the local installation when no task is supplied."""
     from apiforge.application.portable import doctor as portable_doctor
     from apiforge.application.runtime_experience import doctor
 
+    if agentic:
+        from apiforge.runtime.agentic_doctor import diagnose_agentic
+
+        _echo_json(_run(lambda: diagnose_agentic(root)), detail_level)
+        return
     if economy:
         from apiforge.economy.doctor import diagnose
 
@@ -2321,17 +2361,19 @@ def perf_memory_search(
     tool: str | None = typer.Option(None, "--tool"),
     since: str | None = typer.Option(None, "--since", help="ISO-8601 lower bound on recorded_at."),
     root: Path = typer.Option(Path("."), "--root", help="Workspace root."),
+    limit: int | None = typer.Option(
+        None, "--limit", help="Bound carried runs; count stays the real total."
+    ),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
     """search_performance_memory — filters declared fields, never infers."""
 
     def work() -> object:
+        from apiforge.output.page import bound_collections
         from apiforge.perf.run_store import search_runs
 
-        return {
-            "count": len(search_runs(root, subject=subject, tool=tool, since=since)),
-            "runs": search_runs(root, subject=subject, tool=tool, since=since),
-        }
+        runs = search_runs(root, subject=subject, tool=tool, since=since)
+        return bound_collections({"count": len(runs), "runs": runs}, limit)
 
     _echo_json(_run(work), detail_level)
 
@@ -2431,6 +2473,7 @@ def perf_plan(
 
 @perf_app.command("chaos")
 def perf_chaos(
+    limit: int | None = typer.Option(None, "--limit", help="Bound carried scenarios."),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
     """List the declared controlled failure-injection scenarios (CHAOS-001..013).
@@ -2440,9 +2483,10 @@ def perf_chaos(
     executed by API Forge."""
 
     def work() -> object:
+        from apiforge.output.page import bound_collections
         from apiforge.perf.chaos import list_scenarios
 
-        return {"scenarios": list_scenarios()}
+        return bound_collections({"scenarios": list_scenarios()}, limit)
 
     _echo_json(_run(work), detail_level)
 
@@ -3565,6 +3609,62 @@ def agentops_workflow(
         _fail("AF-WORKFLOW-UNKNOWN", str(exc))
 
 
+@agentops_app.command("inspect")
+def agentops_inspect(
+    run_id: str = typer.Argument(..., help="Run id present in the local ledgers."),
+    risk: str | None = typer.Option(
+        None, "--risk", help="Declared run risk (micro/low/medium/high)."
+    ),
+    root: Path = typer.Option(Path("."), "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§53–§54 sectioned report for one run; sections never drop silently."""
+    from apiforge.agentops.inspect import inspect_run
+
+    _echo_json(
+        _run(lambda: inspect_run(root, run_id, risk=risk).model_dump(mode="json")),
+        detail_level,
+    )
+
+
+@agentops_app.command("compare")
+def agentops_compare(
+    run_a: str = typer.Argument(..., help="Baseline run id."),
+    run_b: str = typer.Argument(..., help="Candidate run id."),
+    root: Path = typer.Option(Path("."), "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§55 deterministic a/b over quality/tokens/cost/latency/context/evidence/tools/agents."""
+    from apiforge.agentops.compare import compare_runs
+
+    _echo_json(
+        _run(lambda: compare_runs(root, run_a, run_b).model_dump(mode="json")),
+        detail_level,
+    )
+
+
+@agentops_app.command("waste")
+def agentops_waste(
+    run_id: str = typer.Argument(..., help="Run id present in the local ledgers."),
+    risk: str | None = typer.Option(
+        None, "--risk", help="Declared run risk (micro/low/medium/high)."
+    ),
+    policy: Path | None = typer.Option(
+        None, "--policy", help="rules/agentops_waste.yaml override."
+    ),
+    root: Path = typer.Option(Path("."), "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§56–§57 waste detector; every finding labeled observed/estimated/hypothesis."""
+    from apiforge.agentops.waste import _load_policy, detect_waste
+
+    def work() -> dict[str, object]:
+        detectors = _load_policy(policy) if policy else None
+        return detect_waste(root, run_id, risk=risk, policy=detectors).model_dump(mode="json")
+
+    _echo_json(_run(work), detail_level)
+
+
 @agentops_app.command("hosts")
 def agentops_hosts(
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
@@ -3978,6 +4078,234 @@ def evals_agentic_quality(
         raise typer.Exit(code=1)
 
 
+@evals_app.command("context-quality")
+def evals_context_quality(
+    corpus: Path = typer.Option(Path("evals/corpus/context-quality"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Fixture capsule + recorded uses vs declared metrics and sufficiency gates."""
+    from apiforge.evals.context_quality import run_context_quality
+
+    result = _run(lambda: run_context_quality(corpus))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("agent-governor")
+def evals_agent_governor(
+    corpus: Path = typer.Option(Path("evals/corpus/agent-governor"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§23-§27 governor primitives vs declared corpus expectations."""
+    from apiforge.evals.agent_governor import run_agent_governor
+
+    result = _run(lambda: run_agent_governor(corpus))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("model-routing")
+def evals_model_routing(
+    corpus: Path = typer.Option(Path("evals/corpus/model-routing"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§33-§35 router constraints, scorecard floors and promotion evidence."""
+    from apiforge.evals.model_routing import run_model_routing
+
+    result = _run(lambda: run_model_routing(corpus))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("retrieval")
+def evals_retrieval(
+    corpus: Path = typer.Option(Path("evals/corpus/retrieval"), "--corpus"),
+    root: Path | None = typer.Option(None, "--root", help="Knowledge packs directory."),
+    cost_rate: float | None = typer.Option(None, "--cost-rate", help="Declared cost per token."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§38: lexical/graph/semantic/hybrid on recall, precision, latency, cost."""
+    from apiforge.evals.retrieval import run_retrieval
+
+    result = _run(lambda: run_retrieval(corpus, root=root, cost_rate=cost_rate))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("control-plane")
+def evals_control_plane(
+    corpus: Path = typer.Option(Path("evals/corpus/control-plane"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§28-§32 lifecycle: shadow never governs, promotion gates, fallback."""
+    from apiforge.evals.control_plane import run_control_plane
+
+    result = _run(lambda: run_control_plane(corpus))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("telemetry-otlp")
+def evals_telemetry_otlp(
+    corpus: Path = typer.Option(Path("evals/corpus/telemetry-otlp"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§50-§52: ledger spans -> OTLP export -> structural acceptance."""
+    from apiforge.evals.otel_export import run_otel_export
+
+    result = _run(lambda: run_otel_export(corpus))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("tool-surface")
+def evals_tool_surface(
+    corpus: Path = typer.Option(Path("evals/corpus/tool-surface"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§40–§43: audit findings, disclosure routing, paging, benchmark honesty."""
+    from apiforge.evals.tool_surface import run_tool_surface
+
+    result = _run(lambda: run_tool_surface(corpus))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("forge-protocol")
+def evals_forge_protocol(
+    corpus: Path = typer.Option(Path("evals/corpus/forge-protocol"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§46–§48: submit/attach/inspect/result/evidence/handoff/health lifecycle."""
+    from apiforge.evals.forge_protocol import run_forge_protocol
+
+    result = _run(lambda: run_forge_protocol(corpus))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("trace-grading")
+def evals_trace_grading(
+    corpus: Path = typer.Option(Path("evals/corpus/trace-grading"), "--corpus"),
+    rubric: Path = typer.Option(Path("src/apiforge/rules/trace_rubric.yaml"), "--rubric"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§23: recorded traces graded against the declared rubric."""
+    from apiforge.evals.trace_grading import run_trace_grading
+
+    result = _run(lambda: run_trace_grading(corpus, rubric=rubric))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("security-adversarial")
+def evals_security_adversarial(
+    corpus: Path = typer.Option(Path("evals/corpus/security-adversarial"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§25: synthesized attacks against the platform's own defenses."""
+    from apiforge.evals.security_adversarial import run_security_adversarial
+
+    result = _run(lambda: run_security_adversarial(corpus))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("memory-evals")
+def evals_memory_evals(
+    corpus: Path = typer.Option(Path("evals/corpus/memory-evals"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§24: the eight memory axes against the real governed store."""
+    from apiforge.evals.memory_evals import run_memory_evals
+
+    result = _run(lambda: run_memory_evals(corpus))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("live")
+def evals_live(
+    layer: Path = typer.Option(Path("src/apiforge/rules/live_evals.yaml"), "--layer"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§23: deterministic tier observed; provider tier deferred_external."""
+    from apiforge.evals.live_evals import run_live_evals
+
+    result = _run(lambda: run_live_evals(layer))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("frontier")
+def evals_frontier(
+    report: Path = typer.Option(..., "--report", help="agentic-quality report JSON"),
+    latencies: Path = typer.Option(
+        None, "--latencies", help="optional yaml {latency_ms: {profile: ms}}"
+    ),
+    costs: Path = typer.Option(None, "--costs", help="optional yaml {cost: {profile: usd}}"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§23: quality x cost x latency frontier across profiles."""
+    from apiforge.evals.frontier import run_frontier
+
+    result = _run(lambda: run_frontier(report, latencies=latencies, costs=costs))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("agentops")
+def evals_agentops(
+    corpus: Path = typer.Option(Path("evals/corpus/agentops"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§53–§57: seeded ledgers -> inspect/compare/waste verdicts."""
+    from apiforge.evals.agentops import run_agentops
+
+    result = _run(lambda: run_agentops(corpus))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("token-economics")
+def evals_token_economics(
+    corpus: Path = typer.Option(Path("evals/corpus/token-economics"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Usage rows + pricing + estimate vs ledger/cost/calibration expectations."""
+    from apiforge.evals.token_economics import run_token_economics
+
+    result = _run(lambda: run_token_economics(corpus))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("knowledge-drift")
+def evals_knowledge_drift(
+    corpus: Path = typer.Option(Path("evals/corpus/knowledge-drift"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§29 drift verdicts over declared pack+receipt cases."""
+    from apiforge.evals.knowledge_drift import run_knowledge_drift
+
+    _echo_json(_run(lambda: run_knowledge_drift(corpus)), detail_level)
+
+
 @evals_app.command("economy-freshness")
 def evals_economy_freshness(
     corpus: Path = typer.Option(Path("evals/corpus/economy-freshness"), "--corpus"),
@@ -4199,6 +4527,64 @@ def knowledge_freshness(
             else None
         )
         return verify_pack_freshness(pack, observation, now=now)
+
+    _echo_json(_run(work), detail_level)
+
+
+@knowledge_app.command("drift")
+def knowledge_drift(
+    domain: str = typer.Argument(..., help="Pack directory name."),
+    receipts: list[Path] = typer.Option(
+        [], "--receipt", help="Read-only observation JSON; repeatable."
+    ),
+    root: Path = typer.Option(Path("knowledge"), "--root"),
+    now: str = typer.Option(..., "--now", help="Explicit ISO8601 clock."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§29 drift verdict across one or more read-only source receipts."""
+    from apiforge.contracts.knowledge import SourceObservation
+    from apiforge.knowledge.drift import detect_pack_drift
+    from apiforge.knowledge.loader import load_pack
+
+    def work() -> object:
+        pack = load_pack(root / domain)
+        observations = tuple(
+            SourceObservation.model_validate(json.loads(path.read_text(encoding="utf-8")))
+            for path in receipts
+        )
+        return detect_pack_drift(pack, observations, now=now)
+
+    _echo_json(_run(work), detail_level)
+
+
+@knowledge_app.command("impact")
+def knowledge_impact(
+    root: Path = typer.Option(Path("knowledge"), "--root"),
+    skills: Path = typer.Option(
+        Path(".claude/skills"), "--skills", help="Skill manifests directory."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§29 source -> pack -> rule -> skill -> eval relation graph."""
+    from apiforge.knowledge.impact import build_knowledge_impact
+    from apiforge.rules.catalog import load_catalog
+
+    def work() -> object:
+        return build_knowledge_impact(root, skills_root=skills, catalog=load_catalog())
+
+    _echo_json(_run(work), detail_level)
+
+
+@lab_app.command("scenarios")
+def lab_scenarios(
+    catalog: Path = typer.Option(Path("labs/scenarios.yaml"), "--catalog"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§28 experimental scenario catalog with honest coverage states."""
+    from apiforge.labs.catalog import load_lab_report
+
+    def work() -> object:
+        return load_lab_report(catalog, repo_root=Path("."))
 
     _echo_json(_run(work), detail_level)
 

@@ -3,9 +3,13 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from typing import Literal
 
-from apiforge.contracts.knowledge import FreshnessResult, PackFreshness, SourceObservation
+from apiforge.contracts.knowledge import (
+    FreshnessResult,
+    FreshnessState,
+    PackFreshness,
+    SourceObservation,
+)
 from apiforge.knowledge.loader import Pack
 
 
@@ -39,6 +43,7 @@ def verify_pack_freshness(
     try:
         observed_at = _parse(observation.observed_at)
         current = _parse(now)
+        expires = _parse(metadata.expires_at) if metadata.expires_at else None
     except ValueError as exc:
         return FreshnessResult(
             state="unresolved",
@@ -56,6 +61,16 @@ def verify_pack_freshness(
             reason="observation is in the future relative to the supplied clock",
             next_action="rerun with an explicit consistent clock",
         )
+    if expires is not None and current > expires:
+        return FreshnessResult(
+            state="deprecated",
+            source=observation.source,
+            observed_at=observation.observed_at,
+            age_days=age_days,
+            reason=f"pack validity expired at {metadata.expires_at}",
+            next_action="retire the pack or declare a new validity window",
+            evidence=observation.evidence,
+        )
     if metadata.source_hash and observation.source_hash != metadata.source_hash:
         return FreshnessResult(
             state="stale",
@@ -65,14 +80,37 @@ def verify_pack_freshness(
             reason="source hash differs from the pack declaration",
             next_action="review the pack against a new read-only receipt",
         )
+    if (
+        metadata.source_version
+        and observation.source_version
+        and observation.source_version != metadata.source_version
+    ):
+        return FreshnessResult(
+            state="stale",
+            source=observation.source,
+            observed_at=observation.observed_at,
+            age_days=age_days,
+            reason=(
+                f"source version {observation.source_version!r} differs from the "
+                f"pack declaration {metadata.source_version!r}"
+            ),
+            next_action="review the pack against a new read-only receipt",
+        )
+    version_confirmed = bool(
+        metadata.source_version and observation.source_version == metadata.source_version
+    )
     if metadata.window_days is None:
-        state: Literal["fresh", "stale", "unresolved", "unknown"] = "unknown"
+        state: FreshnessState = "unknown"
         reason = "pack declares no freshness window"
         next_action = "declare a freshness window"
     elif age_days > metadata.window_days:
         state = "stale"
         reason = f"observation age {age_days}d exceeds window {metadata.window_days}d"
         next_action = "collect a new read-only source observation"
+    elif version_confirmed and metadata.source_hash:
+        state = "verified"
+        reason = "source hash, source version and freshness window all confirmed"
+        next_action = "continue with evidence review"
     else:
         state = "fresh"
         reason = "observation is within the declared freshness window"

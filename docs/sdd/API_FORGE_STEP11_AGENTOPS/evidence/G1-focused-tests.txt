@@ -1,0 +1,5 @@
+  E:\projetos\api-forge\src\apiforge\contracts\tool_host.py:87: UserWarning: Field name "schema" in "HostProjection" shadows an attribute in parent "VersionedContract"
+    class HostProjection(VersionedContract):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+18 passed, 1 skipped, 11 warnings in 2.75s

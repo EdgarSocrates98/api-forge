@@ -1,0 +1,12 @@
+........                                                                 [100%]
+8 passed in 0.76s
+  ],
+  "corpus": "evals\\corpus\\token-economics",
+  "passed": true,
+  "schema": "apiforge/token-economics-evals/v1",
+  "totals": {
+    "cases": 4,
+    "failed": 0,
+    "failed_ids": []
+  }
+}

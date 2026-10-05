@@ -1,0 +1,20 @@
+# §29: in shadow the candidate runs in parallel but legacy governs; the
+# difference between both decisions is recorded, sorted.
+id: shadow-never-governs
+routes:
+  - route: model_routing
+    mode: shadow
+    candidate: model-router-v1
+    legacy: tier-descriptor
+    fallback_route: provider_descriptor
+steps:
+  - op: eval
+    route: model_routing
+    candidate: {model: new, cost: 0.1}
+    legacy: {model: old, cost: 0.1}
+    confidence: 0.8
+    evidence: ["fact:shadow-1"]
+    expect:
+      governing: legacy
+      shadow: true
+      mode: shadow

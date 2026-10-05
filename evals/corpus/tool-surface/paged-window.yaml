@@ -1,0 +1,7 @@
+id: paged-window
+paged:
+  items: 10
+  offset: 0
+  limit: 4
+  shown: 4
+  next_offset: 4

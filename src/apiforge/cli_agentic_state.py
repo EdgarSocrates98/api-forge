@@ -130,6 +130,83 @@ def register(app: typer.Typer, runtime_app: typer.Typer) -> None:
         )
         _echo_json(_run(lambda: query_memory(root, query)), detail_level)
 
+    @memory_app.command("rank")
+    def memory_rank(
+        term: list[str] = typer.Option([], "--term"),
+        scope: list[str] = typer.Option([], "--scope"),
+        environment: str | None = typer.Option(None, "--environment"),
+        minimum_trust: str = typer.Option("unknown", "--minimum-trust"),
+        now: str | None = typer.Option(None, "--now"),
+        include_invalidated: bool = typer.Option(False, "--include-invalidated"),
+        max_results: int = typer.Option(20, "--max-results"),
+        root: Path = typer.Option(Path("."), "--root"),
+        detail_level: str = typer.Option("normal", "--detail-level"),
+    ) -> None:
+        """§15 ranked retrieval: per-record score decomposition, deterministic."""
+        from apiforge.cli import _echo_json, _run
+        from apiforge.contracts.agentic_memory import MemoryQuery, MemoryScope, TrustLevel
+        from apiforge.memory.retrieval import query_memory_scored
+
+        query = MemoryQuery(
+            terms=tuple(term),
+            scopes=tuple(cast(MemoryScope, item) for item in scope),
+            environment_fingerprint=environment,
+            now=now,
+            minimum_trust=cast(TrustLevel, minimum_trust),
+            include_invalidated=include_invalidated,
+            max_results=max_results,
+        )
+        _echo_json(_run(lambda: query_memory_scored(root, query)), detail_level)
+
+    @memory_app.command("quarantine-list")
+    def memory_quarantine_list(
+        root: Path = typer.Option(Path("."), "--root"),
+        detail_level: str = typer.Option("normal", "--detail-level"),
+    ) -> None:
+        """List pending and released quarantine rows."""
+        from apiforge.cli import _echo_json, _run
+        from apiforge.memory.store import list_quarantine
+
+        _echo_json(
+            _run(lambda: {"rows": [row.model_dump(mode="json") for row in list_quarantine(root)]}),
+            detail_level,
+        )
+
+    @memory_app.command("quarantine-resolve")
+    def memory_quarantine_resolve(
+        candidate_id: str = typer.Option(..., "--candidate-id"),
+        verdict: str = typer.Option(..., "--verdict", help="persist or reject"),
+        resolved_by: str = typer.Option(..., "--by"),
+        policy: str = typer.Option("default", "--policy"),
+        minimum_trust: str = typer.Option(
+            "observed", "--minimum-trust", help="explicit human floor for the release"
+        ),
+        now: str = typer.Option(..., "--now"),
+        root: Path = typer.Option(Path("."), "--root"),
+        detail_level: str = typer.Option("normal", "--detail-level"),
+    ) -> None:
+        """Human review boundary: release a quarantined candidate."""
+        from apiforge.cli import _echo_json, _run
+        from apiforge.contracts.agentic_memory import MemoryPolicy, TrustLevel
+        from apiforge.memory.store import review_quarantine
+
+        _echo_json(
+            _run(
+                lambda: review_quarantine(
+                    root,
+                    candidate_id,
+                    MemoryPolicy(
+                        policy_id=policy,
+                        minimum_trust=cast(TrustLevel, minimum_trust),
+                    ),
+                    verdict=verdict,
+                    resolved_by=resolved_by,
+                    now=now,
+                )
+            ),
+            detail_level,
+        )
+
     @memory_app.command("invalidate")
     def memory_invalidate(
         memory_id: str = typer.Option(..., "--memory-id"),
@@ -252,6 +329,13 @@ def register(app: typer.Typer, runtime_app: typer.Typer) -> None:
         started_at: str = typer.Option(..., "--started-at"),
         agent_name: str | None = typer.Option(None, "--agent"),
         tool_name: str | None = typer.Option(None, "--tool"),
+        agent_id: str | None = typer.Option(None, "--agent-id"),
+        model_call_id: str | None = typer.Option(None, "--model-call-id"),
+        tool_call_id: str | None = typer.Option(None, "--tool-call-id"),
+        decision_id: str | None = typer.Option(None, "--decision-id"),
+        memory_id: str | None = typer.Option(None, "--memory-id"),
+        context_id: str | None = typer.Option(None, "--context-id"),
+        parent_span_id: str | None = typer.Option(None, "--parent-span-id"),
         ended_at: str | None = typer.Option(None, "--ended-at"),
         status: str = typer.Option("unset", "--status"),
         status_message: str = typer.Option("", "--status-message"),
@@ -277,7 +361,13 @@ def register(app: typer.Typer, runtime_app: typer.Typer) -> None:
                         run_id=run_id,
                         operation=operation,
                         started_at=started_at,
-                        parent_span_id=None,
+                        parent_span_id=parent_span_id,
+                        agent_id=agent_id,
+                        model_call_id=model_call_id,
+                        tool_call_id=tool_call_id,
+                        decision_id=decision_id,
+                        memory_id=memory_id,
+                        context_id=context_id,
                         agent_name=agent_name,
                         tool_name=tool_name,
                         ended_at=ended_at,
@@ -319,6 +409,107 @@ def register(app: typer.Typer, runtime_app: typer.Typer) -> None:
             max_results=max_results,
         )
         _echo_json(_run(lambda: query_spans(root, query)), detail_level)
+
+    @runtime_app.command("telemetry-export")
+    def telemetry_export(
+        out: Path | None = typer.Option(None, "--out", help="Write OTLP JSON to this file."),
+        service_name: str = typer.Option("apiforge", "--service-name"),
+        root: Path = typer.Option(Path("."), "--root"),
+        detail_level: str = typer.Option("normal", "--detail-level"),
+    ) -> None:
+        """§50 export local spans as one OTLP ExportTraceServiceRequest body."""
+        from apiforge.cli import _echo_json, _run
+        from apiforge.runtime.otel_export import export_otlp
+
+        def work() -> dict[str, object]:
+            export = export_otlp(root, service_name=service_name)
+            if out:
+                out.write_text(json.dumps(export.payload, indent=2), encoding="utf-8")
+            return export.model_dump(mode="json")
+
+        _echo_json(_run(work), detail_level)
+
+    @runtime_app.command("telemetry-validate")
+    def telemetry_validate(
+        otlp: Path = typer.Option(..., "--otlp", help="OTLP/JSON payload file."),
+        detail_level: str = typer.Option("normal", "--detail-level"),
+    ) -> None:
+        """§52 deterministic structural acceptance of an OTLP payload."""
+        from apiforge.cli import _echo_json, _run
+        from apiforge.runtime.otel_export import validate_otlp
+
+        def work() -> dict[str, object]:
+            validation = validate_otlp(json.loads(otlp.read_text(encoding="utf-8")))
+            return validation.model_dump(mode="json")
+
+        _echo_json(_run(work), detail_level)
+
+    @runtime_app.command("telemetry-ids")
+    def telemetry_ids(
+        task_id: str | None = typer.Option(None, "--task-id"),
+        run_id: str | None = typer.Option(None, "--run-id"),
+        trace_id: str | None = typer.Option(None, "--trace-id"),
+        span_id: str | None = typer.Option(None, "--span-id"),
+        agent_id: str | None = typer.Option(None, "--agent-id"),
+        model_call_id: str | None = typer.Option(None, "--model-call-id"),
+        tool_call_id: str | None = typer.Option(None, "--tool-call-id"),
+        decision_id: str | None = typer.Option(None, "--decision-id"),
+        memory_id: str | None = typer.Option(None, "--memory-id"),
+        context_id: str | None = typer.Option(None, "--context-id"),
+        issue_trace: bool = typer.Option(False, "--issue-trace"),
+        detail_level: str = typer.Option("normal", "--detail-level"),
+    ) -> None:
+        """§51 emit the standardized correlation id set (+ W3C traceparent)."""
+        from apiforge.cli import _echo_json, _run
+        from apiforge.runtime.otel_export import correlation_ids
+
+        _echo_json(
+            _run(
+                lambda: correlation_ids(
+                    task_id=task_id,
+                    run_id=run_id,
+                    trace_id=trace_id,
+                    span_id=span_id,
+                    agent_id=agent_id,
+                    model_call_id=model_call_id,
+                    tool_call_id=tool_call_id,
+                    decision_id=decision_id,
+                    memory_id=memory_id,
+                    context_id=context_id,
+                    issue_trace=issue_trace,
+                ).model_dump(mode="json")
+            ),
+            detail_level,
+        )
+
+    @runtime_app.command("telemetry-collector-check")
+    def telemetry_collector_check(
+        endpoint: str = typer.Option(..., "--endpoint", help="OTLP/HTTP base URL."),
+        otlp: Path | None = typer.Option(
+            None, "--otlp", help="Payload file; defaults to the local ledger."
+        ),
+        output_file: Path | None = typer.Option(None, "--output-file"),
+        timeout_s: float = typer.Option(30.0, "--timeout-s"),
+        root: Path = typer.Option(Path("."), "--root"),
+        detail_level: str = typer.Option("normal", "--detail-level"),
+    ) -> None:
+        """§52 POST the payload to a real collector and count accepted spans."""
+        from apiforge.cli import _echo_json, _run
+        from apiforge.runtime.otel_export import export_otlp, probe_collector
+
+        def work() -> dict[str, object]:
+            payload = (
+                json.loads(otlp.read_text(encoding="utf-8")) if otlp else export_otlp(root).payload
+            )
+            probe = probe_collector(
+                payload if isinstance(payload, dict) else {},
+                endpoint=endpoint,
+                output_file=output_file,
+                timeout_s=timeout_s,
+            )
+            return probe.model_dump(mode="json")
+
+        _echo_json(_run(work), detail_level)
 
     @governance_app.command("decision-check")
     def governance_decision_check(

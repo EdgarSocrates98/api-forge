@@ -1,0 +1,20 @@
+# LF is the repository's content contract: sha256 manifests, generated
+# mirrors, bundle receipts and the vendor parity check are byte-sensitive.
+# Never normalize text files to CRLF on checkout, on any platform.
+* text=auto eol=lf
+
+# Pinned binary assets — explicit so `text=auto` sniffing never guesses.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.whl binary
+*.zip binary
+*.gz binary
+*.exe binary
+*.dll binary
+*.so binary
+*.woff binary
+*.woff2 binary
+*.bin binary

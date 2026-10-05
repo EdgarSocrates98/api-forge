@@ -56,13 +56,32 @@ authorization to mutate an external system.
 | `AF-MEMORY-UNTRUSTED` | external-untrusted data cannot be persisted under the policy |
 | `AF-MEMORY-EVIDENCE-REQUIRED` | institutional/semantic memory has no verified evidence refs |
 | `AF-MEMORY-MODEL-UNVERIFIED` | model-generated data cannot be promoted automatically |
-| `AF-MEMORY-TRUST-INSUFFICIENT` | candidate trust is below the policy minimum |
+| `AF-MEMORY-TRUST-INSUFFICIENT` | candidate trust is below the policy minimum (legacy code; superseded by `AF-MEMORY-TRUST-QUARANTINED` in the §14 pipeline) |
+| `AF-MEMORY-TRUST-QUARANTINED` | candidate trust is below the policy minimum; parked in the append-only quarantine log for human review |
+| `AF-MEMORY-EXPIRED` | candidate expiry is already past at persist time |
+| `AF-MEMORY-GATE-DENIED` | a §14 gate failed without a more specific code |
+| `AF-MEMORY-QUARANTINE-NOT-FOUND` | review named a candidate with no pending quarantine row |
+| `AF-MEMORY-QUARANTINE-REJECTED` | human review rejected a quarantined candidate; nothing reaches the record log |
 | `AF-MEMORY-NOT-FOUND` | invalidation named a memory absent from the append-only store |
 | `AF-MEMORY-CANDIDATE-NOT-FOUND` | persistence named a candidate absent from the store |
 | `AF-MEMORY-FRESHNESS-UNRESOLVED` | an expiry exists but retrieval received no explicit clock |
 | `AF-MEMORY-STORE-CORRUPT` | a persisted memory row failed its closed contract |
 | `AF-BLACKBOARD-STORE-CORRUPT` | a persisted blackboard row failed its closed contract |
 | `AF-CHECKPOINT-NOT-FOUND` | the requested semantic checkpoint is absent |
+
+## Trust Plane and tool authorization
+
+The Trust Plane annotates every context-bearing surface with origin, trust
+level, taint and instruction authority; tool authorization is allowlist-first
+and defaults to deny. Every refusal carries the denied field and a safe unlock.
+
+| Code | Meaning |
+|---|---|
+| `AF-TRUST-PROPAGATION-EMPTY` | taint propagation requires at least one source unit |
+| `AF-TOOL-PROFILE-MISSING` | the tool has no declared risk profile in `rules/tool_risk.yaml` |
+| `AF-TOOL-AUTHZ-DENIED` | the role has no permission set, or the tool is not in its allowlist |
+| `AF-TOOL-DENIED` | the tool is explicitly denied for the role |
+| `AF-TOOL-RISK-DENIED` | the tool's declared risk classes exceed the role's grant |
 
 ## Decision governance
 
@@ -585,8 +604,28 @@ carry `payload_bytes: 0` so `economy report` totals are unchanged.
 | `AF-CTX-REF-NOT-FOUND` | ref absent from `<root>/.apiforge/ctx`; unlock: rebuild the capsule in the same root |
 | `AF-CTX-HASH-MISMATCH` | stored object no longer hashes to its ref; content is never returned; unlock: delete the object and rebuild |
 | `AF-ECONOMY-RUN-NOT-FOUND` | `economy explain` has no attribution rows for the run id; unlock: pass a `run_id` printed by `context capsule` |
+| `AF-ECONOMY-USAGE-EMPTY` | `economy record-usage` called without `--transcript` or `--estimate`; unlock: pass one or both |
+| `AF-ECONOMY-PRICING-MISSING` | `economy cost` found no `ProviderPricing` row for provider/model (at the horizon); unlock: declare an entry in the pricing catalog yaml |
+| `AF-GOV-ACTION-INVALID` | `governor gain`/`stop` action outside the §24 names; unlock: pass one of the declared action names |
+| `AF-GOV-FAILURE-CLASS-UNKNOWN` | `governor recover` failure class outside the closed §26 vocabulary; unlock: classify into one of the declared classes |
+| `AF-GOV-RECOVERY-UNDECLARED` | failure class is valid but absent from the recovery policy; escalates by default |
+| `AF-GOV-RECOVERY-EXHAUSTED` | recovery attempts exhausted for the class; the ladder's terminal action fires |
+| `AF-GOV-LOOP-DETECTED` | strategy fingerprint repeated inside the declared window; the cycle is blocked |
+| `AF-GOV-GAIN-UNRESOLVED` | expected gain is unmeasurable; continuing is not justified — stop |
+| `AF-GOV-STOP-LOW-GAIN` | expected gain at or below the threshold; stop, not "budget remains" |
+| `AF-GOV-ROUTE-UNKNOWN` | `control eval/promote/demote` target route not declared in `rules/control_plane.yaml`; unlock: declare the route |
+| `AF-GOV-MODE-TRANSITION-INVALID` | lifecycle step skipped or already terminal (active→active); unlock: move one stage at a time shadow→assisted→active |
+| `AF-GOV-PROMOTION-INCOMPLETE` | §31 requirements unmet; `missing` names each absent requirement |
+| `AF-GOV-PROMOTION-NOT-APPROVED` | active promotion without an approved `ApprovalGate` matching `evidence.approval_id` |
+| `AF-GOV-FALLBACK-MISSING` | active route degraded and no `fallback_route` declared; the route refuses (fail-closed) |
+| `AF-GOV-TRIGGER-INVALID` | `control eval` trigger name outside the §32 vocabulary; unlock: pass one of the five triggers |
+| `AF-ROUTE-POLICY-INVALID` | `rules/model_router.yaml` (or `--policy`) schema unexpected; unlock: align `version: 1` |
+| `AF-ROUTE-NO-ELIGIBLE-MODEL` | every candidate failed a declared constraint; `ranked[].reasons` names each refusal |
+| `AF-ROUTE-PROMOTION-EVIDENCE` | `route promote` without a scorecard reaching min_evaluations + quality_floor; a small synthetic benchmark never promotes |
 | `AF-EVALS-ECONOMY-BASELINE-MISSING` | corpus case has no recorded baseline; unlock: `apiforge evals economy --record-baseline` |
 | `AF-EVALS-ECONOMY-BASELINE-STALE` | fixture digest differs from the recorded baseline; unlock: re-record and commit the baseline |
+| `AF-CONTEXT-QUALITY-CAPSULE` | `context quality --capsule` is missing, unreadable or not a `ContextCapsule/v1` payload; unlock: record it with `context capsule ... > capsule.json` |
+| `AF-CONTEXT-QUALITY-GATE` | `context quality --gate` is not `strict\|evidence\|permissive` |
 
 ## Cache & delta (`cache stats|invalidate`, `context delta|gc`, `evals cache`)
 
@@ -612,6 +651,10 @@ arrays only (`diff --name-status`, `show`) and never mutates.
 | `AF-DELTA-GIT-UNAVAILABLE` | git cannot run or the root is not a work tree; unlock: pass `--changed <file>` instead |
 | `AF-DELTA-REF-INVALID` | `git diff` refused `--base`/`--head`; unlock: pass refs that exist (`git rev-parse <ref>`) |
 | `AF-EVALS-INVALID` | an eval corpus is empty, has duplicate ids or a mutation that does not apply; unlock: fix the corpus yaml |
+| `AF-EVALS-TRACE-RUBRIC` | `rules/trace_rubric.yaml` lacks version/rubric_id/dimensions or has non-positive weights; unlock: restore the declared rubric |
+| `AF-EVALS-TRACE-SPAN` | a trace-grading case span fails `build_span` or a `parent` index is out of range; unlock: fix the corpus yaml |
+| `AF-EVALS-LIVE-LAYER` | `rules/live_evals.yaml` declares an unknown eval runner; unlock: name a registered runner id |
+| `AF-EVALS-FRONTIER` | `evals frontier --report` input lacks the per-profile `accuracy` map; unlock: pass an agentic-quality report |
 
 ## Verification, retrieval, evidence and providers (`verify plan`, `knowledge search`, `evidence resolve`, `economy doctor`, `economy tier`, `agentops prompt`, `workspace locality`, `evals economy-extras`)
 
@@ -792,8 +835,12 @@ never enter artifacts, gaps or status. `agents audit` is report-only.
 | Code | Meaning |
 |---|---|
 | `AF-EXPERTISE-TRIGGERS-INVALID` | `rules/expertise_triggers.yaml` is malformed or names a pack that does not exist; unlock: restore it or name existing packs |
-| `AF-ROLE-CONTEXT-POLICY` | `rules/role_context.yaml` does not map every role kind to a declared class or shares exceed 1.0 |
+| `AF-ROLE-CONTEXT-POLICY` | `rules/role_context.yaml` does not map every role kind to a declared class, shares exceed 1.0 or a `policies:` row fails `RoleContextPolicy/v1` validation |
 | `AF-ROLE-CONTEXT-BUDGET` | unresolved note: a role's refs exceeded its share of `context_bytes` and were trimmed (listed in `trimmed`); unlock: raise the profile |
+| `AF-ROLE-CONTEXT-DENIED` | unresolved note: a v2 policy `denied_kinds` removed a ref the class would otherwise allow; unlock: grant the kind or route the evidence through an allowed kind |
+| `AF-ROLE-CONTEXT-TRUST` | unresolved note: a ref's provenance `origin` is below the role's `minimum_origin_rank`; unlock: attest the ref from a higher-trust origin |
+| `AF-ROLE-CONTEXT-REQUIRED` | unresolved note: a `required_kinds` ref existed in the capsule but did not fit the role budget; unlock: widen the budget or drop other kinds |
+| `AF-ROLE-CONTEXT-TOOL` | a v2 policy `tool_visibility` allowlist does not name the requested tool; unlock: add the tool to the role's allowlist |
 | `AF-ECONOMY-SHADOW-BUDGET` | shadow reason: the run was sampled but no call remained after the verification reserve |
 | `AF-DEBATE-DELTA-INVALID` | `--disagree` is not `point=reason`, a point is empty or `--confidence` is outside [0, 1] |
 | `AF-AGENTS-AUDIT-INVALID` | the agents directory is missing or an agent frontmatter is not valid YAML |
@@ -1089,6 +1136,26 @@ values and `delta_pct`. Operations on only one side are named
 | `AF-OTEL-SENSITIVE-ATTRIBUTE` | local agent span contains a secret-like attribute key |
 | `AF-OTEL-STORE-CORRUPT` | local agent span row failed its closed contract |
 | `AF-OTEL-SPAN-CONFLICT` | a span id was reused with a different content hash |
+| `AF-OTEL-TRACEPARENT-INVALID` | §51 traceparent is not `00-<32hex>-<16hex>-<flags>`; unlock: pass valid W3C ids |
+| `AF-OTEL-EXPORT-INVALID` | OTLP payload failed the deterministic structural acceptance; `problems[]` names each defect |
+| `AF-OTEL-COLLECTOR-REFUSED` | §52 collector answered a non-2xx or rejected the payload; unlock: fix payload/endpoint and retry |
+| `AF-OTEL-COLLECTOR-TIMEOUT` | span ids did not reach the collector output file within the declared timeout |
+| `AF-OTEL-COLLECTOR-UNRESOLVED` | collector endpoint unreachable — acceptance stays unresolved, never claimed |
+| `AF-AGENTOPS-WASTE-POLICY` | `agentops waste` policy file unreadable or `detectors` mapping missing; unlock: restore `rules/agentops_waste.yaml` or pass `--policy` |
+| `AF-MCP-SURFACE-POLICY` | `mcp audit` policy file unreadable, `thresholds` mapping missing or `accepted` rows malformed; unlock: restore `rules/tool_surface.yaml` or pass `--policy` |
+| `AF-MCP-DISCLOSURE-POLICY` | `mcp disclose` policy file unreadable or `task_classes` mapping missing; unlock: restore `rules/tool_disclosure.yaml` |
+| `AF-MCP-BENCHMARK-POLICY` | `mcp benchmark` policy file unreadable or `samples` mapping missing; unlock: restore `rules/tool_benchmark.yaml` |
+| `AF-FORGE-POLICY` | `forge_protocol.yaml` unreadable or `engine`/`protocol_version`/`risk_gate`/`engines` missing; unlock: restore the rules file |
+| `AF-FORGE-TASK-ID` | forge task id does not match `^[a-z0-9][a-z0-9-]{1,62}$` |
+| `AF-FORGE-TASK-EXISTS` | `forge submit` on an existing task id |
+| `AF-FORGE-TASK-NOT-FOUND` | `forge inspect|result|evidence|attach|handoff` on an unknown task id |
+| `AF-FORGE-CAPABILITY-UNKNOWN` | `forge submit` names a capability_id absent from the public matrix |
+| `AF-FORGE-RISK-GATE` | gated risk class submitted without `--acknowledge-risk` |
+| `AF-FORGE-STATE` | `forge attach` on a task already completed/failed/refused |
+| `AF-FORGE-ENGINE-UNKNOWN` | `forge handoff --to` an engine not declared in `rules/forge_protocol.yaml` |
+| `AF-FORGE-HANDOFF-EXISTS` | `forge handoff` re-run for the same task+engine pair |
+| `AF-FORGE-HANDOFF-NOT-FOUND` | handoff lookup on an unknown id |
+| `AF-FORGE-STORE` | persisted forge row fails contract validation or is unreadable |
 | `AF-PERF-RUN-INVALID` | compare input is not a PerformanceRun payload |
 | `AF-PERF-MEMORY-CORRUPT` | a `runs.jsonl` line is malformed — the store refuses, never skips |
 | `AF-PERF-SUGGEST-INPUT` | `perf suggest` got neither a readable case dir nor a findings file |
@@ -1182,6 +1249,40 @@ cross-checks every `rule_id` against the catalog; the release gate runs it.
 | `AF-KNOW-EVAL` | eval `expect.kind` outside rule/fact-kind/refusal |
 | `AF-KNOW-EVAL-TYPE` | eval `type` outside the closed 11-value vocabulary |
 | `AF-KNOW-CHECK` | `knowledge check` found cross-catalog problems (exit 4) |
+
+### Knowledge evolution (`knowledge drift`, `knowledge impact`, `evals knowledge-drift`)
+
+`knowledge drift` rolls one or more read-only `SourceObservation`
+receipts up into a `KnowledgeDrift` verdict: `verified` (hash+version+
+window confirmed), `fresh`, `stale` (hash or version moved), `deprecated`
+(`expires_at` passed), `conflicted` (receipts disagree), `unresolved`
+(no receipts) — §29. `knowledge impact` emits the declared
+source -> pack -> rule -> skill -> eval relation graph; undeclared
+relations (agent -> knowledge today) stay in `unresolved`, never
+inferred. Uses the shared `AF-KNOW-*` refusal codes.
+
+### Lab and agentic health (`lab scenarios`, `doctor --agentic`)
+
+| Code | Meaning |
+|---|---|
+| `AF-LAB-CATALOG-MISSING` | `lab scenarios` catalog file absent |
+| `AF-LAB-CATALOG-INVALID` | catalog fails to parse |
+| `AF-LAB-CELL-INVALID` | a scenario cell lacks a declared `kind` |
+| `AF-LAB-CELL-CONFLICT` | a cell declares both coverage and a gap |
+| `AF-LAB-CELL-UNDECLARED` | a cell has no coverage pointer and no declared gap |
+| `AF-DOCTOR-CASE-INVALID` | persisted case file fails to parse |
+| `AF-DOCTOR-MEMORY-QUARANTINE` | quarantined memory candidates await human resolution |
+| `AF-DOCTOR-TRUST-POLICY-MISSING` | `rules/tool_risk.yaml` absent — allowlist-first authorization impossible |
+| `AF-DOCTOR-TRUST-POLICY-INVALID` | tool-risk policy fails to load |
+| `AF-DOCTOR-EVAL-CORPUS-README` | eval corpus directory lacks a README |
+| `AF-DOCTOR-EVAL-CORPUS-PARSE` | a corpus yaml fails to parse |
+| `AF-DOCTOR-SDD-CHAIN-GAP` | an SDD feature dir lacks a discover/ship link in the chain |
+
+`doctor --agentic` aggregates case, memory, trust, telemetry, evals, sdd,
+mcp and economy sections; planes without observable state report
+`unresolved`, never an implied pass. `lab scenarios` emits the §28
+experimental catalog: every cell either points at a real
+fixture/eval/proof or names its declared gap.
 
 ### Resilience (`model resilience`, `perf chaos`)
 

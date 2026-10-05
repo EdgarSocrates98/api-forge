@@ -1,0 +1,48 @@
+# §28 API Forge Lab — declared experimental scenario catalog.
+# Every cell is either covered (fixture/eval/proof pointer) or a named
+# declared-gap. The lab is opt-in, isolated, local-first and
+# evidence-producing; no scenario is required for basic use.
+version: 1
+scenarios:
+  - kind: breaking change
+    fixture: tests/fixtures/openapi/orders-v2-breaking.yaml
+    proof: tests/contract_intel/test_contract_intel.py
+    note: "contract-intel diff classifies orders-v1 -> v2 as breaking"
+  - kind: schema evolution
+    fixture: tests/fixtures/openapi/orders-v1-complete.yaml
+    proof: tests/contract_intel/test_contract_intel.py
+    note: "unified impact report covers additive vs breaking schema moves"
+  - kind: backward compatibility
+    fixture: tests/fixtures/openapi/orders-v1.yaml
+    proof: tests/contract_intel/test_contract_intel.py
+    note: "compat classification is the same deterministic diff path"
+  - kind: latency regression
+    gap: "no replayable latency fixture — perf evals need recorded baselines"
+  - kind: auth migration
+    gap: "no auth-migration fixture or eval declared"
+  - kind: rate limit
+    gap: "no rate-limit scenario fixture or eval declared"
+  - kind: retry storm
+    fixture: tests/fixtures/resilience_app
+    eval: "resilience:resilience/retry-mutating"
+    note: "mutating retry without guard triggers AF-PERF-104"
+  - kind: timeout
+    fixture: tests/fixtures/resilience_app
+    eval: "resilience:resilience/timeout-missing"
+    note: "missing call-site timeout triggers AF-PERF-101"
+  - kind: circuit breaker
+    fixture: tests/fixtures/resilience_app
+    eval: "resilience:resilience/breaker-gap"
+    note: "absent breaker triggers AF-PERF-105"
+  - kind: event contract
+    gap: "no AsyncAPI/event-contract fixture or eval declared"
+  - kind: idempotency
+    eval: "economy-extras:retrieve-idempotency"
+    fixture: evals/corpus/economy-extras/retrieve-idempotency.yaml
+    note: "idempotency retrieval semantics exercised by the economy corpus"
+  - kind: pagination
+    gap: "pagination_absent cell stays a declared gap in the lab matrix"
+  - kind: version migration
+    fixture: tests/fixtures/migrations
+    proof: tests/migration
+    note: "go/java/python/platform-data migration fixtures drive migration tests"

@@ -21,8 +21,8 @@ def test_every_par28_kind_is_declared() -> None:
 def test_coverage_pointers_are_real() -> None:
     report = load_lab_report(CATALOG, repo_root=REPO)
     assert report.totals["scenarios"] == len(SCENARIO_KINDS)
-    assert report.totals["covered"] >= 7
-    assert report.totals["declared_gap"] >= 1
+    assert report.totals["covered"] == len(SCENARIO_KINDS)
+    assert report.totals["declared_gap"] == 0
     assert not any("pointer" in u for u in report.unresolved)
 
 

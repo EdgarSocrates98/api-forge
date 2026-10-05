@@ -3,7 +3,7 @@ sdd: 1
 feature: API_FORGE_EVO_CONVERGENCE
 phase: ship
 profile: critical
-status: draft
+status: done
 deviations:
   - id: external-freshness
     status: unresolved
@@ -19,7 +19,7 @@ evidence:
   - path: sdd/API_FORGE_EVO_CONVERGENCE/evidence/protocol-supply-chain.md
 upstream:
   path: benchmark.md
-  sha256: "a2952410bc5583e568aee1912aae909ad3dbcec9a55a0968e3c7bf474bde2d5e"
+  sha256: "ed634e3dc32757e18e1cb07027555249c799e97c839d03358a3ce9edfe3be4f7"
 ---
 
 # ship

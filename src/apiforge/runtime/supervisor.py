@@ -29,6 +29,8 @@ from apiforge.core.ids import stable_id
 from apiforge.core.models import JsonValue
 from apiforge.governance.gain import expected_gain
 from apiforge.governance.governor import govern
+from apiforge.governance.loop import check_loop, strategy_fingerprint
+from apiforge.governance.recovery import decide_recovery
 from apiforge.governance.stop import decide_stop
 from apiforge.graph.store import read_graph
 from apiforge.runtime.adapters import AgentRequest, ModelAdapter
@@ -320,6 +322,17 @@ def _exhausted(missing: int) -> str:
         f"AF-BUDGET-EXHAUSTED: {missing} planned invocation(s) exceeded the economy call budget; "
         "field=profile; unlock=rerun with --profile balanced|deep or raise TaskSpec budgets"
     )
+
+
+def _failure_class(error: str) -> str:
+    lowered = error.lower()
+    if "timeout" in lowered:
+        return "timeout"
+    if "policy" in lowered or "refus" in lowered:
+        return "policy_conflict"
+    if "invalid" in lowered or "contract" in lowered:
+        return "invalid_input"
+    return "tool_failure"
 
 
 def _economy_block(
@@ -1200,6 +1213,53 @@ async def execute_run(
                 )
             break
 
+    strategy = {
+        "primary": routing_plan.primary,
+        "fallbacks": routing_plan.fallbacks,
+        "execution_mode": routing_plan.execution_mode,
+        "parallel": policy.max_parallel_agents,
+    }
+    loop_detection = check_loop((strategy_fingerprint(strategy),))
+    recovery = (
+        decide_recovery(
+            _failure_class(errors[0]),
+            max(
+                (item.invocation.retry_count for item in results if item.error is not None),
+                default=0,
+            ),
+        )
+        if errors
+        else None
+    )
+    governance_unresolved = set(governance_context.unresolved)
+    governance_unresolved.update(loop_detection.code or "")
+    governance_unresolved.discard("")
+    if recovery is not None:
+        governance_unresolved.update(recovery.unresolved)
+        if recovery.code:
+            governance_unresolved.add(recovery.code)
+    governance_context = governance_context.model_copy(
+        update={
+            "recovery": recovery,
+            "loop": loop_detection,
+            "unresolved": tuple(sorted(governance_unresolved)),
+        }
+    )
+    storage.json("governance-context.json", governance_context.model_dump(mode="json"))
+    storage.event(
+        TrajectoryEvent(
+            event_id=stable_id("event", {"run": run_id, "event": "governance_postflight"}),
+            run_id=run_id,
+            event="governance_postflight",
+            actor="api-orchestrator",
+            subject=governance_context.context_id,
+            payload={
+                "recovery": recovery.model_dump(mode="json") if recovery else None,
+                "loop": loop_detection.model_dump(mode="json"),
+            },
+            created_at=timestamp,
+        )
+    )
     reserve_left = policy.max_calls - control.get(control_run.run_id).calls_used
     gain = assess_gain(
         artifacts, float((economy_config or {}).get("triggers", {}).get("low_confidence", 0.7))

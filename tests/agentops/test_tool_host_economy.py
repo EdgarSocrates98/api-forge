@@ -115,6 +115,9 @@ def test_gateway_refusals() -> None:
     with pytest.raises(ContractError) as surface:
         measure_surface("tiny")
     assert surface.value.code == "AF-MCP-SURFACE-INVALID"
+    with pytest.raises(ContractError) as unauthorized:
+        apiforge_call("rules_list", {}, subject="critic")
+    assert unauthorized.value.code == "AF-TOOL-AUTHZ-DENIED"
 
 
 def test_host_projection_and_mcp_surface_resolution(monkeypatch) -> None:

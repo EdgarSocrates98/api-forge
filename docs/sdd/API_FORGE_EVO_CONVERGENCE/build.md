@@ -3,12 +3,13 @@ sdd: 1
 feature: API_FORGE_EVO_CONVERGENCE
 phase: build
 profile: critical
-status: draft
+status: done
 tasks:
   - p0-agentops
   - convergence-governance
   - retrieval-memory
   - protocol-supply-chain
+  - lab-trust-boundary
 claims:
   - id: baseline-preserved
     claim: existing contract and deterministic validation behavior remain compatible
@@ -22,9 +23,12 @@ claims:
   - id: evidence-boundary
     claim: retrieval, memory, MCP and supply-chain claims preserve unresolved states
     evidence: sdd/API_FORGE_EVO_CONVERGENCE/evidence/protocol-supply-chain.md
+  - id: lab-and-trust
+    claim: local lab catalog is fully pointer-covered and compact MCP access has an explicit default-deny boundary
+    evidence: sdd/API_FORGE_EVO_CONVERGENCE/evidence/lab-trust-boundary.md
 upstream:
   path: plan.md
-  sha256: "9f78267c73f8066f20967f845aa04bbdc4e7df444fe1571377ff2019116c1735"
+  sha256: "a4c536855955c0d5a6973dc5d0b476a1af0364c91ffb2cd7fcc1e879b7819fa5"
 ---
 
 # build

@@ -3,7 +3,7 @@ sdd: 1
 feature: API_FORGE_EVO_CONVERGENCE
 phase: verify
 profile: critical
-status: draft
+status: done
 results:
   - id: focused-tests
     command: uv run pytest -q --basetemp E:/pytest-apiforge-evo-convergence tests/agentops tests/runtime tests/knowledge tests/memory
@@ -19,7 +19,7 @@ results:
     observed: false
 upstream:
   path: build.md
-  sha256: "92809d96297f65ff66aafe61f222cd3d421dd04b4ff988b23f0867f47921c084"
+  sha256: "e159e620fb02f20ab4032d754b177c2c115401b81fad6d79ac37aedf044a207d"
 ---
 
 # verify

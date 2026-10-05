@@ -3,7 +3,7 @@ sdd: 1
 feature: API_FORGE_EVO_CONVERGENCE
 phase: intent
 profile: critical
-status: draft
+status: done
 problem: existing governance, evidence and economy primitives are not consistently authoritative in the runtime and AgentOps projections contain known semantic mismatches
 success:
   - AgentOps emits canonical Context Quality metric names and tri-state decision-gate counts

@@ -3,7 +3,7 @@ sdd: 1
 feature: API_FORGE_EVO_CONVERGENCE
 phase: benchmark
 profile: critical
-status: draft
+status: done
 baseline:
   command: uv run apiforge economy report --case .apiforge/case
   state: collected
@@ -23,7 +23,7 @@ results:
     observed: false
 upstream:
   path: secure.md
-  sha256: "47e7060f1d9c4c321998b78c65ff882ee27f4b5835af28b55d85988441a14734"
+  sha256: "07f56593cd1edb555fba6d3e43ae696c6e5640d929b68449e0865f02a9a33978"
 ---
 
 # benchmark

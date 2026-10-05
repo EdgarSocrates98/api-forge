@@ -48,7 +48,7 @@ def _strategy(
         return _graph(hits, query, root=root, store_root=None)
     if name == "semantic":
         adapter = semantic or HashEmbeddingAdapter()
-        return _hybrid(hits, query, adapter, weights)
+        return _hybrid(hits, query, adapter, weights, root=root, store_root=None)
     adapter = semantic or HashEmbeddingAdapter()
     return _rerank(hits, query, adapter, rerank)
 

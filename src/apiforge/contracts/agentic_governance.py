@@ -259,9 +259,7 @@ class LoopDetection(VersionedContract):
 class RunGovernanceContext(VersionedContract):
     """Authoritative governance snapshot recorded before optional run work."""
 
-    schema: Literal["apiforge/run-governance-context/v1"] = (
-        "apiforge/run-governance-context/v1"  # type: ignore[assignment]
-    )
+    schema: Literal["apiforge/run-governance-context/v1"] = "apiforge/run-governance-context/v1"  # type: ignore[assignment]
     context_id: str = Field(min_length=1)
     run_id: str = Field(min_length=1)
     task_id: str = Field(min_length=1)

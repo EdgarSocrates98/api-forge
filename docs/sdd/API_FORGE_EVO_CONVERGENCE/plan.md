@@ -3,7 +3,7 @@ sdd: 1
 feature: API_FORGE_EVO_CONVERGENCE
 phase: plan
 profile: critical
-status: draft
+status: done
 tasks:
   - id: p0-agentops
     title: correct AgentOps metric semantics and gate aggregation
@@ -26,9 +26,15 @@ tasks:
     covers:
       - MCP, CI, supply-chain and documentation claims match the locally observed implementation and current official protocol research
     proof: sdd/API_FORGE_EVO_CONVERGENCE/evidence/protocol-supply-chain.md
+  - id: lab-trust-boundary
+    title: close deterministic lab coverage and compact gateway authorization
+    covers:
+      - declared lab scenarios have replayable local proof pointers and explicit external limits
+      - compact MCP gateways fail closed through an explicit risk-policy subject
+    proof: sdd/API_FORGE_EVO_CONVERGENCE/evidence/lab-trust-boundary.md
 upstream:
   path: architecture.md
-  sha256: "3ecfd26fe5e5fd0a416a7b582348130dff1fb9473424c6b7355f57948d0de37d"
+  sha256: "ccf2af5682fd1d1e23bb5bea2c2b4578304d57d84b8d4db687db673af007f63c"
 ---
 
 # plan

@@ -17,6 +17,7 @@ technical format and are intentionally not duplicated as product guides.
 - [Platform usage](guides/API_FORGE_PLATFORM_USAGE.en.md)
 - [Experience and interoperability](guides/API_FORGE_EXPERIENCE_INTEROPERABILITY.en.md)
 - [Economy: spend only what is needed, with proof](guides/API_FORGE_ECONOMY.en.md)
+- [Dependency locking and optional MCP](guides/API_FORGE_DEPENDENCY_LOCKING.md)
 - [GitHub governance: ruleset plan and CODEOWNERS](guides/API_FORGE_GITHUB_GOVERNANCE.en.md)
 - [Host parity](HOST_PARITY.md)
 - [Evolution map](API_FORGE_EVOLUTION_MAP.en.md)

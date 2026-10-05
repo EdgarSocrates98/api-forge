@@ -1,10 +1,10 @@
-# MCP compliance matrix — spec revision 2025-11-25
+# MCP compliance matrix — spec revision 2026-07-28
 
 Scope: `apiforge-mcp`, the local FastMCP server (`src/apiforge/mcp/server.py`)
-that exposes the API Forge read tools over stdio. Evaluated against the MCP
-specification revision **2025-11-25**, the current revision as of October 2026
-(the installed `mcp` SDK 1.30.0 negotiates `2024-11-05`, `2025-03-26`,
-`2025-06-18` and `2025-11-25`).
+that exposes the API Forge read tools over stdio. Evaluated against the official
+MCP specification revision **2026-07-28**. The repository requires the optional
+SDK range `mcp>=2.2,<3`; the exact installed SDK and protocol set are observed
+by `scripts/mcp_protocol_probe.py`, never inferred from a dependency label.
 
 States: `SUPPORTED` · `PARTIAL` · `NOT_IMPLEMENTED` · `NOT_APPLICABLE`.
 
@@ -12,23 +12,22 @@ States: `SUPPORTED` · `PARTIAL` · `NOT_IMPLEMENTED` · `NOT_APPLICABLE`.
 |---|---|---|---|---|
 | transport | JSON-RPC 2.0 over stdio; streamable HTTP optional | `SUPPORTED` | `server.run()` uses the FastMCP default stdio transport | no streamable HTTP — deliberate: the server is local-first |
 | authorization | OAuth 2.1 for HTTP transports | `NOT_APPLICABLE` | stdio transport carries no HTTP authorization layer | n/a — revisit if an HTTP transport is ever exposed |
-| stateless core | requests complete independently | `SUPPORTED` | every tool call is a pure read over local ledgers; no per-connection state mutates results | none |
+| stateless core | requests complete independently | `PARTIAL` | the application tools are deterministic and local; the stdio FastMCP wiring has no explicit stateless HTTP/header adapter | prove the 2026-07-28 HTTP/header path with an approved local integration probe |
 | routing | method routing to declared handlers | `SUPPORTED` | SDK routes `tools/call` by name; `apiforge_discover` + `apiforge_call` add a semantic router; §41 `mcp_disclose` routes task → declared tool set | none |
 | multi-round-trip | elicitation / multi-step conversations | `NOT_IMPLEMENTED` | no elicitation or sampling use; tools answer in one round-trip | not needed for the read plane; the governed run stays in the runtime |
 | cacheable list responses | list results SHOULD be deterministic and bounded | `PARTIAL` | `limit` param on `rules_list`, `capabilities_list`, `contract_list`, `knowledge_list`, `memory_quarantine_list`, `context_delta`, `context_gc`, `economy_pricing`, `perf_chaos`, `perf_memory_search`; §42 `ToolPage`/`paged`/`bound_collections` standardizes windows | no `icons`/cache hints emitted; audit reports `unbounded_list: 0` |
 | extensions | protocol extensions negotiated via capabilities | `NOT_APPLICABLE` | no extensions declared or required | none |
-| capability negotiation | `initialize` handshake with `protocolVersion` | `SUPPORTED` | FastMCP/SDK performs negotiation; supported set is the SDK's `SUPPORTED_PROTOCOL_VERSIONS` | none |
+| capability negotiation | `initialize` plus 2026-07-28 protocol header | `PARTIAL` | SDK handshake is delegated to FastMCP; the header behavior is not asserted by the local stdio server | run the protocol probe against the installed SDK and a local client |
 | resources | `resources/list`, `resources/read` | `NOT_IMPLEMENTED` | no `@mcp.resource` registered — the tool surface covers reads | deliberate: artifacts live behind `ctx://` refs exposed via tools, not the resources primitive |
-| tools | `tools/list`, `tools/call` with JSON-Schema args | `SUPPORTED` | 143 tools registered with pydantic-derived JSON Schema; §40 `mcp audit` measures schema/description bytes; §43 `mcp benchmark` measures response cost | none |
+| tools | `tools/list`, `tools/call` with JSON-Schema args | `SUPPORTED` | 151 tools are registered locally with pydantic-derived schemas; §40 audit measures schema/description bytes and §43 benchmark measures response cost | none |
 | error model | JSON-RPC error objects; protocol errors | `SUPPORTED` | refusals raise `ContractError`/`AnalysisError` → SDK error; payload carries `error_code` (`AF-*`), `field` and `unlock` per the catalog | none |
 | security | spec security best practices | `SUPPORTED` | read-only tools; no provider SDK imports in `src/`; sensitive-attribute refusal; secrets never enter payloads | none |
 
 ## Version compatibility (§45)
 
-The server does not pin a protocol revision — the `mcp` SDK negotiates during
-`initialize`. The SDK's declared set is `2024-11-05`, `2025-03-26`,
-`2025-06-18` and `2025-11-25`; a client speaking any of them connects without
-a migration. The tool surface itself is additive-versioned: new tools are
+The server does not hard-code a protocol revision — the `mcp` SDK negotiates
+during `initialize`; the exact local result belongs to the probe receipt. The
+tool surface itself is additive-versioned: new tools are
 appended to the `TOOLS` tuple (never renamed silently), tool names are the
 stable public contract, and `agent_aliases.yaml`-style compatibility notes
 are recorded when a name must change. Breaking tool-name changes are
@@ -55,3 +54,17 @@ refusals with `AF-MCP-TOOL-UNKNOWN` + unlock, not silent drops.
   `summary`/`items`/`refs`/`evidence`/`unresolved`/`pagination` shape;
   adopted incrementally on list tools via `limit` parameters (CLI and MCP
   carry the same bound — parity is contractual).
+
+## Local protocol observation
+
+Run `uv run --extra mcp python scripts/mcp_protocol_probe.py`. The probe is
+read-only and reports the installed SDK version, its declared latest protocol
+revision and whether the target `2026-07-28` is observed. A missing or older
+SDK is `unresolved`; it is never upgraded implicitly by the application.
+
+## Compact gateway trust boundary
+
+The six compact gateways use subject `mcp-gateway` in offline tool-risk
+policy. Unknown subjects or missing gateway grants fail closed with an `AF-*`
+refusal carrying `field` and `unlock`; dynamic dispatch keeps inner API Forge
+policy checks intact.

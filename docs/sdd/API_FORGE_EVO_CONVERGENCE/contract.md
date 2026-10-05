@@ -3,7 +3,7 @@ sdd: 1
 feature: API_FORGE_EVO_CONVERGENCE
 phase: contract
 profile: critical
-status: draft
+status: done
 covers:
   - agentops-context-quality
   - agentops-decision-gates
@@ -15,7 +15,7 @@ covers:
   - locked-supply-chain
 upstream:
   path: intent.md
-  sha256: "25b503514f2b9d03a1d176100feefa2cfc475cba4ed7ac1f14d7b7b6ca139fa5"
+  sha256: "cbb3f52652165d177b74a66d31600d5ea049f5dae6d4fba001e2f7a2adfed309"
 ---
 
 # contract

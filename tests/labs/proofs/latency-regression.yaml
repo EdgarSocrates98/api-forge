@@ -1,0 +1,5 @@
+kind: latency regression
+status: covered
+input: baseline_ms=100,current_ms=125
+expected: regression_percent=25,decision=review
+evidence: deterministic fixture only; no production SLO claim

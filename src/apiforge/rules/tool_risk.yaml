@@ -58,7 +58,42 @@ tools:
     risk_classes: [read_only]
     reversible: true
     notes: bounded query over one task scope
+  apiforge_discover:
+    risk_classes: [read_only]
+    reversible: true
+    notes: compact MCP discovery projection
+  apiforge_call:
+    risk_classes: [read_only]
+    reversible: true
+    notes: compact MCP dispatch boundary; inner tools retain local policy gates
+  apiforge_context:
+    risk_classes: [read_only]
+    reversible: true
+    notes: compact context projection
+  apiforge_expand:
+    risk_classes: [read_only]
+    reversible: true
+    notes: verified context reference expansion
+  apiforge_analyze:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic local analysis and case artifact generation
+  apiforge_evidence:
+    risk_classes: [read_only]
+    reversible: true
+    notes: evidence projection
 permissions:
+  mcp-gateway:
+    allowed_tools:
+      - apiforge_discover
+      - apiforge_call
+      - apiforge_context
+      - apiforge_expand
+      - apiforge_analyze
+      - apiforge_evidence
+    allowed_risk_classes: [read_only]
+    denied_tools: []
+    notes: compact MCP boundary; full tool policy remains explicit
   specialist:
     allowed_tools:
       - context_capsule

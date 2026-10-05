@@ -3,7 +3,7 @@ sdd: 1
 feature: API_FORGE_EVO_CONVERGENCE
 phase: architecture
 profile: critical
-status: draft
+status: done
 files:
   - src/apiforge/agentops/inspect.py
   - src/apiforge/contracts/runtime_governance.py
@@ -26,7 +26,7 @@ decisions:
     rollback: revert only the claim and receipt changes; no external mutation is required
 upstream:
   path: contract.md
-  sha256: "ca92ac6faffc7e3334dac0f0a7a41d1e05553dbbdee49bf4533da4877bb93254"
+  sha256: "f31553e65648179d7718b0fdc436c89b86a5bbe236986417371606e8db7bf851"
 ---
 
 # architecture

@@ -3,7 +3,7 @@ sdd: 1
 feature: API_FORGE_EVO_CONVERGENCE
 phase: secure
 profile: critical
-status: draft
+status: done
 threat_model:
   - asset: decision and evidence integrity
     threats: forged receipts, stale upstreams, false green metrics
@@ -19,7 +19,7 @@ threat_model:
     controls: lock check, least-privilege green-validation job and branch protection
 upstream:
   path: verify.md
-  sha256: "67cf761b2c12c8d8deb4160fa583c7fb46b0d1187e73ab7e3ac7bfdb9abec9d3"
+  sha256: "f0158e446640166193624a08f3591032cc3769df7c8f3a7dbb8ed957dc6b2fbd"
 ---
 
 # secure

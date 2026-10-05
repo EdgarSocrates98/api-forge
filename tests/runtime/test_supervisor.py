@@ -52,6 +52,7 @@ def test_supervisor_persists_governance_context_before_run_expansion(tmp_path: P
     payload = context_path.read_text(encoding="utf-8")
     assert '"decision"' in payload
     assert '"stop"' in payload
+    assert '"loop"' in payload
 
 
 def test_supervisor_loads_and_persists_graph_impact_once(tmp_path: Path) -> None:

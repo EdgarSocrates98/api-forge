@@ -9,7 +9,7 @@ reproducible case. Construction is one-directional: a pre-persistence
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -61,6 +61,34 @@ def _require_dir(path: Path, code: str = "AF-INPUT-NOT-FOUND") -> Path:
     return path
 
 
+# Provenance keys every upstream fact must carry under ``attrs["upstream"]``: the foreign
+# engine that produced it, the run/node/item it derives from. ``extractor`` names the
+# intake channel, never a native extractor (``apiforge`` would launder foreign facts as
+# locally observed ones).
+UPSTREAM_EXTRACTOR = "theforge/handoff"
+_UPSTREAM_KEYS = ("provider", "run_id", "node", "item")
+
+
+def _check_upstream(facts: Sequence[Fact]) -> None:
+    """Refuse foreign facts that cannot be told apart from local evidence."""
+    for index, fact in enumerate(facts):
+        upstream = fact.attrs.get("upstream")
+        if fact.source.extractor == "apiforge" or not isinstance(upstream, Mapping):
+            raise AnalysisError(
+                "AF-UPSTREAM-UNMARKED",
+                f"upstream fact {index} ({fact.fact_id!r}) is not marked: it needs a "
+                f"non-'apiforge' source.extractor and an attrs.upstream provenance map",
+            )
+        missing = [key for key in _UPSTREAM_KEYS if not isinstance(upstream.get(key), str)
+                   or not upstream[key]]
+        if missing:
+            raise AnalysisError(
+                "AF-UPSTREAM-UNMARKED",
+                f"upstream fact {index} ({fact.fact_id!r}): attrs.upstream is missing "
+                f"or has empty keys {missing}",
+            )
+
+
 def _contract_facts(model: ApiModel) -> tuple[Fact, ...]:
     """Synthesize contract.operation Facts so every evidence id resolves."""
     facts: list[Fact] = []
@@ -110,8 +138,16 @@ def analyze_project(
     framework: str = "auto",
     cache_dir: Path | None = None,
     ledger_root: Path | None = None,
+    upstream: Sequence[Fact] = (),
 ) -> AnalysisResult:
-    """Run the deterministic slice and persist a verified case."""
+    """Run the deterministic slice and persist a verified case.
+
+    ``upstream`` facts are foreign evidence admitted through a marked intake
+    (``_check_upstream``): they are persisted with the case so downstream verbs
+    (``graph``, ``evidence``, ``brief``, ``judge --facts``) see them with their
+    provenance intact, but they are never part of the judged API model — a claim
+    about another project must not trigger a rule of this one.
+    """
     contract_path = _require_file(Path(contract))
     project_path = _require_dir(Path(project))
     baseline_path = _require_file(Path(baseline)) if baseline else None
@@ -137,12 +173,13 @@ def analyze_project(
     model = build_api_model(document, inventory)
     findings = judge_api_model(model)
     changes = diff_contracts(load_openapi(baseline_path), document) if baseline_path else ()
+    _check_upstream(upstream)
 
     payload = CasePayload(
         contract_path=str(contract),
         project_path=str(project),
         model=model,
-        facts=(*inventory.facts, *_contract_facts(model)),
+        facts=(*inventory.facts, *_contract_facts(model), *upstream),
         findings=findings,
         changes=changes,
         diagnostics=model.diagnostics,

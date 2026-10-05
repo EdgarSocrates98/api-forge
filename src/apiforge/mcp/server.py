@@ -12,7 +12,13 @@ from typing import Any
 MCP_OPTIONAL_UNAVAILABLE = "AF-MCP-OPTIONAL-UNAVAILABLE"
 
 
-def build_server(surface: str = "full") -> Any:
+def build_server(surface: str = "full", protocol: str = "legacy") -> Any:
+    if protocol == "modern":
+        from apiforge.mcp.modern import build_modern_server
+
+        return build_modern_server(surface)
+    if protocol != "legacy":
+        raise ValueError(f"unsupported MCP protocol {protocol!r}")
     try:
         FastMCP = import_module("mcp.server.fastmcp").FastMCP
     except (ImportError, AttributeError) as exc:

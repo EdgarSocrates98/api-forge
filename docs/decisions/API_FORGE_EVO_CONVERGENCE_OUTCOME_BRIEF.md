@@ -24,7 +24,7 @@ The implementation followed the required SDD chain:
 | Routing/retrieval/memory | `f222acf` | risk/budget/freshness routing constraints, champion/challenger admission, scorecard provenance and memory coverage semantics |
 | Protocol/lab hardening | `092d6f3` | MCP optional lock/probe, default-deny gateway authorization, 13-scenario lab catalog, loop/recovery runtime integration |
 | Trust/context/supply chain | `5c20396` | evidence-aware context quality, counterfactual ablation, bounded graph traversal, tool authorization crossing, deterministic CycloneDX SBOM |
-| Final hardening | pending final commit | budget regression fix, retrieval graph-dir contract, CLI exposure, SDD evidence and documentation refresh |
+| Final hardening | `f12b549` | budget regression fix, retrieval graph-dir contract, CLI exposure, SDD evidence and documentation refresh |
 
 ## Architecture convergence
 

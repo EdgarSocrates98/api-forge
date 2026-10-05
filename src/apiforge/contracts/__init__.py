@@ -52,6 +52,8 @@ from apiforge.contracts.agentic_memory import (
     SemanticCheckpoint,
 )
 from apiforge.contracts.agentops_report import (
+    AgentOpsTimeline,
+    AgentOpsTimelineEvent,
     ComparisonAxis,
     InspectionMetric,
     InspectionSection,
@@ -278,6 +280,8 @@ __all__ = [
     "AdaptivePolicy",
     "AdaptiveRetrievalResult",
     "AdversarialCaseResult",
+    "AgentOpsTimeline",
+    "AgentOpsTimelineEvent",
     "AgentPermissionSet",
     "AgentSpan",
     "AgentSpanQuery",

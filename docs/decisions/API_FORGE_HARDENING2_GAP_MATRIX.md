@@ -15,7 +15,7 @@ Baseline: `docs/decisions/API_FORGE_HARDENING2_BASELINE.md`
 | Context quality | yes | yes | yes | pass with unresolved metrics | KEEP + EXTEND | separate recall from utilization and preserve missing required evidence |
 | Adaptive retrieval | yes | yes | yes | pass but graph/sufficiency gap | FIXED | explicit per-level effective score and graph contribution |
 | Memory | yes | yes | yes | `9/9` + hardening holdouts | HARDENED | freshness, explicit runtime matching, taint admission and conflict outcomes |
-| AgentOps | yes | yes | partial | one regression | EXTEND | coverage/timeline/waste outputs without zero-filling |
+| AgentOps | yes | yes | yes | coverage + timeline proof | HARDENED | coverage/timeline/waste outputs without zero-filling |
 | MCP | yes | modern local proof + legacy adapter | partial | audit + 2-step local proof | HARDENED | keep era-specific discovery/list/call proof and target auth boundary |
 | Forge Protocol | yes | yes | yes | local contract | KEEP | preserve v1; A2A remains adapter-only |
 | Lab | yes | fixtures + proofs | partial | `13/13` catalog | EXTEND | executable runtime-convergence scenarios, local-only claims |

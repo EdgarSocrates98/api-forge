@@ -226,7 +226,8 @@ an unresolved total, and mixed measured/unmeasured rows yield a partial total
 plus `token_observation_coverage`. A missing measurement is never converted to
 an observed zero.
 
-`agentops compare RUN_A RUN_B` emits `RunComparison` over the §55 axis set —
+`agentops timeline RUN` emits `AgentOpsTimeline/v1` over ledger, span and token
+events. Timestamp gaps remain unresolved. `agentops compare RUN_A RUN_B` emits `RunComparison` over the §55 axis set —
 quality, tokens, cost, latency, context, evidence, tools, agents — with a
 deterministic direction per axis (lower-is-better for spend, higher for
 quality/evidence). An axis missing a numeric side is `unresolved`, never a
@@ -239,8 +240,8 @@ agent/review/debate, oversized tool output, full-file read, premium model
 misuse, repeated summary, unused context expansion). Findings are labeled
 `observed`/`estimated`/`hypothesis` per §57; detectors lacking a
 prerequisite (undeclared risk, empty ledgers) land in `unresolved`. MCP
-exposes the three read projections (`agentops_inspect`, `agentops_compare`,
-`agentops_waste`); `evals agentops` covers sections, detection, verdicts and
+exposes the four read projections (`agentops_inspect`, `agentops_timeline`,
+`agentops_compare`, `agentops_waste`); `evals agentops` covers sections, detection, verdicts and
 missing-run honesty.
 
 ## Tool surface engineering and MCP compliance (phase 9)

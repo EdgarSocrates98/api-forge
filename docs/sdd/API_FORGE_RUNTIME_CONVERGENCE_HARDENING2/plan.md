@@ -47,6 +47,12 @@ tasks:
       - memory freshness and runtime compatibility govern eligibility and conflicts remain explicit
     tests: tests/memory/test_retrieval.py and memory eval corpus
     proof: sdd/API_FORGE_RUNTIME_CONVERGENCE_HARDENING2/evidence/p1-memory.md
+  - id: p1-agentops
+    title: expose coverage semantics, timeline and waste evidence
+    covers:
+      - model-call, token, cost and trace coverage remain labeled; timeline preserves missing order evidence
+    tests: tests/agentops/test_inspect_waste.py and evals agentops
+    proof: sdd/API_FORGE_RUNTIME_CONVERGENCE_HARDENING2/evidence/p1-agentops.md
   - id: p1-lab-mcp
     title: add executable local Lab scenarios and modern MCP proof
     covers:

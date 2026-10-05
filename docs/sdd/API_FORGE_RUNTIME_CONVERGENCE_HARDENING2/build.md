@@ -19,6 +19,8 @@ tasks:
     status: done
   - id: p1-memory
     status: done
+  - id: p1-agentops
+    status: done
   - id: p1-lab-mcp
     status: done
   - id: release-evidence
@@ -32,10 +34,11 @@ claims:
   - p1-routing proof records task-class scorecard selection and a shadow receipt whose governing side stays legacy
   - p1-authority proof records role-aware delegated tool authorization and MCP target authorization before dispatch
   - p1-memory proof records freshness state, explicit runtime matching, taint admission and conflict outcomes
+  - p1-agentops proof records explicit coverage metrics, cross-ledger timeline and waste evidence
   - p1-lab-mcp proof records modern local MCP method order and executable Runtime Convergence Lab cells
 upstream:
   path: plan.md
-  sha256: "1c06b43e224fec46de6f9db25e2102a9e561a62e6863c04f9f0e22ed245fe3d4"
+  sha256: "441f340869522a07f8a11be105185c5cd77f6d72b59af89aaaa05db3a46cab8d"
 ---
 
 # build

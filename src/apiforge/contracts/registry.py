@@ -61,6 +61,7 @@ from apiforge.contracts.agentic_memory import (
     SemanticCheckpoint,
 )
 from apiforge.contracts.agentops_report import (
+    AgentOpsTimeline,
     ComparisonAxis,
     InspectionMetric,
     InspectionSection,
@@ -573,6 +574,7 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "OtlpValidation/v1": OtlpValidation,
     "CollectorProbe/v1": CollectorProbe,
     "RunInspection/v1": RunInspection,
+    "AgentOpsTimeline/v1": AgentOpsTimeline,
     "InspectionSection/v1": InspectionSection,
     "InspectionMetric/v1": InspectionMetric,
     "WasteFinding/v1": WasteFinding,

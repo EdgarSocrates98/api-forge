@@ -3643,6 +3643,21 @@ def agentops_compare(
     )
 
 
+@agentops_app.command("timeline")
+def agentops_timeline(
+    run_id: str = typer.Argument(..., help="Run id present in the local ledgers."),
+    root: Path = typer.Option(Path("."), "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Render ordered ledger/span/token events with missing-order evidence."""
+    from apiforge.agentops.timeline import build_timeline
+
+    _echo_json(
+        _run(lambda: build_timeline(root, run_id).model_dump(mode="json")),
+        detail_level,
+    )
+
+
 @agentops_app.command("waste")
 def agentops_waste(
     run_id: str = typer.Argument(..., help="Run id present in the local ledgers."),

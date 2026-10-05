@@ -41,6 +41,19 @@ def test_supervisor_persists_routing_trace(tmp_path: Path) -> None:
     assert "unresolved" in payload
 
 
+def test_supervisor_persists_governance_context_before_run_expansion(tmp_path: Path) -> None:
+    make_task(tmp_path)
+    result = run_runtime(tmp_path, "evolve-orders-api", now="2026-09-23T12:00:00+00:00")
+    run = result["run"]
+    assert isinstance(run, dict)
+    context_path = Path(str(result["run_dir"])) / "governance-context.json"
+    assert context_path.is_file()
+    assert run["governance_context_id"]
+    payload = context_path.read_text(encoding="utf-8")
+    assert '"decision"' in payload
+    assert '"stop"' in payload
+
+
 def test_supervisor_loads_and_persists_graph_impact_once(tmp_path: Path) -> None:
     graph_dir = tmp_path / "graph"
     write_graph(

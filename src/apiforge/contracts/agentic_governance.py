@@ -256,6 +256,25 @@ class LoopDetection(VersionedContract):
     reason: str = ""
 
 
+class RunGovernanceContext(VersionedContract):
+    """Authoritative governance snapshot recorded before optional run work."""
+
+    schema: Literal["apiforge/run-governance-context/v1"] = (
+        "apiforge/run-governance-context/v1"  # type: ignore[assignment]
+    )
+    context_id: str = Field(min_length=1)
+    run_id: str = Field(min_length=1)
+    task_id: str = Field(min_length=1)
+    inputs: GovernorInputs
+    decision: GovernorDecision
+    gain: ExpectedInformationGain | None = None
+    stop: StopDecision | None = None
+    recovery: RecoveryDecision | None = None
+    loop: LoopDetection | None = None
+    evidence_refs: tuple[str, ...] = ()
+    unresolved: tuple[str, ...] = ()
+
+
 # --- step11 phase 5: Decision Control Plane lifecycle (§28-§32)
 
 ControlPlaneMode = Literal["shadow", "assisted", "active"]
@@ -373,6 +392,7 @@ __all__ = [
     "RecoveryAction",
     "RecoveryDecision",
     "RouteDecision",
+    "RunGovernanceContext",
     "ShadowRecord",
     "StopDecision",
 ]

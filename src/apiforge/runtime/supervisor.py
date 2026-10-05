@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from pydantic import TypeAdapter
 
@@ -18,6 +18,7 @@ from apiforge.contracts.agentic import (
     ArtifactKind,
     TrajectoryEvent,
 )
+from apiforge.contracts.agentic_governance import GovernorInputs, RunGovernanceContext
 from apiforge.contracts.base import ContractError
 from apiforge.contracts.economy import EconomyPlan, LadderStep
 from apiforge.contracts.graph import GraphEdge, GraphExport, GraphNode
@@ -26,6 +27,9 @@ from apiforge.contracts.routing_evolution import PromotionGate
 from apiforge.contracts.selective import RoleContext, RoleContextPlan, ShadowDecision
 from apiforge.core.ids import stable_id
 from apiforge.core.models import JsonValue
+from apiforge.governance.gain import expected_gain
+from apiforge.governance.governor import govern
+from apiforge.governance.stop import decide_stop
 from apiforge.graph.store import read_graph
 from apiforge.runtime.adapters import AgentRequest, ModelAdapter
 from apiforge.runtime.control import ControlPlane
@@ -284,6 +288,31 @@ def _effective_policy(policy: Any, task_max_calls: int, economy: EconomyPlan) ->
             "max_rounds": max(1, min(policy.max_rounds, envelope.debate_rounds or 1)),
         }
     )
+
+
+def _governed_policy(policy: Any, decision: Any) -> Any:
+    """Apply governor ceilings without widening a caller's policy."""
+    max_agents = decision.max_agents + decision.max_reviewers
+    return policy.model_copy(
+        update={
+            "max_parallel_agents": min(policy.max_parallel_agents, max(1, decision.max_agents)),
+            "max_calls": min(policy.max_calls, max(1, max_agents)),
+            "max_rounds": min(policy.max_rounds, max(1, decision.max_debates or 1)),
+            "max_retries": min(policy.max_retries, decision.max_retries),
+        }
+    )
+
+
+def _governor_complexity(routing: RoutingDecision) -> str | None:
+    assessment = routing.risk_complexity
+    if assessment is None:
+        return None
+    return {
+        "simple": "low",
+        "moderate": "medium",
+        "complex": "high",
+        "critical": "high",
+    }.get(assessment.complexity)
 
 
 def _exhausted(missing: int) -> str:
@@ -732,6 +761,45 @@ async def execute_run(
         storage.save_routing(routing)
         storage.json("economy.json", economy_plan.model_dump(mode="json"))
         policy = _effective_policy(policy, spec.budgets.max_calls, economy_plan)
+    governor_profile = (
+        economy_plan.effective
+        if economy_plan is not None
+        else (profile if profile in {"economy", "balanced", "deep"} else "balanced")
+    )
+    governor_inputs = GovernorInputs(
+        profile=cast(Any, governor_profile),
+        risk=cast(Any, spec.risk.value),
+        budget_remaining={"calls": policy.max_calls},
+        task_complexity=cast(Any, _governor_complexity(routing)),
+    )
+    governor_decision = govern(governor_inputs)
+    governance_context = RunGovernanceContext(
+        context_id=stable_id(
+            "governance",
+            {"run": run_id, "risk": spec.risk.value, "profile": governor_decision.profile},
+        ),
+        run_id=run_id,
+        task_id=task_id,
+        inputs=governor_inputs,
+        decision=governor_decision,
+        evidence_refs=tuple(sorted(set(routing.evidence))),
+        unresolved=governor_decision.unresolved,
+    )
+    storage.json("governance-context.json", governance_context.model_dump(mode="json"))
+    storage.event(
+        TrajectoryEvent(
+            event_id=stable_id("event", {"run": run_id, "event": "governance_context"}),
+            run_id=run_id,
+            event="governance_context",
+            actor="api-orchestrator",
+            subject=governance_context.context_id,
+            payload=governance_context.model_dump(mode="json"),
+            created_at=timestamp,
+        )
+    )
+    policy = _governed_policy(policy, governor_decision)
+    run = run.model_copy(update={"governance_context_id": governance_context.context_id})
+    storage.save_run(run)
     storage.save_routing_plan(routing_plan)
     storage.event(
         TrajectoryEvent(
@@ -1136,7 +1204,43 @@ async def execute_run(
     gain = assess_gain(
         artifacts, float((economy_config or {}).get("triggers", {}).get("low_confidence", 0.7))
     )
-    if economy_plan is not None:
+    all_unresolved = tuple(item for artifact in artifacts for item in artifact.unresolved)
+    confidences = [item.confidence for item in artifacts if item.confidence is not None]
+    confidence = min(confidences) if confidences else None
+    recommendations = {_recommendation(item) for item in artifacts}
+    review_gain = expected_gain(
+        "call_reviewer",
+        {
+            "agreement": 1.0 if len(recommendations) <= 1 and artifacts else None,
+            "unresolved_share": (
+                min(len(all_unresolved) / max(len(artifacts), 1), 1.0) if artifacts else None
+            ),
+            "confidence": confidence,
+            "remaining_budget": min(reserve_left / max(policy.max_calls, 1), 1.0),
+            "role_coverage": min(len(artifacts) / max(len(initial_capabilities), 1), 1.0),
+        },
+    )
+    review_stop = decide_stop(
+        review_gain,
+        mandatory_requirement=spec.risk.value in policy.critic_risks,
+    )
+    governance_context = governance_context.model_copy(
+        update={
+            "gain": review_gain,
+            "stop": review_stop,
+            "unresolved": tuple(
+                sorted(
+                    set(
+                        governance_context.unresolved
+                        + review_gain.unresolved
+                        + ((review_stop.code,) if review_stop.code else ())
+                    )
+                )
+            ),
+        }
+    )
+    storage.json("governance-context.json", governance_context.model_dump(mode="json"))
+    if economy_plan is not None and review_stop.decision == "continue":
         escalated = await _escalate(
             economy_plan,
             artifacts,
@@ -1170,6 +1274,12 @@ async def execute_run(
         conflicting_facts=len({_recommendation(item) for item in artifacts}) > 1,
         requested_by_user=requested_debate,
     )
+    if economy_plan is not None and room and governor_decision.max_debates <= 0:
+        room = False
+        economy_gaps.append(
+            "AF-GOV-DEBATE-CEILING: field=max_debates; "
+            "unlock=use a governor profile that explicitly permits debate"
+        )
     if economy_plan is not None and room:
         forced = spec.risk.value in policy.critic_risks or economy_plan.effective == "deep"
         if forced or (allows(economy_plan, "L4") and economy_plan.envelope.debate_rounds > 0):
@@ -1243,6 +1353,7 @@ async def execute_run(
         {
             "run_id": run_id,
             "economy": economy_block,
+            "governance": governance_context.model_dump(mode="json"),
             "role_context": role_summary(role_plan) if role_plan is not None else None,
             "shadow": (
                 shadow_decision.model_dump(mode="json") if shadow_decision is not None else None
@@ -1252,7 +1363,10 @@ async def execute_run(
             "debate_reasons": reasons,
             "human_gate": needs_gate,
             "errors": errors,
-            "unresolved": {"routing": list(routing.unresolved)},
+            "unresolved": {
+                "routing": list(routing.unresolved),
+                "governance": list(governance_context.unresolved),
+            },
         },
     )
     if economy_plan is not None and economy_block is not None:
@@ -1297,9 +1411,13 @@ async def execute_run(
             ),
         },
         "economy": economy_block,
+        "governance": governance_context.model_dump(mode="json"),
         "role_context": role_summary(role_plan) if role_plan is not None else None,
         "shadow": shadow_decision.model_dump(mode="json") if shadow_decision is not None else None,
-        "unresolved": {"routing": list(routing.unresolved)},
+        "unresolved": {
+            "routing": list(routing.unresolved),
+            "governance": list(governance_context.unresolved),
+        },
         "status": final_status,
         "run_dir": str(storage.directory),
     }

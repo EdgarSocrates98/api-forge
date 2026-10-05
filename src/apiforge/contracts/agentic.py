@@ -56,6 +56,7 @@ class AgenticRun(VersionedContract):
     evidence: tuple[str, ...] = ()
     gaps: tuple[str, ...] = ()
     control_run_id: str | None = None
+    governance_context_id: str | None = None
     verification_evidence: tuple[str, ...] = ()
     eval_status: Literal["not_run", "passed", "review", "blocked"] = "not_run"
     final_status: Literal["DONE", "REVIEW", "BLOCKED"] | None = None

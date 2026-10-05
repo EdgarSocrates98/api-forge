@@ -6,7 +6,7 @@ profile: critical
 status: done
 upstream:
   path: secure.md
-  sha256: "d968bcbf00ea3016f827d73dbd7c75083847607808cc4fa07afd1c4e42b4f58e"
+  sha256: "34e3c7e1db69cb105c336a51679d4a458815ffaf1d1948e84de5a866766933f5"
 baseline: "4 corpus cases < 1s observed; engine is O(refs + uses) single pass
   plus one re-evaluation; zero added per-run context cost (observed)"
 results:

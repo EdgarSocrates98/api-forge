@@ -6,7 +6,7 @@ profile: critical
 status: done
 upstream:
   path: build.md
-  sha256: "ad37a6fbb295c93596c04b73cf63b7314f6b8326ef00c73a87fec1658677cefb"
+  sha256: "5a2d91584b796b1514b576112c301ec368f4ae5c688199b6a19b95e19df305e4"
 results:
   - focused tests: 74 passed (tests/context + tests/economy/test_selective_agentics.py)
   - evals context-quality: 4/4 cases passed

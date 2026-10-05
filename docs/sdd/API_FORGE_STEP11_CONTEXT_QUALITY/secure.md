@@ -6,7 +6,7 @@ profile: critical
 status: done
 upstream:
   path: verify.md
-  sha256: "ec784de94b4c76050f745e7dbd36d2cf91000da18aef31e1dbd093cbc8afa67c"
+  sha256: "95f59f431ff6227dbf0b36cc73e24b124de70a9bd421b4bee6037b56515cff32"
 threat_model:
   - metrics compute only from recorded inputs; unresolved basis carries no
     value and the contract rejects it

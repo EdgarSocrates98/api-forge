@@ -6,7 +6,7 @@ profile: critical
 status: done
 upstream:
   path: plan.md
-  sha256: "755ef4c8fdd6614e82c3fc681e33623fb06527aa4c0e0e6a4cbf3c3310b3a4e2"
+  sha256: "c9590b4704985d7116c1efd187b257ef45429364dd46008580da47245516dc38"
 tasks:
   - contracts
   - engine

@@ -6,7 +6,7 @@ profile: critical
 status: ready
 upstream:
   path: benchmark.md
-  sha256: "df110b6617429c56787e3f99d710061f0a485aced79db225e55839be5c5d353b"
+  sha256: "f56c07e42df1481a5d6f77d2ab24c437c9f2e320170af800202f34a68daf360d"
 deviations: []
 evidence:
   - path: sdd/API_FORGE_STEP11_CONTEXT_QUALITY/evidence/G1.txt

@@ -6,7 +6,7 @@ profile: critical
 status: done
 upstream:
   path: contract.md
-  sha256: "1b8822a6b5c6fe644607e8ed81659a6f059b558af44604adc9a4cb6be51be917"
+  sha256: "744571210f16363f5f9989982f32af9250c4458dc704875b67a431a5fcf9998e"
 files:
   - src/apiforge/contracts/context_quality.py
   - src/apiforge/contracts/registry.py

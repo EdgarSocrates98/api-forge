@@ -6,7 +6,7 @@ profile: critical
 status: done
 upstream:
   path: architecture.md
-  sha256: "b9e764fb873571ad371d5436e1772ec01f32fcb9e281ebe7f0d4b97d186a6c37"
+  sha256: "72c76bc5baddb3ea6363cf5ef633644196e9495211353e8f37d7f6a65fb3463d"
 tasks:
   - id: G1
     covers: [context-quality-contracts, context-quality-engine]

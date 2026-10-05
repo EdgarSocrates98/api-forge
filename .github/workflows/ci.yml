@@ -194,6 +194,10 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p .apiforge/otel
+          # the contrib image runs as a non-root user; the bind-mounted
+          # output dir must be writable by it or the file exporter
+          # fails to start pipelines with "permission denied"
+          chmod 777 .apiforge/otel
           docker run -d --name otelcol \
             -p 4318:4318 \
             -v "$PWD/scripts/otelcol/otelcol.yaml:/etc/otelcol.yaml:ro" \

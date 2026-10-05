@@ -165,6 +165,7 @@ FailureClass = Literal[
     "deterministic_conflict",
 ]
 RecoveryAction = Literal["retry", "replan", "fallback", "escalate", "stop"]
+LoopAction = Literal["stop", "replan", "fallback", "human"]
 
 
 class GovernorInputs(VersionedContract):
@@ -252,6 +253,7 @@ class LoopDetection(VersionedContract):
     repeats: int = Field(ge=0)
     window: int = Field(ge=1)
     blocked: bool = False
+    action: LoopAction = "stop"
     code: str | None = None
     reason: str = ""
 
@@ -384,6 +386,7 @@ __all__ = [
     "GovernorInputs",
     "GovernorProfile",
     "GovernorSecurityState",
+    "LoopAction",
     "LoopDetection",
     "PromotionDecision",
     "PromotionEvidence",

@@ -23,6 +23,7 @@ def test_repeated_strategy_blocks() -> None:
     assert result.blocked
     assert result.code == "AF-GOV-LOOP-DETECTED"
     assert result.repeats == 2
+    assert result.action == "stop"
 
 
 def test_single_repeat_allowed() -> None:

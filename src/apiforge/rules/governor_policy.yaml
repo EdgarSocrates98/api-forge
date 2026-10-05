@@ -57,3 +57,4 @@ security_clamps:
 loop:
   window: 5
   max_repeats: 2
+  blocked_action: stop

@@ -97,7 +97,10 @@ inputs always produce the same `GovernorDecision`/`StopDecision`/
   §26 vocabulary (unknown classes refuse `AF-GOV-FAILURE-CLASS-UNKNOWN`);
   exhausted caps fire the terminal escalate/stop.
 - `apiforge governor loop-check --fingerprints …` — repeated strategy
-  fingerprints inside the window block `AF-GOV-LOOP-DETECTED`.
+  fingerprints inside the window block `AF-GOV-LOOP-DETECTED`. Runtime records
+  every selected strategy in `events.jsonl` before invoking capabilities; the
+  current governor policy uses `action=stop`, returning `BLOCKED` without
+  spending another call.
 
 The same projections are exposed as read-only MCP tools
 (`governor_decide`, `governor_stop`, `governor_recover`). Nothing in this

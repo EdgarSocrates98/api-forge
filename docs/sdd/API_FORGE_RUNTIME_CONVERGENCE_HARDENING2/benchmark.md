@@ -13,7 +13,7 @@ results:
     note: final comparisons will contain only observed measurements
 upstream:
   path: secure.md
-  sha256: "0668c4713099ed5d0194e71deb92cdb6c31f015c71848f49c89ec9fae3aff985"
+  sha256: "ec6502e9b37e062508474a81c075bfec8d3c0ff963685fc8f4c02edac8e044f9"
 ---
 
 # benchmark

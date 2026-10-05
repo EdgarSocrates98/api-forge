@@ -44,6 +44,33 @@ class RunStore:
             handle.write(json.dumps(event.model_dump(mode="json"), sort_keys=True) + "\n")
         return path
 
+    def strategy_history(self) -> tuple[str, ...]:
+        """Return recorded strategy fingerprints in trajectory order."""
+        path = self.directory / "events.jsonl"
+        if not path.is_file():
+            return ()
+        fingerprints: list[str] = []
+        for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+            if not line.strip():
+                continue
+            try:
+                item = json.loads(line)
+            except json.JSONDecodeError as exc:
+                raise ContractError(
+                    "AF-RUNTIME-LOOP-HISTORY", f"{path}:{line_number}: invalid event JSON"
+                ) from exc
+            if item.get("event") != "strategy_selected":
+                continue
+            payload = item.get("payload")
+            fingerprint = payload.get("fingerprint") if isinstance(payload, dict) else None
+            if not isinstance(fingerprint, str) or not fingerprint.startswith("strategy:"):
+                raise ContractError(
+                    "AF-RUNTIME-LOOP-HISTORY",
+                    f"{path}:{line_number}: strategy_selected lacks fingerprint",
+                )
+            fingerprints.append(fingerprint)
+        return tuple(fingerprints)
+
     def artifact(self, artifact: AgentArtifact) -> Path:
         return self._write(
             f"artifacts/{artifact.artifact_id.replace(':', '-')}.json",

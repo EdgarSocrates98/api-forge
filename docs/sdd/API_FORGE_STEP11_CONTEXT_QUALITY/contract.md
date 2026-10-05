@@ -19,7 +19,7 @@ covers:
 
 - `ContextUseRecord/v1` — one recorded ref interaction: `loaded`, `assigned`,
   `expanded`, `cited`, `artifact`; tokens only `observed` from transcripts.
-- `ContextQualityMetric/v1` — closed `ContextMetricKind` catalog (13 metrics),
+- `ContextQualityMetric/v1` — closed `ContextMetricKind` catalog (14 metrics),
   `basis` enforced: unresolved metrics carry no value, observed metrics
   require one.
 - `ContextQualityReport/v1` — must emit every metric kind; status

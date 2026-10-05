@@ -130,9 +130,18 @@ def evaluate(
     declared_evidence = (
         set(required_evidence_uris) if required_evidence_uris is not None else required
     )
-    required_evidence = {
-        uri for uri in declared_evidence if uri in by_uri and by_uri[uri].kind in EVIDENCE_KINDS
-    }
+    # An explicit required-evidence declaration is authoritative even when a
+    # URI was not recovered. Absence is the recall failure, not a reason to
+    # remove the item from the denominator.
+    required_evidence = (
+        declared_evidence
+        if required_evidence_uris is not None
+        else {
+            uri
+            for uri in declared_evidence
+            if uri in by_uri and by_uri[uri].kind in EVIDENCE_KINDS
+        }
+    )
     if not required_evidence:
         metrics.append(
             _unresolved(
@@ -149,6 +158,25 @@ def evaluate(
                 detail=f"{len(ev_used)}/{len(required_evidence)} required evidence refs used",
             )
         )
+
+    selected_evidence = {
+        uri for uri, ref in by_uri.items() if ref.kind in EVIDENCE_KINDS
+    }
+    selected_evidence_used = selected_evidence & used
+    metrics.append(
+        _unresolved(
+            "selected_evidence_utilization",
+            "no evidence refs were selected; utilization is not applicable",
+        )
+        if not selected_evidence
+        else _metric(
+            "selected_evidence_utilization",
+            len(selected_evidence_used) / len(selected_evidence),
+            detail=(
+                f"{len(selected_evidence_used)}/{len(selected_evidence)} selected evidence refs used"
+            ),
+        )
+    )
 
     total_bytes = sum(ref.size_bytes for ref in refs)
     used_bytes = sum(by_uri[uri].size_bytes for uri in used)

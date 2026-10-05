@@ -30,6 +30,7 @@ ContextMetricKind = Literal[
     "context_reuse_rate",
     "cache_hit_rate",
     "role_context_efficiency",
+    "selected_evidence_utilization",
     "evidence_per_token",
     "useful_facts_per_1k_tokens",
 ]
@@ -46,6 +47,7 @@ METRIC_KINDS: tuple[ContextMetricKind, ...] = (
     "context_reuse_rate",
     "cache_hit_rate",
     "role_context_efficiency",
+    "selected_evidence_utilization",
     "evidence_per_token",
     "useful_facts_per_1k_tokens",
 )

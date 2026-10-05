@@ -93,6 +93,7 @@ def test_metrics_are_measured_not_invented() -> None:
     assert metrics["context_precision"].value == pytest.approx(2 / 3, abs=1e-3)
     assert metrics["context_recall"].value == pytest.approx(2 / 3, abs=1e-3)
     assert metrics["evidence_recall"].value == pytest.approx(0.5, abs=1e-3)
+    assert metrics["selected_evidence_utilization"].value == pytest.approx(0.5, abs=1e-3)
     assert metrics["context_density"].value == pytest.approx(300 / 350, abs=1e-3)
     assert metrics["irrelevant_context_ratio"].value == pytest.approx(1 / 3, abs=1e-3)
     assert metrics["stale_context_ratio"].value == pytest.approx(1 / 3, abs=1e-3)
@@ -109,6 +110,20 @@ def test_evidence_recall_requires_declared_required_evidence() -> None:
     metric = metric_map(report.metrics)["evidence_recall"]
     assert metric.basis == "unresolved"
     assert metric.value is None
+
+
+def test_evidence_recall_keeps_missing_declared_refs_in_denominator() -> None:
+    ref = _ref("contract", kind="contract", origin="contract")
+    missing = _uri("missing-required-evidence")
+    report = evaluate(
+        (ref,),
+        (_use("r", ref, "expanded"),),
+        run_id="r",
+        required_evidence_uris=(ref.uri, missing, _uri("another-missing")),
+    )
+    metrics = metric_map(report.metrics)
+    assert metrics["evidence_recall"].value == pytest.approx(1 / 3, abs=1e-3)
+    assert metrics["selected_evidence_utilization"].value == pytest.approx(1.0)
 
 
 def test_unresolved_metrics_carry_no_value() -> None:

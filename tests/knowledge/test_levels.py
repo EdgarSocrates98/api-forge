@@ -87,9 +87,10 @@ def test_graph_level_traverses_declared_graph(tmp_path) -> None:
     result = adaptive_retrieve("service orders", max_level="L2", graph_dir=graph_dir)
     assert result.level_used == "L2"
     assert len(result.hits) >= 3
-    assert sum(
-        any("knowledge:graph" in ref for ref in refs) for refs in result.provenance.values()
-    ) >= 3
+    assert (
+        sum(any("knowledge:graph" in ref for ref in refs) for refs in result.provenance.values())
+        >= 3
+    )
 
 
 def test_rewrite_gates() -> None:

@@ -19,7 +19,7 @@ threat_model:
     controls: lock check, least-privilege green-validation job and branch protection
 upstream:
   path: verify.md
-  sha256: "f0158e446640166193624a08f3591032cc3769df7c8f3a7dbb8ed957dc6b2fbd"
+  sha256: "807bee29feded8a2aecd3b7182f5d8a5683d50a680f882e018e6679a1785c41f"
 ---
 
 # secure

@@ -295,11 +295,9 @@ def _effective_policy(policy: Any, task_max_calls: int, economy: EconomyPlan) ->
 
 def _governed_policy(policy: Any, decision: Any) -> Any:
     """Apply governor ceilings without widening a caller's policy."""
-    max_agents = decision.max_agents + decision.max_reviewers
     return policy.model_copy(
         update={
             "max_parallel_agents": min(policy.max_parallel_agents, max(1, decision.max_agents)),
-            "max_calls": min(policy.max_calls, max(1, max_agents)),
             "max_rounds": min(policy.max_rounds, max(1, decision.max_debates or 1)),
             "max_retries": min(policy.max_retries, decision.max_retries),
         }
@@ -1298,7 +1296,14 @@ async def execute_run(
     )
     review_stop = decide_stop(
         review_gain,
-        mandatory_requirement=spec.risk.value in policy.critic_risks,
+        mandatory_requirement=(
+            spec.risk.value in policy.critic_risks
+            or (
+                confidence is not None
+                and confidence
+                < float((economy_config or {}).get("triggers", {}).get("low_confidence", 0.7))
+            )
+        ),
     )
     governance_context = governance_context.model_copy(
         update={
@@ -1352,10 +1357,16 @@ async def execute_run(
     )
     if economy_plan is not None and room and governor_decision.max_debates <= 0:
         room = False
-        economy_gaps.append(
-            "AF-GOV-DEBATE-CEILING: field=max_debates; "
-            "unlock=use a governor profile that explicitly permits debate"
-        )
+        if not allows(economy_plan, "L4"):
+            economy_gaps.append(
+                "AF-ECONOMY-CEILING: field=profile; unlock=rerun with --profile balanced|deep "
+                f"to allow a debate room ({','.join(reasons)})"
+            )
+        else:
+            economy_gaps.append(
+                "AF-GOV-DEBATE-CEILING: field=max_debates; "
+                "unlock=use a governor profile that explicitly permits debate"
+            )
     if economy_plan is not None and room:
         forced = spec.risk.value in policy.critic_risks or economy_plan.effective == "deep"
         if forced or (allows(economy_plan, "L4") and economy_plan.envelope.debate_rounds > 0):

@@ -46,7 +46,7 @@ decisions:
     promotion plane"
 upstream:
   path: contract.md
-  sha256: "4dec29fab326d522fa3cfb4095056f8b402c1f69ed0b709385895ace78bf88cc"
+  sha256: "16e88a00a226afda7bbdefa623fc3b6635d982b4550f034ef1d8147c7ed090ed"
 ---
 
 # architecture

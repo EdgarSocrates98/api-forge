@@ -21,7 +21,7 @@ rollback: "revert this commit; all modules are additive — lexical retrieval,
   never opens rules/model_router.yaml or rules/retrieval_levels.yaml"
 upstream:
   path: benchmark.md
-  sha256: "de21db67b5efe6b989fedfa9f7f2251464f7cbb3acafd14e2e8c6e01c521e8ea"
+  sha256: "9e1670950010f28379f01d4a23961c604b018bb7f19c10b96cb957c5e2e23ec3"
 ---
 
 # ship

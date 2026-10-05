@@ -21,6 +21,7 @@ technical format and are intentionally not duplicated as product guides.
 - [GitHub governance: ruleset plan and CODEOWNERS](guides/API_FORGE_GITHUB_GOVERNANCE.en.md)
 - [Host parity](HOST_PARITY.md)
 - [Evolution map](API_FORGE_EVOLUTION_MAP.en.md)
+- [Evo convergence outcome brief](decisions/API_FORGE_EVO_CONVERGENCE_OUTCOME_BRIEF.md)
 
 ## Architecture and capability reference
 

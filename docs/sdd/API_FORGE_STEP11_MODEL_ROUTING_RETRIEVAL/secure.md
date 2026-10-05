@@ -22,7 +22,7 @@ threat_model:
     unresolved
 upstream:
   path: verify.md
-  sha256: "dfb29bfa76a2407cde97af8c5b0f745d4025f433a38ff3d0a2d5f87ee67c5433"
+  sha256: "d6fbb5957e3ebd4d9c1a96439176569dcedc62ed8ef355c2b5352baeae25ce39"
 ---
 
 # secure

@@ -11,19 +11,23 @@ baseline:
 results:
   - metric: context and AgentOps projection correctness
     target: canonical names, separate dimensions, deterministic correlation
-    observed: false
+    observed: true
+    result: focused tests and full suite passed
   - metric: governance overhead
     target: bounded local computation with no provider call
-    observed: false
+    observed: true
+    result: governor, loop/recovery and tool authorization tests passed
   - metric: retrieval and memory semantics
     target: provenance and configurable coverage with unresolved states
-    observed: false
+    observed: true
+    result: retrieval eval passed; graph absence and cost rate remain explicit unresolved fields
   - metric: lock and protocol reproducibility
     target: lock check and protocol claim match local evidence
-    observed: false
+    observed: true
+    result: uv lock check, lock audit, MCP protocol probe and SBOM generation passed
 upstream:
   path: secure.md
-  sha256: "07f56593cd1edb555fba6d3e43ae696c6e5640d929b68449e0865f02a9a33978"
+  sha256: "c2fad4d038877ec45028ae55ae9e62e5cd22f19e45f9f1428f23fed269cb5ea6"
 ---
 
 # benchmark

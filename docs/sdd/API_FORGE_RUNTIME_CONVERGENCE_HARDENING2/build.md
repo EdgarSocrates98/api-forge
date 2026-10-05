@@ -24,7 +24,7 @@ tasks:
   - id: p1-lab-mcp
     status: done
   - id: release-evidence
-    status: pending
+    status: done
 claims:
   - implementation is not accepted until its focused proof and independent verification are recorded
   - p0-truthfulness proof records unresolved/partial token state and model-call correlation
@@ -36,6 +36,7 @@ claims:
   - p1-memory proof records freshness state, explicit runtime matching, taint admission and conflict outcomes
   - p1-agentops proof records explicit coverage metrics, cross-ledger timeline and waste evidence
   - p1-lab-mcp proof records modern local MCP method order and executable Runtime Convergence Lab cells
+  - release-evidence proof records local supply-chain, release, AgentOps and MCP receipts with external limits preserved
 upstream:
   path: plan.md
   sha256: "441f340869522a07f8a11be105185c5cd77f6d72b59af89aaaa05db3a46cab8d"

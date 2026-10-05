@@ -18,7 +18,7 @@ Baseline: `docs/decisions/API_FORGE_HARDENING2_BASELINE.md`
 | AgentOps | yes | yes | yes | coverage + timeline proof | HARDENED | coverage/timeline/waste outputs without zero-filling |
 | MCP | yes | modern local proof + legacy adapter | partial | audit + 2-step local proof | HARDENED | keep era-specific discovery/list/call proof and target auth boundary |
 | Forge Protocol | yes | yes | yes | local contract | KEEP | preserve v1; A2A remains adapter-only |
-| Lab | yes | fixtures + proofs | partial | `13/13` catalog | EXTEND | executable runtime-convergence scenarios, local-only claims |
+| Lab | yes | fixtures + proofs | yes | `21/21` catalog | HARDENED | executable runtime-convergence scenarios, local-only claims |
 | Supply chain / CI | yes | yes | partial | local gates pass | KEEP + EXTEND | local release receipt; CI failures stay correctly classified |
 
 The default strategy is `adapter -> shadow -> assisted -> active -> retire`.

@@ -19,7 +19,7 @@ States: `SUPPORTED` · `PARTIAL` · `NOT_IMPLEMENTED` · `NOT_APPLICABLE`.
 | extensions | protocol extensions negotiated via capabilities | `NOT_APPLICABLE` | no extensions declared or required | none |
 | capability negotiation | legacy `initialize`; modern `server/discover` | `SUPPORTED` (modern local proof) / `PARTIAL` (optional SDK) | `tests/mcp/test_modern_protocol.py` drives `server/discover`; FastMCP SDK handshake stays optional and separately probed | no claim that the optional SDK is installed in the default environment |
 | resources | `resources/list`, `resources/read` | `NOT_IMPLEMENTED` | no `@mcp.resource` registered — the tool surface covers reads | deliberate: artifacts live behind `ctx://` refs exposed via tools, not the resources primitive |
-| tools | `tools/list`, `tools/call` with JSON-Schema args | `SUPPORTED` | 151 tools are registered locally with pydantic-derived schemas; §40 audit measures schema/description bytes and §43 benchmark measures response cost | none |
+| tools | `tools/list`, `tools/call` with JSON-Schema args | `SUPPORTED` | 152 tools are registered locally with pydantic-derived schemas; §40 audit measures schema/description bytes and §43 benchmark measures response cost | none |
 | error model | JSON-RPC error objects; protocol errors | `SUPPORTED` | refusals raise `ContractError`/`AnalysisError` → SDK error; payload carries `error_code` (`AF-*`), `field` and `unlock` per the catalog | none |
 | security | spec security best practices | `SUPPORTED` | read-only tools; no provider SDK imports in `src/`; sensitive-attribute refusal; secrets never enter payloads | none |
 

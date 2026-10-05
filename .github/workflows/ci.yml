@@ -47,6 +47,16 @@ jobs:
       - name: Audit committed dependency lock
         run: python scripts/lock_audit.py
 
+      - name: Emit CycloneDX SBOM from committed lock
+        run: python scripts/sbom.py --output .apiforge/sbom.cdx.json
+
+      - name: Upload CycloneDX SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-forge-sbom
+          path: .apiforge/sbom.cdx.json
+          if-no-files-found: error
+
       - name: Observe optional MCP protocol SDK
         run: python scripts/mcp_protocol_probe.py
 

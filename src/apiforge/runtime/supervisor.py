@@ -79,6 +79,7 @@ from apiforge.runtime.scheduler import run_bounded
 from apiforge.runtime.shadow import decide as decide_shadow
 from apiforge.runtime.store import RunStore, content_hash
 from apiforge.taskspec import store as task_store
+from apiforge.trust.tools import authorize, load_tool_risk
 
 
 def _now(value: str | None) -> str:
@@ -477,7 +478,8 @@ async def _escalate(
     )
 
     async def worker(item: AgentInvocation) -> object:
-        return await adapter.invoke(
+        return await _authorized_invoke(
+            adapter,
             AgentRequest(
                 invocation_id=item.invocation_id,
                 agent=item.agent,
@@ -489,7 +491,7 @@ async def _escalate(
                     (role_rows or {}).get(item.capability),
                     tuple(f"artifact:{artifact.artifact_id}" for artifact in artifacts),
                 ),
-            )
+            ),
         )
 
     results = await run_bounded(
@@ -546,6 +548,19 @@ def _role_fields(row: RoleContext | None, extra_refs: tuple[str, ...] = ()) -> d
         "expertise": row.expertise,
         "prompt_prefix_sha256": row.prompt_prefix_sha256,
     }
+
+
+async def _authorized_invoke(adapter: ModelAdapter, request: AgentRequest) -> object:
+    """Enforce runtime tool admission before crossing the model adapter boundary."""
+    profiles, permissions = load_tool_risk()
+    for tool in ("agent-invocation", *request.tool_names):
+        decision = authorize("api-orchestrator", tool, profiles=profiles, permissions=permissions)
+        if decision.decision != "allow":
+            error = ContractError(decision.code or "AF-TOOL-AUTHZ-DENIED", decision.reason)
+            error.field = decision.field or "tool"  # type: ignore[attr-defined]
+            error.unlock = decision.unlock or "declare an explicit runtime tool grant"  # type: ignore[attr-defined]
+            raise error
+    return await adapter.invoke(request)
 
 
 def _shadow_mode(spec: Any) -> str:
@@ -615,7 +630,8 @@ async def _shadow(
     )
 
     async def worker(item: AgentInvocation) -> object:
-        return await adapter.invoke(
+        return await _authorized_invoke(
+            adapter,
             AgentRequest(
                 invocation_id=item.invocation_id,
                 agent=item.agent,
@@ -624,7 +640,7 @@ async def _shadow(
                 input_refs=item.input_refs,
                 output_contract="AgentArtifact/v1",
                 **_role_fields(context_row),
-            )
+            ),
         )
 
     results = await run_bounded(
@@ -992,7 +1008,7 @@ async def execute_run(
             output_contract="AgentArtifact/v1",
             **_role_fields(role_rows.get(invocation.capability)),
         )
-        return await adapter.invoke(request)
+        return await _authorized_invoke(adapter, request)
 
     reserve = (
         reserve_calls(economy_plan.envelope, policy.max_calls) if economy_plan is not None else 0
@@ -1626,14 +1642,15 @@ async def resume_existing_run(
         )
 
     async def worker(invocation: AgentInvocation) -> object:
-        return await adapter.invoke(
+        return await _authorized_invoke(
+            adapter,
             AgentRequest(
                 invocation_id=invocation.invocation_id,
                 agent=invocation.agent,
                 capability=invocation.capability,
                 prompt=f"Resume API evolution for capability {invocation.capability}",
                 output_contract="AgentArtifact/v1",
-            )
+            ),
         )
 
     results = await run_bounded(

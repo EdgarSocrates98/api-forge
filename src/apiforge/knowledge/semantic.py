@@ -1,9 +1,9 @@
 """§37 semantic retrieval — optional adapter, never a requirement.
 
-The shipped adapter is a deterministic hash-embedding: terms are folded into
-a fixed bucket vector and compared by cosine. No vector DB, no network, no
-provider call — a caller may declare a stronger adapter by passing any object
-implementing :class:`SemanticAdapter`.
+The shipped adapter is deterministic hash-feature similarity: terms are folded
+into a fixed bucket vector and compared by cosine-like overlap. It is not a
+semantic embedding. No vector DB, network or provider call; callers may
+declare stronger adapters through :class:`SemanticAdapter`.
 """
 
 from __future__ import annotations
@@ -31,8 +31,8 @@ class SemanticAdapter(Protocol):
         ...
 
 
-class HashEmbeddingAdapter:
-    """Local adapter: term -> hash bucket; cosine over bucket vectors."""
+class HashFeatureSimilarityAdapter:
+    """Local lexical-feature adapter: term -> hash bucket; cosine-like score."""
 
     def _vector(self, terms: tuple[str, ...]) -> list[float]:
         vector = [0.0] * _BUCKETS
@@ -59,7 +59,14 @@ class HashEmbeddingAdapter:
 
 def load_semantic_adapter(declared: SemanticAdapter | None = None) -> SemanticAdapter | None:
     """The semantic layer exists only when declared — callers may pass None."""
-    return declared if declared is not None else HashEmbeddingAdapter()
+    return declared if declared is not None else HashFeatureSimilarityAdapter()
 
 
-__all__ = ["HashEmbeddingAdapter", "SemanticAdapter", "load_semantic_adapter"]
+HashEmbeddingAdapter = HashFeatureSimilarityAdapter
+
+__all__ = [
+    "HashEmbeddingAdapter",
+    "HashFeatureSimilarityAdapter",
+    "SemanticAdapter",
+    "load_semantic_adapter",
+]

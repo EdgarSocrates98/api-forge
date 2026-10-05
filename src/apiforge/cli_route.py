@@ -151,6 +151,7 @@ def register_retrieval(knowledge_app: typer.Typer) -> None:
         max_level: str = typer.Option("L4", "--max-level", help="L0..L4 ceiling."),
         semantic: bool = typer.Option(False, "--semantic", help="Declare the local adapter."),
         root: Path | None = typer.Option(None, "--root", help="Directory of knowledge packs."),
+        graph_dir: Path | None = typer.Option(None, "--graph-dir", help="Graph JSONL directory."),
         detail_level: str = typer.Option("normal", "--detail-level"),
     ) -> None:
         """§36: L0→L4 ladder; escalates only while the level is insufficient."""
@@ -163,6 +164,7 @@ def register_retrieval(knowledge_app: typer.Typer) -> None:
             return adaptive_retrieve(
                 query,
                 root=root,
+                graph_dir=graph_dir,
                 semantic=adapter,
                 max_level=max_level,  # type: ignore[arg-type]
             ).model_dump(mode="json")

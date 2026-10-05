@@ -15,7 +15,7 @@ threat_model:
   - silent rewrite — QueryRewrite always records original and gate result;
     a blocked rewrite returns null rewritten plus the refusing reason
   - semantic exfiltration — the SemanticAdapter is local-only
-    (HashEmbeddingAdapter); no network, no provider SDK, L3 skipped with
+    (HashFeatureSimilarityAdapter); no network, no provider SDK, L3 skipped with
     unresolved when undeclared
   - cost fabrication — RetrievalComparison reports cost only from a
     declared rate; without one cost stays null and cost_rate lands in

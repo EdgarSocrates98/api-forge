@@ -34,6 +34,8 @@ uses:
     action: expanded
     bytes: 60
 required_uris: [0]
+required_evidence_uris: [0, 1, 3]
+counterfactual: true
 expect:
   status: degraded
   metrics:
@@ -46,3 +48,6 @@ expect:
     sufficient: true
     pruned_count: 1
     pruned_bytes: 300
+  counterfactual:
+    decision_stable: false
+    ablations: 4

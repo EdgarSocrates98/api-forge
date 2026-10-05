@@ -147,7 +147,7 @@ a small synthetic benchmark refuses `AF-ROUTE-PROMOTION-EVIDENCE`.
 `knowledge adaptive` climbs the §36 ladder only as far as needed: `L0` exact →
 `L1` lexical (`knowledge/retrieval.py`) → `L2` structural graph refs → `L3`
 hybrid semantic → `L4` reranker over merged candidates. L3 runs only when a
-`SemanticAdapter` is declared (`HashEmbeddingAdapter` is the deterministic
+`SemanticAdapter` is declared (`HashFeatureSimilarityAdapter` is deterministic
 local option — no vector DB, no network); otherwise the step is skipped with
 `unresolved: ["semantic"]`. `knowledge rewrite` is §39-gated: rewriting runs
 only when deterministic retrieval failed, budget remains and the profile

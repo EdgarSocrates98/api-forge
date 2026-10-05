@@ -10,12 +10,13 @@ Local checks:
 ```bash
 uv lock --check
 python scripts/lock_audit.py
+python scripts/sbom.py --output .apiforge/sbom.cdx.json
 uv run --extra mcp python scripts/mcp_protocol_probe.py
 ```
 
 The audit checks declared dependency membership, lock metadata and SHA-256
 artifact hashes without resolving or downloading. CI also runs `pip check` and
-the offline supply-chain audit. CVE/advisory freshness still requires an
+emits a deterministic CycloneDX 1.5 SBOM from the same lock. CVE/advisory freshness still requires an
 external vulnerability database and remains explicitly unresolved locally.
 
 The MCP extra is `mcp>=2.2,<3`. The protocol probe observes the installed SDK;

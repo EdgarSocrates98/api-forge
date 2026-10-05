@@ -82,6 +82,10 @@ tools:
     risk_classes: [read_only]
     reversible: true
     notes: evidence projection
+  agent-invocation:
+    risk_classes: [read_only]
+    reversible: true
+    notes: governed runtime adapter boundary; declared tool_names are checked separately
 permissions:
   mcp-gateway:
     allowed_tools:
@@ -94,6 +98,11 @@ permissions:
     allowed_risk_classes: [read_only]
     denied_tools: []
     notes: compact MCP boundary; full tool policy remains explicit
+  api-orchestrator:
+    allowed_tools: [agent-invocation]
+    allowed_risk_classes: [read_only]
+    denied_tools: []
+    notes: runtime adapter admission; undeclared requested tools fail closed
   specialist:
     allowed_tools:
       - context_capsule

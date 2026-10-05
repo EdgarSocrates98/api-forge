@@ -7,7 +7,7 @@ status: done
 deviations:
   - "ModelRouteDecision is emitted by route model; wiring a runtime
     dispatcher to consume it per request is left for a later phase"
-  - "HashEmbeddingAdapter is a deterministic local stand-in for semantic
+  - "HashFeatureSimilarityAdapter is deterministic local feature similarity,
     retrieval; a production embedding service would plug the same
     SemanticAdapter protocol"
   - "query rewriting is evaluated at the CLI boundary; the retrieval engine

@@ -16,7 +16,7 @@ results:
   - "routing is O(candidates) constraint checks then O(candidates) scoring; the ladder is O(levels x search) and stops at first sufficient level"
 upstream:
   path: secure.md
-  sha256: "aa3d504eb3b51cbdcd44ad97373163a2ecf729528e87ef126408249693df011d"
+  sha256: "6bc7bd6b2d52c3ab4888bd940df98562d53d1592a5c2ad127ab8429ad6e5e5bb"
 ---
 
 # benchmark

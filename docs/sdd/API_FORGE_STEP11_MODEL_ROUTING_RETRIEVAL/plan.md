@@ -16,7 +16,7 @@ tasks:
     test: sdd/API_FORGE_STEP11_MODEL_ROUTING_RETRIEVAL/evidence/G3-gates.txt
 upstream:
   path: architecture.md
-  sha256: "69149375de67e57c210a3e95378ee67138c4c78a09dfe6c40e3c4d6fb2a051fc"
+  sha256: "30969c705a4238128f6454c2af0dfbb7b5a1579634297596d0a2b64ee8418853"
 ---
 
 # plan

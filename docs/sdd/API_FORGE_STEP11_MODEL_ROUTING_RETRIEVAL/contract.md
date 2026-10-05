@@ -25,7 +25,7 @@ contracts:
   - RetrievalComparison/v1
 upstream:
   path: intent.md
-  sha256: "c8ab91cd7872a4e27dc57db3b199d16fb6e57ff586f923665000c7f3f950e893"
+  sha256: "3ef9410d52e1ac3270f92352e19dded482b6bdab620c111b4851d38d35fae025"
 ---
 
 # contract

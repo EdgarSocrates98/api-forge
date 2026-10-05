@@ -37,7 +37,7 @@ decisions:
   - "the retrieval ladder is data-driven from retrieval_levels.yaml: L0
     exact, L1 lexical, L2 structural graph, L3 hybrid semantic, L4 reranker;
     it stops at the first level meeting min_hits/min_score"
-  - "L3 runs only through a declared SemanticAdapter; HashEmbeddingAdapter
+  - "L3 runs only through a declared SemanticAdapter; HashFeatureSimilarityAdapter
     is the local deterministic implementation — no vector DB, no network"
   - "query rewriting is a pure gate evaluation — deterministic failed +
     budget remaining + profile allows; economy blocks"

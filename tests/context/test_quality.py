@@ -99,8 +99,16 @@ def test_metrics_are_measured_not_invented() -> None:
     assert metrics["context_reuse_rate"].value == pytest.approx(0.5, abs=1e-3)
     assert metrics["cache_hit_rate"].value == pytest.approx(0.5)
     assert metrics["evidence_per_token"].value == pytest.approx(1 / 40, abs=1e-3)
-    assert metrics["useful_facts_per_1k_tokens"].value == pytest.approx(50.0, abs=0.1)
-    assert report.status == "ready"
+    assert report.status == "degraded"
+    assert metrics["useful_facts_per_1k_tokens"].basis == "unresolved"
+
+
+def test_evidence_recall_requires_declared_required_evidence() -> None:
+    ref = _ref("contract", kind="contract", origin="contract")
+    report = evaluate((ref,), (_use("r", ref, "expanded"),), run_id="r")
+    metric = metric_map(report.metrics)["evidence_recall"]
+    assert metric.basis == "unresolved"
+    assert metric.value is None
 
 
 def test_unresolved_metrics_carry_no_value() -> None:

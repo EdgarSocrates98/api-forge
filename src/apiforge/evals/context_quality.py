@@ -87,6 +87,52 @@ def _metric_check(name: str, metric: Any, expect: dict[str, Any], failures: list
         failures.append(f"{name}: {value} > max {expect['max']}")
 
 
+def _counterfactual(
+    refs: tuple[ContextRef, ...],
+    uses: tuple[ContextUseRecord, ...],
+    *,
+    run_id: str,
+    required: set[str],
+    required_evidence: set[str] | None,
+) -> dict[str, Any]:
+    """Ablate one ref at a time; keep static quality and decision evidence separate."""
+    baseline = minimum_sufficient(refs, uses, run_id=run_id, required_uris=required)
+    ablations: list[dict[str, Any]] = []
+    for ref in refs:
+        remaining = tuple(item for item in refs if item.uri != ref.uri)
+        remaining_uses = tuple(use for use in uses if use.ref_uri != ref.uri)
+        report = evaluate(
+            remaining,
+            remaining_uses,
+            run_id=run_id,
+            required_uris=required,
+            required_evidence_uris=required_evidence,
+        )
+        decision = minimum_sufficient(
+            remaining,
+            remaining_uses,
+            run_id=run_id,
+            required_uris=required,
+        )
+        metrics = {metric.name: metric for metric in report.metrics}
+        ablations.append(
+            {
+                "removed_ref": ref.uri,
+                "status": report.status,
+                "context_recall": metrics["context_recall"].model_dump(mode="json"),
+                "evidence_recall": metrics["evidence_recall"].model_dump(mode="json"),
+                "decision": decision.sufficient,
+                "decision_stable": decision.sufficient == baseline.sufficient,
+                "unresolved": report.unresolved,
+            }
+        )
+    return {
+        "baseline_decision": baseline.sufficient,
+        "ablations": ablations,
+        "decision_stable": all(item["decision_stable"] for item in ablations),
+    }
+
+
 def _run_case(case: dict[str, Any]) -> dict[str, Any]:
     refs = _refs(case)
     uses = _uses(case, refs)
@@ -95,11 +141,16 @@ def _run_case(case: dict[str, Any]) -> dict[str, Any]:
         refs[int(index)].uri if isinstance(index, int) else str(index)
         for index in case.get("required_uris") or ()
     }
+    required_evidence = {
+        refs[int(index)].uri if isinstance(index, int) else str(index)
+        for index in case.get("required_evidence_uris") or ()
+    }
     report = evaluate(
         refs,
         uses,
         run_id=run_id,
         required_uris=required,
+        required_evidence_uris=required_evidence or None,
         cache_hits=case.get("cache_hits"),
         cache_lookups=case.get("cache_lookups"),
     )
@@ -138,6 +189,25 @@ def _run_case(case: dict[str, Any]) -> dict[str, Any]:
             failures.append(
                 f"pruned_bytes {sufficiency.pruned_bytes} != {expect_suff['pruned_bytes']}"
             )
+    counterfactual = None
+    if case.get("counterfactual"):
+        counterfactual = _counterfactual(
+            refs,
+            uses,
+            run_id=run_id,
+            required=required,
+            required_evidence=required_evidence or None,
+        )
+        expected_counterfactual = expect.get("counterfactual") or {}
+        if (
+            "decision_stable" in expected_counterfactual
+            and counterfactual["decision_stable"] != expected_counterfactual["decision_stable"]
+        ):
+            failures.append("counterfactual decision stability differs from declared expectation")
+        if "ablations" in expected_counterfactual and len(counterfactual["ablations"]) != int(
+            expected_counterfactual["ablations"]
+        ):
+            failures.append("counterfactual ablation count differs from declared expectation")
     return {
         "id": case["id"],
         "passed": not failures,
@@ -147,6 +217,7 @@ def _run_case(case: dict[str, Any]) -> dict[str, Any]:
         "sufficiency": sufficiency.model_dump(
             mode="json", exclude={"metrics_before", "metrics_after"}
         ),
+        "counterfactual": counterfactual,
     }
 
 

@@ -17,7 +17,7 @@ from apiforge.contracts.base import ContractError
 from apiforge.contracts.economy_extras import Passage
 from apiforge.contracts.model_routing import RetrievalComparison
 from apiforge.knowledge.levels import _graph, _hybrid, _lexical, _rerank, load_level_policy
-from apiforge.knowledge.semantic import HashEmbeddingAdapter
+from apiforge.knowledge.semantic import HashFeatureSimilarityAdapter
 
 _STRATEGIES = ("lexical", "graph", "semantic", "hybrid")
 
@@ -36,7 +36,7 @@ def load_cases(corpus: Path) -> list[dict[str, Any]]:
 def _strategy(
     name: str,
     query: str,
-    semantic: HashEmbeddingAdapter | None,
+    semantic: HashFeatureSimilarityAdapter | None,
     weights: dict[str, float],
     rerank: dict[str, float],
     root: Path | None,
@@ -47,9 +47,9 @@ def _strategy(
     if name == "graph":
         return _graph(hits, query, root=root, store_root=None)
     if name == "semantic":
-        adapter = semantic or HashEmbeddingAdapter()
+        adapter = semantic or HashFeatureSimilarityAdapter()
         return _hybrid(hits, query, adapter, weights, root=root, store_root=None)
-    adapter = semantic or HashEmbeddingAdapter()
+    adapter = semantic or HashFeatureSimilarityAdapter()
     return _rerank(hits, query, adapter, rerank)
 
 
@@ -57,7 +57,7 @@ def _measure(
     name: str,
     query: str,
     gold: set[str],
-    semantic: HashEmbeddingAdapter | None,
+    semantic: HashFeatureSimilarityAdapter | None,
     weights: dict[str, float],
     rerank: dict[str, float],
     root: Path | None,
@@ -102,7 +102,7 @@ def run_retrieval(
                 name,
                 case["query"],
                 gold,
-                HashEmbeddingAdapter() if case.get("semantic", True) else None,
+                HashFeatureSimilarityAdapter() if case.get("semantic", True) else None,
                 policy["hybrid"],
                 policy["rerank"],
                 root,

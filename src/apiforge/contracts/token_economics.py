@@ -68,6 +68,8 @@ class TokenLedgerEntry(VersionedContract):
     run_id: str = Field(min_length=1)
     task_id: str | None = None
     agent: str | None = None
+    # Correlates one token row with its provider/model span.
+    model_call_id: str | None = None
     accounting: TokenAccounting
     recorded_at: str
     provenance: tuple[str, ...] = ()

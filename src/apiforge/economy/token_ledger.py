@@ -26,13 +26,20 @@ from apiforge.contracts.token_economics import (
 LEDGER_DIR = Path("economy/token_usage")
 
 
-def entry_id(run_id: str, accounting: TokenAccounting, recorded_at: str) -> str:
+def entry_id(
+    run_id: str,
+    accounting: TokenAccounting,
+    recorded_at: str,
+    *,
+    model_call_id: str | None = None,
+) -> str:
     """Deterministic ``usage:<sha16>`` — replay produces the same id."""
     payload = json.dumps(
         {
             "run_id": run_id,
             "accounting": accounting.model_dump(mode="json"),
             "recorded_at": recorded_at,
+            "model_call_id": model_call_id,
         },
         sort_keys=True,
     )

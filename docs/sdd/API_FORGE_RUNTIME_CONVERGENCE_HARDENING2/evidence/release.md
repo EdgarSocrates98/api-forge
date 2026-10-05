@@ -18,6 +18,11 @@ Proof:
 - `uv run apiforge mcp benchmark --repeats 2 --detail-level full` → `10/10`
   samples, no unresolved benchmark findings
 - `uv run apiforge lab scenarios` → `21/21` catalog cells covered
+- `uv run pytest --basetemp=E:/pytest-apiforge-hardening2-final2 -q` →
+  `1751 passed, 2 skipped`
+- `uv run ruff check src tests` → pass
+- `uv run ruff format --check src tests` → pass
+- `uv run mypy src` → pass
 
 Artifacts:
 

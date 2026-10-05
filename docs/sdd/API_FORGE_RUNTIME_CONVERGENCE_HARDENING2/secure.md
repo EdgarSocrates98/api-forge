@@ -3,7 +3,7 @@ sdd: 1
 feature: API_FORGE_RUNTIME_CONVERGENCE_HARDENING2
 phase: secure
 profile: critical
-status: draft
+status: done
 threat_model:
   - unknown tools and MCP targets are default-deny
   - tainted tool/model data cannot gain instruction authority
@@ -11,12 +11,11 @@ threat_model:
   - unresolved evidence and token usage cannot be converted into success
 upstream:
   path: verify.md
-  sha256: "030fc263d97b77063e1fa275fed69efd927bebbfa606448aa6ee0f43debb45ad"
+  sha256: "60487d8e6bbbd2c748c28dd4ba279e8ae8f5aad630ea8b91287b7e04fab8600f"
 ---
 
 # secure
 
 Security proof is local and deterministic: trust, delegation, target-tool
-authorization, memory poisoning and MCP boundary cases are tested without
-claiming production security.
-
+authorization, memory poisoning and MCP boundary cases pass. No production
+security claim emitted.

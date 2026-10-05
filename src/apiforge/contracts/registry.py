@@ -43,6 +43,7 @@ from apiforge.contracts.agentic_governance import (
     ShadowRecord,
     StopDecision,
 )
+from apiforge.contracts.agentic_health import AgenticDoctorReport, AgenticDoctorSection
 from apiforge.contracts.agentic_memory import (
     BlackboardEntry,
     BlackboardQuery,
@@ -187,7 +188,13 @@ from apiforge.contracts.integration import (
     ExternalReadResult,
     GitHubPrReceipt,
 )
-from apiforge.contracts.knowledge import ExpertisePack
+from apiforge.contracts.knowledge import (
+    ExpertisePack,
+    KnowledgeDrift,
+    KnowledgeImpactReport,
+    PackApplicability,
+)
+from apiforge.contracts.lab import LabReport, LabScenario
 from apiforge.contracts.model_routing import (
     AdaptiveRetrievalResult,
     ModelCandidate,
@@ -444,6 +451,13 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "ScorecardRoutingAssessment/v1": ScorecardRoutingAssessment,
     "ScorecardShadowEvaluation/v1": ScorecardShadowEvaluation,
     "ExpertisePack/v1": ExpertisePack,
+    "KnowledgeDrift/v1": KnowledgeDrift,
+    "KnowledgeImpactReport/v1": KnowledgeImpactReport,
+    "PackApplicability/v1": PackApplicability,
+    "AgenticDoctorReport/v1": AgenticDoctorReport,
+    "AgenticDoctorSection/v1": AgenticDoctorSection,
+    "LabReport/v1": LabReport,
+    "LabScenario/v1": LabScenario,
     "ScorecardFeedback/v1": ScorecardFeedback,
     "EvidenceRef/v1": EvidenceRef,
     "EvidenceCoverage/v1": EvidenceCoverage,

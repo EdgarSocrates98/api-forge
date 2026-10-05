@@ -33,6 +33,7 @@ from apiforge.contracts.agentic_governance import (
     ShadowRecord,
     StopDecision,
 )
+from apiforge.contracts.agentic_health import AgenticDoctorReport, AgenticDoctorSection
 from apiforge.contracts.agentic_memory import (
     BlackboardEntry,
     BlackboardQuery,
@@ -162,10 +163,14 @@ from apiforge.contracts.integration import (
 from apiforge.contracts.knowledge import (
     ExpertisePack,
     FreshnessResult,
+    KnowledgeDrift,
+    KnowledgeImpactReport,
     KnowledgeObservation,
+    PackApplicability,
     PackFreshness,
     SourceObservation,
 )
+from apiforge.contracts.lab import LabReport, LabScenario
 from apiforge.contracts.model_routing import (
     AdaptiveRetrievalResult,
     ModelCandidate,
@@ -275,6 +280,8 @@ __all__ = [
     "AgentSpanQuery",
     "AgentSpanResult",
     "AgenticBudgetPlan",
+    "AgenticDoctorReport",
+    "AgenticDoctorSection",
     "AssetStatus",
     "BlackboardEntry",
     "BlackboardQuery",
@@ -371,7 +378,11 @@ __all__ = [
     "HostResolution",
     "InspectionMetric",
     "InspectionSection",
+    "KnowledgeDrift",
+    "KnowledgeImpactReport",
     "KnowledgeObservation",
+    "LabReport",
+    "LabScenario",
     "LadderStep",
     "LedgerRef",
     "LiveEvalLayer",
@@ -400,6 +411,7 @@ __all__ = [
     "ObservedSignal",
     "OtlpExport",
     "OtlpValidation",
+    "PackApplicability",
     "PackFreshness",
     "PageWindow",
     "ParticipantDeclaration",

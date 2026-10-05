@@ -316,3 +316,42 @@ quality×cost×latency Pareto over declared profiles; latency and cost
 come from optional sidecars — absent data stays `unresolved`, never
 inferred. `docs/security/agentic-threat-model.md` maps every §10–§11
 attack class to its defense module and eval evidence.
+
+## Knowledge engine + lab + agentic health (phase 12)
+
+§29 extends the knowledge plane: `FreshnessState` gains `verified`
+(hash+version+window all confirmed), `conflicted` (receipts disagree)
+and `deprecated` (`expires_at` passed); `PackFreshness` accepts
+`last_validated` and an `applies_to` block (`PackApplicability`).
+`knowledge drift <domain> --receipt … --now …` rolls one or more
+read-only `SourceObservation` receipts into a `KnowledgeDrift` verdict —
+zero receipts stay `unresolved`, disagreeing receipts become
+`conflicted` with the pairs named, never averaged. `knowledge impact`
+emits the declared source→pack→rule→skill→eval relation graph over the
+40 bundled packs; the agent→knowledge edge is named `unresolved`
+because no declared carrier exists.
+
+§28 ships the opt-in lab catalog (`labs/scenarios.yaml` +
+`lab scenarios`): all 13 scenario kinds are declared, 8 carry real
+fixture/eval/proof pointers (timeout, retry storm, circuit breaker,
+breaking change, schema evolution, backward compatibility,
+idempotency, version migration) and 5 are honest declared gaps
+(latency regression, auth migration, rate limit, event contract,
+pagination) — a cell with neither refuses `AF-LAB-CELL-UNDECLARED`.
+
+`doctor --agentic` emits `AgenticDoctorReport` — cross-plane health
+over case, memory (quarantine backlog), trust (policy presence+parse),
+telemetry (span store), evals (corpus consistency), sdd (chain
+completeness), mcp (registry size) and economy (the §55 checks);
+unobservable planes report `unresolved`, never an implied pass.
+
+§30 hardened CI/supply chain: `windows-parity` job (declared py3.12
+range, external basetemp, full suite), `wheel-smoke` job (build wheel,
+clean-venv install, `apiforge --version` + `capabilities verify`), and
+`scripts/supply_chain_audit.py` wired into validate — dependency
+inventory + `pip check` + vendor parity + corpus consistency + MCP
+surface count; CVE scanning is a named external boundary, not faked.
+`docs/decisions/ADR-011-dependency-locking.md` records the declared-
+ranges-over-lockfile decision. `evals knowledge-drift` adds the
+5-case deterministic corpus (verified/stale/conflicted/deprecated/
+unresolved).

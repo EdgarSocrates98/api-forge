@@ -263,6 +263,12 @@ migration_app = typer.Typer(
     no_args_is_help=True,
 )
 app.add_typer(migration_app)
+lab_app = typer.Typer(
+    name="lab",
+    help="Opt-in experimental scenario catalog (§28).",
+    no_args_is_help=True,
+)
+app.add_typer(lab_app)
 change_control_app = typer.Typer(
     name="change-control",
     help="Govern API, Git and CI/CD changes with read-only evidence.",
@@ -465,12 +471,18 @@ def runtime_doctor(
     ),
     root: Path = typer.Option(Path("."), "--root"),
     economy: bool = typer.Option(False, "--economy", help="Economy diagnostics instead."),
+    agentic: bool = typer.Option(False, "--agentic", help="Cross-plane agentic health report."),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
     """Inspect runtime state, or the local installation when no task is supplied."""
     from apiforge.application.portable import doctor as portable_doctor
     from apiforge.application.runtime_experience import doctor
 
+    if agentic:
+        from apiforge.runtime.agentic_doctor import diagnose_agentic
+
+        _echo_json(_run(lambda: diagnose_agentic(root)), detail_level)
+        return
     if economy:
         from apiforge.economy.doctor import diagnose
 
@@ -4183,9 +4195,7 @@ def evals_forge_protocol(
 @evals_app.command("trace-grading")
 def evals_trace_grading(
     corpus: Path = typer.Option(Path("evals/corpus/trace-grading"), "--corpus"),
-    rubric: Path = typer.Option(
-        Path("src/apiforge/rules/trace_rubric.yaml"), "--rubric"
-    ),
+    rubric: Path = typer.Option(Path("src/apiforge/rules/trace_rubric.yaml"), "--rubric"),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
     """§23: recorded traces graded against the declared rubric."""
@@ -4227,9 +4237,7 @@ def evals_memory_evals(
 
 @evals_app.command("live")
 def evals_live(
-    layer: Path = typer.Option(
-        Path("src/apiforge/rules/live_evals.yaml"), "--layer"
-    ),
+    layer: Path = typer.Option(Path("src/apiforge/rules/live_evals.yaml"), "--layer"),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
     """§23: deterministic tier observed; provider tier deferred_external."""
@@ -4244,7 +4252,9 @@ def evals_live(
 @evals_app.command("frontier")
 def evals_frontier(
     report: Path = typer.Option(..., "--report", help="agentic-quality report JSON"),
-    latencies: Path = typer.Option(None, "--latencies", help="optional yaml {latency_ms: {profile: ms}}"),
+    latencies: Path = typer.Option(
+        None, "--latencies", help="optional yaml {latency_ms: {profile: ms}}"
+    ),
     costs: Path = typer.Option(None, "--costs", help="optional yaml {cost: {profile: usd}}"),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
@@ -4283,6 +4293,17 @@ def evals_token_economics(
     _echo_json(result, detail_level)
     if isinstance(result, dict) and not result.get("passed"):
         raise typer.Exit(code=1)
+
+
+@evals_app.command("knowledge-drift")
+def evals_knowledge_drift(
+    corpus: Path = typer.Option(Path("evals/corpus/knowledge-drift"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§29 drift verdicts over declared pack+receipt cases."""
+    from apiforge.evals.knowledge_drift import run_knowledge_drift
+
+    _echo_json(_run(lambda: run_knowledge_drift(corpus)), detail_level)
 
 
 @evals_app.command("economy-freshness")
@@ -4506,6 +4527,64 @@ def knowledge_freshness(
             else None
         )
         return verify_pack_freshness(pack, observation, now=now)
+
+    _echo_json(_run(work), detail_level)
+
+
+@knowledge_app.command("drift")
+def knowledge_drift(
+    domain: str = typer.Argument(..., help="Pack directory name."),
+    receipts: list[Path] = typer.Option(
+        [], "--receipt", help="Read-only observation JSON; repeatable."
+    ),
+    root: Path = typer.Option(Path("knowledge"), "--root"),
+    now: str = typer.Option(..., "--now", help="Explicit ISO8601 clock."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§29 drift verdict across one or more read-only source receipts."""
+    from apiforge.contracts.knowledge import SourceObservation
+    from apiforge.knowledge.drift import detect_pack_drift
+    from apiforge.knowledge.loader import load_pack
+
+    def work() -> object:
+        pack = load_pack(root / domain)
+        observations = tuple(
+            SourceObservation.model_validate(json.loads(path.read_text(encoding="utf-8")))
+            for path in receipts
+        )
+        return detect_pack_drift(pack, observations, now=now)
+
+    _echo_json(_run(work), detail_level)
+
+
+@knowledge_app.command("impact")
+def knowledge_impact(
+    root: Path = typer.Option(Path("knowledge"), "--root"),
+    skills: Path = typer.Option(
+        Path(".claude/skills"), "--skills", help="Skill manifests directory."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§29 source -> pack -> rule -> skill -> eval relation graph."""
+    from apiforge.knowledge.impact import build_knowledge_impact
+    from apiforge.rules.catalog import load_catalog
+
+    def work() -> object:
+        return build_knowledge_impact(root, skills_root=skills, catalog=load_catalog())
+
+    _echo_json(_run(work), detail_level)
+
+
+@lab_app.command("scenarios")
+def lab_scenarios(
+    catalog: Path = typer.Option(Path("labs/scenarios.yaml"), "--catalog"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§28 experimental scenario catalog with honest coverage states."""
+    from apiforge.labs.catalog import load_lab_report
+
+    def work() -> object:
+        return load_lab_report(catalog, repo_root=Path("."))
 
     _echo_json(_run(work), detail_level)
 

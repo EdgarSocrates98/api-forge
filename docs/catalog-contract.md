@@ -1250,6 +1250,40 @@ cross-checks every `rule_id` against the catalog; the release gate runs it.
 | `AF-KNOW-EVAL-TYPE` | eval `type` outside the closed 11-value vocabulary |
 | `AF-KNOW-CHECK` | `knowledge check` found cross-catalog problems (exit 4) |
 
+### Knowledge evolution (`knowledge drift`, `knowledge impact`, `evals knowledge-drift`)
+
+`knowledge drift` rolls one or more read-only `SourceObservation`
+receipts up into a `KnowledgeDrift` verdict: `verified` (hash+version+
+window confirmed), `fresh`, `stale` (hash or version moved), `deprecated`
+(`expires_at` passed), `conflicted` (receipts disagree), `unresolved`
+(no receipts) — §29. `knowledge impact` emits the declared
+source -> pack -> rule -> skill -> eval relation graph; undeclared
+relations (agent -> knowledge today) stay in `unresolved`, never
+inferred. Uses the shared `AF-KNOW-*` refusal codes.
+
+### Lab and agentic health (`lab scenarios`, `doctor --agentic`)
+
+| Code | Meaning |
+|---|---|
+| `AF-LAB-CATALOG-MISSING` | `lab scenarios` catalog file absent |
+| `AF-LAB-CATALOG-INVALID` | catalog fails to parse |
+| `AF-LAB-CELL-INVALID` | a scenario cell lacks a declared `kind` |
+| `AF-LAB-CELL-CONFLICT` | a cell declares both coverage and a gap |
+| `AF-LAB-CELL-UNDECLARED` | a cell has no coverage pointer and no declared gap |
+| `AF-DOCTOR-CASE-INVALID` | persisted case file fails to parse |
+| `AF-DOCTOR-MEMORY-QUARANTINE` | quarantined memory candidates await human resolution |
+| `AF-DOCTOR-TRUST-POLICY-MISSING` | `rules/tool_risk.yaml` absent — allowlist-first authorization impossible |
+| `AF-DOCTOR-TRUST-POLICY-INVALID` | tool-risk policy fails to load |
+| `AF-DOCTOR-EVAL-CORPUS-README` | eval corpus directory lacks a README |
+| `AF-DOCTOR-EVAL-CORPUS-PARSE` | a corpus yaml fails to parse |
+| `AF-DOCTOR-SDD-CHAIN-GAP` | an SDD feature dir lacks a discover/ship link in the chain |
+
+`doctor --agentic` aggregates case, memory, trust, telemetry, evals, sdd,
+mcp and economy sections; planes without observable state report
+`unresolved`, never an implied pass. `lab scenarios` emits the §28
+experimental catalog: every cell either points at a real
+fixture/eval/proof or names its declared gap.
+
 ### Resilience (`model resilience`, `perf chaos`)
 
 `model resilience --path <project>` is a regex-based static scan of

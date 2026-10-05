@@ -80,8 +80,8 @@ provider/cloud/credentials — contract + offline proof only.
 | Memory invalidation v2 | DONE (w2) | `memory/invalidation.py::suggest_invalidations` — 8 advisory triggers (runtime/framework/contract/policy/source/evidence/outcome/dependency) | shipped |
 | Trust taxonomy | DONE (w2) | `contracts/trust.py::TrustUnit` + `trust/plane.py` — transversal annotation across all §9 boundaries; `MemoryOrigin` +`knowledge` | shipped |
 | Taint propagation | DONE (w2) | `trust/propagation.py::propagate` — union taint, weakest-source trust, 1-tier evidence lift, authority never widens | shipped |
-| Knowledge freshness | EXTEND | `knowledge/freshness.py` (fresh/stale/unresolved/unknown) | add states verified/conflicted/deprecated + source authority + version applicability |
-| Knowledge impact graph | MISSING | `graph/` is provenance-only | relation contract source→knowledge→rule→skill→agent→eval |
+| Knowledge freshness | DELIVERED (phase 12) | `FreshnessState` += `verified`/`conflicted`/`deprecated`; `expires_at`→deprecated, hash+version+window→verified; `PackFreshness` += `last_validated`/`applies_to` (`PackApplicability`) | protect |
+| Knowledge impact graph | DELIVERED (phase 12) | `knowledge/impact.py` + `KnowledgeImpactReport` — declared source→pack→rule→skill→eval graph (40 packs, 342 nodes, 454 edges); agent→pack stays `unresolved` (no declared carrier) | protect |
 | SemanticCheckpoint | DONE (w2) | `tests/runtime/test_checkpoint_parity.py` — continuous == checkpoint→fresh-load→resume, `equivalent()` ignores identity only | shipped |
 
 ### Economy Plane
@@ -158,7 +158,7 @@ provider/cloud/credentials — contract + offline proof only.
 | AgentOps inspect | DELIVERED (phase 8) | `agentops inspect <run>` emits `RunInspection` — the §54 section set (run/agents/context/memory/tools/models/evidence/security) + waste + decision path; absent sources stay `unresolved`, never zero-filled |
 | AgentOps compare | DELIVERED (phase 8) | `agentops compare RUN_A RUN_B` emits `RunComparison` over the §55 axis set (quality/tokens/cost/latency/context/evidence/tools/agents); unresolved axes never tie |
 | Token Waste Detector | DELIVERED (phase 8) | `agentops waste` runs the declared detectors in `rules/agentops_waste.yaml` — 12 `WasteKind`s, every finding labeled `observed`/`estimated`/`hypothesis` per §57; `AF-AGENTOPS-WASTE-POLICY` guards a bad policy file |
-| Self-profiling doctor | EXTEND | `economy/doctor.py`, `doctor` verb | `doctor agentic` health report across planes |
+| Self-profiling doctor | DELIVERED (phase 12) | `doctor --agentic` + `runtime/agentic_doctor.py` — `AgenticDoctorReport` aggregates 8 planes with findings+unlocks+unresolved | protect |
 
 ### Evals Plane
 
@@ -183,11 +183,11 @@ provider/cloud/credentials — contract + offline proof only.
 
 | Capability | State | Evidence | Action |
 |---|---|---|---|
-| Deterministic lab | KEEP→EXTEND | `tests/labs` + `matrix.yaml` | extend scenarios per §66 |
-| CI matrix / wheel validation | EXTEND | `ci.yml` single py3.12 | matrix + wheel smoke where declared support exists |
-| Locked dependencies | DEFER→ADR | no lock strategy | ADR documenting choice vs Spark Forge approach |
-| Supply-chain audit | EXTEND | vendor manifest check exists | dependency audit step + artifact parity check |
-| `doctor agentic` | MISSING | `economy/doctor.py` economy-only | aggregate health across planes |
+| Deterministic lab | DELIVERED (phase 12) | `labs/scenarios.yaml` — all 13 §28 kinds declared; 8 covered via real fixture/eval/proof, 5 honest declared-gaps; `labs/catalog.py` + `lab scenarios` + `tests/labs/test_scenarios.py` | protect |
+| CI matrix / wheel validation | DELIVERED (phase 12) | `ci.yml` — `windows-parity` job (external basetemp, full suite) + `wheel-smoke` job (build wheel, clean-venv install, `apiforge --version` + `capabilities verify`) over the declared py3.12 range | protect |
+| Locked dependencies | DELIVERED (phase 12) | `docs/decisions/ADR-011-dependency-locking.md` — declared ranges + vendored assets chosen over lockfile, revisit trigger named | — |
+| Supply-chain audit | DELIVERED (phase 12) | `scripts/supply_chain_audit.py` — dep inventory + pip check + vendor parity + corpus consistency + surface count; CVE scan honestly `unresolved`; CI step wired | protect |
+| `doctor agentic` | DELIVERED (phase 12) | `doctor --agentic` + `runtime/agentic_doctor.py` + `AgenticDoctorReport` — 8 planes (case/memory/trust/telemetry/evals/sdd/mcp/economy), unresolved named | protect |
 
 ## Explicit protections (§86)
 

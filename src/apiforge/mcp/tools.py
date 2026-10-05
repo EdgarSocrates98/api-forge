@@ -2946,7 +2946,9 @@ def forge_capabilities(detail_level: str = "normal") -> dict[str, Any]:
         dict[str, Any],
         _call(
             "forge_capabilities",
-            lambda: {"capabilities": [row.model_dump(mode="json") for row in discover_capabilities()]},
+            lambda: {
+                "capabilities": [row.model_dump(mode="json") for row in discover_capabilities()]
+            },
             detail_level,
         ),
     )
@@ -3003,6 +3005,68 @@ def forge_health(root: str = ".", detail_level: str = "normal") -> dict[str, Any
         _call(
             "forge_health",
             lambda: health(Path(root)).model_dump(mode="json"),
+            detail_level,
+        ),
+    )
+
+
+def knowledge_drift(
+    domain: str,
+    now: str,
+    receipts: list[str] | None = None,
+    root: str = "knowledge",
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """§29 drift verdict over read-only source receipts; unresolved without receipts."""
+    from apiforge.contracts.knowledge import SourceObservation
+    from apiforge.knowledge.drift import detect_pack_drift
+    from apiforge.knowledge.loader import load_pack
+
+    def work() -> dict[str, Any]:
+        pack = load_pack(Path(root) / domain)
+        observations = tuple(
+            SourceObservation.model_validate(json.loads(Path(path).read_text(encoding="utf-8")))
+            for path in receipts or []
+        )
+        return detect_pack_drift(pack, observations, now=now).model_dump(mode="json")
+
+    return cast(dict[str, Any], _call("knowledge_drift", work, detail_level))
+
+
+def knowledge_impact(
+    root: str = "knowledge",
+    skills: str = ".claude/skills",
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """§29 source -> pack -> rule -> skill -> eval relation graph."""
+    from apiforge.knowledge.impact import build_knowledge_impact
+    from apiforge.rules.catalog import load_catalog
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "knowledge_impact",
+            lambda: build_knowledge_impact(
+                Path(root), skills_root=Path(skills), catalog=load_catalog()
+            ).model_dump(mode="json"),
+            detail_level,
+        ),
+    )
+
+
+def lab_scenarios(
+    catalog: str = "labs/scenarios.yaml",
+    root: str = ".",
+    detail_level: str = "normal",
+) -> dict[str, Any]:
+    """§28 experimental scenario catalog with honest coverage states."""
+    from apiforge.labs.catalog import load_lab_report
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "lab_scenarios",
+            lambda: load_lab_report(Path(catalog), repo_root=Path(root)).model_dump(mode="json"),
             detail_level,
         ),
     )
@@ -3145,6 +3209,9 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     forge_result,
     forge_evidence,
     forge_health,
+    knowledge_drift,
+    knowledge_impact,
+    lab_scenarios,
 )
 
 OBSERVABILITY_TOOLS: tuple[Callable[..., Any], ...] = (

@@ -151,6 +151,9 @@ def test_tools_export_all_expected_verbs() -> None:
         "forge_result",
         "forge_evidence",
         "forge_health",
+        "knowledge_drift",
+        "knowledge_impact",
+        "lab_scenarios",
     }
 
 

@@ -44,7 +44,9 @@ class ScorecardCandidateAssessment(VersionedContract):
     @model_validator(mode="after")
     def champion_requires_fresh_promoted_history(self) -> ScorecardCandidateAssessment:
         if self.lane == "champion" and (
-            not self.eligible or not self.quality_promoted or self.freshness_state != "fresh"
+            not self.eligible
+            or not self.quality_promoted
+            or self.freshness_state not in {"fresh", "verified"}
         ):
             raise ValueError("champion candidates require eligible fresh promoted history")
         return self

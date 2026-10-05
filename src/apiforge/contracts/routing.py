@@ -15,6 +15,7 @@ from apiforge.contracts.graph_impact import (
     GraphImpactPolicy,
     default_graph_impact_policy,
 )
+from apiforge.contracts.knowledge import FreshnessState
 from apiforge.contracts.risk_complexity import (
     RiskComplexityAssessment,
     RiskComplexityPolicy,
@@ -31,7 +32,7 @@ RoutingSignalName = Literal["cost", "duration", "quality", "security"]
 SignalStatus = Literal["observed", "unknown", "unresolved"]
 RoutingObjective = Literal["efficiency", "quality"]
 RoutingExecutionMode = Literal["parallel_review", "sequential_failover"]
-SignalFreshness = Literal["fresh", "stale", "unresolved", "unknown"]
+SignalFreshness = FreshnessState
 
 
 class ObservedSignal(VersionedContract):

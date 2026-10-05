@@ -281,7 +281,7 @@ def _observed_value(assessment: CandidateAssessment, name: str) -> float | None:
         for signal in assessment.signals
         if signal.name == name
         and signal.status == "observed"
-        and signal.freshness_state not in {"stale", "unresolved"}
+        and signal.freshness_state not in {"stale", "unresolved", "conflicted", "deprecated"}
         and signal.value is not None
     ]
     if not values:

@@ -123,7 +123,12 @@ def route_model(
     for candidate in candidates:
         reasons = _constraints(candidate, inputs)
         card = cards.get(_scorecard_key(candidate))
-        if card is not None and card.freshness_state in {"stale", "unresolved"}:
+        if card is not None and card.freshness_state in {
+            "stale",
+            "unresolved",
+            "conflicted",
+            "deprecated",
+        }:
             reasons.append(f"scorecard-{card.freshness_state}")
         if card is not None and card.evaluation_count < rules["min_evaluations"]:
             reasons.append("insufficient-evaluations")

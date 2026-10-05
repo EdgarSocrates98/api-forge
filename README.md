@@ -428,6 +428,9 @@ while refusal codes and `fact_id`s survive.
 | `apiforge evals forge-protocol` | 4-case corpus: lifecycle + completed-run + refusal gates + unresolved/unattached honesty |
 | `apiforge evals trace-grading`, `evals security-adversarial`, `evals memory-evals` | §23–§25 eval plane — rubric-graded `AgentSpan` traces (`rules/trace_rubric.yaml`), 9 synthesized attacks against real defense surfaces, 9 memory cases over the §24 axes against the governed store |
 | `apiforge evals live`, `evals frontier --report R [--latencies L --costs C]` | §23 declared layer: deterministic tier observed, provider tier `deferred_external` (never gates CI); quality×cost×latency Pareto — cost stays `unresolved` without provider data |
+| `apiforge knowledge drift <domain> [--receipt …] --now …`, `knowledge impact` | §29 knowledge engine — drift rollup over read-only receipts (`verified`/`stale`/`conflicted`/`deprecated`/`unresolved`); declared source→pack→rule→skill→eval relation graph with named unresolved edges |
+| `apiforge doctor --agentic` | Cross-plane agentic health: case/memory/trust/telemetry/evals/sdd/mcp/economy sections, findings with unlocks, unobservable planes named `unresolved` |
+| `apiforge lab scenarios`, `evals knowledge-drift` | §28 opt-in scenario catalog (13 kinds, 8 covered, 5 declared gaps — never fabricated); §29 drift eval corpus (5 cases) |
 | `apiforge economy explain <run_id>` | Why each ref was spent, from recorded provenance rules (no model call) |
 | `apiforge evals economy [--record-baseline]` | 12-case benchmark: evidence recall floor + median byte reduction vs recorded baseline |
 | `apiforge runtime run\|resume\|debate <task> --profile economy\|balanced\|deep` | Economy Plane: profile preference with risk floor, trimmed optional roles, call cap + verification reserve, L0–L5 ladder; `economy` block in the result |

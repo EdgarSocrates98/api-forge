@@ -146,6 +146,58 @@ class ControlPlane:
         self._event(run, "planned", steps=[step.name for step in run.steps])
         return run
 
+    def add_steps(
+        self,
+        run_id: str,
+        steps: tuple[tuple[str, tuple[str, ...]], ...],
+    ) -> ControlRun:
+        """Append newly routed steps to a live run (bounded recovery replan).
+
+        Steps join the same persisted state machine and call budget; they are
+        not a shadow path — a replanned capability is audited exactly like a
+        planned one. Names must be new: re-adding an executed step would erase
+        its receipt.
+        """
+        run = self._load(run_id)
+        if run.status in {"completed", "cancelled", "blocked"}:
+            raise ContractError("AF-CONTROL-TERMINAL", f"run is {run.status}")
+        if not steps:
+            raise ContractError("AF-CONTROL-STEPS", "at least one step is required")
+        existing = {step.name for step in run.steps}
+        incoming = {name for name, _ in steps}
+        for name, dependencies in steps:
+            if name in existing:
+                raise ContractError(
+                    "AF-CONTROL-STEP-DUPLICATE",
+                    f"step {name!r} is already registered in run {run_id}",
+                )
+            if any(dep not in existing | incoming for dep in dependencies):
+                raise ContractError("AF-CONTROL-DEPENDENCY", "step dependency is not declared")
+        result = run.model_copy(
+            update={
+                "steps": (
+                    *run.steps,
+                    *(
+                        ControlStep(
+                            step_id=stable_id("step", {"run": run_id, "name": name}),
+                            name=name,
+                            dependencies=deps,
+                            max_retries=run.steps[0].max_retries if run.steps else 2,
+                            idempotency_key=stable_id(
+                                "step-idempotency",
+                                {"run": run_id, "name": name, "dependencies": deps},
+                            ),
+                        )
+                        for name, deps in steps
+                    ),
+                ),
+                "state_revision": run.state_revision + 1,
+            }
+        )
+        self._save(result)
+        self._event(result, "steps_added", steps=[name for name, _ in steps])
+        return result
+
     def get(self, run_id: str) -> ControlRun:
         return self._load(run_id)
 
@@ -169,7 +221,7 @@ class ControlPlane:
             "calls_remaining": max(0, run.max_calls - run.calls_used),
         }
 
-    def start(self, run_id: str, step_id: str) -> ControlRun:
+    def start(self, run_id: str, step_id: str, *, kind: str = "step") -> ControlRun:
         run = self._load(run_id)
         if run.status in {"completed", "cancelled", "blocked"}:
             raise ContractError("AF-CONTROL-TERMINAL", f"run is {run.status}")
@@ -194,7 +246,7 @@ class ControlPlane:
                 "status": "running",
                 "steps": steps,
                 "calls_used": run.calls_used + 1,
-                "calls_by_kind": _count(run, "step"),
+                "calls_by_kind": _count(run, kind),
                 "state_revision": run.state_revision + 1,
             }
         )

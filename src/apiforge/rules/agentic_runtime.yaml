@@ -123,7 +123,7 @@ runtime:
       max_retries: 2
       allow_external_mutation: false
       critic_risks: [sensitive, external_mutation, destructive, irreversible]
-      human_gate_reasons: [external_mutation, destructive, irreversible, unresolved_debate, low_confidence]
+      human_gate_reasons: [external_mutation, destructive, irreversible, unresolved_debate, low_confidence, recovery_escalation]
       debate_triggers: [conflicting_evidence, high_risk, low_confidence, user_requested]
       adapter: fake
       replay_normalize: true

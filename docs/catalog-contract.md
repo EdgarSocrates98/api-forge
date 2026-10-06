@@ -610,6 +610,11 @@ carry `payload_bytes: 0` so `economy report` totals are unchanged.
 | `AF-GOV-FAILURE-CLASS-UNKNOWN` | `governor recover` failure class outside the closed §26 vocabulary; unlock: classify into one of the declared classes |
 | `AF-GOV-RECOVERY-UNDECLARED` | failure class is valid but absent from the recovery policy; escalates by default |
 | `AF-GOV-RECOVERY-EXHAUSTED` | recovery attempts exhausted for the class; the ladder's terminal action fires |
+| `AF-GOV-RECOVERY-NO-FALLBACK` | recovery decided `fallback` but the declared `fallback_order` had no eligible candidate left (or `max_fallbacks` was consumed); escalates; field=recovery.capability; unlock=declare a fallback candidate or approve the escalation |
+| `AF-GOV-RECOVERY-REPLAN-REFUSED` | recovery decided `replan` but the replan was refused — replan ceiling reached, budget exhausted, loop-blocked or no new executable capability; escalates; field=recovery.capability; unlock=raise the governor `max_replans` ceiling or approve the escalation |
+| `AF-GOV-RECOVERY-DEPTH` | a recovery-invoked invocation itself failed; the nested decision is recorded but never executed — recovery depth is bounded at one; field=recovery.capability; unlock=review the nested decision manually |
+| `AF-GOV-RECOVERY-ESCALATION` | a recovery decision routed to the `recovery_escalation` human-gate reason; the run cannot close without review; field=recovery; unlock=review the escalated failures |
+| `AF-RECOVERY-STEP-FAILED` | a recovery-invoked control step failed and was skipped; field=step; unlock=inspect the nested receipt |
 | `AF-GOV-LOOP-DETECTED` | strategy fingerprint repeated inside the declared window; the cycle is blocked |
 | `AF-GOV-GAIN-UNRESOLVED` | expected gain is unmeasurable; continuing is not justified — stop |
 | `AF-GOV-STOP-LOW-GAIN` | expected gain at or below the threshold; stop, not "budget remains" |
@@ -1025,6 +1030,7 @@ The local runtime is provider-neutral and executes only against a sealed TaskSpe
 | `AF-CONTROL-STEP-STATE` | step transition is invalid for its current state; field=step.status; unlock=follow the persisted state machine |
 | `AF-CONTROL-REVIEW-STATE` | review was requested before all required steps reached review; field=run.status; unlock=complete or recover the run first |
 | `AF-CONTROL-IDEMPOTENCY-CONFLICT` | same idempotency key has a different result hash; field=step.idempotency_key; unlock=preserve both receipts and reconcile manually |
+| `AF-CONTROL-STEP-DUPLICATE` | `add_steps` tried to register a step name that already exists in the control run; field=steps; unlock=keep replanned capability names disjoint from executed ones |
 | `AF-BRIEF` | outcome brief rendering failed |
 | `AF-RECIPE-INVALID` | `recipes.yaml` is malformed |
 

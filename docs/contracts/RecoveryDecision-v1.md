@@ -22,3 +22,21 @@ fallbacks). `retry` alone permits a retry; `replan`, `fallback`, `escalate`
 and `stop` terminate the local retry loop for an upper runtime layer to
 handle. Runtime `max_retries` remains a hard ceiling and is reported as
 `AF-GOV-RECOVERY-EXHAUSTED`.
+
+## Execution (supervisor)
+
+Decisions are not labels — the supervisor executes each terminal decision
+exactly once after the invocation pass and persists a
+[`RecoveryReceipt/v1`](RecoveryReceipt-v1.md) per decision:
+
+| Decision | Owner | Executed action |
+|---|---|---|
+| `retry` | supervisor (post-invocation) or scheduler | a single accounted `recovery` call; scheduler-internal retries never reach the supervisor |
+| `replan` | supervisor | re-route with failed capabilities excluded → new `RoutingDecision`/`RoutingPlan` → new strategy fingerprint + loop check → `ControlPlane.add_steps` → bounded invocation (refusals: `AF-GOV-RECOVERY-REPLAN-REFUSED`) |
+| `fallback` | supervisor | next kind-compatible name from the declared `RoutingDecision.fallback_order`, bounded by the plan's `max_fallbacks` (refusals: `AF-GOV-RECOVERY-NO-FALLBACK`) |
+| `escalate` | human | raises the `recovery_escalation` gate reason; the runtime policy decides whether it opens the human gate (`AF-GOV-RECOVERY-ESCALATION`) |
+| `stop` | none | terminal — no further calls for that failure chain |
+
+Depth is bounded at one: a recovery-invoked invocation that fails records its
+own decision and a `skipped` receipt (`AF-GOV-RECOVERY-DEPTH`) — the executor
+never spawns a second recovery pass.

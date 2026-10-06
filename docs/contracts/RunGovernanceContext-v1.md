@@ -10,7 +10,7 @@ additional calls.
 | `inputs` | Declared profile, risk, budget and available signals |
 | `decision` | Conservative ceilings and security clamps |
 | `gain` / `stop` | Optional pre-action information-gain and stop decisions |
-| `recovery` / `recoveries` / `loop` | `recovery` is the governing scheduler decision for the run's first failure; `recoveries` aggregates every canonical decision (scheduler) plus first-point classifications of post-invocation errors |
+| `recovery` / `recoveries` / `receipts` / `loop` | `recovery` is the governing scheduler decision for the run's first failure; `recoveries` aggregates every canonical decision (scheduler) plus first-point classifications of post-invocation errors; `receipts` are the [`RecoveryReceipt/v1`](RecoveryReceipt-v1.md) proofs of the actions the supervisor executed for those decisions |
 | `evidence_refs` | Evidence explicitly available to the decision |
 | `unresolved` | Missing signals or unresolved external claims; never silently zeroed |
 

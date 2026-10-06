@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, cast
@@ -12,9 +13,11 @@ from pydantic import TypeAdapter
 from apiforge.capabilities.scorecard import load_scorecards
 from apiforge.contracts.agentic import (
     AgentArtifact,
+    AgentCapabilityProfile,
     AgenticRun,
     AgenticState,
     AgentInvocation,
+    AgentScorecard,
     ArtifactKind,
     TrajectoryEvent,
 )
@@ -23,12 +26,20 @@ from apiforge.contracts.agentic_governance import (
     LoopAction,
     LoopDetection,
     RecoveryDecision,
+    RecoveryOutcome,
+    RecoveryOwner,
+    RecoveryReceipt,
     RunGovernanceContext,
 )
 from apiforge.contracts.base import ContractError
 from apiforge.contracts.economy import EconomyPlan, LadderStep
 from apiforge.contracts.graph import GraphEdge, GraphExport, GraphNode
-from apiforge.contracts.routing import RoutingDecision
+from apiforge.contracts.routing import (
+    RoutingDecision,
+    RoutingPlan,
+    RoutingPolicy,
+    RoutingRequest,
+)
 from apiforge.contracts.routing_evolution import PromotionGate
 from apiforge.contracts.selective import RoleContext, RoleContextPlan, ShadowDecision
 from apiforge.core.ids import stable_id
@@ -40,7 +51,7 @@ from apiforge.governance.recovery import classify_failure, decide_recovery
 from apiforge.governance.stop import decide_stop
 from apiforge.graph.store import read_graph
 from apiforge.runtime.adapters import AgentRequest, ModelAdapter
-from apiforge.runtime.control import ControlPlane
+from apiforge.runtime.control import ControlPlane, ControlStep
 from apiforge.runtime.critic import critic_findings
 from apiforge.runtime.economy import (
     DeterministicProof,
@@ -69,7 +80,7 @@ from apiforge.runtime.policy import (
     should_open_room,
 )
 from apiforge.runtime.promotion import decide_promotion, is_active, load_evolution_policy
-from apiforge.runtime.registry import load_capabilities, load_profiles
+from apiforge.runtime.registry import Capability, load_capabilities, load_profiles
 from apiforge.runtime.review import build_runtime_review, review_task_spec
 from apiforge.runtime.role_context import plan_roles
 from apiforge.runtime.role_context import record as record_roles
@@ -81,7 +92,7 @@ from apiforge.runtime.routing import (
     load_routing_policy,
     route_capabilities,
 )
-from apiforge.runtime.scheduler import run_bounded
+from apiforge.runtime.scheduler import InvocationResult, run_bounded
 from apiforge.runtime.shadow import decide as decide_shadow
 from apiforge.runtime.store import RunStore, content_hash
 from apiforge.taskspec import store as task_store
@@ -381,6 +392,622 @@ def _recovery_for_error(error: str) -> RecoveryDecision:
     validation gap the scheduler never saw). Invocation failures already carry
     the canonical ``InvocationResult.recovery`` — never reclassified here."""
     return decide_recovery(classify_failure("", error), 0)
+
+
+# One observed failure plus its canonical scheduler decision.
+_RecoveryEvent = tuple[str, str, RecoveryDecision]
+
+_RECOVERY_HUMAN_REASON = "recovery_escalation"
+
+
+def _build_artifact(
+    result: InvocationResult,
+    *,
+    run_id: str,
+) -> tuple[AgentArtifact | None, str | None, RecoveryDecision | None]:
+    """Turn a successful invocation response into an artifact, or return the
+    governed failure for a post-invocation payload gap (first classification
+    point — the scheduler never saw this error)."""
+    try:
+        payload = _json_payload(result.response)
+    except (ContractError, ValueError) as exc:
+        error = str(exc)
+        return None, error, _recovery_for_error(error)
+    guardrail_gaps = validate_agent_payload(payload)
+    if guardrail_gaps:
+        error = "; ".join(guardrail_gaps)
+        return None, error, _recovery_for_error(error)
+    return (
+        AgentArtifact(
+            artifact_id=stable_id(
+                "artifact", {"run": run_id, "invocation": result.invocation.invocation_id}
+            ),
+            run_id=run_id,
+            invocation_id=result.invocation.invocation_id,
+            agent=result.invocation.agent,
+            capability=result.invocation.capability,
+            kind=ArtifactKind.SPECIALIST,
+            schema_name="AgentArtifact/v1",
+            payload=payload,
+            evidence=_strings(payload, "facts"),
+            assumptions=_strings(payload, "assumptions"),
+            risks=_strings(payload, "risks"),
+            unresolved=_strings(payload, "unresolved"),
+            confidence=_confidence(payload),
+            content_sha256=content_hash(payload),
+        ),
+        None,
+        None,
+    )
+
+
+@dataclass(slots=True)
+class _ExecCtx:
+    """Shared runtime surface for bounded recovery action execution."""
+
+    storage: RunStore
+    control: ControlPlane
+    control_run_id: str
+    control_steps: dict[str, ControlStep]
+    capabilities: dict[str, Capability]
+    adapter: ModelAdapter
+    spec: Any
+    run_id: str
+    policy: Any
+    worker: Any
+    reserve: int
+    timestamp: str
+    artifacts: list[AgentArtifact] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
+    invocation_ids: list[str] = field(default_factory=list)
+
+
+@dataclass(slots=True)
+class _RecoveryOutcome:
+    receipts: list[RecoveryReceipt] = field(default_factory=list)
+    gate_reasons: list[str] = field(default_factory=list)
+    nested: list[_RecoveryEvent] = field(default_factory=list)
+
+
+def _receipt(
+    seq: int,
+    ctx: _ExecCtx,
+    capability: str | None,
+    decision: RecoveryDecision,
+    *,
+    owner: RecoveryOwner,
+    action_taken: str,
+    outcome: RecoveryOutcome,
+    code: str | None = None,
+    evidence: tuple[str, ...] = (),
+    unresolved: tuple[str, ...] = (),
+    invocation_id: str | None = None,
+) -> RecoveryReceipt:
+    return RecoveryReceipt(
+        receipt_id=stable_id(
+            "receipt",
+            {
+                "run": ctx.run_id,
+                "seq": seq,
+                "capability": capability,
+                "decision": decision.decision,
+                "attempt": decision.attempt,
+                "action": action_taken,
+            },
+        ),
+        run_id=ctx.run_id,
+        invocation_id=invocation_id,
+        capability=capability,
+        failure_class=decision.failure_class,
+        decision=decision.decision,
+        attempt=decision.attempt,
+        owner=owner,
+        action_taken=action_taken,
+        outcome=outcome,
+        code=code,
+        evidence=evidence,
+        unresolved=unresolved,
+    )
+
+
+def _calls_remaining(ctx: _ExecCtx) -> int:
+    return int(
+        max(
+            0,
+            ctx.policy.max_calls - ctx.control.get(ctx.control_run_id).calls_used - ctx.reserve,
+        )
+    )
+
+
+async def _invoke_recovery_step(
+    ctx: _ExecCtx,
+    capability: str,
+    *,
+    kind: str,
+) -> tuple[AgentArtifact | None, RecoveryDecision | None]:
+    """Execute one recovery-invoked capability: authority check via the shared
+    worker, bounded retries via the scheduler, accounting under ``kind``."""
+    step = ctx.control_steps[capability]
+    try:
+        ctx.control.start(ctx.control_run_id, step.step_id, kind=kind)
+    except ContractError as exc:
+        return None, _recovery_for_error(f"{exc.code} {exc}")
+    invocation = AgentInvocation(
+        invocation_id=stable_id("inv", {"run": ctx.run_id, "capability": capability, "kind": kind}),
+        run_id=ctx.run_id,
+        agent=ctx.capabilities[capability].agent,
+        capability=capability,
+        adapter=ctx.adapter.name,
+        dependencies=(),
+        input_refs=ctx.spec.inputs,
+        idempotency_key=step.idempotency_key,
+        retry_count=step.attempts,
+    )
+    ctx.invocation_ids.append(invocation.invocation_id)
+    try:
+        results = await run_bounded(
+            (invocation,),
+            ctx.worker,
+            limit=1,
+            timeout_seconds=ctx.policy.timeout_seconds,
+            max_calls=None,
+            max_retries=ctx.policy.max_retries,
+        )
+    except ContractError as exc:
+        return None, _recovery_for_error(f"{exc.code} {exc}")
+    if not results:
+        ctx.control.skip(
+            ctx.control_run_id, step.step_id, "AF-CONTROL-BUDGET: no recovery call remained"
+        )
+        return None, _recovery_for_error("AF-CONTROL-BUDGET no recovery call remained")
+    result = results[0]
+    if result.error is not None or result.response is None:
+        error = result.error or "recovery invocation failed"
+        ctx.errors.append(f"{capability}: {error}")
+        failed_run = ctx.control.fail(ctx.control_run_id, step.step_id, error)
+        if next(item for item in failed_run.steps if item.name == capability).status == "pending":
+            ctx.control.skip(ctx.control_run_id, step.step_id, f"AF-RECOVERY-STEP-FAILED: {error}")
+        return None, result.recovery or _recovery_for_error(error)
+    artifact, payload_error, decision = _build_artifact(result, run_id=ctx.run_id)
+    if payload_error is not None:
+        ctx.errors.append(f"{capability}: {payload_error}")
+        ctx.control.fail(ctx.control_run_id, step.step_id, payload_error)
+        return None, decision
+    ctx.artifacts.append(cast(AgentArtifact, artifact))
+    ctx.control.complete(
+        ctx.control_run_id, step.step_id, cast(AgentArtifact, artifact).model_dump(mode="json")
+    )
+    ctx.storage.artifact(cast(AgentArtifact, artifact))
+    ctx.storage.event(
+        TrajectoryEvent(
+            event_id=stable_id(
+                "event",
+                {"run": ctx.run_id, "invocation": invocation.invocation_id, "event": kind},
+            ),
+            run_id=ctx.run_id,
+            event=f"recovery_{kind}_checkpoint",
+            actor="api-orchestrator",
+            subject=invocation.invocation_id,
+            payload={
+                "artifact_id": cast(AgentArtifact, artifact).artifact_id,
+                "capability": capability,
+            },
+            created_at=ctx.timestamp,
+        )
+    )
+    return cast(AgentArtifact, artifact), None
+
+
+def _fallback_candidate(
+    *,
+    routing: RoutingDecision,
+    ctx: _ExecCtx,
+    failed_capability: str,
+    exhausted: set[str],
+) -> str | None:
+    """Next declared, eligible fallback candidate for the failed capability.
+
+    ``RoutingDecision.fallback_order`` is the ranked eligible order produced
+    by routing; a recovery fallback consumes it in order rather than
+    inventing a parallel pool. Kind compatibility is enforced so a specialist
+    failure never yields a critic/referee substitute.
+    """
+    failed_kind = ctx.capabilities[failed_capability].kind
+    compatible = (
+        {"specialist", "fallback"} if failed_kind in {"specialist", "fallback"} else {failed_kind}
+    )
+    consumed = exhausted | {step.name for step in ctx.control.get(ctx.control_run_id).steps}
+    for name in routing.fallback_order:
+        capability = ctx.capabilities.get(name)
+        if name not in consumed and capability is not None and capability.kind in compatible:
+            return name
+    return None
+
+
+async def _execute_recovery(
+    ctx: _ExecCtx,
+    events: list[_RecoveryEvent],
+    *,
+    routing: RoutingDecision,
+    routing_plan: RoutingPlan,
+    routing_request: RoutingRequest,
+    routing_policy: RoutingPolicy,
+    profiles: dict[str, AgentCapabilityProfile],
+    scorecards: tuple[AgentScorecard, ...] | list[AgentScorecard],
+    fallbacks_attempted: set[str],
+    fallback_budget: int,
+    max_replans: int,
+    graph_kwargs: dict[str, Any] | None = None,
+) -> _RecoveryOutcome:
+    """Execute the scheduler's terminal recovery decisions, once each.
+
+    Ownership: scheduler-emitted terminal results never carry ``retry`` (the
+    retry loop lives inside ``run_bounded``), so a ``retry`` reaching the
+    supervisor is a post-invocation failure — executed once as an accounted
+    ``recovery`` call. ``stop`` is terminal by definition; ``escalate``
+    raises the ``recovery_escalation`` gate reason so policy decides review
+    vs human gate; ``fallback`` consumes ``RoutingDecision.fallback_order``
+    within the plan's declared ``max_fallbacks`` bound; ``replan`` re-routes
+    excluding capabilities that already failed in this run. Recovery-invoked
+    failures produce receipts marked ``skipped`` (``AF-GOV-RECOVERY-DEPTH``)
+    instead of triggering a second recovery pass — depth is bounded at one.
+    """
+    outcome = _RecoveryOutcome()
+    seq = 0
+    replans_done = 0
+
+    def escalate(
+        capability: str | None,
+        decision: RecoveryDecision,
+        action: str,
+        *,
+        code: str | None = None,
+        unresolved: tuple[str, ...] = (),
+    ) -> None:
+        nonlocal seq
+        outcome.gate_reasons.append(_RECOVERY_HUMAN_REASON)
+        outcome.receipts.append(
+            _receipt(
+                seq,
+                ctx,
+                capability,
+                decision,
+                owner="human",
+                action_taken=action,
+                outcome="executed",
+                code=code,
+                unresolved=unresolved or decision.unresolved,
+            )
+        )
+        seq += 1
+
+    failed_caps = {capability for capability, _, _ in events}
+    snapshot = tuple(events)
+    for capability, _error, decision in snapshot:
+        action = decision.decision
+        if action == "retry":
+            # The scheduler executes retry decisions inside run_bounded; a
+            # retry reaching the supervisor came from a post-invocation error
+            # whose step is already terminal. Execute it once, accounted as a
+            # recovery call rather than a disguised step restart.
+            if _calls_remaining(ctx) <= 0:
+                escalate(
+                    capability,
+                    decision,
+                    "escalated:retry_no_budget",
+                    code="AF-BUDGET-EXHAUSTED",
+                    unresolved=(capability,),
+                )
+                continue
+            try:
+                ctx.control.record_call(ctx.control_run_id, "recovery")
+            except ContractError:
+                escalate(
+                    capability,
+                    decision,
+                    "escalated:retry_no_budget",
+                    code="AF-BUDGET-EXHAUSTED",
+                    unresolved=(capability,),
+                )
+                continue
+            invocation = AgentInvocation(
+                invocation_id=stable_id(
+                    "inv",
+                    {"run": ctx.run_id, "capability": capability, "kind": "retry"},
+                ),
+                run_id=ctx.run_id,
+                agent=ctx.capabilities[capability].agent,
+                capability=capability,
+                adapter=ctx.adapter.name,
+                dependencies=(),
+                input_refs=ctx.spec.inputs,
+                retry_count=decision.attempt + 1,
+            )
+            ctx.invocation_ids.append(invocation.invocation_id)
+            try:
+                retry_results = await run_bounded(
+                    (invocation,),
+                    ctx.worker,
+                    limit=1,
+                    timeout_seconds=ctx.policy.timeout_seconds,
+                    max_calls=None,
+                    max_retries=0,
+                )
+            except ContractError as exc:
+                escalate(
+                    capability,
+                    decision,
+                    "escalated:retry_failed",
+                    code=exc.code,
+                    unresolved=(capability,),
+                )
+                continue
+            retry_result = retry_results[0] if retry_results else None
+            retry_decision = retry_result.recovery if retry_result is not None else None
+            retry_artifact: AgentArtifact | None = None
+            if (
+                retry_result is not None
+                and retry_result.error is None
+                and retry_result.response is not None
+            ):
+                retry_artifact, payload_error, retry_decision = _build_artifact(
+                    retry_result, run_id=ctx.run_id
+                )
+                if payload_error is not None:
+                    ctx.errors.append(f"{capability}: {payload_error}")
+                elif retry_artifact is not None:
+                    ctx.artifacts.append(retry_artifact)
+                    ctx.storage.artifact(retry_artifact)
+            elif retry_result is not None:
+                ctx.errors.append(
+                    f"{capability}: {retry_result.error or 'retry invocation failed'}"
+                )
+            outcome.receipts.append(
+                _receipt(
+                    seq,
+                    ctx,
+                    capability,
+                    decision,
+                    owner="supervisor",
+                    action_taken=f"retried:{capability}",
+                    outcome="executed",
+                    evidence=(
+                        f"invocation:{invocation.invocation_id}",
+                        "artifact:produced" if retry_artifact is not None else "artifact:none",
+                    ),
+                    invocation_id=invocation.invocation_id,
+                )
+            )
+            seq += 1
+            if retry_decision is not None and retry_artifact is None:
+                outcome.nested.append((capability, "recovery retry failed", retry_decision))
+            continue
+        if action == "stop":
+            outcome.receipts.append(
+                _receipt(
+                    seq,
+                    ctx,
+                    capability,
+                    decision,
+                    owner="none",
+                    action_taken="stopped",
+                    outcome="executed",
+                    code=decision.code,
+                    evidence=("terminal_no_calls",),
+                )
+            )
+            seq += 1
+            continue
+        if action == "escalate":
+            escalate(capability, decision, "escalated:human_gate", code=decision.code)
+            continue
+        if action == "fallback":
+            if _calls_remaining(ctx) <= 0 or len(fallbacks_attempted) >= fallback_budget:
+                escalate(
+                    capability,
+                    decision,
+                    "escalated:no_fallback_budget",
+                    code="AF-GOV-RECOVERY-NO-FALLBACK",
+                    unresolved=(capability, "fallback_budget"),
+                )
+                continue
+            candidate = _fallback_candidate(
+                routing=routing,
+                ctx=ctx,
+                failed_capability=capability,
+                exhausted=fallbacks_attempted,
+            )
+            if candidate is None:
+                escalate(
+                    capability,
+                    decision,
+                    "escalated:no_declared_fallback",
+                    code="AF-GOV-RECOVERY-NO-FALLBACK",
+                    unresolved=(capability,),
+                )
+                continue
+            strategy: dict[str, JsonValue] = {
+                "primary": candidate,
+                "fallbacks": (),
+                "execution_mode": "recovery_fallback",
+                "parallel": 0,
+            }
+            loop = _record_strategy(ctx.storage, ctx.run_id, strategy, ctx.timestamp)
+            if loop.blocked:
+                escalate(
+                    capability,
+                    decision,
+                    "escalated:loop_blocked",
+                    code=loop.code or "AF-GOV-LOOP-DETECTED",
+                    unresolved=(capability, "loop"),
+                )
+                continue
+            if candidate not in ctx.control_steps:
+                registered = {step.name: step for step in ctx.control.get(ctx.control_run_id).steps}
+                if candidate not in registered:
+                    ctx.control.add_steps(ctx.control_run_id, ((candidate, ()),))
+                    registered = {
+                        step.name: step for step in ctx.control.get(ctx.control_run_id).steps
+                    }
+                ctx.control_steps[candidate] = registered[candidate]
+            fallbacks_attempted.add(candidate)
+            calls_before = len(ctx.invocation_ids)
+            artifact, nested_decision = await _invoke_recovery_step(ctx, candidate, kind="recovery")
+            invocation_ref = (
+                (f"invocation:{ctx.invocation_ids[-1]}",)
+                if len(ctx.invocation_ids) > calls_before
+                else ()
+            )
+            outcome.receipts.append(
+                _receipt(
+                    seq,
+                    ctx,
+                    capability,
+                    decision,
+                    owner="supervisor",
+                    action_taken=f"fallback:{candidate}",
+                    outcome="executed",
+                    evidence=(
+                        f"capability:{candidate}",
+                        *invocation_ref,
+                        *(("artifact:produced",) if artifact is not None else ("artifact:none",)),
+                    ),
+                )
+            )
+            if artifact is None and nested_decision is not None:
+                outcome.nested.append((candidate, "recovery fallback failed", nested_decision))
+            seq += 1
+            continue
+        if action == "replan":
+            if replans_done >= max_replans or _calls_remaining(ctx) <= 0:
+                escalate(
+                    capability,
+                    decision,
+                    "escalated:replan_refused",
+                    code="AF-GOV-RECOVERY-REPLAN-REFUSED",
+                    unresolved=(capability, "max_replans"),
+                )
+                continue
+            replans_done += 1
+            replan_outcome = await _replan_once(
+                ctx,
+                routing_request=routing_request,
+                routing_policy=routing_policy,
+                profiles=profiles,
+                scorecards=scorecards,
+                exclude=set(failed_caps),
+                graph_kwargs=graph_kwargs or {},
+            )
+            if replan_outcome is None:
+                escalate(
+                    capability,
+                    decision,
+                    "escalated:replan_empty",
+                    code="AF-GOV-RECOVERY-REPLAN-REFUSED",
+                    unresolved=(capability,),
+                )
+                continue
+            new_decision, new_plan, executed, nested_failures = replan_outcome
+            for name, nested in nested_failures:
+                outcome.nested.append((name, "recovery replan step failed", nested))
+            outcome.receipts.append(
+                _receipt(
+                    seq,
+                    ctx,
+                    capability,
+                    decision,
+                    owner="supervisor",
+                    action_taken=f"replanned:{new_decision.decision_id}",
+                    outcome="executed",
+                    evidence=(
+                        f"routing_decision:{new_decision.decision_id}",
+                        f"plan:{new_plan.plan_id}",
+                        *(f"invoked:{name}" for name in executed),
+                    ),
+                )
+            )
+            seq += 1
+            continue
+    # Depth bound: decisions emitted by recovery-invoked work are receipts
+    # only — a second recovery pass is never spawned inside this executor.
+    for capability, error, nested_decision in outcome.nested:
+        outcome.receipts.append(
+            _receipt(
+                seq,
+                ctx,
+                capability,
+                nested_decision,
+                owner="supervisor",
+                action_taken=f"observed_only:{nested_decision.decision}",
+                outcome="skipped",
+                code="AF-GOV-RECOVERY-DEPTH",
+                unresolved=(capability,),
+            )
+        )
+        seq += 1
+    return outcome
+
+
+async def _replan_once(
+    ctx: _ExecCtx,
+    *,
+    routing_request: RoutingRequest,
+    routing_policy: RoutingPolicy,
+    profiles: dict[str, AgentCapabilityProfile],
+    scorecards: tuple[AgentScorecard, ...] | list[AgentScorecard],
+    exclude: set[str],
+    graph_kwargs: dict[str, Any],
+) -> (
+    tuple[RoutingDecision, RoutingPlan, tuple[str, ...], list[tuple[str, RecoveryDecision]]] | None
+):
+    """Bounded replan: re-route with failed capabilities excluded, record the
+    new strategy fingerprint for loop detection, then execute the plan's
+    remaining primary/parallel names as governed recovery steps."""
+    remaining = {
+        name: capability for name, capability in ctx.capabilities.items() if name not in exclude
+    }
+    decision = route_capabilities(
+        remaining,
+        profiles,
+        routing_request,
+        policy=routing_policy,
+        scorecards=tuple(scorecards),
+        **graph_kwargs,
+    )
+    ctx.storage.save_routing(decision)
+    plan = build_routing_plan(decision, remaining, policy=routing_policy)
+    ctx.storage.save_routing_plan(plan)
+    strategy = _strategy_payload(plan, ctx.policy)
+    loop = _record_strategy(ctx.storage, ctx.run_id, strategy, ctx.timestamp)
+    if loop.blocked:
+        return None
+    wanted = tuple(
+        dict.fromkeys(name for name in (plan.primary, *plan.parallel) if name is not None)
+    )
+    fresh = tuple(
+        name
+        for name in wanted
+        if name not in ctx.control_steps and name not in exclude and name in remaining
+    )
+    if not fresh:
+        return None
+    budgeted = fresh[: _calls_remaining(ctx)]
+    if not budgeted:
+        return None
+    ctx.control.add_steps(ctx.control_run_id, tuple((name, ()) for name in budgeted))
+    for name in budgeted:
+        ctx.control_steps[name] = next(
+            step for step in ctx.control.get(ctx.control_run_id).steps if step.name == name
+        )
+    executed: list[str] = []
+    nested_failures: list[tuple[str, RecoveryDecision]] = []
+    for name in budgeted:
+        artifact, nested = await _invoke_recovery_step(ctx, name, kind="replan")
+        if artifact is not None:
+            executed.append(name)
+        elif nested is not None:
+            nested_failures.append((name, nested))
+    return decision, plan, tuple(executed), nested_failures
 
 
 def _economy_block(
@@ -1174,54 +1801,29 @@ async def execute_run(
     # Canonical recovery decisions: the scheduler's InvocationResult.recovery
     # governs invocation failures; the supervisor only classifies errors that
     # never passed through the scheduler (post-invocation validation gaps).
-    recovery_decisions: list[RecoveryDecision] = []
+    recovery_events: list[_RecoveryEvent] = []
+    fallbacks_attempted: set[str] = set()
     for result in results:
         control_step = control_steps[result.invocation.capability]
         if result.error is not None or result.response is None:
-            errors.append(result.error or "invocation failed")
+            error = result.error or "invocation failed"
+            errors.append(error)
             if result.recovery is not None:
-                recovery_decisions.append(result.recovery)
+                recovery_events.append((result.invocation.capability, error, result.recovery))
             elif result.invocation.error_code != "AF-RUNTIME-DEPENDENCY-FAILED":
-                recovery_decisions.append(_recovery_for_error(result.error or "invocation failed"))
-            control.fail(
-                control_run.run_id, control_step.step_id, result.error or "invocation failed"
-            )
-            continue
-        try:
-            payload = _json_payload(result.response)
-        except (ContractError, ValueError) as exc:
-            # A non-contract adapter payload is a governed failure, not a run
-            # crash: first classification point produces the decision.
-            error = str(exc)
-            errors.append(f"{result.invocation.capability}: {error}")
-            recovery_decisions.append(_recovery_for_error(error))
+                recovery_events.append(
+                    (result.invocation.capability, error, _recovery_for_error(error))
+                )
             control.fail(control_run.run_id, control_step.step_id, error)
             continue
-        guardrail_gaps = validate_agent_payload(payload)
-        if guardrail_gaps:
-            errors.extend(f"{result.invocation.capability}: {gap}" for gap in guardrail_gaps)
-            recovery_decisions.append(_recovery_for_error("; ".join(guardrail_gaps)))
-            control.fail(control_run.run_id, control_step.step_id, "; ".join(guardrail_gaps))
+        artifact, payload_error, decision = _build_artifact(result, run_id=run_id)
+        if payload_error is not None:
+            errors.append(f"{result.invocation.capability}: {payload_error}")
+            if decision is not None:
+                recovery_events.append((result.invocation.capability, payload_error, decision))
+            control.fail(control_run.run_id, control_step.step_id, payload_error)
             continue
-        artifact_id = stable_id(
-            "artifact", {"run": run_id, "invocation": result.invocation.invocation_id}
-        )
-        artifact = AgentArtifact(
-            artifact_id=artifact_id,
-            run_id=run_id,
-            invocation_id=result.invocation.invocation_id,
-            agent=result.invocation.agent,
-            capability=result.invocation.capability,
-            kind=ArtifactKind.SPECIALIST,
-            schema_name="AgentArtifact/v1",
-            payload=payload,
-            evidence=_strings(payload, "facts"),
-            assumptions=_strings(payload, "assumptions"),
-            risks=_strings(payload, "risks"),
-            unresolved=_strings(payload, "unresolved"),
-            confidence=_confidence(payload),
-            content_sha256=content_hash(payload),
-        )
+        artifact = cast(AgentArtifact, artifact)
         artifacts.append(artifact)
         control.complete(control_run.run_id, control_step.step_id, artifact.model_dump(mode="json"))
         storage.artifact(artifact)
@@ -1290,21 +1892,25 @@ async def execute_run(
             if not fallback_results:
                 error = f"{fallback}: AF-CONTROL-BUDGET: no fallback call remained"
                 errors.append(error)
-                recovery_decisions.append(_recovery_for_error(error))
+                recovery_events.append((fallback, error, _recovery_for_error(error)))
                 control.skip(
                     control_run.run_id,
                     fallback_step.step_id,
                     "AF-ROUTING-FALLBACK-BUDGET: no call budget remained",
                 )
                 continue
+            fallbacks_attempted.add(fallback)
             fallback_result = fallback_results[0]
             if fallback_result.error is not None or fallback_result.response is None:
                 error = fallback_result.error or "fallback invocation failed"
                 errors.append(f"{fallback}: {error}")
-                if fallback_result.recovery is not None:
-                    recovery_decisions.append(fallback_result.recovery)
-                else:
-                    recovery_decisions.append(_recovery_for_error(error))
+                recovery_events.append(
+                    (
+                        fallback,
+                        error,
+                        fallback_result.recovery or _recovery_for_error(error),
+                    )
+                )
                 failed_run = control.fail(control_run.run_id, fallback_step.step_id, error)
                 if (
                     next(item for item in failed_run.steps if item.name == fallback).status
@@ -1316,20 +1922,14 @@ async def execute_run(
                         f"AF-ROUTING-FALLBACK-FAILED: {error}",
                     )
                 continue
-            try:
-                payload = _json_payload(fallback_result.response)
-            except (ContractError, ValueError) as exc:
-                error = f"{fallback}: {exc}"
-                errors.append(error)
-                recovery_decisions.append(_recovery_for_error(error))
-                control.fail(control_run.run_id, fallback_step.step_id, error)
-                continue
-            fallback_gaps = validate_agent_payload(payload)
-            if fallback_gaps:
-                error = "; ".join(fallback_gaps)
-                errors.extend(f"{fallback}: {error}" for _ in [0])
-                recovery_decisions.append(_recovery_for_error(error))
-                failed_run = control.fail(control_run.run_id, fallback_step.step_id, error)
+            artifact, payload_error, fallback_decision = _build_artifact(
+                fallback_result, run_id=run_id
+            )
+            if payload_error is not None:
+                errors.append(f"{fallback}: {payload_error}")
+                if fallback_decision is not None:
+                    recovery_events.append((fallback, payload_error, fallback_decision))
+                failed_run = control.fail(control_run.run_id, fallback_step.step_id, payload_error)
                 if (
                     next(item for item in failed_run.steps if item.name == fallback).status
                     == "pending"
@@ -1337,28 +1937,10 @@ async def execute_run(
                     control.skip(
                         control_run.run_id,
                         fallback_step.step_id,
-                        f"AF-ROUTING-FALLBACK-INVALID: {error}",
+                        f"AF-ROUTING-FALLBACK-INVALID: {payload_error}",
                     )
                 continue
-            artifact = AgentArtifact(
-                artifact_id=stable_id(
-                    "artifact",
-                    {"run": run_id, "invocation": fallback_result.invocation.invocation_id},
-                ),
-                run_id=run_id,
-                invocation_id=fallback_result.invocation.invocation_id,
-                agent=fallback_result.invocation.agent,
-                capability=fallback_result.invocation.capability,
-                kind=ArtifactKind.SPECIALIST,
-                schema_name="AgentArtifact/v1",
-                payload=payload,
-                evidence=_strings(payload, "facts"),
-                assumptions=_strings(payload, "assumptions"),
-                risks=_strings(payload, "risks"),
-                unresolved=_strings(payload, "unresolved"),
-                confidence=_confidence(payload),
-                content_sha256=content_hash(payload),
-            )
+            artifact = cast(AgentArtifact, artifact)
             artifacts.append(artifact)
             control.complete(
                 control_run.run_id, fallback_step.step_id, artifact.model_dump(mode="json")
@@ -1388,18 +1970,70 @@ async def execute_run(
             break
 
     # The scheduler's InvocationResult.recovery is the canonical decision for
-    # every invocation failure; recovery_decisions was collected in error
-    # order during processing, so the first entry governs the run's outcome.
+    # every invocation failure; recovery_events was collected in error order
+    # during processing, so the first entry governs the run's outcome. The
+    # supervisor then executes each decision exactly once — replan, fallback,
+    # escalate and stop are real runtime actions with persisted receipts, not
+    # labels on a context object.
+    recovery_ctx = _ExecCtx(
+        storage=storage,
+        control=control,
+        control_run_id=control_run.run_id,
+        control_steps=control_steps,
+        capabilities=capabilities_catalog,
+        adapter=adapter,
+        spec=spec,
+        run_id=run_id,
+        policy=policy,
+        worker=worker,
+        reserve=reserve,
+        timestamp=timestamp,
+        artifacts=artifacts,
+        errors=errors,
+        invocation_ids=all_invocation_ids,
+    )
+    recovery_outcome = await _execute_recovery(
+        recovery_ctx,
+        recovery_events,
+        routing=routing,
+        routing_plan=routing_plan,
+        routing_request=routing_request,
+        routing_policy=routing_policy,
+        profiles=load_profiles(),
+        scorecards=scorecards,
+        fallbacks_attempted=fallbacks_attempted,
+        fallback_budget=routing_plan.max_fallbacks,
+        max_replans=governor_decision.max_replans,
+        graph_kwargs={
+            "graph_nodes": graph_nodes,
+            "graph_edges": graph_edges,
+            "graph_snapshot": graph_snapshot,
+        },
+    )
+    recovery_events.extend(recovery_outcome.nested)
+    recovery_gate_reasons = recovery_outcome.gate_reasons
+    recovery_receipts = recovery_outcome.receipts
+    recovery_decisions = [decision for _, _, decision in recovery_events]
+    if recovery_receipts:
+        storage.json(
+            "recovery-receipts.json",
+            [receipt.model_dump(mode="json") for receipt in recovery_receipts],
+        )
     recovery = recovery_decisions[0] if recovery_decisions else None
     governance_unresolved = set(governance_context.unresolved)
     for decision in recovery_decisions:
         governance_unresolved.update(decision.unresolved)
         if decision.code:
             governance_unresolved.add(decision.code)
+    for receipt in recovery_receipts:
+        governance_unresolved.update(receipt.unresolved)
+        if receipt.code:
+            governance_unresolved.add(receipt.code)
     governance_context = governance_context.model_copy(
         update={
             "recovery": recovery,
             "recoveries": tuple(recovery_decisions),
+            "receipts": tuple(recovery_receipts),
             "loop": loop_detection,
             "unresolved": tuple(sorted(governance_unresolved)),
         }
@@ -1415,6 +2049,7 @@ async def execute_run(
             payload={
                 "recovery": recovery.model_dump(mode="json") if recovery else None,
                 "loop": loop_detection.model_dump(mode="json"),
+                "recovery_receipts": tuple(receipt.receipt_id for receipt in recovery_receipts),
             },
             created_at=timestamp,
         )
@@ -1524,7 +2159,9 @@ async def execute_run(
             )
     critic = critic_findings(item.model_dump(mode="json") for item in artifacts)
     critic_required = requires_critic(policy, spec.risk.value)
-    gate_reasons = tuple(sorted(set(reasons + (("critic_findings",) if critic else ()))))
+    gate_reasons = tuple(
+        sorted(set(reasons + (("critic_findings",) if critic else ())) | set(recovery_gate_reasons))
+    )
     needs_gate = requires_human_gate(policy, gate_reasons) or (critic_required and bool(critic))
     final_status = (
         "REVIEW" if errors or room or needs_gate else "BLOCKED" if not artifacts else "REVIEW"
@@ -1594,6 +2231,7 @@ async def execute_run(
             "critic_findings": critic,
             "debate_reasons": reasons,
             "human_gate": needs_gate,
+            "recovery_receipts": [receipt.model_dump(mode="json") for receipt in recovery_receipts],
             "errors": errors,
             "unresolved": {
                 "routing": list(routing.unresolved),
@@ -1644,6 +2282,7 @@ async def execute_run(
         },
         "economy": economy_block,
         "governance": governance_context.model_dump(mode="json"),
+        "recovery_receipts": [receipt.model_dump(mode="json") for receipt in recovery_receipts],
         "role_context": role_summary(role_plan) if role_plan is not None else None,
         "shadow": shadow_decision.model_dump(mode="json") if shadow_decision is not None else None,
         "unresolved": {
@@ -1860,44 +2499,31 @@ async def resume_existing_run(
     )
     new_artifacts: list[AgentArtifact] = []
     errors: list[str] = []
+    # Recovery decisions observed during a resumed run follow the same
+    # canonical path: scheduler decision first, supervisor classification
+    # only for post-invocation payload gaps.
+    recovery_events: list[_RecoveryEvent] = []
     for result in results:
         step = step_map[result.invocation.capability]
         if result.error is not None or result.response is None:
             error = result.error or "invocation failed"
             errors.append(error)
+            if result.recovery is not None:
+                recovery_events.append((result.invocation.capability, error, result.recovery))
+            elif result.invocation.error_code != "AF-RUNTIME-DEPENDENCY-FAILED":
+                recovery_events.append(
+                    (result.invocation.capability, error, _recovery_for_error(error))
+                )
             control.fail(run_id, step.step_id, error)
             continue
-        try:
-            payload = _json_payload(result.response)
-        except (ContractError, ValueError) as exc:
-            error = str(exc)
-            errors.append(error)
-            control.fail(run_id, step.step_id, error)
+        artifact, payload_error, decision = _build_artifact(result, run_id=run_id)
+        if payload_error is not None:
+            errors.append(f"{result.invocation.capability}: {payload_error}")
+            if decision is not None:
+                recovery_events.append((result.invocation.capability, payload_error, decision))
+            control.fail(run_id, step.step_id, payload_error)
             continue
-        gaps = validate_agent_payload(payload)
-        if gaps:
-            error = "; ".join(gaps)
-            errors.extend(f"{result.invocation.capability}: {error}" for _ in [0])
-            control.fail(run_id, step.step_id, error)
-            continue
-        artifact = AgentArtifact(
-            artifact_id=stable_id(
-                "artifact", {"run": run_id, "invocation": result.invocation.invocation_id}
-            ),
-            run_id=run_id,
-            invocation_id=result.invocation.invocation_id,
-            agent=result.invocation.agent,
-            capability=result.invocation.capability,
-            kind=ArtifactKind.SPECIALIST,
-            schema_name="AgentArtifact/v1",
-            payload=payload,
-            evidence=_strings(payload, "facts"),
-            assumptions=_strings(payload, "assumptions"),
-            risks=_strings(payload, "risks"),
-            unresolved=_strings(payload, "unresolved"),
-            confidence=_confidence(payload),
-            content_sha256=content_hash(payload),
-        )
+        artifact = cast(AgentArtifact, artifact)
         control.complete(run_id, step.step_id, artifact.model_dump(mode="json"))
         storage.artifact(artifact)
         storage.event(
@@ -1915,6 +2541,77 @@ async def resume_existing_run(
             )
         )
         new_artifacts.append(artifact)
+    recovery_ctx = _ExecCtx(
+        storage=storage,
+        control=control,
+        control_run_id=run_id,
+        control_steps=step_map,
+        capabilities=capabilities,
+        adapter=adapter,
+        spec=spec,
+        run_id=run_id,
+        policy=policy,
+        worker=worker,
+        reserve=0,
+        timestamp=timestamp,
+        artifacts=new_artifacts,
+        errors=errors,
+        invocation_ids=[],
+    )
+    recovery_outcome = await _execute_recovery(
+        recovery_ctx,
+        recovery_events,
+        routing=routing,
+        routing_plan=routing_plan,
+        routing_request=routing_request,
+        routing_policy=routing_policy,
+        profiles=profiles,
+        scorecards=scorecards,
+        fallbacks_attempted=set(),
+        fallback_budget=routing_plan.max_fallbacks,
+        max_replans=1,
+        graph_kwargs={
+            "graph_nodes": graph_nodes,
+            "graph_edges": graph_edges,
+            "graph_snapshot": graph_snapshot,
+        },
+    )
+    recovery_events.extend(recovery_outcome.nested)
+    if recovery_outcome.receipts:
+        storage.json(
+            "recovery-receipts.json",
+            [receipt.model_dump(mode="json") for receipt in recovery_outcome.receipts],
+        )
+        storage.event(
+            TrajectoryEvent(
+                event_id=stable_id("event", {"run": run_id, "event": "recovery_actions"}),
+                run_id=run_id,
+                event="recovery_actions",
+                actor="api-orchestrator",
+                subject=run_id,
+                payload={
+                    "receipts": tuple(
+                        receipt.model_dump(mode="json") for receipt in recovery_outcome.receipts
+                    ),
+                    "decisions": tuple(
+                        decision.model_dump(mode="json") for _, _, decision in recovery_events
+                    ),
+                },
+                created_at=timestamp,
+            )
+        )
+        for receipt in recovery_outcome.receipts:
+            if receipt.code is not None and receipt.outcome != "executed":
+                errors.append(
+                    f"{receipt.code}: field=recovery.{receipt.capability}; "
+                    f"unlock={receipt.action_taken}"
+                )
+            if _RECOVERY_HUMAN_REASON in recovery_outcome.gate_reasons:
+                errors.append(
+                    "AF-GOV-RECOVERY-ESCALATION: field=recovery; "
+                    "unlock=human review required before this run can close"
+                )
+                break
     artifact_ids = tuple(
         dict.fromkeys((*previous.artifact_ids, *(item.artifact_id for item in new_artifacts)))
     )
@@ -1925,6 +2622,15 @@ async def resume_existing_run(
             if final_status == "REVIEW"
             else AgenticState.BLOCKED,
             "artifact_ids": artifact_ids,
+            "invocation_ids": tuple(
+                dict.fromkeys(
+                    (
+                        *previous.invocation_ids,
+                        *(item.invocation_id for item in invocations),
+                        *recovery_ctx.invocation_ids,
+                    )
+                )
+            ),
             "gaps": tuple(sorted({*previous.gaps, *errors})),
             "final_status": final_status,
             "finished_at": timestamp,
@@ -1953,6 +2659,9 @@ async def resume_existing_run(
         "status": final_status,
         "resumed": True,
         "reused_invocations": len(previous.invocation_ids),
+        "recovery_receipts": [
+            receipt.model_dump(mode="json") for receipt in recovery_outcome.receipts
+        ],
         "economy": {
             "checkpoint": resume_checkpoint.model_dump(mode="json"),
             "previous_calls_used": checkpoint.calls_used if checkpoint is not None else None,

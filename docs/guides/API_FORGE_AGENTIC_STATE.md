@@ -105,7 +105,16 @@ inputs always produce the same `GovernorDecision`/`StopDecision`/
   (`AF-GOV-GAIN-UNRESOLVED`) unless a mandatory requirement holds.
 - `apiforge governor recover --failure-class C --attempt N` — the closed
   §26 vocabulary (unknown classes refuse `AF-GOV-FAILURE-CLASS-UNKNOWN`);
-  exhausted caps fire the terminal escalate/stop.
+  exhausted caps fire the terminal escalate/stop. The supervisor executes
+  each terminal decision once and persists a `RecoveryReceipt/v1` per
+  decision (`recovery-receipts.json`, embedded in the governance context):
+  `replan` re-routes with failed capabilities excluded (new strategy
+  fingerprint + loop check + `ControlPlane.add_steps`), `fallback` consumes
+  the declared `RoutingDecision.fallback_order` within `max_fallbacks`,
+  `escalate` raises the `recovery_escalation` human-gate reason, `stop` is
+  terminal, and supervisor-visible `retry` runs once as an accounted
+  `recovery` call. Recovery depth is bounded at one — nested failures are
+  recorded as `skipped` receipts (`AF-GOV-RECOVERY-DEPTH`), never re-run.
 - `apiforge governor loop-check --fingerprints …` — repeated strategy
   fingerprints inside the window block `AF-GOV-LOOP-DETECTED`. Runtime records
   every selected strategy in `events.jsonl` before invoking capabilities; the

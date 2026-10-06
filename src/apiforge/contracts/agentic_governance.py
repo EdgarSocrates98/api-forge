@@ -245,6 +245,36 @@ class RecoveryDecision(VersionedContract):
     unresolved: tuple[str, ...] = ()
 
 
+RecoveryOwner = Literal["scheduler", "supervisor", "human", "none"]
+RecoveryOutcome = Literal["executed", "refused", "skipped", "observed"]
+
+
+class RecoveryReceipt(VersionedContract):
+    """§26 proof that a recovery decision actually changed runtime behavior.
+
+    The scheduler's ``RecoveryDecision`` says *what* should happen; the
+    receipt records *who* owned the action and *what ran*. ``executed`` means
+    a real runtime effect occurred (a new invocation, a new plan or an
+    explicit terminal stop); ``refused``/``skipped`` name the ``AF-*`` code
+    that blocked execution so a decision never looks silently enforced.
+    """
+
+    schema: Literal["apiforge/recovery-receipt/v1"] = "apiforge/recovery-receipt/v1"  # type: ignore[assignment]
+    receipt_id: str = Field(min_length=1)
+    run_id: str = Field(min_length=1)
+    invocation_id: str | None = None
+    capability: str | None = None
+    failure_class: FailureClass
+    decision: RecoveryAction
+    attempt: int = Field(ge=0)
+    owner: RecoveryOwner
+    action_taken: str = ""
+    outcome: RecoveryOutcome = "executed"
+    code: str | None = None
+    evidence: tuple[str, ...] = ()
+    unresolved: tuple[str, ...] = ()
+
+
 class LoopDetection(VersionedContract):
     """§27 repeated-strategy detection over a fingerprint window."""
 
@@ -271,6 +301,7 @@ class RunGovernanceContext(VersionedContract):
     stop: StopDecision | None = None
     recovery: RecoveryDecision | None = None
     recoveries: tuple[RecoveryDecision, ...] = ()
+    receipts: tuple[RecoveryReceipt, ...] = ()
     loop: LoopDetection | None = None
     evidence_refs: tuple[str, ...] = ()
     unresolved: tuple[str, ...] = ()
@@ -393,6 +424,9 @@ __all__ = [
     "PromotionEvidence",
     "RecoveryAction",
     "RecoveryDecision",
+    "RecoveryOutcome",
+    "RecoveryOwner",
+    "RecoveryReceipt",
     "RouteDecision",
     "RunGovernanceContext",
     "ShadowRecord",

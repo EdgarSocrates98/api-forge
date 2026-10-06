@@ -41,3 +41,25 @@ to unify, `INTEGRATE` = exists but not in the normal runtime path,
 - `next-step` refuses the stale persisted case (`AF-ROUTING-NO-ROUTE` on the
   historical fixture findings) — recorded; the wave proceeds on the audited
   source path, not on the stale case.
+
+## Phase progress
+
+- **Phase 1 (row 1) — DONE locally.** `MemoryConflict` now carries
+  `preferred_memory_id`/`conflicting_memory_id`/`admission_effect`;
+  destructive+contradiction yields `quarantine`/`exclude_both` before any
+  preference is computed, and `query_memory` filters on `admission_effect`
+  so outcome and result set are coherent by construction. Commit `dee0d2b`.
+- **Phase 2 (row 2) — DONE locally.** `classify_failure` moved to
+  `governance/recovery` as the single surface; the supervisor consumes
+  `InvocationResult.recovery` and only classifies post-invocation errors.
+  Commit `f25e9bb`.
+- **Phase 3 (row 3) — DONE locally.** `RecoveryReceipt/v1` added; the
+  supervisor executes each terminal decision once — `retry` (supervisor-side)
+  runs one accounted `recovery` call, `replan` re-routes excluding failed
+  capabilities through `ControlPlane.add_steps` + strategy loop check,
+  `fallback` consumes `RoutingDecision.fallback_order` bounded by
+  `max_fallbacks`, `escalate` raises the `recovery_escalation` human-gate
+  reason (declared in `agentic_runtime.yaml`), `stop` is terminal.
+  Receipts persist in `recovery-receipts.json`, the governance context and
+  summary; `resume_existing_run` runs the same executor; depth is bounded
+  at one (`AF-GOV-RECOVERY-DEPTH` skipped receipts).

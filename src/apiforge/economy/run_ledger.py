@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 from collections.abc import Iterator
+from datetime import UTC, datetime
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -34,14 +35,27 @@ PERSIST_FAILURE = "AF-ECONOMY-LEDGER-PERSIST"
 FAILURES_NAME = "economy.persist-failures"
 
 
-def append(root: Path, entry: RunLedgerEntry, *, auditable: bool = False) -> bool:
+def append(
+    root: Path,
+    entry: RunLedgerEntry,
+    *,
+    auditable: bool = False,
+    recorded_at: str | None = None,
+) -> bool:
     """Append one attribution row and report whether it was persisted.
 
     Best-effort telemetry (``auditable=False``) swallows I/O failure like the
     legacy recorder. An auditable row that cannot be written is recorded in
     ``economy.persist-failures`` (when possible) and the caller must surface
     ``AF-ECONOMY-LEDGER-PERSIST`` as unresolved; a lost row is never silent.
+
+    ``recorded_at`` is the append instant — observed, never synthesized after
+    the fact. Callers may pass an authoritative timestamp; otherwise the write
+    time is stamped here so new rows carry real temporal evidence.
     """
+    stamp = recorded_at or entry.recorded_at or datetime.now(UTC).isoformat()
+    if entry.recorded_at != stamp:
+        entry = entry.model_copy(update={"recorded_at": stamp})
     row = {
         "verb": entry.verb,
         "detail_level": entry.detail_level,

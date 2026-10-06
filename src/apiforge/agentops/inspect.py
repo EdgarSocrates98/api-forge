@@ -293,14 +293,18 @@ def inspect_run(root: Path, run_id: str, *, risk: str | None = None) -> RunInspe
                 )
             )
         )
+        # §60–61: this measures CostVector field presence, not monetary
+        # pricing — the name stays for compatibility, basis says what it is.
         cost_coverage = _metric(
             "cost_coverage",
             cost_rows / len(rows),
             "observed" if cost_rows == len(rows) else "partial",
             f"{cost_rows}/{len(rows)} rows carry non-zero measured cost vector fields",
-        )
+        ).model_copy(update={"basis": "cost_vector"})
     else:
-        cost_coverage = _unresolved("cost_coverage", "no run-ledger rows available")
+        cost_coverage = _unresolved("cost_coverage", "no run-ledger rows available").model_copy(
+            update={"basis": "cost_vector"}
+        )
     if model_call_ids:
         model_calls = _metric(
             "calls",
@@ -485,6 +489,16 @@ def inspect_run(root: Path, run_id: str, *, risk: str | None = None) -> RunInspe
             _metric("entries", len(rows)),
             _metric("spans", len(spans)),
             _metric("token_entries", len(usage)),
+            (
+                _metric(
+                    "timestamp_coverage",
+                    timeline.timestamp_coverage,
+                    "observed" if timeline.timestamp_coverage == 1.0 else "partial",
+                    detail=f"critical_path events: {len(timeline.critical_path)}",
+                )
+                if timeline.timestamp_coverage is not None
+                else _unresolved("timestamp_coverage", "no events to measure temporal coverage on")
+            ),
         ),
     )
 

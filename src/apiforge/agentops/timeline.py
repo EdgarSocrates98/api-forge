@@ -21,13 +21,16 @@ def build_timeline(root: Path, run_id: str) -> AgentOpsTimeline:
                 event_id=f"ledger:{index}",
                 source="ledger",
                 operation=row.verb,
+                timestamp=row.recorded_at,
                 status="observed",
                 detail=f"{len(row.refs)} ref(s)",
             )
         )
-    if run_rows:
+    missing_ledger_stamps = sum(1 for row in run_rows if row.recorded_at is None)
+    if missing_ledger_stamps:
         unresolved.append(
-            "ledger rows lack timestamps; append order retained after timestamped events"
+            f"{missing_ledger_stamps} ledger row(s) lack timestamps; "
+            "append order retained after timestamped events"
         )
 
     spans = [span for span in _read(_directory(root)) if span.run_id == run_id]
@@ -65,9 +68,28 @@ def build_timeline(root: Path, run_id: str) -> AgentOpsTimeline:
             event.event_id,
         )
     )
+    timestamp_coverage: float | None = None
+    critical_path: tuple[str, ...] = ()
     if not events:
         unresolved.append("no ledger, span or token events for this run")
-    return AgentOpsTimeline(run_id=run_id, events=tuple(events), unresolved=tuple(unresolved))
+    else:
+        stamped = sum(1 for event in events if event.timestamp is not None)
+        timestamp_coverage = stamped / len(events)
+        # §63: a critical path requires full temporal evidence — partial
+        # coverage leaves it unresolved rather than inventing order.
+        if timestamp_coverage == 1.0:
+            critical_path = tuple(event.event_id for event in events)
+        else:
+            unresolved.append(
+                f"timestamp_coverage={timestamp_coverage:.4f} < 1.0 — critical path unresolved"
+            )
+    return AgentOpsTimeline(
+        run_id=run_id,
+        events=tuple(events),
+        timestamp_coverage=timestamp_coverage,
+        critical_path=critical_path,
+        unresolved=tuple(unresolved),
+    )
 
 
 __all__ = ["build_timeline"]

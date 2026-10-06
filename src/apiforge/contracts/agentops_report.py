@@ -37,6 +37,9 @@ class InspectionMetric(VersionedContract):
     value: JsonValue | None = None
     state: InspectionState = "observed"
     detail: str = ""
+    # §60–61: optional basis marker; e.g. ``cost_coverage`` declares
+    # ``cost_vector`` — it measures CostVector field presence, not pricing.
+    basis: str | None = None
 
     @model_validator(mode="after")
     def value_matches_state(self) -> InspectionMetric:
@@ -79,11 +82,18 @@ class AgentOpsTimelineEvent(VersionedContract):
 
 
 class AgentOpsTimeline(VersionedContract):
-    """Deterministic cross-ledger timeline with explicit ordering gaps."""
+    """Deterministic cross-ledger timeline with explicit ordering gaps.
+
+    §62–§63: ``timestamp_coverage`` is measured before any path derivation;
+    ``critical_path`` stays empty (and the gap is recorded in ``unresolved``)
+    unless every event carries a timestamp — temporal order is never invented.
+    """
 
     schema: Literal["apiforge/agentops-timeline/v1"] = "apiforge/agentops-timeline/v1"  # type: ignore[assignment]
     run_id: str = Field(min_length=1)
     events: tuple[AgentOpsTimelineEvent, ...] = ()
+    timestamp_coverage: float | None = Field(default=None, ge=0.0, le=1.0)
+    critical_path: tuple[str, ...] = ()
     unresolved: tuple[str, ...] = ()
 
 

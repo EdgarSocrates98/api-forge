@@ -294,7 +294,12 @@ plus `token_observation_coverage`. A missing measurement is never converted to
 an observed zero.
 
 `agentops timeline RUN` emits `AgentOpsTimeline/v1` over ledger, span and token
-events. Timestamp gaps remain unresolved. `agentops compare RUN_A RUN_B` emits `RunComparison` over the §55 axis set —
+events. Timestamp gaps remain unresolved; `timestamp_coverage` is measured
+first and `critical_path` resolves only at full coverage — partial temporal
+evidence leaves it unresolved rather than inventing order. Ledger rows now
+carry an append-time `recorded_at` stamp; `inspect`'s `cost_coverage` keeps its
+name and declares `basis="cost_vector"` (CostVector field presence, never
+monetary pricing). `agentops compare RUN_A RUN_B` emits `RunComparison` over the §55 axis set —
 quality, tokens, cost, latency, context, evidence, tools, agents — with a
 deterministic direction per axis (lower-is-better for spend, higher for
 quality/evidence). An axis missing a numeric side is `unresolved`, never a

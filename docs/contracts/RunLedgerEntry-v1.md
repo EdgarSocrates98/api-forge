@@ -11,6 +11,7 @@ attribution row appended to `<root>/.apiforge/economy.jsonl`.
 | `source` | `graph`, `contract`, `code`, `knowledge`, `filesystem` or `envelope` |
 | `cost` | `CostVector/v1` |
 | `refs` | `LedgerRef/v1` entries attributed by this row |
+| `recorded_at` | Optional append-time stamp (§64). `run_ledger.append()` stamps the write instant when the caller supplies none; rows written before the field existed stay timestamp-free and the timeline reports the coverage gap |
 
 Rows are written with `payload_bytes: 0` because the transport bytes of the
 same emission are recorded by the verb's legacy row; `economy report` totals

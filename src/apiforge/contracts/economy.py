@@ -50,6 +50,9 @@ class RunLedgerEntry(VersionedContract):
     source: LedgerSource
     cost: CostVector = Field(default_factory=CostVector)
     refs: tuple[LedgerRef, ...] = ()
+    # §64: optional append-time stamp; rows written before it stay timestamp-free
+    # and the timeline reports the coverage gap instead of inventing order.
+    recorded_at: str | None = None
 
 
 EconomyProfile = Literal["economy", "balanced", "deep"]

@@ -226,8 +226,13 @@ def test_inspect_exposes_coverage_metrics_and_timeline(tmp_path: Path) -> None:
     assert metrics["model_call_coverage"].value == 1.0
     assert metrics["trace_coverage"].value == 1.0
     assert metrics["cost_coverage"].value == 1.0
+    # §60–61: the name stays; the basis records it is CostVector presence, not pricing
+    assert metrics["cost_coverage"].basis == "cost_vector"
     assert report.timeline[0].source == "span"
-    assert any("ledger rows lack timestamps" in item for item in report.unresolved)
+    # ledger rows now carry append-time stamps → full coverage → path resolves
+    run_section = next(section for section in report.sections if section.name == "run")
+    run_metrics = {metric.name: metric for metric in run_section.metrics}
+    assert run_metrics["timestamp_coverage"].value == 1.0
 
 
 def test_inspect_context_tokens_without_observation_are_unresolved(tmp_path: Path) -> None:
@@ -239,6 +244,46 @@ def test_inspect_context_tokens_without_observation_are_unresolved(tmp_path: Pat
     assert metrics["tokens"].value is None
     assert metrics["tokens"].state == "unresolved"
     assert metrics["token_observation_coverage"].value == 0.0
+
+
+def test_ledger_rows_carry_append_time_stamps(tmp_path: Path) -> None:
+    run_ledger.append(tmp_path, _row("run-1"))
+    rows, _ = run_ledger.entries(tmp_path)
+    assert len(rows) == 1
+    assert rows[0].recorded_at is not None
+
+
+def test_timeline_critical_path_requires_full_timestamp_coverage(tmp_path: Path) -> None:
+    # full coverage → path resolves in timestamp order
+    run_ledger.append(tmp_path, _row("run-1"))
+    from apiforge.agentops.timeline import build_timeline
+
+    timeline = build_timeline(tmp_path, "run-1")
+    assert timeline.timestamp_coverage == 1.0
+    assert len(timeline.critical_path) == len(timeline.events) == 1
+
+    # a legacy row without a stamp drops coverage → path stays unresolved
+    legacy = {
+        "schema": "apiforge/run-ledger-entry/v1",
+        "version": 1,
+        "run_id": "run-2",
+        "verb": "context capsule",
+        "detail_level": "normal",
+        "source": "contract",
+        "cost": {},
+        "refs": [],
+        "recorded_at": None,
+        "payload_bytes": 0,
+    }
+    from apiforge.economy.ledger import ledger_path
+
+    path = ledger_path(tmp_path)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(legacy) + "\n")
+    timeline = build_timeline(tmp_path, "run-2")
+    assert timeline.timestamp_coverage is not None and timeline.timestamp_coverage < 1.0
+    assert timeline.critical_path == ()
+    assert any("critical path unresolved" in item for item in timeline.unresolved)
 
 
 def test_inspect_context_tokens_expose_partial_coverage(tmp_path: Path) -> None:

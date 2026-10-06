@@ -1,0 +1,97 @@
+# §28 API Forge Lab — declared experimental scenario catalog.
+# Every cell is either covered (fixture/eval/proof pointer) or a named
+# declared-gap. The lab is opt-in, isolated, local-first and
+# evidence-producing; no scenario is required for basic use.
+version: 1
+scenarios:
+  - kind: breaking change
+    fixture: tests/fixtures/openapi/orders-v2-breaking.yaml
+    proof: tests/contract_intel/test_contract_intel.py
+    note: "contract-intel diff classifies orders-v1 -> v2 as breaking"
+  - kind: schema evolution
+    fixture: tests/fixtures/openapi/orders-v1-complete.yaml
+    proof: tests/contract_intel/test_contract_intel.py
+    note: "unified impact report covers additive vs breaking schema moves"
+  - kind: backward compatibility
+    fixture: tests/fixtures/openapi/orders-v1.yaml
+    proof: tests/contract_intel/test_contract_intel.py
+    note: "compat classification is the same deterministic diff path"
+  - kind: latency regression
+    fixture: tests/labs/proofs/latency-regression.yaml
+    proof: tests/labs/test_scenario_proofs.py
+    note: "deterministic baseline delta proof; production latency remains external"
+  - kind: auth migration
+    fixture: tests/labs/proofs/auth-migration.yaml
+    proof: tests/labs/test_scenario_proofs.py
+    note: "deterministic policy transition proof; provider IAM remains external"
+  - kind: rate limit
+    fixture: tests/labs/proofs/rate-limit.yaml
+    proof: tests/labs/test_scenario_proofs.py
+    note: "deterministic admission proof; live quota remains external"
+  - kind: retry storm
+    fixture: tests/fixtures/resilience_app
+    eval: "resilience:resilience/retry-mutating"
+    note: "mutating retry without guard triggers AF-PERF-104"
+  - kind: timeout
+    fixture: tests/fixtures/resilience_app
+    eval: "resilience:resilience/timeout-missing"
+    note: "missing call-site timeout triggers AF-PERF-101"
+  - kind: circuit breaker
+    fixture: tests/fixtures/resilience_app
+    eval: "resilience:resilience/breaker-gap"
+    note: "absent breaker triggers AF-PERF-105"
+  - kind: event contract
+    fixture: tests/labs/proofs/event-contract.yaml
+    proof: tests/labs/test_scenario_proofs.py
+    note: "deterministic message envelope proof; broker delivery remains external"
+  - kind: idempotency
+    eval: "economy-extras:retrieve-idempotency"
+    fixture: evals/corpus/economy-extras/retrieve-idempotency.yaml
+    note: "idempotency retrieval semantics exercised by the economy corpus"
+  - kind: pagination
+    fixture: tests/labs/proofs/pagination.yaml
+    proof: tests/labs/test_scenario_proofs.py
+    note: "deterministic cursor boundary proof; datastore plan remains external"
+  - kind: version migration
+    fixture: tests/fixtures/migrations
+    proof: tests/migration
+    note: "go/java/python/platform-data migration fixtures drive migration tests"
+  - kind: recovery timeout
+    proof: tests/labs/test_runtime_convergence.py
+    note: "governed timeout ladder chooses bounded retry/terminal action"
+  - kind: recovery replan
+    proof: tests/runtime/test_recovery_execution.py
+    note: "engine real: failure -> recovery=replan -> new routed steps -> loop check -> executed invocation"
+  - kind: recovery fallback
+    proof: tests/runtime/test_recovery_execution.py
+    note: "engine real: provider failure -> recovery=fallback -> next ranked capability invoked"
+  - kind: loop detection
+    proof: tests/labs/test_runtime_convergence.py
+    note: "persisted strategy fingerprint repetition blocks before another attempt"
+  - kind: model router shadow
+    proof: tests/runtime/test_model_route_shadow.py
+    note: "engine real: execute_run persists a ModelRouteShadowReceipt while the declared adapter governs"
+  - kind: tool authorization denial
+    proof: tests/labs/test_runtime_convergence.py
+    note: "role tool denial retains AF code, field and unlock"
+  - kind: mcp target risk denial
+    proof: tests/labs/test_runtime_convergence.py
+    note: "engine real: allowed_targets=['*'] never authorizes a target whose risk classes exceed the grant"
+  - kind: trust taint admission
+    proof: tests/labs/test_runtime_convergence.py
+    note: "engine real: denied taints and trust floors trim refs at role admission with AF codes"
+  - kind: memory stale
+    proof: tests/labs/test_runtime_convergence.py
+    note: "stale memory degrades read-only retrieval and is ineligible for destructive use"
+  - kind: memory conflict
+    proof: tests/labs/test_runtime_convergence.py
+    note: "applicable trusted fresh contradiction returns explicit review/quarantine"
+  - kind: memory destructive conflict
+    proof: tests/labs/test_runtime_convergence.py
+    note: "engine real: risk=destructive collapses trusted contradictions to quarantine; both records excluded"
+  - kind: context missing evidence
+    proof: tests/labs/test_runtime_convergence.py
+    note: "required evidence remains in denominator and marks coverage missing"
+  - kind: challenger comparison
+    proof: tests/runtime/test_challenger_comparison.py
+    note: "engine real: challenger shadows, never governs, and emits a ChallengerComparison receipt"

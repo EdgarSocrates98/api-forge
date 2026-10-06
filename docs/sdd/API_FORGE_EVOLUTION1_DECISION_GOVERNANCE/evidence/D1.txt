@@ -1,0 +1,1 @@
+D1: request/result contracts and evidence refusal are deterministic.

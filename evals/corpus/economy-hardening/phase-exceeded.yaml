@@ -1,0 +1,6 @@
+id: phase-exceeded
+kind: phase
+profile: economy
+usage:
+  build: {calls: 9}
+expect: exceeded

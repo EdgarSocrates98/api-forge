@@ -1,0 +1,4 @@
+=== ruff check ===
+All checks passed!
+=== mypy strict ===
+Success: no issues found in 9 source files

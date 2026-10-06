@@ -1,0 +1,162 @@
+openapi: 3.1.0
+info:
+  title: Payments API
+  version: 1.0.0
+paths:
+  /payments:
+    get:
+      operationId: listPayments
+      parameters:
+        - {name: cursor, in: query, required: false, schema: {type: string}}
+        - {name: limit, in: query, required: false, schema: {type: integer, maximum: 100}}
+      responses:
+        "200":
+          description: Payment page
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentPage"
+    post:
+      operationId: createPayment
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaymentRequest"
+      responses:
+        "201":
+          description: Payment accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Payment"
+        "409":
+          description: Idempotency conflict
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+  /payments/{payment_id}:
+    get:
+      operationId: getPayment
+      parameters:
+        - {name: payment_id, in: path, required: true, schema: {type: string}}
+      responses:
+        "200":
+          description: Payment found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Payment"
+        "404":
+          description: Payment not found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+  /payments/{payment_id}/refunds:
+    post:
+      operationId: refundPayment
+      parameters:
+        - {name: payment_id, in: path, required: true, schema: {type: string}}
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefundRequest"
+      responses:
+        "201":
+          description: Refund accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Refund"
+  /customers/{customer_id}:
+    get:
+      operationId: getCustomer
+      parameters:
+        - {name: customer_id, in: path, required: true, schema: {type: string}}
+      responses:
+        "200":
+          description: Customer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+  /health:
+    get:
+      operationId: health
+      responses:
+        "200":
+          description: Service healthy
+components:
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema: {type: string, minLength: 8}
+  schemas:
+    Money:
+      type: object
+      required: [amount, currency]
+      properties:
+        amount: {type: integer, description: Minor units}
+        currency: {type: string, pattern: "^[A-Z]{3}$"}
+    PaymentRequest:
+      type: object
+      required: [customer_id, amount, method]
+      properties:
+        customer_id: {type: string}
+        amount: {$ref: "#/components/schemas/Money"}
+        method: {type: string, enum: [card, pix, boleto]}
+        description: {type: string, maxLength: 140}
+        idempotency_key: {type: string}
+    Payment:
+      type: object
+      required: [payment_id, status, amount]
+      properties:
+        payment_id: {type: string}
+        status: {type: string, enum: [pending, authorized, captured, failed]}
+        amount: {$ref: "#/components/schemas/Money"}
+        created_at: {type: string, format: date-time}
+    PaymentPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items: {$ref: "#/components/schemas/Payment"}
+        next_cursor: {type: string}
+    RefundRequest:
+      type: object
+      required: [amount, reason]
+      properties:
+        amount: {$ref: "#/components/schemas/Money"}
+        reason: {type: string, enum: [duplicate, fraud, requested_by_customer]}
+    Refund:
+      type: object
+      required: [refund_id, payment_id, status]
+      properties:
+        refund_id: {type: string}
+        payment_id: {type: string}
+        status: {type: string, enum: [pending, succeeded, failed]}
+        amount: {$ref: "#/components/schemas/Money"}
+    Customer:
+      type: object
+      properties:
+        customer_id: {type: string}
+        email: {type: string, format: email}
+        segment: {type: string}
+    Problem:
+      type: object
+      required: [type, title, status]
+      properties:
+        type: {type: string}
+        title: {type: string}
+        status: {type: integer}
+        detail: {type: string}

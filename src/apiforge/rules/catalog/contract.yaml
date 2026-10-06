@@ -1,0 +1,42 @@
+catalog_version: 1
+schema_version: 1
+area: CONTRACT
+retrieved: 2026-09-21
+rules:
+  - id: AF-CONTRACT-001
+    title: Contract operation has no implementation
+    severity: high
+    rationale: >-
+      A contract operation without a matching code route means clients can call
+      an endpoint the service does not serve.
+    remediation: >-
+      Implement the route or remove the operation from the contract.
+    reference: docs/specs/2026-09-21-api-forge-design.md
+  - id: AF-CODE-001
+    title: Duplicate code route
+    severity: medium
+    rationale: >-
+      Two handlers bound to the same method and path make the served behavior
+      depend on registration order.
+    remediation: >-
+      Keep a single handler per method/path pair or give them distinct paths.
+    reference: docs/specs/2026-09-21-api-forge-design.md
+  - id: AF-CODE-002
+    title: Code route missing from contract
+    severity: medium
+    rationale: >-
+      A served route absent from the contract is invisible to generated clients
+      and undocumented to consumers.
+    remediation: >-
+      Add the operation to the contract or remove the route.
+    reference: docs/specs/2026-09-21-api-forge-design.md
+  - id: AF-CODE-003
+    title: Route could not be resolved statically
+    severity: low
+    rationale: >-
+      A dynamic route expression keeps the inventory incomplete, so presence or
+      absence findings near it cannot be confirmed.
+    remediation: >-
+      Replace the dynamic expression with a literal path or register the route
+      through a static include.
+    reference: docs/specs/2026-09-21-api-forge-design.md

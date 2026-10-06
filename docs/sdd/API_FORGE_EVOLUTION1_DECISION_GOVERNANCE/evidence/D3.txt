@@ -1,0 +1,1 @@
+D3: catalog, docs, tests and SDD hashes preserve the authorization boundary.

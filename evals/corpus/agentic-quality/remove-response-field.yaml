@@ -1,0 +1,5 @@
+id: remove-response-field
+outcome: remove the status field from the Order response
+risk: sensitive
+ground_truth: breaking
+default_verdict: breaking

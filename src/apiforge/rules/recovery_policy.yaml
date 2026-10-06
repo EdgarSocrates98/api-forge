@@ -1,0 +1,36 @@
+# Recovery policy (step11 phase 4, §26): declarative per-class strategies.
+# strategy is an ordered ladder walked by attempt number; max_attempts caps
+# how many recovery tries the class gets before the ladder's terminal action
+# fires. Terminal actions are always escalate or stop — never silent retry.
+schema: apiforge/recovery-policy/v1
+classes:
+  missing_evidence:
+    strategy: [escalate, stop]
+    max_attempts: 1
+  invalid_input:
+    strategy: [replan, stop]
+    max_attempts: 1
+  timeout:
+    strategy: [retry, escalate]
+    max_attempts: 2
+  provider_failure:
+    strategy: [retry, fallback, escalate]
+    max_attempts: 2
+  tool_failure:
+    strategy: [retry, fallback, escalate]
+    max_attempts: 2
+  policy_conflict:
+    strategy: [escalate, stop]
+    max_attempts: 0
+  budget_exhausted:
+    strategy: [stop]
+    max_attempts: 0
+  security_refusal:
+    strategy: [escalate, stop]
+    max_attempts: 0
+  strategy_failure:
+    strategy: [replan, fallback, escalate]
+    max_attempts: 2
+  deterministic_conflict:
+    strategy: [escalate, stop]
+    max_attempts: 0

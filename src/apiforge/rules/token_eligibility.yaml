@@ -1,0 +1,9 @@
+# Token eligibility (economy hardening 2). Only ledger rows that describe a
+# model-facing call belong in the token-coverage denominator; deterministic
+# attribution rows (capsule, cache, routing) never consume provider tokens.
+# A row that carries measured tokens is always eligible.
+schema: apiforge/token-eligibility/v1
+verb_prefixes:
+  - "runtime role:"
+  - "provider"
+  - "transcript"

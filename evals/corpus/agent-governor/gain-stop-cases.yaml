@@ -1,0 +1,47 @@
+# Gain scoring and the §25 stop decision: high unresolved drives gain and
+# continues; agreement+coverage drives the score down and stops.
+id: gain-stop-cases
+gain:
+  action: start_debate
+  signals:
+    agreement: 0.0
+    unresolved_share: 0.9
+    evidence_coverage: 0.2
+    confidence: 0.3
+    novelty_potential: 0.8
+    remaining_budget: 1.0
+    role_coverage: 1.0
+    context_coverage: 0.2
+expect:
+  level: high
+stop:
+  action: call_reviewer
+  signals:
+    agreement: 0.95
+    unresolved_share: 0.0
+    evidence_coverage: 0.95
+    confidence: 0.9
+    novelty_potential: 0.0
+    remaining_budget: 1.0
+    role_coverage: 1.0
+    context_coverage: 1.0
+  threshold: 0.33
+expect:
+  stop_decision: stop
+  stop_code: AF-GOV-STOP-LOW-GAIN
+recovery:
+  failure_class: provider_failure
+  attempt: 3
+expect:
+  recovery_decision: escalate
+  recovery_code: AF-GOV-RECOVERY-EXHAUSTED
+loop:
+  strategies:
+    - {plan: retry-same}
+    - {plan: different}
+    - {plan: retry-same}
+    - {plan: retry-same}
+  window: 5
+  max_repeats: 2
+expect:
+  blocked: true

@@ -1,0 +1,6 @@
+{"results": [
+  {"check_id": "python.flask.security.injection", "path": "app/routes.py",
+   "start": {"line": 42}, "extra": {"severity": "ERROR"}},
+  {"check_id": "python.jwt.unverified-decode", "path": "app/auth.py",
+   "start": {"line": 17}, "extra": {"severity": "WARNING"}}
+], "errors": []}

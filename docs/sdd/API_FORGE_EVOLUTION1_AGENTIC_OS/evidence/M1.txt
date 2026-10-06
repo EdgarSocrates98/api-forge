@@ -1,0 +1,3 @@
+pytest -q tests/agentic_state/test_memory_blackboard.py
+19 passed, 1 skipped
+M1: governed memory contracts, policy refusals and environment/freshness checks passed.

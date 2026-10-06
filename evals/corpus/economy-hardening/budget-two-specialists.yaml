@@ -1,0 +1,4 @@
+id: budget-two-specialists
+kind: budget
+context_bytes: 32000
+roles: [specialist, specialist, reviewer]

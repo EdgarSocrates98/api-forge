@@ -1,0 +1,10 @@
+id: complex-deep
+shape: complex
+risk: read_only
+size: L
+profile: deep
+expected:
+  effective: deep
+  minimum_roles:
+  - critic
+  - reviewer

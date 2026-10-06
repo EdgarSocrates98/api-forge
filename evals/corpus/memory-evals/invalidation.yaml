@@ -1,0 +1,13 @@
+id: invalidation-plan
+axis: memory_invalidation
+setup:
+  records:
+    - {scope: task, origin: system, trust_level: verified, evidence_refs: ["ctx://e1"], environment_fingerprint: "python-3.11", payload: {note: "3.11-specific behavior"}}
+    - {scope: task, origin: system, trust_level: verified, evidence_refs: ["ctx://e2"], payload: {note: "version-agnostic"}}
+action:
+  type: invalidate_suggest
+  trigger: runtime_change
+  environment_fingerprint: "python-3.12"
+expect:
+  memory_ids: ["memory:0000000000000000"]
+  absent_ids: ["memory:0000000000000001"]

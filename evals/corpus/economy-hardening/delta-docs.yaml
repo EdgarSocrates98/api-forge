@@ -1,0 +1,5 @@
+id: delta-docs
+kind: delta
+path: docs/guide.md
+expect_status: ready
+expect_unmapped_source: false

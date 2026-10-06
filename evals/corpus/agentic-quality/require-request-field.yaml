@@ -1,0 +1,7 @@
+id: require-request-field
+outcome: make customer_id required in the create order request
+risk: sensitive
+ground_truth: breaking
+default_verdict: breaking
+responses:
+  task-review: compatible

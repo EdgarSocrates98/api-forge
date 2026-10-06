@@ -1,0 +1,2 @@
+T2: Local span append/query and CLI/MCP projections return the same versioned
+payloads without network calls.

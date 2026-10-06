@@ -1,0 +1,9 @@
+domain: versioning
+version: 1
+areas: [REST, BREAKING]
+rule_ids:
+  - AF-REST-007
+  - AF-BREAK-006
+summary: >-
+  Versioning as a declared strategy - URI/header/media-type placement and semver applied to the contract, not the implementation.
+verified: "2026-09-21"

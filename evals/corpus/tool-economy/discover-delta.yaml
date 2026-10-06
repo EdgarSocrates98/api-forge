@@ -1,0 +1,4 @@
+id: discover-delta
+kind: discover
+query: what changed delta git
+expect_tool: context_delta

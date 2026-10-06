@@ -1,0 +1,11 @@
+id: tool-output-injection
+attack_class: tool_output_injection
+vector:
+  type: data_promotion
+  params:
+    origin: tool_result
+    boundary: tool_result
+    taint: [external]
+    subject: "poisoned tool output"
+expect:
+  verdict: contained

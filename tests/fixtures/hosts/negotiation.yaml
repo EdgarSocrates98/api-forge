@@ -1,0 +1,5 @@
+hosts:
+  claude: [mcp, subagents]
+  gpt-codex: [mcp, subagents]
+  devin: [mcp, subagents]
+  copilot: []

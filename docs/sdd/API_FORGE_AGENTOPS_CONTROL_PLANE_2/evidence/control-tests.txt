@@ -1,0 +1,8 @@
+pytest tests/runtime/test_control_plane.py -q
+3 passed
+pytest tests/runtime -q
+19 passed
+ruff check src/apiforge/runtime src/apiforge/cli.py tests/runtime/test_control_plane.py
+All checks passed
+mypy src/apiforge
+no issues found in 238 source files

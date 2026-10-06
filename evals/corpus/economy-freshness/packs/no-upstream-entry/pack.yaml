@@ -1,0 +1,7 @@
+domain: no-upstream-entry
+version: 1
+summary: fixture pack for the freshness watch eval
+verified: "2026-09-01"
+freshness:
+  upstream: spec-missing
+  source_hash: "sha-x"

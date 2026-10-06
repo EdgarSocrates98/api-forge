@@ -1,0 +1,152 @@
+{
+  "facts": [
+    {
+      "attrs": {
+        "function": "secret",
+        "reachable": false,
+        "router": "hidden",
+        "via": null
+      },
+      "fact_id": "fact:5651fe1004c31318",
+      "kind": "code.route",
+      "measures": {
+        "method": "get",
+        "path": "/secret"
+      },
+      "source": {
+        "column": null,
+        "extractor": "fastapi",
+        "line": 6,
+        "path": "app/routes/hidden.py",
+        "sha256": "4d499f6e8928d103de43096e67b868816e4c4694f183b5c454501ee818d5912f"
+      },
+      "version": 1
+    },
+    {
+      "attrs": {
+        "function": "create_order",
+        "reachable": true,
+        "router": "router",
+        "via": "app/main.py:7"
+      },
+      "fact_id": "fact:b421560a83ac4077",
+      "kind": "code.route",
+      "measures": {
+        "method": "post",
+        "path": "/v1/orders"
+      },
+      "source": {
+        "column": null,
+        "extractor": "fastapi",
+        "line": 16,
+        "path": "app/routes/orders.py",
+        "sha256": "2ecfbd45ef3d068a0928ecae681b0e757acc09ae72ceb4366b8170afdd0b6e48"
+      },
+      "version": 1
+    },
+    {
+      "attrs": {
+        "function": "create_order_again",
+        "reachable": true,
+        "router": "router",
+        "via": "app/main.py:7"
+      },
+      "fact_id": "fact:b781c86d735f1129",
+      "kind": "code.route",
+      "measures": {
+        "method": "post",
+        "path": "/v1/orders"
+      },
+      "source": {
+        "column": null,
+        "extractor": "fastapi",
+        "line": 21,
+        "path": "app/routes/orders.py",
+        "sha256": "2ecfbd45ef3d068a0928ecae681b0e757acc09ae72ceb4366b8170afdd0b6e48"
+      },
+      "version": 1
+    },
+    {
+      "attrs": {
+        "function": "list_orders",
+        "reachable": true,
+        "router": "router",
+        "via": "app/main.py:7"
+      },
+      "fact_id": "fact:6aac6103de6ebdc7",
+      "kind": "code.route",
+      "measures": {
+        "method": "get",
+        "path": "/v1/orders/"
+      },
+      "source": {
+        "column": null,
+        "extractor": "fastapi",
+        "line": 11,
+        "path": "app/routes/orders.py",
+        "sha256": "2ecfbd45ef3d068a0928ecae681b0e757acc09ae72ceb4366b8170afdd0b6e48"
+      },
+      "version": 1
+    },
+    {
+      "attrs": {
+        "function": "get_order",
+        "reachable": true,
+        "router": "router",
+        "via": "app/main.py:7"
+      },
+      "fact_id": "fact:b938d5ca3d11a5d0",
+      "kind": "code.route",
+      "measures": {
+        "method": "get",
+        "path": "/v1/orders/{order_id}"
+      },
+      "source": {
+        "column": null,
+        "extractor": "fastapi",
+        "line": 6,
+        "path": "app/routes/orders.py",
+        "sha256": "2ecfbd45ef3d068a0928ecae681b0e757acc09ae72ceb4366b8170afdd0b6e48"
+      },
+      "version": 1
+    },
+    {
+      "attrs": {
+        "operation_id": "listOrders"
+      },
+      "fact_id": "fact:69b729a0070ef2d7",
+      "kind": "contract.operation",
+      "measures": {
+        "method": "get",
+        "path": "/orders"
+      },
+      "source": {
+        "column": null,
+        "extractor": "openapi",
+        "line": null,
+        "path": "E:/projetos/api-forge/tests/fixtures/openapi/orders-v1.yaml",
+        "sha256": "12f6f441b9de279b8c1a01a115f3edfa8bd5c7aa4ecdad7b5f5f9364b2909311"
+      },
+      "version": 1
+    },
+    {
+      "attrs": {
+        "operation_id": "createOrder"
+      },
+      "fact_id": "fact:4246297bbb062b63",
+      "kind": "contract.operation",
+      "measures": {
+        "method": "post",
+        "path": "/orders"
+      },
+      "source": {
+        "column": null,
+        "extractor": "openapi",
+        "line": null,
+        "path": "E:/projetos/api-forge/tests/fixtures/openapi/orders-v1.yaml",
+        "sha256": "12f6f441b9de279b8c1a01a115f3edfa8bd5c7aa4ecdad7b5f5f9364b2909311"
+      },
+      "version": 1
+    }
+  ]
+}

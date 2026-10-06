@@ -1,0 +1,222 @@
+{
+  "cases": 10,
+  "gates": {
+    "delta_recall": true,
+    "identical_bytes": true,
+    "invalidation_precision": true,
+    "invalidation_recall": true,
+    "stale_reuse_zero": true,
+    "warm_hit_rate": true
+  },
+  "passed": true,
+  "rows": [
+    {
+      "case_id": "fastapi-contract-operation",
+      "delta_recall": 1.0,
+      "delta_targets": [
+        "GET /customers/{customer_id}",
+        "GET /health",
+        "GET /payments",
+        "GET /payments/{payment_id}",
+        "POST /payments",
+        "POST /payments/{payment_id}/refunds"
+      ],
+      "expected_invalidated": [
+        "GET /payments"
+      ],
+      "identical_bytes": true,
+      "invalidated": [
+        "GET /payments"
+      ],
+      "precision": 1.0,
+      "recall": 1.0,
+      "reused_after_change": 5,
+      "stale_reuse": [],
+      "targets": 6,
+      "warm_hit_rate": 1.0
+    },
+    {
+      "case_id": "fastapi-contract",
+      "delta_recall": 1.0,
+      "delta_targets": [
+        "GET /customers/{customer_id}",
+        "GET /health",
+        "GET /payments",
+        "GET /payments/{payment_id}",
+        "POST /payments",
+        "POST /payments/{payment_id}/refunds"
+      ],
+      "expected_invalidated": [],
+      "identical_bytes": true,
+      "invalidated": [],
+      "precision": 1.0,
+      "recall": 1.0,
+      "reused_after_change": 6,
+      "stale_reuse": [],
+      "targets": 6,
+      "warm_hit_rate": 1.0
+    },
+    {
+      "case_id": "fastapi-customers-route",
+      "delta_recall": 1.0,
+      "delta_targets": [
+        "GET /customers/{customer_id}"
+      ],
+      "expected_invalidated": [
+        "GET /customers/{customer_id}"
+      ],
+      "identical_bytes": true,
+      "invalidated": [
+        "GET /customers/{customer_id}"
+      ],
+      "precision": 1.0,
+      "recall": 1.0,
+      "reused_after_change": 5,
+      "stale_reuse": [],
+      "targets": 6,
+      "warm_hit_rate": 1.0
+    },
+    {
+      "case_id": "fastapi-models",
+      "delta_recall": 1.0,
+      "delta_targets": [
+        "GET /customers/{customer_id}",
+        "GET /payments",
+        "GET /payments/{payment_id}",
+        "POST /payments",
+        "POST /payments/{payment_id}/refunds"
+      ],
+      "expected_invalidated": [],
+      "identical_bytes": true,
+      "invalidated": [],
+      "precision": 1.0,
+      "recall": 1.0,
+      "reused_after_change": 6,
+      "stale_reuse": [],
+      "targets": 6,
+      "warm_hit_rate": 1.0
+    },
+    {
+      "case_id": "fastapi-money-field",
+      "delta_recall": 1.0,
+      "delta_targets": [
+        "GET /customers/{customer_id}",
+        "GET /payments",
+        "GET /payments/{payment_id}",
+        "POST /payments",
+        "POST /payments/{payment_id}/refunds"
+      ],
+      "expected_invalidated": [
+        "GET /payments",
+        "GET /payments/{payment_id}",
+        "POST /payments",
+        "POST /payments/{payment_id}/refunds"
+      ],
+      "identical_bytes": true,
+      "invalidated": [
+        "GET /payments",
+        "GET /payments/{payment_id}",
+        "POST /payments",
+        "POST /payments/{payment_id}/refunds"
+      ],
+      "precision": 1.0,
+      "recall": 1.0,
+      "reused_after_change": 2,
+      "stale_reuse": [],
+      "targets": 6,
+      "warm_hit_rate": 1.0
+    },
+    {
+      "case_id": "fastapi-test-file",
+      "delta_recall": 1.0,
+      "delta_targets": [
+        "GET /payments/{payment_id}",
+        "POST /payments",
+        "POST /payments/{payment_id}/refunds"
+      ],
+      "expected_invalidated": [
+        "GET /payments/{payment_id}",
+        "POST /payments",
+        "POST /payments/{payment_id}/refunds"
+      ],
+      "identical_bytes": true,
+      "invalidated": [
+        "GET /payments/{payment_id}",
+        "POST /payments",
+        "POST /payments/{payment_id}/refunds"
+      ],
+      "precision": 1.0,
+      "recall": 1.0,
+      "reused_after_change": 3,
+      "stale_reuse": [],
+      "targets": 6,
+      "warm_hit_rate": 1.0
+    },
+    {
+      "case_id": "fastapi-unchanged",
+      "delta_recall": 1.0,
+      "delta_targets": [],
+      "expected_invalidated": [],
+      "identical_bytes": true,
+      "invalidated": [],
+      "precision": 1.0,
+      "recall": 1.0,
+      "reused_after_change": 6,
+      "stale_reuse": [],
+      "targets": 6,
+      "warm_hit_rate": 1.0
+    },
+    {
+      "case_id": "fastapi-unrelated-file",
+      "delta_recall": 1.0,
+      "delta_targets": [],
+      "expected_invalidated": [],
+      "identical_bytes": true,
+      "invalidated": [],
+      "precision": 1.0,
+      "recall": 1.0,
+      "reused_after_change": 6,
+      "stale_reuse": [],
+      "targets": 6,
+      "warm_hit_rate": 1.0
+    },
+    {
+      "case_id": "spring-payment-request-field",
+      "delta_recall": 1.0,
+      "delta_targets": [
+        "POST /payments"
+      ],
+      "expected_invalidated": [
+        "POST /payments"
+      ],
+      "identical_bytes": true,
+      "invalidated": [
+        "POST /payments"
+      ],
+      "precision": 1.0,
+      "recall": 1.0,
+      "reused_after_change": 5,
+      "stale_reuse": [],
+      "targets": 6,
+      "warm_hit_rate": 1.0
+    },
+    {
+      "case_id": "spring-payment-request",
+      "delta_recall": 1.0,
+      "delta_targets": [
+        "POST /payments"
+      ],
+      "expected_invalidated": [],
+      "identical_bytes": true,
+      "invalidated": [],
+      "precision": 1.0,
+      "recall": 1.0,
+      "reused_after_change": 6,
+      "stale_reuse": [],
+      "targets": 6,
+      "warm_hit_rate": 1.0
+    }
+  ],
+  "schema": "apiforge/cache-eval/v1",
+  "stale_reuse_cases": []
+}

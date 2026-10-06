@@ -1,0 +1,20 @@
+{
+  "items": [
+    {
+      "stageName": "prod",
+      "deploymentId": "dep1",
+      "cacheClusterEnabled": true,
+      "cacheClusterSize": "0.5",
+      "accessLogSettings": {"format": "$context.requestId", "destinationArn": "arn:aws:logs:us-east-1:1:log-group:gw"},
+      "methodSettings": {
+        "*/*": {"throttlingRateLimit": 1000, "throttlingBurstLimit": 500, "loggingLevel": "INFO", "cachingEnabled": false},
+        "GET/orders": {"cachingEnabled": true, "cacheTtlInSeconds": 300}
+      }
+    },
+    {
+      "stageName": "dev",
+      "deploymentId": "dep2",
+      "cacheClusterEnabled": false
+    }
+  ]
+}

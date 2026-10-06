@@ -1,0 +1,16 @@
+id: go-orders-create
+fixture: tests/fixtures/go_orders
+contract: tests/fixtures/openapi/orders-v1.yaml
+target: POST /orders
+level: L3
+budget_bytes: 16000
+required_refs:
+- path: openapi.yaml
+  symbol: createOrder
+  kind: contract
+- path: openapi.yaml
+  symbol: total
+  kind: schema
+- path: proj/internal/orders/chi.go
+  symbol: createOrder
+  kind: code

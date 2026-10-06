@@ -1,0 +1,4 @@
+    class HostProjection(VersionedContract):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+18 passed, 1 skipped, 11 warnings in 8.92s

@@ -1,0 +1,17 @@
+{
+  "vertical": "api-git-cicd",
+  "state": "supported",
+  "expected": "review",
+  "required_evidence": ["case.json", "next-step.json", "graph.json", "receipt.json", "brief.json"],
+  "required_recommendation_fields": [
+    "recommendation",
+    "facts",
+    "assumptions",
+    "alternatives",
+    "risks",
+    "unresolved",
+    "evidence_refs",
+    "verifier",
+    "confidence"
+  ]
+}

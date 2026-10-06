@@ -1,0 +1,18 @@
+{
+  "extracted": {
+    "tasks": [
+      {
+        "id": "A1",
+        "status": "done"
+      },
+      {
+        "id": "A2",
+        "status": "pending"
+      }
+    ]
+  },
+  "kind": "plan.tasks",
+  "recorded_at": "2026-09-21T00:00:00Z",
+  "source_path": "E:\\projetos\\api-forge\\.pytest-tmp\\test_plan_tasks_extracts_task_0\\plan.md",
+  "source_sha256": "49332ba3b111b98fb3163a253a6829dc9d905531c0c458de118e41589ff0dfad"
+}

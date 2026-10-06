@@ -1,0 +1,24 @@
+{
+  "adapter_errors": [],
+  "artifact_refs": [
+    "case.json"
+  ],
+  "base_sha": "0000000000000000000000000000000000000000",
+  "details": {},
+  "head_sha": "1111111111111111111111111111111111111111",
+  "repository": "example/repo",
+  "run_id": "run",
+  "source": "artifact",
+  "stages": [
+    {
+      "duration_ms": 1.0,
+      "error_code": null,
+      "stage": "analyze",
+      "status": "ok",
+      "version": 1
+    }
+  ],
+  "status": "review",
+  "unresolved": [],
+  "version": 1
+}

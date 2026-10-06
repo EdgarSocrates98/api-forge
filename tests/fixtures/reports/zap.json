@@ -1,0 +1,6 @@
+{"site": [{"@name": "http://localhost:8080",
+  "alerts": [
+    {"alert": "Content Security Policy Header Not Set", "riskcode": "2", "instances": [{"uri": "/orders"}]},
+    {"alert": "X-Content-Type-Options Header Missing", "riskcode": "1", "instances": [{"uri": "/orders"}, {"uri": "/health"}]},
+    {"alert": "SQL Injection", "riskcode": "3", "instances": [{"uri": "/orders?id=1"}]}
+  ]}]}

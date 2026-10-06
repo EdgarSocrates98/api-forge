@@ -1,0 +1,5 @@
+id: expertise-dynamodb
+kind: expertise
+intent: choose the DynamoDB partition key for payments
+expect_packs:
+- dynamodb

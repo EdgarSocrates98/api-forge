@@ -1,0 +1,8 @@
+runtime: spring-boot
+constraints:
+  - component: java
+    min: "17"
+    note: Boot 3.x baseline; Boot 2.x reaches end of support
+  - component: spring-boot
+    range: ">=3.2 <4"
+    verified: "2026-09-21"

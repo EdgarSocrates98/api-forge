@@ -1,0 +1,5 @@
+sources:
+  - name: "net/http package docs"
+    url: https://pkg.go.dev/net/http
+    authority: vendor-docs
+    verified: "2026-09-21"

@@ -1,0 +1,5 @@
+full suite: 1218 passed, 1 skipped
+H1 security/context: tests/security/test_source_paths.py, tests/context/test_gateway_trust.py
+H2: tests/economy/test_hardening_accounting.py, tests/runtime/test_role_context_supervisor.py, tests/economy/test_selective_agentics.py
+H3: tests/runtime/test_economy_plan.py, tests/cache/test_cache_store.py, tests/knowledge/test_knowledge_generation.py
+H4: tests/economy/test_hardening_reporting.py

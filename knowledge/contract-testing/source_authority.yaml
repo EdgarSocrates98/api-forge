@@ -1,0 +1,9 @@
+sources:
+  - name: "Pact documentation"
+    url: https://docs.pact.io/
+    authority: vendor-docs
+    verified: "2026-09-21"
+  - name: "Schemathesis documentation"
+    url: https://schemathesis.readthedocs.io/
+    authority: vendor-docs
+    verified: "2026-09-21"

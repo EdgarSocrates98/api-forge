@@ -1,0 +1,5 @@
+kind: memory conflict
+status: covered
+input: applicable=true,trusted=true,fresh=true,contradictory=true
+expected: readonly=review,destructive=quarantine
+evidence: deterministic scalar conflict fixture only; no semantic provider claim

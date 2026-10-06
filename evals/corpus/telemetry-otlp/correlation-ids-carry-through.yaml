@@ -1,0 +1,13 @@
+id: correlation-ids-carry-through
+summary: §51 ids ride the span into OTLP attributes; unresolved stays named
+spans:
+  - operation: decision
+    decision_id: dec-7
+    memory_id: mem-3
+    context_id: ctx-9
+    status: unresolved
+    unresolved: [approval]
+expect:
+  accepted: true
+  span_count: 1
+  operations: [decision]

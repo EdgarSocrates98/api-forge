@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "schema_version": "af-change-bundle/1",
+  "repository": "example/api-forge-orders",
+  "base_sha": "0000000000000000000000000000000000000001",
+  "head_sha": "0000000000000000000000000000000000000002",
+  "origin": "replay",
+  "provider": "artifact",
+  "contract": "tests/fixtures/openapi/orders-v1.yaml",
+  "project": "tests/fixtures/fastapi_orders",
+  "policy": {
+    "version": 1,
+    "read_only": true,
+    "mutation_allowed": false,
+    "untrusted_input": true,
+    "limitations": ["fixture is local and provider-neutral"]
+  },
+  "limitations": ["live provider freshness is not proven by replay"]
+}

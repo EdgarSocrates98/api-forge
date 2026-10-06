@@ -1,0 +1,5 @@
+{
+  "vertical": "database",
+  "state": "heuristic",
+  "expected": ["bounded lookup", "schema-backed entity"]
+}

@@ -1,0 +1,2 @@
+version: 1
+defaults: {read_only: maybe, local_reversible: allow, sensitive: gate, external_mutation: gate, destructive: gate, irreversible: deny}

@@ -1,0 +1,11 @@
+{
+  "overrides": [
+    {
+      "actor": "edgar",
+      "gate": "build-verified",
+      "phase": "verify",
+      "reason": "no tests yet",
+      "status": "ready"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "base": "main",
+  "dry_run": true,
+  "head": "feature",
+  "mutation_allowed": false,
+  "operation": "create_or_reuse",
+  "repository": "example/repo",
+  "schema_version": "af-github-pr-receipt/1"
+}

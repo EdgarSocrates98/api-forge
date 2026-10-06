@@ -1,0 +1,43 @@
+id: full-operation-coverage
+summary: all 18 §50 operations export as valid OTLP with gen_ai.operation.name
+spans:
+  - {operation: task}
+  - {operation: routing}
+  - {operation: context_build}
+  - {operation: context_expansion}
+  - {operation: retrieval}
+  - {operation: memory_read}
+  - {operation: memory_write}
+  - {operation: invoke_agent, agent_name: planner}
+  - {operation: invoke_model}
+  - {operation: execute_tool, tool_name: budget_check}
+  - {operation: handoff}
+  - {operation: review}
+  - {operation: debate}
+  - {operation: security_decision}
+  - {operation: decision, decision_id: dec-1}
+  - {operation: checkpoint}
+  - {operation: resume}
+  - {operation: promotion, decision_id: dec-1}
+expect:
+  accepted: true
+  span_count: 18
+  operations:
+    - task
+    - routing
+    - context_build
+    - context_expansion
+    - retrieval
+    - memory_read
+    - memory_write
+    - invoke_agent
+    - invoke_model
+    - execute_tool
+    - handoff
+    - review
+    - debate
+    - security_decision
+    - decision
+    - checkpoint
+    - resume
+    - promotion

@@ -1,0 +1,8 @@
+{
+  "dominant_area": "CONTRACT",
+  "finding_count": 8,
+  "phase": "verify",
+  "rationale": "Contract/code divergence surfacing at verify time is the governance question: style, compatibility, and lifecycle policy.",
+  "recommended_agent": "api-governance-reviewer",
+  "unmapped_count": 0
+}

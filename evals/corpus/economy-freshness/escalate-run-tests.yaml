@@ -1,0 +1,5 @@
+id: escalate-run-tests
+kind: escalate
+static: likely
+expect_action: run_tests
+expect_next: test

@@ -1,0 +1,5 @@
+sources:
+  - name: API Forge project runtime migration policy
+    url: https://github.com/luanmorenommaciel/api-forge
+    authority: project-docs
+    verified: "2026-09-22"

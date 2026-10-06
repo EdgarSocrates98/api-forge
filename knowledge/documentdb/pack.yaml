@@ -1,0 +1,10 @@
+domain: documentdb
+version: 1
+areas: [DATA, STORAGE]
+rule_ids:
+  - AF-DATA-011
+  - AF-DATA-012
+  - AF-STORE-003
+summary: >-
+  DocumentDB as MongoDB-compatible access plus AWS cluster posture (storage encryption, backup) measured from dumps.
+verified: "2026-09-21"

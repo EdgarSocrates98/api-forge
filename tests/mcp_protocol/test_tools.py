@@ -1,0 +1,231 @@
+"""MCP tool bodies: same payloads as the CLI, economy recorded as mcp:<verb>."""
+
+import json
+from pathlib import Path
+
+import pytest
+
+from apiforge.mcp import tools
+
+FIXTURES = Path(__file__).resolve().parents[1] / "fixtures"
+CONTRACT = FIXTURES / "openapi" / "orders-v1.yaml"
+PROJECT = FIXTURES / "fastapi_orders"
+
+
+def test_tools_export_all_expected_verbs() -> None:
+    names = {t.__name__ for t in tools.TOOLS}
+    assert names == {
+        "discover",
+        "analyze",
+        "judge",
+        "model_build",
+        "model_api_gateway",
+        "diff_contract",
+        "next_step",
+        "portable_inspect",
+        "portable_init",
+        "portable_status",
+        "portable_doctor",
+        "workspace_discover",
+        "workspace_status",
+        "workspace_graph",
+        "field_record",
+        "field_annotate",
+        "field_verify",
+        "field_report",
+        "workspace_add",
+        "context_resolve",
+        "change_control_run",
+        "change_control_collect",
+        "change_control_publish",
+        "change_control_surface",
+        "integration_github_issues",
+        "integration_health",
+        "integration_json",
+        "platform_verify_runtime",
+        "capabilities_list",
+        "capabilities_verify",
+        "rules_list",
+        "rules_lookup",
+        "playbook",
+        "economy_report",
+        "economy_stats",
+        "economy_explain",
+        "context_funnel",
+        "context_capsule",
+        "context_expand",
+        "context_delta",
+        "context_gc",
+        "cache_stats",
+        "cache_invalidate",
+        "knowledge_select",
+        "debate_packet",
+        "agents_audit",
+        "slice_tests",
+        "slice_log",
+        "mcp_surface",
+        "agentops_projection",
+        "agentops_inspect",
+        "agentops_timeline",
+        "agentops_compare",
+        "agentops_waste",
+        "mcp_audit",
+        "mcp_disclose",
+        "mcp_benchmark",
+        "economy_roi",
+        "economy_ledger",
+        "economy_pricing",
+        "economy_reconcile",
+        "governor_decide",
+        "governor_recover",
+        "governor_stop",
+        "control_routes",
+        "control_shadow",
+        "control_triggers",
+        "route_model",
+        "knowledge_adaptive",
+        "evals_replay",
+        "evals_gate",
+        "evals_economy_hardening",
+        "evals_agentic_quality",
+        "verify_plan",
+        "knowledge_search",
+        "evidence_resolve",
+        "economy_doctor",
+        "economy_tier",
+        "knowledge_watch",
+        "evidence_gate",
+        "verify_escalate",
+        "economy_phase_budget",
+        "runtime_checkpoint",
+        "graph_query",
+        "graph_impact",
+        "graph_trace",
+        "graph_coverage",
+        "index_status",
+        "task_status",
+        "task_compile",
+        "task_plan",
+        "task_verify",
+        "brief_show",
+        "contract_list",
+        "contract_show",
+        "model_dump",
+        "model_redis",
+        "model_otel",
+        "perf_compare",
+        "perf_verdict",
+        "perf_memory_search",
+        "perf_suggest",
+        "autonomy_status",
+        "knowledge_list",
+        "knowledge_show",
+        "knowledge_check",
+        "plan_architecture",
+        "run_list",
+        "perf_scenario",
+        "perf_chaos",
+        "model_resilience",
+        "runtime_run",
+        "runtime_status",
+        "runtime_resume",
+        "runtime_debate",
+        "runtime_approve",
+        "memory_propose",
+        "memory_persist",
+        "memory_search",
+        "memory_rank",
+        "memory_quarantine_list",
+        "memory_quarantine_resolve",
+        "blackboard_append",
+        "blackboard_query",
+        "budget_plan",
+        "budget_check",
+        "budget_spend",
+        "agent_span_append",
+        "agent_span_query",
+        "telemetry_export",
+        "telemetry_validate",
+        "decision_check",
+        "forge_capabilities",
+        "forge_inspect",
+        "forge_result",
+        "forge_evidence",
+        "forge_health",
+        "knowledge_drift",
+        "knowledge_impact",
+        "lab_scenarios",
+    }
+
+
+def test_new_read_tools_mirror_cli(tmp_path: Path) -> None:
+    """graph/index/task/brief/contract tools return the CLI-shaped payloads."""
+    from apiforge.application.analyze import analyze_project
+    from apiforge.contracts.task import TaskSpec
+    from apiforge.graph.build import build_graph
+    from apiforge.index.build import build_index
+    from apiforge.taskspec.service import create_task
+
+    case_dir = tmp_path / "case"
+    analyze_project(CONTRACT, PROJECT, None, case_dir)
+    graph_dir = tmp_path / "graph"
+    build_graph(case_dir, graph_dir)
+
+    assert tools.graph_coverage(str(graph_dir))["counts"]["finding"] > 0
+    q = tools.graph_query(str(graph_dir), kind="finding")
+    assert q["node_count"] > 0
+    backed = next(
+        json.loads(line)
+        for line in (graph_dir / "edges.jsonl").read_text().splitlines()
+        if line.strip() and json.loads(line)["kind"] == "backed_by"
+    )
+    tr = tools.graph_trace(str(graph_dir), backed["from_id"], backed["to_id"])
+    assert tr["reachable"] is True
+    im = tools.graph_impact(str(graph_dir), backed["to_id"])
+    assert im["impacted_count"] >= 1
+
+    build_index(PROJECT, tmp_path)
+    st = tools.index_status(str(PROJECT), str(tmp_path))
+    assert st["stale"] is False
+
+    create_task(tmp_path, TaskSpec.model_validate({"id": "mcp-1", "outcome": "x"}))
+    ts = tools.task_status("mcp-1", str(tmp_path))
+    assert ts["task"]["id"] == "mcp-1"
+    br = tools.brief_show("mcp-1", str(tmp_path))
+    assert br["status"] in {"DECIDE", "REVIEW", "BLOCKED", "FAILED", "DONE"}
+    assert "OutcomeBrief/v1" in tools.contract_list()["contracts"]
+    assert tools.contract_show("OutcomeBrief/v1")["title"]
+
+
+def test_rules_lookup_payload_and_economy(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    data = tools.rules_lookup("AF-SEC-001")
+    assert data["id"] == "AF-SEC-001"
+    ledger = tmp_path / ".apiforge" / "economy.jsonl"
+    entry = json.loads(ledger.read_text().strip().splitlines()[-1])
+    assert entry["verb"] == "mcp:rules_lookup"
+
+
+def test_playbook_unknown_refuses() -> None:
+    from apiforge.application.analyze import AnalysisError
+
+    with pytest.raises(AnalysisError, match="AF-PLAYBOOK-NOT-FOUND"):
+        tools.playbook("nobody")
+
+
+def test_analyze_persists_case(tmp_path: Path) -> None:
+    out = tmp_path / "case"
+    data = tools.analyze(str(CONTRACT), str(PROJECT), out_dir=str(out))
+    assert data["operations"] > 0
+    assert (out / "case.json").is_file()
+
+
+def test_server_imports_or_refuses() -> None:
+    """build_server works when the mcp extra is installed; otherwise ImportError."""
+    try:
+        from apiforge.mcp.server import build_server
+
+        server = build_server()
+        assert server is not None
+    except (ImportError, RuntimeError):
+        pytest.skip("mcp extra not installed")

@@ -1,0 +1,7 @@
+domain: version-changed
+version: 1
+summary: fixture pack for the freshness watch eval
+verified: "2026-09-01"
+freshness:
+  upstream: spec-c
+  source_version: "2.0"

@@ -1,0 +1,155 @@
+# API Forge Agent Instructions
+
+API Forge is a deterministic, offline-first platform for API construction,
+evolution, migration, testing, performance, observability, data access,
+streaming and messaging.
+
+## Operating contract
+
+1. Read `AGENT_PROTOCOL.md` and load or create a persisted case under
+   `.apiforge/case/` before substantive analysis.
+2. Run `apiforge next-step` before selecting a specialist when a case has
+   findings.
+3. Prefer deterministic facts, rules, indexes, Graphify and adapters over model
+   memory. Never invent versions, TPS, costs, evidence or runtime capabilities.
+4. Use SDD for non-trivial work. Required flow:
+   `discover -> intent -> contract -> architecture -> plan -> build -> verify -> secure -> benchmark -> ship`.
+5. Build only in sandbox, branch or worktree. Cloud, database and destructive
+   actions stay read-only unless an explicit policy gate and approval exist.
+6. A compact response is a projection, never the source of truth. Preserve full
+   artifacts, hashes, critical errors, findings, contracts and evidence.
+7. Do not declare `DONE` without independent verification, holdout/mutation
+   checks when applicable, and an Outcome Brief with unresolved gaps.
+8. Record tools, versions, commands, results, artifacts and hashes in the case.
+9. For API changes tied to Git/CI/CD, use `af-change-bundle/1` and preserve
+   the read-only GitHub adapter boundary. The deterministic route is
+   `analyze -> next-step -> graph -> evidence -> brief`; provider freshness,
+   deployment safety and permissions remain unresolved without independent
+   external evidence.
+10. Every refusal must expose an `AF-*` code, rejected field and safe unlock;
+    the code must be present in `docs/catalog-contract.md`.
+11. CI may open a PR only through the dedicated green-validation workflow job
+    and an explicitly configured least-privilege credential; agents and the
+    application core never perform that mutation. The host script emits a
+    `af-github-pr-receipt/1`; auto-merge is an explicit repository-variable
+    policy and remains controlled by branch protection.
+
+## User preference
+
+- When Codex makes repository changes, create a Git commit after verification
+  by default. Do not commit unrelated pre-existing changes, and skip the
+  commit only when the user explicitly asks not to commit or a safety/policy
+  gate blocks it.
+
+## Agentic runtime
+
+The supervisor is deterministic. Agents propose; TaskSpec governs; sandbox
+executes; Verifier decides. Dynamic parallelism is allowed only for independent
+sealed tasks with budgets. Debate triggers: high risk, contradiction, missing
+evidence, or explicit human request.
+
+Use native project capabilities:
+
+- `apiforge context compact` for RTK-style output reduction;
+- `apiforge agentops workflows` for Caveman-inspired workflows;
+- `apiforge economy report` for measured bytes and transcript-backed tokens;
+- economy verbs before spending: `context capsule` instead of the whole case,
+  `knowledge select`/`search`, `evidence gate` before any live source,
+  `verify plan` then `verify escalate`, `runtime checkpoint` on resume
+  (see `docs/guides/API_FORGE_ECONOMY.en.md`); safety and evidence never
+  enter the budget;
+- GitHub governance: `.github/CODEOWNERS` and the read-only
+  `scripts/github_ruleset_plan.py` (the owner applies the ruleset);
+- economy certification: `evals economy-hardening` and `evals agentic-quality`
+  (absolute floor + baseline); paths from cases or callers outside the project
+  are `AF-PATH-OUTSIDE-ROOT` and are never read;
+- `apiforge graph` for provenance and impact;
+- `apiforge task`, `runtime`, `sandbox`, `evidence` and `brief` for governed work.
+
+## Agent roster
+
+`agents/*.md` is the only hand-edited agent source: 25 coordinators, each with
+a nine-section contract (When you enter, When not to enter, Inputs, Method,
+Output, Done when, Refusal and escalation, Permissions, Executors), `access`
+(`read-only`, `state-writer` or `writer`) with `write_scope`, owned
+`apiforge_tools` and `replaces`. `apiforge agents sync` renders the host
+mirrors (`.claude/agents/*.md`, `.agents/agents/*.md`, `.codex/agents/*.toml`);
+never edit a mirror. Before committing agent changes run `apiforge agents lint`,
+`agents check`, `agents references` and `agents audit`, plus
+`apiforge evals agent-routing --baseline <report>` and
+`--cases evals/corpus/agent-routing/holdout.json`. Deprecated names resolve
+through `src/apiforge/rules/agent_aliases.yaml` until `roster-v2`.
+
+## Data and messaging specializations
+
+Route by engine instead of treating every datastore or broker as generic:
+
+- relational/RDS: `model rds-access`, `model postgres-access`, `model mysql-access`;
+- Kafka/MSK/Kinesis: `model kafka-access`, `model msk-access`;
+- AWS messaging: `model sqs-access`, `model sns-access`,
+  `model eventbridge-access`, `model kinesis-access`;
+- low-latency and partitioned data: Redis/Valkey and DynamoDB profiles;
+- analytics: `model opensearch-access`, `model redshift-access`;
+- brokers: `model rabbitmq-access`, `model nats-access`, `model pulsar-access`;
+- document: MongoDB/DocumentDB profiles;
+- graph (Neptune, Neo4j): `model graph-access`, `model neptune-access`,
+  `model neo4j-access`, plans via `model graph-explain` (owner:
+  `api-graph-data-architect`, skill `api-forge-graph`).
+
+Use the corresponding IR (`DataAccessIR`, `GraphAccessIR`/`GraphPlanIR`, `StreamingAccessIR`,
+`MessagingAccessIR`, `AnalyticalAccessIR`) and preserve the distinction
+between observed signals and runtime claims. Never infer indexes, hot keys,
+consumer lag, query plans, throughput or delivery guarantees without evidence.
+
+## Safety and evidence
+
+Never suppress critical evidence to save context. Preserve `AF-*` codes, errors,
+warnings, failed tests, status codes, security findings and unresolved states.
+Local adapters must not call model SDKs, AWS or live databases. External
+integrations belong behind explicit read-only adapters and policy gates.
+Collectors may create hashed AWS posture dumps only through the AWS collector
+family; source models never publish, consume, execute SQL, commit offsets or
+mutate topology. `change-control collect` is a separate GitHub GET-only path
+that creates a sanitized replay bundle and collection receipt. The external
+issue/health adapters are also GET-only and emit freshness receipts. Local
+vertical runtime proof is opt-in and allowlisted through
+`apiforge platform verify-runtime`; it proves fixtures, not production.
+
+## Validation
+
+Before handoff, run focused tests, full tests when practical, Ruff, mypy and
+the relevant SDD check. Report exact results and the remaining `unresolved`
+items. Use the project handoff shape:
+
+```text
+Status:
+Outcome:
+Human action:
+Proof:
+Gaps:
+Next:
+Open:
+```
+
+## Devin Desktop, CLI and Cloud adapter
+
+Devin CLI loads this file automatically. The repository also ships the
+Devin-native `.devin/` layer:
+
+- `.devin/config.json` keeps project permissions fail-closed and asks before
+  commits, pushes, Docker use or secret-file writes.
+- `.devin/hooks.v1.json` blocks irreversible shell commands and announces the
+  API Forge case/routing preconditions at session start.
+- `.devin/skills/api-forge-devin-runbook/` is the entry skill for a governed
+  Devin task; `.devin/agents/api-forge-reviewer.md` is a read-only reviewer.
+- `apiforge devin payload` emits a portable prompt for `desktop`, `cli` or
+  `cloud`; `apiforge devin probe` only observes a local `devin` executable;
+  `apiforge devin capabilities` reports declared versus observed support.
+
+Use `/plan` or `--permission-mode normal` for discovery and planning. Use
+`accept-edits` only after the plan and writable paths are reviewed. Use
+`--sandbox`/Autonomous only on a supported host; native Windows requires WSL 2
+for Devin CLI sandboxing. `/handoff`, `/open desktop`, `/pickup` and Cloud
+sessions remain human-reviewed boundaries. Never put credentials in a payload;
+personal MCP secrets belong in `.devin/mcp_config.local.json` and must not be
+committed. The API Forge core never invokes Devin APIs or opens PRs.

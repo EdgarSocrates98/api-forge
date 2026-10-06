@@ -1,0 +1,4 @@
+id: path-parent
+kind: path
+candidate: "../secret.txt"
+expect: refuse

@@ -1,0 +1,108 @@
+{
+  "findings": [
+    {
+      "detail": "GET /orders: contract operation may be missing, but extraction uncertainty (AF-FASTAPI-DYNAMIC-ROUTE) prevents proving absence",
+      "evidence": [
+        "fact:69b729a0070ef2d7"
+      ],
+      "finding_id": "finding:8b57107ac9ede611",
+      "remediation": "Implement the route or remove the operation from the contract.",
+      "rule_id": "AF-CONTRACT-001",
+      "severity": "high",
+      "status": "unresolved",
+      "title": "Contract operation has no implementation",
+      "version": 1
+    },
+    {
+      "detail": "POST /orders: contract operation may be missing, but extraction uncertainty (AF-FASTAPI-DYNAMIC-ROUTE) prevents proving absence",
+      "evidence": [
+        "fact:4246297bbb062b63"
+      ],
+      "finding_id": "finding:a1d361952b15e9e0",
+      "remediation": "Implement the route or remove the operation from the contract.",
+      "rule_id": "AF-CONTRACT-001",
+      "severity": "high",
+      "status": "unresolved",
+      "title": "Contract operation has no implementation",
+      "version": 1
+    },
+    {
+      "detail": "POST /v1/orders: 2 handlers bound",
+      "evidence": [
+        "fact:b421560a83ac4077",
+        "fact:b781c86d735f1129"
+      ],
+      "finding_id": "finding:13500ad4e43969eb",
+      "remediation": "Keep a single handler per method/path pair or give them distinct paths.",
+      "rule_id": "AF-CODE-001",
+      "severity": "medium",
+      "status": "confirmed",
+      "title": "Duplicate code route",
+      "version": 1
+    },
+    {
+      "detail": "POST /v1/orders: code route has no contract operation",
+      "evidence": [
+        "fact:b421560a83ac4077",
+        "fact:b781c86d735f1129"
+      ],
+      "finding_id": "finding:0e7695af40f71d5b",
+      "remediation": "Add the operation to the contract or remove the route.",
+      "rule_id": "AF-CODE-002",
+      "severity": "medium",
+      "status": "confirmed",
+      "title": "Code route missing from contract",
+      "version": 1
+    },
+    {
+      "detail": "GET /v1/orders/{order_id}: code route has no contract operation",
+      "evidence": [
+        "fact:b938d5ca3d11a5d0"
+      ],
+      "finding_id": "finding:bf42ad271388b4ec",
+      "remediation": "Add the operation to the contract or remove the route.",
+      "rule_id": "AF-CODE-002",
+      "severity": "medium",
+      "status": "confirmed",
+      "title": "Code route missing from contract",
+      "version": 1
+    },
+    {
+      "detail": "GET /v1/orders/: code route has no contract operation",
+      "evidence": [
+        "fact:6aac6103de6ebdc7"
+      ],
+      "finding_id": "finding:ca52b0469439dfea",
+      "remediation": "Add the operation to the contract or remove the route.",
+      "rule_id": "AF-CODE-002",
+      "severity": "medium",
+      "status": "confirmed",
+      "title": "Code route missing from contract",
+      "version": 1
+    },
+    {
+      "detail": "GET /secret: code route has no contract operation",
+      "evidence": [
+        "fact:5651fe1004c31318"
+      ],
+      "finding_id": "finding:fee4dcc511db0fd2",
+      "remediation": "Add the operation to the contract or remove the route.",
+      "rule_id": "AF-CODE-002",
+      "severity": "medium",
+      "status": "confirmed",
+      "title": "Code route missing from contract",
+      "version": 1
+    },
+    {
+      "detail": "AF-FASTAPI-DYNAMIC-ROUTE at app/routes/orders.py:26: dynamic_route: route path or methods are not literals",
+      "evidence": [],
+      "finding_id": "finding:f347b5e79053aca5",
+      "remediation": "Replace the dynamic expression with a literal path or register the route through a static include.",
+      "rule_id": "AF-CODE-003",
+      "severity": "low",
+      "status": "unresolved",
+      "title": "Route could not be resolved statically",
+      "version": 1
+    }
+  ]
+}

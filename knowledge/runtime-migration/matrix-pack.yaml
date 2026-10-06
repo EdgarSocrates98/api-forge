@@ -1,0 +1,4 @@
+constraints:
+  - {component: java, set: ["11", "17", "21", "25"]}
+  - {component: python, range: "2, 3.8-3.14"}
+  - {component: go, range: "1.18-1.27"}

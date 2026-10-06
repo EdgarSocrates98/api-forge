@@ -1,0 +1,5053 @@
+"""API Forge CLI: deterministic, offline API analysis."""
+
+from __future__ import annotations
+
+import json
+import os
+from collections.abc import Callable
+from pathlib import Path
+from typing import Literal, NoReturn, cast
+
+import typer
+from typer._click.globals import get_current_context
+
+from apiforge import __version__
+from apiforge.adapters.apigateway.extract import extract_apigateway
+from apiforge.adapters.fastapi.extractor import extract_fastapi
+from apiforge.api_ir.builder import build_api_model
+from apiforge.application.analyze import AnalysisError, AnalysisResult, analyze_project
+from apiforge.application.artifacts import load_findings
+from apiforge.application.change_control import (
+    build_change_collection_receipt,
+    run_change_control,
+)
+from apiforge.application.change_errors import ChangeControlError
+from apiforge.application.change_publishers import (
+    ChangePublishError,
+    publish_change_control_reports,
+)
+from apiforge.build.service import build_endpoint
+from apiforge.case.service import CaseIntegrityError, CaseStorageError
+from apiforge.collectors.apigateway import collect
+from apiforge.collectors.manifest import CollectError, CollectManifest
+from apiforge.contract_intel import (
+    ContractProtocol,
+    analyze_contract,
+    build_twin_plan,
+    simulate_twin,
+)
+from apiforge.contracts.base import ContractError
+from apiforge.contracts.devin import DevinPermissionMode, DevinSurface, DevinTaskKind
+from apiforge.contracts.stubs import PerformanceRun
+from apiforge.core.detail import apply_detail_level
+from apiforge.core.models import Fact, Finding, FindingStatus, Severity
+from apiforge.debate.service import DebateError
+from apiforge.dispatch.runner import DispatchError
+from apiforge.integrations.replay import ReplayAdapterError
+from apiforge.integrations.transport import TransportError
+from apiforge.openapi.diff import diff_contracts
+from apiforge.openapi.loader import OpenApiLoadError, load_openapi
+from apiforge.rules.fact_judge import judge_facts
+from apiforge.rules.judge import judge_api_model
+
+_SEVERITY_RANK = {
+    Severity.CRITICAL: 0,
+    Severity.HIGH: 1,
+    Severity.MEDIUM: 2,
+    Severity.LOW: 3,
+    Severity.INFO: 4,
+}
+
+app = typer.Typer(
+    help="Analyze API evolution deterministically and offline.",
+    invoke_without_command=True,
+)
+model_app = typer.Typer(help="Build the canonical API-IR.")
+rules_app = typer.Typer(
+    name="rules",
+    help="Read the rule catalog — the knowledge base every finding cites.",
+    no_args_is_help=True,
+)
+app.add_typer(rules_app)
+build_app = typer.Typer(
+    name="build",
+    help="Generate code skeletons — evaluated in the sandbox, promoted via worktree only.",
+    no_args_is_help=True,
+)
+app.add_typer(build_app)
+collect_app = typer.Typer(
+    name="collect",
+    help="Collect AWS artifacts into offline dumps (the only family that touches AWS).",
+    no_args_is_help=True,
+)
+app.add_typer(collect_app)
+diff_app = typer.Typer(help="Diff OpenAPI contracts.")
+app.add_typer(model_app, name="model")
+app.add_typer(diff_app, name="diff")
+
+from apiforge.cli_governance import (
+    autonomy_app as _governance_autonomy,
+)
+from apiforge.cli_governance import (
+    evidence_app,
+    policy_app,
+    sandbox_app,
+    sdd_app,
+)
+
+app.add_typer(policy_app, name="policy")
+app.add_typer(sdd_app, name="sdd")
+app.add_typer(sandbox_app, name="sandbox")
+app.add_typer(evidence_app, name="evidence")
+economy_app = typer.Typer(
+    name="economy",
+    help="Measured cost per call — bytes recorded, tokens unresolved without a transcript.",
+    no_args_is_help=True,
+)
+app.add_typer(economy_app)
+context_app = typer.Typer(
+    name="context",
+    help="Measured context accounting — the funnel, in bytes per stage.",
+    no_args_is_help=True,
+)
+app.add_typer(context_app)
+agentops_app = typer.Typer(
+    name="agentops",
+    help="Host-neutral Caveman/RTK protocols, workflows and adapters.",
+    no_args_is_help=True,
+)
+app.add_typer(agentops_app)
+devin_app = typer.Typer(
+    name="devin",
+    help="Generate and inspect offline-first payloads for Devin Desktop, CLI and Cloud.",
+    no_args_is_help=True,
+)
+app.add_typer(devin_app)
+evals_app = typer.Typer(
+    name="evals",
+    help="Declarative local eval matrix, goldens and holdout metadata.",
+    no_args_is_help=True,
+)
+app.add_typer(evals_app)
+capabilities_app = typer.Typer(
+    name="capabilities",
+    help="Inspect the evidence-backed public capability matrix.",
+    no_args_is_help=True,
+)
+app.add_typer(capabilities_app)
+contract_intel_app = typer.Typer(
+    name="contract-intel",
+    help="Unify contract impact analysis and build an offline API Digital Twin.",
+    no_args_is_help=True,
+)
+app.add_typer(contract_intel_app)
+report_app = typer.Typer(
+    name="report",
+    help="Release evidence bundle — sign binds hashes; verify names what diverged.",
+    no_args_is_help=True,
+)
+app.add_typer(report_app)
+plan_app = typer.Typer(
+    name="plan",
+    help="Planning verbs — compose over facts other verbs already extracted.",
+    no_args_is_help=True,
+)
+app.add_typer(plan_app)
+debate_app = typer.Typer(
+    name="debate",
+    help="Record specialist disagreement — positions cite fact_ids, a referee closes.",
+    no_args_is_help=True,
+)
+app.add_typer(debate_app)
+dispatch_app = typer.Typer(
+    name="dispatch",
+    help="Run deterministic playbook steps; pending steps name their missing inputs.",
+    no_args_is_help=True,
+)
+app.add_typer(dispatch_app)
+perf_app = typer.Typer(
+    name="perf",
+    help="Compose over measured runs — compare, never interpolate.",
+    no_args_is_help=True,
+)
+app.add_typer(perf_app)
+agents_app = typer.Typer(
+    name="agents",
+    help="Publish coordinator profiles to host-native mirrors.",
+    no_args_is_help=True,
+)
+app.add_typer(agents_app)
+run_app = typer.Typer(
+    name="run",
+    help="Execute allowlisted scanner binaries, then read their reports.",
+    no_args_is_help=True,
+)
+app.add_typer(run_app)
+autonomy_app = _governance_autonomy
+app.add_typer(autonomy_app, name="autonomy")
+contract_app = typer.Typer(
+    name="contract",
+    help="List and inspect the canonical versioned contracts.",
+    no_args_is_help=True,
+)
+app.add_typer(contract_app)
+task_app = typer.Typer(
+    name="task",
+    help="Sealed, budgeted units of agentic work (TaskSpec).",
+    no_args_is_help=True,
+)
+app.add_typer(task_app)
+runtime_app = typer.Typer(
+    name="runtime",
+    help="Bounded agentic execution over sealed TaskSpecs; local and CI safe.",
+    no_args_is_help=True,
+)
+app.add_typer(runtime_app)
+governor_app = typer.Typer(
+    name="governor",
+    help="Agent Governor decisions: ceilings, gain, stop, recovery and loop checks.",
+    no_args_is_help=True,
+)
+app.add_typer(governor_app)
+control_app = typer.Typer(
+    name="control",
+    help="Decision Control Plane lifecycle: shadow, assisted, active and fallback.",
+    no_args_is_help=True,
+)
+app.add_typer(control_app)
+route_app = typer.Typer(
+    name="route",
+    help="Model routing: candidates, scorecards and lifecycle promotion.",
+    no_args_is_help=True,
+)
+app.add_typer(route_app)
+brief_app = typer.Typer(
+    name="brief",
+    help="Outcome Briefs — DONE is refused while mandatory gaps exist.",
+    no_args_is_help=True,
+)
+app.add_typer(brief_app)
+graph_app = typer.Typer(
+    name="graph",
+    help="Native provenance graph — canonical JSONL store, closed-vocabulary queries.",
+    no_args_is_help=True,
+)
+app.add_typer(graph_app)
+index_app = typer.Typer(
+    name="index",
+    help="TokenSave: content-hash cache + local indexes over extractor output.",
+    no_args_is_help=True,
+)
+app.add_typer(index_app)
+knowledge_app = typer.Typer(
+    name="knowledge",
+    help="Domain packs — source authority, runtime matrices, declared evals.",
+    no_args_is_help=True,
+)
+app.add_typer(knowledge_app)
+observability_app = typer.Typer(
+    name="observability",
+    help="Offline-first OTel, Datadog and Dynatrace control plane.",
+    no_args_is_help=True,
+)
+app.add_typer(observability_app)
+grpc_app = typer.Typer(
+    name="grpc",
+    help="Offline-first gRPC contract control plane.",
+    no_args_is_help=True,
+)
+app.add_typer(grpc_app)
+migration_app = typer.Typer(
+    name="migration",
+    help="Offline-first runtime migration analysis and verification.",
+    no_args_is_help=True,
+)
+app.add_typer(migration_app)
+lab_app = typer.Typer(
+    name="lab",
+    help="Opt-in experimental scenario catalog (§28).",
+    no_args_is_help=True,
+)
+app.add_typer(lab_app)
+change_control_app = typer.Typer(
+    name="change-control",
+    help="Govern API, Git and CI/CD changes with read-only evidence.",
+    no_args_is_help=True,
+)
+app.add_typer(change_control_app)
+integration_app = typer.Typer(
+    name="integration",
+    help="Read-only external evidence adapters and freshness receipts.",
+    no_args_is_help=True,
+)
+app.add_typer(integration_app)
+platform_app = typer.Typer(
+    name="platform",
+    help="Run allowlisted local runtime probes for platform verticals.",
+    no_args_is_help=True,
+)
+app.add_typer(platform_app)
+from apiforge.cli_agentic_state import register as _register_agentic_state
+from apiforge.cli_agents import register as _register_agents
+from apiforge.cli_cache import register as _register_cache
+from apiforge.cli_context import register as _register_context
+from apiforge.cli_control import register as _register_control
+from apiforge.cli_distribution import register as _register_distribution
+from apiforge.cli_economy import register as _register_economy
+from apiforge.cli_extras import register as _register_extras
+from apiforge.cli_field import register as _register_field
+from apiforge.cli_forge import register as _register_forge
+from apiforge.cli_governor import register as _register_governor
+from apiforge.cli_resume import register as _register_resume
+from apiforge.cli_route import register as _register_route
+from apiforge.cli_route import register_retrieval as _register_retrieval
+from apiforge.cli_selective import register as _register_selective
+from apiforge.cli_tool_host import register as _register_tool_host
+from apiforge.cli_tui import tui_app
+from apiforge.cli_workspace import register as _register_workspace
+from apiforge.cli_workspace import workspace_app as _workspace_app
+
+app.add_typer(tui_app, name="tui")
+_register_distribution(app)
+_register_workspace(app)
+_register_field(app)
+_register_context(context_app)
+_register_cache(app)
+_register_selective(knowledge_app, debate_app, agents_app)
+_register_agents(agents_app, evals_app)
+_register_tool_host(app, agentops_app)
+_verify_app = _register_extras(
+    app,
+    knowledge_app=knowledge_app,
+    evidence_app=evidence_app,
+    economy_app=economy_app,
+    agentops_app=agentops_app,
+    workspace_app=_workspace_app,
+)
+_register_resume(
+    knowledge_app=knowledge_app,
+    evidence_app=evidence_app,
+    verify_app=_verify_app,
+    economy_app=economy_app,
+    runtime_app=runtime_app,
+)
+_register_economy(economy_app)
+_register_forge(app)
+_register_governor(governor_app)
+_register_control(control_app)
+_register_route(route_app)
+_register_retrieval(knowledge_app)
+_register_agentic_state(app, runtime_app)
+
+
+_OUTPUT_MODE: dict[str, str | None] = {"mode": None}
+
+
+@app.callback()
+def main(
+    version: bool = typer.Option(
+        False,
+        "--version",
+        help="Show the API Forge version and exit.",
+        is_eager=True,
+    ),
+    output: str | None = typer.Option(
+        None,
+        "--output",
+        help="Payload projection: json (default) or compact (minified, null/empty pruned).",
+    ),
+) -> None:
+    """Analyze API evolution deterministically and offline."""
+    if version:
+        typer.echo(f"apiforge {__version__}")
+        raise typer.Exit()
+    from apiforge.output.render import resolve_mode
+
+    _OUTPUT_MODE["mode"] = _run(lambda: resolve_mode(output))  # type: ignore[assignment]
+
+
+_DETAIL_HELP = "Payload level: summary|normal|full."
+
+
+def _detail_option() -> object:
+    return typer.Option("normal", "--detail-level", help=_DETAIL_HELP)
+
+
+def _echo_json(value: object, detail_level: str = "normal") -> None:
+    if isinstance(value, list):
+        value = [v.model_dump(mode="json") if hasattr(v, "model_dump") else v for v in value]
+    elif hasattr(value, "model_dump"):
+        value = value.model_dump(mode="json")
+    value = apply_detail_level(value, detail_level)
+    # JSON must remain printable on Windows hosts whose stdout is cp1252;
+    # Unicode content stays lossless through JSON escapes.
+    from apiforge.output.render import render, resolve_mode
+
+    text = render(value, _OUTPUT_MODE["mode"] or resolve_mode())
+    from apiforge.economy.ledger import record
+
+    ctx = get_current_context(silent=True)
+    record(
+        Path.cwd(),
+        verb=ctx.command_path if ctx is not None else "unknown",
+        detail_level=detail_level,
+        payload_bytes=len(text.encode("utf-8")),
+    )
+    typer.echo(text)
+
+
+def _fail(
+    code: str,
+    detail: str,
+    exit_code: int = 2,
+    *,
+    field: str = "unknown",
+    unlock: str = "inspect the documented contract and rerun the verifier",
+) -> NoReturn:
+    typer.echo(f"{code}: {detail} (field={field}; unlock={unlock})", err=True)
+    raise typer.Exit(code=exit_code)
+
+
+def _load_facts(path: Path) -> list[Fact]:
+    """Read a facts payload ({"facts": [...]} or a bare list) from disk."""
+    if not path.is_file():
+        raise AnalysisError("AF-INPUT-NOT-FOUND", str(path))
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    payload = doc.get("facts", doc) if isinstance(doc, dict) else doc
+    if not isinstance(payload, list):
+        raise AnalysisError("AF-JUDGE-FACTS-INVALID", f"{path}: not a fact list")
+    return [Fact.model_validate(f) for f in payload]
+
+
+def _run(fn: Callable[[], object]) -> object:
+    """Map typed errors onto exit codes; let nothing else through."""
+    try:
+        return fn()
+    except AnalysisError as exc:
+        _fail(
+            exc.code,
+            exc.detail,
+            field=getattr(exc, "field", "analysis input"),
+            unlock=getattr(exc, "unlock", "correct the input and rerun analysis"),
+        )
+    except DebateError as exc:
+        _fail(exc.code, str(exc).split(": ", 1)[-1])
+    except DispatchError as exc:
+        _fail(exc.code, str(exc).split(": ", 1)[-1])
+    except (OpenApiLoadError, CaseStorageError) as exc:
+        _fail(exc.code, str(exc).split(": ", 1)[-1])
+    except CaseIntegrityError as exc:
+        _fail(exc.code, exc.path, exit_code=3)
+    except ContractError as exc:
+        _fail(
+            exc.code,
+            exc.detail,
+            field=getattr(exc, "field", "contract"),
+            unlock=getattr(exc, "unlock", "inspect the documented contract and retry"),
+        )
+    except ChangeControlError as exc:
+        _fail(exc.code, exc.detail, field=exc.field, unlock=exc.unlock)
+    except ChangePublishError as exc:
+        _fail(exc.code, exc.detail, field=exc.field, unlock=exc.unlock)
+    except ReplayAdapterError as exc:
+        _fail(exc.code, exc.detail, field=exc.field, unlock=exc.unlock)
+    except TransportError as exc:
+        _fail(exc.code, exc.detail, field=exc.field, unlock=exc.unlock)
+    except (OSError, UnicodeDecodeError, TypeError, ValueError, json.JSONDecodeError) as exc:
+        _fail("AF-CLI-INPUT", str(exc))
+    except Exception as exc:  # noqa: BLE001
+        _fail("AF-CLI-INTERNAL", str(exc))
+
+
+from apiforge.cli_experience import register as _register_experience
+
+_register_experience(app)
+
+
+@app.command("doctor")
+def runtime_doctor(
+    task_id: str | None = typer.Argument(
+        None, help="TaskSpec id, or omit for installation doctor."
+    ),
+    root: Path = typer.Option(Path("."), "--root"),
+    economy: bool = typer.Option(False, "--economy", help="Economy diagnostics instead."),
+    agentic: bool = typer.Option(False, "--agentic", help="Cross-plane agentic health report."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Inspect runtime state, or the local installation when no task is supplied."""
+    from apiforge.application.portable import doctor as portable_doctor
+    from apiforge.application.runtime_experience import doctor
+
+    if agentic:
+        from apiforge.runtime.agentic_doctor import diagnose_agentic
+
+        _echo_json(_run(lambda: diagnose_agentic(root)), detail_level)
+        return
+    if economy:
+        from apiforge.economy.doctor import diagnose
+
+        _echo_json(_run(lambda: diagnose(root)), detail_level)
+        return
+    result = portable_doctor(root) if task_id is None else doctor(root, task_id)
+    _echo_json(_run(lambda: result), detail_level)
+
+
+@app.command("status")
+def runtime_status(
+    task_id: str | None = typer.Argument(None, help="TaskSpec id, or omit for project status."),
+    root: Path = typer.Option(Path("."), "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Show TaskSpec status, or project/workspace status when no task is supplied."""
+    from apiforge.application.portable import status as portable_status
+    from apiforge.application.runtime_experience import status
+
+    result = portable_status(root) if task_id is None else status(root, task_id)
+    _echo_json(_run(lambda: result), detail_level)
+
+
+@app.command("inspect")
+def portable_inspect(
+    root: Path = typer.Option(Path("."), "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Inspect installed assets and bounded project/workspace discovery."""
+    from apiforge.application.portable import inspect
+
+    _echo_json(_run(lambda: inspect(root)), detail_level)
+
+
+@app.command("init")
+def portable_init(
+    root: Path = typer.Option(Path("."), "--root"),
+    workspace: bool = typer.Option(False, "--workspace"),
+    name: str | None = typer.Option(None, "--name"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Create only a minimal local project or workspace manifest."""
+    from apiforge.application.portable import initialize
+
+    _echo_json(_run(lambda: initialize(root, workspace=workspace, name=name)), detail_level)
+
+
+@app.command("review")
+def runtime_review(
+    task_id: str = typer.Argument(..., help="TaskSpec id to review."),
+    root: Path = typer.Option(Path("."), "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Render the canonical Outcome Brief for a runtime run."""
+    from apiforge.application.runtime_experience import review
+
+    _echo_json(_run(lambda: review(root, task_id)), detail_level)
+
+
+@app.command("evolve")
+def runtime_evolve(
+    task_id: str = typer.Argument(..., help="TaskSpec id to execute."),
+    root: Path = typer.Option(Path("."), "--root"),
+    policy: str = typer.Option("local-ci-safe", "--policy"),
+    now: str | None = typer.Option(None, "--now"),
+    debate: bool = typer.Option(False, "--debate"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Execute a bounded, evidence-backed API evolution run."""
+    from apiforge.application.runtime_experience import evolve
+
+    _echo_json(
+        _run(lambda: evolve(root, task_id, policy_id=policy, now=now, requested_debate=debate)),
+        detail_level,
+    )
+
+
+@app.command("resume")
+def runtime_resume_friendly(
+    task_id: str = typer.Argument(..., help="TaskSpec id to resume."),
+    root: Path = typer.Option(Path("."), "--root"),
+    policy: str = typer.Option("local-ci-safe", "--policy"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Resume only persisted, eligible work from the latest control run."""
+    from apiforge.application.runtime_experience import resume
+
+    _echo_json(_run(lambda: resume(root, task_id, policy_id=policy)), detail_level)
+
+
+@capabilities_app.command("list")
+def capabilities_list(
+    capability_id: str | None = typer.Option(None, "--capability"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """List public capabilities and their explicit support boundaries."""
+    from apiforge.capabilities.registry import load_capabilities
+
+    def work() -> object:
+        records = load_capabilities()
+        selected = tuple(
+            item for item in records if capability_id is None or item.capability_id == capability_id
+        )
+        if capability_id is not None and not selected:
+            raise AnalysisError("AF-CAPABILITY-NOT-FOUND", capability_id)
+        return [item.model_dump(mode="json") for item in selected]
+
+    _echo_json(_run(work), detail_level)
+
+
+@capabilities_app.command("verify")
+def capabilities_verify(
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Verify documentation, limitations and evidence requirements."""
+    from apiforge.capabilities.registry import load_capabilities
+    from apiforge.capabilities.verify import verify_capabilities
+
+    _echo_json(
+        _run(lambda: verify_capabilities(load_capabilities(), root=Path.cwd())),
+        detail_level,
+    )
+
+
+def _confirmed_rank(findings: tuple[Finding, ...]) -> int | None:
+    ranks = [_SEVERITY_RANK[f.severity] for f in findings if f.status == FindingStatus.CONFIRMED]
+    return min(ranks) if ranks else None
+
+
+@observability_app.command("ingest")
+def observability_ingest(
+    source: Path = typer.Option(..., "--source", help="OTel-compatible JSON fixture."),
+    service: str | None = typer.Option(None, "--service"),
+    slo: Path | None = typer.Option(None, "--slo", help="SLO JSON definition."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Normalize a fixture and compute signals without external access."""
+    from apiforge.observability.supervisor import run_fixture
+
+    def work() -> dict[str, object]:
+        if not source.is_file():
+            raise AnalysisError("AF-INPUT-NOT-FOUND", str(source))
+        definition = json.loads(slo.read_text(encoding="utf-8")) if slo else None
+        return run_fixture(Path.cwd(), source, service=service, slo=definition)
+
+    _echo_json(_run(work), detail_level)
+
+
+@observability_app.command("capabilities")
+def observability_capabilities(
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Show provider capabilities without credentials."""
+    from apiforge.observability.registry import capabilities
+
+    _echo_json(capabilities(), detail_level)
+
+
+@observability_app.command("instrument")
+def observability_instrument(
+    language: str = typer.Option(..., "--language"),
+    framework: str | None = typer.Option(None, "--framework"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Recommend OTel instrumentation for Java, Go or Python."""
+    from apiforge.observability.instrumentation import recommend
+
+    _echo_json(recommend(language, framework), detail_level)
+
+
+@observability_app.command("health")
+def observability_health(
+    source: Path = typer.Option(..., "--source", help="OTel-compatible JSON fixture."),
+    service: str = typer.Option(..., "--service"),
+    slo: Path | None = typer.Option(None, "--slo", help="SLO JSON definition."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Correlate telemetry and SLO evidence into an incident-ready health view."""
+    from apiforge.contracts.observability import SLODefinition, SLOResult
+    from apiforge.observability.adapters.otel_json import read
+    from apiforge.observability.health import assess_health
+    from apiforge.observability.normalize import normalize_records
+    from apiforge.observability.slo import evaluate_slo
+
+    try:
+        if not source.is_file():
+            raise AnalysisError("AF-INPUT-NOT-FOUND", str(source))
+        records = tuple(
+            record
+            for record in normalize_records(read(source), source=source.name)
+            if record.service == service
+        )
+        slo_results: tuple[SLOResult, ...] = ()
+        if slo:
+            definitions = json.loads(slo.read_text(encoding="utf-8"))
+            raw_definitions = definitions if isinstance(definitions, list) else [definitions]
+            slo_results = tuple(
+                evaluate_slo(SLODefinition.model_validate(item), records)
+                for item in raw_definitions
+            )
+        result = assess_health(service, records, slo_results)
+    except (OSError, TypeError, ValueError, json.JSONDecodeError) as exc:
+        raise AnalysisError("AF-OBSERVABILITY-HEALTH-INVALID", str(exc)) from exc
+    _echo_json(result.model_dump(mode="json"), detail_level)
+
+
+@observability_app.command("read-plan")
+def observability_read_plan(
+    provider: str = typer.Option(..., "--provider", help="otel, datadog, dynatrace or cloudwatch."),
+    service: str = typer.Option(..., "--service"),
+    start: str = typer.Option(..., "--start", help="ISO-8601 start."),
+    end: str = typer.Option(..., "--end", help="ISO-8601 end."),
+    environment: str = typer.Option("unknown", "--environment"),
+    signal: list[str] = typer.Option([], "--signal", help="traces, metrics, logs or events."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Create a vendor read plan without credentials or network access."""
+    from apiforge.observability.read import build_read_plan
+
+    try:
+        signals = cast(
+            tuple[Literal["traces", "metrics", "logs", "events"], ...],
+            tuple(signal) if signal else ("traces", "metrics"),
+        )
+        result = build_read_plan(
+            provider, service, start, end, environment=environment, signals=signals
+        )
+    except (TypeError, ValueError) as exc:
+        raise AnalysisError("AF-OBS-READ-PLAN-INVALID", str(exc)) from exc
+    _echo_json(result.model_dump(mode="json"), detail_level)
+
+
+@observability_app.command("credential-check")
+def observability_credential_check(
+    provider: str = typer.Option(..., "--provider"),
+    reference: str = typer.Option(
+        ..., "--reference", help="Secret reference name; never a secret value."
+    ),
+    source: str = typer.Option("external_broker", "--source"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Validate credential metadata without reading environment or secret stores."""
+    from apiforge.observability.credentials import check_reference
+
+    try:
+        result = check_reference(provider, reference, source)
+    except ValueError as exc:
+        raise AnalysisError("AF-OBS-CREDENTIAL-INVALID", str(exc)) from exc
+    _echo_json(result.model_dump(mode="json"), detail_level)
+
+
+@app.command()
+def discover(
+    project: Path = typer.Option(..., "--project", help="FastAPI project root."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Statically inventory FastAPI routes without executing code."""
+
+    def work() -> object:
+        if not project.is_dir():
+            raise AnalysisError("AF-INPUT-NOT-FOUND", str(project))
+        from apiforge.index.cache import extract_cached
+
+        inventory, cache_meta = extract_cached(
+            project,
+            "fastapi",
+            extract_fastapi,
+            Path.cwd() / ".apiforge" / "cache",
+            ledger_root=Path.cwd(),
+        )
+        return {
+            "cache": cache_meta,
+            "routes": [f.model_dump(mode="json") for f in inventory.facts],
+            "diagnostics": [d.model_dump(mode="json") for d in inventory.diagnostics],
+            "input_hashes": dict(inventory.input_hashes),
+        }
+
+    _echo_json(_run(work), detail_level)
+
+
+@app.command()
+def analyze(
+    contract: Path = typer.Option(..., "--contract", help="OpenAPI 3.1 document."),
+    project: Path = typer.Option(..., "--project", help="FastAPI project root."),
+    baseline: Path | None = typer.Option(
+        None, "--baseline", help="Baseline OpenAPI document to diff against."
+    ),
+    out_dir: Path = typer.Option(Path(".apiforge"), "--out-dir", help="Case output directory."),
+    fail_on: Severity | None = typer.Option(
+        None, "--fail-on", help="Exit 4 on confirmed findings at this severity or worse."
+    ),
+    framework: str = typer.Option(
+        "auto", "--framework", help="fastapi|spring|go|auto (detected from files)."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Run the full deterministic slice and persist a case."""
+
+    def work() -> AnalysisResult:
+        return analyze_project(
+            contract,
+            project,
+            baseline,
+            out_dir,
+            framework=framework,
+            cache_dir=Path.cwd() / ".apiforge" / "cache",
+            ledger_root=Path.cwd(),
+        )
+
+    result = _run(work)
+    assert isinstance(result, AnalysisResult)
+    _echo_json(
+        {
+            "cache": dict(result.cache),
+            "case_id": result.manifest.case_id,
+            "out_dir": str(out_dir),
+            "artifacts": {k: v.path for k, v in result.manifest.artifacts.items()},
+            "operations": len(result.model.operations),
+            "findings": len(result.findings),
+            "changes": len(result.changes),
+            "diagnostics": len(result.diagnostics),
+        },
+        detail_level,
+    )
+    if fail_on is not None:
+        rank = _confirmed_rank(result.findings)
+        if rank is not None and rank <= _SEVERITY_RANK[fail_on]:
+            raise typer.Exit(code=4)
+
+
+@app.command()
+def judge(
+    contract: Path | None = typer.Option(None, "--contract", help="OpenAPI 3.1 document."),
+    project: Path | None = typer.Option(None, "--project", help="FastAPI project root."),
+    facts: Path | None = typer.Option(
+        None, "--facts", help="facts.json emitted by a `model *` verb."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Judge contract/code divergence, or catalog checks over report facts."""
+
+    def work() -> object:
+        if facts is not None:
+            if contract is not None or project is not None:
+                raise AnalysisError(
+                    "AF-JUDGE-INPUT-AMBIGUOUS",
+                    "--facts is exclusive with --contract/--project",
+                )
+            return [f.model_dump(mode="json") for f in judge_facts(_load_facts(facts))]
+        if contract is None or project is None:
+            raise AnalysisError(
+                "AF-JUDGE-INPUT-MISSING",
+                "judge needs --contract/--project or --facts",
+            )
+        if not contract.is_file() or not project.is_dir():
+            raise AnalysisError("AF-INPUT-NOT-FOUND", f"{contract} or {project}")
+        model = build_api_model(load_openapi(contract), extract_fastapi(project))
+        return [f.model_dump(mode="json") for f in judge_api_model(model)]
+
+    _echo_json(_run(work), detail_level)
+
+
+@model_app.command("build")
+def model_build(
+    contract: Path = typer.Option(..., "--contract", help="OpenAPI 3.1 document."),
+    project: Path = typer.Option(..., "--project", help="FastAPI project root."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Compose the API-IR and print it."""
+
+    def work() -> object:
+        if not contract.is_file():
+            raise AnalysisError("AF-INPUT-NOT-FOUND", str(contract))
+        if not project.is_dir():
+            raise AnalysisError("AF-INPUT-NOT-FOUND", str(project))
+        return build_api_model(load_openapi(contract), extract_fastapi(project))
+
+    _echo_json(_run(work), detail_level)
+
+
+@app.command("next-step")
+def next_step_cmd(
+    findings: Path = typer.Option(
+        ..., "--findings", help="findings.json produced by analyze or judge."
+    ),
+    phase: str = typer.Option(..., "--phase", help="Canonical SDD phase."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Recommend the specialist agent for the dominant finding area."""
+
+    def work() -> object:
+        from apiforge.application.next_step import RoutingError, next_step
+
+        if not findings.is_file():
+            raise AnalysisError("AF-INPUT-NOT-FOUND", str(findings))
+        parsed = load_findings(findings)
+        try:
+            return next_step(parsed, phase)
+        except RoutingError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_json(_run(work), detail_level)
+
+
+@change_control_app.command("run")
+def change_control_run(
+    bundle: Path = typer.Option(..., "--bundle", help="Provider-neutral af-change-bundle/1 JSON."),
+    out_dir: Path = typer.Option(
+        Path(".apiforge/change-control"), "--out-dir", help="Governed output directory."
+    ),
+    framework: str = typer.Option(
+        "auto", "--framework", help="fastapi|spring|go|auto (detected from files)."
+    ),
+    phase: str = typer.Option("verify", "--phase", help="Canonical SDD phase for routing."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Run analyze -> next-step -> graph -> evidence -> brief from a bundle."""
+    from apiforge.integrations.replay import ReplayAdapter
+
+    def work() -> object:
+        change_bundle = ReplayAdapter().load(bundle)
+        return run_change_control(change_bundle, out_dir, framework=framework, phase=phase)
+
+    _echo_json(_run(work), detail_level)
+
+
+@change_control_app.command("collect")
+def change_control_collect(
+    repository: str = typer.Option(..., "--repository", help="GitHub owner/repository."),
+    base_sha: str = typer.Option(..., "--base-sha", help="40-character base commit SHA."),
+    head_sha: str = typer.Option(..., "--head-sha", help="40-character head commit SHA."),
+    out_bundle: Path = typer.Option(
+        Path(".apiforge/change-control/change-bundle.json"),
+        "--out-bundle",
+        help="Sanitized bundle output path.",
+    ),
+    pull_number: int | None = typer.Option(None, "--pull-number", min=1),
+    contract: Path | None = typer.Option(None, "--contract"),
+    baseline: Path | None = typer.Option(None, "--baseline"),
+    project: Path | None = typer.Option(None, "--project"),
+    api_base: str = typer.Option("https://api.github.com", "--api-base"),
+    origin: str = typer.Option("manual", "--origin"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Collect GitHub context with a GET-only adapter into a replay bundle."""
+    from apiforge.contracts.change_control import ChangeCollectRequest, ChangeOrigin
+    from apiforge.core.io import write_json
+    from apiforge.integrations.github import GitHubReadOnlyAdapter, UrllibReadOnlyTransport
+
+    def work() -> dict[str, object]:
+        token = os.environ.get("APIFORGE_GITHUB_READ_ONLY_TOKEN")
+        if not token:
+            raise ChangeControlError(
+                "AF-GITHUB-AUTH",
+                "read-only token is absent; use artifact replay for an untrusted or forked change",
+                field="APIFORGE_GITHUB_READ_ONLY_TOKEN",
+                unlock="provide a host-managed read-only token or use `change-control run` with a replay bundle",
+            )
+        request = ChangeCollectRequest(
+            repository=repository,
+            base_sha=base_sha,
+            head_sha=head_sha,
+            origin=cast(ChangeOrigin, origin),
+            pull_number=pull_number,
+            contract=str(contract) if contract else None,
+            baseline=str(baseline) if baseline else None,
+            project=str(project) if project else None,
+            api_base=api_base,
+        )
+        adapter = GitHubReadOnlyAdapter(
+            UrllibReadOnlyTransport(
+                request.api_base,
+                token=token,
+            )
+        )
+        bundle = adapter.collect(request)
+        write_json(out_bundle, bundle)
+        receipt_path = out_bundle.with_suffix(".receipt.json")
+        receipt = build_change_collection_receipt(bundle, out_bundle)
+        write_json(receipt_path, receipt)
+        return {
+            "bundle": str(out_bundle),
+            "receipt": str(receipt_path),
+            "provider": bundle.provider,
+            "repository": bundle.repository,
+            "base_sha": bundle.base_sha,
+            "head_sha": bundle.head_sha,
+            "checks": len(bundle.checks),
+            "sources": len(bundle.sources),
+            "read_only": bundle.policy.read_only,
+        }
+
+    _echo_json(_run(work), detail_level)
+
+
+@change_control_app.command("verify")
+def change_control_verify(
+    run_dir: Path = typer.Option(
+        ..., "--run-dir", help="Output directory from change-control run."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Verify that a change-control result still references existing artifacts."""
+
+    def work() -> dict[str, object]:
+        result_path = run_dir / "result.json"
+        if not result_path.is_file():
+            raise ChangeControlError(
+                "AF-CHANGE-RESULT-MISSING",
+                str(result_path),
+                field="run_dir/result.json",
+                unlock="run `apiforge change-control run` before verification",
+            )
+        payload = json.loads(result_path.read_text(encoding="utf-8"))
+        result = payload.get("payload", {}) if isinstance(payload, dict) else {}
+        refs = result.get("artifacts", []) if isinstance(result, dict) else []
+        missing = tuple(str(ref) for ref in refs if not Path(str(ref)).is_file())
+        return {
+            "ok": not missing,
+            "status": "ok" if not missing else "failed",
+            "run_dir": str(run_dir),
+            "artifact_refs": refs,
+            "missing": missing,
+        }
+
+    _echo_json(_run(work), detail_level)
+
+
+@change_control_app.command("publish")
+def change_control_publish(
+    run_dir: Path = typer.Option(
+        ..., "--run-dir", help="Output directory from change-control run."
+    ),
+    junit: Path | None = typer.Option(None, "--junit", help="JUnit XML output path."),
+    markdown: Path | None = typer.Option(None, "--markdown", help="Markdown report output path."),
+    sarif: Path | None = typer.Option(None, "--sarif", help="SARIF JSON output path."),
+    html: Path | None = typer.Option(None, "--html", help="Standalone HTML output path."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Publish the canonical result to JUnit, Markdown, SARIF and HTML."""
+    _echo_json(
+        _run(
+            lambda: publish_change_control_reports(
+                run_dir,
+                junit_path=junit,
+                markdown_path=markdown,
+                sarif_path=sarif,
+                html_path=html,
+            )
+        ),
+        detail_level,
+    )
+
+
+@change_control_app.command("surface")
+def change_control_surface(
+    run_dir: Path = typer.Option(
+        ..., "--run-dir", help="Output directory from change-control run."
+    ),
+    surface: Literal["ide", "ui"] = typer.Option("ide", "--surface"),
+    out: Path | None = typer.Option(None, "--out", help="Optional projection JSON path."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Export a canonical IDE/UI projection without changing its semantics."""
+    from apiforge.core.io import write_json
+    from apiforge.surfaces.change_control_host import surface_projection
+
+    def work() -> dict[str, object]:
+        projection = surface_projection(run_dir, surface)
+        if out:
+            write_json(out, projection)
+            return {"surface": surface, "out": str(out)}
+        return projection
+
+    _echo_json(_run(work), detail_level)
+
+
+@change_control_app.command("serve")
+def change_control_serve(
+    run_dir: Path = typer.Option(
+        ..., "--run-dir", help="Output directory from change-control run."
+    ),
+    host: str = typer.Option("127.0.0.1", "--host"),
+    port: int = typer.Option(8765, "--port", min=1, max=65535),
+    token_env: str = typer.Option("APIFORGE_HOST_TOKEN", "--token-env"),
+    tls_cert: Path | None = typer.Option(None, "--tls-cert"),
+    tls_key: Path | None = typer.Option(None, "--tls-key"),
+    trust_proxy: bool = typer.Option(False, "--trust-proxy"),
+) -> None:
+    """Serve a local or authenticated TLS read-only UI and IDE bridge."""
+    from apiforge.surfaces.change_control_host import serve_change_control
+
+    _run(
+        lambda: serve_change_control(
+            run_dir,
+            host=host,
+            port=port,
+            auth_token=os.environ.get(token_env),
+            tls_cert=tls_cert,
+            tls_key=tls_key,
+            trust_proxy=trust_proxy,
+        )
+    )
+
+
+@integration_app.command("github-issues")
+def integration_github_issues(
+    repository: str = typer.Option(..., "--repository"),
+    state: str = typer.Option("open", "--state"),
+    api_base: str = typer.Option("https://api.github.com", "--api-base"),
+    max_age: int = typer.Option(300, "--max-age", min=1, max=86_400),
+    out: Path | None = typer.Option(None, "--out", help="Optional JSON evidence path."),
+    token_env: str = typer.Option("GITHUB_TOKEN", "--token-env"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Read GitHub issues through a GET-only adapter and emit a receipt."""
+    from apiforge.core.io import write_json
+    from apiforge.integrations.external import GitHubIssuesReadOnlyAdapter
+    from apiforge.integrations.github import UrllibReadOnlyTransport
+
+    def work() -> object:
+        result = GitHubIssuesReadOnlyAdapter(
+            UrllibReadOnlyTransport(api_base, token=os.environ.get(token_env))
+        ).read(repository, state=state, max_age_seconds=max_age)
+        payload = result.model_dump(mode="json")
+        if out:
+            write_json(out, payload)
+            return {"out": str(out), "receipt": payload["receipt"]}
+        return payload
+
+    _echo_json(_run(work), detail_level)
+
+
+@integration_app.command("health")
+def integration_health(
+    url: str = typer.Option(..., "--url"),
+    max_age: int = typer.Option(60, "--max-age", min=1, max=86_400),
+    out: Path | None = typer.Option(None, "--out", help="Optional JSON evidence path."),
+    token_env: str = typer.Option("APIFORGE_HOST_TOKEN", "--token-env"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Read a remote HTTP health endpoint and emit a freshness receipt."""
+    from apiforge.core.io import write_json
+    from apiforge.integrations.external import adapter_for_url
+
+    def work() -> object:
+        result = adapter_for_url(url, token=os.environ.get(token_env)).read(
+            url, max_age_seconds=max_age
+        )
+        payload = result.model_dump(mode="json")
+        if out:
+            write_json(out, payload)
+            return {"out": str(out), "receipt": payload["receipt"]}
+        return payload
+
+    _echo_json(_run(work), detail_level)
+
+
+@integration_app.command("json")
+def integration_json(
+    url: str = typer.Option(..., "--url"),
+    max_age: int = typer.Option(300, "--max-age", min=1, max=86_400),
+    out: Path | None = typer.Option(None, "--out", help="Optional JSON evidence path."),
+    token_env: str = typer.Option("APIFORGE_EXTERNAL_READ_TOKEN", "--token-env"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Read a generic external JSON endpoint (Jira, Linear or similar)."""
+    from urllib.parse import urlsplit
+
+    from apiforge.core.io import write_json
+    from apiforge.integrations.external import HttpJsonReadOnlyAdapter
+    from apiforge.integrations.github import UrllibReadOnlyTransport
+
+    def work() -> object:
+        parsed = urlsplit(url)
+        adapter = HttpJsonReadOnlyAdapter(
+            UrllibReadOnlyTransport(
+                f"{parsed.scheme}://{parsed.netloc}",
+                token=os.environ.get(token_env),
+                accept="application/json",
+            )
+        )
+        payload = adapter.read(url, max_age_seconds=max_age).model_dump(mode="json")
+        if out:
+            write_json(out, payload)
+            return {"out": str(out), "receipt": payload["receipt"]}
+        return payload
+
+    _echo_json(_run(work), detail_level)
+
+
+@integration_app.command("verify-receipt")
+def integration_verify_receipt(
+    receipt: Path = typer.Option(..., "--receipt"),
+    now: str = typer.Option(..., "--now", help="Explicit ISO-8601 verification time."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Verify external receipt correspondence and declared freshness."""
+    from apiforge.contracts.integration import ExternalReadReceipt
+    from apiforge.integrations.external import verify_external_receipt
+
+    def work() -> object:
+        payload = json.loads(receipt.read_text(encoding="utf-8"))
+        raw = payload.get("receipt", payload) if isinstance(payload, dict) else payload
+        return verify_external_receipt(ExternalReadReceipt.model_validate(raw), now=now)
+
+    _echo_json(_run(work), detail_level)
+
+
+@platform_app.command("verify-runtime")
+def platform_verify_runtime(
+    root: Path = typer.Option(Path("."), "--root"),
+    vertical: list[str] = typer.Option([], "--vertical"),
+    now: str | None = typer.Option(None, "--now", help="Explicit ISO-8601 observation time."),
+    out: Path | None = typer.Option(None, "--out", help="Optional runtime receipt path."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Execute committed probes and emit local runtime evidence."""
+    from apiforge.application.platform_runtime import (
+        VERTICALS,
+        runtime_summary,
+        verify_platform_runtime,
+    )
+    from apiforge.core.io import write_json
+
+    def work() -> object:
+        selected = tuple(vertical) or VERTICALS
+        receipt = verify_platform_runtime(root, verticals=selected, now=now)
+        payload = receipt.model_dump(mode="json") | {"summary": runtime_summary(receipt)}
+        if out:
+            write_json(out, payload)
+            return {"out": str(out), "summary": payload["summary"]}
+        return payload
+
+    _echo_json(_run(work), detail_level)
+
+
+@diff_app.command("contract")
+def diff_contract(
+    baseline: Path = typer.Option(..., "--baseline", help="Baseline OpenAPI document."),
+    candidate: Path = typer.Option(..., "--candidate", help="Candidate OpenAPI document."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Classify bounded breaking changes between two contracts."""
+
+    def work() -> object:
+        for path in (baseline, candidate):
+            if not path.is_file():
+                raise AnalysisError("AF-INPUT-NOT-FOUND", str(path))
+        return [
+            c.model_dump(mode="json")
+            for c in diff_contracts(load_openapi(baseline), load_openapi(candidate))
+        ]
+
+    _echo_json(_run(work), detail_level)
+
+
+@collect_app.command("api-gateway")
+def collect_api_gateway(
+    api_id: str = typer.Option(..., "--api-id", help="REST API id."),
+    out_dir: Path = typer.Option(..., "--out", help="Dump directory to write."),
+    now: str | None = typer.Option(
+        None, "--now", help="Explicit ISO8601 collection timestamp (the only clock)."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Fetch one REST API's configuration into an offline dump."""
+
+    def work() -> CollectManifest:
+        try:
+            return collect(api_id, out_dir, now=now)
+        except CollectError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    manifest = _run(work)
+    assert isinstance(manifest, CollectManifest)
+    _echo_json(
+        {
+            "artifacts": manifest.artifacts,
+            "collected_at": manifest.collected_at,
+            "source": manifest.source,
+            "tool_version": manifest.tool_version,
+        },
+        detail_level,
+    )
+
+
+@collect_app.command("lambda")
+def collect_lambda(
+    function_name: str = typer.Option(..., "--function-name", help="Lambda function name."),
+    out_dir: Path = typer.Option(..., "--out", help="Dump directory to write."),
+    now: str | None = typer.Option(
+        None, "--now", help="Explicit ISO8601 collection timestamp (the only clock)."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Fetch one Lambda function's configuration into an offline dump."""
+
+    def work() -> CollectManifest:
+        from apiforge.collectors.lambda_ import collect
+
+        try:
+            return collect(function_name, out_dir, now=now)
+        except CollectError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    manifest = _run(work)
+    assert isinstance(manifest, CollectManifest)
+    _echo_json(
+        {
+            "artifacts": manifest.artifacts,
+            "collected_at": manifest.collected_at,
+            "source": manifest.source,
+            "tool_version": manifest.tool_version,
+        },
+        detail_level,
+    )
+
+
+@model_app.command("lambda")
+def inventory_lambda(
+    path: Path = typer.Option(..., "--path", help="Dump directory from collect lambda."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Read a Lambda dump into facts — offline, no credentials."""
+
+    def work() -> dict[str, object]:
+        from apiforge.adapters.lambda_.extract import extract_lambda
+
+        if not path.is_dir():
+            raise AnalysisError("AF-INPUT-NOT-FOUND", str(path))
+        inventory = extract_lambda(path)
+        return {
+            "diagnostics": [d.model_dump(mode="json") for d in inventory.diagnostics],
+            "facts": [f.model_dump(mode="json") for f in inventory.facts],
+            "framework": inventory.framework,
+            "input_hashes": dict(inventory.input_hashes),
+        }
+
+    _echo_json(_run(work), detail_level)
+
+
+_AWS_DUMP_READERS = {
+    "sqs": "apiforge.adapters.awsdumps.extract_sqs",
+    "sns": "apiforge.adapters.awsdumps.extract_sns",
+    "eventbridge": "apiforge.adapters.awsdumps.extract_eventbridge",
+    "iam-role": "apiforge.adapters.awsdumps.extract_iam_role",
+    "cognito": "apiforge.adapters.awsdumps.extract_cognito",
+    "waf": "apiforge.adapters.awsdumps.extract_waf",
+    "dynamodb": "apiforge.adapters.awsdumps.extract_dynamodb",
+    "docdb": "apiforge.adapters.awsdumps.extract_docdb",
+    "neptune": "apiforge.adapters.awsdumps.extract_neptune",
+    "stepfunctions": "apiforge.adapters.awsdumps.extract_stepfunctions",
+    "cloudwatch": "apiforge.adapters.awsdumps.extract_cloudwatch",
+    "xray": "apiforge.adapters.awsdumps.extract_xray",
+    "kms": "apiforge.adapters.awsdumps.extract_kms",
+    "secrets": "apiforge.adapters.awsdumps.extract_secrets",
+    "vpc-endpoints": "apiforge.adapters.awsdumps.extract_vpc_endpoints",
+    "s3": "apiforge.adapters.awsdumps.extract_s3",
+    "alb": "apiforge.adapters.awsdumps.extract_alb",
+    "ecs": "apiforge.adapters.awsdumps.extract_ecs",
+    "eks": "apiforge.adapters.awsdumps.extract_eks",
+    "ec2": "apiforge.adapters.awsdumps.extract_ec2",
+    "msk": "apiforge.adapters.awsdumps.extract_msk",
+    "elasticache": "apiforge.adapters.awsdumps.extract_elasticache",
+}
+
+
+def _register_dump_models() -> None:
+    """One `model <svc>` command per collector dump — same closed shape."""
+
+    def make(dotted: str) -> Callable[[Path, str], None]:
+        def cmd(
+            path: Path = typer.Option(..., "--path", help="Dump directory from `collect`."),
+            detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+        ) -> None:
+            def work() -> dict[str, object]:
+                import importlib
+
+                if not path.is_dir():
+                    raise AnalysisError("AF-INPUT-NOT-FOUND", str(path))
+                module, _, func = dotted.rpartition(".")
+                inventory = getattr(importlib.import_module(module), func)(path)
+                return {
+                    "diagnostics": [d.model_dump(mode="json") for d in inventory.diagnostics],
+                    "facts": [f.model_dump(mode="json") for f in inventory.facts],
+                    "framework": inventory.framework,
+                    "input_hashes": dict(inventory.input_hashes),
+                }
+
+            _echo_json(_run(work), detail_level)
+
+        return cmd
+
+    for svc, dotted in _AWS_DUMP_READERS.items():
+        model_app.command(svc)(make(dotted))
+
+
+_register_dump_models()
+
+
+@collect_app.command("sqs")
+def collect_sqs(
+    queue_url: str = typer.Option(..., "--queue-url", help="SQS queue URL."),
+    out_dir: Path = typer.Option(..., "--out", help="Dump directory to write."),
+    now: str | None = typer.Option(
+        None, "--now", help="Explicit ISO8601 collection timestamp (the only clock)."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Fetch one queue's attribute set into an offline dump."""
+
+    def work() -> CollectManifest:
+        from apiforge.collectors.messaging import collect_sqs
+
+        try:
+            return collect_sqs(queue_url, out_dir, now=now)
+        except CollectError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_manifest(_run(work), detail_level)
+
+
+@collect_app.command("sns")
+def collect_sns(
+    topic_arn: str = typer.Option(..., "--topic-arn", help="SNS topic ARN."),
+    out_dir: Path = typer.Option(..., "--out", help="Dump directory to write."),
+    now: str | None = typer.Option(
+        None, "--now", help="Explicit ISO8601 collection timestamp (the only clock)."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Fetch one topic's attributes and subscriptions into an offline dump."""
+
+    def work() -> CollectManifest:
+        from apiforge.collectors.messaging import collect_sns
+
+        try:
+            return collect_sns(topic_arn, out_dir, now=now)
+        except CollectError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_manifest(_run(work), detail_level)
+
+
+@collect_app.command("eventbridge")
+def collect_eventbridge(
+    bus_name: str = typer.Option(..., "--event-bus", help="Event bus name."),
+    out_dir: Path = typer.Option(..., "--out", help="Dump directory to write."),
+    now: str | None = typer.Option(
+        None, "--now", help="Explicit ISO8601 collection timestamp (the only clock)."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Fetch the bus, its rules and their targets into an offline dump."""
+
+    def work() -> CollectManifest:
+        from apiforge.collectors.messaging import collect_eventbridge
+
+        try:
+            return collect_eventbridge(bus_name, out_dir, now=now)
+        except CollectError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_manifest(_run(work), detail_level)
+
+
+@collect_app.command("iam-role")
+def collect_iam_role(
+    role_name: str = typer.Option(..., "--role-name", help="IAM role name."),
+    out_dir: Path = typer.Option(..., "--out", help="Dump directory to write."),
+    now: str | None = typer.Option(
+        None, "--now", help="Explicit ISO8601 collection timestamp (the only clock)."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Fetch one role, its attached policies and inline policy documents."""
+
+    def work() -> CollectManifest:
+        from apiforge.collectors.identity import collect_iam_role
+
+        try:
+            return collect_iam_role(role_name, out_dir, now=now)
+        except CollectError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_manifest(_run(work), detail_level)
+
+
+@collect_app.command("cognito")
+def collect_cognito(
+    user_pool_id: str = typer.Option(..., "--user-pool-id", help="User pool id."),
+    out_dir: Path = typer.Option(..., "--out", help="Dump directory to write."),
+    now: str | None = typer.Option(
+        None, "--now", help="Explicit ISO8601 collection timestamp (the only clock)."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Fetch the user pool and its app clients into an offline dump."""
+
+    def work() -> CollectManifest:
+        from apiforge.collectors.identity import collect_cognito
+
+        try:
+            return collect_cognito(user_pool_id, out_dir, now=now)
+        except CollectError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_manifest(_run(work), detail_level)
+
+
+@collect_app.command("waf")
+def collect_waf(
+    web_acl_id: str = typer.Option(..., "--web-acl-id", help="WebACL id."),
+    web_acl_name: str = typer.Option(..., "--web-acl-name", help="WebACL name."),
+    scope: str = typer.Option("REGIONAL", "--scope", help="REGIONAL or CLOUDFRONT."),
+    out_dir: Path = typer.Option(..., "--out", help="Dump directory to write."),
+    now: str | None = typer.Option(
+        None, "--now", help="Explicit ISO8601 collection timestamp (the only clock)."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Fetch one WebACL's configuration into an offline dump."""
+
+    def work() -> CollectManifest:
+        from apiforge.collectors.identity import collect_waf
+
+        try:
+            return collect_waf(web_acl_id, web_acl_name, scope, out_dir, now=now)
+        except CollectError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_manifest(_run(work), detail_level)
+
+
+_COLLECT_SIMPLE = {
+    "rds": (
+        "apiforge.collectors.datastores.collect_rds",
+        "--resource-id",
+        "RDS instance or Aurora cluster identifier.",
+    ),
+    "dynamodb": (
+        "apiforge.collectors.datastores.collect_dynamodb",
+        "--table-name",
+        "DynamoDB table name.",
+    ),
+    "docdb": (
+        "apiforge.collectors.datastores.collect_docdb",
+        "--cluster-id",
+        "DocDB cluster identifier.",
+    ),
+    "neptune": (
+        "apiforge.collectors.datastores.collect_neptune",
+        "--cluster-id",
+        "Neptune cluster identifier.",
+    ),
+    "stepfunctions": (
+        "apiforge.collectors.ops.collect_stepfunctions",
+        "--state-machine-arn",
+        "State machine ARN.",
+    ),
+    "cloudwatch": (
+        "apiforge.collectors.ops.collect_cloudwatch",
+        "--alarm-prefix",
+        "Alarm name prefix.",
+    ),
+    "kms": (
+        "apiforge.collectors.ops.collect_kms",
+        "--key-id",
+        "KMS key id or ARN.",
+    ),
+    "secrets": (
+        "apiforge.collectors.ops.collect_secrets",
+        "--secret-id",
+        "Secret name or ARN — metadata only, value never read.",
+    ),
+    "vpc-endpoints": (
+        "apiforge.collectors.ops.collect_vpc_endpoints",
+        "--vpc-id",
+        "VPC id.",
+    ),
+    "s3": (
+        "apiforge.collectors.ops.collect_s3",
+        "--bucket",
+        "S3 bucket name — posture only, never objects.",
+    ),
+    "alb": (
+        "apiforge.collectors.compute.collect_alb",
+        "--lb-arn",
+        "Load balancer ARN.",
+    ),
+    "ecs": (
+        "apiforge.collectors.compute.collect_ecs",
+        "--cluster",
+        "ECS cluster name — collects every service in it.",
+    ),
+    "eks": (
+        "apiforge.collectors.compute.collect_eks",
+        "--cluster-name",
+        "EKS cluster name.",
+    ),
+    "ec2": (
+        "apiforge.collectors.compute.collect_ec2",
+        "--instance-id",
+        "EC2 instance id — posture only, never user-data.",
+    ),
+    "msk": (
+        "apiforge.collectors.compute.collect_msk",
+        "--cluster-arn",
+        "MSK cluster ARN.",
+    ),
+    "elasticache": (
+        "apiforge.collectors.compute.collect_elasticache",
+        "--replication-group-id",
+        "ElastiCache replication group id.",
+    ),
+}
+
+
+def _register_collect_simple() -> None:
+    """One `collect <svc>` per single-identifier collector — closed shape."""
+
+    def make(dotted: str, flag: str, help_text: str) -> Callable[..., None]:
+        def cmd(
+            identifier: str = typer.Option(..., flag, help=help_text),
+            out_dir: Path = typer.Option(..., "--out", help="Dump directory to write."),
+            now: str | None = typer.Option(
+                None,
+                "--now",
+                help="Explicit ISO8601 collection timestamp (the only clock).",
+            ),
+            detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+        ) -> None:
+            def work() -> CollectManifest:
+                import importlib
+
+                module, _, func = dotted.rpartition(".")
+                collect_fn = getattr(importlib.import_module(module), func)
+                try:
+                    manifest = collect_fn(identifier, out_dir, now=now)
+                    assert isinstance(manifest, CollectManifest)
+                    return manifest
+                except CollectError as exc:
+                    raise AnalysisError(exc.code, exc.detail) from exc
+
+            _echo_manifest(_run(work), detail_level)
+
+        return cmd
+
+    for svc, (dotted, flag, help_text) in _COLLECT_SIMPLE.items():
+        collect_app.command(svc)(make(dotted, flag, help_text))
+
+    @collect_app.command("xray")
+    def collect_xray_cmd(
+        out_dir: Path = typer.Option(..., "--out", help="Dump directory to write."),
+        now: str | None = typer.Option(
+            None,
+            "--now",
+            help="Explicit ISO8601 collection timestamp (the only clock).",
+        ),
+        detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+    ) -> None:
+        """Fetch X-Ray sampling rules and encryption config."""
+
+        def work() -> CollectManifest:
+            from apiforge.collectors.ops import collect_xray
+
+            try:
+                return collect_xray(out_dir, now=now)
+            except CollectError as exc:
+                raise AnalysisError(exc.code, exc.detail) from exc
+
+        _echo_manifest(_run(work), detail_level)
+
+
+_register_collect_simple()
+
+
+def _echo_manifest(manifest: object, detail_level: str) -> None:
+    assert isinstance(manifest, CollectManifest)
+    _echo_json(
+        {
+            "artifacts": manifest.artifacts,
+            "collected_at": manifest.collected_at,
+            "source": manifest.source,
+            "tool_version": manifest.tool_version,
+        },
+        detail_level,
+    )
+
+
+@collect_app.command("neptune-explain")
+def collect_neptune_explain_cmd(
+    endpoint: str = typer.Option(
+        ..., "--endpoint", help="Neptune endpoint URL (https://host:8182)."
+    ),
+    language: str = typer.Option(..., "--language", help="gremlin|opencypher (sparql: dump only)."),
+    out_dir: Path = typer.Option(..., "--out", help="Dump directory to write."),
+    query: str | None = typer.Option(None, "--query", help="Literal query text."),
+    query_file: Path | None = typer.Option(None, "--query-file", help="File holding the query."),
+    profile: bool = typer.Option(
+        False, "--profile", help="Executing plan (profile/dynamic); needs --reader-endpoint."
+    ),
+    reader_endpoint: str | None = typer.Option(
+        None, "--reader-endpoint", help="Declared reader; must equal --endpoint for --profile."
+    ),
+    now: str | None = typer.Option(None, "--now", help="Explicit ISO8601 collection timestamp."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Read-only explain/profile over the neptunedata allowlist; receipt in manifest."""
+
+    def work() -> CollectManifest:
+        from apiforge.collectors.graph_explain import collect_neptune_explain
+
+        if (query is None) == (query_file is None):
+            error = AnalysisError("AF-GDB-COLLECT-ARG", "pass exactly one of --query/--query-file")
+            error.field, error.unlock = "query", "pass --query <text> or --query-file <path>"  # type: ignore[attr-defined]
+            raise error
+        text = query if query is not None else Path(str(query_file)).read_text(encoding="utf-8")
+        try:
+            return collect_neptune_explain(
+                language,
+                text,
+                endpoint,
+                out_dir,
+                profile=profile,
+                reader_endpoint=reader_endpoint,
+                now=now,
+            )
+        except CollectError as exc:
+            error = AnalysisError(exc.code, exc.detail)
+            error.field = getattr(exc, "field", "collector")  # type: ignore[attr-defined]
+            error.unlock = getattr(exc, "unlock", "fix the collector input and rerun")  # type: ignore[attr-defined]
+            raise error from exc
+
+    _echo_manifest(_run(work), detail_level)
+
+
+@model_app.command("terraform")
+def inventory_terraform(
+    path: Path = typer.Option(..., "--path", help="Directory of *.tf files."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Extract API Gateway + Lambda resources from HCL — offline, no terraform."""
+
+    def work() -> dict[str, object]:
+        from apiforge.adapters.terraform.extract import extract_terraform
+
+        if not path.is_dir():
+            raise AnalysisError("AF-INPUT-NOT-FOUND", str(path))
+        inventory = extract_terraform(path)
+        return {
+            "diagnostics": [d.model_dump(mode="json") for d in inventory.diagnostics],
+            "facts": [f.model_dump(mode="json") for f in inventory.facts],
+            "framework": inventory.framework,
+            "input_hashes": dict(inventory.input_hashes),
+        }
+
+    _echo_json(_run(work), detail_level)
+
+
+@model_app.command("sam")
+def inventory_sam(
+    path: Path = typer.Option(..., "--path", help="SAM template.yaml."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Extract AWS::Serverless::* resources — intrinsics become named diagnostics."""
+
+    def work() -> dict[str, object]:
+        from apiforge.adapters.sam.extract import extract_sam
+
+        if not path.is_file():
+            raise AnalysisError("AF-INPUT-NOT-FOUND", str(path))
+        inventory = extract_sam(path)
+        return {
+            "diagnostics": [d.model_dump(mode="json") for d in inventory.diagnostics],
+            "facts": [f.model_dump(mode="json") for f in inventory.facts],
+            "framework": inventory.framework,
+            "input_hashes": dict(inventory.input_hashes),
+        }
+
+    _echo_json(_run(work), detail_level)
+
+
+_REPORT_READERS: tuple[tuple[str, str, str], ...] = (
+    ("pact", "apiforge.adapters.testreports.extract_pact", "Pact contract JSON file."),
+    (
+        "schemathesis",
+        "apiforge.adapters.testreports.extract_schemathesis",
+        "Schemathesis JSON report.",
+    ),
+    ("k6", "apiforge.adapters.testreports.extract_k6", "k6 --summary-export JSON."),
+    ("locust", "apiforge.adapters.testreports.extract_locust", "Locust --csv stats export."),
+    ("jmeter", "apiforge.adapters.testreports.extract_jmeter", "JMeter JTL CSV."),
+    (
+        "gatling",
+        "apiforge.adapters.testreports.extract_gatling",
+        "Gatling global_stats.json or report dir.",
+    ),
+    ("vegeta", "apiforge.adapters.testreports.extract_vegeta", "vegeta report -type=json."),
+    ("wrk", "apiforge.adapters.testreports.extract_wrk", "wrk stdout summary text."),
+    ("hey", "apiforge.adapters.testreports.extract_hey", "hey -o csv export."),
+    (
+        "pytest-benchmark",
+        "apiforge.adapters.testreports.extract_pytest_benchmark",
+        "pytest-benchmark --benchmark-json.",
+    ),
+    ("coverage", "apiforge.adapters.testreports.extract_coverage", "coverage.py JSON report."),
+    ("zap", "apiforge.adapters.secreports.extract_zap", "OWASP ZAP JSON report."),
+    ("semgrep", "apiforge.adapters.secreports.extract_semgrep", "Semgrep --json output."),
+    ("trivy", "apiforge.adapters.secreports.extract_trivy", "trivy --format json output."),
+    ("gitleaks", "apiforge.adapters.secreports.extract_gitleaks", "gitleaks report JSON."),
+    (
+        "asyncapi",
+        "apiforge.adapters.asyncapi.extract.extract_asyncapi",
+        "AsyncAPI 2.x/3.x document.",
+    ),
+    (
+        "graphql",
+        "apiforge.adapters.graphql_.extract.extract_graphql",
+        "GraphQL SDL schema file.",
+    ),
+    ("jfr", "apiforge.adapters.perfprofiles.extract_jfr", "jfr print --json output."),
+    ("pprof", "apiforge.adapters.perfprofiles.extract_pprof", "go tool pprof -top text."),
+    (
+        "pyroscope",
+        "apiforge.adapters.perfprofiles.extract_pyroscope",
+        "Pyroscope flamebearer JSON.",
+    ),
+)
+
+
+def _register_report(name: str, import_path: str, help_text: str) -> None:
+    """One `model <name>` command per report reader — identical payload shape."""
+
+    def cmd(
+        path: Path = typer.Option(..., "--path", help=help_text),
+        detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+    ) -> None:
+        def work() -> dict[str, object]:
+            import importlib
+
+            if not path.is_file():
+                raise AnalysisError("AF-INPUT-NOT-FOUND", str(path))
+            module, func = import_path.rsplit(".", 1)
+            extract = getattr(importlib.import_module(module), func)
+            inventory = extract(path)
+            return {
+                "diagnostics": [d.model_dump(mode="json") for d in inventory.diagnostics],
+                "facts": [f.model_dump(mode="json") for f in inventory.facts],
+                "framework": inventory.framework,
+                "input_hashes": dict(inventory.input_hashes),
+            }
+
+        _echo_json(_run(work), detail_level)
+
+    model_app.command(name)(cmd)
+
+
+for _name, _import, _help in _REPORT_READERS:
+    _register_report(_name, _import, _help)
+
+
+@model_app.command("proto")
+def inventory_proto(
+    path: Path = typer.Option(..., "--path", help="Directory of *.proto files."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Extract gRPC services/messages from .proto — no protoc, offline."""
+
+    def work() -> dict[str, object]:
+        from apiforge.adapters.protobuf.extract import extract_protobuf
+
+        if not path.is_dir():
+            raise AnalysisError("AF-INPUT-NOT-FOUND", str(path))
+        inventory = extract_protobuf(path)
+        return {
+            "diagnostics": [d.model_dump(mode="json") for d in inventory.diagnostics],
+            "facts": [f.model_dump(mode="json") for f in inventory.facts],
+            "framework": inventory.framework,
+            "input_hashes": dict(inventory.input_hashes),
+        }
+
+    _echo_json(_run(work), detail_level)
+
+
+@model_app.command("resilience")
+def inventory_resilience(
+    path: Path = typer.Option(
+        ..., "--path", help="Project directory to scan for resilience signals."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Static resilience scan (timeouts, retries, pools, breaker/shutdown/
+    idempotency declarations) — heuristic, blind spots named."""
+
+    def work() -> dict[str, object]:
+        from apiforge.adapters.resilience import extract_resilience
+
+        if not path.is_dir():
+            raise AnalysisError("AF-INPUT-NOT-FOUND", str(path))
+        inventory = extract_resilience(path)
+        return {
+            "diagnostics": [d.model_dump(mode="json") for d in inventory.diagnostics],
+            "facts": [f.model_dump(mode="json") for f in inventory.facts],
+            "framework": inventory.framework,
+            "input_hashes": dict(inventory.input_hashes),
+        }
+
+    _echo_json(_run(work), detail_level)
+
+
+@model_app.command("redis")
+def inventory_redis(
+    path: Path = typer.Option(
+        ..., "--path", help="Project directory to scan for Redis/Valkey calls."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Static extraction of Redis/Valkey call sites + DataAccessIR — offline."""
+
+    def work() -> dict[str, object]:
+        from apiforge.adapters.redis_.extract import extract_redis
+        from apiforge.adapters.redis_.ir import build_data_access_ir
+
+        if not path.is_dir():
+            raise AnalysisError("AF-INPUT-NOT-FOUND", str(path))
+        inventory = extract_redis(path)
+        return {
+            "data_access_ir": build_data_access_ir(inventory).model_dump(mode="json"),
+            "diagnostics": [d.model_dump(mode="json") for d in inventory.diagnostics],
+            "facts": [f.model_dump(mode="json") for f in inventory.facts],
+            "framework": inventory.framework,
+            "input_hashes": dict(inventory.input_hashes),
+        }
+
+    _echo_json(_run(work), detail_level)
+
+
+_DATA_ACCESS_READERS = {
+    "rds-access": (
+        "apiforge.adapters.relational.extract_rds_access",
+        "rds",
+        "rds",
+        "Project directory to scan for PostgreSQL/MySQL/Aurora relational access.",
+    ),
+    "postgres-access": (
+        "apiforge.adapters.relational.extract_postgres",
+        "postgres",
+        "postgres",
+        "Project directory to scan for PostgreSQL access.",
+    ),
+    "mysql-access": (
+        "apiforge.adapters.relational.extract_mysql",
+        "mysql",
+        "mysql",
+        "Project directory to scan for MySQL/MariaDB access.",
+    ),
+    "elasticache-access": (
+        "apiforge.adapters.redis_.extract.extract_elasticache",
+        "elasticache",
+        "elasticache",
+        "Project directory to scan for Redis-protocol calls on ElastiCache.",
+    ),
+    "mongo": (
+        "apiforge.adapters.dbaccess.extract_mongo",
+        "mongodb|documentdb",
+        "mongodb",
+        "Project directory to scan for MongoDB/DocumentDB calls.",
+    ),
+    "dynamodb-access": (
+        "apiforge.adapters.dbaccess.extract_dynamo_access",
+        "dynamodb",
+        "dynamodb",
+        "Project directory to scan for DynamoDB data-plane calls.",
+    ),
+    "neptune-access": (
+        "apiforge.adapters.graph_.extract.extract_neptune_access",
+        "neptune",
+        "neptune",
+        "Project directory to scan for Neptune gremlin/cypher/SPARQL calls.",
+    ),
+    "neo4j-access": (
+        "apiforge.adapters.graph_.extract.extract_neo4j_access",
+        "neo4j",
+        "neo4j",
+        "Project directory to scan for Neo4j openCypher calls.",
+    ),
+}
+
+
+def _register_data_access_models() -> None:
+    """`model <db>-access` — source-tree scan + DataAccessIR, offline."""
+
+    def make(dotted: str, provider: str, database: str) -> Callable[..., None]:
+        def cmd(
+            path: Path = typer.Option(..., "--path", help="Project directory."),
+            detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+        ) -> None:
+            def work() -> dict[str, object]:
+                import importlib
+
+                from apiforge.adapters.redis_.ir import build_data_access_ir
+
+                if not path.is_dir():
+                    raise AnalysisError("AF-INPUT-NOT-FOUND", str(path))
+                module, _, func = dotted.rpartition(".")
+                inventory = getattr(importlib.import_module(module), func)(path)
+                return {
+                    "data_access_ir": build_data_access_ir(
+                        inventory, database=database, provider=provider
+                    ).model_dump(mode="json"),
+                    "diagnostics": [d.model_dump(mode="json") for d in inventory.diagnostics],
+                    "facts": [f.model_dump(mode="json") for f in inventory.facts],
+                    "framework": inventory.framework,
+                    "input_hashes": dict(inventory.input_hashes),
+                }
+
+            _echo_json(_run(work), detail_level)
+
+        return cmd
+
+    for name, (dotted, provider, database, _help) in _DATA_ACCESS_READERS.items():
+        model_app.command(name)(make(dotted, provider, database))
+
+
+_register_data_access_models()
+
+
+@model_app.command("graph-access")
+def model_graph_access(
+    path: Path = typer.Option(..., "--path", help="Project directory to scan."),
+    vendor: str | None = typer.Option(None, "--vendor", help="neptune|neo4j (default: both)."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Graph call sites (Gremlin/openCypher/SPARQL) + GraphAccessIR and domain sketch."""
+
+    def work() -> dict[str, object]:
+        from apiforge.adapters.graph_.extract import VENDORS, extract_graph_access
+        from apiforge.adapters.graph_.ir import build_graph_access_ir
+
+        if not path.is_dir():
+            raise AnalysisError("AF-INPUT-NOT-FOUND", str(path))
+        if vendor is not None and vendor not in VENDORS:
+            error = AnalysisError("AF-INPUT-INVALID", f"--vendor {vendor!r} not in {VENDORS}")
+            error.field, error.unlock = "vendor", "pass --vendor neptune or --vendor neo4j"  # type: ignore[attr-defined]
+            raise error
+        inventory = extract_graph_access(path, vendor)
+        return {
+            "graph_access_ir": build_graph_access_ir(inventory).model_dump(mode="json"),
+            "diagnostics": [d.model_dump(mode="json") for d in inventory.diagnostics],
+            "facts": [f.model_dump(mode="json") for f in inventory.facts],
+            "framework": inventory.framework,
+            "input_hashes": dict(inventory.input_hashes),
+        }
+
+    _echo_json(_run(work), detail_level)
+
+
+@model_app.command("graph-explain")
+def model_graph_explain(
+    path: Path = typer.Option(..., "--path", help="One explain/profile dump file."),
+    fmt: str | None = typer.Option(None, "--format", help="Plan format (auto-detected)."),
+    synthetic: bool = typer.Option(False, "--synthetic", help="Mark the plan as synthetic."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Parse a Neptune/Neo4j plan dump into GraphPlanIR + data.graph.plan facts."""
+
+    def work() -> dict[str, object]:
+        from apiforge.adapters.graph_.plans import extract_graph_plan
+
+        inventory, plan = extract_graph_plan(path, fmt, synthetic=synthetic)
+        return {
+            "graph_plan_ir": plan.model_dump(mode="json"),
+            "diagnostics": [],
+            "facts": [f.model_dump(mode="json") for f in inventory.facts],
+            "framework": inventory.framework,
+            "input_hashes": dict(inventory.input_hashes),
+        }
+
+    _echo_json(_run(work), detail_level)
+
+
+_STREAMING_READERS = {
+    "kafka-access": (
+        "apiforge.adapters.streaming.extract_kafka",
+        "kafka",
+        "kafka|msk",
+        "Project directory to scan for Kafka producer/consumer access.",
+    ),
+    "msk-access": (
+        "apiforge.adapters.streaming.extract_msk_access",
+        "msk",
+        "aws-msk",
+        "Project directory to scan for Kafka access declared for Amazon MSK.",
+    ),
+    "rabbitmq-access": (
+        "apiforge.adapters.streaming.extract_rabbitmq",
+        "rabbitmq",
+        "rabbitmq",
+        "Project directory to scan for RabbitMQ access.",
+    ),
+    "nats-access": (
+        "apiforge.adapters.streaming.extract_nats",
+        "nats",
+        "nats",
+        "Project directory to scan for NATS access.",
+    ),
+    "pulsar-access": (
+        "apiforge.adapters.streaming.extract_pulsar",
+        "pulsar",
+        "pulsar",
+        "Project directory to scan for Apache Pulsar access.",
+    ),
+}
+
+
+def _register_streaming_models() -> None:
+    def make(dotted: str, broker: str, provider: str, help_text: str) -> Callable[..., None]:
+        def cmd(
+            path: Path = typer.Option(..., "--path", help=help_text),
+            detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+        ) -> None:
+            def work() -> dict[str, object]:
+                import importlib
+
+                from apiforge.adapters.streaming import build_streaming_ir
+
+                if not path.is_dir():
+                    raise AnalysisError("AF-INPUT-NOT-FOUND", str(path))
+                module, _, func = dotted.rpartition(".")
+                inventory = getattr(importlib.import_module(module), func)(path)
+                return {
+                    "streaming_access_ir": build_streaming_ir(
+                        inventory, broker=broker, provider=provider
+                    ).model_dump(mode="json"),
+                    "diagnostics": [d.model_dump(mode="json") for d in inventory.diagnostics],
+                    "facts": [f.model_dump(mode="json") for f in inventory.facts],
+                    "framework": inventory.framework,
+                    "input_hashes": dict(inventory.input_hashes),
+                }
+
+            _echo_json(_run(work), detail_level)
+
+        return cmd
+
+    for name, (dotted, broker, provider, help_text) in _STREAMING_READERS.items():
+        model_app.command(name)(make(dotted, broker, provider, help_text))
+
+
+_register_streaming_models()
+
+
+_MESSAGING_READERS = {
+    "sqs-access": ("apiforge.adapters.messaging.extract_sqs", "sqs", "AWS SQS"),
+    "sns-access": ("apiforge.adapters.messaging.extract_sns", "sns", "AWS SNS"),
+    "eventbridge-access": (
+        "apiforge.adapters.messaging.extract_eventbridge",
+        "eventbridge",
+        "AWS EventBridge",
+    ),
+    "kinesis-access": ("apiforge.adapters.messaging.extract_kinesis", "kinesis", "AWS Kinesis"),
+}
+
+
+def _register_messaging_models() -> None:
+    def make(dotted: str, service: str, help_text: str) -> Callable[..., None]:
+        def cmd(
+            path: Path = typer.Option(..., "--path", help=help_text),
+            detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+        ) -> None:
+            def work() -> dict[str, object]:
+                import importlib
+
+                from apiforge.adapters.messaging import build_messaging_ir
+
+                if not path.is_dir():
+                    raise AnalysisError("AF-INPUT-NOT-FOUND", str(path))
+                module, _, func = dotted.rpartition(".")
+                inventory = getattr(importlib.import_module(module), func)(path)
+                return {
+                    "messaging_access_ir": build_messaging_ir(
+                        inventory, service=service
+                    ).model_dump(mode="json"),
+                    "diagnostics": [d.model_dump(mode="json") for d in inventory.diagnostics],
+                    "facts": [f.model_dump(mode="json") for f in inventory.facts],
+                    "framework": inventory.framework,
+                    "input_hashes": dict(inventory.input_hashes),
+                }
+
+            _echo_json(_run(work), detail_level)
+
+        return cmd
+
+    for name, (dotted, service, help_text) in _MESSAGING_READERS.items():
+        model_app.command(name)(make(dotted, service, help_text))
+
+
+_register_messaging_models()
+
+
+_ANALYTICAL_READERS = {
+    "opensearch-access": (
+        "apiforge.adapters.analytical.extract_opensearch",
+        "opensearch",
+        "OpenSearch/Elasticsearch",
+    ),
+    "redshift-access": (
+        "apiforge.adapters.analytical.extract_redshift",
+        "redshift",
+        "Amazon Redshift",
+    ),
+}
+
+
+def _register_analytical_models() -> None:
+    def make(dotted: str, engine: str, help_text: str) -> Callable[..., None]:
+        def cmd(
+            path: Path = typer.Option(..., "--path", help=help_text),
+            detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+        ) -> None:
+            def work() -> dict[str, object]:
+                import importlib
+
+                from apiforge.adapters.analytical import build_analytical_ir
+
+                if not path.is_dir():
+                    raise AnalysisError("AF-INPUT-NOT-FOUND", str(path))
+                module, _, func = dotted.rpartition(".")
+                inventory = getattr(importlib.import_module(module), func)(path)
+                return {
+                    "analytical_access_ir": build_analytical_ir(
+                        inventory, engine=engine
+                    ).model_dump(mode="json"),
+                    "diagnostics": [d.model_dump(mode="json") for d in inventory.diagnostics],
+                    "facts": [f.model_dump(mode="json") for f in inventory.facts],
+                    "framework": inventory.framework,
+                    "input_hashes": dict(inventory.input_hashes),
+                }
+
+            _echo_json(_run(work), detail_level)
+
+        return cmd
+
+    for name, (dotted, engine, help_text) in _ANALYTICAL_READERS.items():
+        model_app.command(name)(make(dotted, engine, help_text))
+
+
+_register_analytical_models()
+
+
+@model_app.command("otel")
+def inventory_otel(
+    path: Path = typer.Option(..., "--path", help="OTLP/JSON trace export from an OTel collector."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """OTel export -> perf.otel.* facts + a PerformanceRun — offline."""
+
+    def work() -> dict[str, object]:
+        from apiforge.adapters.otel.extract import extract_otel
+        from apiforge.adapters.otel.run import build_performance_run
+
+        if not path.is_file():
+            raise AnalysisError("AF-INPUT-NOT-FOUND", str(path))
+        inventory = extract_otel(path)
+        return {
+            "diagnostics": [d.model_dump(mode="json") for d in inventory.diagnostics],
+            "facts": [f.model_dump(mode="json") for f in inventory.facts],
+            "framework": inventory.framework,
+            "input_hashes": dict(inventory.input_hashes),
+            "performance_run": build_performance_run(inventory, path.name).model_dump(mode="json"),
+        }
+
+    _echo_json(_run(work), detail_level)
+
+
+def _load_repeat_baselines(directory: Path | None) -> tuple[PerformanceRun, ...]:
+    """Every ``*.json`` in the dir is a repeated baseline run — or named."""
+    if directory is None:
+        return ()
+    if not directory.is_dir():
+        raise AnalysisError("AF-PERF-RUN-INVALID", f"{directory}: not a directory")
+    runs = tuple(_load_performance_run(p) for p in sorted(directory.glob("*.json")))
+    return runs
+
+
+@perf_app.command("compare")
+def perf_compare(
+    baseline: Path = typer.Option(
+        ..., "--baseline", help="PerformanceRun JSON (or `model otel` payload)."
+    ),
+    candidate: Path = typer.Option(
+        ..., "--candidate", help="PerformanceRun JSON (or `model otel` payload)."
+    ),
+    threshold_pct: float = typer.Option(
+        10.0, "--threshold-pct", help="Regression threshold — declared, never assumed."
+    ),
+    min_samples: int = typer.Option(
+        3, "--min-samples", help="Minimum span count per operation to be judged."
+    ),
+    repeat_baseline: Path | None = typer.Option(
+        None,
+        "--repeat-baseline",
+        help="Dir of repeated baseline runs — measures the noise floor.",
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """compare_runs / detect_regression over two PerformanceRun payloads."""
+
+    def work() -> object:
+        from apiforge.perf.compare import compare_runs
+
+        base = _load_performance_run(baseline)
+        cand = _load_performance_run(candidate)
+        return compare_runs(
+            base,
+            cand,
+            threshold_pct=threshold_pct,
+            min_samples=min_samples,
+            repeat_baselines=_load_repeat_baselines(repeat_baseline),
+        ).model_dump(mode="json")
+
+    _echo_json(_run(work), detail_level)
+
+
+@perf_app.command("verdict")
+def perf_verdict(
+    run: Path = typer.Option(..., "--run", help="PerformanceRun JSON (or `model otel` payload)."),
+    repeat_baseline: Path | None = typer.Option(
+        None,
+        "--repeat-baseline",
+        help="Dir of repeated baseline runs — deltas inside the measured "
+        "noise floor make the verdict inconclusive.",
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """passed / failed / inconclusive over a run — conditions named, never guessed."""
+
+    def work() -> object:
+        from apiforge.perf.verdict import verdict
+
+        return verdict(
+            _load_performance_run(run),
+            repeat_baselines=_load_repeat_baselines(repeat_baseline),
+        ).model_dump(mode="json")
+
+    _echo_json(_run(work), detail_level)
+
+
+memory_app = typer.Typer(help="Append-only PerformanceRun memory — local store.")
+perf_app.add_typer(memory_app, name="memory")
+
+
+@memory_app.command("add")
+def perf_memory_add(
+    run: Path = typer.Option(..., "--run", help="PerformanceRun JSON to persist."),
+    root: Path = typer.Option(Path("."), "--root", help="Workspace root."),
+    recorded_at: str | None = typer.Option(
+        None, "--recorded-at", help="Explicit timestamp; the only clock source."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Append a run to .apiforge/perf/runs.jsonl — payload hash recorded."""
+
+    def work() -> object:
+        from apiforge.perf.run_store import add_run
+
+        return add_run(root, _load_performance_run(run), recorded_at=recorded_at)
+
+    _echo_json(_run(work), detail_level)
+
+
+@memory_app.command("search")
+def perf_memory_search(
+    subject: str | None = typer.Option(None, "--subject"),
+    tool: str | None = typer.Option(None, "--tool"),
+    since: str | None = typer.Option(None, "--since", help="ISO-8601 lower bound on recorded_at."),
+    root: Path = typer.Option(Path("."), "--root", help="Workspace root."),
+    limit: int | None = typer.Option(
+        None, "--limit", help="Bound carried runs; count stays the real total."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """search_performance_memory — filters declared fields, never infers."""
+
+    def work() -> object:
+        from apiforge.output.page import bound_collections
+        from apiforge.perf.run_store import search_runs
+
+        runs = search_runs(root, subject=subject, tool=tool, since=since)
+        return bound_collections({"count": len(runs), "runs": runs}, limit)
+
+    _echo_json(_run(work), detail_level)
+
+
+@perf_app.command("suggest")
+def perf_suggest(
+    case: Path | None = typer.Option(
+        None, "--case", help="Case dir — reads findings.json inside it."
+    ),
+    findings: Path | None = typer.Option(
+        None, "--findings", help="Findings JSON (list or {findings: []})."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """suggest_fix — emits an ActionPlan; never applies it."""
+
+    def work() -> object:
+        from apiforge.core.models import Finding
+        from apiforge.perf.suggest import suggest_fix
+
+        source = findings or (case / "findings.json" if case else None)
+        if source is None or not Path(source).is_file():
+            raise AnalysisError(
+                "AF-PERF-SUGGEST-INPUT",
+                "pass --case <dir> (reads findings.json) or --findings <file>",
+            )
+        try:
+            doc = json.loads(Path(source).read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError, UnicodeDecodeError) as exc:
+            raise AnalysisError("AF-PERF-SUGGEST-INPUT", f"{source}: {exc}") from exc
+        payload = doc if isinstance(doc, list) else doc.get("findings", [])
+        try:
+            parsed = [Finding.model_validate(f) for f in payload]
+        except Exception as exc:
+            raise AnalysisError("AF-PERF-SUGGEST-INPUT", f"{source}: {exc}") from exc
+        return suggest_fix(parsed).model_dump(mode="json")
+
+    _echo_json(_run(work), detail_level)
+
+
+@perf_app.command("scenario")
+def perf_scenario(
+    tool: str = typer.Option(..., "--tool", help="k6 | jmeter | locust."),
+    scenario: Path = typer.Option(
+        ..., "--scenario", help="Declared scenario JSON (endpoints, rps, duration)."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Generate the tool's script for a declared scenario — never executes it."""
+
+    def work() -> object:
+        from apiforge.perf.scenario import generate_scenario
+        from apiforge.run_tools import RunError
+
+        try:
+            spec = json.loads(scenario.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError, UnicodeDecodeError) as exc:
+            raise AnalysisError("AF-SCENARIO-SCHEMA", f"{scenario}: {exc}") from exc
+        try:
+            return generate_scenario(tool, spec)
+        except RunError as exc:
+            raise AnalysisError(exc.code, str(exc).split(": ", 1)[-1]) from exc
+
+    _echo_json(_run(work), detail_level)
+
+
+@perf_app.command("plan")
+def perf_plan(
+    subject: str = typer.Option(..., "--subject"),
+    endpoint: list[str] = typer.Option(..., "--endpoint"),
+    target_tps: float = typer.Option(..., "--target-tps", min=0.0001),
+    test_kind: str = typer.Option("load", "--test-kind"),
+    duration_s: int = typer.Option(60, "--duration-s", min=1),
+    max_p99_ms: float = typer.Option(500, "--max-p99-ms", min=0.001),
+    max_error_rate: float = typer.Option(0.01, "--max-error-rate", min=0, max=1),
+    generator: str = typer.Option("k6", "--generator"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Create a declarative load plan; generation never executes a tool."""
+    from apiforge.perf_control import build_plan
+
+    try:
+        result = build_plan(
+            subject,
+            tuple(endpoint),
+            target_tps=target_tps,
+            test_kind=test_kind,
+            duration_s=duration_s,
+            max_p99_ms=max_p99_ms,
+            max_error_rate=max_error_rate,
+            generator=generator,
+        )
+    except (TypeError, ValueError) as exc:
+        raise AnalysisError("AF-PERF-PLAN-INVALID", str(exc)) from exc
+    _echo_json(result.model_dump(mode="json"), detail_level)
+
+
+@perf_app.command("chaos")
+def perf_chaos(
+    limit: int | None = typer.Option(None, "--limit", help="Bound carried scenarios."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """List the declared controlled failure-injection scenarios (CHAOS-001..013).
+
+    Each scenario names the fault, the expected signal, the blast-radius
+    guard and the evidence a run must produce — injection itself is never
+    executed by API Forge."""
+
+    def work() -> object:
+        from apiforge.output.page import bound_collections
+        from apiforge.perf.chaos import list_scenarios
+
+        return bound_collections({"scenarios": list_scenarios()}, limit)
+
+    _echo_json(_run(work), detail_level)
+
+
+def _load_performance_run(path: Path) -> PerformanceRun:
+    """Accept a bare PerformanceRun or the `model otel` payload wrapping one."""
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError, UnicodeDecodeError) as exc:
+        raise AnalysisError("AF-PERF-RUN-INVALID", f"{path}: {exc}") from exc
+    if isinstance(payload, dict) and isinstance(payload.get("performance_run"), dict):
+        payload = payload["performance_run"]
+    try:
+        return PerformanceRun.model_validate(payload)
+    except Exception as exc:
+        raise AnalysisError("AF-PERF-RUN-INVALID", f"{path}: {exc}") from exc
+
+
+@plan_app.command("strangler")
+def plan_strangler(
+    baseline: Path = typer.Option(..., "--baseline", help="facts.json from the legacy surface."),
+    candidate: Path = typer.Option(
+        ..., "--candidate", help="facts.json from the new implementation."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Per-route strangler cut plan over two code inventories."""
+
+    def work() -> object:
+        from apiforge.plan.strangler import strangler_plan
+
+        base = _load_facts(baseline)
+        cand = _load_facts(candidate)
+        if not any(f.kind == "code.route" for f in (*base, *cand)):
+            raise AnalysisError("AF-PLAN-NO-ROUTES", "neither payload carries code.route facts")
+        return strangler_plan(base, cand)
+
+    _echo_json(_run(work), detail_level)
+
+
+@plan_app.command("architecture")
+def plan_architecture(
+    profile: Path = typer.Option(
+        ..., "--profile", help="WorkloadProfile JSON — every field declared."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Architecture Decision Engine — rank AWS primitives per role.
+
+    Eliminates on declared hard constraints, scores survivors on the
+    profile, and emits chosen + rejected-with-reason + change conditions.
+    """
+
+    def work() -> object:
+        from apiforge.contracts.stubs import WorkloadProfile
+        from apiforge.plan.architecture import recommend
+
+        try:
+            payload = json.loads(profile.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError, UnicodeDecodeError) as exc:
+            raise AnalysisError("AF-PLAN-PROFILE-INVALID", f"{profile}: {exc}") from exc
+        if isinstance(payload, dict) and isinstance(payload.get("workload_profile"), dict):
+            payload = payload["workload_profile"]
+        try:
+            wp = WorkloadProfile.model_validate(payload)
+        except Exception as exc:
+            raise AnalysisError("AF-PLAN-PROFILE-INVALID", f"{profile}: {exc}") from exc
+        return recommend(wp)
+
+    _echo_json(_run(work), detail_level)
+
+
+@debate_app.command("open")
+def debate_open(
+    case: Path = typer.Option(..., "--case", help="Case directory."),
+    question: str = typer.Option(..., "--question", help="What is disputed."),
+    sides: str = typer.Option(..., "--sides", help="Comma-separated side names."),
+    now: str = typer.Option(..., "--now", help="ISO8601 timestamp — the only clock."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Open a debate over a question with named sides."""
+
+    def work() -> object:
+        from apiforge.debate.service import open_debate
+
+        parts = tuple(s.strip() for s in sides.split(",") if s.strip())
+        d = open_debate(case, question, parts, now)
+        return {"debate_id": d.debate_id, "status": d.status, "sides": list(d.sides)}
+
+    _echo_json(_run(work), detail_level)
+
+
+@debate_app.command("submit")
+def debate_submit(
+    case: Path = typer.Option(..., "--case", help="Case directory."),
+    debate: str = typer.Option(..., "--debate", help="Debate id."),
+    side: str = typer.Option(..., "--side", help="Which side this position serves."),
+    position: str = typer.Option(..., "--position", help="The position text."),
+    evidence: str = typer.Option(..., "--evidence", help="Comma-separated fact_id citations."),
+    disagree: list[str] = typer.Option(
+        [], "--disagree", help="Position delta: 'point=reason' (repeatable)."
+    ),
+    risk: list[str] = typer.Option([], "--risk", help="Position delta risk (repeatable)."),
+    confidence: float | None = typer.Option(None, "--confidence", help="0.0-1.0."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Append a position — every position must cite fact_id evidence."""
+
+    def work() -> object:
+        from apiforge.application.selective import parse_disagreements
+        from apiforge.debate.service import submit
+
+        ev = tuple(e.strip() for e in evidence.split(",") if e.strip())
+        d = submit(
+            case,
+            debate,
+            side,
+            position,
+            ev,
+            disagreements=parse_disagreements(disagree),
+            risks=tuple(risk),
+            confidence=confidence,
+        )
+        return {"debate_id": d.debate_id, "submissions": len(d.submissions)}
+
+    _echo_json(_run(work), detail_level)
+
+
+@debate_app.command("close")
+def debate_close(
+    case: Path = typer.Option(..., "--case", help="Case directory."),
+    debate: str = typer.Option(..., "--debate", help="Debate id."),
+    referee: str = typer.Option(..., "--referee", help="Who closes the debate."),
+    decision: str | None = typer.Option(
+        None, "--decision", help="The decision; omit to record unresolved."
+    ),
+    now: str = typer.Option(..., "--now", help="ISO8601 timestamp."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Close as resolved (--decision) or unresolved (no --decision)."""
+
+    def work() -> object:
+        from apiforge.debate.service import close
+
+        d = close(case, debate, referee, decision, now)
+        return {
+            "debate_id": d.debate_id,
+            "status": d.status,
+            "decision": d.decision,
+            "referee": d.referee,
+        }
+
+    _echo_json(_run(work), detail_level)
+
+
+@dispatch_app.command("run")
+def dispatch_run(
+    coordinator: str = typer.Option(..., "--coordinator", help="Coordinator name."),
+    case: Path = typer.Option(..., "--case", help="Case directory."),
+    project: Path | None = typer.Option(None, "--project"),
+    contract: Path | None = typer.Option(None, "--contract"),
+    baseline: Path | None = typer.Option(None, "--baseline"),
+    candidate: Path | None = typer.Option(None, "--candidate"),
+    input_path: Path | None = typer.Option(
+        None, "--input-path", help="Dump/report/template path for model verbs."
+    ),
+    findings: Path | None = typer.Option(None, "--findings"),
+    rule_id: str | None = typer.Option(None, "--rule-id"),
+    tool: str | None = typer.Option(
+        None, "--tool", help="Tool selection for verbs that need one (perf scenario)."
+    ),
+    now: str | None = typer.Option(None, "--now", help="ISO8601 — the only clock."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Run a coordinator's playbook; pending steps name their missing inputs."""
+
+    def work() -> object:
+        from apiforge.dispatch.runner import DispatchContext, run_playbook
+
+        ctx = DispatchContext(
+            case=case,
+            project=project,
+            contract=contract,
+            baseline=baseline,
+            candidate=candidate,
+            input_path=input_path,
+            findings=findings,
+            rule_id=rule_id,
+            tool=tool,
+            now=now,
+        )
+        return run_playbook(coordinator, ctx)
+
+    _echo_json(_run(work), detail_level)
+
+
+@agents_app.command("sync")
+def agents_sync(
+    root: Path = typer.Option(Path("."), "--root", help="Repository root."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Render `.agents/agents/`, `.claude/agents/` and `.codex/agents/` from `agents/*.md`."""
+
+    def work() -> object:
+        from apiforge.dispatch.mirrors import sync_mirrors
+
+        return sync_mirrors(Path(root).resolve())
+
+    _echo_json(_run(work), detail_level)
+
+
+@agents_app.command("check")
+def agents_check(
+    root: Path = typer.Option(Path("."), "--root", help="Repository root."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Report render drift for all three hosts — the release gate fails on the same check."""
+
+    def work() -> object:
+        from apiforge.dispatch.mirrors import mirror_drift
+
+        drift = mirror_drift(Path(root).resolve())
+        return {"drift": drift, "ok": not drift}
+
+    _echo_json(_run(work), detail_level)
+
+
+@run_app.command("tool")
+def run_tool_cmd(
+    tool: str = typer.Argument(..., help="Allowlisted tool: semgrep|trivy|gitleaks|k6."),
+    target: Path = typer.Option(..., "--target", help="Path the tool scans."),
+    out: Path = typer.Option(..., "--out", help="Report file the tool writes."),
+    config: str | None = typer.Option(
+        None, "--config", help="Tool config (semgrep requires a local rules path)."
+    ),
+    timeout: int = typer.Option(300, "--timeout", help="Seconds before the run is refused."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Print argv; execute nothing."),
+    approve: str | None = typer.Option(
+        None,
+        "--approve",
+        help="Approval reference required when a load script targets a remote or "
+        "unresolvable URL (policy gate `sensitive`).",
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Execute a scanner binary (fixed argv, no shell) and read its report."""
+
+    def work() -> dict[str, object]:
+        from apiforge.run_tools import RunError, run_tool
+
+        try:
+            extra = {"config": config} if config else {}
+            return run_tool(tool, target, out, extra, timeout, dry_run=dry_run, approval=approve)
+        except RunError as exc:
+            raise AnalysisError(exc.code, str(exc).split(": ", 1)[-1]) from exc
+
+    _echo_json(_run(work), detail_level)
+
+
+@run_app.command("list")
+def run_list(
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """The tool registry — declared metadata plus *measured* install status."""
+
+    def work() -> dict[str, object]:
+        from apiforge.run_tools import list_tools
+
+        return {"tools": list_tools()}
+
+    _echo_json(_run(work), detail_level)
+
+
+@contract_app.command("list")
+def contract_list(
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """List the registered canonical contracts."""
+
+    def work() -> dict[str, object]:
+        from apiforge.contracts.registry import contract_names
+
+        return {"contracts": contract_names()}
+
+    _echo_json(_run(work), detail_level)
+
+
+@contract_app.command("show")
+def contract_show(
+    name: str = typer.Argument(..., help="Contract name, e.g. TaskSpec/v1."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Emit the JSON schema of a canonical contract."""
+
+    def work() -> dict[str, object]:
+        from apiforge.contracts.base import ContractError
+        from apiforge.contracts.registry import contract_schema
+
+        try:
+            return contract_schema(name)
+        except ContractError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_json(_run(work), detail_level)
+
+
+def _task_root(root: Path | None) -> Path:
+    return root if root is not None else Path.cwd()
+
+
+@task_app.command("create")
+def task_create(
+    task_id: str = typer.Argument(..., help="Task id (lowercase, digits, hyphens)."),
+    outcome: str = typer.Option(..., "--outcome", help="The single outcome."),
+    spec_file: Path | None = typer.Option(
+        None, "--spec", help="YAML/JSON TaskSpec to load instead of flags."
+    ),
+    input_: list[str] = typer.Option(
+        [], "--input", help="field=path-or-value (project, contract, findings…)"
+    ),
+    writable: list[str] = typer.Option([], "--writable", help="Writable path glob."),
+    strategy: str = typer.Option("direct", "--strategy", help="Recipe name."),
+    risk: str = typer.Option("read_only", "--risk", help="Action class."),
+    root: Path | None = typer.Option(None, "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Create a task in draft; sealed only after review."""
+
+    def work() -> dict[str, object]:
+        from apiforge.contracts.base import ContractError
+        from apiforge.contracts.task import TaskSpec
+        from apiforge.taskspec.service import create_task
+
+        try:
+            if spec_file is not None:
+                import yaml
+
+                data = yaml.safe_load(spec_file.read_text(encoding="utf-8"))
+                data["id"] = task_id
+                spec = TaskSpec.model_validate(data)
+            else:
+                spec = TaskSpec.model_validate(
+                    {
+                        "id": task_id,
+                        "outcome": outcome,
+                        "inputs": tuple(input_),
+                        "writable_paths": tuple(writable),
+                        "strategy": strategy,
+                        "risk": risk,
+                    }
+                )
+            created = create_task(_task_root(root), spec)
+            return created.model_dump(mode="json")
+        except ContractError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_json(_run(work), detail_level)
+
+
+@task_app.command("review")
+def task_review(
+    task_id: str = typer.Argument(...),
+    by: str = typer.Option(..., "--by", help="Reviewer identity."),
+    set_: list[str] = typer.Option([], "--set", help="scalar field=value changes"),
+    root: Path | None = typer.Option(None, "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Mark reviewed — any --set change bumps the revision, voiding seals."""
+
+    def work() -> dict[str, object]:
+        from apiforge.contracts.base import ContractError
+        from apiforge.taskspec.service import review_task
+
+        sets = dict(item.split("=", 1) for item in set_ if "=" in item)
+        try:
+            spec = review_task(_task_root(root), task_id, by, sets)
+            return spec.model_dump(mode="json")
+        except ContractError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_json(_run(work), detail_level)
+
+
+@task_app.command("seal")
+def task_seal(
+    task_id: str = typer.Argument(...),
+    key: Path = typer.Option(..., "--key", help="Ed25519 private PEM."),
+    by: str = typer.Option(..., "--by"),
+    root: Path | None = typer.Option(None, "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Seal the current revision — key possession, never identity."""
+
+    def work() -> dict[str, object]:
+        from apiforge.contracts.base import ContractError
+        from apiforge.taskspec.service import seal_task
+
+        try:
+            spec = seal_task(_task_root(root), task_id, key, by)
+            return spec.model_dump(mode="json")
+        except ContractError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_json(_run(work), detail_level)
+
+
+@task_app.command("run")
+def task_run(
+    task_id: str = typer.Argument(...),
+    by: str = typer.Option(..., "--by", help="Executor identity."),
+    now: str | None = typer.Option(None, "--now", help="ISO8601 (only clock)."),
+    root: Path | None = typer.Option(None, "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Run the recipe within budgets; ends awaiting supervision or named stop."""
+
+    def work() -> dict[str, object]:
+        from apiforge.contracts.base import ContractError
+        from apiforge.taskspec.runner import run_task
+
+        try:
+            return run_task(_task_root(root), task_id, by, now=now)
+        except ContractError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_json(_run(work), detail_level)
+
+
+@task_app.command("accept")
+def task_accept(
+    task_id: str = typer.Argument(...),
+    by: str = typer.Option(..., "--by", help="Acceptor — never the executor."),
+    evidence: list[str] = typer.Option([], "--evidence"),
+    notes: str = typer.Option("", "--notes"),
+    root: Path | None = typer.Option(None, "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Accept a supervised run; the acceptor must differ from the executor."""
+
+    def work() -> dict[str, object]:
+        from apiforge.contracts.base import ContractError
+        from apiforge.taskspec.runner import accept_task
+
+        try:
+            return accept_task(_task_root(root), task_id, by, tuple(evidence), notes)
+        except ContractError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_json(_run(work), detail_level)
+
+
+@task_app.command("reject")
+def task_reject(
+    task_id: str = typer.Argument(...),
+    by: str = typer.Option(..., "--by"),
+    reason: str = typer.Option(..., "--reason"),
+    root: Path | None = typer.Option(None, "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Reject a supervised run back to reviewable state."""
+
+    def work() -> dict[str, object]:
+        from apiforge.contracts.base import ContractError
+        from apiforge.taskspec.runner import reject_task
+
+        try:
+            spec = reject_task(_task_root(root), task_id, by, reason)
+            return spec.model_dump(mode="json")
+        except ContractError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_json(_run(work), detail_level)
+
+
+@task_app.command("status")
+def task_status_cmd(
+    task_id: str = typer.Argument(...),
+    root: Path | None = typer.Option(None, "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Task spec plus its append-only history."""
+
+    def work() -> dict[str, object]:
+        from apiforge.contracts.base import ContractError
+        from apiforge.taskspec.runner import task_status
+
+        try:
+            return task_status(_task_root(root), task_id)
+        except ContractError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_json(_run(work), detail_level)
+
+
+@task_app.command("compile")
+def task_compile(
+    task_id: str = typer.Argument(...),
+    outcome: str = typer.Option(..., "--outcome"),
+    contract: Path = typer.Option(..., "--contract"),
+    project: Path = typer.Option(..., "--project"),
+    case: Path = typer.Option(..., "--case"),
+    root: Path | None = typer.Option(None, "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Compile a local API intention into a verified TaskSpec draft."""
+
+    def work() -> dict[str, object]:
+        from apiforge.contracts.base import ContractError
+        from apiforge.taskspec.compiler import compile_intent
+        from apiforge.taskspec.service import create_task
+
+        try:
+            spec = compile_intent(
+                task_id,
+                outcome,
+                contract=contract,
+                project=project,
+                case=case,
+            )
+            return create_task(_task_root(root), spec).model_dump(mode="json")
+        except ContractError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_json(_run(work), detail_level)
+
+
+@task_app.command("plan")
+def task_plan_cmd(
+    task_id: str = typer.Argument(...),
+    root: Path | None = typer.Option(None, "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Bind a sealed TaskSpec to a closed persisted TaskPlan."""
+
+    def work() -> dict[str, object]:
+        from apiforge.contracts.base import ContractError
+        from apiforge.taskspec.planner import plan_task
+
+        try:
+            return plan_task(_task_root(root), task_id).model_dump(mode="json")
+        except ContractError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_json(_run(work), detail_level)
+
+
+@task_app.command("holdout")
+def task_holdout_cmd(
+    project: Path = typer.Option(..., "--project"),
+    contract: Path = typer.Option(..., "--contract"),
+    manifest: Path = typer.Option(..., "--manifest"),
+    root: Path | None = typer.Option(None, "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Run deterministic local mutations and report whether proofs detect them."""
+
+    def work() -> dict[str, object]:
+        from apiforge.contracts.base import ContractError
+        from apiforge.verification.holdout import run_holdouts
+
+        try:
+            records = run_holdouts(_task_root(root), project, contract, manifest)
+            return {"holdouts": [record.model_dump(mode="json") for record in records]}
+        except ContractError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_json(_run(work), detail_level)
+
+
+@task_app.command("verify")
+def task_verify_cmd(
+    task_id: str = typer.Argument(...),
+    project: Path = typer.Option(..., "--project"),
+    contract: Path = typer.Option(..., "--contract"),
+    manifest: Path | None = typer.Option(None, "--manifest"),
+    run_id: str = typer.Option("manual", "--run-id"),
+    by: str = typer.Option("af-verifier", "--by"),
+    root: Path | None = typer.Option(None, "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Run independent proof checks and persist a VerificationRecord."""
+
+    def work() -> dict[str, object]:
+        from apiforge.contracts.base import ContractError
+        from apiforge.taskspec.planner import plan_task
+        from apiforge.verification.holdout import run_holdouts
+        from apiforge.verification.service import verify_task
+
+        task_root = _task_root(root)
+        try:
+            plan_path = task_root / ".apiforge" / "tasks" / task_id / "plan.json"
+            if not plan_path.is_file():
+                plan_task(task_root, task_id)
+            holdout = (
+                run_holdouts(task_root, project, contract, manifest) if manifest is not None else ()
+            )
+            return verify_task(
+                task_root,
+                task_id,
+                project=project,
+                contract=contract,
+                run_id=run_id,
+                holdout=holdout,
+                verified_by=by,
+            ).model_dump(mode="json")
+        except ContractError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_json(_run(work), detail_level)
+
+
+@brief_app.command("show")
+def brief_show(
+    task_id: str = typer.Option(..., "--task", help="Task id to brief."),
+    root: Path | None = typer.Option(None, "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Render the Outcome Brief for a task — DONE is refused, not advised."""
+
+    def work() -> dict[str, object]:
+        from apiforge.brief.render import brief_payload
+        from apiforge.contracts.base import ContractError
+
+        try:
+            return brief_payload(_task_root(root), task_id)
+        except ContractError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_json(_run(work), detail_level)
+
+
+def _graph_work(fn: Callable[[], object]) -> object:
+    from apiforge.contracts.base import ContractError
+
+    try:
+        return fn()
+    except ContractError as exc:
+        raise AnalysisError(exc.code, exc.detail) from exc
+
+
+@graph_app.command("build")
+def graph_build(
+    case: Path = typer.Option(..., "--case", help="Case directory with case.json."),
+    out: Path = typer.Option(..., "--out", help="Graph output directory."),
+    tasks_root: Path | None = typer.Option(
+        None, "--tasks-root", help="Root holding .apiforge/tasks for task nodes."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Populate nodes.jsonl/edges.jsonl from case artifacts — deterministic bytes."""
+
+    def work() -> object:
+        from apiforge.graph.build import build_graph
+
+        return _graph_work(lambda: build_graph(case, out, tasks_root))
+
+    _echo_json(_run(work), detail_level)
+
+
+@graph_app.command("query")
+def graph_query(
+    graph: Path = typer.Option(..., "--graph", help="Graph directory (nodes.jsonl)."),
+    kind: str | None = typer.Option(None, "--kind", help="Filter nodes by kind."),
+    edge_kind: str | None = typer.Option(None, "--edge", help="Filter edges by kind."),
+    prop: list[str] = typer.Option([], "--prop", help="Node prop filter `k=v` (repeatable)."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Filter nodes/edges by closed vocabulary — no free text."""
+
+    def work() -> object:
+        from apiforge.graph.query import query_graph
+
+        return _graph_work(
+            lambda: query_graph(graph, kind=kind, edge_kind=edge_kind, prop=tuple(prop))
+        )
+
+    _echo_json(_run(work), detail_level)
+
+
+@graph_app.command("impact")
+def graph_impact(
+    graph: Path = typer.Option(..., "--graph", help="Graph directory."),
+    node: str = typer.Option(..., "--node", help="Node id whose dependents to list."),
+    max_depth: int = typer.Option(4, "--max-depth"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Reverse traversal: everything that transitively depends on the node."""
+
+    def work() -> object:
+        from apiforge.graph.query import impact
+
+        return _graph_work(lambda: impact(graph, node, max_depth=max_depth))
+
+    _echo_json(_run(work), detail_level)
+
+
+@graph_app.command("trace")
+def graph_trace(
+    graph: Path = typer.Option(..., "--graph", help="Graph directory."),
+    from_id: str = typer.Option(..., "--from", help="Source node id."),
+    to_id: str = typer.Option(..., "--to", help="Target node id."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Shortest directed path between two nodes; absent path is named."""
+
+    def work() -> object:
+        from apiforge.graph.query import trace
+
+        return _graph_work(lambda: trace(graph, from_id, to_id))
+
+    _echo_json(_run(work), detail_level)
+
+
+@graph_app.command("coverage")
+def graph_coverage(
+    graph: Path = typer.Option(..., "--graph", help="Graph directory."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Structural gaps: unverified findings, unimplemented ops, unreferenced facts."""
+
+    def work() -> object:
+        from apiforge.graph.query import coverage
+
+        return _graph_work(lambda: coverage(graph))
+
+    _echo_json(_run(work), detail_level)
+
+
+@graph_app.command("export")
+def graph_export(
+    graph: Path = typer.Option(..., "--graph", help="Graph directory."),
+    out: Path = typer.Option(..., "--out", help="Export directory."),
+    fmt: str = typer.Option(
+        "jsonl", "--format", help="jsonl|neptune (Gremlin CSV)|rdf (N-Triples)."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """jsonl copy, Neptune Gremlin CSV or RDF N-Triples, plus export.json digests."""
+
+    def work() -> object:
+        from apiforge.graph.export import export_graph, export_summary
+
+        return _graph_work(lambda: export_summary(export_graph(graph, out, fmt)))
+
+    _echo_json(_run(work), detail_level)
+
+
+@index_app.command("build")
+def index_build(
+    project: Path = typer.Option(..., "--project", help="Project root to index."),
+    root: Path = typer.Option(Path("."), "--root", help="Root holding .apiforge/."),
+    framework: str = typer.Option("auto", "--framework", help="fastapi|spring|go|auto."),
+    findings: Path | None = typer.Option(
+        None,
+        "--findings",
+        help="Case findings.json feeding the derived findings index.",
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Write the 12 index kinds under .apiforge/index/ (manifest lists all)."""
+
+    def work() -> object:
+        from apiforge.contracts.base import ContractError
+        from apiforge.index.build import build_index
+
+        try:
+            return build_index(project, root, framework=framework, findings_path=findings)
+        except ContractError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_json(_run(work), detail_level)
+
+
+@index_app.command("status")
+def index_status(
+    project: Path = typer.Option(..., "--project", help="Project root to compare."),
+    root: Path = typer.Option(Path("."), "--root", help="Root holding .apiforge/."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Name added/changed/removed source files against the built index."""
+
+    def work() -> object:
+        from apiforge.contracts.base import ContractError
+        from apiforge.index.build import index_status as status
+
+        try:
+            return status(project, root)
+        except ContractError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_json(_run(work), detail_level)
+
+
+@model_app.command("api-gateway")
+def inventory_api_gateway(
+    path: Path = typer.Option(..., "--path", help="Dump directory from collect api-gateway."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Read an API Gateway dump into facts — offline, no credentials."""
+
+    def work() -> dict[str, object]:
+        if not path.is_dir():
+            raise AnalysisError("AF-INPUT-NOT-FOUND", str(path))
+        inventory = extract_apigateway(path)
+        return {
+            "diagnostics": [d.model_dump(mode="json") for d in inventory.diagnostics],
+            "facts": [f.model_dump(mode="json") for f in inventory.facts],
+            "framework": inventory.framework,
+            "input_hashes": dict(inventory.input_hashes),
+        }
+
+    _echo_json(_run(work), detail_level)
+
+
+@build_app.command("endpoint")
+def build_endpoint_cmd(
+    contract: Path = typer.Option(..., "--contract", help="OpenAPI 3.1 document."),
+    operation_id: str = typer.Option(..., "--operation-id", help="operationId to build."),
+    project: Path = typer.Option(..., "--project", help="Java project root."),
+    write_diff: Path | None = typer.Option(
+        None, "--write-diff", help="Also write the emitted unified diff to a file."
+    ),
+    into_worktree: str | None = typer.Option(
+        None, "--into-worktree", help="Promote generated files into this git worktree."
+    ),
+    approve: bool = typer.Option(
+        False, "--approve", help="Record approval evidence for the sensitive-class gate."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Synthesize a Spring endpoint skeleton; main tree is never touched."""
+
+    def work() -> dict[str, object]:
+        if not project.is_dir():
+            raise AnalysisError("AF-INPUT-NOT-FOUND", str(project))
+        return build_endpoint(
+            contract, project, operation_id, promote=into_worktree, approve=approve
+        )
+
+    report = _run(work)
+    assert isinstance(report, dict)
+    if write_diff is not None:
+        from apiforge.build.diff import sources_to_diff
+        from apiforge.build.java import operation_to_sources
+        from apiforge.openapi.loader import load_openapi
+
+        sources = operation_to_sources(load_openapi(contract), operation_id)
+        write_diff.write_text(sources_to_diff(sources), encoding="utf-8")
+    _echo_json(report, detail_level)
+    promo = report.get("promotion")
+    if report.get("refused") or (isinstance(promo, dict) and promo.get("refused")):
+        raise typer.Exit(4)
+
+
+@rules_app.command("list")
+def rules_list(
+    area: str | None = typer.Option(None, "--area", help="Filter by catalog area."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """List rule ids, titles and severities by area."""
+
+    def work() -> dict[str, object]:
+        from apiforge.rules.catalog import load_catalog
+
+        catalog = load_catalog()
+        by_area: dict[str, list[dict[str, str]]] = {}
+        for rule_id, meta in sorted(catalog.items()):
+            if area is not None and meta.area.upper() != area.upper():
+                continue
+            by_area.setdefault(meta.area, []).append(
+                {"id": rule_id, "severity": meta.severity.value, "title": meta.title}
+            )
+        return {"areas": by_area, "count": sum(len(v) for v in by_area.values())}
+
+    _echo_json(_run(work), detail_level)
+
+
+@economy_app.command("report")
+def economy_report(
+    root: Path | None = typer.Option(
+        None, "--root", help="Directory whose .apiforge/economy.jsonl to aggregate."
+    ),
+    transcript: Path | None = typer.Option(
+        None, "--transcript", help="Host transcript JSONL; unlocks counted tokens."
+    ),
+    estimate: bool = typer.Option(
+        False, "--estimate", help="Add a labeled chars/4 estimate (never counted)."
+    ),
+    cost_basis: Path | None = typer.Option(
+        None, "--cost-basis", help="YAML model->rates; unlocks dollar cost."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Aggregate recorded call sizes; detail_level_effect shows what summary saves."""
+
+    def work() -> dict[str, object]:
+        from apiforge.economy.ledger import report
+        from apiforge.economy.tokens import (
+            TokenError,
+            cost,
+            estimate_tokens,
+            read_transcript,
+        )
+
+        try:
+            payload = report(root if root is not None else Path.cwd())
+            if transcript is not None:
+                counted = read_transcript(transcript)
+                payload["tokens"] = counted
+                payload["tokens_unresolved"] = False
+                if cost_basis is not None:
+                    payload["cost"] = cost(counted, cost_basis)
+            elif cost_basis is not None:
+                raise TokenError(
+                    "AF-ECONOMY-TRANSCRIPT-MISSING",
+                    "--cost-basis needs --transcript — no tokens to price",
+                )
+            if estimate:
+                payload["token_estimate"] = estimate_tokens(int(payload["payload_bytes"]))
+            return payload
+        except TokenError as exc:
+            raise AnalysisError(exc.code, str(exc).split(": ", 1)[-1]) from exc
+
+    _echo_json(_run(work), detail_level)
+
+
+@report_app.command("build")
+def report_build(
+    case_dir: Path = typer.Option(..., "--case", help="Persisted case directory."),
+    receipt: Path | None = typer.Option(
+        None, "--receipt", help="evidence receipt JSON to pin into the bundle."
+    ),
+    now: str | None = typer.Option(None, "--now", help="Explicit ISO8601 (only clock)."),
+    out: Path | None = typer.Option(None, "--out", help="Write report.json here."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Compose the release evidence bundle for a case."""
+
+    def work() -> dict[str, object]:
+        from apiforge.report.bundle import ReportError, build_report, canonical
+
+        try:
+            report = build_report(case_dir, receipt_path=receipt, now=now)
+        except ReportError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+        if out is not None:
+            out.write_text(canonical(report), encoding="utf-8")
+        return report
+
+    _echo_json(_run(work), detail_level)
+
+
+@report_app.command("keygen")
+def report_keygen(
+    name: str = typer.Option(..., "--name", help="Key name (writes <name>.pem)."),
+    keys_dir: Path = typer.Option(
+        Path(".apiforge/keys"), "--keys-dir", help="Directory holding PEM keys."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Generate an Ed25519 keypair — proves key possession, never identity."""
+
+    def work() -> dict[str, object]:
+        from apiforge.report.bundle import ReportError
+        from apiforge.report.keys import generate_keypair
+
+        try:
+            result: dict[str, object] = dict(generate_keypair(keys_dir, name))
+            return result
+        except ReportError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    _echo_json(_run(work), detail_level)
+
+
+@report_app.command("sign")
+def report_sign(
+    report: Path = typer.Option(..., "--report", help="report.json to sign."),
+    key: Path | None = typer.Option(
+        None, "--key", help="Ed25519 private PEM — adds cryptographic binding."
+    ),
+    out: Path | None = typer.Option(None, "--out", help="Write signed report here."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Append the signature block binding body/evidence/catalog hashes."""
+
+    def work() -> dict[str, object]:
+        import json as _json
+
+        from apiforge.report.bundle import canonical
+        from apiforge.report.sign import sign_report
+
+        if not report.is_file():
+            raise AnalysisError("AF-INPUT-NOT-FOUND", str(report))
+        if key is not None and not key.is_file():
+            raise AnalysisError("AF-INPUT-NOT-FOUND", str(key))
+        signed = sign_report(_json.loads(report.read_text(encoding="utf-8")), key_path=key)
+        target = out if out is not None else report
+        target.write_text(canonical(signed), encoding="utf-8")
+        return signed
+
+    _echo_json(_run(work), detail_level)
+
+
+@report_app.command("verify")
+def report_verify(
+    report: Path = typer.Option(..., "--report", help="signed report.json."),
+    receipt: Path | None = typer.Option(
+        None, "--receipt", help="receipt file to re-hash for the evidence check."
+    ),
+    pubkey: Path | None = typer.Option(
+        None, "--pubkey", help="Ed25519 public PEM to verify signature_b64."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Name which part diverged: signature_version|body|evidence|catalog|signature_crypto."""
+
+    def work() -> dict[str, object]:
+        import json as _json
+
+        from apiforge.report.bundle import ReportError
+        from apiforge.report.sign import verify_report
+
+        if not report.is_file():
+            raise AnalysisError("AF-INPUT-NOT-FOUND", str(report))
+        if pubkey is not None and not pubkey.is_file():
+            raise AnalysisError("AF-INPUT-NOT-FOUND", str(pubkey))
+        try:
+            return verify_report(
+                _json.loads(report.read_text(encoding="utf-8")),
+                receipt_path=receipt,
+                pubkey_path=pubkey,
+            )
+        except ReportError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+
+    result = _run(work)
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and result.get("ok") is False:
+        raise typer.Exit(code=4)
+
+
+@context_app.command("funnel")
+def context_funnel(
+    case_dir: Path = typer.Option(
+        ..., "--case", help="Persisted case directory (api-ir/facts/findings)."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Measure what each case stage keeps — bytes, never claims."""
+
+    def work() -> dict[str, object]:
+        from apiforge.application.funnel import measure_funnel
+
+        return measure_funnel(case_dir)
+
+    _echo_json(_run(work), detail_level)
+
+
+@context_app.command("compact")
+def context_compact(
+    input_path: Path = typer.Option(..., "--input", help="UTF-8 command output artifact."),
+    command: str = typer.Option("unknown", "--command", help="Logical command name."),
+    mode: str = typer.Option("full", "--mode", help="Caveman mode: off|lite|full|ultra|wenyan."),
+    max_lines: int | None = typer.Option(None, "--max-lines", min=1),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Compact a command artifact while preserving critical evidence."""
+
+    def work() -> dict[str, object]:
+        from apiforge.agentops.compact import compact_file
+        from apiforge.economy.ledger import record_compaction
+
+        try:
+            result = compact_file(
+                input_path,
+                command=command,
+                mode=mode,
+                max_lines=max_lines,
+            )
+            record_compaction(Path.cwd(), result)
+            return result.to_dict()
+        except (FileNotFoundError, ValueError) as exc:
+            raise AnalysisError("AF-COMPACT-INVALID", str(exc)) from exc
+
+    _echo_json(_run(work), detail_level)
+
+
+@agentops_app.command("filters")
+def agentops_filters(
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """List closed command filters used by the RTK adapter."""
+    from apiforge.agentops.filters import list_filters
+
+    _echo_json(list_filters(), detail_level)
+
+
+@agentops_app.command("workflows")
+def agentops_workflows(
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """List deterministic Caveman-inspired API workflows."""
+    from apiforge.agentops.workflows import list_workflows
+
+    _echo_json(list_workflows(), detail_level)
+
+
+@agentops_app.command("workflow")
+def agentops_workflow(
+    name: str = typer.Argument(..., help="Workflow name."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Render one workflow plan; execution remains governed by TaskSpec."""
+    from apiforge.agentops.workflows import plan_workflow
+
+    try:
+        _echo_json(plan_workflow(name).to_dict(), detail_level)
+    except ValueError as exc:
+        _fail("AF-WORKFLOW-UNKNOWN", str(exc))
+
+
+@agentops_app.command("inspect")
+def agentops_inspect(
+    run_id: str = typer.Argument(..., help="Run id present in the local ledgers."),
+    risk: str | None = typer.Option(
+        None, "--risk", help="Declared run risk (micro/low/medium/high)."
+    ),
+    root: Path = typer.Option(Path("."), "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§53–§54 sectioned report for one run; sections never drop silently."""
+    from apiforge.agentops.inspect import inspect_run
+
+    _echo_json(
+        _run(lambda: inspect_run(root, run_id, risk=risk).model_dump(mode="json")),
+        detail_level,
+    )
+
+
+@agentops_app.command("compare")
+def agentops_compare(
+    run_a: str = typer.Argument(..., help="Baseline run id."),
+    run_b: str = typer.Argument(..., help="Candidate run id."),
+    root: Path = typer.Option(Path("."), "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§55 deterministic a/b over quality/tokens/cost/latency/context/evidence/tools/agents."""
+    from apiforge.agentops.compare import compare_runs
+
+    _echo_json(
+        _run(lambda: compare_runs(root, run_a, run_b).model_dump(mode="json")),
+        detail_level,
+    )
+
+
+@agentops_app.command("timeline")
+def agentops_timeline(
+    run_id: str = typer.Argument(..., help="Run id present in the local ledgers."),
+    root: Path = typer.Option(Path("."), "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Render ordered ledger/span/token events with missing-order evidence."""
+    from apiforge.agentops.timeline import build_timeline
+
+    _echo_json(
+        _run(lambda: build_timeline(root, run_id).model_dump(mode="json")),
+        detail_level,
+    )
+
+
+@agentops_app.command("waste")
+def agentops_waste(
+    run_id: str = typer.Argument(..., help="Run id present in the local ledgers."),
+    risk: str | None = typer.Option(
+        None, "--risk", help="Declared run risk (micro/low/medium/high)."
+    ),
+    policy: Path | None = typer.Option(
+        None, "--policy", help="rules/agentops_waste.yaml override."
+    ),
+    root: Path = typer.Option(Path("."), "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§56–§57 waste detector; every finding labeled observed/estimated/hypothesis."""
+    from apiforge.agentops.waste import _load_policy, detect_waste
+
+    def work() -> dict[str, object]:
+        detectors = _load_policy(policy) if policy else None
+        return detect_waste(root, run_id, risk=risk, policy=detectors).model_dump(mode="json")
+
+    _echo_json(_run(work), detail_level)
+
+
+@agentops_app.command("hosts")
+def agentops_hosts(
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """List host adapters for Claude, GPT/Codex, Devin and Copilot."""
+    from apiforge.agentops.hosts import list_hosts
+
+    _echo_json(list_hosts(), detail_level)
+
+
+@agentops_app.command("native")
+def agentops_native(
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Inspect repository-native Caveman/Cavekit assets and RTK configuration."""
+    from apiforge.agentops.native import native_status
+
+    _echo_json(native_status(Path.cwd()), detail_level)
+
+
+@agentops_app.command("parity")
+def agentops_parity(
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Audit host discovery and capability parity without invoking a host."""
+    from apiforge.agentops.parity import audit_host_parity
+
+    _echo_json(audit_host_parity(Path.cwd()), detail_level)
+
+
+@agentops_app.command("negotiate")
+def agentops_negotiate(
+    capability: str = typer.Option(..., "--capability"),
+    host: list[str] = typer.Option([], "--host", help="Limit to one or more declared hosts."),
+    root: Path = typer.Option(Path("."), "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Resolve a capability intersection from local host declarations."""
+    from apiforge.agentops.negotiation import negotiate_from_root
+    from apiforge.contracts.host import HostCapabilityRequest, HostName
+
+    request = HostCapabilityRequest(
+        capability=capability,
+        hosts=(
+            cast(tuple[HostName, ...], tuple(host))
+            if host
+            else HostCapabilityRequest.model_fields["hosts"].default
+        ),
+    )
+    _echo_json(_run(lambda: negotiate_from_root(root, request)), detail_level)
+
+
+@devin_app.command("payload")
+def devin_payload(
+    objective: str = typer.Argument(..., help="Objective to send to Devin."),
+    surface: str = typer.Option("cli", "--surface", help="desktop, cli or cloud."),
+    task_kind: str = typer.Option(
+        "planning",
+        "--task-kind",
+        help="discovery, planning, implementation, verification, review or handoff.",
+    ),
+    root: Path = typer.Option(Path("."), "--root"),
+    title: str | None = typer.Option(None, "--title"),
+    permission_mode: str = typer.Option("normal", "--permission-mode"),
+    sandbox: bool = typer.Option(False, "--sandbox"),
+    model: str | None = typer.Option(None, "--model"),
+    platform: str = typer.Option("unknown", "--platform"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Create a Devin payload; this command never starts Devin or mutates Git."""
+    from apiforge.integrations.devin import build_devin_payload
+
+    try:
+        payload = build_devin_payload(
+            objective=objective,
+            surface=cast(DevinSurface, surface),
+            task_kind=cast(DevinTaskKind, task_kind),
+            root=root,
+            title=title,
+            permission_mode=cast(DevinPermissionMode, permission_mode),
+            sandbox=sandbox,
+            model=model,
+            platform=platform,
+        )
+    except (ContractError, ValueError) as exc:
+        if isinstance(exc, ContractError):
+            _fail(
+                exc.code, exc.detail, field="Devin payload", unlock="correct the payload and rerun"
+            )
+        _fail(
+            "AF-DEVIN-PAYLOAD",
+            str(exc),
+            field="Devin payload",
+            unlock="correct the payload and rerun",
+        )
+    _echo_json(payload, detail_level)
+
+
+@devin_app.command("probe")
+def devin_probe(
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Observe whether a local Devin CLI executable is available on PATH."""
+    from apiforge.integrations.devin import probe_devin_cli
+
+    _echo_json(probe_devin_cli(), detail_level)
+
+
+@devin_app.command("capabilities")
+def devin_capabilities(
+    root: Path = typer.Option(Path("."), "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Report Devin capability declarations plus local CLI observation."""
+    from apiforge.integrations.devin import build_devin_declaration
+
+    _echo_json(build_devin_declaration(root), detail_level)
+
+
+@agentops_app.command("activation-plan")
+def agentops_activation_plan(
+    host: str = typer.Option(..., "--host", help="claude, gpt-codex, devin or copilot."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Build a host activation plan; no host configuration is mutated."""
+    from apiforge.agentops.activation import build_activation_plan
+
+    try:
+        result = build_activation_plan(host, str(Path.cwd()))
+    except ValueError as exc:
+        raise AnalysisError("AF-HOST-ACTIVATION-INVALID", str(exc)) from exc
+    _echo_json(result.model_dump(mode="json"), detail_level)
+
+
+@agentops_app.command("tools")
+def agentops_tools(
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """List typed Tool Adapters and their safety/evidence metadata."""
+    from apiforge.agentops.tools import list_tool_adapters
+
+    _echo_json([item.to_dict() for item in list_tool_adapters()], detail_level)
+
+
+@agentops_app.command("tool")
+def agentops_tool(
+    name: str = typer.Argument(...),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Inspect one Tool Adapter contract."""
+    from apiforge.agentops.tools import get_tool_adapter
+
+    try:
+        _echo_json(get_tool_adapter(name).to_dict(), detail_level)
+    except ValueError as exc:
+        _fail("AF-TOOL-ADAPTER-UNKNOWN", str(exc))
+
+
+@evals_app.command("list")
+def evals_list(
+    path: Path = typer.Option(Path("evals/cases/platform.yaml"), "--path"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """List declarative eval cases without executing agents."""
+    from apiforge.evals.suite import list_case_dicts
+
+    _echo_json(list_case_dicts(path), detail_level)
+
+
+@evals_app.command("validate")
+def evals_validate(
+    path: Path = typer.Option(Path("evals/cases/platform.yaml"), "--path"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Validate closed eval vocabulary and mutation/holdout requirements."""
+    from apiforge.evals.suite import load_cases
+
+    try:
+        cases = load_cases(path)
+        ids = [case.case_id for case in cases]
+        duplicate_ids = sorted({item for item in ids if ids.count(item) > 1})
+        invalid = [
+            case.case_id for case in cases if not case.required_evidence or case.mutation == "none"
+        ]
+        result = {
+            "ok": not duplicate_ids and not invalid,
+            "cases": len(cases),
+            "duplicate_ids": duplicate_ids,
+            "invalid_cases": invalid,
+        }
+    except (KeyError, OSError, TypeError, ValueError) as exc:
+        raise AnalysisError("AF-EVALS-INVALID", str(exc)) from exc
+    _echo_json(result, detail_level)
+
+
+@evals_app.command("economy")
+def evals_economy(
+    corpus: Path = typer.Option(Path("evals/corpus/economy"), "--corpus"),
+    repo_root: Path = typer.Option(Path("."), "--repo-root", help="Where fixture paths resolve."),
+    record: bool = typer.Option(
+        False, "--record-baseline", help="Measure and persist the no-gateway baseline only."
+    ),
+    min_reduction: float = typer.Option(0.40, "--min-reduction", min=0.0, max=1.0),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Capsule bytes and evidence recall vs the recorded baseline; exit 1 when a gate fails."""
+    from apiforge.evals.economy import record_baseline, run_economy
+
+    if record:
+        _echo_json(_run(lambda: record_baseline(corpus, repo_root)), detail_level)
+        return
+    result = _run(lambda: run_economy(corpus, repo_root, min_reduction=min_reduction))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("economy-routing")
+def evals_economy_routing(
+    corpus: Path = typer.Option(Path("evals/corpus/economy-routing"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Profiles vs pre-economy plans with the risk floor as invariant; exit 1 on gate failure."""
+    from apiforge.evals.economy_routing import run_economy_routing
+
+    result = _run(lambda: run_economy_routing(corpus))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("graph-quality")
+def evals_graph_quality(
+    corpus: Path = typer.Option(Path("evals/corpus/graph-quality"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Per-rule x language precision/recall of graph rules over the golden corpus."""
+    from apiforge.evals.graph_quality import run_graph_quality
+
+    result = _run(lambda: run_graph_quality(corpus))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("cache")
+def evals_cache(
+    corpus: Path = typer.Option(Path("evals/corpus/economy-cache"), "--corpus"),
+    repo_root: Path = typer.Option(Path("."), "--repo-root", help="Where fixture paths resolve."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Warm/mutate/rebuild: all-hit on unchanged, precise invalidation, zero stale reuse."""
+    from apiforge.evals.cache import run_cache_eval
+
+    result = _run(lambda: run_cache_eval(corpus, repo_root))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("selective-agentics")
+def evals_selective(
+    corpus: Path = typer.Option(Path("evals/corpus/selective-agentics"), "--corpus"),
+    repo_root: Path = typer.Option(Path("."), "--repo-root", help="Where fixture paths resolve."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Lazy expertise, per-role bytes, referee packets, shadow share and agent audit gates."""
+    from apiforge.evals.selective import run_selective_eval
+
+    result = _run(lambda: run_selective_eval(corpus, repo_root))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("tool-economy")
+def evals_tool_economy(
+    corpus: Path = typer.Option(Path("evals/corpus/tool-economy"), "--corpus"),
+    repo_root: Path = typer.Option(Path("."), "--repo-root", help="Where fixture paths resolve."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Compact output, gateway surface, discover/call reach and slicer recall gates."""
+    from apiforge.evals.tool_economy import run_tool_economy
+
+    result = _run(lambda: run_tool_economy(corpus, repo_root))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("economy-matrix")
+def evals_economy_matrix(
+    corpus: Path = typer.Option(Path("evals/corpus/economy-matrix"), "--corpus"),
+    repo_root: Path = typer.Option(Path("."), "--repo-root", help="Where fixture paths resolve."),
+    out: Path | None = typer.Option(None, "--out", help="Write the EconomyMatrix/v1 report."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Canonical tasks x economy/balanced/deep with quality, evidence, cost, context, latency apart."""
+    from apiforge.evals.matrix import run_matrix
+
+    def work() -> dict[str, object]:
+        report = run_matrix(corpus, repo_root)
+        if out is not None:
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_bytes((report.model_dump_json(indent=2) + "\n").encode("utf-8"))
+        return report.model_dump(mode="json")
+
+    result = _run(work)
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("gate")
+def evals_gate_cmd(
+    baseline: Path = typer.Option(..., "--baseline", help="EconomyMatrix/v1 before the change."),
+    candidate: Path = typer.Option(..., "--candidate", help="EconomyMatrix/v1 after the change."),
+    max_quality_regression: int = typer.Option(0, "--max-quality-regression", min=0),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Ship only without quality, safety, holdout or mutation regression; exit 1 on reject."""
+    from apiforge.evals.gate import gate_files
+
+    result = _run(
+        lambda: gate_files(baseline, candidate, max_quality_regression=max_quality_regression)
+    )
+    _echo_json(result, detail_level)
+    if getattr(result, "decision", "reject") != "ship":
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("replay")
+def evals_replay_cmd(
+    root: Path | None = typer.Option(None, "--root", help="Replay stored runs under a root."),
+    corpus: Path | None = typer.Option(None, "--corpus", help="Replay stored run bundles."),
+    profile: str | None = typer.Option(None, "--profile", help="Re-plan under this profile."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Re-plan stored decisions under the current policy; exit 1 if a required role is removed."""
+    from apiforge.evals.replay import replay
+
+    result = _run(lambda: replay(root=root, corpus=corpus, profile=profile))
+    _echo_json(result, detail_level)
+    if not getattr(result, "passed", False):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("economy-extras")
+def evals_economy_extras(
+    corpus: Path = typer.Option(Path("evals/corpus/economy-extras"), "--corpus"),
+    repo_root: Path = typer.Option(Path("."), "--repo-root", help="Where fixture paths resolve."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Verification plans, retrieval, evidence refs, doctor, tiers, prefixes and locality gates."""
+    from apiforge.evals.extras import run_extras
+
+    result = _run(lambda: run_extras(corpus, repo_root))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("economy-hardening")
+def evals_economy_hardening(
+    corpus: Path = typer.Option(Path("evals/corpus/economy-hardening"), "--corpus"),
+    repo_root: Path = typer.Option(Path("."), "--repo-root", help="Where fixture paths resolve."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Path containment, class-pool budget, tokens, phase and delta gates on production code."""
+    from apiforge.evals.hardening import run_hardening
+
+    result = _run(lambda: run_hardening(corpus, repo_root))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("agentic-quality")
+def evals_agentic_quality(
+    corpus: Path = typer.Option(Path("evals/corpus/agentic-quality"), "--corpus"),
+    responses_dir: Path | None = typer.Option(
+        None, "--responses-dir", help="Recorded outputs: <case_id>.json capability -> payload."
+    ),
+    min_accuracy: float = typer.Option(
+        1.0, "--min-accuracy", help="Absolute accuracy floor every profile must reach."
+    ),
+    baseline: Path | None = typer.Option(
+        None, "--baseline", help="Previous agentic-quality report; no profile may regress."
+    ),
+    allow_cross_corpus_baseline: bool = typer.Option(
+        False,
+        "--allow-cross-corpus-baseline",
+        help="Compare with a baseline of another benchmark (recorded as cross_corpus).",
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Recorded specialist verdicts vs ground truth under each profile (no model calls)."""
+    from apiforge.evals.agentic_quality import run_agentic_quality
+
+    result = _run(
+        lambda: run_agentic_quality(
+            corpus,
+            responses_dir,
+            min_accuracy=min_accuracy,
+            baseline=baseline,
+            allow_cross_corpus_baseline=allow_cross_corpus_baseline,
+        )
+    )
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("context-quality")
+def evals_context_quality(
+    corpus: Path = typer.Option(Path("evals/corpus/context-quality"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Fixture capsule + recorded uses vs declared metrics and sufficiency gates."""
+    from apiforge.evals.context_quality import run_context_quality
+
+    result = _run(lambda: run_context_quality(corpus))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("agent-governor")
+def evals_agent_governor(
+    corpus: Path = typer.Option(Path("evals/corpus/agent-governor"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§23-§27 governor primitives vs declared corpus expectations."""
+    from apiforge.evals.agent_governor import run_agent_governor
+
+    result = _run(lambda: run_agent_governor(corpus))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("model-routing")
+def evals_model_routing(
+    corpus: Path = typer.Option(Path("evals/corpus/model-routing"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§33-§35 router constraints, scorecard floors and promotion evidence."""
+    from apiforge.evals.model_routing import run_model_routing
+
+    result = _run(lambda: run_model_routing(corpus))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("retrieval")
+def evals_retrieval(
+    corpus: Path = typer.Option(Path("evals/corpus/retrieval"), "--corpus"),
+    root: Path | None = typer.Option(None, "--root", help="Knowledge packs directory."),
+    graph_dir: Path | None = typer.Option(
+        None, "--graph-dir", help="Hashed graph directory for the graph strategy."
+    ),
+    cost_rate: float | None = typer.Option(None, "--cost-rate", help="Declared cost per token."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§38: lexical/graph/semantic/hybrid on recall, precision, latency, cost."""
+    from apiforge.evals.retrieval import run_retrieval
+
+    result = _run(
+        lambda: run_retrieval(corpus, root=root, graph_dir=graph_dir, cost_rate=cost_rate)
+    )
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("control-plane")
+def evals_control_plane(
+    corpus: Path = typer.Option(Path("evals/corpus/control-plane"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§28-§32 lifecycle: shadow never governs, promotion gates, fallback."""
+    from apiforge.evals.control_plane import run_control_plane
+
+    result = _run(lambda: run_control_plane(corpus))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("telemetry-otlp")
+def evals_telemetry_otlp(
+    corpus: Path = typer.Option(Path("evals/corpus/telemetry-otlp"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§50-§52: ledger spans -> OTLP export -> structural acceptance."""
+    from apiforge.evals.otel_export import run_otel_export
+
+    result = _run(lambda: run_otel_export(corpus))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("tool-surface")
+def evals_tool_surface(
+    corpus: Path = typer.Option(Path("evals/corpus/tool-surface"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§40–§43: audit findings, disclosure routing, paging, benchmark honesty."""
+    from apiforge.evals.tool_surface import run_tool_surface
+
+    result = _run(lambda: run_tool_surface(corpus))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("forge-protocol")
+def evals_forge_protocol(
+    corpus: Path = typer.Option(Path("evals/corpus/forge-protocol"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§46–§48: submit/attach/inspect/result/evidence/handoff/health lifecycle."""
+    from apiforge.evals.forge_protocol import run_forge_protocol
+
+    result = _run(lambda: run_forge_protocol(corpus))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("trace-grading")
+def evals_trace_grading(
+    corpus: Path = typer.Option(Path("evals/corpus/trace-grading"), "--corpus"),
+    rubric: Path = typer.Option(Path("src/apiforge/rules/trace_rubric.yaml"), "--rubric"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§23: recorded traces graded against the declared rubric."""
+    from apiforge.evals.trace_grading import run_trace_grading
+
+    result = _run(lambda: run_trace_grading(corpus, rubric=rubric))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("security-adversarial")
+def evals_security_adversarial(
+    corpus: Path = typer.Option(Path("evals/corpus/security-adversarial"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§25: synthesized attacks against the platform's own defenses."""
+    from apiforge.evals.security_adversarial import run_security_adversarial
+
+    result = _run(lambda: run_security_adversarial(corpus))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("memory-evals")
+def evals_memory_evals(
+    corpus: Path = typer.Option(Path("evals/corpus/memory-evals"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§24: the eight memory axes against the real governed store."""
+    from apiforge.evals.memory_evals import run_memory_evals
+
+    result = _run(lambda: run_memory_evals(corpus))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("live")
+def evals_live(
+    layer: Path = typer.Option(Path("src/apiforge/rules/live_evals.yaml"), "--layer"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§23: deterministic tier observed; provider tier deferred_external."""
+    from apiforge.evals.live_evals import run_live_evals
+
+    result = _run(lambda: run_live_evals(layer))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("frontier")
+def evals_frontier(
+    report: Path = typer.Option(..., "--report", help="agentic-quality report JSON"),
+    latencies: Path = typer.Option(
+        None, "--latencies", help="optional yaml {latency_ms: {profile: ms}}"
+    ),
+    costs: Path = typer.Option(None, "--costs", help="optional yaml {cost: {profile: usd}}"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§23: quality x cost x latency frontier across profiles."""
+    from apiforge.evals.frontier import run_frontier
+
+    result = _run(lambda: run_frontier(report, latencies=latencies, costs=costs))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("agentops")
+def evals_agentops(
+    corpus: Path = typer.Option(Path("evals/corpus/agentops"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§53–§57: seeded ledgers -> inspect/compare/waste verdicts."""
+    from apiforge.evals.agentops import run_agentops
+
+    result = _run(lambda: run_agentops(corpus))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("token-economics")
+def evals_token_economics(
+    corpus: Path = typer.Option(Path("evals/corpus/token-economics"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Usage rows + pricing + estimate vs ledger/cost/calibration expectations."""
+    from apiforge.evals.token_economics import run_token_economics
+
+    result = _run(lambda: run_token_economics(corpus))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("knowledge-drift")
+def evals_knowledge_drift(
+    corpus: Path = typer.Option(Path("evals/corpus/knowledge-drift"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§29 drift verdicts over declared pack+receipt cases."""
+    from apiforge.evals.knowledge_drift import run_knowledge_drift
+
+    _echo_json(_run(lambda: run_knowledge_drift(corpus)), detail_level)
+
+
+@evals_app.command("economy-freshness")
+def evals_economy_freshness(
+    corpus: Path = typer.Option(Path("evals/corpus/economy-freshness"), "--corpus"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Freshness watch, live gating, escalation, phase budget and resume pinning gates."""
+    from apiforge.evals.freshness_resume import run_freshness_resume
+
+    result = _run(lambda: run_freshness_resume(corpus))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and not result.get("passed"):
+        raise typer.Exit(code=1)
+
+
+@contract_intel_app.command("impact")
+def contract_intel_impact(
+    protocol: str = typer.Option(..., "--protocol", help="openapi or grpc."),
+    baseline: Path = typer.Option(..., "--baseline"),
+    candidate: Path = typer.Option(..., "--candidate"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Classify compatibility and expose affected contract references."""
+    try:
+        result = analyze_contract(ContractProtocol(protocol), baseline, candidate)
+    except (OSError, ValueError, TypeError) as exc:
+        raise AnalysisError("AF-CONTRACT-INTEL-INVALID", str(exc)) from exc
+    _echo_json(result.model_dump(mode="json"), detail_level)
+
+
+@contract_intel_app.command("twin")
+def contract_intel_twin(
+    contract: Path = typer.Option(..., "--contract"),
+    protocol: str = typer.Option(..., "--protocol", help="openapi or grpc."),
+    dependency: list[str] = typer.Option(
+        [], "--dependency", help="Declared downstream dependency."
+    ),
+    scenario: str | None = typer.Option(
+        None, "--scenario", help="Simulate one scenario after planning."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Create a no-network Digital Twin plan and optionally simulate a scenario."""
+    try:
+        plan = build_twin_plan(contract, ContractProtocol(protocol), tuple(dependency))
+        result: object = plan.model_dump(mode="json")
+        if scenario is not None:
+            result = {
+                "plan": result,
+                "simulation": simulate_twin(plan, scenario).model_dump(mode="json"),
+            }
+    except (OSError, ValueError, TypeError) as exc:
+        raise AnalysisError("AF-TWIN-INVALID", str(exc)) from exc
+    _echo_json(result, detail_level)
+
+
+@app.command("playbook")
+def playbook_cmd(
+    coordinator: str = typer.Argument(..., help="Coordinator profile name."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Render the declared executor decomposition for a coordinator.
+
+    The floor on every platform — works without dispatch.
+    """
+
+    def work() -> dict[str, object]:
+        from apiforge.dispatch.aliases import resolve_agent
+        from apiforge.rules.catalog import load_playbooks
+
+        playbooks = load_playbooks()
+        resolution = resolve_agent(coordinator)
+        steps = playbooks.get(resolution.name)
+        if steps is None:
+            raise AnalysisError(
+                "AF-PLAYBOOK-NOT-FOUND",
+                f"no playbook for {coordinator!r}; known: {sorted(playbooks)}",
+            )
+        payload: dict[str, object] = {
+            "coordinator": resolution.name,
+            "steps": [dict(s, order=i) for i, s in enumerate(steps, 1)],
+        }
+        if resolution.warning:
+            payload["warnings"] = [resolution.warning]
+        return payload
+
+    _echo_json(_run(work), detail_level)
+
+
+@rules_app.command("lookup")
+def rules_lookup(
+    rule_id: str = typer.Argument(..., help="Rule id, e.g. AF-SEC-001."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Print one rule's full guidance."""
+
+    def work() -> dict[str, object]:
+        from apiforge.rules.catalog import load_catalog
+
+        meta = load_catalog().get(rule_id.upper())
+        if meta is None:
+            raise AnalysisError("AF-RULE-NOT-FOUND", f"no rule {rule_id!r} in the catalog")
+        return meta.model_dump(mode="json") | {"id": rule_id.upper()}
+
+    _echo_json(_run(work), detail_level)
+
+
+@knowledge_app.command("list")
+def knowledge_list(
+    root: Path = typer.Option(Path("knowledge"), "--root", help="Directory of knowledge packs."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """List every pack with its areas, rules and verification date."""
+
+    def work() -> dict[str, object]:
+        from apiforge.contracts.base import ContractError
+        from apiforge.knowledge.loader import load_packs
+
+        try:
+            packs = load_packs(root)
+        except ContractError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+        return {
+            "packs": [
+                {
+                    "areas": list(p.areas),
+                    "domain": p.domain,
+                    "evals": len(p.evals),
+                    "has_matrix": bool(p.matrix),
+                    "rule_ids": list(p.rule_ids),
+                    "sources": len(p.sources),
+                    "verified": p.verified,
+                    "freshness": p.freshness.model_dump(mode="json") if p.freshness else None,
+                    "evidence_level": p.evidence_level,
+                }
+                for p in packs.values()
+            ],
+            "count": len(packs),
+        }
+
+    _echo_json(_run(work), detail_level)
+
+
+@knowledge_app.command("show")
+def knowledge_show(
+    domain: str = typer.Argument(..., help="Pack directory name, e.g. rest-design."),
+    root: Path = typer.Option(Path("knowledge"), "--root", help="Directory of knowledge packs."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Print one pack: summary, source authority, matrix, declared evals."""
+
+    def work() -> dict[str, object]:
+        from apiforge.contracts.base import ContractError
+        from apiforge.knowledge.loader import load_pack
+
+        try:
+            pack = load_pack(root / domain)
+        except ContractError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+        return {
+            "areas": list(pack.areas),
+            "domain": pack.domain,
+            "evals": list(pack.evals),
+            "matrix": list(pack.matrix),
+            "rule_ids": list(pack.rule_ids),
+            "sources": [s.__dict__ for s in pack.sources],
+            "summary": pack.summary,
+            "verified": pack.verified,
+            "freshness": pack.freshness.model_dump(mode="json") if pack.freshness else None,
+            "evidence_level": pack.evidence_level,
+            "version": pack.version,
+        }
+
+    _echo_json(_run(work), detail_level)
+
+
+@knowledge_app.command("check")
+def knowledge_check(
+    root: Path = typer.Option(Path("knowledge"), "--root", help="Directory of knowledge packs."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Validate every pack; exit 4 when any problem is named."""
+
+    def work() -> dict[str, object]:
+        from apiforge.contracts.base import ContractError
+        from apiforge.knowledge.loader import check_packs
+
+        try:
+            result = check_packs(root)
+        except ContractError as exc:
+            raise AnalysisError(exc.code, exc.detail) from exc
+        if not result["ok"]:
+            raise AnalysisError(
+                "AF-KNOW-CHECK",
+                "pack problems: " + "; ".join(str(p) for p in result["problems"]),
+            )
+        return result
+
+    _echo_json(_run(work), detail_level)
+
+
+@knowledge_app.command("freshness")
+def knowledge_freshness(
+    domain: str = typer.Argument(..., help="Pack directory name."),
+    receipt: Path | None = typer.Option(None, "--receipt", help="Read-only observation JSON."),
+    root: Path = typer.Option(Path("knowledge"), "--root"),
+    now: str = typer.Option(..., "--now", help="Explicit ISO8601 clock."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Verify pack freshness from a local read-only source receipt."""
+    from apiforge.contracts.knowledge import SourceObservation
+    from apiforge.knowledge.freshness import verify_pack_freshness
+    from apiforge.knowledge.loader import load_pack
+
+    def work() -> object:
+        pack = load_pack(root / domain)
+        observation = (
+            SourceObservation.model_validate(json.loads(receipt.read_text(encoding="utf-8")))
+            if receipt
+            else None
+        )
+        return verify_pack_freshness(pack, observation, now=now)
+
+    _echo_json(_run(work), detail_level)
+
+
+@knowledge_app.command("drift")
+def knowledge_drift(
+    domain: str = typer.Argument(..., help="Pack directory name."),
+    receipts: list[Path] = typer.Option(
+        [], "--receipt", help="Read-only observation JSON; repeatable."
+    ),
+    root: Path = typer.Option(Path("knowledge"), "--root"),
+    now: str = typer.Option(..., "--now", help="Explicit ISO8601 clock."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§29 drift verdict across one or more read-only source receipts."""
+    from apiforge.contracts.knowledge import SourceObservation
+    from apiforge.knowledge.drift import detect_pack_drift
+    from apiforge.knowledge.loader import load_pack
+
+    def work() -> object:
+        pack = load_pack(root / domain)
+        observations = tuple(
+            SourceObservation.model_validate(json.loads(path.read_text(encoding="utf-8")))
+            for path in receipts
+        )
+        return detect_pack_drift(pack, observations, now=now)
+
+    _echo_json(_run(work), detail_level)
+
+
+@knowledge_app.command("impact")
+def knowledge_impact(
+    root: Path = typer.Option(Path("knowledge"), "--root"),
+    skills: Path = typer.Option(
+        Path(".claude/skills"), "--skills", help="Skill manifests directory."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§29 source -> pack -> rule -> skill -> eval relation graph."""
+    from apiforge.knowledge.impact import build_knowledge_impact
+    from apiforge.rules.catalog import load_catalog
+
+    def work() -> object:
+        return build_knowledge_impact(root, skills_root=skills, catalog=load_catalog())
+
+    _echo_json(_run(work), detail_level)
+
+
+@lab_app.command("scenarios")
+def lab_scenarios(
+    catalog: Path = typer.Option(Path("labs/scenarios.yaml"), "--catalog"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§28 experimental scenario catalog with honest coverage states."""
+    from apiforge.labs.catalog import load_lab_report
+
+    def work() -> object:
+        return load_lab_report(catalog, repo_root=Path("."))
+
+    _echo_json(_run(work), detail_level)
+
+
+@runtime_app.command("run")
+def runtime_run(
+    task_id: str = typer.Argument(..., help="TaskSpec id to execute."),
+    root: Path = typer.Option(Path("."), "--root", help="Project root."),
+    policy: str = typer.Option("local-ci-safe", "--policy"),
+    now: str | None = typer.Option(None, "--now", help="Deterministic timestamp for replay."),
+    debate: bool = typer.Option(False, "--debate", help="Request a debate room."),
+    profile: str | None = typer.Option(
+        None, "--profile", help="Economy profile: economy|balanced|deep (risk may escalate)."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Execute a sealed TaskSpec with the deterministic fake adapter."""
+
+    def work() -> object:
+        from apiforge.runtime.runner import run_runtime
+
+        return run_runtime(
+            root, task_id, policy_id=policy, now=now, requested_debate=debate, profile=profile
+        )
+
+    try:
+        _echo_json(_run(work), detail_level)
+    except ContractError as exc:
+        _fail(exc.code, exc.detail)
+
+
+@runtime_app.command("status")
+def runtime_status_cmd(
+    task_id: str = typer.Argument(...),
+    root: Path = typer.Option(Path("."), "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Show the newest persisted runtime run."""
+    from apiforge.runtime.runner import runtime_status
+
+    _echo_json(runtime_status(root, task_id), detail_level)
+
+
+@runtime_app.command("resume")
+def runtime_resume(
+    task_id: str = typer.Argument(...),
+    root: Path = typer.Option(Path("."), "--root"),
+    policy: str = typer.Option("local-ci-safe", "--policy"),
+    profile: str | None = typer.Option(
+        None, "--profile", help="Economy profile: economy|balanced|deep (risk may escalate)."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Resume by replaying the TaskSpec through the bounded supervisor."""
+    from apiforge.runtime.runner import resume_runtime
+
+    _echo_json(
+        _run(lambda: resume_runtime(root, task_id, policy_id=policy, profile=profile)),
+        detail_level,
+    )
+
+
+@runtime_app.command("debate")
+def runtime_debate(
+    task_id: str = typer.Argument(...),
+    root: Path = typer.Option(Path("."), "--root"),
+    policy: str = typer.Option("local-ci-safe", "--policy"),
+    profile: str | None = typer.Option(
+        None, "--profile", help="Economy profile: economy|balanced|deep (risk may escalate)."
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Request a debate room before the runtime makes a final decision."""
+    from apiforge.runtime.runner import debate_runtime
+
+    _echo_json(
+        _run(lambda: debate_runtime(root, task_id, policy_id=policy, profile=profile)),
+        detail_level,
+    )
+
+
+@runtime_app.command("approve")
+def runtime_approve(
+    task_id: str = typer.Argument(...),
+    run_id: str = typer.Argument(...),
+    approver: str = typer.Option(..., "--approver"),
+    root: Path = typer.Option(Path("."), "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Record a local human approval artifact for a runtime run."""
+    from apiforge.runtime.runner import approve_runtime
+
+    _echo_json(approve_runtime(root, task_id, run_id, approver), detail_level)
+
+
+@runtime_app.command("control-create")
+def runtime_control_create(
+    task_id: str = typer.Argument(...),
+    step: list[str] = typer.Option(
+        ..., "--step", help="Step or step=dependency1,dependency2; repeatable."
+    ),
+    root: Path = typer.Option(Path("."), "--root"),
+    max_parallel: int = typer.Option(4, "--max-parallel", min=1),
+    max_calls: int = typer.Option(20, "--max-calls", min=1),
+    max_retries: int = typer.Option(2, "--max-retries", min=0),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Create a persistent control-plane run without executing work."""
+    from apiforge.runtime.control import ControlPlane
+
+    steps: list[tuple[str, tuple[str, ...]]] = []
+    for raw in step:
+        name, separator, dependencies = raw.partition("=")
+        steps.append(
+            (name, tuple(item for item in dependencies.split(",") if item) if separator else ())
+        )
+    try:
+        result = ControlPlane(root).create(
+            task_id,
+            tuple(steps),
+            max_parallel=max_parallel,
+            max_calls=max_calls,
+            max_retries=max_retries,
+        )
+    except ContractError as exc:
+        _fail(exc.code, exc.detail)
+    else:
+        _echo_json(result, detail_level)
+
+
+@runtime_app.command("control-plan")
+def runtime_control_plan(
+    run_id: str = typer.Argument(...),
+    root: Path = typer.Option(Path("."), "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Show ready steps and dynamic parallel width."""
+    from apiforge.runtime.control import ControlPlane
+
+    _echo_json(ControlPlane(root).plan(run_id), detail_level)
+
+
+@runtime_app.command("control-start")
+def runtime_control_start(
+    run_id: str = typer.Argument(...),
+    step_id: str = typer.Argument(...),
+    root: Path = typer.Option(Path("."), "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Claim one ready step and consume one bounded call."""
+    from apiforge.runtime.control import ControlPlane
+
+    try:
+        result = ControlPlane(root).start(run_id, step_id)
+    except ContractError as exc:
+        _fail(exc.code, exc.detail)
+    else:
+        _echo_json(result, detail_level)
+
+
+@runtime_app.command("control-complete")
+def runtime_control_complete(
+    run_id: str = typer.Argument(...),
+    step_id: str = typer.Argument(...),
+    result_json: str = typer.Option("{}", "--result", help="JSON result payload."),
+    root: Path = typer.Option(Path("."), "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Complete a running step with a content-hashed result."""
+    from apiforge.runtime.control import ControlPlane
+
+    try:
+        result = ControlPlane(root).complete(run_id, step_id, json.loads(result_json))
+    except (ContractError, json.JSONDecodeError) as exc:
+        _fail(getattr(exc, "code", "AF-CONTROL-RESULT"), str(exc))
+    else:
+        _echo_json(result, detail_level)
+
+
+@runtime_app.command("control-cancel")
+def runtime_control_cancel(
+    run_id: str = typer.Argument(...),
+    actor: str = typer.Option(..., "--actor"),
+    root: Path = typer.Option(Path("."), "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Cancel a control-plane run and persist the actor."""
+    from apiforge.runtime.control import ControlPlane
+
+    _echo_json(ControlPlane(root).cancel(run_id, actor), detail_level)
+
+
+@runtime_app.command("control-review")
+def runtime_control_review(
+    run_id: str = typer.Argument(...),
+    reviewer: str = typer.Option(..., "--reviewer"),
+    verdict: Literal["approved", "rejected", "review"] = typer.Option("review", "--verdict"),
+    root: Path = typer.Option(Path("."), "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Close a completed plan through an independent review verdict."""
+    from apiforge.runtime.control import ControlPlane
+
+    try:
+        result = ControlPlane(root).review(run_id, reviewer, verdict)
+    except ContractError as exc:
+        _fail(exc.code, exc.detail)
+    else:
+        _echo_json(result, detail_level)
+
+
+@grpc_app.command("analyze")
+def grpc_analyze_cmd(
+    source: Path = typer.Argument(..., help=".proto or descriptor source."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Build the canonical gRPC IR without invoking external toolchains."""
+    from apiforge.grpc.source import load_source
+
+    _echo_json(load_source(source), detail_level)
+
+
+@grpc_app.command("discover")
+def grpc_discover_cmd(
+    source: Path = typer.Argument(..., help=".proto or descriptor source."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Discover a gRPC contract and expose its canonical IR."""
+    from apiforge.grpc.source import load_source
+
+    _echo_json(load_source(source), detail_level)
+
+
+@grpc_app.command("diff")
+def grpc_diff_cmd(
+    baseline: Path = typer.Argument(...),
+    candidate: Path = typer.Argument(...),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Classify protobuf evolution using deterministic compatibility rules."""
+    from apiforge.grpc.compatibility import compare
+    from apiforge.grpc.source import load_source
+
+    _echo_json(compare(load_source(baseline), load_source(candidate)), detail_level)
+
+
+@grpc_app.command("capabilities")
+def grpc_capabilities_cmd(
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Show optional local gRPC toolchain capabilities."""
+    from apiforge.grpc.capabilities import discover
+
+    _echo_json({"capabilities": discover()}, detail_level)
+
+
+@grpc_app.command("codegen")
+def grpc_codegen_cmd(
+    source: Path = typer.Argument(...),
+    language: list[str] = typer.Option(["python"], "--language"),
+    output_dir: Path = typer.Option(Path("generated"), "--output-dir"),
+    tool: str = typer.Option("fake", "--tool"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Generate deterministic local artifacts or report missing toolchains."""
+    from apiforge.contracts.grpc import GrpcCodegenRequest
+    from apiforge.grpc.codegen import plan_codegen
+    from apiforge.grpc.source import load_source
+
+    target_languages = cast(tuple[Literal["python", "go", "java"], ...], tuple(language))
+    target_tool = cast(Literal["fake", "protoc", "buf"], tool)
+    request = GrpcCodegenRequest(
+        languages=target_languages, output_dir=str(output_dir), tool=target_tool
+    )
+    _echo_json(plan_codegen(load_source(source), request), detail_level)
+
+
+@grpc_app.command("gateway")
+def grpc_gateway_cmd(
+    source: Path = typer.Argument(...),
+    gateway: list[str] = typer.Option(["openapi"], "--gateway"),
+    output_dir: Path = typer.Option(Path("gateway"), "--output-dir"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Project the contract to local gateway artifacts."""
+    from apiforge.contracts.grpc import GrpcGatewayRequest
+    from apiforge.grpc.gateway import plan_gateway
+    from apiforge.grpc.source import load_source
+
+    target_gateways = cast(
+        tuple[Literal["envoy", "grpc_gateway", "grpc_web", "openapi"], ...], tuple(gateway)
+    )
+    request = GrpcGatewayRequest(gateways=target_gateways, output_dir=str(output_dir))
+    _echo_json(plan_gateway(load_source(source), request), detail_level)
+
+
+@grpc_app.command("verify")
+def grpc_verify_cmd(
+    source: Path = typer.Argument(...),
+    baseline: Path | None = typer.Option(None, "--baseline"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Run independent local verification over a gRPC contract."""
+    from apiforge.grpc.compatibility import compare
+    from apiforge.grpc.source import load_source
+    from apiforge.grpc.verify import verify
+
+    candidate = load_source(source)
+    compatibility = compare(load_source(baseline), candidate) if baseline else None
+    _echo_json(verify(candidate, compatibility), detail_level)
+
+
+@grpc_app.command("test")
+def grpc_test_cmd(
+    source: Path = typer.Argument(...),
+    baseline: Path | None = typer.Option(None, "--baseline"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Run the offline contract test and independent verification gates."""
+    from apiforge.grpc.compatibility import compare
+    from apiforge.grpc.source import load_source
+    from apiforge.grpc.verify import verify
+
+    candidate = load_source(source)
+    compatibility = compare(load_source(baseline), candidate) if baseline else None
+    _echo_json(
+        {
+            "tests": ["parse", "compatibility", "streaming", "security"],
+            "verification": verify(candidate, compatibility),
+        },
+        detail_level,
+    )
+
+
+@grpc_app.command("benchmark")
+def grpc_benchmark_cmd(
+    run: Path = typer.Argument(..., help="JSON performance run."),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Evaluate RPS/TPS evidence without claiming capacity from invalid runs."""
+    from apiforge.contracts.grpc import GrpcPerformanceRun
+    from apiforge.grpc.performance import evaluate
+
+    _echo_json(
+        evaluate(GrpcPerformanceRun.model_validate(json.loads(run.read_text(encoding="utf-8")))),
+        detail_level,
+    )
+
+
+@migration_app.command("analyze")
+def migration_analyze_cmd(
+    project: Path = typer.Argument(..., help="Project root to inspect."),
+    ecosystem: str = typer.Option(..., "--ecosystem", help="java, python or go."),
+    source: str = typer.Option(..., "--source"),
+    target: str = typer.Option(..., "--target"),
+    matrix: Path | None = typer.Option(None, "--matrix"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Discover runtime migration impact without changing the project."""
+    from apiforge.migration.contracts import Ecosystem, MigrationSpec
+    from apiforge.migration.discovery import discover
+
+    try:
+        spec = MigrationSpec(
+            project_root=str(project.resolve()),
+            ecosystem=cast(Ecosystem, ecosystem),
+            source_version=source,
+            target_version=target,
+        )
+        result = discover(spec, matrix)
+    except ContractError as exc:
+        _fail(exc.code, exc.detail)
+    _echo_json(result, detail_level)
+
+
+@migration_app.command("plan")
+def migration_plan_cmd(
+    project: Path = typer.Argument(..., help="Project root to inspect."),
+    ecosystem: str = typer.Option(..., "--ecosystem"),
+    source: str = typer.Option(..., "--source"),
+    target: str = typer.Option(..., "--target"),
+    matrix: Path | None = typer.Option(None, "--matrix"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Build a closed migration TaskSpec and dependency DAG."""
+    from apiforge.migration.contracts import Ecosystem, MigrationSpec
+    from apiforge.migration.discovery import discover
+    from apiforge.migration.planner import compile_plan
+
+    try:
+        spec = MigrationSpec(
+            project_root=str(project.resolve()),
+            ecosystem=cast(Ecosystem, ecosystem),
+            source_version=source,
+            target_version=target,
+        )
+        result = compile_plan(spec, discover(spec, matrix))
+    except ContractError as exc:
+        _fail(exc.code, exc.detail)
+    _echo_json(result, detail_level)
+
+
+@migration_app.command("verify")
+def migration_verify_cmd(
+    report: Path = typer.Argument(..., help="MigrationReport JSON."),
+    evidence_ok: bool = typer.Option(False, "--evidence-ok"),
+    verification_ok: bool = typer.Option(False, "--verification-ok"),
+    contract_breaking: bool = typer.Option(False, "--contract-breaking"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Apply conservative status gates to a migration report."""
+    from apiforge.migration.contracts import MigrationReport
+    from apiforge.migration.verifier import verify_report
+
+    try:
+        payload = json.loads(report.read_text(encoding="utf-8"))
+        result = verify_report(
+            MigrationReport.model_validate(payload),
+            evidence_ok=evidence_ok,
+            verification_ok=verification_ok,
+            contract_breaking=contract_breaking,
+        )
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError, ValueError) as exc:
+        _fail("AF-MIGRATION-REPORT", str(exc))
+    _echo_json(result, detail_level)
+
+
+@migration_app.command("matrix")
+def migration_matrix_cmd(
+    ecosystem: str = typer.Option(..., "--ecosystem"),
+    receipt: list[Path] = typer.Option([], "--receipt", help="Runtime receipt JSON; repeatable."),
+    matrix: Path | None = typer.Option(None, "--matrix"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Project an observed compatibility matrix; missing cells remain unresolved."""
+    from apiforge.contracts.compatibility import RuntimeReceipt
+    from apiforge.migration.matrix import compatibility_matrix
+
+    def work() -> object:
+        receipts = tuple(
+            RuntimeReceipt.model_validate(json.loads(path.read_text(encoding="utf-8")))
+            for path in receipt
+        )
+        return compatibility_matrix(ecosystem, receipts, matrix)
+
+    _echo_json(_run(work), detail_level)

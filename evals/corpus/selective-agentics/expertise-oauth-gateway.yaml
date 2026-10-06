@@ -1,0 +1,6 @@
+id: expertise-oauth-gateway
+kind: expertise
+intent: require OAuth scopes on the API Gateway usage plan
+expect_packs:
+- aws-api-gateway
+- oauth-oidc

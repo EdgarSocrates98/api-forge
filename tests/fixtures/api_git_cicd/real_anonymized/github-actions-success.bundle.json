@@ -1,0 +1,58 @@
+{
+  "artifacts": [],
+  "base_sha": "0000000000000000000000000000000000000000",
+  "baseline": null,
+  "checks": [
+    {
+      "conclusion": "success",
+      "details": {
+        "conclusion": "success",
+        "status": "completed"
+      },
+      "name": "Validate project",
+      "source": {
+        "kind": "check_run",
+        "observed_at": "2026-09-23T00:40:59.306932+00:00",
+        "provider": "github",
+        "reference": "https://api.github.com/repos/example-org/example-api/check-runs/anonymous",
+        "sha256": "301b59da7f1bcea95420c7d9fa240a8ef505a0a1e913687c7221e9e820d5742e",
+        "version": 1
+      },
+      "version": 1
+    }
+  ],
+  "contract": null,
+  "diff": null,
+  "head_sha": "1111111111111111111111111111111111111111",
+  "limitations": [
+    "repository identity, refs and provider payload details were anonymized",
+    "anonymized replay cannot prove current provider freshness"
+  ],
+  "origin": "pull_request",
+  "policy": {
+    "limitations": [
+      "provider payloads are observations, not execution proof",
+      "source fields were anonymized for fixture distribution"
+    ],
+    "mutation_allowed": false,
+    "read_only": true,
+    "untrusted_input": true,
+    "version": 1
+  },
+  "project": null,
+  "provider": "github",
+  "pull_number": 42,
+  "repository": "example-org/example-api",
+  "schema_version": "af-change-bundle/1",
+  "sources": [
+    {
+      "kind": "compare",
+      "observed_at": "2026-09-23T00:40:59.306932+00:00",
+      "provider": "github",
+      "reference": "/repos/example-org/example-api/compare/0000000000000000000000000000000000000000...1111111111111111111111111111111111111111",
+      "sha256": "07723efa372a52c0469803ce0350656a5498b321dbea34bc1631d1b29483334d",
+      "version": 1
+    }
+  ],
+  "version": 1
+}

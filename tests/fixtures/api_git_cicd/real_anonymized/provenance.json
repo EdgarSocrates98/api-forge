@@ -1,0 +1,22 @@
+{
+  "schema_version": "api-forge-anonymized-example/1",
+  "source": "tests/fixtures/api_git_cicd/live/github-success.receipt.json",
+  "source_kind": "authorized_github_read_only_collection",
+  "sample": "github-actions-success.bundle.json",
+  "anonymized_fields": [
+    "repository",
+    "base_sha",
+    "head_sha",
+    "pull_number",
+    "source.reference",
+    "provider_payload_identity",
+    "provider_urls",
+    "user_identity",
+    "application_metadata"
+  ],
+  "limitations": [
+    "The example preserves provider shape and a successful check observation, not repository identity.",
+    "It is replay evidence and cannot prove current provider freshness or deployment safety."
+  ],
+  "review": "sanitized before commit"
+}

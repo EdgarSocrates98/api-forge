@@ -1,0 +1,69 @@
+# Context budgets per role (economy wave 4, prompt §86-87).
+# Every role receives a subset of ONE shared capsule, capped at
+# share x envelope.context_bytes. `artifacts: true` adds refs to artifacts
+# already produced in the run (the delta); `deltas: true` means the role only
+# reads debate position deltas, never capsule refs.
+#
+# v2 (step11 phase 1, prompt §7): the optional `policies:` block declares the
+# RoleContextPolicy contract per role — required/denied context kinds, memory/
+# knowledge/artifact visibility, tool allowlist, minimum provenance rank,
+# byte/token caps and required evidence. Roles without a policy row keep the
+# permissive v1 defaults; the classes/roles mapping is unchanged.
+schema: apiforge/role-context/v2
+classes:
+  focused:
+    kinds: [contract, schema, code, test]
+    share: 0.5
+  evidence_plus_delta:
+    kinds: [contract, schema, policy]
+    share: 0.2
+    artifacts: true
+  decision_plus_evidence:
+    kinds: [policy, contract]
+    share: 0.15
+    artifacts: true
+  disagreements_only:
+    kinds: []
+    share: 0.15
+    deltas: true
+roles:
+  specialist: focused
+  reviewer: evidence_plus_delta
+  critic: decision_plus_evidence
+  referee: disagreements_only
+policies:
+  # §40: the dangerous taints are data-only everywhere and excluded from
+  # every role's context by policy; trust_floor applies to external capsule
+  # refs (a run's own artifacts are first-party data, never authority).
+  specialist:
+    knowledge_visibility: full
+    artifact_visibility: none
+    minimum_origin_rank: filesystem
+    denied_taints: [prompt_injection, instruction_laundering, malicious_artifact]
+  reviewer:
+    required_kinds: [policy]
+    denied_kinds: [code]
+    knowledge_visibility: full
+    artifact_visibility: summary
+    minimum_origin_rank: filesystem
+    required_evidence: true
+    trust_floor: observed
+    denied_taints: [prompt_injection, instruction_laundering, malicious_artifact]
+  critic:
+    required_kinds: [policy]
+    denied_kinds: [code, test]
+    knowledge_visibility: summary
+    artifact_visibility: full
+    minimum_origin_rank: filesystem
+    required_evidence: true
+    trust_floor: observed
+    denied_taints: [prompt_injection, instruction_laundering, malicious_artifact]
+  referee:
+    denied_kinds: [code, test, schema]
+    memory_visibility: summary
+    knowledge_visibility: summary
+    artifact_visibility: summary
+    minimum_origin_rank: filesystem
+    required_evidence: true
+    trust_floor: observed
+    denied_taints: [prompt_injection, instruction_laundering, malicious_artifact]

@@ -32,10 +32,14 @@ roles:
   critic: decision_plus_evidence
   referee: disagreements_only
 policies:
+  # §40: the dangerous taints are data-only everywhere and excluded from
+  # every role's context by policy; trust_floor applies to external capsule
+  # refs (a run's own artifacts are first-party data, never authority).
   specialist:
     knowledge_visibility: full
     artifact_visibility: none
     minimum_origin_rank: filesystem
+    denied_taints: [prompt_injection, instruction_laundering, malicious_artifact]
   reviewer:
     required_kinds: [policy]
     denied_kinds: [code]
@@ -43,6 +47,8 @@ policies:
     artifact_visibility: summary
     minimum_origin_rank: filesystem
     required_evidence: true
+    trust_floor: observed
+    denied_taints: [prompt_injection, instruction_laundering, malicious_artifact]
   critic:
     required_kinds: [policy]
     denied_kinds: [code, test]
@@ -50,6 +56,8 @@ policies:
     artifact_visibility: full
     minimum_origin_rank: filesystem
     required_evidence: true
+    trust_floor: observed
+    denied_taints: [prompt_injection, instruction_laundering, malicious_artifact]
   referee:
     denied_kinds: [code, test, schema]
     memory_visibility: summary
@@ -57,3 +65,5 @@ policies:
     artifact_visibility: summary
     minimum_origin_rank: filesystem
     required_evidence: true
+    trust_floor: observed
+    denied_taints: [prompt_injection, instruction_laundering, malicious_artifact]

@@ -15,6 +15,7 @@ from typing import Any
 from apiforge.contracts.base import ContractError
 from apiforge.contracts.context import ContextRef, RefOrigin
 from apiforge.contracts.context_quality import RoleContextPolicy, VisibilityLevel
+from apiforge.contracts.trust import TrustUnit
 
 #: Deterministic provenance rank — never a model-asserted trust score.
 ORIGIN_RANK: dict[RefOrigin, int] = {
@@ -90,6 +91,48 @@ def filter_refs(
     return kept, trimmed, notes
 
 
+def admit_refs(
+    policy: RoleContextPolicy, refs: list[ContextRef]
+) -> tuple[list[ContextRef], list[str], list[str], tuple[TrustUnit, ...]]:
+    """§8/§39 admission: filter_refs verdicts plus the declared trust posture.
+
+    Every kept ref carries its annotated ``TrustUnit``; a declared
+    ``trust_floor`` trims units below it (``AF-TRUST-FLOOR``) and
+    ``denied_taints`` trims tainted units (``AF-TRUST-TAINT-DENIED``) —
+    denied context is named in ``notes``, never silently dropped.
+    """
+    from apiforge.trust.plane import annotate_ref
+    from apiforge.trust.propagation import TRUST_ORDER
+
+    kept, trimmed, notes = filter_refs(policy, refs)
+    floor = TRUST_ORDER.get(policy.trust_floor) if policy.trust_floor else None
+    denied_taints = set(policy.denied_taints)
+    units: list[TrustUnit] = []
+    admitted: list[ContextRef] = []
+    for ref in kept:
+        unit = annotate_ref(ref).trust
+        if floor is not None and TRUST_ORDER.get(unit.trust_level, 0) < floor:
+            trimmed.append(ref.uri)
+            notes.append(
+                f"AF-TRUST-FLOOR: field=trust_level; role={policy.role}; "
+                f"level={unit.trust_level} below {policy.trust_floor}; "
+                "unlock=attest the ref from a higher-trust origin or lower the floor"
+            )
+            continue
+        if denied_taints & set(unit.taint):
+            trimmed.append(ref.uri)
+            notes.append(
+                f"AF-TRUST-TAINT-DENIED: field=taint; role={policy.role}; "
+                f"taint={sorted(denied_taints & set(unit.taint))}; "
+                "unlock=run a governed_verification propagation with evidence "
+                "to reduce the declared taint"
+            )
+            continue
+        units.append(unit)
+        admitted.append(ref)
+    return admitted, trimmed, notes, tuple(units)
+
+
 def order_required_first(policy: RoleContextPolicy, refs: list[ContextRef]) -> list[ContextRef]:
     """Required kinds are delivered first inside the role's budget."""
     required = set(policy.required_kinds)
@@ -127,6 +170,7 @@ def visibility_for(policy: RoleContextPolicy, plane: str) -> VisibilityLevel:
 __all__ = [
     "ORIGIN_RANK",
     "VISIBILITY_RANK",
+    "admit_refs",
     "check_tool",
     "default_policy",
     "filter_refs",

@@ -852,6 +852,8 @@ never enter artifacts, gaps or status. `agents audit` is report-only.
 | `AF-ROLE-CONTEXT-TRUST` | unresolved note: a ref's provenance `origin` is below the role's `minimum_origin_rank`; unlock: attest the ref from a higher-trust origin |
 | `AF-ROLE-CONTEXT-REQUIRED` | unresolved note: a `required_kinds` ref existed in the capsule but did not fit the role budget; unlock: widen the budget or drop other kinds |
 | `AF-ROLE-CONTEXT-TOOL` | a v2 policy `tool_visibility` allowlist does not name the requested tool; unlock: add the tool to the role's allowlist |
+| `AF-TRUST-FLOOR` | unresolved note: a ref's annotated `TrustUnit.trust_level` is below the role's `trust_floor`; unlock: attest the ref from a higher-trust origin or lower the floor |
+| `AF-TRUST-TAINT-DENIED` | unresolved note: a context unit carries a taint the role's `denied_taints` excludes; unlock: reduce the taint via a `governed_verification` propagation with evidence |
 | `AF-ECONOMY-SHADOW-BUDGET` | shadow reason: the run was sampled but no call remained after the verification reserve |
 | `AF-DEBATE-DELTA-INVALID` | `--disagree` is not `point=reason`, a point is empty or `--confidence` is outside [0, 1] |
 | `AF-AGENTS-AUDIT-INVALID` | the agents directory is missing or an agent frontmatter is not valid YAML |

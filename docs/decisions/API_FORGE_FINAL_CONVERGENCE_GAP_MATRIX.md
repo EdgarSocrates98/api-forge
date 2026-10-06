@@ -85,4 +85,15 @@ to unify, `INTEGRATE` = exists but not in the normal runtime path,
   now emits a canonical `RouteTransitionReceipt/v1` into
   `control-plane/transitions.jsonl`. The stale `recovery` row was corrected:
   `legacy: scheduler-canonical-recovery` names the post-Phase-2 incumbent.
-  Commit pending.
+  Commit `235235a`.
+- **Phase 6 (row 6) — DONE locally.** Trust admission is wired into
+  `plan_roles`: every admitted capsule ref carries its annotated
+  `TrustUnit` (`RoleContext.trust_units` records it per role) and
+  run-produced artifacts enter downstream roles as `model_generated`
+  first-party data — `instruction_authority=none` throughout, and
+  verification still cannot turn data into instruction. `RoleContextPolicy`
+  gained `trust_floor` and `denied_taints`; `admit_refs` enforces both with
+  `AF-TRUST-FLOOR`/`AF-TRUST-TAINT-DENIED` notes in `plan.unresolved`. The
+  shipped policy denies `prompt_injection`, `instruction_laundering` and
+  `malicious_artifact` on every role and declares `trust_floor: observed`
+  for reviewer/critic/referee over external refs. Commit pending.

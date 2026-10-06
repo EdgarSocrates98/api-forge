@@ -12,6 +12,7 @@ from typing import Literal
 
 from pydantic import Field, model_validator
 
+from apiforge.contracts.agentic_memory import TrustLevel
 from apiforge.contracts.base import VersionedContract
 from apiforge.contracts.context import RefKind, RefOrigin
 from apiforge.contracts.selective import RoleKind
@@ -176,6 +177,8 @@ class RoleContextPolicy(VersionedContract):
     max_context_bytes: int | None = Field(default=None, ge=0)
     max_context_tokens: int | None = Field(default=None, ge=0)
     required_evidence: bool = False
+    trust_floor: TrustLevel | None = None
+    denied_taints: tuple[str, ...] = ()
 
     @model_validator(mode="after")
     def kinds_are_disjoint(self) -> RoleContextPolicy:

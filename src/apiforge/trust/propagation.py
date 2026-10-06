@@ -20,7 +20,8 @@ from apiforge.contracts.trust import (
     TrustUnit,
 )
 
-_TRUST_ORDER: dict[TrustLevel, int] = {
+#: Deterministic trust ranking shared by propagation and context admission.
+TRUST_ORDER: dict[TrustLevel, int] = {
     "unknown": 0,
     "untrusted": 1,
     "candidate": 1,
@@ -28,6 +29,7 @@ _TRUST_ORDER: dict[TrustLevel, int] = {
     "trusted": 3,
     "verified": 4,
 }
+_TRUST_ORDER = TRUST_ORDER
 _AUTHORITY_ORDER = {"none": 0, "policy": 1, "system": 2}
 _LEVEL_BY_ORDER: dict[int, TrustLevel] = {
     0: "unknown",
@@ -94,4 +96,4 @@ def propagate(
     )
 
 
-__all__ = ["propagate"]
+__all__ = ["TRUST_ORDER", "propagate"]

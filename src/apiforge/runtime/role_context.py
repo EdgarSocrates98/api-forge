@@ -136,11 +136,13 @@ def plan_roles(
         members[cls] = members.get(cls, 0) + 1
     seen: dict[str, int] = {}
     from apiforge.context.role_policy import (
-        filter_refs,
+        admit_refs,
         order_required_first,
         policy_for,
         required_missing,
     )
+    from apiforge.contracts.trust import TrustUnit
+    from apiforge.trust.plane import trust_unit
 
     role_policies: dict[str, Any] = policy.get("policies") or {}
     for capability, kind in resolved:
@@ -158,9 +160,10 @@ def plan_roles(
         trimmed: list[str] = []
         used = 0
         eligible = [ref for ref in refs if ref.kind in allowed]
-        eligible, denied, deny_notes = filter_refs(row_policy, eligible)
+        eligible, denied, deny_notes, admitted_units = admit_refs(row_policy, eligible)
         trimmed.extend(denied)
         unresolved.extend(deny_notes)
+        units_by_uri = {unit.subject: unit for unit in admitted_units}
         eligible = order_required_first(row_policy, eligible)
         over_budget = 0
         for ref in eligible:
@@ -182,7 +185,7 @@ def plan_roles(
                 f"AF-ROLE-CONTEXT-BUDGET: field=context_bytes; role={capability}; "
                 f"unlock=raise the profile to widen context ({over_budget} refs trimmed)"
             )
-        artifact_refs = (
+        raw_artifact_refs = (
             tuple(
                 f"artifact:{artifact}"
                 for name, artifact in sorted(produced.items())
@@ -191,6 +194,30 @@ def plan_roles(
             if spec_cls.get("artifacts")
             else ()
         )
+        # §35: artifacts entering another agent's context are model-generated
+        # data — instruction_authority=none, provenance-bound, and still gated
+        # by the role's denied_taints (the trust floor applies to external
+        # context refs, not to this run's own first-party outputs).
+        artifact_units: list[TrustUnit] = []
+        artifact_refs_list: list[str] = []
+        for uri in raw_artifact_refs:
+            unit = trust_unit(
+                "model_generated",
+                subject=uri,
+                boundary="agent_handoff",
+                provenance=(f"run:{run_id}",),
+            )
+            denied_marks = set(row_policy.denied_taints) & set(unit.taint)
+            if denied_marks:
+                unresolved.append(
+                    f"AF-TRUST-TAINT-DENIED: field=taint; role={capability}; "
+                    f"taint={sorted(denied_marks)}; unlock=run a governed_verification "
+                    "propagation with evidence to reduce the declared taint"
+                )
+                continue
+            artifact_units.append(unit)
+            artifact_refs_list.append(uri)
+        artifact_refs = tuple(artifact_refs_list)
         expertise = select_expertise(spec.outcome, capability=capability, frameworks=detected)
         rows.append(
             RoleContext(
@@ -209,6 +236,8 @@ def plan_roles(
                         root, capability, (item.pack_id for item in expertise.selected)
                     ).encode("utf-8")
                 ).hexdigest(),
+                trust_units=tuple(units_by_uri[ref.uri] for ref in kept if ref.uri in units_by_uri)
+                + tuple(artifact_units),
             )
         )
     full = sum(ref.size_bytes for ref in refs)

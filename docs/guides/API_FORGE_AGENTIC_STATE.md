@@ -134,6 +134,20 @@ edge and requested-tool scope. `apiforge_call` authorizes the gateway and then
 the resolved target against the MCP registry before preserving inner domain
 gates.
 
+Context admission is trust-aware: `plan_roles` annotates every capsule ref
+with its `TrustUnit` (`annotate_ref`) and every run-produced artifact ref as
+`model_generated` first-party data — `instruction_authority=none` in both
+cases, since verification can never turn data into instruction. The role
+policy's `trust_floor` trims refs whose annotated level is below it
+(`AF-TRUST-FLOOR`); `denied_taints` trims units carrying excluded taints
+(`AF-TRUST-TAINT-DENIED`) — the shipped policy excludes
+`prompt_injection`, `instruction_laundering` and `malicious_artifact` from
+every role, and reviewer/critic/referee declare `trust_floor: observed` over
+external refs. The admitted units are recorded per role row
+(`RoleContext.trust_units`), so a plan proves the trust posture of what it
+admitted instead of asserting it. Taint may only be reduced by a
+`governed_verification` propagation backed by `evidence_refs`.
+
 ## Decision Control Plane lifecycle (phase 5)
 
 Every decision route declared in `rules/control_plane.yaml` lives under a

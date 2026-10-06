@@ -7,6 +7,7 @@ from typing import Literal
 from pydantic import Field, model_validator
 
 from apiforge.contracts.base import VersionedContract
+from apiforge.contracts.trust import TrustUnit
 
 ContextClass = Literal[
     "focused", "evidence_plus_delta", "decision_plus_evidence", "disagreements_only"
@@ -38,7 +39,12 @@ class ExpertiseSelection(VersionedContract):
 
 
 class RoleContext(VersionedContract):
-    """What one invocation receives: its class, refs, bytes and budget."""
+    """What one invocation receives: its class, refs, bytes and budget.
+
+    ``trust_units`` records the §8 TrustUnit admission decision per admitted
+    ref/artifact — the run can prove which trust/taint posture each context
+    unit carried instead of asserting it after the fact.
+    """
 
     role: RoleKind
     capability: str = Field(min_length=1)
@@ -51,6 +57,7 @@ class RoleContext(VersionedContract):
     pool_bytes: int | None = Field(default=None, ge=0)
     trimmed: tuple[str, ...] = ()
     prompt_prefix_sha256: str | None = None
+    trust_units: tuple[TrustUnit, ...] = ()
 
     @model_validator(mode="after")
     def bytes_within_budget(self) -> RoleContext:

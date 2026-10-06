@@ -143,6 +143,9 @@ class ModelRouteShadowReceipt(VersionedContract):
     candidate: ModelRouteDecision | None = None
     control: dict[str, object] | None = None
     code: str | None = None
+    policy_id: str | None = None
+    policy_version: str | None = None
+    policy_hash: str | None = None
     invalid_inputs: tuple[str, ...] = ()
     unresolved: tuple[str, ...] = ()
     recorded_at: str = Field(min_length=1)

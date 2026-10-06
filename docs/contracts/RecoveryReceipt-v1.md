@@ -14,6 +14,7 @@ decision can never look silently enforced.
 | `action_taken` | The concrete effect — `retried:<cap>`, `fallback:<cap>`, `replanned:<decision_id>`, `escalated:human_gate`, `stopped` |
 | `outcome` | `executed` (real runtime effect), `refused` (governance blocked it, `code` names why), `skipped` (depth bound — see `AF-GOV-RECOVERY-DEPTH`), `observed` (scheduler-side action) |
 | `code` | The `AF-*` that blocked or qualified the action (`AF-GOV-RECOVERY-NO-FALLBACK`, `AF-GOV-RECOVERY-REPLAN-REFUSED`, `AF-GOV-RECOVERY-DEPTH`, `AF-BUDGET-EXHAUSTED`, `AF-GOV-LOOP-DETECTED`) |
+| `policy_id` / `policy_version` / `policy_hash` | §86 anchor to `rules/recovery_policy.yaml`: declared schema plus `sha256:` content hash, so a verdict binds to policy content, not a file name |
 | `evidence` | `capability:<name>`, `invocation:<id>`, `routing_decision:<id>`, `plan:<id>`, `artifact:produced`/`artifact:none` |
 | `unresolved` | Named gaps — the failed capability, the exhausted budget — never silent |
 

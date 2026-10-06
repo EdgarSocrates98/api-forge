@@ -114,6 +114,7 @@ from apiforge.contracts.economy_evals import (
     EconomyMatrix,
     EvaluationGate,
     InformationGain,
+    ReplayDecision,
     ReplayReport,
     RoleROI,
 )
@@ -642,6 +643,7 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "HostProjection/v1": HostProjection,
     "EconomyMatrix/v1": EconomyMatrix,
     "EvaluationGate/v1": EvaluationGate,
+    "ReplayDecision/v1": ReplayDecision,
     "ReplayReport/v1": ReplayReport,
     "RoleROI/v1": RoleROI,
     "InformationGain/v1": InformationGain,

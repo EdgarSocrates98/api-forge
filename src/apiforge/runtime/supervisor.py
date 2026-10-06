@@ -489,6 +489,10 @@ def _receipt(
     unresolved: tuple[str, ...] = (),
     invocation_id: str | None = None,
 ) -> RecoveryReceipt:
+    from apiforge.core.policy import policy_descriptor
+    from apiforge.governance.recovery import RECOVERY_POLICY
+
+    descriptor = policy_descriptor(RECOVERY_POLICY, policy_id="recovery_policy")
     return RecoveryReceipt(
         receipt_id=stable_id(
             "receipt",
@@ -511,6 +515,9 @@ def _receipt(
         action_taken=action_taken,
         outcome=outcome,
         code=code,
+        policy_id=str(descriptor["policy_id"]),
+        policy_version=str(descriptor["policy_version"]),
+        policy_hash=str(descriptor["policy_hash"]),
         evidence=evidence,
         unresolved=unresolved,
     )
@@ -656,8 +663,14 @@ def _model_route_shadow(
         ModelRouteDecision,
         ModelRouteShadowReceipt,
     )
-    from apiforge.runtime.model_router import load_model_router_policy, route_model_shadow
+    from apiforge.core.policy import policy_descriptor
+    from apiforge.runtime.model_router import (
+        RULES,
+        load_model_router_policy,
+        route_model_shadow,
+    )
 
+    descriptor = policy_descriptor(RULES, policy_id="model_router")
     inputs, invalid = _model_route_inputs(spec, routing, calls_remaining=max_calls - calls_used)
     scorecards, scorecard_code = _model_route_scorecards(root, spec, inputs)
     legacy: dict[str, object] = {"selected": adapter.name, "source": "declared_adapter"}
@@ -681,6 +694,9 @@ def _model_route_shadow(
             inputs=inputs,
             legacy_decision=legacy,
             code=str(code),
+            policy_id=str(descriptor["policy_id"]),
+            policy_version=str(descriptor["policy_version"]),
+            policy_hash=str(descriptor["policy_hash"]),
             invalid_inputs=tuple(invalid),
             unresolved=tuple(sorted(set(invalid) | {"router_policy"})),
             recorded_at=stamp,
@@ -698,6 +714,9 @@ def _model_route_shadow(
         candidate=candidate,
         control=control,
         code=candidate.code or scorecard_code,
+        policy_id=str(descriptor["policy_id"]),
+        policy_version=str(descriptor["policy_version"]),
+        policy_hash=str(descriptor["policy_hash"]),
         invalid_inputs=tuple(invalid),
         unresolved=tuple(sorted(unresolved)),
         recorded_at=stamp,

@@ -1,0 +1,12 @@
+id: mcp-target-escalation
+attack_class: mcp_dynamic_target_escalation
+vector:
+  type: tool_authorize
+  params:
+    subject: mcp-gateway
+    tool: memory_persist
+    target: true
+    known_targets: [memory_persist]
+expect:
+  verdict: refused
+  code: AF-TOOL-RISK-DENIED

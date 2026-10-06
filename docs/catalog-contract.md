@@ -801,6 +801,7 @@ floor (`quality-below-floor`) and orders champions by observed cost.
 | `AF-EVALS-GATE-INVALID` | a report passed to `evals gate` is not `EconomyMatrix/v1`; unlock: use `evals economy-matrix --out` |
 | `AF-EVALS-GATE-MISMATCH` | the two reports cover different case × profile rows; unlock: run both on the same corpus |
 | `AF-REPLAY-RUN-INCOMPLETE` | replay reason: a stored run lacks its decision, economy plan or task spec; reported unresolved, never guessed |
+| `AF-REPLAY-DECISION-CHANGED` | replay marker: a persisted control-plane decision (loop, model-route shadow, tool authorization, trust admission, recovery) re-decides differently under the current policy; unlock: review the policy diff and either re-stamp the run evidence or accept the drift |
 
 ## Tool/host economy (`--output`, `slice tests`, `slice log`, `mcp surface`, `agentops projection`, `apiforge-mcp --surface/--host`, `evals tool-economy`)
 

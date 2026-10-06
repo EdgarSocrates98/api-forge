@@ -92,7 +92,7 @@ def test_adversarial_corpus_all_contained_or_refused() -> None:
     result = run_security_adversarial(CORPUS / "security-adversarial")
     assert result["passed"], [c for c in result["cases"] if not c["passed"]]
     assert result["totals"]["escaped"] == 0
-    assert result["totals"]["cases"] == 9
+    assert result["totals"]["cases"] == 16
 
 
 def test_memory_corpus_covers_axes() -> None:

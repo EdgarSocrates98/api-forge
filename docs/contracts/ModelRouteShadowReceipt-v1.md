@@ -16,6 +16,7 @@ shadowed.
 | `candidate` | The full `ModelRouteDecision/v1` (`selected`, `ranked`, `code`, `unresolved`) — `null` when the router/policy could not run |
 | `control` | The `RouteDecision/v1` dump from `evaluate_route` |
 | `code` | Router refusal (`AF-ROUTE-NO-ELIGIBLE-MODEL`), policy failure (`AF-ROUTE-POLICY-INVALID`) or evaluation-store failure (`AF-ROUTE-EVALUATIONS-INVALID`, `AF-PATH-OUTSIDE-ROOT`) |
+| `policy_id` / `policy_version` / `policy_hash` | §86 anchor to `rules/model_router.yaml`: declared `version` plus `sha256:` content hash |
 | `invalid_inputs` | `model_route_*` spec values rejected by validation — surfaced, never guessed |
 | `unresolved` | Union of candidate `unresolved`, invalid input names and refusal codes — feeds `RunGovernanceContext.unresolved` |
 | `recorded_at` | The run timestamp |

@@ -402,13 +402,17 @@ coverage, status honesty, unresolved reporting, operation coverage,
 retry justification) scored deterministically; empty or mixed-id
 traces are `unresolved`, never zero-scored.
 
-`evals security-adversarial` drives nine synthesized §25 attacks
+`evals security-adversarial` drives sixteen synthesized §25 attacks
 against the platform's own defenses — `evaluate_gates` (memory
 poisoning, scope violation, evidence-free persist), allowlist-first
-`authorize` (privilege escalation, unknown tool), `propagate`
-(cross-agent injection, trust laundering, authority forgery) and
-`trust_unit` (tool-output injection). Every defense verdict is
-`refused` or `contained`; `escaped` fails loudly.
+`authorize` (privilege escalation, unknown tool, confused-deputy
+delegation and scope-escape, MCP dynamic-target risk escalation and
+unknown target), `propagate` (cross-agent injection, trust laundering,
+authority forgery, tainted tool output → agent), `trust_unit`
+(tool-output injection, model-generated instruction laundering) and a
+real `memory_conflict` vector (destructive-risk contradiction
+quarantines both records). Every defense verdict is `refused` or
+`contained`; `escaped` fails loudly.
 
 `evals memory-evals` covers the eight §24 axes — usefulness,
 poisoning, stale, wrong-environment, conflicting, cross-task leakage,
@@ -436,11 +440,26 @@ emits the declared source→pack→rule→skill→eval relation graph over the
 because no declared carrier exists.
 
 §28 ships the opt-in lab catalog (`labs/scenarios.yaml` +
-`lab scenarios`): all 21 scenario kinds are declared and covered. Eight
-Runtime Convergence cells exercise recovery, loop, shadow routing, role auth,
-memory, context evidence and challenger comparison through
-`tests/labs/test_runtime_convergence.py`; local proof never claims production
-provider behavior.
+`lab scenarios`): all 26 scenario kinds are declared and covered. The
+Runtime Convergence cells exercise recovery replan/fallback, loop,
+model-route shadow, role auth, MCP target risk, trust admission, memory
+conflicts and challenger comparison against the real engines —
+`tests/labs/test_runtime_convergence.py` for unit-level probes and the
+`tests/runtime/` suites for end-to-end `execute_run` runs; local proof
+never claims production provider behavior.
+
+`evals replay` is the §83–§87 deterministic control-plane replay: beyond
+re-planning routing+economy it re-derives each persisted decision —
+loop verdicts from the `events.jsonl` fingerprint stream, the model-route
+shadow from the receipt's declared `ModelRouteInputs`, the tool
+authorization boundary from `rules/tool_risk.yaml`, admitted trust units
+against `rules/role_context.yaml`, and every `RecoveryReceipt` through
+`decide_recovery`. Each decision reports `same`/`changed`/`unresolved`/
+`absent` and names its policy by `policy_hash`; governed receipts
+(`RecoveryReceipt`, `ModelRouteShadowReceipt`) now carry
+`policy_id`/`policy_version`/`policy_hash` so verdicts bind to policy
+content (§86). Replay only re-decides control-plane artifacts — never
+LLM text (§85).
 
 `doctor --agentic` emits `AgenticDoctorReport` — cross-plane health
 over case, memory (quarantine backlog), trust (policy presence+parse),

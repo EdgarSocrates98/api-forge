@@ -81,6 +81,91 @@ def test_memory_conflict_is_not_silent(tmp_path) -> None:
     assert result.conflicts
 
 
+def test_memory_destructive_conflict_quarantines_both(tmp_path) -> None:
+    """§80/§113: trusted fresh contradiction + destructive risk → quarantine,
+    both records excluded, conflict audit preserved."""
+    for value in (300, 30):
+        candidate = propose_memory(
+            tmp_path,
+            scope="task",
+            origin="trusted_internal",
+            payload={"timeout": value},
+            proposed_by="lab",
+            reason="fixture",
+            created_at="2026-10-05T10:00:00Z",
+            trust_level="trusted",
+            evidence_refs=("evidence:lab",),
+        )
+        assert persist_candidate(
+            tmp_path,
+            candidate,
+            MemoryPolicy(policy_id="lab", minimum_trust="candidate"),
+            now="2026-10-05T10:01:00Z",
+        ).accepted
+    result = query_memory(tmp_path, MemoryQuery(risk="destructive"))
+    assert result.records == ()
+    assert result.conflicts
+    for conflict in result.conflicts:
+        assert conflict.outcome == "quarantine"
+        assert conflict.admission_effect == "exclude_both"
+
+
+def test_mcp_target_risk_denial_beats_wildcard() -> None:
+    """§80/§120: allowed_targets=['*'] never covers risk classes outside the grant."""
+    profiles, permissions = load_tool_risk()
+    result = authorize(
+        "mcp-gateway",
+        "memory_persist",
+        profiles=profiles,
+        permissions=permissions,
+        target=True,
+        known_targets=("memory_persist",),
+    )
+    assert result.decision == "deny"
+    assert result.code == "AF-TOOL-RISK-DENIED"
+    assert "security_impact" in result.risk_classes
+
+
+def test_trust_taint_admission_trims_denied() -> None:
+    """§80: denied taints and trust floors are enforced at role admission."""
+    from apiforge.context.role_policy import admit_refs
+    from apiforge.contracts.context import ContextRef
+    from apiforge.contracts.context_quality import RoleContextPolicy
+
+    def ref(seed: str, kind: str, origin: str) -> ContextRef:
+        return ContextRef(
+            uri=f"ctx://sha256/{seed * 64}",
+            kind=kind,  # type: ignore[arg-type]
+            label=f"lab-{kind}",
+            source="lab",
+            size_bytes=16,
+            provenance="lab",
+            origin=origin,  # type: ignore[arg-type]
+        )
+
+    code_ref = ref("a", "code", "code")  # trusted origin
+    kb_ref = ref("b", "knowledge", "knowledge")  # taint=unverified_source
+    contract_ref = ref("c", "contract", "contract")  # verified, clean
+
+    # trust floor runs before the taint check: verified floor trims `trusted`.
+    floored, _trimmed, fnotes, funits = admit_refs(
+        RoleContextPolicy(role="critic", trust_floor="verified"),
+        [code_ref, contract_ref],
+    )
+    assert [item.uri for item in floored] == [contract_ref.uri]
+    assert "AF-TRUST-FLOOR" in ";".join(fnotes)
+    assert [u.subject for u in funits] == [contract_ref.uri]
+
+    # denied taints trim refs whose annotated unit carries the taint.
+    admitted, _trimmed2, notes, units = admit_refs(
+        RoleContextPolicy(role="critic", denied_taints=("unverified_source",)),
+        [code_ref, kb_ref],
+    )
+    assert [item.uri for item in admitted] == [code_ref.uri]
+    assert "AF-TRUST-TAINT-DENIED" in ";".join(notes)
+    assert {unit.instruction_authority for unit in units} == {"none"}
+
+
 def test_context_missing_evidence_stays_partial() -> None:
     result = calculate_evidence_coverage(("contract", "policy"), ("contract",))
     assert result.state == "partial"

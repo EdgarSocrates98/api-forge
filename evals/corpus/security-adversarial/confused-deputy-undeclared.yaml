@@ -1,0 +1,11 @@
+id: confused-deputy-undeclared
+attack_class: confused_deputy
+vector:
+  type: tool_authorize
+  params:
+    subject: critic
+    tool: memory_query
+    delegated_from: referee
+expect:
+  verdict: refused
+  code: AF-TOOL-AUTHZ-DENIED

@@ -271,6 +271,9 @@ class RecoveryReceipt(VersionedContract):
     action_taken: str = ""
     outcome: RecoveryOutcome = "executed"
     code: str | None = None
+    policy_id: str | None = None
+    policy_version: str | None = None
+    policy_hash: str | None = None
     evidence: tuple[str, ...] = ()
     unresolved: tuple[str, ...] = ()
 

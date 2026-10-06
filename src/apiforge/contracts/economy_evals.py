@@ -93,6 +93,27 @@ class EvaluationGate(VersionedContract):
     reasons: tuple[str, ...] = ()
 
 
+class ReplayDecision(VersionedContract):
+    """One §83–§87 control-plane decision replayed against stored run evidence.
+
+    ``same`` = the stored verdict reproduces under the current policy;
+    ``changed`` = policy or data drift alters the verdict; ``unresolved`` =
+    the stored run lacks the inputs needed to re-derive it; ``absent`` =
+    the run never produced this decision. Decisions are reported in the
+    §87 chain order: governor → routing → loop → model shadow → tool
+    authorization → trust admission → recovery.
+    """
+
+    schema: Literal["apiforge/replay-decision/v1"] = "apiforge/replay-decision/v1"  # type: ignore[assignment]
+    name: str = Field(min_length=1)
+    status: Literal["same", "changed", "unresolved", "absent"]
+    stored: str = ""
+    observed: str = ""
+    code: str | None = None
+    policy_hash: str | None = None
+    detail: str = ""
+
+
 class ReplayRun(VersionedContract):
     run: str = Field(min_length=1)
     profile: str
@@ -103,6 +124,7 @@ class ReplayRun(VersionedContract):
     effective_before: str | None = None
     effective_after: str | None = None
     reason: str = ""
+    decisions: tuple[ReplayDecision, ...] = ()
 
 
 class ReplayReport(VersionedContract):
@@ -113,6 +135,9 @@ class ReplayReport(VersionedContract):
     changed: int = Field(default=0, ge=0)
     unresolved: int = Field(default=0, ge=0)
     removed_required_roles: int = Field(default=0, ge=0)
+    decisions_changed: int = Field(default=0, ge=0)
+    decisions_unresolved: int = Field(default=0, ge=0)
+    policies: dict[str, str] = Field(default_factory=dict)
     passed: bool = True
 
 

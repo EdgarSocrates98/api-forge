@@ -12,14 +12,16 @@ authority kept at ``none``), ``escaped`` = the defense failed.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import yaml
 
 from apiforge.contracts.agentic_memory import (
     MemoryCandidate,
     MemoryPolicy,
+    MemoryQuery,
     MemoryRecord,
+    MemoryRisk,
 )
 from apiforge.contracts.base import ContractError
 from apiforge.contracts.eval_plane import AdversarialCaseResult, SecurityAdversarialReport
@@ -94,10 +96,63 @@ def _run_tool_authorize(params: dict[str, Any]) -> tuple[str, str, str]:
         str(params["tool"]),
         profiles=profiles,
         permissions=permissions,
+        delegated_from=(
+            str(params["delegated_from"]) if params.get("delegated_from") is not None else None
+        ),
+        delegated_scope=tuple(str(item) for item in params.get("delegated_scope") or ()),
+        target=bool(params.get("target", False)),
+        known_targets=tuple(str(item) for item in params.get("known_targets") or ()),
     )
     if decision.decision == "deny":
         return "refused", str(decision.code or ""), str(decision.reason)
     return "escaped", "", f"{params['subject']} authorized for {params['tool']}"
+
+
+def _run_memory_conflict(params: dict[str, Any]) -> tuple[str, str, str]:
+    """Conflicting trusted records under a destructive-risk query must be
+    quarantined/excluded — never silently preferred (Phase 1 semantics)."""
+    import tempfile
+
+    from apiforge.memory.store import persist_candidate, propose_memory, query_memory
+
+    risk = cast("MemoryRisk", str(params.get("risk", "destructive")))
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        for value in params.get("values") or (300, 30):
+            candidate = propose_memory(
+                root,
+                scope="task",
+                origin="trusted_internal",
+                payload={"timeout": int(value)},
+                proposed_by="eval-attacker",
+                reason="conflict fixture",
+                created_at=NOW,
+                trust_level="trusted",
+                evidence_refs=("evidence:eval",),
+            )
+            persist_candidate(
+                root,
+                candidate,
+                MemoryPolicy(policy_id="eval", minimum_trust="candidate"),
+                now=NOW,
+            )
+        result = query_memory(root, MemoryQuery(risk=risk, now=NOW))
+    conflicts = result.conflicts
+    unsafe = [conflict for conflict in conflicts if conflict.admission_effect == "admit_preferred"]
+    if result.records or unsafe:
+        detail = (
+            f"risk={risk} admitted {len(result.records)} record(s); "
+            f"conflict outcomes={[c.outcome for c in conflicts]}"
+        )
+        return ("escaped", "", detail)
+    if not conflicts:
+        return "escaped", "", "conflicting records produced no conflict detection at all"
+    detail = (
+        f"risk={risk} excluded all records; outcomes="
+        f"{sorted({str(c.outcome) for c in conflicts})} admission="
+        f"{sorted({str(c.admission_effect) for c in conflicts})}"
+    )
+    return ("contained", "", detail)
 
 
 def _run_trust_propagate(params: dict[str, Any]) -> tuple[str, str, str]:
@@ -149,6 +204,7 @@ def _run_data_promotion(params: dict[str, Any]) -> tuple[str, str, str]:
 
 _VECTORS = {
     "memory_gate": _run_memory_gate,
+    "memory_conflict": _run_memory_conflict,
     "tool_authorize": _run_tool_authorize,
     "trust_propagate": _run_trust_propagate,
     "data_promotion": _run_data_promotion,

@@ -419,6 +419,46 @@ def _load_facts(path: Path) -> list[Fact]:
     return [Fact.model_validate(f) for f in payload]
 
 
+_UPSTREAM_BYTES = 256 * 1024
+_UPSTREAM_ITEMS = 128
+UPSTREAM_SCHEMA = "apiforge/upstream-facts/v1"
+
+
+def _load_upstream(path: Path) -> list[Fact]:
+    """Read a bounded upstream-facts payload: an ``apiforge/upstream-facts/v1``
+    document (schema optional), ``{"facts": [...]}`` or a bare list."""
+    if not path.is_file():
+        raise AnalysisError("AF-INPUT-NOT-FOUND", str(path))
+    size = path.stat().st_size
+    if size > _UPSTREAM_BYTES:
+        raise AnalysisError(
+            "AF-UPSTREAM-LIMIT",
+            f"{path}: {size} bytes exceeds the {_UPSTREAM_BYTES}-byte upstream limit",
+        )
+    try:
+        doc = json.loads(path.read_text(encoding="utf-8"))
+    except (UnicodeDecodeError, ValueError) as exc:
+        raise AnalysisError("AF-UPSTREAM-INVALID", f"{path}: not JSON ({exc})") from exc
+    schema = doc.get("schema") if isinstance(doc, dict) else None
+    if schema is not None and schema != UPSTREAM_SCHEMA:
+        raise AnalysisError(
+            "AF-UPSTREAM-INVALID",
+            f"{path}: schema {schema!r} is not {UPSTREAM_SCHEMA!r}",
+        )
+    payload = doc.get("facts", doc) if isinstance(doc, dict) else doc
+    if not isinstance(payload, list):
+        raise AnalysisError("AF-UPSTREAM-INVALID", f"{path}: not a fact list")
+    if len(payload) > _UPSTREAM_ITEMS:
+        raise AnalysisError(
+            "AF-UPSTREAM-LIMIT",
+            f"{path}: {len(payload)} facts exceeds the {_UPSTREAM_ITEMS}-item upstream limit",
+        )
+    try:
+        return [Fact.model_validate(f) for f in payload]
+    except (ValueError, TypeError) as exc:
+        raise AnalysisError("AF-UPSTREAM-INVALID", f"{path}: {exc}") from exc
+
+
 def _run(fn: Callable[[], object]) -> object:
     """Map typed errors onto exit codes; let nothing else through."""
     try:
@@ -777,6 +817,12 @@ def analyze(
     framework: str = typer.Option(
         "auto", "--framework", help="fastapi|spring|go|auto (detected from files)."
     ),
+    upstream: Path | None = typer.Option(
+        None,
+        "--upstream",
+        help="Bounded foreign facts (apiforge/upstream-facts/v1) persisted with the "
+        "case under their original provenance; never judged as local evidence.",
+    ),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
     """Run the full deterministic slice and persist a case."""
@@ -790,6 +836,7 @@ def analyze(
             framework=framework,
             cache_dir=Path.cwd() / ".apiforge" / "cache",
             ledger_root=Path.cwd(),
+            upstream=_load_upstream(upstream) if upstream is not None else (),
         )
 
     result = _run(work)
@@ -804,6 +851,7 @@ def analyze(
             "findings": len(result.findings),
             "changes": len(result.changes),
             "diagnostics": len(result.diagnostics),
+            "upstream": sum(1 for f in result.facts if "upstream" in f.attrs),
         },
         detail_level,
     )

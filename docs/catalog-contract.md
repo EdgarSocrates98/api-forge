@@ -18,6 +18,10 @@ requires the cost of the run that never happened.
 | `AF-INPUT-NOT-FOUND` | a declared `--path`/`--project`/`--findings` argument does not exist |
 | `AF-INPUT-FRAMEWORK-UNKNOWN` | `--framework` names an adapter that is not registered |
 | `AF-INPUT-INVALID` | an input argument fails shape validation (e.g. dump dir layout) |
+| `AF-UPSTREAM-INVALID` | an `--upstream` payload is not JSON, names a foreign schema or holds a malformed fact |
+| `AF-UPSTREAM-LIMIT` | an `--upstream` payload exceeds the byte or fact-count bound |
+| `AF-UPSTREAM-UNMARKED` | an upstream fact lacks the `attrs.upstream` provenance map, claims the native `apiforge` extractor, or escapes the `upstream:`/`upstream.` id/kind namespaces |
+| `AF-UPSTREAM-FORBIDDEN` | an upstream fact carries an imperative key (`instruction`, `prompt`, `command`, `routing`, `task`, … the closed `_FORBIDDEN_KEYS` vocabulary in `application/analyze.py`); the intake transports evidence, never commands — unlock: keep declarative fields (`claim`, `severity`, provenance, artifact refs) and drop the imperative key |
 | `AF-PERF-PLAN-INVALID` | declarative performance plan fails endpoint, threshold or generator validation |
 | `AF-OBS-READ-PLAN-INVALID` | vendor read plan fails provider, window or signal validation |
 | `AF-OBS-READ-PROVIDER` | requested observability provider has no registered read adapter |

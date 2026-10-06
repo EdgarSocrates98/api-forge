@@ -111,9 +111,9 @@ def test_plan_roles_records_trust_units_and_artifact_taint_gate(tmp_path: Path) 
     # trusted_internal origins are >= the reviewer's observed floor
     ref_subjects = {unit.subject for unit in reviewer.trust_units}
     assert set(reviewer.refs) <= ref_subjects
-    assert all(
-        unit.instruction_authority == "none" for unit in reviewer.trust_units
-    ), "data never gains instruction authority"
+    assert all(unit.instruction_authority == "none" for unit in reviewer.trust_units), (
+        "data never gains instruction authority"
+    )
 
 
 def test_shipped_policy_denies_dangerous_taints_on_every_role() -> None:

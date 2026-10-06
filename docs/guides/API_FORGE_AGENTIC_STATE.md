@@ -132,7 +132,14 @@ adapter crossing remains one `agent-invocation` boundary grant; it does not
 grant the requesting role every tool. Delegation requires an explicit parent
 edge and requested-tool scope. `apiforge_call` authorizes the gateway and then
 the resolved target against the MCP registry before preserving inner domain
-gates.
+gates. Target authorization is risk-aware (phase 7): the target must carry a
+declared `ToolRiskProfile` in `rules/tool_risk.yaml` — unknown profiles deny
+closed (`AF-TOOL-PROFILE-MISSING`) — and every risk class of that profile must
+sit inside the subject's `allowed_risk_classes`. `allowed_targets=["*"]` is a
+name grant only; it never widens the risk grant, so the default `mcp-gateway`
+role dispatches read-only targets and denies write/security/external ones
+(`AF-TOOL-RISK-DENIED`). The full target inventory is generated in
+`docs/security/MCP_TOOL_RISK_INVENTORY.md`.
 
 Context admission is trust-aware: `plan_roles` annotates every capsule ref
 with its `TrustUnit` (`annotate_ref`) and every run-produced artifact ref as

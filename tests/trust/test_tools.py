@@ -122,3 +122,136 @@ def test_mcp_target_requires_registry_and_target_grant() -> None:
     )
     assert unknown.decision == "deny"
     assert unknown.code == "AF-MCP-TOOL-UNKNOWN"
+
+
+def test_every_mcp_dispatchable_tool_has_a_risk_profile() -> None:
+    from apiforge.mcp.gateway import full_tools
+
+    profiles, _ = _grants()
+    missing = [name for name in full_tools() if name not in profiles]
+    assert missing == []
+
+
+def test_mcp_target_wildcard_does_not_bypass_risk_classes() -> None:
+    # §43: allowed_targets=["*"] is a name grant, never a risk grant —
+    # a write/security target still denies for the read-only gateway role.
+    profiles, permissions = _grants()
+    for write_target in ("memory_persist", "runtime_run", "budget_spend"):
+        decision = authorize(
+            "mcp-gateway",
+            write_target,
+            profiles=profiles,
+            permissions=permissions,
+            target=True,
+            known_targets=(write_target,),
+        )
+        assert decision.decision == "deny", write_target
+        assert decision.code == "AF-TOOL-RISK-DENIED"
+        assert decision.field == "risk_classes"
+        assert "read_only" not in decision.risk_classes
+
+
+def test_mcp_target_allowed_reports_real_profile() -> None:
+    profiles, permissions = _grants()
+    decision = authorize(
+        "mcp-gateway",
+        "rules_list",
+        profiles=profiles,
+        permissions=permissions,
+        target=True,
+        known_targets=("rules_list",),
+    )
+    assert decision.decision == "allow"
+    assert decision.risk_classes == profiles["rules_list"].risk_classes
+
+
+def test_mcp_target_registered_but_unprofiled_denies() -> None:
+    # fail-closed: registry presence without a declared profile denies.
+    profiles, permissions = _grants()
+    decision = authorize(
+        "mcp-gateway",
+        "undeclared_target",
+        profiles=profiles,
+        permissions=permissions,
+        target=True,
+        known_targets=("undeclared_target",),
+    )
+    assert decision.decision == "deny"
+    assert decision.code == "AF-TOOL-PROFILE-MISSING"
+    assert decision.field == "target"
+    assert decision.unlock
+
+
+def test_mcp_target_specific_grant_is_respected() -> None:
+    from apiforge.contracts.trust import AgentPermissionSet
+
+    profiles, permissions = _grants()
+    permissions["gateway-elevated"] = AgentPermissionSet(
+        subject="gateway-elevated",
+        allowed_tools=("apiforge_call",),
+        allowed_risk_classes=("read_only", "write"),
+        allowed_targets=("workspace_add",),
+    )
+    allowed = authorize(
+        "gateway-elevated",
+        "workspace_add",
+        profiles=profiles,
+        permissions=permissions,
+        target=True,
+        known_targets=("workspace_add",),
+    )
+    assert allowed.decision == "allow"
+    assert allowed.risk_classes == ("write",)
+
+    # explicit grant for one target never leaks to another write target
+    leaked = authorize(
+        "gateway-elevated",
+        "runtime_run",
+        profiles=profiles,
+        permissions=permissions,
+        target=True,
+        known_targets=("runtime_run",),
+    )
+    assert leaked.decision == "deny"
+    assert leaked.code == "AF-TOOL-AUTHZ-DENIED"
+    assert leaked.field == "target"
+
+
+def test_mcp_target_denied_tools_win_over_wildcard() -> None:
+    from apiforge.contracts.trust import AgentPermissionSet
+
+    profiles, permissions = _grants()
+    permissions["gateway-fenced"] = AgentPermissionSet(
+        subject="gateway-fenced",
+        allowed_tools=("apiforge_call",),
+        allowed_risk_classes=("read_only", "write"),
+        allowed_targets=("*",),
+        denied_tools=("memory_persist",),
+    )
+    decision = authorize(
+        "gateway-fenced",
+        "memory_persist",
+        profiles=profiles,
+        permissions=permissions,
+        target=True,
+        known_targets=("memory_persist",),
+    )
+    assert decision.decision == "deny"
+    assert decision.code == "AF-TOOL-DENIED"
+
+
+def test_mcp_gateway_boundary_and_target_authorization_are_both_required() -> None:
+    # a role without apiforge_call in allowed_tools cannot reach dispatch at all
+    profiles, permissions = _grants()
+    gate = authorize("critic", "apiforge_call", profiles=profiles, permissions=permissions)
+    assert gate.decision == "deny"
+    # and even a role carrying the gateway tool still needs the target grant
+    target = authorize(
+        "mcp-gateway",
+        "rules_list",
+        profiles=profiles,
+        permissions=permissions,
+        target=True,
+        known_targets=("rules_list",),
+    )
+    assert target.decision == "allow"

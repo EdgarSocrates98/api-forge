@@ -65,6 +65,8 @@ def authorize(
     """Decide whether `subject` may invoke `tool`. Every refusal carries an
     AF code, the denied field and a safe unlock — never a silent block."""
     if target:
+        # §43-§46: dynamic dispatch gates on the target's real risk profile.
+        # Registry presence alone never authorizes — an unknown profile denies.
         if tool not in known_targets:
             return ToolAuthorization(
                 subject=subject,
@@ -75,24 +77,69 @@ def authorize(
                 unlock="select a target returned by the declared MCP registry",
                 reason=f"target tool {tool!r} is not present in the MCP registry",
             )
-        grants = permissions.get(subject)
-        if grants is None or "*" not in grants.allowed_targets:
+        profile = profiles.get(tool)
+        if profile is None:
             return ToolAuthorization(
                 subject=subject,
                 tool=tool,
                 decision="deny",
-                risk_classes=("read_only",),
+                code="AF-TOOL-PROFILE-MISSING",
+                field="target",
+                unlock="declare a risk profile for the target in rules/tool_risk.yaml",
+                reason=f"no risk profile declared for target {tool!r}; denying (fail-closed)",
+            )
+        grants = permissions.get(subject)
+        if grants is None:
+            return ToolAuthorization(
+                subject=subject,
+                tool=tool,
+                decision="deny",
+                risk_classes=profile.risk_classes,
+                code="AF-TOOL-AUTHZ-DENIED",
+                field="subject",
+                unlock="declare a permission set for the role in rules/tool_risk.yaml",
+                reason=f"no permission set declared for {subject!r}",
+            )
+        if tool in grants.denied_tools:
+            return ToolAuthorization(
+                subject=subject,
+                tool=tool,
+                decision="deny",
+                risk_classes=profile.risk_classes,
+                code="AF-TOOL-DENIED",
+                field="target",
+                unlock="have a human remove the target from the role's denied_tools",
+                reason=f"target {tool!r} is explicitly denied for {subject!r}",
+            )
+        if tool not in grants.allowed_targets and "*" not in grants.allowed_targets:
+            return ToolAuthorization(
+                subject=subject,
+                tool=tool,
+                decision="deny",
+                risk_classes=profile.risk_classes,
                 code="AF-TOOL-AUTHZ-DENIED",
                 field="target",
                 unlock="declare the target in the effective role permission set",
                 reason=f"target {tool!r} is not allowlisted for {subject!r}",
             )
+        blocked = sorted(set(profile.risk_classes) - set(grants.allowed_risk_classes))
+        if blocked:
+            return ToolAuthorization(
+                subject=subject,
+                tool=tool,
+                decision="deny",
+                risk_classes=profile.risk_classes,
+                code="AF-TOOL-RISK-DENIED",
+                field="risk_classes",
+                unlock="have a human widen allowed_risk_classes or pick a safer target",
+                reason=f"target {tool!r} carries risk classes outside the grant: {blocked}",
+            )
         return ToolAuthorization(
             subject=subject,
             tool=tool,
             decision="allow",
-            risk_classes=("read_only",),
-            reason="target is present in the registry and allowlisted for the role",
+            risk_classes=profile.risk_classes,
+            reason="target is registered, allowlisted and inside the role's risk grant",
         )
     profile = profiles.get(tool)
     if profile is None:

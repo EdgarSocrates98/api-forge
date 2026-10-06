@@ -64,20 +64,63 @@ def _require_dir(path: Path, code: str = "AF-INPUT-NOT-FOUND") -> Path:
 # Provenance keys every upstream fact must carry under ``attrs["upstream"]``: the foreign
 # engine that produced it, the run/node/item it derives from. ``extractor`` names the
 # intake channel, never a native extractor (``apiforge`` would launder foreign facts as
-# locally observed ones).
+# locally observed ones). ``kind``/``fact_id`` live in the ``upstream.*`` namespaces for
+# the same reason: a foreign observation must never be indistinguishable from a local one.
 UPSTREAM_EXTRACTOR = "theforge/handoff"
 _UPSTREAM_KEYS = ("provider", "run_id", "node", "item")
 
+# Keys that would turn evidence transport into instruction transport. The intake accepts
+# declarative payloads (claims, severities, provenance, artifact references) and refuses
+# imperative ones: an upstream document must never carry an agent prompt, a routing
+# command or a directive for the receiving engine. The vocabulary is closed — widening
+# it is a contract change, not a judgement call. Matching is exact after normalization
+# (lowercase, ``-``/`` `` → ``_``), so ``plan_run`` stays a provenance key while ``plan``
+# is refused.
+_FORBIDDEN_KEYS = frozenset({
+    "action", "actions", "agent", "command", "commands", "directive", "directives",
+    "execute", "goal", "instruction", "instructions", "message", "messages",
+    "objective", "persona", "plan", "prompt", "prompts", "request", "role",
+    "route", "routes", "routing", "system", "task", "tasks", "tool_call",
+    "workflow",
+})
+
+
+def _normalized_key(key: object) -> str:
+    return str(key).strip().lower().replace("-", "_").replace(" ", "_")
+
+
+def _forbidden_key(value: object) -> str | None:
+    """First forbidden key found walking a JSON tree, or None. Iterative: payload
+    depth is adversary-controlled."""
+    stack = [value]
+    while stack:
+        node = stack.pop()
+        if isinstance(node, Mapping):
+            for key, item in node.items():
+                if _normalized_key(key) in _FORBIDDEN_KEYS:
+                    return str(key)
+                stack.append(item)
+        elif isinstance(node, (list, tuple)):
+            stack.extend(node)
+    return None
+
 
 def _check_upstream(facts: Sequence[Fact]) -> None:
-    """Refuse foreign facts that cannot be told apart from local evidence."""
+    """Refuse foreign facts that cannot be told apart from local evidence — and any
+    that try to carry instructions instead of observations."""
     for index, fact in enumerate(facts):
         upstream = fact.attrs.get("upstream")
-        if fact.source.extractor == "apiforge" or not isinstance(upstream, Mapping):
+        if (
+            fact.source.extractor == "apiforge"
+            or not isinstance(upstream, Mapping)
+            or not fact.fact_id.startswith("upstream:")
+            or not fact.kind.startswith("upstream.")
+        ):
             raise AnalysisError(
                 "AF-UPSTREAM-UNMARKED",
                 f"upstream fact {index} ({fact.fact_id!r}) is not marked: it needs a "
-                f"non-'apiforge' source.extractor and an attrs.upstream provenance map",
+                f"non-'apiforge' source.extractor, an attrs.upstream provenance map "
+                f"and the upstream: / upstream. id/kind namespaces",
             )
         missing = [key for key in _UPSTREAM_KEYS if not isinstance(upstream.get(key), str)
                    or not upstream[key]]
@@ -87,6 +130,15 @@ def _check_upstream(facts: Sequence[Fact]) -> None:
                 f"upstream fact {index} ({fact.fact_id!r}): attrs.upstream is missing "
                 f"or has empty keys {missing}",
             )
+        for field_name, payload in (("attrs", fact.attrs), ("measures", fact.measures)):
+            bad = _forbidden_key(payload)
+            if bad is not None:
+                raise AnalysisError(
+                    "AF-UPSTREAM-FORBIDDEN",
+                    f"upstream fact {index} ({fact.fact_id!r}): {field_name} carries "
+                    f"key {bad!r}, which transports instructions — the upstream intake "
+                    f"accepts evidence, never commands",
+                )
 
 
 def _contract_facts(model: ApiModel) -> tuple[Fact, ...]:

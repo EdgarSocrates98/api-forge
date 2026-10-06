@@ -36,8 +36,10 @@ to unify, `INTEGRATE` = exists but not in the normal runtime path,
 
 ## Unresolved at Phase-0 close
 
-- Full-suite pytest number pending in this environment (run in progress;
-  `pytest-of-edgar` basetemp was unwritable — local `.pytest_tmp` used).
+- Full-suite pytest resolved at Phase 12: default Windows basetemp was
+  unwritable and an in-repo basetemp leaks the parent `.git` into
+  git-discovery fixtures — final runs use an explicit `--basetemp` outside
+  the repository.
 - `next-step` refuses the stale persisted case (`AF-ROUTING-NO-ROUTE` on the
   historical fixture findings) — recorded; the wave proceeds on the audited
   source path, not on the stale case.
@@ -96,4 +98,50 @@ to unify, `INTEGRATE` = exists but not in the normal runtime path,
   `AF-TRUST-FLOOR`/`AF-TRUST-TAINT-DENIED` notes in `plan.unresolved`. The
   shipped policy denies `prompt_injection`, `instruction_laundering` and
   `malicious_artifact` on every role and declares `trust_floor: observed`
-  for reviewer/critic/referee over external refs. Commit pending.
+  for reviewer/critic/referee over external refs. Commit `b61071c`.
+- **Phase 7 (row 7) — DONE locally.** `ToolGateway.authorize(target=True)`
+  now resolves the declared `ToolRiskProfile` from
+  `src/apiforge/rules/tool_risk.yaml` (profiles declared for all 152 MCP
+  full-surface tools, audited from docstrings and recorded in
+  `docs/security/MCP_TOOL_RISK_INVENTORY.md`). Unknown targets refuse
+  `AF-MCP-TOOL-UNKNOWN`, unregistered targets `AF-TOOL-PROFILE-MISSING`,
+  denied tools `AF-TOOL-DENIED` and risk outside the role grant
+  `AF-TOOL-RISK-DENIED` — `allowed_targets=["*"]` no longer bypasses the
+  risk class. Commit `2ee7157`.
+- **Phase 8 (row 8) — DONE locally.** `build_server` migrated to the
+  installed `mcp` 2.3.0 `MCPServer` API (the `mcp.server.fastmcp` path was
+  removed upstream). `tests/mcp_protocol/test_sdk_protocol.py` round-trips
+  `initialize` → `tools/list` → `tools/call` through real
+  `ClientSession`/in-memory streams and skips (never fakes) when the SDK is
+  absent; the shadowing `tests/mcp/` package was renamed so the external
+  `mcp` resolves. `docs/mcp-compliance.md` records the honest status.
+  Commit `ee958a4`.
+- **Phase 9 (row 9) — DONE locally.** `ChallengerSide/v1` +
+  `ChallengerComparison/v1` registered and documented; every executed
+  challenger persists a comparison receipt over observable fields only
+  (`null` when unobserved), referenced by `ShadowDecision.comparison_ref`.
+  `governs=false` is contractual — promotion remains a control-plane
+  decision over accumulated evidence, never implied by one comparison.
+  Challenger↔fallback separation documented. Commit `1ada789`.
+- **Phase 10 (row 10) — DONE locally.** `RunInspection` reports
+  `basis="cost_vector"` for cost coverage; `RunLedgerEntry.recorded_at`
+  (optional) is stamped at append time; `AgentOpsTimeline` gains
+  `timestamp_coverage` and `critical_path` which stays `unresolved` below
+  full coverage. Waste findings keep the
+  observed/estimated/hypothesis/unresolved distinction. Commit `90d2455`.
+- **Phase 11 (row 11) — DONE locally.** Five new executable lab kinds
+  (26/26 catalog coverage, real engine probes not YAML declarations);
+  security-adversarial corpus grew 9→16 cases covering confused deputy,
+  MCP dynamic target escalation, instruction laundering, tainted output
+  admission and destructive memory conflict — all refused or contained.
+  `evals replay` now re-decides loop, model-route shadow, tool authz,
+  trust admission and recovery against recorded inputs, anchored by
+  `policy_id`/`policy_version`/`policy_hash`; deterministic for identical
+  inputs and never replays model text. Commit `055f889`.
+- **Phase 12 (row 12) — DONE locally.** Release gate
+  `scripts/check_release.py` PASS; code parity restored (`AF-MCP-TOOL`
+  phantom literal removed, `ChallengerSide-v1.md` added); SDD check clean;
+  full pytest, mypy strict, ruff and the eval suites run as the final
+  evidence bundle. Outcome brief:
+  `docs/decisions/API_FORGE_FINAL_CONVERGENCE_OUTCOME_BRIEF.md`.
+  Commit pending.

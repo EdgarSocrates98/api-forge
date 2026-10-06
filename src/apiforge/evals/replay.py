@@ -258,7 +258,7 @@ def _replay_tool_authorization(bundle: Mapping[str, Any]) -> ReplayDecision:
             detail=f"tool-risk policy unreadable: {exc}",
         )
     gaps = [str(gap) for gap in run.get("gaps") or ()]
-    tool_denials = [gap for gap in gaps if "AF-TOOL" in gap or "AF-MCP-TOOL" in gap]
+    tool_denials = [gap for gap in gaps if gap.startswith(("AF-TOOL", "AF-MCP"))]
     proceeded = bool(run.get("invocation_ids")) or bool(run.get("artifact_ids"))
     stored = "denied" if (tool_denials and not proceeded) else "allowed"
     observed = "allowed" if boundary.decision == "allow" else "denied"

@@ -270,6 +270,7 @@ class RunGovernanceContext(VersionedContract):
     gain: ExpectedInformationGain | None = None
     stop: StopDecision | None = None
     recovery: RecoveryDecision | None = None
+    recoveries: tuple[RecoveryDecision, ...] = ()
     loop: LoopDetection | None = None
     evidence_refs: tuple[str, ...] = ()
     unresolved: tuple[str, ...] = ()

@@ -22,6 +22,29 @@ from apiforge.contracts.agentic_governance import (
 RECOVERY_POLICY = Path(__file__).resolve().parent.parent / "rules" / "recovery_policy.yaml"
 
 
+def classify_failure(error_code: str, message: str = "") -> FailureClass:
+    """Map an error code/message onto the closed §26 failure-class vocabulary.
+
+    This is the single classification surface: the scheduler calls it at the
+    failure site and the supervisor calls it only for post-invocation errors
+    (e.g. payload validation gaps) that never carried a scheduler decision.
+    """
+    text = f"{error_code} {message}".lower()
+    if "timeout" in text:
+        return "timeout"
+    if "security" in text or "unauthor" in text or "forbidden" in text:
+        return "security_refusal"
+    if "budget" in text or "exhaust" in text:
+        return "budget_exhausted"
+    if "policy" in text or "refus" in text:
+        return "policy_conflict"
+    if "schema" in text or "invalid" in text or "contract" in text:
+        return "invalid_input"
+    if "provider" in text:
+        return "provider_failure"
+    return "tool_failure"
+
+
 def load_recovery_policy(path: Path = RECOVERY_POLICY) -> dict[str, Any]:
     data = yaml.safe_load(path.read_text(encoding="utf-8"))
     if not isinstance(data, dict) or data.get("schema") != "apiforge/recovery-policy/v1":
@@ -86,4 +109,4 @@ def decide_recovery(
     )
 
 
-__all__ = ["RECOVERY_POLICY", "decide_recovery", "load_recovery_policy"]
+__all__ = ["RECOVERY_POLICY", "classify_failure", "decide_recovery", "load_recovery_policy"]

@@ -7,9 +7,9 @@ from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 
 from apiforge.contracts.agentic import AgentInvocation, InvocationStatus
-from apiforge.contracts.agentic_governance import FailureClass, RecoveryDecision
+from apiforge.contracts.agentic_governance import RecoveryDecision
 from apiforge.contracts.base import ContractError
-from apiforge.governance.recovery import decide_recovery
+from apiforge.governance.recovery import classify_failure, decide_recovery
 
 
 @dataclass(frozen=True, slots=True)
@@ -20,30 +20,13 @@ class InvocationResult:
     recovery: RecoveryDecision | None = None
 
 
-def _failure_class(error_code: str, message: str) -> FailureClass:
-    text = f"{error_code} {message}".lower()
-    if "timeout" in text:
-        return "timeout"
-    if "security" in text or "unauthor" in text or "forbidden" in text:
-        return "security_refusal"
-    if "budget" in text or "exhaust" in text:
-        return "budget_exhausted"
-    if "policy" in text or "refus" in text:
-        return "policy_conflict"
-    if "schema" in text or "invalid" in text or "contract" in text:
-        return "invalid_input"
-    if "provider" in text:
-        return "provider_failure"
-    return "tool_failure"
-
-
 def _govern_recovery(
     error_code: str,
     message: str,
     attempt: int,
     max_retries: int,
 ) -> RecoveryDecision:
-    failure_class = _failure_class(error_code, message)
+    failure_class = classify_failure(error_code, message)
     decision = decide_recovery(failure_class, attempt)
     if decision.decision == "retry" and attempt >= max_retries:
         return decision.model_copy(

@@ -12,8 +12,13 @@ vocabulary is closed: unknown classes refuse
 | `code` | `AF-GOV-RECOVERY-UNDECLARED` (class valid but absent from policy) or `AF-GOV-RECOVERY-EXHAUSTED` (cap reached; terminal `escalate`/`stop` fires) |
 | `unresolved` | Named gaps, never silent |
 
-The scheduler classifies each worker failure and records `RecoveryDecision`
-before deciding whether another attempt may start. `retry` alone permits a
-retry; `replan`, `fallback`, `escalate` and `stop` terminate the local retry
-loop for an upper runtime layer to handle. Runtime `max_retries` remains a
-hard ceiling and is reported as `AF-GOV-RECOVERY-EXHAUSTED`.
+The scheduler classifies each worker failure (`governance.recovery.
+classify_failure`, the single classification surface) and records
+`RecoveryDecision` before deciding whether another attempt may start.
+`InvocationResult.recovery` is the canonical decision for that failure — the
+supervisor consumes and aggregates it, and only classifies errors that never
+passed through the scheduler (post-invocation payload gaps, budget-blocked
+fallbacks). `retry` alone permits a retry; `replan`, `fallback`, `escalate`
+and `stop` terminate the local retry loop for an upper runtime layer to
+handle. Runtime `max_retries` remains a hard ceiling and is reported as
+`AF-GOV-RECOVERY-EXHAUSTED`.

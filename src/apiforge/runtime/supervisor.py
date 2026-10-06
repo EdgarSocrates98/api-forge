@@ -22,6 +22,7 @@ from apiforge.contracts.agentic_governance import (
     GovernorInputs,
     LoopAction,
     LoopDetection,
+    RecoveryDecision,
     RunGovernanceContext,
 )
 from apiforge.contracts.base import ContractError
@@ -35,7 +36,7 @@ from apiforge.core.models import JsonValue
 from apiforge.governance.gain import expected_gain
 from apiforge.governance.governor import govern
 from apiforge.governance.loop import check_loop, load_loop_policy, strategy_fingerprint
-from apiforge.governance.recovery import decide_recovery
+from apiforge.governance.recovery import classify_failure, decide_recovery
 from apiforge.governance.stop import decide_stop
 from apiforge.graph.store import read_graph
 from apiforge.runtime.adapters import AgentRequest, ModelAdapter
@@ -375,15 +376,11 @@ def _exhausted(missing: int) -> str:
     )
 
 
-def _failure_class(error: str) -> str:
-    lowered = error.lower()
-    if "timeout" in lowered:
-        return "timeout"
-    if "policy" in lowered or "refus" in lowered:
-        return "policy_conflict"
-    if "invalid" in lowered or "contract" in lowered:
-        return "invalid_input"
-    return "tool_failure"
+def _recovery_for_error(error: str) -> RecoveryDecision:
+    """First classification point for a post-invocation error (e.g. a payload
+    validation gap the scheduler never saw). Invocation failures already carry
+    the canonical ``InvocationResult.recovery`` — never reclassified here."""
+    return decide_recovery(classify_failure("", error), 0)
 
 
 def _economy_block(
@@ -1174,18 +1171,36 @@ async def execute_run(
             economy_gaps.append(_exhausted(len(invocations) - len(results)))
     artifacts: list[AgentArtifact] = []
     errors: list[str] = []
+    # Canonical recovery decisions: the scheduler's InvocationResult.recovery
+    # governs invocation failures; the supervisor only classifies errors that
+    # never passed through the scheduler (post-invocation validation gaps).
+    recovery_decisions: list[RecoveryDecision] = []
     for result in results:
         control_step = control_steps[result.invocation.capability]
         if result.error is not None or result.response is None:
             errors.append(result.error or "invocation failed")
+            if result.recovery is not None:
+                recovery_decisions.append(result.recovery)
+            elif result.invocation.error_code != "AF-RUNTIME-DEPENDENCY-FAILED":
+                recovery_decisions.append(_recovery_for_error(result.error or "invocation failed"))
             control.fail(
                 control_run.run_id, control_step.step_id, result.error or "invocation failed"
             )
             continue
-        payload = _json_payload(result.response)
+        try:
+            payload = _json_payload(result.response)
+        except (ContractError, ValueError) as exc:
+            # A non-contract adapter payload is a governed failure, not a run
+            # crash: first classification point produces the decision.
+            error = str(exc)
+            errors.append(f"{result.invocation.capability}: {error}")
+            recovery_decisions.append(_recovery_for_error(error))
+            control.fail(control_run.run_id, control_step.step_id, error)
+            continue
         guardrail_gaps = validate_agent_payload(payload)
         if guardrail_gaps:
             errors.extend(f"{result.invocation.capability}: {gap}" for gap in guardrail_gaps)
+            recovery_decisions.append(_recovery_for_error("; ".join(guardrail_gaps)))
             control.fail(control_run.run_id, control_step.step_id, "; ".join(guardrail_gaps))
             continue
         artifact_id = stable_id(
@@ -1273,7 +1288,9 @@ async def execute_run(
                 max_retries=policy.max_retries,
             )
             if not fallback_results:
-                errors.append(f"{fallback}: AF-CONTROL-BUDGET: no fallback call remained")
+                error = f"{fallback}: AF-CONTROL-BUDGET: no fallback call remained"
+                errors.append(error)
+                recovery_decisions.append(_recovery_for_error(error))
                 control.skip(
                     control_run.run_id,
                     fallback_step.step_id,
@@ -1284,6 +1301,10 @@ async def execute_run(
             if fallback_result.error is not None or fallback_result.response is None:
                 error = fallback_result.error or "fallback invocation failed"
                 errors.append(f"{fallback}: {error}")
+                if fallback_result.recovery is not None:
+                    recovery_decisions.append(fallback_result.recovery)
+                else:
+                    recovery_decisions.append(_recovery_for_error(error))
                 failed_run = control.fail(control_run.run_id, fallback_step.step_id, error)
                 if (
                     next(item for item in failed_run.steps if item.name == fallback).status
@@ -1295,11 +1316,19 @@ async def execute_run(
                         f"AF-ROUTING-FALLBACK-FAILED: {error}",
                     )
                 continue
-            payload = _json_payload(fallback_result.response)
+            try:
+                payload = _json_payload(fallback_result.response)
+            except (ContractError, ValueError) as exc:
+                error = f"{fallback}: {exc}"
+                errors.append(error)
+                recovery_decisions.append(_recovery_for_error(error))
+                control.fail(control_run.run_id, fallback_step.step_id, error)
+                continue
             fallback_gaps = validate_agent_payload(payload)
             if fallback_gaps:
                 error = "; ".join(fallback_gaps)
                 errors.extend(f"{fallback}: {error}" for _ in [0])
+                recovery_decisions.append(_recovery_for_error(error))
                 failed_run = control.fail(control_run.run_id, fallback_step.step_id, error)
                 if (
                     next(item for item in failed_run.steps if item.name == fallback).status
@@ -1358,25 +1387,19 @@ async def execute_run(
                 )
             break
 
-    recovery = (
-        decide_recovery(
-            _failure_class(errors[0]),
-            max(
-                (item.invocation.retry_count for item in results if item.error is not None),
-                default=0,
-            ),
-        )
-        if errors
-        else None
-    )
+    # The scheduler's InvocationResult.recovery is the canonical decision for
+    # every invocation failure; recovery_decisions was collected in error
+    # order during processing, so the first entry governs the run's outcome.
+    recovery = recovery_decisions[0] if recovery_decisions else None
     governance_unresolved = set(governance_context.unresolved)
-    if recovery is not None:
-        governance_unresolved.update(recovery.unresolved)
-        if recovery.code:
-            governance_unresolved.add(recovery.code)
+    for decision in recovery_decisions:
+        governance_unresolved.update(decision.unresolved)
+        if decision.code:
+            governance_unresolved.add(decision.code)
     governance_context = governance_context.model_copy(
         update={
             "recovery": recovery,
+            "recoveries": tuple(recovery_decisions),
             "loop": loop_detection,
             "unresolved": tuple(sorted(governance_unresolved)),
         }
@@ -1844,7 +1867,13 @@ async def resume_existing_run(
             errors.append(error)
             control.fail(run_id, step.step_id, error)
             continue
-        payload = _json_payload(result.response)
+        try:
+            payload = _json_payload(result.response)
+        except (ContractError, ValueError) as exc:
+            error = str(exc)
+            errors.append(error)
+            control.fail(run_id, step.step_id, error)
+            continue
         gaps = validate_agent_payload(payload)
         if gaps:
             error = "; ".join(gaps)

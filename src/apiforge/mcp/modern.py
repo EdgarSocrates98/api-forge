@@ -3,8 +3,8 @@
 This adapter keeps protocol-shape verification independent from the optional
 MCP SDK. It exercises the local server contract for ``server/discover``,
 ``tools/list`` and ``tools/call`` without network access or provider state.
-The FastMCP stdio server remains the production transport when the extra is
-installed.
+The SDK ``MCPServer`` stdio transport remains the production server when the
+extra is installed.
 """
 
 from __future__ import annotations
@@ -125,7 +125,7 @@ class ModernMcpClient:
 
 
 def build_modern_server(surface: str = "compact") -> ModernMcpServer:
-    """Build the local modern proof server; production transport stays FastMCP."""
+    """Build the local modern proof server; production transport stays the SDK."""
     return ModernMcpServer(surface)
 
 

@@ -1,7 +1,7 @@
 """Measured MCP surface cost (§91): name, description and schema bytes per tool.
 
 Schemas are derived from the tool signatures with pydantic — the same
-information FastMCP publishes — so the surface can be measured without the
+information the SDK server publishes — so the surface can be measured without the
 optional ``mcp`` extra. What a host actually loads (e.g. deferred tool
 schemas) is host behavior, recorded in the host projection, not assumed here.
 """

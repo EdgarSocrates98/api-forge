@@ -6,7 +6,7 @@ import json
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, cast
+from typing import Any, cast, get_args
 
 from pydantic import TypeAdapter
 
@@ -507,6 +507,194 @@ def _receipt(
         code=code,
         evidence=evidence,
         unresolved=unresolved,
+    )
+
+
+def _model_route_inputs(
+    spec: Any,
+    routing: RoutingDecision,
+    *,
+    calls_remaining: int,
+) -> tuple[Any, tuple[str, ...]]:
+    """Derive §33 ``ModelRouteInputs`` strictly from declared run data.
+
+    ``spec.inputs`` may declare ``model_route_<field>=<value>`` pairs; every
+    field never declared stays ``None`` and lands in the decision's
+    ``unresolved`` — nothing is inferred from task text. ``risk`` and
+    ``task_complexity`` come from the sealed spec and the risk-complexity
+    assessment; ``needs_structured_output`` is declared by the run's
+    ``AgentArtifact/v1`` output contract unless the spec overrides it.
+    """
+    from apiforge.contracts.model_routing import (
+        ModelRouteInputs,
+        ModelTaskClass,
+    )
+
+    raw: dict[str, str] = {}
+    for item in spec.inputs:
+        key, sep, value = str(item).partition("=")
+        if sep and key.startswith("model_route_"):
+            raw[key] = value
+    invalid: list[str] = []
+
+    def _literal(field: str, allowed: tuple[str, ...]) -> str | None:
+        value = raw.get(f"model_route_{field}")
+        if value is None:
+            return None
+        if value not in allowed:
+            invalid.append(field)
+            return None
+        return value
+
+    def _number(field: str, parser: Any) -> Any:
+        value = raw.get(f"model_route_{field}")
+        if value is None:
+            return None
+        try:
+            return parser(value)
+        except (TypeError, ValueError):
+            invalid.append(field)
+            return None
+
+    def _flag(field: str) -> bool | None:
+        value = raw.get(f"model_route_{field}")
+        if value is None:
+            return None
+        if value.strip().lower() in {"1", "true", "yes"}:
+            return True
+        if value.strip().lower() in {"0", "false", "no"}:
+            return False
+        invalid.append(field)
+        return None
+
+    structured = _flag("needs_structured_output")
+    inputs = ModelRouteInputs(
+        task_complexity=cast(Any, _governor_complexity(routing)),
+        task_class=cast(
+            ModelTaskClass | None,
+            _literal("task_class", tuple(str(arg) for arg in get_args(ModelTaskClass))),
+        ),
+        risk=cast(Any, spec.risk.value),
+        reasoning_needs=cast(Any, _literal("reasoning_needs", ("none", "light", "deep"))),
+        context_size=_number("context_size", int),
+        needs_tool_support=_flag("needs_tool_support"),
+        needs_structured_output=True if structured is None else structured,
+        max_latency_ms=_number("max_latency_ms", int),
+        max_cost=_number("max_cost", float),
+        budget_remaining={"calls": max(0, calls_remaining)},
+        allow_challenger=bool(_flag("allow_challenger")),
+    )
+    return inputs, tuple(sorted(set(invalid)))
+
+
+def _model_route_scorecards(
+    root: Path, spec: Any, inputs: Any
+) -> tuple[dict[tuple[str, str], Any] | dict[tuple[str, str, Any], Any] | None, str | None]:
+    """Load §34 scorecards only when the spec declares an evaluations JSONL.
+
+    The path must resolve inside ``root`` (``AF-PATH-OUTSIDE-ROOT``); when no
+    store is declared the router runs with ``scorecards=None`` and marks the
+    evidence missing rather than fabricating quality history.
+    """
+    from apiforge.contracts.model_routing import ModelEvaluation
+    from apiforge.runtime.model_scorecard import aggregate_scorecards
+
+    declared = next(
+        (
+            str(item).partition("=")[2]
+            for item in spec.inputs
+            if str(item).partition("=")[0] == "model_route_evaluations"
+            and str(item).partition("=")[1]
+        ),
+        None,
+    )
+    if declared is None:
+        return None, None
+    resolved_root = root.resolve()
+    path = Path(declared)
+    resolved = path.resolve() if path.is_absolute() else (resolved_root / path).resolve()
+    if resolved != resolved_root and resolved_root not in resolved.parents:
+        return None, "AF-PATH-OUTSIDE-ROOT"
+    try:
+        rows = [
+            ModelEvaluation.model_validate(json.loads(line))
+            for line in resolved.read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        ]
+    except (OSError, ValueError):
+        return None, "AF-ROUTE-EVALUATIONS-INVALID"
+    return aggregate_scorecards(rows), None
+
+
+def _model_route_shadow(
+    root: Path,
+    spec: Any,
+    routing: RoutingDecision,
+    adapter: ModelAdapter,
+    *,
+    calls_used: int,
+    max_calls: int,
+    timestamp: str,
+) -> Any:
+    """§33 model routing as a shadow observer inside the governed run.
+
+    The declared adapter/provider path remains authoritative: the candidate
+    router is evaluated through ``route_model_shadow`` (which appends the
+    §29 ``ShadowRecord`` to the control-plane ledger) and the verdict is
+    returned as a ``ModelRouteShadowReceipt``. While ``control_plane.yaml``
+    keeps ``model_routing`` in shadow mode the receipt can never alter
+    execution — ``governing`` stays ``legacy``. A router/policy failure is
+    recorded on the receipt instead of taking the run down.
+    """
+    from apiforge.contracts.model_routing import (
+        ModelRouteDecision,
+        ModelRouteShadowReceipt,
+    )
+    from apiforge.runtime.model_router import load_model_router_policy, route_model_shadow
+
+    inputs, invalid = _model_route_inputs(spec, routing, calls_remaining=max_calls - calls_used)
+    scorecards, scorecard_code = _model_route_scorecards(root, spec, inputs)
+    legacy: dict[str, object] = {"selected": adapter.name, "source": "declared_adapter"}
+    stamp = timestamp
+    if scorecard_code is not None:
+        invalid = tuple(sorted(set(invalid) | {"model_route_evaluations"}))
+    try:
+        rules = load_model_router_policy()
+        result = route_model_shadow(
+            root,
+            inputs,
+            rules["candidates"],
+            scorecards,
+            legacy_decision=legacy,
+            policy=rules,
+            now=datetime.fromisoformat(timestamp),
+        )
+    except Exception as exc:  # noqa: BLE001 — the shadow observer never takes the run down
+        code = getattr(exc, "code", None) or "AF-ROUTE-POLICY-INVALID"
+        return ModelRouteShadowReceipt(
+            inputs=inputs,
+            legacy_decision=legacy,
+            code=str(code),
+            invalid_inputs=tuple(invalid),
+            unresolved=tuple(sorted(set(invalid) | {"router_policy"})),
+            recorded_at=stamp,
+        )
+    candidate = ModelRouteDecision.model_validate(result["candidate"])
+    control = cast(dict[str, object], result["control"])
+    unresolved = set(candidate.unresolved) | set(invalid)
+    if scorecard_code is not None:
+        unresolved.add(scorecard_code)
+    return ModelRouteShadowReceipt(
+        mode=cast(Any, control.get("mode")),
+        governing=cast(Any, control.get("governing")),
+        inputs=inputs,
+        legacy_decision=legacy,
+        candidate=candidate,
+        control=control,
+        code=candidate.code or scorecard_code,
+        invalid_inputs=tuple(invalid),
+        unresolved=tuple(sorted(unresolved)),
+        recorded_at=stamp,
     )
 
 
@@ -2020,7 +2208,34 @@ async def execute_run(
             [receipt.model_dump(mode="json") for receipt in recovery_receipts],
         )
     recovery = recovery_decisions[0] if recovery_decisions else None
+    # §33 model routing runs in shadow inside every governed run: the declared
+    # adapter decision stays authoritative while the candidate router's verdict
+    # is recorded through the §29 control plane and persisted as a receipt.
+    model_route_receipt = _model_route_shadow(
+        root,
+        spec,
+        routing,
+        adapter,
+        calls_used=control.get(control_run.run_id).calls_used,
+        max_calls=policy.max_calls,
+        timestamp=timestamp,
+    )
+    storage.json("model-route-shadow.json", model_route_receipt.model_dump(mode="json"))
+    storage.event(
+        TrajectoryEvent(
+            event_id=stable_id("event", {"run": run_id, "event": "model_route_shadow"}),
+            run_id=run_id,
+            event="model_route_shadow",
+            actor="api-orchestrator",
+            subject=model_route_receipt.route,
+            payload=model_route_receipt.model_dump(mode="json"),
+            created_at=timestamp,
+        )
+    )
     governance_unresolved = set(governance_context.unresolved)
+    governance_unresolved.update(model_route_receipt.unresolved)
+    if model_route_receipt.code:
+        governance_unresolved.add(model_route_receipt.code)
     for decision in recovery_decisions:
         governance_unresolved.update(decision.unresolved)
         if decision.code:
@@ -2227,6 +2442,7 @@ async def execute_run(
             "shadow": (
                 shadow_decision.model_dump(mode="json") if shadow_decision is not None else None
             ),
+            "model_route_shadow": model_route_receipt.model_dump(mode="json"),
             "critic_required": critic_required,
             "critic_findings": critic,
             "debate_reasons": reasons,
@@ -2285,6 +2501,7 @@ async def execute_run(
         "recovery_receipts": [receipt.model_dump(mode="json") for receipt in recovery_receipts],
         "role_context": role_summary(role_plan) if role_plan is not None else None,
         "shadow": shadow_decision.model_dump(mode="json") if shadow_decision is not None else None,
+        "model_route_shadow": model_route_receipt.model_dump(mode="json"),
         "unresolved": {
             "routing": list(routing.unresolved),
             "governance": list(governance_context.unresolved),

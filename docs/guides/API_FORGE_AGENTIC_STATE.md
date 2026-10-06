@@ -177,6 +177,19 @@ a small synthetic benchmark refuses `AF-ROUTE-PROMOTION-EVIDENCE`.
 in the existing `model_routing` Decision Plane route; candidate output remains
 non-authoritative while the route is `shadow`.
 
+The same shadow evaluation now runs inside every governed `execute_run`: the
+supervisor derives `ModelRouteInputs` strictly from declared run data
+(`model_route_*` spec inputs, spec risk, the risk-complexity complexity, the
+remaining call budget and the `AgentArtifact/v1` structured-output contract —
+nothing inferred from task text), feeds §34 scorecards only when the spec
+declares a `model_route_evaluations` JSONL inside the project root, and
+persists a `ModelRouteShadowReceipt` (`model-route-shadow.json`, a
+`model_route_shadow` trajectory event, `summary.json` and the return payload)
+alongside the §29 ledger row. `governing` stays `legacy`: the declared adapter
+remains authoritative while the route is `shadow`. Rejected `model_route_*`
+values land in `invalid_inputs`; a router/policy failure is recorded on the
+receipt instead of taking the run down.
+
 `knowledge adaptive` climbs the §36 ladder only as far as needed: `L0` exact →
 `L1` lexical (`knowledge/retrieval.py`) → `L2` structural graph refs → `L3`
 hybrid semantic → `L4` reranker over merged candidates. L3 runs only when a

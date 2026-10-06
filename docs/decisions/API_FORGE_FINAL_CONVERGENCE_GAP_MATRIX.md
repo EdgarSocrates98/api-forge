@@ -63,3 +63,16 @@ to unify, `INTEGRATE` = exists but not in the normal runtime path,
   Receipts persist in `recovery-receipts.json`, the governance context and
   summary; `resume_existing_run` runs the same executor; depth is bounded
   at one (`AF-GOV-RECOVERY-DEPTH` skipped receipts).
+- **Phase 4 (row 4) — DONE locally.** `execute_run` now evaluates the §33
+  candidate router through `route_model_shadow` on every governed run.
+  `ModelRouteInputs` derives only from declared run data — `model_route_*`
+  spec inputs, spec risk, the risk-complexity complexity, the remaining call
+  budget and the `AgentArtifact/v1` structured-output contract; undeclared
+  fields stay `None` and land in `unresolved`. Scorecards load only from a
+  declared `model_route_evaluations` JSONL confined to the project root
+  (`AF-PATH-OUTSIDE-ROOT`, `AF-ROUTE-EVALUATIONS-INVALID`). The typed
+  `ModelRouteShadowReceipt/v1` persists in `model-route-shadow.json`, a
+  `model_route_shadow` trajectory event, `summary.json` and the return
+  payload; the §29 `ShadowRecord` lands in the control-plane ledger.
+  `governing` stays `legacy` — the declared adapter remains authoritative.
+  Commit pending.

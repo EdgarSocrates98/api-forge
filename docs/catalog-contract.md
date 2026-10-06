@@ -627,6 +627,7 @@ carry `payload_bytes: 0` so `economy report` totals are unchanged.
 | `AF-ROUTE-POLICY-INVALID` | `rules/model_router.yaml` (or `--policy`) schema unexpected; unlock: align `version: 1` |
 | `AF-ROUTE-NO-ELIGIBLE-MODEL` | every candidate failed a declared constraint; `ranked[].reasons` names each refusal |
 | `AF-ROUTE-PROMOTION-EVIDENCE` | `route promote` without a scorecard reaching min_evaluations + quality_floor; a small synthetic benchmark never promotes |
+| `AF-ROUTE-EVALUATIONS-INVALID` | declared `model_route_evaluations` spec input does not parse as `ModelEvaluation` JSONL; the shadow route records it and keeps legacy governing |
 | `AF-EVALS-ECONOMY-BASELINE-MISSING` | corpus case has no recorded baseline; unlock: `apiforge evals economy --record-baseline` |
 | `AF-EVALS-ECONOMY-BASELINE-STALE` | fixture digest differs from the recorded baseline; unlock: re-record and commit the baseline |
 | `AF-CONTEXT-QUALITY-CAPSULE` | `context quality --capsule` is missing, unreadable or not a `ContextCapsule/v1` payload; unlock: record it with `context capsule ... > capsule.json` |

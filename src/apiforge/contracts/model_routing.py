@@ -6,7 +6,11 @@ from typing import Literal
 
 from pydantic import Field
 
-from apiforge.contracts.agentic_governance import DecisionRisk, GovernorComplexity
+from apiforge.contracts.agentic_governance import (
+    ControlPlaneMode,
+    DecisionRisk,
+    GovernorComplexity,
+)
 from apiforge.contracts.base import VersionedContract
 
 RoutingKind = Literal["capability", "agent", "model"]
@@ -116,6 +120,34 @@ class ModelRouteDecision(VersionedContract):
     unresolved: tuple[str, ...] = ()
 
 
+class ModelRouteShadowReceipt(VersionedContract):
+    """§33/§29 run-scoped proof the candidate router ran without governing.
+
+    ``route_model_shadow`` also appends the §29 ``ShadowRecord`` to the
+    control-plane ledger; this receipt binds that observation to the run:
+    declared inputs, the candidate decision, the legacy decision that kept
+    governing and the control-plane verdict. ``invalid_inputs`` records
+    ``model_route_*`` spec values that failed validation — rejected, never
+    guessed. ``code`` carries the router refusal when no candidate survived
+    or the policy could not be loaded.
+    """
+
+    schema: Literal["apiforge/model-route-shadow-receipt/v1"] = (
+        "apiforge/model-route-shadow-receipt/v1"  # type: ignore[assignment]
+    )
+    route: Literal["model_routing"] = "model_routing"
+    mode: ControlPlaneMode | None = None
+    governing: Literal["legacy", "candidate", "none"] | None = None
+    inputs: ModelRouteInputs
+    legacy_decision: dict[str, object] = Field(default_factory=dict)
+    candidate: ModelRouteDecision | None = None
+    control: dict[str, object] | None = None
+    code: str | None = None
+    invalid_inputs: tuple[str, ...] = ()
+    unresolved: tuple[str, ...] = ()
+    recorded_at: str = Field(min_length=1)
+
+
 class RetrievalStep(VersionedContract):
     """One level attempted inside an adaptive retrieval ladder.
 
@@ -177,6 +209,7 @@ __all__ = [
     "ModelEvaluation",
     "ModelRouteDecision",
     "ModelRouteInputs",
+    "ModelRouteShadowReceipt",
     "ModelScorecard",
     "ModelTaskClass",
     "QueryRewrite",

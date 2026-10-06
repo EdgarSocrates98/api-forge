@@ -367,6 +367,31 @@ class PromotionDecision(VersionedContract):
     reason: str = ""
 
 
+class RouteTransitionReceipt(VersionedContract):
+    """§29-§31 canonical receipt for every promote/demote attempt.
+
+    One row per transition evaluation — allowed or refused — appended to
+    ``control-plane/transitions.jsonl``; the declared yaml and ``modes.jsonl``
+    keep their existing roles, the receipt is the auditable *why*.
+    """
+
+    schema: Literal["apiforge/route-transition-receipt/v1"] = "apiforge/route-transition-receipt/v1"  # type: ignore[assignment]
+    route: str = Field(min_length=1)
+    mode: ControlPlaneMode
+    previous: ControlPlaneMode
+    candidate: str = Field(min_length=1)
+    governing: Literal["legacy", "candidate", "none"]
+    evidence: dict[str, object] = Field(default_factory=dict)
+    policy: str = Field(min_length=1)
+    approval: str | None = None
+    fallback: str | None = None
+    rollback: bool = False
+    allowed: bool = False
+    code: str | None = None
+    reason: str = ""
+    recorded_at: str = Field(min_length=1)
+
+
 class FallbackDecision(VersionedContract):
     """§32 every active route needs a declared fallback when degraded."""
 
@@ -428,6 +453,7 @@ __all__ = [
     "RecoveryOwner",
     "RecoveryReceipt",
     "RouteDecision",
+    "RouteTransitionReceipt",
     "RunGovernanceContext",
     "ShadowRecord",
     "StopDecision",

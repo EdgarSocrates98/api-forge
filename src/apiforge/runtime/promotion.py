@@ -1,4 +1,11 @@
-"""Evidence-gated promotion and evolution policy loading."""
+"""Evidence-gated promotion and evolution policy loading.
+
+Scope note: this is the capability-evolution ``PromotionGate`` — it decides
+whether a *capability* may be adopted. The route lifecycle
+(shadow/assisted/active over ``control_plane.yaml``) is owned by
+``apiforge.governance.control_plane``; see
+``docs/decisions/API_FORGE_CONTROL_PLANE_MIGRATION_MAP.md``.
+"""
 
 from __future__ import annotations
 

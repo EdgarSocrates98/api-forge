@@ -31,6 +31,7 @@ from apiforge.contracts.agentic_governance import (
     RecoveryDecision,
     RecoveryReceipt,
     RouteDecision,
+    RouteTransitionReceipt,
     ShadowRecord,
     StopDecision,
 )
@@ -454,6 +455,7 @@ __all__ = [
     "RoleContextQuality",
     "RoleContextTelemetry",
     "RouteDecision",
+    "RouteTransitionReceipt",
     "RoutingDecision",
     "RoutingEvolution",
     "RoutingPlan",

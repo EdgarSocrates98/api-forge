@@ -25,6 +25,7 @@ from apiforge.contracts.agentic_governance import (
     PromotionDecision,
     PromotionEvidence,
     RouteDecision,
+    RouteTransitionReceipt,
     ShadowRecord,
 )
 from apiforge.economy.run_ledger import EconomyError
@@ -33,6 +34,7 @@ RULES = Path(__file__).resolve().parent.parent / "rules" / "control_plane.yaml"
 _DIR = Path(".apiforge") / "control-plane"
 _MODES = "modes.jsonl"
 _SHADOW = "shadow.jsonl"
+_TRANSITIONS = "transitions.jsonl"
 
 ROUTE_UNKNOWN = "AF-GOV-ROUTE-UNKNOWN"
 TRANSITION_INVALID = "AF-GOV-MODE-TRANSITION-INVALID"
@@ -141,6 +143,45 @@ def record_shadow(root: Path, record: ShadowRecord) -> dict[str, object]:
 def shadow_records(root: Path, route: str | None = None) -> list[ShadowRecord]:
     rows = _rows(_directory(root) / _SHADOW, ShadowRecord)
     return [row for row in rows if route is None or row.route == route]
+
+
+def transition_receipts(root: Path, route: str | None = None) -> list[RouteTransitionReceipt]:
+    """Canonical transition receipts — one row per promote/demote attempt."""
+    rows = _rows(_directory(root) / _TRANSITIONS, RouteTransitionReceipt)
+    return [row for row in rows if route is None or row.route == route]
+
+
+def _record_transition(
+    root: Path,
+    *,
+    route: ControlPlaneRoute,
+    previous: ControlPlaneMode,
+    target: ControlPlaneMode,
+    policy: str,
+    evidence: PromotionEvidence | None,
+    approval: str | None,
+    allowed: bool,
+    code: str | None,
+    reason: str,
+    stamp: str,
+) -> None:
+    receipt = RouteTransitionReceipt(
+        route=route.route,
+        mode=target,
+        previous=previous,
+        candidate=route.candidate,
+        governing="candidate" if target == "active" else "legacy",
+        evidence=evidence.model_dump(mode="json") if evidence is not None else {},
+        policy=policy,
+        approval=approval,
+        fallback=route.fallback_route,
+        rollback=bool(evidence.rollback_exists) if evidence is not None else True,
+        allowed=allowed,
+        code=code,
+        reason=reason,
+        recorded_at=stamp,
+    )
+    _append(root, _TRANSITIONS, receipt.model_dump(mode="json"))
 
 
 def detect_triggers(
@@ -272,8 +313,49 @@ def promote(
             unlock="pass a PromotionEvidence whose route matches the target route",
         )
     route = route_status(root, route_name, routes=routes)
+    stamp = (now or datetime.now(UTC)).isoformat()
     target: ControlPlaneMode = "assisted" if route.mode == "shadow" else "active"
+    policy = f"promotion:{target}"
+
+    def _refused(code: str, reason: str) -> PromotionDecision:
+        _record_transition(
+            root,
+            route=route,
+            previous=route.mode,
+            target=target,
+            policy=policy,
+            evidence=evidence,
+            approval=evidence.approval_id,
+            allowed=False,
+            code=code,
+            reason=reason,
+            stamp=stamp,
+        )
+        return PromotionDecision(
+            route=route_name,
+            from_mode=route.mode,
+            to_mode=target,
+            allowed=False,
+            missing=tuple(missing),
+            code=code,
+            reason=reason,
+        )
+
     if route.mode == "active":
+        target = "active"
+        _record_transition(
+            root,
+            route=route,
+            previous=route.mode,
+            target=target,
+            policy="promotion:active",
+            evidence=evidence,
+            approval=evidence.approval_id,
+            allowed=False,
+            code=TRANSITION_INVALID,
+            reason="route is already active; no forward step exists",
+            stamp=stamp,
+        )
         return PromotionDecision(
             route=route_name,
             from_mode="active",
@@ -298,14 +380,9 @@ def promote(
         if evidence.approval_id is None:
             missing.append("approval_id")
     if missing:
-        return PromotionDecision(
-            route=route_name,
-            from_mode=route.mode,
-            to_mode=target,
-            allowed=False,
-            missing=tuple(missing),
-            code=PROMOTION_INCOMPLETE,
-            reason=f"promotion requirements unmet: {', '.join(missing)}",
+        return _refused(
+            PROMOTION_INCOMPLETE,
+            f"promotion requirements unmet: {', '.join(missing)}",
         )
     if target == "active":
         approved = (
@@ -314,16 +391,10 @@ def promote(
             and approval.gate_id == evidence.approval_id
         )
         if not approved:
-            return PromotionDecision(
-                route=route_name,
-                from_mode=route.mode,
-                to_mode="active",
-                allowed=False,
-                code=PROMOTION_NOT_APPROVED,
-                reason="active promotion requires an approved ApprovalGate "
-                "matching evidence.approval_id",
+            return _refused(
+                PROMOTION_NOT_APPROVED,
+                "active promotion requires an approved ApprovalGate matching evidence.approval_id",
             )
-    stamp = (now or datetime.now(UTC)).isoformat()
     row = _ModeRow(
         route=route.route,
         mode=target,
@@ -334,6 +405,19 @@ def promote(
         promotion_approval_id=evidence.approval_id,
     )
     _append(root, _MODES, row.model_dump(mode="json"))
+    _record_transition(
+        root,
+        route=route,
+        previous=route.mode,
+        target=target,
+        policy=policy,
+        evidence=evidence,
+        approval=evidence.approval_id,
+        allowed=True,
+        code=None,
+        reason=f"route promoted {route.mode} -> {target}",
+        stamp=stamp,
+    )
     return PromotionDecision(
         route=route_name,
         from_mode=route.mode,
@@ -367,6 +451,19 @@ def demote(
         promotion_approval_id=None,
     )
     _append(root, _MODES, row.model_dump(mode="json"))
+    _record_transition(
+        root,
+        route=route,
+        previous=route.mode,
+        target=previous,
+        policy="demotion",
+        evidence=None,
+        approval=None,
+        allowed=True,
+        code=None,
+        reason=f"route demoted {route.mode} -> {previous} (safe direction)",
+        stamp=stamp,
+    )
     return route_status(root, route_name, routes=routes)
 
 
@@ -387,4 +484,5 @@ __all__ = [
     "route_status",
     "select_fallback",
     "shadow_records",
+    "transition_receipts",
 ]

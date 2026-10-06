@@ -16,7 +16,11 @@ routes:
   - route: recovery
     mode: shadow
     candidate: recovery-ladder-v1
-    legacy: supervisor-default-retry
+    # incumbent is the scheduler-canonical path: governance/recovery
+    # classify_failure + rules/recovery_policy.yaml, executed by the
+    # supervisor with RecoveryReceipt/v1 proofs — the supervisor never
+    # defaults to retry.
+    legacy: scheduler-canonical-recovery
     fallback_route: escalate_to_human
   - route: context_selection
     mode: shadow

@@ -1,4 +1,10 @@
-"""Persistent AgentOps control plane for bounded local/CI execution."""
+"""Persistent AgentOps control plane for bounded local/CI execution.
+
+Scope note: this is the *execution* plane — steps, calls and budgets per run.
+The *decision* plane (route lifecycle, shadow records, transition receipts)
+is owned by ``apiforge.governance.control_plane``; see
+``docs/decisions/API_FORGE_CONTROL_PLANE_MIGRATION_MAP.md``.
+"""
 
 from __future__ import annotations
 

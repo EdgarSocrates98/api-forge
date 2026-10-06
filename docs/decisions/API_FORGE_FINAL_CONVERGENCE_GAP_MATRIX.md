@@ -75,4 +75,14 @@ to unify, `INTEGRATE` = exists but not in the normal runtime path,
   `model_route_shadow` trajectory event, `summary.json` and the return
   payload; the §29 `ShadowRecord` lands in the control-plane ledger.
   `governing` stays `legacy` — the declared adapter remains authoritative.
+  Commit `7990659`.
+- **Phase 5 (row 5) — DONE locally.** `governance.control_plane` confirmed as
+  the sole route-lifecycle authority; the overlap with `runtime.promotion`,
+  `runtime.shadow`, `runtime.scorecard_shadow` and `runtime.control` was
+  nominal, not duplicated decision authority — boundaries documented in
+  `docs/decisions/API_FORGE_CONTROL_PLANE_MIGRATION_MAP.md` and module
+  docstrings instead of deleting code (§31). Every promote/demote attempt
+  now emits a canonical `RouteTransitionReceipt/v1` into
+  `control-plane/transitions.jsonl`. The stale `recovery` row was corrected:
+  `legacy: scheduler-canonical-recovery` names the post-Phase-2 incumbent.
   Commit pending.

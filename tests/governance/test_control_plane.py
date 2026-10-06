@@ -19,6 +19,7 @@ from apiforge.governance.control_plane import (
     route_status,
     select_fallback,
     shadow_records,
+    transition_receipts,
 )
 
 
@@ -255,6 +256,52 @@ def test_demote_always_allowed(tmp_path: Path) -> None:
     assert again.mode == "shadow"
     floor = demote(tmp_path, "terminal", routes=routes)
     assert floor.mode == "shadow"
+
+
+def test_promotion_attempts_emit_canonical_receipts(tmp_path: Path) -> None:
+    """§32: every promote/demote attempt lands in transitions.jsonl."""
+    routes = _declared(tmp_path)
+    denied = promote(
+        tmp_path,
+        "model_routing",
+        _evidence("model_routing", evidence_complete=False),
+        routes=routes,
+    )
+    assert denied.allowed is False
+
+    receipts = transition_receipts(tmp_path, "model_routing")
+    assert len(receipts) == 1
+    refused = receipts[0]
+    assert refused.schema == "apiforge/route-transition-receipt/v1"
+    assert refused.previous == "shadow" and refused.mode == "assisted"
+    assert refused.allowed is False
+    assert refused.code == "AF-GOV-PROMOTION-INCOMPLETE"
+    assert refused.governing == "legacy"  # assisted keeps legacy authoritative
+    assert refused.policy == "promotion:assisted"
+    assert refused.candidate == "model-router-v1"
+    assert refused.fallback == "provider_descriptor"
+    assert refused.evidence["evidence_complete"] is False
+
+    allowed = promote(tmp_path, "model_routing", _evidence("model_routing"), routes=routes)
+    assert allowed.allowed is True
+    receipts = transition_receipts(tmp_path, "model_routing")
+    assert len(receipts) == 2
+    granted = receipts[-1]
+    assert granted.allowed is True and granted.code is None
+    assert granted.approval == "gate-1"
+    assert granted.rollback is True
+
+
+def test_demote_emits_receipt(tmp_path: Path) -> None:
+    routes = _declared(tmp_path)
+    demoted = demote(tmp_path, "terminal", routes=routes)
+    assert demoted.mode == "assisted"
+    receipts = transition_receipts(tmp_path, "terminal")
+    assert len(receipts) == 1
+    row = receipts[0]
+    assert row.previous == "active" and row.mode == "assisted"
+    assert row.allowed is True and row.policy == "demotion"
+    assert row.governing == "legacy"
 
 
 def test_shadow_record_roundtrip(tmp_path: Path) -> None:

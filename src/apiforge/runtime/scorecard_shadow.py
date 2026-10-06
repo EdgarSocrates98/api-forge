@@ -1,4 +1,10 @@
-"""Pure offline shadow comparison for scorecard-adaptive routing."""
+"""Pure offline shadow comparison for scorecard-adaptive routing.
+
+Scope note: this compares *capability routing orders* offline. The canonical
+route lifecycle and shadow records live in
+``apiforge.governance.control_plane``; see
+``docs/decisions/API_FORGE_CONTROL_PLANE_MIGRATION_MAP.md``.
+"""
 
 from __future__ import annotations
 

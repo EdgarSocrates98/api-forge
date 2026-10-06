@@ -155,6 +155,12 @@ decision-check` gate stays the admission boundary underneath.
   `AF-GOV-FALLBACK-MISSING` instead of continuing.
 
 `control demote` steps a route back — the safe direction never needs a gate.
+Every promote/demote attempt — allowed or refused — also appends a canonical
+`RouteTransitionReceipt` (`route`, `mode`, `previous`, `candidate`,
+`governing`, `evidence`, `policy`, `approval`, `fallback`, `rollback`,
+`reason`) to `control-plane/transitions.jsonl`; the concern boundaries with
+the same-named runtime helpers are recorded in
+`docs/decisions/API_FORGE_CONTROL_PLANE_MIGRATION_MAP.md`.
 
 ## Model routing, scorecards and adaptive retrieval (phase 6)
 

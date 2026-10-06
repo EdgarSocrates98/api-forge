@@ -4,6 +4,11 @@ Sampling is a pure function of the run id, so a replay makes the same
 choice. A sampled challenger runs only from calls left after the verification
 reserve; its artifact is stored under ``shadow/`` and compared with the
 primary, but it never enters the run's artifacts, gaps or status.
+
+Scope note: this is challenger *sampling*, not a decision-plane route. The
+canonical route shadow/assisted/active lifecycle lives in
+``apiforge.governance.control_plane``; see
+``docs/decisions/API_FORGE_CONTROL_PLANE_MIGRATION_MAP.md``.
 """
 
 from __future__ import annotations

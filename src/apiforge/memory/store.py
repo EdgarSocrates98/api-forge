@@ -368,11 +368,14 @@ def query_memory(root: Path, query: MemoryQuery) -> MemoryRetrievalResult:
     conflicts = detect_memory_conflicts(matches, query) if query.detect_conflicts else ()
     if conflicts:
         unresolved.extend(f"conflict:{item.conflict_id}:{item.outcome}" for item in conflicts)
-        if query.risk == "destructive":
-            conflict_ids = {item.memory_a_id for item in conflicts} | {
-                item.memory_b_id for item in conflicts
-            }
-            matches = [item for item in matches if item.memory_id not in conflict_ids]
+        excluded: set[str] = set()
+        for item in conflicts:
+            if item.admission_effect == "exclude_both":
+                excluded.update((item.memory_a_id, item.memory_b_id))
+            elif item.admission_effect == "admit_preferred" and item.conflicting_memory_id:
+                excluded.add(item.conflicting_memory_id)
+        if excluded:
+            matches = [item for item in matches if item.memory_id not in excluded]
     order = {score.memory_id: index for index, score in enumerate(rank_records(matches, query))}
     matches.sort(key=lambda item: order[item.memory_id])
     status = "ready"

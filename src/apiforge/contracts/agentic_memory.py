@@ -154,10 +154,19 @@ class MemoryOutcome(VersionedContract):
 
 
 MemoryConflictOutcome = Literal["prefer_a", "prefer_b", "quarantine", "review", "unresolved"]
+MemoryConflictAdmission = Literal["admit_preferred", "review_only", "exclude_both"]
 
 
 class MemoryConflict(VersionedContract):
-    """Deterministic contradiction between two applicable memory records."""
+    """Deterministic contradiction between two applicable memory records.
+
+    ``outcome`` is the detection verdict; ``admission_effect`` is what the
+    retriever is allowed to do with the pair. ``prefer_a``/``prefer_b`` name
+    the preferred record explicitly through ``preferred_memory_id`` and the
+    losing side through ``conflicting_memory_id`` — they never authorize a
+    destructive action, because ``risk=destructive`` collapses every
+    contradiction to ``quarantine`` before scoring is consulted.
+    """
 
     schema: Literal["apiforge/memory-conflict/v1"] = "apiforge/memory-conflict/v1"  # type: ignore[assignment]
     conflict_id: str = Field(pattern=r"^memory-conflict:[0-9a-f]{16}$")
@@ -166,6 +175,9 @@ class MemoryConflict(VersionedContract):
     outcome: MemoryConflictOutcome
     conflicting_paths: tuple[str, ...] = ()
     signals: dict[str, float] = Field(default_factory=dict)
+    preferred_memory_id: str | None = Field(default=None, pattern=r"^memory:[0-9a-f]{16}$")
+    conflicting_memory_id: str | None = Field(default=None, pattern=r"^memory:[0-9a-f]{16}$")
+    admission_effect: MemoryConflictAdmission | None = None
     reason: str = ""
     unresolved: tuple[str, ...] = ()
 
@@ -294,6 +306,7 @@ __all__ = [
     "Freshness",
     "MemoryCandidate",
     "MemoryConflict",
+    "MemoryConflictAdmission",
     "MemoryConflictOutcome",
     "MemoryInvalidation",
     "MemoryOutcome",

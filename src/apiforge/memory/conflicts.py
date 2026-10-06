@@ -114,14 +114,23 @@ def detect_memory_conflicts(
             continue
         left_score, left_signals = _score(left, query)
         right_score, right_signals = _score(right, query)
-        if abs(left_score - right_score) >= 0.15:
-            outcome = "prefer_a" if left_score > right_score else "prefer_b"
-            unresolved: tuple[str, ...] = ()
-        elif query.risk == "destructive":
+        preferred_id: str | None = None
+        conflicting_id: str | None = None
+        # Destructive risk quarantines before scoring is consulted: prefer_*
+        # is an advisory preference, never an authorization to destroy.
+        if query.risk == "destructive":
             outcome = "quarantine"
-            unresolved = ("destructive action requires conflict quarantine",)
+            admission_effect: str = "exclude_both"
+            unresolved: tuple[str, ...] = ("destructive action requires conflict quarantine",)
+        elif abs(left_score - right_score) >= 0.15:
+            outcome = "prefer_a" if left_score > right_score else "prefer_b"
+            admission_effect = "admit_preferred"
+            preferred_id = left.memory_id if left_score > right_score else right.memory_id
+            conflicting_id = right.memory_id if left_score > right_score else left.memory_id
+            unresolved = ()
         else:
             outcome = "review"
+            admission_effect = "review_only"
             unresolved = ("conflicting applicable memory requires review",)
         signals = {f"a_{key}": value for key, value in left_signals.items()} | {
             f"b_{key}": value for key, value in right_signals.items()
@@ -135,6 +144,9 @@ def detect_memory_conflicts(
                 outcome=outcome,  # type: ignore[arg-type]
                 conflicting_paths=paths,
                 signals=signals,
+                preferred_memory_id=preferred_id,
+                conflicting_memory_id=conflicting_id,
+                admission_effect=admission_effect,  # type: ignore[arg-type]
                 reason=f"applicable records disagree at {', '.join(paths)}",
                 unresolved=unresolved,
             )

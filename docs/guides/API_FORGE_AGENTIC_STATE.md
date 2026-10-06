@@ -40,7 +40,10 @@ terms never satisfy runtime constraints. Risk-aware `stale_handling` lets
 read-only retrieval include stale state, sensitive retrieval request review,
 and destructive retrieval exclude it. Tainted rows stay outside default
 context admission. Applicable trusted fresh contradictions return
-`MemoryConflict/v1` review/quarantine outcomes.
+`MemoryConflict/v1` review/quarantine outcomes; a strong evidence gap may
+yield advisory `prefer_*` (`admit_preferred` serves only the preferred row),
+but destructive risk always quarantines — `prefer_*` never authorizes
+destruction.
 
 ## The four different things people call "compaction"
 

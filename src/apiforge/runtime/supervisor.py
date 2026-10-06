@@ -6,7 +6,7 @@ import json
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, cast, get_args
+from typing import Any, Literal, cast, get_args
 
 from pydantic import TypeAdapter
 
@@ -41,7 +41,13 @@ from apiforge.contracts.routing import (
     RoutingRequest,
 )
 from apiforge.contracts.routing_evolution import PromotionGate
-from apiforge.contracts.selective import RoleContext, RoleContextPlan, ShadowDecision
+from apiforge.contracts.selective import (
+    ChallengerComparison,
+    ChallengerSide,
+    RoleContext,
+    RoleContextPlan,
+    ShadowDecision,
+)
 from apiforge.core.ids import stable_id
 from apiforge.core.models import JsonValue
 from apiforge.governance.gain import expected_gain
@@ -1443,11 +1449,112 @@ async def _authorized_invoke(adapter: ModelAdapter, request: AgentRequest) -> ob
     return await adapter.invoke(request)
 
 
-def _shadow_mode(spec: Any) -> str:
+def _shadow_mode(spec: Any) -> Literal["paired_ab", "capability_eval"]:
     for item in getattr(spec, "inputs", ()) or ():
         if str(item).strip() == "shadow_mode=capability_eval":
             return "capability_eval"
     return "paired_ab"
+
+
+def _challenger_comparison(
+    run_id: str,
+    task_id: str,
+    mode: Literal["paired_ab", "capability_eval"],
+    champion: AgentArtifact,
+    champion_response: Any,
+    challenger_name: str,
+    challenger_response: Any,
+    challenger_payload: dict[str, JsonValue],
+    agreement: bool | None,
+) -> ChallengerComparison:
+    """§53–58 receipt over observable fields; unobserved metrics stay ``None``.
+
+    ``champion_response``/``challenger_response`` are ``AgentResponse`` values —
+    token/latency/tool fields are only populated when the adapter reports them.
+    ``structured_correctness`` reuses the artifact guardrail check; ``tool_correctness``
+    is observable only when the challenger response reports tool calls at all.
+    """
+
+    def _side_fields(response: Any) -> dict[str, Any]:
+        return {
+            "input_tokens": getattr(response, "input_tokens", None),
+            "output_tokens": getattr(response, "output_tokens", None),
+            "duration_ms": getattr(response, "duration_ms", None),
+            "tool_calls": tuple(getattr(response, "tool_calls", ()) or ()),
+        }
+
+    champion_fields = _side_fields(champion_response)
+    challenger_fields = _side_fields(challenger_response)
+    champion_confidence = champion.confidence
+    challenger_confidence = _confidence(challenger_payload)
+    champion_tokens = champion_fields["input_tokens"]
+    challenger_tokens = challenger_fields["input_tokens"]
+    champion_latency = champion_fields["duration_ms"]
+    challenger_latency = challenger_fields["duration_ms"]
+    champion_tools = champion_fields["tool_calls"]
+    challenger_tools = challenger_fields["tool_calls"]
+
+    basis: list[str] = ["agreement"] if agreement is not None else []
+    if champion_confidence is not None and challenger_confidence is not None:
+        basis.append("quality")
+    if champion_latency is not None and challenger_latency is not None:
+        basis.append("latency")
+    if champion_tokens is not None and challenger_tokens is not None:
+        basis.append("tokens")
+    basis.append("structured_correctness")
+    if challenger_tools or champion_tools:
+        basis.append("tool_correctness")
+
+    return ChallengerComparison(
+        run_id=run_id,
+        task_id=task_id,
+        mode=mode,
+        champion=ChallengerSide(
+            capability=champion.capability,
+            artifact_id=champion.artifact_id,
+            recommendation=_recommendation(champion) or None,
+            confidence=champion_confidence,
+            facts=_strings(
+                champion.payload if isinstance(champion.payload, dict) else {},
+                "facts",
+            ),
+            evidence=champion.evidence,
+            **champion_fields,
+        ),
+        challenger=ChallengerSide(
+            capability=challenger_name,
+            recommendation=(
+                str(challenger_payload.get("recommendation"))
+                if challenger_payload.get("recommendation") is not None
+                else None
+            ),
+            confidence=challenger_confidence,
+            facts=_strings(challenger_payload, "facts"),
+            evidence=_strings(challenger_payload, "evidence"),
+            **challenger_fields,
+        ),
+        agreement=agreement,
+        quality_delta=(
+            round(challenger_confidence - champion_confidence, 6)
+            if champion_confidence is not None and challenger_confidence is not None
+            else None
+        ),
+        latency_delta_ms=(
+            challenger_latency - champion_latency
+            if champion_latency is not None and challenger_latency is not None
+            else None
+        ),
+        token_delta=(
+            challenger_tokens - champion_tokens
+            if champion_tokens is not None and challenger_tokens is not None
+            else None
+        ),
+        structured_correctness=not validate_agent_payload(challenger_payload),
+        tool_correctness=(
+            challenger_tools == champion_tools if (challenger_tools or champion_tools) else None
+        ),
+        basis=tuple(basis),
+    )
 
 
 async def _shadow(
@@ -1466,6 +1573,7 @@ async def _shadow(
     *,
     control: ControlPlane,
     control_run_id: str,
+    champion_response: Any = None,
 ) -> ShadowDecision:
     """Observational challenger run; never touches artifacts, gaps or status.
 
@@ -1545,11 +1653,39 @@ async def _shadow(
         if champion is not None
         else None
     )
+    comparison_ref: str | None = None
+    if champion is not None:
+        comparison = _challenger_comparison(
+            run_id,
+            spec.id,
+            mode,
+            champion,
+            champion_response,
+            name,
+            result.response,
+            payload,
+            agreement,
+        )
+        comparison_ref = f"challenger-comparison-{name}.json"
+        storage.json(comparison_ref, comparison.model_dump(mode="json"))
     storage.json(
         f"shadow-{name}.json",
-        {"capability": name, "payload": payload, "agreement": agreement, "primary": primary},
+        {
+            "capability": name,
+            "payload": payload,
+            "agreement": agreement,
+            "primary": primary,
+            "comparison_ref": comparison_ref,
+        },
     )
-    return decision.model_copy(update={"executed": True, "calls": 1, "agreement": agreement})
+    return decision.model_copy(
+        update={
+            "executed": True,
+            "calls": 1,
+            "agreement": agreement,
+            "comparison_ref": comparison_ref,
+        }
+    )
 
 
 async def execute_run(
@@ -2415,6 +2551,16 @@ async def execute_run(
             role_rows,
             control=control,
             control_run_id=control_run.run_id,
+            champion_response=next(
+                (
+                    item.response
+                    for item in results
+                    if item.invocation.capability == routing_plan.primary
+                    and item.error is None
+                    and item.response is not None
+                ),
+                None,
+            ),
         )
     economy_block = (
         _economy_block(

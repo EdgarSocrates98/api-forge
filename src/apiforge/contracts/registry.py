@@ -266,6 +266,8 @@ from apiforge.contracts.scorecard_routing import (
 from apiforge.contracts.scorecard_shadow import ScorecardShadowEvaluation
 from apiforge.contracts.selective import (
     AgentUniqueness,
+    ChallengerComparison,
+    ChallengerSide,
     ExpertiseSelection,
     PositionDelta,
     RefereePacket,
@@ -631,6 +633,8 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "PositionDelta/v1": PositionDelta,
     "RefereePacket/v1": RefereePacket,
     "ShadowDecision/v1": ShadowDecision,
+    "ChallengerSide/v1": ChallengerSide,
+    "ChallengerComparison/v1": ChallengerComparison,
     "AgentUniqueness/v1": AgentUniqueness,
     "TestSlice/v1": TestSlice,
     "ErrorSlice/v1": ErrorSlice,

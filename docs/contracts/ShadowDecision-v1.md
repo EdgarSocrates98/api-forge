@@ -9,6 +9,7 @@
 | `executed` / `challenger` / `calls` | Whether the first planned challenger ran, and how many calls it used |
 | `reason` | `shadow disabled`, `no challenger planned`, `run not sampled`, `AF-ECONOMY-SHADOW-BUDGET: ...` or `sampled within share` |
 | `agreement` | Challenger recommendation equals the primary's (null without a primary artifact) |
+| `comparison_ref` | Path to the persisted `ChallengerComparison/v1` receipt (null when no champion artifact exists to compare against) |
 
 The shadow artifact is stored as `shadow-<capability>.json`; it never enters
 the run's artifacts, gaps or final status.

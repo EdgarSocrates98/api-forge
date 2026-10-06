@@ -183,6 +183,21 @@ Every promote/demote attempt — allowed or refused — also appends a canonical
 the same-named runtime helpers are recorded in
 `docs/decisions/API_FORGE_CONTROL_PLANE_MIGRATION_MAP.md`.
 
+### Champion/challenger semantics (phase 9)
+
+The champion is the current route's primary; a challenger is selected by the
+scorecard lanes and **runs in shadow only** — it never competes for authority
+mid-run and never enters the run's artifacts, gaps or status. When a sampled
+challenger completes beside a healthy champion, the run persists a
+`ChallengerComparison/v1` receipt (`challenger-comparison-<capability>.json`,
+linked by `ShadowDecision.comparison_ref`) covering only observable fields:
+recommendation agreement, confidence delta, latency/token deltas when the
+adapter reports them, structured correctness and tool correctness. Metrics
+the runtime cannot observe (e.g. `cost_delta_usd`) stay `null` and out of
+`basis`. A challenger is not a fallback — fallbacks execute on failure to
+produce the authoritative result — and a single comparison never promotes:
+promotion stays a control-plane decision over accumulated evidence.
+
 ## Model routing, scorecards and adaptive retrieval (phase 6)
 
 The `model_routing` route declared in `rules/control_plane.yaml` is served by

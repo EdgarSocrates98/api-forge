@@ -139,6 +139,50 @@ class ShadowDecision(VersionedContract):
     calls: int = Field(default=0, ge=0)
     reason: str = ""
     agreement: bool | None = None
+    comparison_ref: str | None = None
+
+
+class ChallengerSide(VersionedContract):
+    """One side of a champion/challenger comparison; ``None`` = unobservable."""
+
+    schema: Literal["apiforge/challenger-side/v1"] = "apiforge/challenger-side/v1"  # type: ignore[assignment]
+    capability: str = Field(min_length=1)
+    artifact_id: str | None = None
+    recommendation: str | None = None
+    confidence: float | None = Field(default=None, ge=0, le=1)
+    facts: tuple[str, ...] = ()
+    evidence: tuple[str, ...] = ()
+    input_tokens: int | None = Field(default=None, ge=0)
+    output_tokens: int | None = Field(default=None, ge=0)
+    duration_ms: int | None = Field(default=None, ge=0)
+    tool_calls: tuple[str, ...] = ()
+
+
+class ChallengerComparison(VersionedContract):
+    """§53–58 receipt: champion vs challenger over observable fields only.
+
+    The challenger ran in shadow and never governs; this receipt records the
+    comparison — promotion remains a control-plane decision over accumulated
+    evidence, never implied by a single comparison. A challenger is not a
+    fallback: fallbacks execute on failure to produce the authoritative
+    result; challengers run beside a healthy champion to be observed.
+    """
+
+    schema: Literal["apiforge/challenger-comparison/v1"] = "apiforge/challenger-comparison/v1"  # type: ignore[assignment]
+    run_id: str
+    task_id: str
+    mode: Literal["paired_ab", "capability_eval"]
+    champion: ChallengerSide
+    challenger: ChallengerSide
+    agreement: bool | None = None
+    quality_delta: float | None = None
+    latency_delta_ms: int | None = None
+    token_delta: int | None = None
+    cost_delta_usd: float | None = None
+    structured_correctness: bool | None = None
+    tool_correctness: bool | None = None
+    governs: Literal[False] = False
+    basis: tuple[str, ...] = ()
 
 
 class AgentUniqueness(VersionedContract):
@@ -161,6 +205,8 @@ class AgentUniqueness(VersionedContract):
 
 __all__ = [
     "AgentUniqueness",
+    "ChallengerComparison",
+    "ChallengerSide",
     "ContextClass",
     "Disagreement",
     "ExpertisePick",

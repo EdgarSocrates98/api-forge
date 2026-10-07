@@ -76,13 +76,38 @@ _UPSTREAM_KEYS = ("provider", "run_id", "node", "item")
 # it is a contract change, not a judgement call. Matching is exact after normalization
 # (lowercase, ``-``/`` `` → ``_``), so ``plan_run`` stays a provenance key while ``plan``
 # is refused.
-_FORBIDDEN_KEYS = frozenset({
-    "action", "actions", "agent", "command", "commands", "directive", "directives",
-    "execute", "goal", "instruction", "instructions", "message", "messages",
-    "objective", "persona", "plan", "prompt", "prompts", "request", "role",
-    "route", "routes", "routing", "system", "task", "tasks", "tool_call",
-    "workflow",
-})
+_FORBIDDEN_KEYS = frozenset(
+    {
+        "action",
+        "actions",
+        "agent",
+        "command",
+        "commands",
+        "directive",
+        "directives",
+        "execute",
+        "goal",
+        "instruction",
+        "instructions",
+        "message",
+        "messages",
+        "objective",
+        "persona",
+        "plan",
+        "prompt",
+        "prompts",
+        "request",
+        "role",
+        "route",
+        "routes",
+        "routing",
+        "system",
+        "task",
+        "tasks",
+        "tool_call",
+        "workflow",
+    }
+)
 
 
 def _normalized_key(key: object) -> str:
@@ -122,8 +147,11 @@ def _check_upstream(facts: Sequence[Fact]) -> None:
                 f"non-'apiforge' source.extractor, an attrs.upstream provenance map "
                 f"and the upstream: / upstream. id/kind namespaces",
             )
-        missing = [key for key in _UPSTREAM_KEYS if not isinstance(upstream.get(key), str)
-                   or not upstream[key]]
+        missing = [
+            key
+            for key in _UPSTREAM_KEYS
+            if not isinstance(upstream.get(key), str) or not upstream[key]
+        ]
         if missing:
             raise AnalysisError(
                 "AF-UPSTREAM-UNMARKED",

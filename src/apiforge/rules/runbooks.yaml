@@ -1,0 +1,27 @@
+version: 1
+# Ordered autonomous loops. Each step names a dispatchable verb and the
+# autonomy class it runs under — the policy engine decides per step, the
+# mode decides what happens next (observe records, supervised halts on a
+# non-executed step, continuous records and continues).
+runbooks:
+  api-review:
+    description: >-
+      Static review loop over a project: discover, model, judge, route.
+    steps:
+      - {verb: "discover", class: read_only}
+      - {verb: "model build", class: read_only}
+      - {verb: "judge", class: read_only}
+      - {verb: "next-step", class: read_only}
+      - {verb: "evidence emit", class: local_reversible}
+  data-access-audit:
+    description: >-
+      Data-access sweep: Redis/Valkey call sites plus the index snapshot.
+    steps:
+      - {verb: "model redis", class: read_only}
+      - {verb: "rules list --area DATA", class: read_only}
+  perf-watch:
+    description: >-
+      Telemetry loop: ingest the export, compare against the baseline run.
+    steps:
+      - {verb: "model otel", class: read_only}
+      - {verb: "perf compare", class: read_only}

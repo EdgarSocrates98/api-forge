@@ -1,0 +1,4 @@
+id: expertise-no-trigger
+kind: expertise
+intent: hello there
+expect_packs: []

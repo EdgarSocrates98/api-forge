@@ -1,0 +1,1 @@
+T1: AgentSpan/v1 is closed, registered and rejects secret-like attribute keys.

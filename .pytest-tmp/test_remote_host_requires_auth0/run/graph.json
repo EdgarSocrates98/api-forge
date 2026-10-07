@@ -1,0 +1,15 @@
+{
+  "built_from": [
+    "case.json",
+    "api-ir.json",
+    "facts.json",
+    "findings.json"
+  ],
+  "edge_count": 29,
+  "edges_sha256": "95df328139ea17ebfbb9cf71db136231e97543ed9b59796cbe38eb40a18823e8",
+  "files": [],
+  "format": "jsonl",
+  "node_count": 28,
+  "nodes_sha256": "eddb45ebed14ebd9415d35bf32e88674fedae77a0499c82d9630916704ef2cb2",
+  "version": 1
+}

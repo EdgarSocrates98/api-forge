@@ -1,0 +1,6 @@
+openapi: 3.1.0
+info: {title: x, version: '1'}
+paths:
+  /orders:
+    get: {operationId: a, responses: {}}
+    GET: {operationId: b, responses: {}}

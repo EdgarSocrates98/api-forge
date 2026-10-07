@@ -1,0 +1,4 @@
+id: evidence-operation
+kind: evidence
+ref: evidence://operation/POST /payments
+expect_source: true

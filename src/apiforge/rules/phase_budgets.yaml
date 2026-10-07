@@ -1,0 +1,15 @@
+# Per-SDD-phase budgets (economy wave 8, prompt §104). Shares split the profile
+# envelope (provider_calls, context_bytes) across the SDD chain and must sum to
+# 1.0. Protected phases carry the safety invariants of §100: an overrun there is
+# reported, never cut.
+schema: apiforge/phase-budgets/v1
+phases:
+  - {phase: discover, share: 0.10}
+  - {phase: intent, share: 0.05}
+  - {phase: contract, share: 0.15, protected: true}
+  - {phase: architecture, share: 0.10}
+  - {phase: plan, share: 0.10}
+  - {phase: build, share: 0.20}
+  - {phase: verify, share: 0.15, protected: true}
+  - {phase: secure, share: 0.10, protected: true}
+  - {phase: ship, share: 0.05}

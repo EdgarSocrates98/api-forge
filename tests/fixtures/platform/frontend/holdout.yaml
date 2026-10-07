@@ -1,0 +1,4 @@
+vertical: frontend
+status: unresolved
+case: browser_accessibility_missing
+reason: browser runtime and accessibility evidence are not present

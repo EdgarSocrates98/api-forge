@@ -1,0 +1,2 @@
+T3: Catalog, contract docs, tests and SDD hashes preserve the offline evidence
+boundary and unresolved exporter scope.

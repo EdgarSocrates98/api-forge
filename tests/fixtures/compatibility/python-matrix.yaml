@@ -1,0 +1,6 @@
+ecosystem: python
+observed:
+  - version: '3.12'
+    state: passed
+unresolved:
+  - '3.13'

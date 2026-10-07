@@ -1,0 +1,29 @@
+{
+  "base_sha": "d9ec062068c6c86b90aae88a64eef718a972cfe3",
+  "bundle_sha256": "5bc0bb4baae08b1c605502abe4be2425a99fbdf082df866796759c724639f1b4",
+  "check_conclusions": [
+    "success",
+    "success",
+    "success"
+  ],
+  "check_names": [
+    "Validate project",
+    "Validate API/Git/CI replay control plane",
+    "Validate project"
+  ],
+  "head_sha": "b111d26b4e8f77b6a6f50c43d063d26e354f2494",
+  "limitations": [
+    "GitHub adapter does not merge, push, dispatch or deploy",
+    "provider payloads are observations, not execution proof"
+  ],
+  "mutation_allowed": false,
+  "observed_at": "2026-09-23T00:54:33.695758+00:00",
+  "provider": "github",
+  "read_only": true,
+  "repository": "EdgarSocrates98/api-forge",
+  "schema_version": "af-change-collection-receipt/1",
+  "source_hashes": [
+    "07723efa372a52c0469803ce0350656a5498b321dbea34bc1631d1b29483334d"
+  ],
+  "version": 1
+}

@@ -1,0 +1,13 @@
+sources:
+  - name: SQS dead-letter queues
+    url: https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-dead-letter-queues.html
+    authority: aws-docs
+    verified: "2026-09-21"
+  - name: SNS server-side encryption
+    url: https://docs.aws.amazon.com/sns/latest/dg/sns-server-side-encryption.html
+    authority: aws-docs
+    verified: "2026-09-21"
+  - name: EventBridge rules
+    url: https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-rules.html
+    authority: aws-docs
+    verified: "2026-09-21"

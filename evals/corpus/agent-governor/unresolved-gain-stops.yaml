@@ -1,0 +1,15 @@
+# An unmeasurable gain cannot justify continuing — STOP fails closed.
+id: unresolved-gain-stops
+stop:
+  action: spawn_agent
+  signals: {}
+  threshold: 0.33
+expect:
+  stop_decision: stop
+  stop_code: AF-GOV-GAIN-UNRESOLVED
+loop:
+  strategies: []
+  window: 5
+  max_repeats: 2
+expect:
+  blocked: false

@@ -1,0 +1,19 @@
+id: risk-and-unresolved
+submit:
+  task_id: gated-eval
+  capability_id: api.analyze
+  risk: external_mutation
+  refuse: AF-FORGE-RISK-GATE
+setup:
+  submits:
+    - {task_id: lonely-task, capability_id: api.analyze, intent: "no governed link"}
+result:
+  task_id: lonely-task
+  status: unresolved
+  gaps: ["attach"]
+evidence:
+  task_id: lonely-task
+  unresolved: ["no governed task attached"]
+health:
+  state: ok
+  tasks_by_state: {accepted: 1}

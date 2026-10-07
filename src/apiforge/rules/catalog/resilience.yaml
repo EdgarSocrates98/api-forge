@@ -1,0 +1,119 @@
+area: PERF
+rules:
+  - id: AF-PERF-101
+    title: "HTTP call site without a visible timeout"
+    severity: high
+    rationale: >
+      A blocking call with no timeout inherits the TCP defaults — a hung
+      dependency holds the worker until the OS gives up, which is the
+      classic pool-exhaustion cascade. The rule fires only on call sites
+      where no timeout is visible in the surrounding lines.
+    remediation: "Pass an explicit timeout (connect + read where the client splits them) sized under the caller's SLO."
+    reference: "https://docs.python-requests.org/en/latest/user/advanced/#timeouts"
+    runtime_scope: null
+    check:
+      kind: resilience.http_call
+      path: measures.has_timeout
+      op: eq
+      value: false
+  - id: AF-PERF-102
+    title: "Retry without backoff"
+    severity: medium
+    rationale: >
+      Retrying immediately turns a struggling dependency into a retry
+      storm; every retry lands on a service that has not recovered.
+    remediation: "Use exponential backoff with a capped max wait between attempts."
+    reference: "https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/"
+    runtime_scope: null
+    check:
+      kind: resilience.retry
+      path: measures.has_backoff
+      op: eq
+      value: false
+  - id: AF-PERF-103
+    title: "Retry without jitter"
+    severity: low
+    rationale: >
+      Even with backoff, synchronized retries herd: every client retries at
+      the same computed instant and re-collides. Jitter decorrelates them.
+    remediation: "Add full or decorrelated jitter to the backoff schedule."
+    reference: "https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/"
+    runtime_scope: null
+    check:
+      kind: resilience.retry
+      path: measures.has_jitter
+      op: eq
+      value: false
+  - id: AF-PERF-104
+    title: "Retry wrapping a mutating call"
+    severity: high
+    rationale: >
+      Retrying a write whose effect already landed produces duplicates
+      unless the operation is idempotent — the pattern match cannot see an
+      idempotency key, so the finding names the retry site to confirm.
+    remediation: "Retry mutating calls only with an idempotency key, or make the retry idempotent by checking state first."
+    reference: "https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/"
+    runtime_scope: null
+    check:
+      kind: resilience.retry
+      path: measures.mutating_target
+      op: eq
+      value: true
+  - id: AF-PERF-105
+    title: "No circuit breaker declared in the project"
+    severity: medium
+    rationale: >
+      Without a breaker, every caller keeps paying full latency to a dead
+      dependency. Absence is measured as a project-level scan result —
+      the blind spot is named when the scan saw nothing to scan.
+    remediation: "Introduce a circuit breaker (resilience4j, pybreaker, gobreaker, Polly) around dependency calls."
+    reference: "https://martinfowler.com/bliki/CircuitBreaker.html"
+    runtime_scope: null
+    check:
+      kind: resilience.summary
+      path: measures.circuit_breaker_gap
+      op: eq
+      value: 1
+  - id: AF-PERF-106
+    title: "Connection pool usage without a visible bound"
+    severity: medium
+    rationale: >
+      An unbounded pool exhausts memory or the database under load; the
+      bound is the resilience mechanism, not a tuning detail.
+    remediation: "Declare max pool size and queueing behavior for every pooled resource."
+    reference: "https://docs.python.org/3/library/queue.html"
+    runtime_scope: null
+    check:
+      kind: resilience.pool
+      path: measures.bounded
+      op: eq
+      value: false
+  - id: AF-PERF-107
+    title: "No graceful shutdown hook declared in the project"
+    severity: medium
+    rationale: >
+      In-flight requests and buffered writes die with the process; the
+      shutdown hook is what lets drain happen before exit.
+    remediation: "Register a shutdown hook (@PreDestroy, signal handler, defer Close, atexit) that drains in-flight work."
+    reference: "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/"
+    runtime_scope: null
+    check:
+      kind: resilience.summary
+      path: measures.graceful_shutdown_gap
+      op: eq
+      value: 1
+  - id: AF-PERF-108
+    title: "No idempotency mechanism declared in the project"
+    severity: medium
+    rationale: >
+      Retries and at-least-once delivery mean every mutating operation
+      will eventually arrive twice; without a dedup mechanism the second
+      arrival mutates again.
+    remediation: "Add idempotency keys or a deduplication mechanism on mutating operations."
+    reference: "https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/"
+    runtime_scope: null
+    check:
+      kind: resilience.summary
+      path: measures.idempotency_gap
+      op: eq
+      value: 1

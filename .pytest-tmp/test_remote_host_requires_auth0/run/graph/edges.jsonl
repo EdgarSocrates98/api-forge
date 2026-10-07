@@ -1,0 +1,29 @@
+{"from_id":"case:case:498d9a24303a0754","kind":"derived_from","props":{},"to_id":"contract:12f6f441b9de279b","version":1}
+{"from_id":"case:case:498d9a24303a0754","kind":"derived_from","props":{},"to_id":"project:tests\\fixtures\\fastapi_orders","version":1}
+{"from_id":"finding:0e7695af40f71d5b","kind":"backed_by","props":{},"to_id":"fact:b421560a83ac4077","version":1}
+{"from_id":"finding:0e7695af40f71d5b","kind":"backed_by","props":{},"to_id":"fact:b781c86d735f1129","version":1}
+{"from_id":"finding:0e7695af40f71d5b","kind":"violates","props":{},"to_id":"rule:AF-CODE-002","version":1}
+{"from_id":"finding:13500ad4e43969eb","kind":"backed_by","props":{},"to_id":"fact:b421560a83ac4077","version":1}
+{"from_id":"finding:13500ad4e43969eb","kind":"backed_by","props":{},"to_id":"fact:b781c86d735f1129","version":1}
+{"from_id":"finding:13500ad4e43969eb","kind":"violates","props":{},"to_id":"rule:AF-CODE-001","version":1}
+{"from_id":"finding:8b57107ac9ede611","kind":"backed_by","props":{},"to_id":"fact:69b729a0070ef2d7","version":1}
+{"from_id":"finding:8b57107ac9ede611","kind":"violates","props":{},"to_id":"rule:AF-CONTRACT-001","version":1}
+{"from_id":"finding:a1d361952b15e9e0","kind":"backed_by","props":{},"to_id":"fact:4246297bbb062b63","version":1}
+{"from_id":"finding:a1d361952b15e9e0","kind":"violates","props":{},"to_id":"rule:AF-CONTRACT-001","version":1}
+{"from_id":"finding:bf42ad271388b4ec","kind":"backed_by","props":{},"to_id":"fact:b938d5ca3d11a5d0","version":1}
+{"from_id":"finding:bf42ad271388b4ec","kind":"violates","props":{},"to_id":"rule:AF-CODE-002","version":1}
+{"from_id":"finding:ca52b0469439dfea","kind":"backed_by","props":{},"to_id":"fact:6aac6103de6ebdc7","version":1}
+{"from_id":"finding:ca52b0469439dfea","kind":"violates","props":{},"to_id":"rule:AF-CODE-002","version":1}
+{"from_id":"finding:f347b5e79053aca5","kind":"violates","props":{},"to_id":"rule:AF-CODE-003","version":1}
+{"from_id":"finding:fee4dcc511db0fd2","kind":"backed_by","props":{},"to_id":"fact:5651fe1004c31318","version":1}
+{"from_id":"finding:fee4dcc511db0fd2","kind":"violates","props":{},"to_id":"rule:AF-CODE-002","version":1}
+{"from_id":"operation:GET /orders","kind":"described_by","props":{},"to_id":"contract:12f6f441b9de279b","version":1}
+{"from_id":"operation:GET /secret","kind":"described_by","props":{},"to_id":"contract:12f6f441b9de279b","version":1}
+{"from_id":"operation:GET /secret","kind":"implemented_by","props":{},"to_id":"fact:5651fe1004c31318","version":1}
+{"from_id":"operation:GET /v1/orders/","kind":"described_by","props":{},"to_id":"contract:12f6f441b9de279b","version":1}
+{"from_id":"operation:GET /v1/orders/","kind":"implemented_by","props":{},"to_id":"fact:6aac6103de6ebdc7","version":1}
+{"from_id":"operation:GET /v1/orders/{order_id}","kind":"described_by","props":{},"to_id":"contract:12f6f441b9de279b","version":1}
+{"from_id":"operation:GET /v1/orders/{order_id}","kind":"implemented_by","props":{},"to_id":"fact:b938d5ca3d11a5d0","version":1}
+{"from_id":"operation:POST /orders","kind":"described_by","props":{},"to_id":"contract:12f6f441b9de279b","version":1}
+{"from_id":"operation:POST /v1/orders","kind":"described_by","props":{},"to_id":"contract:12f6f441b9de279b","version":1}
+{"from_id":"operation:POST /v1/orders","kind":"implemented_by","props":{},"to_id":"fact:b781c86d735f1129","version":1}

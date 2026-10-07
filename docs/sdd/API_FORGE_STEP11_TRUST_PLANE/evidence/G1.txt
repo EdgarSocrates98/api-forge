@@ -1,0 +1,12 @@
+G1 — Trust Plane contracts, annotation and propagation
+=====================================================
+tests/contracts/test_trust.py: 7 passed
+tests/trust/test_plane.py: 4 passed
+tests/trust/test_propagation.py: 7 passed
+
+Proven: TrustUnit validator refuses instruction_authority != none for all 10
+data origins; system/governed_policy keep authority. annotate_* maps every
+RefOrigin and every TrustBoundary deterministically. propagate() unions taint,
+preserves the weakest source's exact trust label (untrusted stays untrusted),
+lifts at most one tier under governed_verification with evidence_refs, and
+collapses instruction authority to none whenever any source is data.

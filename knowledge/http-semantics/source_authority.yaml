@@ -1,0 +1,9 @@
+sources:
+  - name: "HTTP Semantics (RFC 9110)"
+    url: https://www.rfc-editor.org/rfc/rfc9110
+    authority: ietf-rfc
+    verified: "2026-09-21"
+  - name: "HTTP Caching (RFC 9111)"
+    url: https://www.rfc-editor.org/rfc/rfc9111
+    authority: ietf-rfc
+    verified: "2026-09-21"

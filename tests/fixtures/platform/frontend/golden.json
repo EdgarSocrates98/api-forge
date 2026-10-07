@@ -1,0 +1,5 @@
+{
+  "vertical": "frontend",
+  "state": "heuristic",
+  "expected": ["typed API response", "declared test command"]
+}

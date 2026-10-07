@@ -1,0 +1,26 @@
+{
+  "PreToolUse": [
+    {
+      "matcher": "exec",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "python scripts/devin_pretool_guard.py",
+          "timeout": 5
+        }
+      ]
+    }
+  ],
+  "SessionStart": [
+    {
+      "matcher": "",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "python -c \"print('API Forge Devin guardrails loaded: read AGENT_PROTOCOL.md, load .apiforge/case, run apiforge next-step.')\"",
+          "timeout": 5
+        }
+      ]
+    }
+  ]
+}

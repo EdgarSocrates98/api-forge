@@ -1,0 +1,25 @@
+verticals:
+  api:
+    fixture: tests/fixtures/platform/api
+    golden: tests/fixtures/platform/api/golden.json
+    holdout: tests/fixtures/platform/api/holdout.yaml
+  database:
+    fixture: tests/fixtures/platform/database
+    golden: tests/fixtures/platform/database/golden.json
+    holdout: tests/fixtures/platform/database/holdout.yaml
+  messaging:
+    fixture: tests/fixtures/platform/messaging
+    golden: tests/fixtures/platform/messaging/golden.json
+    holdout: tests/fixtures/platform/messaging/holdout.yaml
+  cicd:
+    fixture: tests/fixtures/platform/cicd
+    golden: tests/fixtures/platform/cicd/golden.json
+    holdout: tests/fixtures/platform/cicd/holdout.yaml
+  cloud:
+    fixture: tests/fixtures/platform/cloud
+    golden: tests/fixtures/platform/cloud/golden.json
+    holdout: tests/fixtures/platform/cloud/holdout.yaml
+  frontend:
+    fixture: tests/fixtures/platform/frontend
+    golden: tests/fixtures/platform/frontend/golden.json
+    holdout: tests/fixtures/platform/frontend/holdout.yaml

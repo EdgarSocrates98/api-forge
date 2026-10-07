@@ -1,0 +1,33 @@
+version: 1
+# §56-§57 declared thresholds for the token waste detector.
+# Every limit is declared data — detectors never hardcode a number.
+
+detectors:
+  duplicate_context:
+    min_loads: 2          # same ref loaded/assigned at least this often
+  duplicate_retrieval:
+    min_calls: 2          # same retrieval verb run at least this often
+  repeated_tool_call:
+    min_calls: 3          # identical (verb, refs) rows at least this often
+  repeated_rule_lookup:
+    min_reads: 3          # same rules/*.yaml ref read at least this often
+    ref_prefix: rules/
+  redundant_agent:
+    min_distinct_agents: 2  # distinct agent_names on one task -> HYPOTHESIS
+  redundant_review:
+    min_reviews: 2        # review spans beyond the first
+  unnecessary_debate:
+    low_risk_values: [micro, low]  # debates under these risk values -> HYPOTHESIS
+  oversized_tool_output:
+    max_bytes: 32768      # tool_result_bytes above this -> OBSERVED
+  full_file_read:
+    file_suffixes: [.py, .ts, .js, .go, .java, .rb]
+    symbol_verbs: [graph, "graph ", context symbol]
+  premium_model_misuse:
+    premium_tiers: [T3]
+    low_risk_values: [micro, low]
+  repeated_summary:
+    min_calls: 2
+    verbs: [brief, "context compact", "agentops compact"]
+  unused_context_expansion:
+    min_expanded: 1       # expanded refs never cited -> ESTIMATED

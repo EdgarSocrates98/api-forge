@@ -1,0 +1,741 @@
+# Tool risk profiles and agent permission sets (step11 §13).
+#
+# Every callable surface carries a declared risk profile; every agent role is
+# authorized against an explicit allowlist. Authorization is default-deny:
+# a tool not named in allowed_tools, carrying a risk class outside
+# allowed_risk_classes, or named in denied_tools is refused with an AF code.
+schema: apiforge/tool-risk/v1
+tools:
+  semgrep:
+    risk_classes: [read_only]
+    reversible: true
+    notes: local SAST scan; writes only the report artifact
+  trivy:
+    risk_classes: [read_only]
+    reversible: true
+    notes: filesystem/image scan; vulnerability db fetched by the tool itself
+  gitleaks:
+    risk_classes: [read_only, security_impact]
+    reversible: true
+    notes: secret scan output may contain partial secret material — treat as sensitive
+  k6:
+    risk_classes: [external_side_effect, production_impact]
+    reversible: false
+    notes: executes real HTTP calls against its target; gated by the load-target policy
+  context_capsule:
+    risk_classes: [read_only]
+    reversible: true
+    notes: builds a context projection; no mutation
+  context_quality:
+    risk_classes: [read_only]
+    reversible: true
+    notes: ledger-derived measurement; no mutation
+  memory_propose:
+    risk_classes: [write]
+    reversible: true
+    notes: appends a candidate row; never persists truth
+  memory_persist:
+    risk_classes: [write, security_impact]
+    reversible: true
+    notes: promotes candidate to the immutable record log through the gate pipeline
+  memory_query:
+    risk_classes: [read_only]
+    reversible: true
+    notes: bounded retrieval with freshness diagnostics
+  memory_invalidate:
+    risk_classes: [write]
+    reversible: true
+    notes: append-only invalidation event; never deletes
+  memory_quarantine_resolve:
+    risk_classes: [write, security_impact]
+    reversible: true
+    notes: human review boundary that can persist or reject a quarantined candidate
+  blackboard_append:
+    risk_classes: [write]
+    reversible: true
+    notes: append-only shared-state entry
+  blackboard_query:
+    risk_classes: [read_only]
+    reversible: true
+    notes: bounded query over one task scope
+  apiforge_discover:
+    risk_classes: [read_only]
+    reversible: true
+    notes: compact MCP discovery projection
+  apiforge_call:
+    risk_classes: [read_only]
+    reversible: true
+    notes: compact MCP dispatch boundary; inner tools retain local policy gates
+  apiforge_context:
+    risk_classes: [read_only]
+    reversible: true
+    notes: compact context projection
+  apiforge_expand:
+    risk_classes: [read_only]
+    reversible: true
+    notes: verified context reference expansion
+  apiforge_analyze:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic local analysis and case artifact generation
+  apiforge_evidence:
+    risk_classes: [read_only]
+    reversible: true
+    notes: evidence projection
+  agent-invocation:
+    risk_classes: [read_only]
+    reversible: true
+    notes: governed runtime adapter boundary; declared tool_names are checked separately
+  agent_span_append:
+    risk_classes: [write]
+    reversible: true
+    notes: local append/persist inside the declared workspace boundary
+  agent_span_query:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  agentops_compare:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  agentops_inspect:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  agentops_projection:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  agentops_timeline:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  agentops_waste:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  agents_audit:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  analyze:
+    risk_classes: [write]
+    reversible: true
+    notes: local append/persist inside the declared workspace boundary
+  autonomy_status:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  brief_show:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  budget_check:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  budget_plan:
+    risk_classes: [write]
+    reversible: true
+    notes: local append/persist inside the declared workspace boundary
+  budget_spend:
+    risk_classes: [write]
+    reversible: true
+    notes: local append/persist inside the declared workspace boundary
+  cache_invalidate:
+    risk_classes: [write]
+    reversible: true
+    notes: local append/persist inside the declared workspace boundary
+  cache_stats:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  capabilities_list:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  capabilities_verify:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  change_control_collect:
+    risk_classes: [read_only, external_side_effect]
+    reversible: true
+    notes: GET-only external read; leaves the local boundary
+  change_control_publish:
+    risk_classes: [write]
+    reversible: true
+    notes: local append/persist inside the declared workspace boundary
+  change_control_run:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  change_control_surface:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  context_delta:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  context_expand:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  context_funnel:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  context_gc:
+    risk_classes: [write]
+    reversible: true
+    notes: local append/persist inside the declared workspace boundary
+  context_resolve:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  contract_list:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  contract_show:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  control_routes:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  control_shadow:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  control_triggers:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  debate_packet:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  decision_check:
+    risk_classes: [read_only, security_impact]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  diff_contract:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  discover:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  economy_doctor:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  economy_explain:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  economy_ledger:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  economy_phase_budget:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  economy_pricing:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  economy_reconcile:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  economy_report:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  economy_roi:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  economy_stats:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  economy_tier:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  evals_agentic_quality:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  evals_economy_hardening:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  evals_gate:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  evals_replay:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  evidence_gate:
+    risk_classes: [read_only, security_impact]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  evidence_resolve:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  field_annotate:
+    risk_classes: [write]
+    reversible: true
+    notes: local append/persist inside the declared workspace boundary
+  field_record:
+    risk_classes: [write]
+    reversible: true
+    notes: local append/persist inside the declared workspace boundary
+  field_report:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  field_verify:
+    risk_classes: [write, security_impact]
+    reversible: true
+    notes: local append/persist inside the declared workspace boundary
+  forge_capabilities:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  forge_evidence:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  forge_health:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  forge_inspect:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  forge_result:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  governor_decide:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  governor_recover:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  governor_stop:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  graph_coverage:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  graph_impact:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  graph_query:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  graph_trace:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  grpc_analyze:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  grpc_benchmark:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  grpc_capabilities:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  grpc_codegen:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  grpc_diff:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  grpc_gateway:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  grpc_verify:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  index_status:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  integration_github_issues:
+    risk_classes: [read_only, external_side_effect]
+    reversible: true
+    notes: GET-only external read; leaves the local boundary
+  integration_health:
+    risk_classes: [read_only, external_side_effect]
+    reversible: true
+    notes: GET-only external read; leaves the local boundary
+  integration_json:
+    risk_classes: [read_only, external_side_effect]
+    reversible: true
+    notes: GET-only external read; leaves the local boundary
+  judge:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  knowledge_adaptive:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  knowledge_check:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  knowledge_drift:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  knowledge_impact:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  knowledge_list:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  knowledge_search:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  knowledge_select:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  knowledge_show:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  knowledge_watch:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  lab_scenarios:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  mcp_audit:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  mcp_benchmark:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  mcp_disclose:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  mcp_surface:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  memory_quarantine_list:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  memory_rank:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  memory_search:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  migration_analyze:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  migration_plan:
+    risk_classes: [write]
+    reversible: true
+    notes: local append/persist inside the declared workspace boundary
+  migration_verify:
+    risk_classes: [write]
+    reversible: true
+    notes: local append/persist inside the declared workspace boundary
+  model_api_gateway:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  model_build:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  model_dump:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  model_otel:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  model_redis:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  model_resilience:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  next_step:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  observability_capabilities:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  observability_ingest:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  perf_chaos:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  perf_compare:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  perf_memory_search:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  perf_scenario:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  perf_suggest:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  perf_verdict:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  plan_architecture:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  platform_verify_runtime:
+    risk_classes: [write]
+    reversible: true
+    notes: local append/persist inside the declared workspace boundary
+  playbook:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  portable_doctor:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  portable_init:
+    risk_classes: [write]
+    reversible: true
+    notes: local append/persist inside the declared workspace boundary
+  portable_inspect:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  portable_status:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  route_model:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  rules_list:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  rules_lookup:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  run_list:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  runtime_approve:
+    risk_classes: [write, security_impact]
+    reversible: true
+    notes: local append/persist inside the declared workspace boundary
+  runtime_checkpoint:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  runtime_debate:
+    risk_classes: [write]
+    reversible: true
+    notes: local append/persist inside the declared workspace boundary
+  runtime_resume:
+    risk_classes: [write]
+    reversible: true
+    notes: local append/persist inside the declared workspace boundary
+  runtime_run:
+    risk_classes: [write]
+    reversible: true
+    notes: local append/persist inside the declared workspace boundary
+  runtime_status:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  slice_log:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  slice_tests:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  task_compile:
+    risk_classes: [write]
+    reversible: true
+    notes: local append/persist inside the declared workspace boundary
+  task_plan:
+    risk_classes: [write]
+    reversible: true
+    notes: local append/persist inside the declared workspace boundary
+  task_status:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  task_verify:
+    risk_classes: [write, security_impact]
+    reversible: true
+    notes: local append/persist inside the declared workspace boundary
+  telemetry_export:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  telemetry_validate:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  verify_escalate:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  verify_plan:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  workspace_add:
+    risk_classes: [write]
+    reversible: true
+    notes: local append/persist inside the declared workspace boundary
+  workspace_discover:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  workspace_graph:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+  workspace_status:
+    risk_classes: [read_only]
+    reversible: true
+    notes: deterministic read/projection; no mutation
+permissions:
+  mcp-gateway:
+    allowed_tools:
+      - apiforge_discover
+      - apiforge_call
+      - apiforge_context
+      - apiforge_expand
+      - apiforge_analyze
+      - apiforge_evidence
+    allowed_risk_classes: [read_only]
+    allowed_targets: ["*"]
+    denied_tools: []
+    notes: compact MCP boundary; full tool policy remains explicit
+  api-orchestrator:
+    allowed_tools: [agent-invocation]
+    allowed_risk_classes: [read_only]
+    denied_tools: []
+    delegates_to: [specialist, reviewer, critic, referee, runner]
+    notes: runtime adapter admission; undeclared requested tools fail closed
+  specialist:
+    allowed_tools:
+      - context_capsule
+      - context_quality
+      - memory_propose
+      - memory_query
+      - blackboard_append
+      - blackboard_query
+    allowed_risk_classes: [read_only, write]
+    denied_tools: [k6]
+    notes: reads and proposes; may append working data, never promote memory
+  reviewer:
+    allowed_tools:
+      - context_capsule
+      - context_quality
+      - memory_propose
+      - memory_query
+      - memory_invalidate
+      - memory_quarantine_resolve
+      - blackboard_append
+      - blackboard_query
+      - semgrep
+      - trivy
+      - gitleaks
+    allowed_risk_classes: [read_only, write, security_impact]
+    denied_tools: [k6]
+    notes: reviews and curates; may resolve quarantine with a named reviewer
+  critic:
+    allowed_tools:
+      - context_capsule
+      - context_quality
+      - memory_query
+      - blackboard_query
+    allowed_risk_classes: [read_only]
+    denied_tools: [memory_persist, k6]
+    notes: adversarial read-only analysis; proposes nothing, mutates nothing
+  referee:
+    allowed_tools:
+      - context_capsule
+      - context_quality
+      - memory_query
+      - blackboard_query
+    allowed_risk_classes: [read_only]
+    denied_tools: [memory_persist, memory_quarantine_resolve, k6]
+    notes: rules on disputes from evidence only; no state mutation
+  runner:
+    allowed_tools: [semgrep, trivy, gitleaks, k6]
+    allowed_risk_classes: [read_only, security_impact, external_side_effect, production_impact]
+    denied_tools: [memory_persist, memory_quarantine_resolve]
+    notes: executes allowlisted local binaries; load targets still need the policy gate

@@ -1,0 +1,6 @@
+{"type": "assistant", "message": {"model": "m-a", "usage": {"input_tokens": 100, "output_tokens": 50, "cache_read_input_tokens": 10}}}
+{"type": "assistant", "message": {"model": "m-a", "usage": {"input_tokens": 200, "output_tokens": 60}}}
+{"type": "assistant", "message": {"model": "m-b", "usage": {"input_tokens": 5, "output_tokens": 7}}}
+{"type": "human", "message": {"role": "user"}}
+not json
+{"type": "assistant", "message": {"usage": {"input_tokens": 1}}}

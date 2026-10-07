@@ -1,0 +1,6 @@
+id: gate-static-breaking
+kind: gate
+question: "is renaming this field a breaking change?"
+mode: live_read_only
+expect_mode: static
+expect_live: false

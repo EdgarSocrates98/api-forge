@@ -1,0 +1,32 @@
+id: waste-detection
+run_id: run-waste
+ledger:
+  - run_id: run-waste
+    verb: context capsule
+    source: knowledge
+    cost: {context_bytes: 100}
+    refs:
+      - {hash: c}
+      - {hash: c}
+  - run_id: run-waste
+    verb: context expand
+    source: knowledge
+    cost: {context_bytes: 50}
+    refs:
+      - {hash: c}
+  - run_id: run-waste
+    verb: context expand
+    source: knowledge
+    cost: {context_bytes: 50}
+    refs:
+      - {hash: c}
+waste:
+  findings:
+    duplicate_context: observed
+    duplicate_retrieval: observed
+  absent:
+    - premium_model_misuse
+inspect:
+  metrics:
+    context:
+      bytes: {value: 200}

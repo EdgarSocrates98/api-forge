@@ -1,0 +1,8 @@
+id: select-payments-route-low
+kind: selection
+changed:
+- proj/app/routes/payments.py
+risk: low
+expect_level: V2
+expect_tests:
+- proj/tests/test_payments.py

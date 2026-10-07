@@ -1,0 +1,40 @@
+{
+  "artifacts": {
+    "api_ir": {
+      "path": "api-ir.json",
+      "sha256": "e8dcf46f9795c9e4a133ae6436273d9bb973a021b1a1f6231c2456d76d68ff0a"
+    },
+    "facts": {
+      "path": "facts.json",
+      "sha256": "416a70dc795e05fe80ea30da14e442a957d63a1efa7383d140fab8a650df54a8"
+    },
+    "findings": {
+      "path": "findings.json",
+      "sha256": "96f3192f304f66d7dc64891738706a8b82ce652f743f7c61b9d3f11373d85837"
+    }
+  },
+  "case_id": "case:ec1f1cefe46544b3",
+  "diagnostics_count": 1,
+  "finding_counts": {
+    "severity:high": 2,
+    "severity:low": 1,
+    "severity:medium": 5,
+    "status:confirmed": 5,
+    "status:unresolved": 3
+  },
+  "generator": "apiforge 0.1.0",
+  "input_hashes": {
+    "code:app/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "code:app/main.py": "18df36fbab20e3430f748db881d8c34c36e77548ec7ae896c6be07a40f56f7a2",
+    "code:app/routes/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "code:app/routes/hidden.py": "4d499f6e8928d103de43096e67b868816e4c4694f183b5c454501ee818d5912f",
+    "code:app/routes/orders.py": "2ecfbd45ef3d068a0928ecae681b0e757acc09ae72ceb4366b8170afdd0b6e48",
+    "code:app/utils.py": "dcbd041fac0342883bd4c42d0374e5d0298201b1bc5c0d4f4ee10e4c56cb5f51",
+    "contract:E:/projetos/api-forge/tests/fixtures/openapi/orders-v1.yaml": "12f6f441b9de279b8c1a01a115f3edfa8bd5c7aa4ecdad7b5f5f9364b2909311"
+  },
+  "inputs": {
+    "contract": "E:\\projetos\\api-forge\\tests\\fixtures\\openapi\\orders-v1.yaml",
+    "project": "E:\\projetos\\api-forge\\tests\\fixtures\\fastapi_orders"
+  },
+  "schema_version": "1"
+}

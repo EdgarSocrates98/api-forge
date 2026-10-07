@@ -1,0 +1,81 @@
+{
+  "agents": 25,
+  "alias_mapping_applied": true,
+  "by_family": [
+    [
+      "architecture",
+      1.0
+    ],
+    [
+      "assurance",
+      1.0
+    ],
+    [
+      "contract",
+      0.9167
+    ],
+    [
+      "data",
+      1.0
+    ],
+    [
+      "observability",
+      1.0
+    ],
+    [
+      "operations",
+      0.8333
+    ],
+    [
+      "planning",
+      1.0
+    ],
+    [
+      "quality",
+      1.0
+    ],
+    [
+      "runtime",
+      1.0
+    ],
+    [
+      "security",
+      1.0
+    ]
+  ],
+  "cases": 75,
+  "leakage_4gram": 0.2533,
+  "limitations": [
+    "lexical proxy of the host router; hosts route with a model over the same descriptions",
+    "leakage_4gram is the share of cases sharing a 4-word sequence with the expected agent"
+  ],
+  "misses": [
+    {
+      "expected": "api-codegen-engineer",
+      "id": "R027",
+      "predicted": "api-governance-reviewer",
+      "top3": [
+        "api-governance-reviewer",
+        "api-codegen-engineer",
+        "api-dx-docs-reviewer"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-release-guardian",
+      "id": "R074",
+      "predicted": "api-observability-integration-engineer",
+      "top3": [
+        "api-observability-integration-engineer",
+        "api-adversarial-critic",
+        "api-release-guardian"
+      ],
+      "version": 1
+    }
+  ],
+  "protected_misroutes": [],
+  "schema": "apiforge/agent-routing-eval/v1",
+  "top1": 0.9733,
+  "top3": 1.0,
+  "version": 1
+}

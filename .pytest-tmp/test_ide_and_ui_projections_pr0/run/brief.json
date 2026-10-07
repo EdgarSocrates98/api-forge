@@ -1,0 +1,21 @@
+{
+  "gaps": [
+    "live provider freshness is not proven by replay"
+  ],
+  "graph_impact": null,
+  "human_action": "independently verify findings before approving the change",
+  "next": "resolve findings, then rerun the governed verifier",
+  "open": [],
+  "outcome": "API/Git/CI change-control analysis completed",
+  "proof": [
+    "E:\\projetos\\api-forge\\.pytest-tmp\\test_ide_and_ui_projections_pr0\\run\\case\\case.json",
+    "E:\\projetos\\api-forge\\.pytest-tmp\\test_ide_and_ui_projections_pr0\\run\\next-step.json",
+    "E:\\projetos\\api-forge\\.pytest-tmp\\test_ide_and_ui_projections_pr0\\run\\graph.json",
+    "E:\\projetos\\api-forge\\.pytest-tmp\\test_ide_and_ui_projections_pr0\\run\\graph\\nodes.jsonl",
+    "E:\\projetos\\api-forge\\.pytest-tmp\\test_ide_and_ui_projections_pr0\\run\\graph\\edges.jsonl",
+    "E:\\projetos\\api-forge\\.pytest-tmp\\test_ide_and_ui_projections_pr0\\run\\evidence\\receipt.json"
+  ],
+  "status": "REVIEW",
+  "subject": "21340b43-4366-510f-a768-641ac9c0db94",
+  "version": 1
+}

@@ -1,0 +1,25 @@
+{
+  "items": [
+    {"id": "root1", "path": "/", "resourceMethods": {}},
+    {
+      "id": "r-orders",
+      "path": "/orders",
+      "pathPart": "orders",
+      "parentId": "root1",
+      "resourceMethods": {
+        "GET": {"httpMethod": "GET", "authorizationType": "AWS_IAM", "apiKeyRequired": false},
+        "POST": {"httpMethod": "POST", "authorizationType": "NONE", "apiKeyRequired": true}
+      }
+    },
+    {
+      "id": "r-order",
+      "path": "/orders/{id}",
+      "pathPart": "{id}",
+      "parentId": "r-orders",
+      "resourceMethods": {
+        "GET": {"httpMethod": "GET", "authorizationType": "CUSTOM", "authorizerId": "auth1", "apiKeyRequired": false},
+        "DELETE": {"httpMethod": "DELETE", "authorizationType": "NONE", "apiKeyRequired": false}
+      }
+    }
+  ]
+}

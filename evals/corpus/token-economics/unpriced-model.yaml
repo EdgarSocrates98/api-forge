@@ -1,0 +1,18 @@
+# A model absent from the pricing catalog: the run's tokens stay measured
+# but cost is unresolved — never priced by inference.
+id: unpriced-model
+run_id: eval-unpriced
+usage_rows:
+  - basis: observed
+    input_tokens: 500
+    output_tokens: 100
+    model: ghost
+estimate:
+  tokens: 400
+  cost: 0.01
+expect:
+  observed_total: 600
+  unresolved_axes: [cost, tool_calls, elapsed_ms]
+  resolved_axes: [tokens]
+  calibration:
+    tokens: 0.5

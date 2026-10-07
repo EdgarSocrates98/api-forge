@@ -1,0 +1,63 @@
+{
+  "adapter_errors": [],
+  "artifact_refs": [
+    "E:\\projetos\\api-forge\\.pytest-tmp\\test_remote_host_requires_auth0\\run\\case\\case.json",
+    "E:\\projetos\\api-forge\\.pytest-tmp\\test_remote_host_requires_auth0\\run\\next-step.json",
+    "E:\\projetos\\api-forge\\.pytest-tmp\\test_remote_host_requires_auth0\\run\\graph.json",
+    "E:\\projetos\\api-forge\\.pytest-tmp\\test_remote_host_requires_auth0\\run\\graph\\nodes.jsonl",
+    "E:\\projetos\\api-forge\\.pytest-tmp\\test_remote_host_requires_auth0\\run\\graph\\edges.jsonl",
+    "E:\\projetos\\api-forge\\.pytest-tmp\\test_remote_host_requires_auth0\\run\\evidence\\receipt.json",
+    "E:\\projetos\\api-forge\\.pytest-tmp\\test_remote_host_requires_auth0\\run\\brief.json",
+    "E:\\projetos\\api-forge\\.pytest-tmp\\test_remote_host_requires_auth0\\run\\result.json"
+  ],
+  "base_sha": "0000000000000000000000000000000000000001",
+  "details": {
+    "bundle_sha256": "12f6f441b9de279b8c1a01a115f3edfa8bd5c7aa4ecdad7b5f5f9364b2909311"
+  },
+  "head_sha": "0000000000000000000000000000000000000002",
+  "repository": "example/api-forge-orders",
+  "run_id": "21340b43-4366-510f-a768-641ac9c0db94",
+  "source": "artifact",
+  "stages": [
+    {
+      "duration_ms": 357.451,
+      "error_code": null,
+      "stage": "analyze",
+      "status": "ok",
+      "version": 1
+    },
+    {
+      "duration_ms": 291.102,
+      "error_code": null,
+      "stage": "next_step",
+      "status": "ok",
+      "version": 1
+    },
+    {
+      "duration_ms": 36.701,
+      "error_code": null,
+      "stage": "graph",
+      "status": "ok",
+      "version": 1
+    },
+    {
+      "duration_ms": 4.915,
+      "error_code": null,
+      "stage": "evidence",
+      "status": "ok",
+      "version": 1
+    },
+    {
+      "duration_ms": 4.982,
+      "error_code": null,
+      "stage": "brief",
+      "status": "review",
+      "version": 1
+    }
+  ],
+  "status": "review",
+  "unresolved": [
+    "live provider freshness is not proven by replay"
+  ],
+  "version": 1
+}

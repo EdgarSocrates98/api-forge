@@ -1,0 +1,21 @@
+sources:
+  - name: KMS key rotation
+    url: https://docs.aws.amazon.com/kms/latest/developerguide/rotate-keys.html
+    authority: aws-docs
+    verified: "2026-09-21"
+  - name: Secrets Manager rotation
+    url: https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_overview.html
+    authority: aws-docs
+    verified: "2026-09-21"
+  - name: S3 block public access
+    url: https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-control-block-public-access.html
+    authority: aws-docs
+    verified: "2026-09-21"
+  - name: S3 default bucket encryption
+    url: https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-encryption.html
+    authority: aws-docs
+    verified: "2026-09-21"
+  - name: VPC endpoints private DNS
+    url: https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints.html
+    authority: aws-docs
+    verified: "2026-09-21"

@@ -1,0 +1,12 @@
+version: 1
+# §33 Adaptive Model Router policy. Candidates are declared descriptors —
+# capabilities and measured cost/latency, never invented. Quality history
+# comes from ModelScorecard records (§34); scorecard-missing candidates stay
+# eligible but rank only on declared descriptors.
+quality_floor: 0.8
+min_evaluations: 3
+weights: {quality: 0.45, latency: 0.15, cost: 0.25, availability: 0.15}
+candidates:
+  - {provider: local-small, model: local-small-v1, role: champion, tool_support: false, structured_output: true, context_window: 32000, reasoning_tier: none, availability: available, cost_per_1k: 0.0, latency_p50_ms: 800}
+  - {provider: general-strong, model: general-strong-v1, role: fallback, tool_support: true, structured_output: true, context_window: 200000, reasoning_tier: light, availability: available, cost_per_1k: 0.01, latency_p50_ms: 2500}
+  - {provider: frontier-reviewer, model: frontier-reviewer-v1, role: challenger, tool_support: true, structured_output: true, context_window: 1000000, reasoning_tier: deep, availability: available, cost_per_1k: 0.06, latency_p50_ms: 9000}

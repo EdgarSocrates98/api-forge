@@ -1,0 +1,6 @@
+id: output-payloads
+kind: output
+fixture: tests/fixtures/economy_payments/fastapi
+contract: tests/fixtures/economy_payments/openapi.yaml
+target: POST /payments
+max_ratio: 0.65

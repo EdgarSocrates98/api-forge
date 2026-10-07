@@ -1,0 +1,8 @@
+domain: go-chi
+version: 1
+areas: [REST]
+rule_ids: []
+summary: >-
+  chi router idioms the Go adapter reads: r.Method, r.Get/r.Post,
+  middleware via r.Use, and the stdlib net/http contract underneath.
+verified: "2026-09-21"

@@ -1,0 +1,45 @@
+# A fully priced observed run: cost components declared, calibration on all
+# four axes.
+id: priced-observed
+run_id: eval-priced
+usage_rows:
+  - basis: observed
+    input_tokens: 1000000
+    output_tokens: 500000
+    cached_input_tokens: 200000
+    cache_creation_tokens: 100000
+    model: m
+pricing_rows:
+  - provider: p
+    model: m
+    effective_at: "2026-01-01"
+    currency: USD
+    source: "declared:eval-fixture"
+    input_per_mtok: 2.0
+    output_per_mtok: 10.0
+    cached_input_per_mtok: 0.5
+    cache_creation_per_mtok: 3.0
+cost_accounting:
+  basis: observed
+  input_tokens: 1000000
+  output_tokens: 500000
+  cached_input_tokens: 200000
+  cache_creation_tokens: 100000
+  model: m
+estimate:
+  tokens: 2000000
+  cost: 8.0
+  tool_calls: 5
+  elapsed_ms: 1000
+observed:
+  tool_calls: 4
+  elapsed_ms: 800
+expect:
+  observed_total: 1800000
+  cost_total: 7.4
+  calibration:
+    tokens: -0.1
+    cost: -0.075
+    tool_calls: -0.2
+    elapsed_ms: -0.2
+  resolved_axes: [tokens, cost, tool_calls, elapsed_ms]

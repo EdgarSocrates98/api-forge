@@ -1,0 +1,6 @@
+schema: apiforge/project/v1
+project_id: project:portable-fixture
+root: .
+default_scope: repo
+hosts: []
+evidence_refs: []

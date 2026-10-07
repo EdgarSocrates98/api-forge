@@ -1,0 +1,208 @@
+{
+  "capability_id": "api.change-control",
+  "error_code": null,
+  "evidence": [
+    "E:\\projetos\\api-forge\\.pytest-tmp\\test_remote_host_requires_auth0\\run\\case\\case.json",
+    "E:\\projetos\\api-forge\\.pytest-tmp\\test_remote_host_requires_auth0\\run\\next-step.json",
+    "E:\\projetos\\api-forge\\.pytest-tmp\\test_remote_host_requires_auth0\\run\\graph.json",
+    "E:\\projetos\\api-forge\\.pytest-tmp\\test_remote_host_requires_auth0\\run\\graph\\nodes.jsonl",
+    "E:\\projetos\\api-forge\\.pytest-tmp\\test_remote_host_requires_auth0\\run\\graph\\edges.jsonl",
+    "E:\\projetos\\api-forge\\.pytest-tmp\\test_remote_host_requires_auth0\\run\\evidence\\receipt.json",
+    "E:\\projetos\\api-forge\\.pytest-tmp\\test_remote_host_requires_auth0\\run\\brief.json"
+  ],
+  "gaps": [
+    "live provider freshness is not proven by replay"
+  ],
+  "limitations": [
+    "live provider freshness is not proven by replay"
+  ],
+  "payload": {
+    "analysis": {
+      "artifacts": {
+        "api_ir": {
+          "path": "api-ir.json",
+          "sha256": "5498335729a2b2d89d54a1b8cc6ee22ee167c40a8d7bbcda5ef2f891adf9b7bf"
+        },
+        "facts": {
+          "path": "facts.json",
+          "sha256": "4c7d674f0789cbcbe97fb1af7160d0f7aecb054827c560030efdef7c0a36e898"
+        },
+        "findings": {
+          "path": "findings.json",
+          "sha256": "96f3192f304f66d7dc64891738706a8b82ce652f743f7c61b9d3f11373d85837"
+        }
+      },
+      "case_id": "case:498d9a24303a0754",
+      "diagnostics_count": 1,
+      "finding_counts": {
+        "severity:high": 2,
+        "severity:low": 1,
+        "severity:medium": 5,
+        "status:confirmed": 5,
+        "status:unresolved": 3
+      },
+      "generator": "apiforge 0.1.0",
+      "input_hashes": {
+        "code:app/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "code:app/main.py": "18df36fbab20e3430f748db881d8c34c36e77548ec7ae896c6be07a40f56f7a2",
+        "code:app/routes/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "code:app/routes/hidden.py": "4d499f6e8928d103de43096e67b868816e4c4694f183b5c454501ee818d5912f",
+        "code:app/routes/orders.py": "2ecfbd45ef3d068a0928ecae681b0e757acc09ae72ceb4366b8170afdd0b6e48",
+        "code:app/utils.py": "dcbd041fac0342883bd4c42d0374e5d0298201b1bc5c0d4f4ee10e4c56cb5f51",
+        "contract:tests/fixtures/openapi/orders-v1.yaml": "12f6f441b9de279b8c1a01a115f3edfa8bd5c7aa4ecdad7b5f5f9364b2909311"
+      },
+      "inputs": {
+        "contract": "tests\\fixtures\\openapi\\orders-v1.yaml",
+        "project": "tests\\fixtures\\fastapi_orders"
+      },
+      "schema_version": "1"
+    },
+    "artifacts": [
+      "E:\\projetos\\api-forge\\.pytest-tmp\\test_remote_host_requires_auth0\\run\\case\\case.json",
+      "E:\\projetos\\api-forge\\.pytest-tmp\\test_remote_host_requires_auth0\\run\\next-step.json",
+      "E:\\projetos\\api-forge\\.pytest-tmp\\test_remote_host_requires_auth0\\run\\graph.json",
+      "E:\\projetos\\api-forge\\.pytest-tmp\\test_remote_host_requires_auth0\\run\\graph\\nodes.jsonl",
+      "E:\\projetos\\api-forge\\.pytest-tmp\\test_remote_host_requires_auth0\\run\\graph\\edges.jsonl",
+      "E:\\projetos\\api-forge\\.pytest-tmp\\test_remote_host_requires_auth0\\run\\evidence\\receipt.json",
+      "E:\\projetos\\api-forge\\.pytest-tmp\\test_remote_host_requires_auth0\\run\\brief.json"
+    ],
+    "base_sha": "0000000000000000000000000000000000000001",
+    "evaluation": {
+      "case_id": "change-control",
+      "dataset": "api-git-cicd",
+      "matched_requirements": [
+        "recommendation",
+        "evidence",
+        "verifier"
+      ],
+      "missing_requirements": [],
+      "notes": [],
+      "status": "pass",
+      "version": 1
+    },
+    "graph": {
+      "built_from": [
+        "case.json",
+        "api-ir.json",
+        "facts.json",
+        "findings.json"
+      ],
+      "edge_count": 29,
+      "edges_sha256": "95df328139ea17ebfbb9cf71db136231e97543ed9b59796cbe38eb40a18823e8",
+      "files": [],
+      "format": "jsonl",
+      "node_count": 28,
+      "nodes_sha256": "eddb45ebed14ebd9415d35bf32e88674fedae77a0499c82d9630916704ef2cb2",
+      "version": 1
+    },
+    "head_sha": "0000000000000000000000000000000000000002",
+    "origin": "replay",
+    "receipt": {
+      "artifacts": [
+        {
+          "kind": "api_ir",
+          "path": "api-ir.json",
+          "sha256": "5498335729a2b2d89d54a1b8cc6ee22ee167c40a8d7bbcda5ef2f891adf9b7bf"
+        },
+        {
+          "kind": "facts",
+          "path": "facts.json",
+          "sha256": "4c7d674f0789cbcbe97fb1af7160d0f7aecb054827c560030efdef7c0a36e898"
+        },
+        {
+          "kind": "findings",
+          "path": "findings.json",
+          "sha256": "96f3192f304f66d7dc64891738706a8b82ce652f743f7c61b9d3f11373d85837"
+        }
+      ],
+      "case": "E:\\projetos\\api-forge\\.pytest-tmp\\test_remote_host_requires_auth0\\run\\case",
+      "emitted_at": null,
+      "input_hashes": [
+        [
+          "code:app/__init__.py",
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        ],
+        [
+          "code:app/main.py",
+          "18df36fbab20e3430f748db881d8c34c36e77548ec7ae896c6be07a40f56f7a2"
+        ],
+        [
+          "code:app/routes/__init__.py",
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        ],
+        [
+          "code:app/routes/hidden.py",
+          "4d499f6e8928d103de43096e67b868816e4c4694f183b5c454501ee818d5912f"
+        ],
+        [
+          "code:app/routes/orders.py",
+          "2ecfbd45ef3d068a0928ecae681b0e757acc09ae72ceb4366b8170afdd0b6e48"
+        ],
+        [
+          "code:app/utils.py",
+          "dcbd041fac0342883bd4c42d0374e5d0298201b1bc5c0d4f4ee10e4c56cb5f51"
+        ],
+        [
+          "contract:tests/fixtures/openapi/orders-v1.yaml",
+          "12f6f441b9de279b8c1a01a115f3edfa8bd5c7aa4ecdad7b5f5f9364b2909311"
+        ]
+      ],
+      "policy_sha256": "cd0fdb0a8bff2aef209a55cdb9649219d48d6dea591ed858a08906ad0990a13d",
+      "proves": "correspondence between the listed paths and their sha256 contents at emit time; it does not prove authorship or freshness",
+      "schema_version": "af-receipt/1"
+    },
+    "recommendation": {
+      "alternatives": [
+        "approve after independent verification",
+        "hold the change and request remediation"
+      ],
+      "assumptions": [
+        "provider observations are read-only and may be stale"
+      ],
+      "confidence": 0.6,
+      "evidence_refs": [
+        "E:\\projetos\\api-forge\\.pytest-tmp\\test_remote_host_requires_auth0\\run\\case\\case.json",
+        "E:\\projetos\\api-forge\\.pytest-tmp\\test_remote_host_requires_auth0\\run\\next-step.json",
+        "E:\\projetos\\api-forge\\.pytest-tmp\\test_remote_host_requires_auth0\\run\\graph.json",
+        "E:\\projetos\\api-forge\\.pytest-tmp\\test_remote_host_requires_auth0\\run\\graph\\nodes.jsonl",
+        "E:\\projetos\\api-forge\\.pytest-tmp\\test_remote_host_requires_auth0\\run\\graph\\edges.jsonl",
+        "E:\\projetos\\api-forge\\.pytest-tmp\\test_remote_host_requires_auth0\\run\\evidence\\receipt.json"
+      ],
+      "facts": [
+        "finding:8b57107ac9ede611",
+        "finding:a1d361952b15e9e0",
+        "finding:13500ad4e43969eb",
+        "finding:0e7695af40f71d5b",
+        "finding:bf42ad271388b4ec",
+        "finding:ca52b0469439dfea",
+        "finding:fee4dcc511db0fd2",
+        "finding:f347b5e79053aca5"
+      ],
+      "recommendation": "Review the governed change bundle and resolve every unresolved finding before merge.",
+      "risks": [
+        "contract and implementation can diverge",
+        "CI observations do not prove deployment safety"
+      ],
+      "unresolved": [
+        "finding:8b57107ac9ede611",
+        "finding:a1d361952b15e9e0",
+        "finding:f347b5e79053aca5"
+      ],
+      "verifier": "apiforge change-control verify --run-dir E:\\projetos\\api-forge\\.pytest-tmp\\test_remote_host_requires_auth0\\run",
+      "version": 1
+    },
+    "repository": "example/api-forge-orders",
+    "route": {
+      "dominant_area": "CONTRACT",
+      "finding_count": 8,
+      "phase": "verify",
+      "rationale": "Contract/code divergence surfacing at verify time is the governance question: style, compatibility, and lifecycle policy.",
+      "recommended_agent": "api-governance-reviewer",
+      "unmapped_count": 0
+    },
+    "run_id": "21340b43-4366-510f-a768-641ac9c0db94"
+  },
+  "state": "supported",
+  "status": "review",
+  "version": 1
+}

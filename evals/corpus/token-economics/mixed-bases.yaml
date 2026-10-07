@@ -1,0 +1,29 @@
+# Bases never mix: observed and estimated rows roll up separately, an
+# unresolved row is counted, not added.
+id: mixed-bases
+run_id: eval-mixed
+usage_rows:
+  - basis: observed
+    input_tokens: 100
+    output_tokens: 20
+    task_id: t1
+    model: m
+  - basis: estimated
+    input_tokens: 90
+    estimation_method: bytes/4
+    task_id: t1
+    agent: planner
+  - basis: unresolved
+    source: provider-silent
+estimate:
+  tokens: 150
+expect:
+  observed_input: 100
+  observed_output: 20
+  estimated_input: 90
+  unresolved_entries: 1
+  observed_total: 120
+  calibration:
+    tokens: -0.2
+  unresolved_axes: [cost, tool_calls, elapsed_ms]
+  resolved_axes: [tokens]

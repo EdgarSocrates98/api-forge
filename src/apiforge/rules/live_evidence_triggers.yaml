@@ -1,0 +1,24 @@
+# Live evidence gating (economy wave 8, prompt §97). A question pays for live
+# read-only evidence only when it names a runtime effect. Terms are matched as
+# lowercase substrings. live_mutation is never granted by this gate (§98).
+schema: apiforge/live-evidence-triggers/v1
+runtime:
+  - id: production-impact
+    terms: [produção, producao, production, em prod, in prod, prod traffic, clientes afetados, customers affected, causou, caused, impacto real, real impact]
+    sources: [otel, datadog, dynatrace, cloudwatch]
+  - id: errors-at-runtime
+    terms: [taxa de erro, error rate, 5xx, 4xx rate, incidente, incident, outage, alarme, alarm, alerta disparou, alert fired]
+    sources: [otel, datadog, cloudwatch]
+  - id: latency
+    terms: [latência, latencia, latency, p95, p99, lento em, slow in, saturação, saturation, throttl]
+    sources: [otel, datadog, dynatrace, cloudwatch, x-ray]
+  - id: traffic
+    terms: [tráfego, trafego, traffic, rps observado, observed rps, volume real, pico de, spike]
+    sources: [otel, cloudwatch, datadog]
+static:
+  - id: contract-shape
+    terms: [removido, removed, remove field, campo, field, schema, openapi, contrato, contract, required, obrigatório, obrigatorio, nullable, tipo do, type of]
+  - id: compatibility
+    terms: [breaking, compatib, rename, renomead, deprecat, versão da api, api version]
+  - id: code
+    terms: [handler, rota, route, endpoint existe, endpoint exists, código, code path]

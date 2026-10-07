@@ -1,0 +1,2 @@
+pytest -q tests/mcp/test_tools.py
+S1: MCP tool registry includes the memory and blackboard projections and existing surface tests pass.

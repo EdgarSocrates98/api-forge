@@ -1,0 +1,338 @@
+name: API Forge CI
+
+on:
+  push:
+  pull_request:
+    branches:
+      - main
+  # Backstop: squash commits merged into main by auto-merge enabled with the
+  # workflow token do not start workflows, so main is validated daily as well.
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: api-forge-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate project
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install project and development dependencies
+        run: python -m pip install -e ".[dev,mcp]"
+
+      - name: Check vendored assets
+        run: python scripts/vendor_caveman.py --check
+
+      - name: Check Python dependency consistency
+        run: python -m pip check
+
+      - name: Audit committed dependency lock
+        run: python scripts/lock_audit.py
+
+      - name: Emit CycloneDX SBOM from committed lock
+        run: python scripts/sbom.py --output .apiforge/sbom.cdx.json
+
+      - name: Upload CycloneDX SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-forge-sbom
+          path: .apiforge/sbom.cdx.json
+          if-no-files-found: error
+
+      - name: Observe optional MCP protocol SDK
+        run: python scripts/mcp_protocol_probe.py
+
+      - name: Offline supply-chain audit
+        run: python scripts/supply_chain_audit.py
+
+      - name: Validate skills
+        run: python scripts/validate_skills.py --check-mirrors
+
+      - name: Validate agent mirrors
+        run: apiforge agents check --root .
+
+      - name: Verify public capability matrix
+        run: apiforge capabilities verify
+
+      - name: Execute local runtime probes for all platform verticals
+        run: >-
+          apiforge platform verify-runtime
+          --now "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          --out .apiforge/platform-runtime-receipt.json
+
+      - name: Smoke test API/Git/CI change control
+        run: >-
+          apiforge change-control run
+          --bundle tests/fixtures/api_git_cicd/change_bundle.json
+          --out-dir .apiforge/change-control
+
+      - name: Verify change-control evidence references
+        run: apiforge change-control verify --run-dir .apiforge/change-control
+
+      - name: Publish change-control reports
+        run: apiforge change-control publish --run-dir .apiforge/change-control
+
+      - name: Ruff lint
+        run: python -m ruff check src tests
+
+      - name: Ruff format
+        run: python -m ruff format --check src tests
+
+      - name: Mypy
+        run: python -m mypy src/apiforge
+
+      - name: Test suite
+        run: python -m pytest -q --junitxml=test-results.xml
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-forge-test-results
+          path: test-results.xml
+          if-no-files-found: ignore
+
+      - name: Upload governed change-control reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-forge-change-control-reports
+          path: .apiforge/change-control/reports
+          if-no-files-found: error
+
+      - name: Upload platform runtime receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-forge-platform-runtime-receipt
+          path: .apiforge/platform-runtime-receipt.json
+          if-no-files-found: error
+
+      - name: Release gate
+        run: python scripts/check_release.py
+
+  windows-parity:
+    name: Windows parity (declared python range)
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install project and development dependencies
+        run: python -m pip install -e ".[dev]"
+
+      - name: Ruff lint
+        run: python -m ruff check src tests
+
+      - name: Test suite
+        run: >-
+          python -m pytest -q
+          --basetemp "$env:TEMP/apiforge-pytest"
+          --junitxml=test-results.xml
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-forge-test-results-windows
+          path: test-results.xml
+          if-no-files-found: ignore
+
+  wheel-smoke:
+    name: Wheel installation validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build wheel
+        run: python -m pip wheel . --no-deps -w dist
+
+      - name: Install wheel into a clean venv
+        run: |
+          python -m venv /tmp/wheelcheck
+          /tmp/wheelcheck/bin/pip install dist/*.whl
+
+      - name: Smoke the installed console script
+        run: |
+          /tmp/wheelcheck/bin/apiforge --version
+          /tmp/wheelcheck/bin/apiforge capabilities verify --detail-level summary
+
+  otel-collector:
+    name: OTLP payload vs real OpenTelemetry Collector
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install project
+        run: python -m pip install -e .
+
+      - name: Start pinned OpenTelemetry Collector
+        run: |
+          set -euo pipefail
+          mkdir -p .apiforge/otel
+          # the contrib image runs as a non-root user; the bind-mounted
+          # output dir must be writable by it or the file exporter
+          # fails to start pipelines with "permission denied"
+          chmod 777 .apiforge/otel
+          docker run -d --name otelcol \
+            -p 4318:4318 \
+            -v "$PWD/scripts/otelcol/otelcol.yaml:/etc/otelcol.yaml:ro" \
+            -v "$PWD/.apiforge/otel:/out" \
+            otel/opentelemetry-collector-contrib:0.114.0 \
+            --config /etc/otelcol.yaml
+          for i in $(seq 1 40); do
+            if docker logs otelcol 2>&1 | grep -q "Everything is ready"; then
+              exit 0
+            fi
+            sleep 0.5
+          done
+          docker logs otelcol
+          echo "collector did not become ready" >&2
+          exit 1
+
+      - name: POST OTLP payload and verify collector acceptance
+        run: >-
+          python scripts/otel_collector_check.py
+          --endpoint http://127.0.0.1:4318
+          --output-file .apiforge/otel/spans.json
+          --timeout-s 30
+
+      - name: Upload collector acceptance report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-forge-otel-collector
+          path: .apiforge/otel/
+          if-no-files-found: ignore
+
+  open-green-pr:
+    name: Open PR after green validation
+    if: >-
+      github.event_name == 'push' && startsWith(github.ref, 'refs/heads/') &&
+      github.ref != 'refs/heads/main' && github.repository == 'EdgarSocrates98/api-forge'
+    needs: validate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Open or reuse pull request
+        env:
+          PR_TOKEN: ${{ secrets.APIFORGE_PR_TOKEN }}
+          WORKFLOW_TOKEN: ${{ github.token }}
+          APIFORGE_HOST_APPROVED: "true"
+        run: |
+          set -euo pipefail
+          if [ -n "${PR_TOKEN:-}" ]; then
+            export GH_TOKEN="$PR_TOKEN"
+          else
+            export GH_TOKEN="$WORKFLOW_TOKEN"
+          fi
+          python scripts/github_pr_host.py \
+            --operation create_or_reuse \
+            --repository "${GITHUB_REPOSITORY}" \
+            --head "${GITHUB_REF_NAME}" \
+            --base main \
+            --title "Validate ${GITHUB_REF_NAME}" \
+            --body "Automated PR opened after all API Forge CI validations passed for commit ${GITHUB_SHA}." \
+            --receipt .apiforge/pr/pr-receipt.json
+
+      - name: Upload GitHub mutation receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-forge-github-pr-receipt
+          path: .apiforge/pr/pr-receipt.json
+          if-no-files-found: ignore
+
+  auto-merge-green:
+    name: Request auto-merge after green validation
+    if: >-
+      github.event_name == 'push' && startsWith(github.ref, 'refs/heads/') &&
+      github.ref != 'refs/heads/main' && github.repository == 'EdgarSocrates98/api-forge' &&
+      vars.APIFORGE_AUTO_MERGE == 'true'
+    needs: open-green-pr
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Request GitHub auto-merge
+        env:
+          PR_TOKEN: ${{ secrets.APIFORGE_PR_TOKEN }}
+          WORKFLOW_TOKEN: ${{ github.token }}
+          APIFORGE_HOST_APPROVED: "true"
+        run: |
+          set -euo pipefail
+          # A merge enabled with the workflow token does not trigger CI on main;
+          # the PR token does when it is allowed to enable auto-merge (it needs
+          # contents and pull-requests write). Otherwise fall back to the
+          # workflow token: the merge still happens and the scheduled run
+          # validates main.
+          request() {
+            GH_TOKEN="$1" python scripts/github_pr_host.py \
+              --operation enable_auto_merge \
+              --repository "${GITHUB_REPOSITORY}" \
+              --head "${GITHUB_REF_NAME}" \
+              --base main \
+              --receipt .apiforge/pr/auto-merge-receipt.json
+          }
+          if [ -n "${PR_TOKEN:-}" ] && request "$PR_TOKEN"; then
+            exit 0
+          fi
+          echo "::warning::auto-merge not enabled with APIFORGE_PR_TOKEN (unset or lacking contents/pull-requests write); using the workflow token, so main is validated by the scheduled run"
+          request "$WORKFLOW_TOKEN"
+
+      - name: Upload auto-merge receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-forge-github-auto-merge-receipt
+          path: .apiforge/pr/auto-merge-receipt.json
+          if-no-files-found: ignore

@@ -1,0 +1,5 @@
+sources:
+  - name: fixture source
+    url: https://example.invalid/spec
+    authority: ietf-rfc
+    verified: "2026-09-01"

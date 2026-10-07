@@ -1,0 +1,17 @@
+# Risk floor raises economy to deep; budget clamps agents+tokens.
+id: risk-floor-raise
+govern:
+  profile: economy
+  risk: irreversible
+  budget_remaining:
+    observed_tokens: 2000
+    calls: 3
+expect:
+  decision:
+    profile: deep
+    max_agents: 3
+    max_reviewers: 0
+    max_tokens: 2000
+    max_debates: 2
+    allowed_execution_modes: [deterministic, sandbox, provider]
+  clamped_by: ["risk:irreversible->deep", "budget:calls", "budget:observed_tokens"]

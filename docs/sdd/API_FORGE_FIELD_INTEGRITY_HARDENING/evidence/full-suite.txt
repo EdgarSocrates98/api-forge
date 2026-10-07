@@ -1,0 +1,4 @@
+command: pytest -q (full suite)
+commit-base: 7dc0322 (branch sdd/field-integrity, uncommitted build)
+1 failed, 1344 passed, 1 skipped in 131.40s
+failure: tests/scripts/test_check_release.py::test_release_gate_accepts_complete_repository -- 'agent mirror drift: .claude/agents/README.md (non-agent file)'; the file is untracked and pre-existing (present before this feature), not introduced here

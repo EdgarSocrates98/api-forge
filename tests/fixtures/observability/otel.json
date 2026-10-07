@@ -1,0 +1,1 @@
+{"records":[{"id":"span-1","kind":"span","service":"orders","operation":"/orders/123","status_code":200,"duration_ms":12},{"id":"span-2","kind":"span","service":"orders","operation":"/orders/123","status_code":500,"duration_ms":40}]}

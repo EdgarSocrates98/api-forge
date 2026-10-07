@@ -1,0 +1,3 @@
+command: pytest tests/field tests/workspace tests/mcp tests/agentops tests/contracts -q
+commit-base: 6f9d02d (branch sdd/new-forge)
+170 passed, 1 skipped in 12.25s

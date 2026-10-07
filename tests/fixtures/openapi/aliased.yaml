@@ -1,0 +1,6 @@
+openapi: 3.1.0
+info: &info
+  title: x
+  version: "1"
+paths: {}
+metadata: *info

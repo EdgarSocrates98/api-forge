@@ -1,0 +1,12 @@
+{
+  "extracted": {
+    "error": 0,
+    "failed": 0,
+    "passed": 490,
+    "skipped": 1
+  },
+  "kind": "test.results",
+  "recorded_at": "2026-09-21T00:00:00Z",
+  "source_path": "E:\\projetos\\api-forge\\.pytest-tmp\\test_test_results_evidence_unb0\\pytest.txt",
+  "source_sha256": "415cab53aa42a9db5e22becfd75ede2151543e9eb51410a9a69977f728711bb0"
+}

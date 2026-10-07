@@ -1,0 +1,2 @@
+{"id":"agent:api-performance-review","kind":"agent","props":{},"sha256":"ccb2c0fc7e77db939dedce8a95377975d3ff9fcbf6ade2d32f8ce4fa73446d5d","version":1}
+{"id":"service:orders","kind":"service","props":{},"sha256":"623feeeb44a5d39de84bd3f2b8df6088050d1e724c61f9614b4b00b4a3b62e68","version":1}

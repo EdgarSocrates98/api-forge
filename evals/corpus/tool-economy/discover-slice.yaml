@@ -1,0 +1,4 @@
+id: discover-slice
+kind: discover
+query: failing tests slice
+expect_tool: slice_tests

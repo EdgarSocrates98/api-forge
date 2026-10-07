@@ -1,0 +1,15 @@
+# No provider usage at all: nothing is compared, everything stays named.
+id: all-unresolved
+run_id: eval-silent
+usage_rows:
+  - basis: unresolved
+    source: provider-silent
+estimate:
+  tokens: 1000
+  cost: 0.05
+  tool_calls: 3
+  elapsed_ms: 2000
+expect:
+  observed_total: 0
+  unresolved_entries: 1
+  unresolved_axes: [tokens, cost, tool_calls, elapsed_ms]

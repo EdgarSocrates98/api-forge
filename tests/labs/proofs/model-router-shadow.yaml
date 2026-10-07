@@ -1,0 +1,5 @@
+kind: model router shadow
+status: covered
+input: candidate_route=adaptive,legacy_route=baseline
+expected: shadow=true,governing=legacy
+evidence: deterministic Decision Plane fixture only; no provider quality claim

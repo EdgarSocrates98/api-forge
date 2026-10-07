@@ -1,0 +1,17 @@
+# A below-floor scorecard with enough evaluations is a constraint, and a
+# one-row benchmark never counts as history (§35 rule).
+id: scorecard-floor-blocks
+inputs:
+  reasoning_needs: light
+  needs_tool_support: true
+task_class: analysis
+candidates:
+  - {provider: mid, model: mid-v1, tool_support: true, structured_output: true, context_window: 200000, reasoning_tier: light, availability: available, cost_per_1k: 0.01, latency_p50_ms: 2500}
+evaluations:
+  - {provider: mid, model: mid-v1, task_class: analysis, quality: 0.5, recorded_at: "2026-10-06T00:00:00Z"}
+  - {provider: mid, model: mid-v1, task_class: analysis, quality: 0.4, recorded_at: "2026-10-06T01:00:00Z"}
+  - {provider: mid, model: mid-v1, task_class: analysis, quality: 0.45, recorded_at: "2026-10-06T02:00:00Z"}
+expect:
+  code: AF-ROUTE-NO-ELIGIBLE-MODEL
+  ineligible:
+    mid-v1: [quality-below-floor]

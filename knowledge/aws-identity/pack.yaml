@@ -1,0 +1,9 @@
+domain: aws-identity
+version: 1
+areas: [IDENTITY]
+rule_ids: [AF-IAM-001, AF-IAM-002, AF-IAM-003, AF-IAM-004, AF-IAM-005]
+summary: >-
+  IAM least privilege (wildcard grants, session duration) and Cognito pool
+  posture (MFA, deletion protection) as measured by the iam-role/cognito
+  dump readers.
+verified: "2026-09-21"

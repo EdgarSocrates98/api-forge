@@ -120,10 +120,14 @@ def test_cli_upstream_round_trip(tmp_path: Path, monkeypatch: pytest.MonkeyPatch
         app,
         [
             "analyze",
-            "--contract", str(CONTRACT),
-            "--project", str(PROJECT),
-            "--out-dir", "case",
-            "--upstream", str(payload),
+            "--contract",
+            str(CONTRACT),
+            "--project",
+            str(PROJECT),
+            "--out-dir",
+            "case",
+            "--upstream",
+            str(payload),
         ],
     )
     assert result.exit_code == 0, result.output
@@ -137,10 +141,14 @@ def test_cli_upstream_rejects_malformed_file(tmp_path: Path) -> None:
         app,
         [
             "analyze",
-            "--contract", str(CONTRACT),
-            "--project", str(PROJECT),
-            "--out-dir", str(tmp_path / "case"),
-            "--upstream", str(bad),
+            "--contract",
+            str(CONTRACT),
+            "--project",
+            str(PROJECT),
+            "--out-dir",
+            str(tmp_path / "case"),
+            "--upstream",
+            str(bad),
         ],
     )
     assert result.exit_code == 2
@@ -168,9 +176,7 @@ def test_upstream_fact_with_nested_routing_key_is_refused(tmp_path: Path) -> Non
 def test_upstream_fact_without_upstream_namespaces_is_refused(tmp_path: Path) -> None:
     for over in ({"fact_id": "foreign:abc"}, {"kind": "evidence"}):
         with pytest.raises(AnalysisError, match="AF-UPSTREAM-UNMARKED"):
-            analyze_project(
-                CONTRACT, PROJECT, None, tmp_path / "case", upstream=(_fact(**over),)
-            )
+            analyze_project(CONTRACT, PROJECT, None, tmp_path / "case", upstream=(_fact(**over),))
 
 
 def test_upstream_fact_keep_declarative_keys(tmp_path: Path) -> None:

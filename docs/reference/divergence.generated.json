@@ -1,0 +1,125 @@
+{
+  "schema": "forge/DocDivergence/v1",
+  "cli": "apiforge",
+  "documented_missing": [
+    {
+      "file": "api-forge\\docs\\guides\\API_FORGE_PLATFORM_USAGE.en.md; api-forge\\docs\\guides\\API_FORGE_PLATFORM_USAGE.md; api-forge\\docs\\guides\\API_FORGE_PORTABLE_DISTRIBUTION.pt-BR.md",
+      "line": "-",
+      "problem": "`apiforge apiforge` documented but not a real command",
+      "impact": "user runs a command that fails",
+      "fix": "remove or rename the `apiforge` mention"
+    },
+    {
+      "file": "api-forge\\docs\\sdd\\API_FORGE_AGENT_ROSTER\\architecture.md",
+      "line": "-",
+      "problem": "`apiforge commands` documented but not a real command",
+      "impact": "user runs a command that fails",
+      "fix": "remove or rename the `commands` mention"
+    },
+    {
+      "file": "api-forge\\docs\\plans\\2026-09-21-api-forge-sdd-policy-sandbox-evidence.md",
+      "line": "-",
+      "problem": "`apiforge git` documented but not a real command",
+      "impact": "user runs a command that fails",
+      "fix": "remove or rename the `git` mention"
+    },
+    {
+      "file": "api-forge\\docs\\API_FORGE_EVOLUTION_MAP.en.md; api-forge\\docs\\API_FORGE_EVOLUTION_MAP.md; api-forge\\docs\\contracts\\ContextScope-v1.md; api-forge\\docs\\contracts\\ContextScope-v1.pt-BR.md; api-forge\\docs\\guides\\API_FORGE_EXPERIENCE_INTEROPERABILITY.en.md; api-forge\\docs\\guides\\API_FORGE_EXPERIENCE_INTEROPERABILITY.md; api-forge\\docs\\guides\\API_FORGE_PLATFORM_USAGE.en.md; api-forge\\docs\\guides\\API_FORGE_PORTABLE_DISTRIBUTION.md; api-forge\\docs\\guides\\API_FORGE_PORTABLE_DISTRIBUTION.pt-BR.md",
+      "line": "-",
+      "problem": "`apiforge here` documented but not a real command",
+      "impact": "user runs a command that fails",
+      "fix": "remove or rename the `here` mention"
+    },
+    {
+      "file": "api-forge\\docs\\installation\\troubleshooting.md",
+      "line": "-",
+      "problem": "`apiforge mcp-verify` documented but not a real command",
+      "impact": "user runs a command that fails",
+      "fix": "remove or rename the `mcp-verify` mention"
+    },
+    {
+      "file": "api-forge\\docs\\sdd\\API_FORGE_PERFORMANCE_CONTROL_PLANE_E\\verify.md; api-forge\\docs\\sdd\\API_GRAPH_NEPTUNE\\verify.md",
+      "line": "-",
+      "problem": "`apiforge outcome` documented but not a real command",
+      "impact": "user runs a command that fails",
+      "fix": "remove or rename the `outcome` mention"
+    },
+    {
+      "file": "api-forge\\docs\\plans\\2026-09-21-api-forge-mvp-vertical-slice.md",
+      "line": "-",
+      "problem": "`apiforge package` documented but not a real command",
+      "impact": "user runs a command that fails",
+      "fix": "remove or rename the `package` mention"
+    },
+    {
+      "file": "api-forge\\docs\\guides\\API_FORGE_EXPERIENCE_INTEROPERABILITY.md",
+      "line": "-",
+      "problem": "`apiforge pytest` documented but not a real command",
+      "impact": "user runs a command that fails",
+      "fix": "remove or rename the `pytest` mention"
+    },
+    {
+      "file": "api-forge\\README.md; api-forge\\docs\\guides\\API_FORGE_PLATFORM_USAGE.md; api-forge\\docs\\plans\\2026-09-21-api-forge-catalog-routing-spring.md; api-forge\\docs\\plans\\2026-09-21-api-forge-mvp-vertical-slice.md; api-forge\\docs\\plans\\2026-09-21-api-forge-sdd-policy-sandbox-evidence.md",
+      "line": "-",
+      "problem": "`apiforge python` documented but not a real command",
+      "impact": "user runs a command that fails",
+      "fix": "remove or rename the `python` mention"
+    },
+    {
+      "file": "api-forge\\docs\\installation\\troubleshooting.md; api-forge\\docs\\installation\\update-and-repair.md",
+      "line": "-",
+      "problem": "`apiforge repair` documented but not a real command",
+      "impact": "user runs a command that fails",
+      "fix": "remove or rename the `repair` mention"
+    },
+    {
+      "file": "api-forge\\docs\\sdd\\API_FORGE_EVOLUTION1_AGENTIC_OS\\architecture.md",
+      "line": "-",
+      "problem": "`apiforge rollback` documented but not a real command",
+      "impact": "user runs a command that fails",
+      "fix": "remove or rename the `rollback` mention"
+    },
+    {
+      "file": "api-forge\\docs\\sdd\\API_FORGE_AGENTOPS_CONTROL_PLANE_2\\verify.md; api-forge\\docs\\sdd\\API_FORGE_AGENT_PROTOCOL_2_CAVEMAN_RTK_INTEGRATION\\verify.md; api-forge\\docs\\sdd\\API_FORGE_EVALS_GOLDEN_HOLDOUT_C\\verify.md; api-forge\\docs\\sdd\\API_FORGE_TOOL_ADAPTER_REGISTRY_B\\verify.md",
+      "line": "-",
+      "problem": "`apiforge tests` documented but not a real command",
+      "impact": "user runs a command that fails",
+      "fix": "remove or rename the `tests` mention"
+    },
+    {
+      "file": "api-forge\\docs\\installation\\uninstall.md",
+      "line": "-",
+      "problem": "`apiforge uninstall` documented but not a real command",
+      "impact": "user runs a command that fails",
+      "fix": "remove or rename the `uninstall` mention"
+    },
+    {
+      "file": "api-forge\\docs\\installation\\update-and-repair.md",
+      "line": "-",
+      "problem": "`apiforge update` documented but not a real command",
+      "impact": "user runs a command that fails",
+      "fix": "remove or rename the `update` mention"
+    },
+    {
+      "file": "api-forge\\docs\\guides\\API_FORGE_EXPERIENCE_INTEROPERABILITY.en.md; api-forge\\docs\\guides\\API_FORGE_PLATFORM_USAGE.en.md",
+      "line": "-",
+      "problem": "`apiforge uv` documented but not a real command",
+      "impact": "user runs a command that fails",
+      "fix": "remove or rename the `uv` mention"
+    },
+    {
+      "file": "api-forge\\docs\\contracts\\BenchmarkIdentity-v1.md",
+      "line": "-",
+      "problem": "`apiforge version` documented but not a real command",
+      "impact": "user runs a command that fails",
+      "fix": "remove or rename the `version` mention"
+    }
+  ],
+  "undocumented_commands": [
+    "evolve",
+    "grpc",
+    "resume",
+    "review"
+  ],
+  "generated_at": "2026-10-09T22:27:46Z"
+}

@@ -52,12 +52,25 @@ apiforge-tui = "apiforge.cli_tui:tui_app"
 [tool.hatch.build.targets.wheel]
 packages = ["src/apiforge"]
 
+# As arvores canonicas `agents/` e `.agents/skills/` vivem na raiz do repo; o
+# wheel as copia para `apiforge/host_assets/` — e o que `apiforge install` le
+# quando nao ha checkout (mesmo padrao do `integrate/bundle` no SparkForge).
+[tool.hatch.build.targets.wheel.force-include]
+"agents" = "apiforge/host_assets/agents"
+".agents/skills" = "apiforge/host_assets/skills"
+"AGENT_PROTOCOL.md" = "apiforge/host_assets/AGENT_PROTOCOL.md"
+
 [tool.ruff]
 line-length = 100
 target-version = "py312"
 
 [tool.ruff.lint.flake8-bugbear]
 extend-immutable-calls = ["typer.Option", "typer.Argument"]
+
+[tool.ruff.lint.per-file-ignores]
+# Vendored engine (canonical: the-forge/scripts/installkit) — kept
+# byte-identical to the shared source; linted in the canonical repo.
+"src/apiforge/_installkit.py" = ["ALL"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
@@ -70,6 +83,12 @@ files = ["src/apiforge"]
 [[tool.mypy.overrides]]
 module = "mcp.*"
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+# Vendored engine (canonical: the-forge/scripts/installkit); typed to the
+# consumer-side contract, kept outside `strict` to stay byte-identical.
+module = "apiforge._installkit"
+ignore_errors = true
 
 [[tool.mypy.overrides]]
 module = "apiforge.tui.*"

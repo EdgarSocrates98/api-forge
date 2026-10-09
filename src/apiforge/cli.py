@@ -503,6 +503,10 @@ from apiforge.cli_experience import register as _register_experience
 
 _register_experience(app)
 
+from apiforge.cli_install import register as _register_install
+
+_register_install(app)
+
 
 @app.command("doctor")
 def runtime_doctor(

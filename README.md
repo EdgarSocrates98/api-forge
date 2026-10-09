@@ -1,3 +1,5 @@
+
+> Instalação portátil: [`docs/installation/quickstart.md`](docs/installation/quickstart.md) — clone → setup → install.
 <p align="center">
   <img src="docs/assets/api-forge-logo.jpg" alt="API Forge logo" width="420" />
 </p>

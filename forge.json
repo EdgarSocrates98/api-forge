@@ -1,0 +1,14 @@
+{
+  "forge_id": "api-forge",
+  "package": "apiforge",
+  "distribution": "apiforge",
+  "cli": "apiforge",
+  "python": ">=3.12,<3.13",
+  "mcp_server_name": "apiforge",
+  "mcp_command": [
+    "apiforge-mcp"
+  ],
+  "extras": [
+    "mcp"
+  ]
+}

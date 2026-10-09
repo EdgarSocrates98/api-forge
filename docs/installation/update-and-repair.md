@@ -3,7 +3,7 @@
 ## Update
 
 ```bash
-apiforge update --to <versão ou tag pinada>
+apiforge install update --to <versão ou tag pinada>
 ```
 
 `latest` é recusado por contrato — sempre pin a versão. Sem checkout
@@ -13,7 +13,7 @@ registrado o update reporta BLOCKED honestamente.
 
 ```bash
 apiforge doctor   # mostra o drift
-apiforge repair   # reassegura regiões gerenciadas
+apiforge install repair   # reassegura regiões gerenciadas
 ```
 
 Repair restaura arquivos gerenciados removidos e cura blocos

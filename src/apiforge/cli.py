@@ -383,7 +383,7 @@ def main(
             typer.echo(f"  {name:<14} {desc}")
         typer.echo()
         typer.echo("help:    apiforge --help  |  apiforge <command> --help")
-        typer.echo("install: apiforge install apply")
+        typer.echo("install: apiforge install")
         typer.echo("docs:    docs/installation/quickstart.md")
         raise typer.Exit()
     from apiforge.output.render import resolve_mode

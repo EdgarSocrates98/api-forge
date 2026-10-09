@@ -1,3 +1,6 @@
+
+> Instalação portátil: [`docs/installation/quickstart.md`](docs/installation/quickstart.md) — clone → setup → install.
+> Docs: [commands](docs/reference/commands.md) · [skills](docs/reference/skills.md) · [agents](docs/reference/agents.md) · [tutorial](docs/tutorials/first-run.md) · [economy](docs/economy.md) · [troubleshooting](docs/installation/troubleshooting.md)
 <p align="center">
   <img src="docs/assets/api-forge-logo.jpg" alt="API Forge logo" width="420" />
 </p>
@@ -34,6 +37,36 @@ volume or container. Add its executable directory to `PATH`, or invoke it by
 absolute path. Set `APIFORGE_HOME`, `APIFORGE_CONFIG` and `APIFORGE_CACHE` when
 the default project state location is not writable. See
 [the portable distribution guide](docs/guides/API_FORGE_PORTABLE_DISTRIBUTION.md).
+
+### Bootstrap and project install
+
+Clone once, bootstrap once — `setup.sh` / `setup.ps1` resolve a compatible
+interpreter, create an isolated `~/.forge/installs/api-forge` venv, install the
+runtime from a built wheel and register the installation under
+`~/.forge/installations/`:
+
+```bash
+./setup.sh            # or .\setup.ps1 on Windows
+```
+
+From any other repository, project-scope installation writes the managed
+host assets (skills, agents, `.mcp.json` entry, `api-forge:managed` marker
+block) under `.apiforge/install/` ownership — user files are adopted or
+skipped, never silently overwritten:
+
+```bash
+cd ~/projetos/meu-servico
+apiforge install --yes            # or --dry-run to see the plan
+apiforge install status           # ledger + drift + health
+apiforge install doctor           # deep checks + MCP handshake
+apiforge install repair           # restore managed assets only
+apiforge install uninstall        # removes only managed files
+```
+
+Scopes are `project` (default), `workspace` and `user`; profiles are
+`minimal`, `recommended` (skills + MCP) and `full` (+ agents); hosts are
+`claude`, `devin`, `codex`, `copilot` or `all`. Every mutation emits a
+`forge/InstallReceipt/v1` receipt under `.apiforge/install/receipts/`.
 
 The hostless first-run surface is:
 

@@ -36,6 +36,19 @@ requires the cost of the run that never happened.
 | `AF-DIST-PATH-INVALID` | selected installation, state, config or cache path is empty, invalid or not usable |
 | `AF-DIST-ASSET-MISSING` | packaged API Forge asset or host asset manifest is missing or unreadable |
 | `AF-DIST-ASSET-DIVERGED` | packaged asset hash does not match the declared source hash |
+| `FORGE-INSTALL-SCOPE-UNKNOWN` | `--scope` outside project\|workspace\|user; unlock: pick a documented scope |
+| `FORGE-INSTALL-HOST-UNKNOWN` | `--host` outside claude\|devin\|codex\|copilot\|all; unlock: pick a documented host |
+| `FORGE-INSTALL-PROFILE-UNKNOWN` | `--profile` outside minimal\|recommended\|full; unlock: pick a documented profile |
+| `FORGE-INSTALL-PERMISSION-DENIED` | target root is not writable; unlock: fix permissions or choose another `--root` |
+| `FORGE-INSTALL-PYTHON-INCOMPATIBLE` | resolved interpreter does not satisfy the declared python spec |
+| `FORGE-INSTALL-NOT-A-REPO` | no VCS root and no installed state dir from cwd; unlock: pass `--root` or run inside a repo |
+| `FORGE-INSTALL-PLAN-NOT-APPROVED` | write requested without `--yes`/`--dry-run`; unlock: approve explicitly or plan first |
+| `FORGE-INSTALL-LOCKED` | another install operation holds `.apiforge/install/.install.lock` |
+| `FORGE-INSTALL-NOT-INSTALLED` | lifecycle verb ran against a target with no managed ledger |
+| `FORGE-INSTALL-DRIFT-UNREPAIRABLE` | drifted file cannot be safely restored without touching user content |
+| `FORGE-INSTALL-UNSUPPORTED` | requested scope/host combination is not supported by this forge |
+| `FORGE-INSTALL-SPAWN-DISABLED` | verification step needed subprocess but the environment forbids it |
+| `FORGE-INSTALL-VERIFY-FAILED` | post-install verification (smoke/handshake) did not pass |
 | `AF-MANIFEST-INVALID` | project or workspace manifest is missing, malformed or violates its versioned schema |
 | `AF-MANIFEST-SECRET` | project, workspace or user config contains secret-like material refused by the local contract |
 | `AF-MANIFEST-WRITE` | minimal manifest could not be written to the requested user-owned location |

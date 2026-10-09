@@ -374,6 +374,22 @@ def main(
         typer.echo(f"apiforge {__version__}")
         raise typer.Exit()
     if ctx.invoked_subcommand is None:
+        # TTY → interactive home; non-TTY → product summary (§1.2, §6).
+        try:
+            import sys as _sys
+
+            if _sys.stdin.isatty() and _sys.stdout.isatty():
+                from apiforge.ui.home import run_home
+                from apiforge.ui.kit import NonInteractive
+
+                try:
+                    rc = run_home()
+                except NonInteractive:
+                    rc = None
+                if rc is not None:
+                    raise typer.Exit(rc)
+        except ImportError:
+            pass
         # Phase 4.1 — bare ``apiforge`` prints a product summary and the
         # path to help; never silent, never a mutation.
         typer.echo("apiforge - deterministic, offline API evolution analysis.")

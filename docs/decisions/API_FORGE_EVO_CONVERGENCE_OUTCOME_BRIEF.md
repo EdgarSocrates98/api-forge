@@ -101,4 +101,4 @@ environmental failure.
 The complete phase artifacts and hashes are in
 [`docs/sdd/API_FORGE_EVO_CONVERGENCE/`](../sdd/API_FORGE_EVO_CONVERGENCE/),
 and the persisted execution case is in
-[`.apiforge/case/`](../../.apiforge/case/).
+`.apiforge/case/`.

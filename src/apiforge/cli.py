@@ -343,8 +343,20 @@ _register_agentic_state(app, runtime_app)
 _OUTPUT_MODE: dict[str, str | None] = {"mode": None}
 
 
+_TOP_COMMANDS: tuple[tuple[str, str], ...] = (
+    ("model", "build the canonical API-IR from a spec"),
+    ("analyze", "analyze an API artifact (breaking changes, rules)"),
+    ("diff", "diff two OpenAPI contracts"),
+    ("judge", "judge findings against the rule catalog"),
+    ("install", "install/manage host integrations"),
+    ("capabilities", "discover skills, agents and commands"),
+    ("doctor", "health-check the installation"),
+)
+
+
 @app.callback()
 def main(
+    ctx: typer.Context,
     version: bool = typer.Option(
         False,
         "--version",
@@ -360,6 +372,19 @@ def main(
     """Analyze API evolution deterministically and offline."""
     if version:
         typer.echo(f"apiforge {__version__}")
+        raise typer.Exit()
+    if ctx.invoked_subcommand is None:
+        # Phase 4.1 — bare ``apiforge`` prints a product summary and the
+        # path to help; never silent, never a mutation.
+        typer.echo("apiforge - deterministic, offline API evolution analysis.")
+        typer.echo()
+        typer.echo("most used:")
+        for name, desc in _TOP_COMMANDS:
+            typer.echo(f"  {name:<14} {desc}")
+        typer.echo()
+        typer.echo("help:    apiforge --help  |  apiforge <command> --help")
+        typer.echo("install: apiforge install apply")
+        typer.echo("docs:    docs/installation/quickstart.md")
         raise typer.Exit()
     from apiforge.output.render import resolve_mode
 

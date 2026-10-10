@@ -13,6 +13,26 @@ def test_menu_well_formed():
         assert argv is None or argv == "__wizard__" or isinstance(argv, list)
 
 
+def test_menu_argv_parse_on_real_cli():
+    """Every menu argv names a real command path — `--help` on it exits 0.
+
+    Shape-only checks let `install mcp-verify` (a verb that never existed)
+    sit in the menu; parsing each entry against the live Typer app catches
+    invented commands.
+    """
+    from typer.testing import CliRunner
+
+    from apiforge.cli import app
+    from apiforge.ui import home
+
+    runner = CliRunner()
+    for label, argv in home._MENU:
+        if argv is None or argv == "__wizard__":
+            continue
+        result = runner.invoke(app, [*argv, "--help"])
+        assert result.exit_code == 0, (label, argv, result.output[-400:])
+
+
 def test_tui_entries_real():
     from apiforge.ui import tui
     entries = tui.entries()

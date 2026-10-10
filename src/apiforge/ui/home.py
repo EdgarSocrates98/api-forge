@@ -20,11 +20,20 @@ CLI_NAME = 'apiforge'
 CLI_ENTRY = 'apiforge.cli:app'
 
 _MENU: list[tuple[str, list[str] | None]] = [
-    ('Analyze this API', ['analyze']),
-    ('Explore skills and agents', ['agents']),
-    ('Check installation health', ['doctor']),
-    ('MCP verify (real handshake)', ['install', 'mcp-verify']),
-    ('Graph Studio (browser)', ['graph','ui','--graph','.apiforge/graph']),
+    ('API analysis (project/workspace status)', ['status']),
+    ('Discover API routes (FastAPI)', ['discover', '--project', '.']),
+    ('Contract explorer', ['contract', 'list']),
+    ('Architecture explorer (capability matrix)', ['capabilities', 'list']),
+    ('Agentic tasks', ['forge', 'health']),
+    ('Test results (eval catalog)', ['evals', 'list']),
+    ('Verification plan', ['verify', 'plan']),
+    ('Evidence (field records)', ['field', 'report']),
+    ('History (agent/tool spans)', ['runtime', 'telemetry-query']),
+    ('Installation health', ['install', 'status']),
+    ('Host manager (AI hosts)', ['ai']),
+    ('Explore agents (drift check)', ['agents', 'check']),
+    ('MCP verify (real handshake)', ['install', 'verify']),
+    ('Graph Studio (browser)', ['graph', 'ui', '--graph', '.apiforge/graph']),
     ("installation wizard", "__wizard__"),
     ("quit", None),
 ]

@@ -17,6 +17,8 @@ Revisado em 2026-10 contra o CLI instalado (apiforge dev v0.1.0,
 | `docs/learn/recipes/java-go.md` | sugeria `analyze` sem contrato — `--contract` é obrigatório | reescrito: `discover` (FastAPI) + skill `api-forge-discovery` para Java/Go |
 | `docs/learn/recipes/graphfy.md` | `graph query/impact --dir` — flag real é `--graph` | corrigido |
 | `docs/HOST_PARITY.md` | sem fluxo de abrir host | seção "Opening a host session" documentando `apiforge ai` |
+| `src/apiforge/cli.py` | `apiforge --help` **crashava** no console Windows cp1252 — `→` (U+2192) no docstring do `ai` | `->`; gate `test_help_is_cp1252_safe` varre help/params de todos os comandos |
+| `src/apiforge/ui/home.py` | menu TUI com `install mcp-verify` (verbo inexistente) e `analyze`/`agents` bare que só imprimem usage | menu reescrito cobrindo os 10 dashboards §2.3 com argv real verificado; gate `test_menu_argv_parse_on_real_cli` parseia cada entrada no app Typer |
 
 ## Estado por documento
 
@@ -47,10 +49,16 @@ Revisado em 2026-10 contra o CLI instalado (apiforge dev v0.1.0,
 
 ## Pendências declaradas
 
-- TUI §2.3: `apiforge tui <task_id>` é execução por TaskSpec — os
-  dashboards de navegação do programa (API Analysis, Contract Explorer,
-  Host Manager…) não existem como superfície separada; `experience`
-  projeta status/doctor/review. Decisão de escopo pendente.
+- TUI §2.3: o menu interativo (`ui/home.py` + `ui/tui.py` full-screen)
+  cobre os 10 dashboards exigidos — API Analysis (`status`), Contract
+  Explorer (`contract list`), Architecture Explorer (`capabilities
+  list`), Agentic Tasks (`forge health`), Test Results (`evals list`),
+  Verification (`verify plan`), Evidence (`field report`), History
+  (`runtime telemetry-query`), Installation (`install status`), Host
+  Manager (`ai`) — cada entrada é argv real que o teste de contrato
+  parseia no app Typer. `apiforge tui <task_id>` continua sendo a
+  projeção de execução por TaskSpec (superfície separada, não
+  substituída).
 - Codex em escopo de projeto: o host lê só `~/.codex/config.toml` —
   MCP user-scope via `install --scope user --host codex`.
 - 36 links quebrados pré-existentes no índice de docs (não desta onda).

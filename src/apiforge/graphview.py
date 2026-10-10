@@ -25,7 +25,7 @@ def build_view(graph_dir: str | Path) -> ForgeGraphView | None:
 
     try:
         nodes, edges = read_graph(Path(graph_dir))
-    except Exception:
+    except (OSError, ValueError, KeyError, TypeError):
         return None
     desc = new_descriptor(
         provider_id=PROVIDER,

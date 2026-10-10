@@ -76,6 +76,10 @@ extend-immutable-calls = ["typer.Option", "typer.Argument"]
 # Vendored engine (canonical: the-forge/scripts/installkit) — kept
 # byte-identical to the shared source; linted in the canonical repo.
 "src/apiforge/_installkit.py" = ["ALL"]
+"scripts/forge_bootstrap.py" = ["ALL"]
+"scripts/forge_installkit.py" = ["ALL"]
+# Eval fixtures are deliberately non-idiomatic analyzer inputs.
+"evals/corpus/**/fixtures/**" = ["ALL"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]

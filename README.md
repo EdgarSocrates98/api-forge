@@ -686,3 +686,10 @@ to create and approve pull requests.
 Security reports belong in [`SECURITY.md`](SECURITY.md), preferably through a
 private GitHub Security Advisory. API Forge is released under the
 [`MIT License`](LICENSE).
+
+## Graph Studio
+
+`apiforge graph view --graph .apiforge/graph` emits a `forge/ForgeGraphView/v1`
+view of the built graph; `apiforge graph ui` opens the embedded local explorer
+(declinable at install via `--components`). Full docs:
+`the-forge/docs/graph-studio/`.

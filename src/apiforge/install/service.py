@@ -49,20 +49,22 @@ def _spec() -> kit.ForgeSpec:
 
 
 def _render_for(ctx: kit.InstallContext) -> dict[str, bytes]:
-    kinds = set(kit.profile_asset_kinds(ctx.profile))
+    kinds = set(kit.asset_kinds_for(ctx))
     return render.render(
         ctx.hosts, skills="skill" in kinds, agents="agent" in kinds)
 
 
 def _ctx(scope: str, root: Path | None, hosts: tuple[str, ...],
-         profile: str, dry_run: bool, cwd: Path | None = None) -> kit.InstallContext:
+         profile: str, dry_run: bool, cwd: Path | None = None,
+         components: tuple[str, ...] | None = None) -> kit.InstallContext:
     spec = _spec()
     base = Path(cwd or Path.cwd())
     target = kit.resolve_scope(spec, scope, base, root)
     return kit.InstallContext(
         spec=spec, scope=scope, root=target,
         state_dir=kit.state_dir_for(spec, scope, target),
-        profile=profile, hosts=hosts, dry_run=dry_run)
+        profile=profile, hosts=hosts, dry_run=dry_run,
+        options=kit.component_options(profile, components))
 
 
 def _hosts(host: str) -> tuple[str, ...]:
@@ -76,12 +78,13 @@ def _hosts(host: str) -> tuple[str, ...]:
 
 def install(host: str = "all", *, scope: str = "project",
             root: Path | None = None, profile: str = "recommended",
-            yes: bool = False, dry_run: bool = False) -> dict[str, Any]:
+            yes: bool = False, dry_run: bool = False,
+            components: tuple[str, ...] | None = None) -> dict[str, Any]:
     """Aplica a instalacao no alvo resolvido. Sem ``yes`` nem ``dry_run``
     a escrita e recusada — o plano e o contrato."""
     if profile not in PROFILES:
         raise kit.InstallError(kit.E_PROFILE, f"profile {profile!r}; {PROFILES}")
-    ctx = _ctx(scope, root, _hosts(host), profile, dry_run)
+    ctx = _ctx(scope, root, _hosts(host), profile, dry_run, components=components)
     state = ctx.state_dir
     with kit.acquire_lock(state):
         receipt = kit.apply_install(ctx, approved=yes)

@@ -3327,6 +3327,57 @@ def graph_export(
     _echo_json(_run(work), detail_level)
 
 
+
+@graph_app.command("view")
+def graph_view(
+    graph: Path = typer.Option(..., "--graph", help="Graph directory (nodes.jsonl)."),
+) -> None:
+    """Emit the ForgeGraphView/v1 document (Graph Studio contract)."""
+
+    def work() -> object:
+        from apiforge.graphview import build_view
+
+        view = build_view(graph)
+        if view is None:
+            raise AnalysisError(
+                "AF-GRAPH-NOT-FOUND",
+                f"no nodes.jsonl under {graph} — run `apiforge graph build` first",
+            )
+        return view.to_dict()
+
+    _echo_json(_run(work), "full")
+
+
+@graph_app.command("ui")
+def graph_ui(
+    graph: Path = typer.Option(..., "--graph", help="Graph directory (nodes.jsonl)."),
+    no_browser: bool = typer.Option(
+        False, "--no-browser", help="Serve without opening a browser (SSH/remote)."
+    ),
+    port: int = typer.Option(0, "--port", help="Port to bind (default ephemeral)."),
+) -> None:
+    """Open the local Graph Studio explorer for this graph."""
+
+    from apiforge._graphstudio import graph_studio_enabled, open_studio
+    from apiforge.graphview import build_view
+
+    if not graph_studio_enabled(
+        Path("."), state_rel=".apiforge/install", user_state_rel="~/.apiforge/install"
+    ):
+        raise AnalysisError(
+            "AF-GRAPH-STUDIO-DISABLED",
+            "Graph Studio recusado na instalacao "
+            "(components.json: graph_studio=false) — reinstale com o componente",
+        )
+    view = build_view(graph)
+    if view is None:
+        raise AnalysisError(
+            "AF-GRAPH-NOT-FOUND",
+            f"no nodes.jsonl under {graph} — run `apiforge graph build` first",
+        )
+    raise typer.Exit(open_studio([view], open_browser=not no_browser, port=port))
+
+
 @index_app.command("build")
 def index_build(
     project: Path = typer.Option(..., "--project", help="Project root to index."),

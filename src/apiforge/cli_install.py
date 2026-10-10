@@ -71,13 +71,19 @@ def install_apply(
         help="Explicit approval; without it only --dry-run is allowed."),
     dry_run: bool = typer.Option(
         False, "--dry-run", help="Plan only — writes nothing."),
+    components: str | None = typer.Option(
+        None, "--components",
+        help="Optional components csv: skills,agents,mcp,tui,graph-studio."),
     detail_level: str = typer.Option("normal", "--detail-level"),
 ) -> None:
     """Install API Forge host assets into the resolved scope."""
     if ctx.invoked_subcommand is not None:
         return
+    comps = tuple(
+        c.strip() for c in components.split(",") if c.strip()
+    ) if components else None
     out = _call(service.install, host, scope=scope, root=root,
-                profile=profile, yes=yes, dry_run=dry_run)
+                profile=profile, yes=yes, dry_run=dry_run, components=comps)
     _emit(out, detail_level)
 
 

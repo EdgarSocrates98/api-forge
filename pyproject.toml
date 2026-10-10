@@ -68,6 +68,9 @@ target-version = "py312"
 extend-immutable-calls = ["typer.Option", "typer.Argument"]
 
 [tool.ruff.lint.per-file-ignores]
+# Vendored Graph Studio kit (canonical: the-forge/src/theforge)
+"src/apiforge/_graphview.py" = ["ALL"]
+"src/apiforge/_graphstudio.py" = ["ALL"]
 # Vendored Forge UI kit (canonical: the-forge/src/theforge/ui)
 "src/apiforge/ui/**/*.py" = ["ALL"]
 # Vendored engine (canonical: the-forge/scripts/installkit) — kept

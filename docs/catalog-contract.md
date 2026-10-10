@@ -1080,6 +1080,7 @@ writes RDF 1.1 N-Triples (`graph.nt`); both are re-validated before
 | `AF-GRAPH-INPUT` | a source artifact is unreadable or malformed |
 | `AF-GRAPH-FORMAT` | export format outside `jsonl`, `neptune`, `rdf` |
 | `AF-GRAPH-EXPORT-INVALID` | a projection failed its loader-grammar validation; nothing is listed in `export.json` |
+| `AF-GRAPH-STUDIO-DISABLED` | `graph ui` refused: `graph-studio` was declined at install (`components.json`); unlock: reinstall with `graph-studio` in `--components` |
 
 ### Index (`index`)
 

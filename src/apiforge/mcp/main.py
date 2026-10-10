@@ -40,6 +40,10 @@ def resolve_protocol(argv: list[str] | None = None) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is not None:
+            reconfigure(encoding="utf-8", errors="replace")
     surface = resolve_surface(argv)
     protocol = resolve_protocol(argv)
     try:

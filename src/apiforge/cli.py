@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 from collections.abc import Callable
 from pathlib import Path
 from typing import Literal, NoReturn, cast
@@ -370,6 +371,10 @@ def main(
     ),
 ) -> None:
     """Analyze API evolution deterministically and offline."""
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is not None:
+            reconfigure(encoding="utf-8", errors="replace")
     if version:
         typer.echo(f"apiforge {__version__}")
         raise typer.Exit()

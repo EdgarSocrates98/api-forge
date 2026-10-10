@@ -22,6 +22,12 @@ def tui(
     fallback: bool = typer.Option(False, "--fallback", help="Force headless projection."),
 ) -> None:
     """Open the canonical execution and governance projection."""
+    import sys
+
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is not None:
+            reconfigure(encoding="utf-8", errors="replace")
     run_tui(root, task_id, force_fallback=fallback)
 
 

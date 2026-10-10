@@ -19,6 +19,7 @@ Revisado em 2026-10 contra o CLI instalado (apiforge dev v0.1.0,
 | `docs/HOST_PARITY.md` | sem fluxo de abrir host | seção "Opening a host session" documentando `apiforge ai` |
 | `src/apiforge/cli.py` | `apiforge --help` **crashava** no console Windows cp1252 — `→` (U+2192) no docstring do `ai` | `->`; gate `test_help_is_cp1252_safe` varre help/params de todos os comandos |
 | `src/apiforge/ui/home.py` | menu TUI com `install mcp-verify` (verbo inexistente) e `analyze`/`agents` bare que só imprimem usage | menu reescrito cobrindo os 10 dashboards §2.3 com argv real verificado; gate `test_menu_argv_parse_on_real_cli` parseia cada entrada no app Typer |
+| `scripts/docs/doc_catalogs.py` | frontmatter folded `description: >-` virava `>-` cru; e o fallback lia `name:` de dentro do frontmatter quando `description` ausente (executors mostravam `name: af-*`) | parser de bloco folded + scan do corpo após o frontmatter; propagado aos irmãos que usam o mesmo gerador |
 
 ## Estado por documento
 

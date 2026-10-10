@@ -1,0 +1,270 @@
+{
+  "agentops": {
+    "why": "protocolos host-neutral Caveman/RTK, workflows e adapters",
+    "when": "operações do runtime agêntico que cruzam hosts"
+  },
+  "agents": {
+    "why": "publica perfis de coordenadores para mirrors nativos dos hosts",
+    "when": "sincronizar/inspecionar o roster de agentes — mirror nunca é editado à mão"
+  },
+  "analyze": {
+    "why": "roda a fatia determinística completa e persiste um case",
+    "when": "primeira passada num projeto antes de judge/next-step"
+  },
+  "autonomy": {
+    "why": "modos de autonomia (observe→continuous) e runbooks no policy engine",
+    "when": "entender/subir o nível de autonomia com política explícita"
+  },
+  "blackboard": {
+    "why": "estado compartilhado estruturado, append-only",
+    "when": "ver o que os agentes já publicaram no case"
+  },
+  "brief": {
+    "why": "Outcome Briefs — DONE é recusado enquanto houver gaps obrigatórios",
+    "when": "fechar uma execução com evidência completa e gaps nomeados"
+  },
+  "build": {
+    "why": "gera esqueletos de código — avaliados em sandbox, promovidos só via worktree",
+    "when": "scaffolding governado de código novo"
+  },
+  "cache": {
+    "why": "cache em camadas, advisory — reusa só evidência fresca, invalida por dependência",
+    "when": "inspecionar/limpar evidência cacheada"
+  },
+  "capabilities": {
+    "why": "matriz pública de capabilities com evidência por trás",
+    "when": "perguntar o que a forja declara atender"
+  },
+  "change-control": {
+    "why": "governa mudanças de API, Git e CI/CD com evidência read-only",
+    "when": "revisar uma mudança antes de propor — mutação fica no host"
+  },
+  "collect": {
+    "why": "coleta artefatos AWS em dumps offline — única família que toca AWS",
+    "when": "trazer evidência de runtime para análise offline"
+  },
+  "context": {
+    "why": "contabilidade de contexto medida — o funil, em bytes por estágio",
+    "when": "montar contexto econômico para um agente/host"
+  },
+  "contract": {
+    "why": "lista e inspeciona os contratos versionados canônicos",
+    "when": "conferir o contrato antes de depender dele"
+  },
+  "contract-intel": {
+    "why": "unifica análise de impacto de contrato e constrói o Digital Twin de API offline",
+    "when": "avaliar impacto de mudança de contrato de ponta a ponta"
+  },
+  "control": {
+    "why": "ciclo de vida do Decision Control Plane: shadow, assisted, active, fallback",
+    "when": "operar o plano de decisão governado"
+  },
+  "debate": {
+    "why": "registra desacordo de especialistas — posições citam fact_ids, referee fecha",
+    "when": "quando especialistas divergem sobre o caso"
+  },
+  "devin": {
+    "why": "payloads offline-first para Devin Desktop, CLI e Cloud",
+    "when": "transportar a forja para hosts Devin"
+  },
+  "diff": {
+    "why": "diff semântico de contratos OpenAPI",
+    "when": "comparar duas versões de contrato com mudanças tipadas"
+  },
+  "discover": {
+    "why": "inventaria rotas FastAPI estaticamente, sem executar código",
+    "when": "primeiro mapa de uma API desconhecida"
+  },
+  "dispatch": {
+    "why": "executa passos de playbook determinísticos; pendentes nomeiam inputs faltantes",
+    "when": "rodar um fluxo declarado passo a passo"
+  },
+  "distribution": {
+    "why": "inspeciona o pacote instalado, paths e capabilities hostless",
+    "when": "verificar a distribuição instalada"
+  },
+  "doctor": {
+    "why": "inspeciona estado de runtime, ou a instalação local sem task",
+    "when": "primeira linha de diagnóstico: ambiente, instalação, imports"
+  },
+  "economy": {
+    "why": "custo medido por chamada — bytes gravados, tokens só com transcript",
+    "when": "quantificar custo real de contexto antes de otimizar"
+  },
+  "evals": {
+    "why": "matriz de avaliação declarativa local, goldens e holdout",
+    "when": "validar qualidade determinística antes de release"
+  },
+  "evidence": {
+    "why": "recibos de evidência de release",
+    "when": "produzir/verificar a cadeia de evidência de uma entrega"
+  },
+  "evolve": {
+    "why": "executa um run de evolução de API bounded e com evidência",
+    "when": "evolução governada de API com limites declarados"
+  },
+  "experience": {
+    "why": "projeções canônicas de execução, governança e evidência",
+    "when": "consultar a visão de experiência canônica"
+  },
+  "field": {
+    "why": "validação de campo pré-registrada: run records com evidência juntada e gap report",
+    "when": "validar em campo contra casos pré-registrados"
+  },
+  "forge": {
+    "why": "Forge Protocol: capabilities, task submit/inspect/result/evidence, handoff, health",
+    "when": "interoperar com o control plane The Forge"
+  },
+  "governance": {
+    "why": "gates de decisão agêntica fail-closed",
+    "when": "verificar política antes de uma ação governada"
+  },
+  "governor": {
+    "why": "decisões do Agent Governor: tetos, ganho, stop, recovery, loop checks",
+    "when": "inspecionar limites e decisões do governador"
+  },
+  "graph": {
+    "why": "grafo de proveniência nativo — store JSONL canônico, queries de vocabulário fechado",
+    "when": "perguntas de dependência, impacto ou proveniência"
+  },
+  "grpc": {
+    "why": "control plane de contratos gRPC offline-first",
+    "when": "trabalhar contratos gRPC sem executar serviços"
+  },
+  "index": {
+    "why": "TokenSave: cache por content-hash + índices locais sobre saída de extratores",
+    "when": "recuperação econômica por níveis L0-L6"
+  },
+  "init": {
+    "why": "cria só um manifesto mínimo de projeto/workspace",
+    "when": "primeiro passo num diretório novo"
+  },
+  "inspect": {
+    "why": "inspeciona assets instalados e descoberta bounded de projeto/workspace",
+    "when": "perguntar sobre artefatos instalados antes de ler arquivo"
+  },
+  "install": {
+    "why": "instala assets API Forge em projeto, workspace ou home; gerencia o ciclo de vida",
+    "when": "ativar a forja num escopo governado"
+  },
+  "integration": {
+    "why": "adapters de evidência externa read-only e recibos de frescor",
+    "when": "consultar fontes externas sem mutação"
+  },
+  "judge": {
+    "why": "julga divergência contrato/código, ou checks de catálogo sobre facts",
+    "when": "depois do analyze: facts viram findings com rule_id"
+  },
+  "knowledge": {
+    "why": "domain packs — autoridade de fonte, matrizes de runtime, evals declarados",
+    "when": "consultar a fonte canônica de conhecimento de domínio"
+  },
+  "lab": {
+    "why": "catálogo de cenários experimentais opt-in (§28)",
+    "when": "cenários reproduzíveis sem tocar o real"
+  },
+  "mcp": {
+    "why": "projeções de superfície MCP e seu custo medido",
+    "when": "servir a forja via MCP ou auditar o custo da superfície"
+  },
+  "memory": {
+    "why": "memória de agente append-only governada",
+    "when": "persistir contexto entre sessões com governo"
+  },
+  "migration": {
+    "why": "análise e verificação de migração de runtime offline-first",
+    "when": "avaliar migração de runtime/framework com evidência"
+  },
+  "model": {
+    "why": "constrói o API-IR canônico",
+    "when": "materializar a representação intermediária da API"
+  },
+  "next-step": {
+    "why": "recomenda o agente especialista para a área dominante dos findings",
+    "when": "depois de um case com findings: quem atende agora"
+  },
+  "observability": {
+    "why": "control plane OTel, Datadog e Dynatrace offline-first",
+    "when": "trabalhar telemetria/observabilidade com evidência exportada"
+  },
+  "perf": {
+    "why": "compõe sobre runs medidos — compara, nunca interpola",
+    "when": "comparar performance entre execuções medidas"
+  },
+  "plan": {
+    "why": "verbos de planejamento — compõem sobre facts já extraídos",
+    "when": "revisar passos antes de executar trabalho composto"
+  },
+  "platform": {
+    "why": "probes de runtime locais allowlisted para verticais de plataforma",
+    "when": "prova de runtime opt-in e allowlisted — prova fixtures, não produção"
+  },
+  "playbook": {
+    "why": "renderiza a decomposição de executor declarada para um coordenador",
+    "when": "ver como um coordenador decompõe o trabalho"
+  },
+  "policy": {
+    "why": "avalia ações contra o catálogo de políticas",
+    "when": "checar veredito de política antes de agir"
+  },
+  "report": {
+    "why": "bundle de evidência de release — sign amarra hashes; verify nomeia o que divergiu",
+    "when": "provar que o relatório corresponde à evidência"
+  },
+  "resume": {
+    "why": "retoma só trabalho persistido e elegível do último control run",
+    "when": "uma execução falhou no meio — continuar do ponto válido"
+  },
+  "review": {
+    "why": "renderiza o Outcome Brief canônico de um runtime run",
+    "when": "revisar o resultado de uma execução com gaps nomeados"
+  },
+  "route": {
+    "why": "roteamento de modelo: candidatos, scorecards e promoção de ciclo de vida",
+    "when": "decidir rota de modelo com scorecard, não chute"
+  },
+  "rules": {
+    "why": "lê o catálogo de regras — a base que todo finding cita",
+    "when": "inspecionar regras disponíveis e metadados"
+  },
+  "run": {
+    "why": "executa binários de scanner allowlisted e lê seus relatórios",
+    "when": "rodar ferramentas externas permitidas e capturar saída"
+  },
+  "runtime": {
+    "why": "execução agêntica bounded sobre TaskSpecs selados; seguro local e CI",
+    "when": "executar trabalho agêntico com orçamento e selo"
+  },
+  "sandbox": {
+    "why": "avaliação em sandbox por cópia",
+    "when": "testar uma mudança sem tocar a árvore original"
+  },
+  "sdd": {
+    "why": "artefatos e gates de spec-driven development",
+    "when": "trabalho não-trivial: discover→intent→contract→architecture→plan→build→verify→secure→benchmark→ship"
+  },
+  "slice": {
+    "why": "falhas e assinaturas em vez de logs inteiros; o log fica atrás de ctx://",
+    "when": "inspecionar falhas sem pagar o log completo em contexto"
+  },
+  "status": {
+    "why": "status de TaskSpec, ou de projeto/workspace sem task",
+    "when": "visão rápida do estado atual"
+  },
+  "task": {
+    "why": "unidades seladas e orçadas de trabalho agêntico (TaskSpec)",
+    "when": "submeter/inspecionar trabalho governado"
+  },
+  "tui": {
+    "why": "UX de terminal execution-first com fallback Rich/JSON",
+    "when": "operar a forja interativamente no terminal"
+  },
+  "verify": {
+    "why": "planos de verificação direcionados — nunca executa",
+    "when": "planejar verificação antes de executar"
+  },
+  "workspace": {
+    "why": "registra repositórios independentes num workspace virtual local",
+    "when": "operar multi-repo num escopo declarado"
+  }
+}

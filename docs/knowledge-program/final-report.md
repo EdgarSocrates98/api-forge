@@ -3,8 +3,8 @@
 | Campo | Valor |
 |---|---|
 | repository | `api-forge` |
-| branch | `feat/docs-evolution` |
-| commit | `03c50d3` |
+| branch | `main` |
+| commit | `39c9dc2` |
 | docs inventoried | 1931 (excl. GENERATED mirrors: 1338; vendored upstream: 68) |
 
 ## Review levels (honest)

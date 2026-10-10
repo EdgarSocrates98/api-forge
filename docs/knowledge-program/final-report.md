@@ -3,14 +3,14 @@
 | Campo | Valor |
 |---|---|
 | repository | `api-forge` |
-| branch | `feat/knowledge-experience` |
-| commit | `bf79a38` |
-| docs inventoried | 1930 (excl. GENERATED mirrors: 1337; vendored upstream: 68) |
+| branch | `feat/docs-evolution` |
+| commit | `30880ee` |
+| docs inventoried | 1931 (excl. GENERATED mirrors: 1338; vendored upstream: 68) |
 
 ## Review levels (honest)
 
 - `INVENTORIED`: 0
-- `AUTOMATICALLY_CHECKED`: 1930
+- `AUTOMATICALLY_CHECKED`: 1931
 - `TECHNICALLY_VERIFIED`: 0
 - `SEMANTICALLY_REVIEWED`: 0
 - `USER_JOURNEY_VALIDATED`: 0
@@ -22,7 +22,7 @@ Automatic checks ran on every row; semantic review is recorded only where a huma
 - `SDD_ARTIFACT`: 731
 - `GENERATED`: 593
 - `CONTRACT`: 316
-- `UNKNOWN`: 98
+- `UNKNOWN`: 99
 - `INTERNAL`: 68
 - `USER_GUIDE`: 58
 - `HOW_TO`: 17

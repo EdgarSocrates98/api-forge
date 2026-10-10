@@ -44,3 +44,18 @@ and `apiforge devin capabilities`. The payload adapter keeps product claims at
 `declared` until a local executable or repository artifact is observed. See
 [API Forge + Devin](integrations/API_FORGE_DEVIN.md) for Desktop/CLI/Cloud
 launch shapes, MCP, skills, hooks, permissions and handoff boundaries.
+
+## Opening a host session
+
+`apiforge ai` is the host-open flow: it observes each host binary
+(`claude`, `devin`, `codex`, `copilot`), reads its version, checks the
+official authentication status subcommand (the receipt carries only the
+`logged_in` boolean, never credential paths), and reads the install
+integration state — ledger health plus the managed `.mcp.json` key.
+
+Use it after `apiforge install`, or when a host session does not see the
+MCP server. `apiforge ai` measures all four hosts; `apiforge ai <host>`
+measures one and prints the `launch_command` the operator runs to open a
+session in the repo. `apiforge ai <host> --launch` opens the binary here —
+a human boundary: one host only, TTY required, a logged-out host is never
+launched (the receipt names the official login command instead).

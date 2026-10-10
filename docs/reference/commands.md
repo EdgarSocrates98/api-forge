@@ -2,12 +2,13 @@
 
 Generated from the real CLI parser by `doc_inventory.py` + `doc_reference.py`. Do not hand-edit generated sections — write between `keep:start`/`keep:end` markers. `por que`/`quando` lines come from the curated `command-rationale.json` — edit rationale there, never here. Status vocabulary: `available` unless marked otherwise.
 
-Rationale coverage: **67/67** first-level groups curated in `command-rationale.json`.
+Rationale coverage: **67/68** first-level groups curated in `command-rationale.json`.
 
 ## Groups
 
 - [`agentops`](#agentops) — 17 command(s)
 - [`agents`](#agents) — 6 command(s)
+- [`ai`](#ai) — 1 command(s)
 - [`analyze`](#analyze) — 1 command(s)
 - [`autonomy`](#autonomy) — 7 command(s)
 - [`blackboard`](#blackboard) — 3 command(s)
@@ -575,6 +576,35 @@ apiforge agents sync [root] [detail_level]
 | argument/flag | required | default | description |
 |---|---|---|---|
 | `root` | no | — | Repository root. |
+| `detail_level` | no | — | Payload level: summary|normal|full. |
+
+<!-- keep:start -->
+_free notes — errors, examples, next steps (hand-written, preserved)_
+<!-- keep:end -->
+
+## ai
+
+### `ai`
+
+**para que:** Observe an AI host (detect → version → auth → integration) and open it.
+
+Why: the §1.2 host-open flow — one receipt tells you whether the host
+CLI exists, is logged in and sees the API Forge install, before you
+spend a session on it. When to use: after `apiforge install`, or when
+a host session does not see the MCP server. `--launch` is a human
+boundary: only one host, only on a TTY, never from MCP.
+
+**Syntax**
+
+```text
+apiforge ai [host] [launch] [root] [detail_level]
+```
+
+| argument/flag | required | default | description |
+|---|---|---|---|
+| `host` | no | — | claude, devin, codex, copilot — or `all` to measure the four. |
+| `launch` | no | — | Open the selected host binary here; needs a TTY. |
+| `root` | no | — | — |
 | `detail_level` | no | — | Payload level: summary|normal|full. |
 
 <!-- keep:start -->

@@ -607,6 +607,32 @@ def portable_inspect(
     _echo_json(_run(lambda: inspect(root)), detail_level)
 
 
+@app.command("ai")
+def ai_open(
+    host: str = typer.Argument(
+        "all", help="claude, devin, codex, copilot — or `all` to measure the four."
+    ),
+    launch: bool = typer.Option(
+        False, "--launch", help="Open the selected host binary here; needs a TTY."
+    ),
+    root: Path = typer.Option(Path("."), "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Observe an AI host (detect → version → auth → integration) and open it.
+
+    Why: the §1.2 host-open flow — one receipt tells you whether the host
+    CLI exists, is logged in and sees the API Forge install, before you
+    spend a session on it. When to use: after `apiforge install`, or when
+    a host session does not see the MCP server. `--launch` is a human
+    boundary: only one host, only on a TTY, never from MCP.
+    """
+    from apiforge.integrations.hosts import ai_flow
+
+    _echo_json(
+        _run(lambda: ai_flow(host, root=root, launch=launch)), detail_level
+    )
+
+
 @app.command("init")
 def portable_init(
     root: Path = typer.Option(Path("."), "--root"),

@@ -2,9 +2,9 @@
   "schema": "forge/CommandInventory/v1",
   "forge_id": "api-forge",
   "cli": "apiforge",
-  "generated_at": "2026-10-10T10:34:01Z",
+  "generated_at": "2026-10-10T19:13:26Z",
   "generated_by": "doc_inventory.py/1",
-  "command_count": 445,
+  "command_count": 446,
   "commands": [
     {
       "path": "agentops",
@@ -669,6 +669,56 @@
           "choices": null,
           "positional": false,
           "help": "Repository root."
+        },
+        {
+          "name": "detail_level",
+          "flags": [
+            "--detail-level"
+          ],
+          "required": false,
+          "default": "normal",
+          "choices": null,
+          "positional": false,
+          "help": "Payload level: summary|normal|full."
+        }
+      ]
+    },
+    {
+      "path": "ai",
+      "help": "Observe an AI host (detect → version → auth → integration) and open it.\n\nWhy: the §1.2 host-open flow — one receipt tells you whether the host\nCLI exists, is logged in and sees the API Forge install, before you\nspend a session on it. When to use: after `apiforge install`, or when\na host session does not see the MCP server. `--launch` is a human\nboundary: only one host, only on a TTY, never from MCP.",
+      "arguments": [
+        {
+          "name": "host",
+          "flags": [
+            "host"
+          ],
+          "required": false,
+          "default": "all",
+          "choices": null,
+          "positional": false,
+          "help": "claude, devin, codex, copilot — or `all` to measure the four."
+        },
+        {
+          "name": "launch",
+          "flags": [
+            "--launch"
+          ],
+          "required": false,
+          "default": "False",
+          "choices": null,
+          "positional": false,
+          "help": "Open the selected host binary here; needs a TTY."
+        },
+        {
+          "name": "root",
+          "flags": [
+            "--root"
+          ],
+          "required": false,
+          "default": ".",
+          "choices": null,
+          "positional": false,
+          "help": null
         },
         {
           "name": "detail_level",

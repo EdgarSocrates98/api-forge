@@ -3,8 +3,8 @@
 | Campo | Valor |
 |---|---|
 | repository | `api-forge` |
-| branch | `main` |
-| commit | `39c9dc2` |
+| branch | `feat/ultimate-completion` |
+| commit | `c55d762` |
 | docs inventoried | 1931 (excl. GENERATED mirrors: 1338; vendored upstream: 68) |
 
 ## Review levels (honest)
@@ -41,7 +41,7 @@ Automatic checks ran on every row; semantic review is recorded only where a huma
 - duplicate groups (non-generated): 0
 - broken internal links total: 36 (active docs: 0; remainder in frozen/historical trees)
 - documented-but-missing commands: 0 (active docs: 0)
-- undocumented public commands: 0
+- undocumented public commands: 1
 
 ## Educational layer delivered
 

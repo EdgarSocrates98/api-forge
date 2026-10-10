@@ -81,7 +81,7 @@ FastAPI scratch: `discover` (4 rotas) → `model build` (contrato) →
 | Docs drift (`check_docs`) | 1200 arquivos, 0 problemas |
 | Catálogos (`doc_catalogs`) | regenerados; folded `>-` parseado; fallback lê corpo pós-frontmatter |
 | TUI/cli/hosts | 8 + 12 verdes (menu argv + cp1252 + ai flow) |
-| Suíte integral | ver seção final — resultado consolidado no fechamento |
+| Suíte integral | **1856 passed, 1 skipped** em 4m09s — `pytest tests -q` no HEAD da fase |
 
 ## Limitações declaradas (não escondidas)
 

@@ -13,8 +13,11 @@ contrato tipado — não diff de texto.
 ## Passo a passo
 
 ```bash
+# --out-dir é obrigatório e fica FORA do projeto analisado — o case-store
+# não pode contaminar o input (AF-CASE-INPUT-OUTPUT-OVERLAP se dentro)
 apiforge analyze --contract api/openapi-v2.yaml --project . \
-  --baseline api/openapi-v1.yaml
+  --baseline api/openapi-v1.yaml \
+  --out-dir /caminho/absoluto/fora/do/projeto
 ```
 
 ## Saída esperada / interpretação
@@ -24,7 +27,7 @@ case — com o `--fail-on` você transforma em gate de CI.
 
 ## Verificação
 
-O case em `.apiforge/case/` lista os eventos; re-rodar com os mesmos inputs
+O case no `--out-dir` lista os eventos; re-rodar com os mesmos inputs
 produz a mesma classificação (determinístico).
 
 ## Limitações

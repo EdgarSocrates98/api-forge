@@ -55,6 +55,13 @@ o check sai `BLOCKED` — é declaração honesta, não falha do install.
 | `BLOCKED` no handshake | extra `mcp` ausente | `pip install apiforge[mcp]` / extra no venv |
 | `degraded` no status | asset gerenciado editado/removido | `apiforge install repair` |
 
+## Nota — `apiforge analyze`
+
+`analyze` persiste o case num `--out-dir` **fora** do projeto analisado
+(default `.apiforge` dentro do root é recusado por
+`AF-CASE-INPUT-OUTPUT-OVERLAP` — o case-store não pode contaminar o
+input). Ex.: `--out-dir C:\tmp\af-case`.
+
 ## Uso por agentes
 
 Todas as saídas são JSON estruturado com estados nomeados — o host lê

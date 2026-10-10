@@ -137,7 +137,7 @@ _Task-oriented guides and workflows._
 - [Receita — ler um schema GraphQL SDL em IR canônico](learn/recipes/graphql.md)
 - [Receita — revisar e fazer diff de contrato gRPC](learn/recipes/grpc.md)
 - [Receita — medir e abrir a sessão do host de IA](learn/recipes/integrar-host.md)
-- [Receita — inventariar uma API Java ou Go sem contrato mantido](learn/recipes/java-go.md)
+- [Receita — inventariar uma API sem contrato OpenAPI mantido](learn/recipes/java-go.md)
 - [Receita — primeira utilização do API Forge](learn/recipes/primeiro-uso.md)
 - [Receita — invocar um coordenador de agente do API Forge](learn/recipes/usar-agents.md)
 - [Receita — usar as 14 skills canônicas do API Forge](learn/recipes/usar-skills.md)
@@ -637,6 +637,7 @@ _Historical, deprecated, generated and evidence docs (preserved, not entry point
 - [Accessibility](experience/accessibility.md) `UNKNOWN`
 - [Automation mode](experience/automation-mode.md) `UNKNOWN`
 - [Interactive CLI](experience/interactive-cli.md) `UNKNOWN`
+- [Revisão semântica — API Forge (FASE 2 §12-equivalente)](experience/semantic-review.md) `UNKNOWN`
 - [Themes and visual identity](experience/themes.md) `UNKNOWN`
 
 ### field/

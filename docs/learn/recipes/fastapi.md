@@ -23,21 +23,23 @@ contrato mantido no repo) + o root do projeto.
 ```bash
 apiforge model build --contract api/openapi.yaml --project . \
   --detail-level full
-apiforge analyze --contract api/openapi.yaml --project .   # persiste o case
-apiforge next-step
+# o case-store fica FORA do projeto analisado (overlap é recusado)
+apiforge analyze --contract api/openapi.yaml --project . \
+  --out-dir /caminho/absoluto/fora/do/projeto
+apiforge next-step --findings <out-dir>/findings.json --phase verify
 ```
 
 ## Saída esperada / interpretação
 
 API-IR JSON: rotas, schemas, handlers e dependências com proveniência.
-`analyze` grava o case em `.apiforge/` com hashes; `next-step` roteia o
-que fazer com os findings.
+`analyze` grava o case no `--out-dir` com hashes; `next-step` roteia
+os findings para o especialista.
 
 ## Verificação
 
-O case deve existir em `.apiforge/case/` — `apiforge next-step` falha
-com AF-* se nada foi persistido, e isso é a prova de que o analyze rodou
-de verdade.
+O case deve existir no `--out-dir` — `next-step` devolve
+`AF-ROUTING-NO-FINDINGS` se nada foi persistido, e isso é a prova de que
+o analyze rodou de verdade.
 
 ## Limitações
 

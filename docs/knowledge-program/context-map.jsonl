@@ -387,6 +387,7 @@
 {"path": "docs/experience/automation-mode.md", "title": "Automation mode", "category": "UNKNOWN", "audience": "public", "related_commands": ["doctor", "install"], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/experience/installation-wizard.md", "title": "Installation wizard", "category": "USER_GUIDE", "audience": "public", "related_commands": ["install"], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/experience/interactive-cli.md", "title": "Interactive CLI", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/experience/semantic-review.md", "title": "Revis\u00e3o sem\u00e2ntica \u2014 API Forge (FASE 2 \u00a712-equivalente)", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/experience/themes.md", "title": "Themes and visual identity", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/field/hypothesis.md", "title": "Field validation \u2014 pre-registered hypothesis", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/field/README.md", "title": "Field validation protocol", "category": "USER_GUIDE", "audience": "public", "related_commands": ["field", "workspace"], "review_level": "AUTOMATICALLY_CHECKED"}
@@ -446,7 +447,7 @@
 {"path": "docs/learn/recipes/graphql.md", "title": "Receita \u2014 ler um schema GraphQL SDL em IR can\u00f4nico", "category": "HOW_TO", "audience": "public", "related_commands": ["model"], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/learn/recipes/grpc.md", "title": "Receita \u2014 revisar e fazer diff de contrato gRPC", "category": "HOW_TO", "audience": "public", "related_commands": ["grpc"], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/learn/recipes/integrar-host.md", "title": "Receita \u2014 medir e abrir a sess\u00e3o do host de IA", "category": "HOW_TO", "audience": "public", "related_commands": ["ai"], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/learn/recipes/java-go.md", "title": "Receita \u2014 inventariar uma API Java ou Go sem contrato mantido", "category": "HOW_TO", "audience": "public", "related_commands": ["analyze", "next-step"], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/learn/recipes/java-go.md", "title": "Receita \u2014 inventariar uma API sem contrato OpenAPI mantido", "category": "HOW_TO", "audience": "public", "related_commands": ["discover"], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/learn/recipes/primeiro-uso.md", "title": "Receita \u2014 primeira utiliza\u00e7\u00e3o do API Forge", "category": "HOW_TO", "audience": "public", "related_commands": ["ai", "install"], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/learn/recipes/sdd.md", "title": "Receita \u2014 conduzir uma mudan\u00e7a pelo SDD do API Forge", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": ["sdd"], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/learn/recipes/usar-agents.md", "title": "Receita \u2014 invocar um coordenador de agente do API Forge", "category": "HOW_TO", "audience": "agent", "related_commands": ["agents", "next-step"], "review_level": "AUTOMATICALLY_CHECKED"}

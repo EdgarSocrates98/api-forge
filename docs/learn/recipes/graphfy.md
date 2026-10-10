@@ -23,14 +23,14 @@ artefatos reais, nunca de texto.
 ## Passo a passo
 
 ```bash
-apiforge graph build --case .apiforge/case --out .apiforge/graph
-apiforge graph query --dir .apiforge/graph --kind route
-apiforge graph impact --dir .apiforge/graph --node <node_id>
+apiforge graph build --case <out-dir-do-analyze> --out .apiforge/graph
+apiforge graph query --graph .apiforge/graph --kind finding
+apiforge graph impact --graph .apiforge/graph --node rule:AF-CODE-002
 ```
 
 ## Saída esperada / interpretação
 
-Nós e edges JSONL determinísticos; `query` filtra por kind/fechado;
+Nós e edges JSONL determinísticos; `query` filtra por `--kind` do vocabulario fechado;
 `impact` devolve tudo que depende transitivamente do nó.
 
 ## Verificação

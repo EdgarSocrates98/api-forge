@@ -4,13 +4,13 @@
 |---|---|
 | repository | `api-forge` |
 | branch | `feat/ultimate-completion` |
-| commit | `58ec447` |
-| docs inventoried | 1947 (excl. GENERATED mirrors: 1354; vendored upstream: 68) |
+| commit | `2674b17` |
+| docs inventoried | 1948 (excl. GENERATED mirrors: 1355; vendored upstream: 68) |
 
 ## Review levels (honest)
 
 - `INVENTORIED`: 0
-- `AUTOMATICALLY_CHECKED`: 1947
+- `AUTOMATICALLY_CHECKED`: 1948
 - `TECHNICALLY_VERIFIED`: 0
 - `SEMANTICALLY_REVIEWED`: 0
 - `USER_JOURNEY_VALIDATED`: 0
@@ -30,8 +30,8 @@ Automatic checks ran on every row; semantic review is recorded only where a huma
 - `ADR`: 11
 - `ARCHITECTURE`: 9
 - `AGENT_INSTRUCTIONS`: 3
+- `RELEASE_REPORT`: 3
 - `GETTING_STARTED`: 3
-- `RELEASE_REPORT`: 2
 - `REFERENCE`: 2
 - `CONCEPT`: 2
 - `TUTORIAL`: 1

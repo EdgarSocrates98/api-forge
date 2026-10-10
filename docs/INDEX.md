@@ -636,6 +636,7 @@ _Historical, deprecated, generated and evidence docs (preserved, not entry point
 
 - [Accessibility](experience/accessibility.md) `UNKNOWN`
 - [Automation mode](experience/automation-mode.md) `UNKNOWN`
+- [FASE 2 — API Forge como plataforma agentic de referência](experience/fase2-report.md) `RELEASE_REPORT`
 - [Interactive CLI](experience/interactive-cli.md) `UNKNOWN`
 - [Revisão semântica — API Forge (FASE 2 §12-equivalente)](experience/semantic-review.md) `UNKNOWN`
 - [Themes and visual identity](experience/themes.md) `UNKNOWN`

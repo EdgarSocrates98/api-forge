@@ -586,7 +586,7 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `ai`
 
-**para que:** Observe an AI host (detect → version → auth → integration) and open it.
+**para que:** Observe an AI host (detect -> version -> auth -> integration) and open it.
 
 Why: the §1.2 host-open flow — one receipt tells you whether the host
 CLI exists, is logged in and sees the API Forge install, before you

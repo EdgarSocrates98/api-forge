@@ -2,9 +2,9 @@
   "schema": "forge/CommandInventory/v1",
   "forge_id": "api-forge",
   "cli": "apiforge",
-  "generated_at": "2026-10-09T22:45:15Z",
+  "generated_at": "2026-10-10T01:11:05Z",
   "generated_by": "doc_inventory.py/1",
-  "command_count": 443,
+  "command_count": 445,
   "commands": [
     {
       "path": "agentops",
@@ -9740,6 +9740,62 @@
       ]
     },
     {
+      "path": "graph ui",
+      "help": "Open the local Graph Studio explorer for this graph.",
+      "arguments": [
+        {
+          "name": "graph",
+          "flags": [
+            "--graph"
+          ],
+          "required": true,
+          "default": null,
+          "choices": null,
+          "positional": false,
+          "help": "Graph directory (nodes.jsonl)."
+        },
+        {
+          "name": "no_browser",
+          "flags": [
+            "--no-browser"
+          ],
+          "required": false,
+          "default": "False",
+          "choices": null,
+          "positional": false,
+          "help": "Serve without opening a browser (SSH/remote)."
+        },
+        {
+          "name": "port",
+          "flags": [
+            "--port"
+          ],
+          "required": false,
+          "default": "0",
+          "choices": null,
+          "positional": false,
+          "help": "Port to bind (default ephemeral)."
+        }
+      ]
+    },
+    {
+      "path": "graph view",
+      "help": "Emit the ForgeGraphView/v1 document (Graph Studio contract).",
+      "arguments": [
+        {
+          "name": "graph",
+          "flags": [
+            "--graph"
+          ],
+          "required": true,
+          "default": null,
+          "choices": null,
+          "positional": false,
+          "help": "Graph directory (nodes.jsonl)."
+        }
+      ]
+    },
+    {
       "path": "grpc",
       "help": "Offline-first gRPC contract control plane.",
       "arguments": [],
@@ -10328,6 +10384,17 @@
           "choices": null,
           "positional": false,
           "help": "Plan only — writes nothing."
+        },
+        {
+          "name": "components",
+          "flags": [
+            "--components"
+          ],
+          "required": false,
+          "default": null,
+          "choices": null,
+          "positional": false,
+          "help": "Optional components csv: skills,agents,mcp,tui,graph-studio."
         },
         {
           "name": "detail_level",

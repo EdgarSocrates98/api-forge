@@ -35,7 +35,7 @@ Generated from the real CLI parser by `doc_inventory.py` + `doc_reference.py`. D
 - [`forge`](#forge) — 9 command(s)
 - [`governance`](#governance) — 2 command(s)
 - [`governor`](#governor) — 6 command(s)
-- [`graph`](#graph) — 7 command(s)
+- [`graph`](#graph) — 9 command(s)
 - [`grpc`](#grpc) — 10 command(s)
 - [`index`](#index) — 3 command(s)
 - [`init`](#init) — 1 command(s)
@@ -4341,6 +4341,44 @@ apiforge graph trace <graph> <from_id> <to_id> [detail_level]
 _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
+### `graph ui`
+
+Open the local Graph Studio explorer for this graph.
+
+**Syntax**
+
+```text
+apiforge graph ui <graph> [no_browser] [port]
+```
+
+| argument/flag | required | default | description |
+|---|---|---|---|
+| `graph` | yes | — | Graph directory (nodes.jsonl). |
+| `no_browser` | no | — | Serve without opening a browser (SSH/remote). |
+| `port` | no | — | Port to bind (default ephemeral). |
+
+<!-- keep:start -->
+_free notes — errors, examples, next steps (hand-written, preserved)_
+<!-- keep:end -->
+
+### `graph view`
+
+Emit the ForgeGraphView/v1 document (Graph Studio contract).
+
+**Syntax**
+
+```text
+apiforge graph view <graph>
+```
+
+| argument/flag | required | default | description |
+|---|---|---|---|
+| `graph` | yes | — | Graph directory (nodes.jsonl). |
+
+<!-- keep:start -->
+_free notes — errors, examples, next steps (hand-written, preserved)_
+<!-- keep:end -->
+
 ## grpc
 
 ### `grpc`
@@ -4646,7 +4684,7 @@ Install API Forge assets into a project, workspace or the user home; manage the 
 **Syntax**
 
 ```text
-apiforge install [scope] [host] [profile] [root] [yes] [dry_run] [detail_level]
+apiforge install [scope] [host] [profile] [root] [yes] [dry_run] [components] [detail_level]
 ```
 
 | argument/flag | required | default | description |
@@ -4657,6 +4695,7 @@ apiforge install [scope] [host] [profile] [root] [yes] [dry_run] [detail_level]
 | `root` | no | — | Target root (default: VCS root or cwd). |
 | `yes` | no | — | Explicit approval; without it only --dry-run is allowed. |
 | `dry_run` | no | — | Plan only — writes nothing. |
+| `components` | no | — | Optional components csv: skills,agents,mcp,tui,graph-studio. |
 | `detail_level` | no | — | — |
 
 <!-- keep:start -->

@@ -16,4 +16,6 @@
 | "O que quebrou entre duas versões da API?" | [contract-diff](recipes/contract-diff.md) |
 | "Quero trabalho governado com evidência" | [governed-case](recipes/governed-case.md) |
 
+Hub do ecossistema (descoberta cross-forge): `the-forge/docs/hub/` — install, which-forge, hosts, MCP, troubleshooting.
+
 Índice gerado: [../INDEX.md](../INDEX.md).

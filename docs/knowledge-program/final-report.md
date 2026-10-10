@@ -4,7 +4,7 @@
 |---|---|
 | repository | `api-forge` |
 | branch | `feat/docs-evolution` |
-| commit | `30880ee` |
+| commit | `03c50d3` |
 | docs inventoried | 1931 (excl. GENERATED mirrors: 1338; vendored upstream: 68) |
 
 ## Review levels (honest)

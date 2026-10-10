@@ -1,7 +1,7 @@
 # Broken link report
 Forge: `api-forge`
 
-Internal-link findings: 43
+Internal-link findings: 36
 
 | File | Link | Problem |
 |---|---|---|
@@ -41,10 +41,3 @@ Internal-link findings: 43
 | `.claude/sdd/archive/RISK_AWARE_ROUTING_TASK_COMPLEXITY/BUILD_REPORT_RISK_AWARE_ROUTING_TASK_COMPLEXITY.md` | `../features/DESIGN_RISK_AWARE_ROUTING_TASK_COMPLEXITY.md` | broken internal link |
 | `.claude/sdd/archive/SCORECARD_ADAPTIVE_ROUTING/BUILD_REPORT_SCORECARD_ADAPTIVE_ROUTING.md` | `../features/DEFINE_SCORECARD_ADAPTIVE_ROUTING.md` | broken internal link |
 | `.claude/sdd/archive/SCORECARD_ADAPTIVE_ROUTING/BUILD_REPORT_SCORECARD_ADAPTIVE_ROUTING.md` | `../features/DESIGN_SCORECARD_ADAPTIVE_ROUTING.md` | broken internal link |
-| `vendor/caveman/INSTALL.md` | `cli/install.js` | broken internal link |
-| `vendor/caveman/INSTALL.md` | `./SECURITY.md#privacy--telemetry` | missing anchor |
-| `vendor/caveman/README.md` | `./benchmarks/` | broken internal link |
-| `vendor/caveman/README.md` | `./evals/` | broken internal link |
-| `vendor/caveman/README.md` | `./docs/HONEST-NUMBERS.md` | broken internal link |
-| `vendor/caveman/README.md` | `./SECURITY.md#privacy--telemetry` | missing anchor |
-| `vendor/caveman/README.md` | `./docs/assets/star-history.png` | broken internal link |

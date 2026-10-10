@@ -194,3 +194,16 @@ def test_cli_install_uninstall(projeto):
     assert result.exit_code == 0, result.stdout
     resto = [p for p in _arquivos(projeto) if not p.startswith(".git/")]
     assert resto == []
+
+
+def test_hosts_none_e_csv():
+    """GAP-003: `none` nunca vira `all`; csv subconjunto e validado."""
+    import pytest
+    from apiforge.install import render, service
+    assert service._hosts("all") == render.HOSTS
+    assert service._hosts("none") == ()
+    assert service._hosts("") == ()
+    assert service._hosts("claude") == ("claude",)
+    assert set(service._hosts("claude,devin")) == {"claude", "devin"}
+    with pytest.raises(Exception):
+        service._hosts("nope")

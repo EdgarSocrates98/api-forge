@@ -68,12 +68,19 @@ def _ctx(scope: str, root: Path | None, hosts: tuple[str, ...],
 
 
 def _hosts(host: str) -> tuple[str, ...]:
+    """``all`` → todos; ``none``/vazio → opt-out explícito (nunca todos);
+    nome único ou csv → subconjunto validado (GAP-003)."""
     if host == "all":
         return render.HOSTS
-    if host not in render.HOSTS:
+    if not host or host == "none":
+        return ()
+    nomes = [h.strip() for h in host.split(",") if h.strip()]
+    desconhecidos = [h for h in nomes if h not in render.HOSTS]
+    if desconhecidos:
         raise kit.InstallError(
-            kit.E_HOST, f"host {host!r}; conhecidos: {list(render.HOSTS)} + all")
-    return (host,)
+            kit.E_HOST,
+            f"host {desconhecidos[0]!r}; conhecidos: {list(render.HOSTS)} + all,none")
+    return tuple(dict.fromkeys(nomes))
 
 
 def install(host: str = "all", *, scope: str = "project",

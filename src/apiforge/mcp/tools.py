@@ -1508,6 +1508,23 @@ def graph_coverage(graph: str, detail_level: str = "normal") -> dict[str, Any]:
     return out
 
 
+def graph_view(graph_dir: str, detail_level: str = "normal") -> dict[str, Any]:
+    """ForgeGraphView/v1 projection of the built graph — Studio producer."""
+    from apiforge.graphview import build_view
+
+    def _view() -> dict[str, Any]:
+        view = build_view(Path(graph_dir))
+        if view is None:
+            return {
+                "refusal": "AF-GRAPH-NOT-FOUND",
+                "unlock": "apiforge graph build <source>",
+            }
+        return view.to_dict()
+
+    out: dict[str, Any] = _call("graph_view", _view, detail_level)
+    return out
+
+
 def index_status(project: str, root: str = ".", detail_level: str = "normal") -> dict[str, Any]:
     """Name added/changed/removed source files against the built index."""
     from apiforge.index.build import index_status as status
@@ -3173,6 +3190,7 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     graph_impact,
     graph_trace,
     graph_coverage,
+    graph_view,
     index_status,
     task_status,
     task_compile,

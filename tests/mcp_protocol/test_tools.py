@@ -102,6 +102,7 @@ def test_tools_export_all_expected_verbs() -> None:
         "graph_impact",
         "graph_trace",
         "graph_coverage",
+        "graph_view",
         "index_status",
         "task_status",
         "task_compile",

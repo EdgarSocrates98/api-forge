@@ -125,6 +125,11 @@ _Task-oriented guides and workflows._
 - [Runtime Migration Knowledge Pack](../knowledge/runtime-migration/index.md)
 - [Runtime Migration Recipes](../knowledge/runtime-migration/recipes.md)
 
+### learn/
+
+- [API Forge — trilha de aprendizado](learn/README.md)
+- [Receita — trabalho governado com evidência persistida](learn/recipes/governed-case.md)
+
 ## Reference
 
 _Command, contract, schema and tool references._
@@ -446,6 +451,11 @@ _Command, contract, schema and tool references._
 ### knowledge/
 
 - [Runtime Migration Quick Reference](../knowledge/runtime-migration/quick-reference.md)
+
+### learn/
+
+- [Receita — o código implementa o contrato OpenAPI?](learn/recipes/analyze-contract.md)
+- [Receita — o que quebrou entre duas versões da API?](learn/recipes/contract-diff.md)
 
 ### reference/
 

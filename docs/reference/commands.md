@@ -1,6 +1,8 @@
 # `apiforge` command reference
 
-Generated from the real CLI parser by `doc_inventory.py` + `doc_reference.py`. Do not hand-edit generated sections — write between `keep:start`/`keep:end` markers. Status vocabulary: `available` unless marked otherwise.
+Generated from the real CLI parser by `doc_inventory.py` + `doc_reference.py`. Do not hand-edit generated sections — write between `keep:start`/`keep:end` markers. `por que`/`quando` lines come from the curated `command-rationale.json` — edit rationale there, never here. Status vocabulary: `available` unless marked otherwise.
+
+Rationale coverage: **67/67** first-level groups curated in `command-rationale.json`.
 
 ## Groups
 
@@ -76,7 +78,10 @@ Generated from the real CLI parser by `doc_inventory.py` + `doc_reference.py`. D
 
 ### `agentops`
 
-Host-neutral Caveman/RTK protocols, workflows and adapters.
+**para que:** Host-neutral Caveman/RTK protocols, workflows and adapters.
+
+- **por que:** protocolos host-neutral Caveman/RTK, workflows e adapters
+- **quando usar:** operações do runtime agêntico que cruzam hosts
 
 **Syntax**
 
@@ -90,7 +95,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `agentops activation-plan`
 
-Build a host activation plan; no host configuration is mutated.
+**para que:** Build a host activation plan; no host configuration is mutated.
+
+- **por que:** protocolos host-neutral Caveman/RTK, workflows e adapters
+- **quando usar:** operações do runtime agêntico que cruzam hosts
 
 **Syntax**
 
@@ -109,7 +117,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `agentops compare`
 
-§55 deterministic a/b over quality/tokens/cost/latency/context/evidence/tools/agents.
+**para que:** §55 deterministic a/b over quality/tokens/cost/latency/context/evidence/tools/agents.
+
+- **por que:** protocolos host-neutral Caveman/RTK, workflows e adapters
+- **quando usar:** operações do runtime agêntico que cruzam hosts
 
 **Syntax**
 
@@ -130,7 +141,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `agentops filters`
 
-List closed command filters used by the RTK adapter.
+**para que:** List closed command filters used by the RTK adapter.
+
+- **por que:** protocolos host-neutral Caveman/RTK, workflows e adapters
+- **quando usar:** operações do runtime agêntico que cruzam hosts
 
 **Syntax**
 
@@ -148,7 +162,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `agentops hosts`
 
-List host adapters for Claude, GPT/Codex, Devin and Copilot.
+**para que:** List host adapters for Claude, GPT/Codex, Devin and Copilot.
+
+- **por que:** protocolos host-neutral Caveman/RTK, workflows e adapters
+- **quando usar:** operações do runtime agêntico que cruzam hosts
 
 **Syntax**
 
@@ -166,7 +183,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `agentops inspect`
 
-§53–§54 sectioned report for one run; sections never drop silently.
+**para que:** §53–§54 sectioned report for one run; sections never drop silently.
+
+- **por que:** protocolos host-neutral Caveman/RTK, workflows e adapters
+- **quando usar:** operações do runtime agêntico que cruzam hosts
 
 **Syntax**
 
@@ -187,7 +207,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `agentops native`
 
-Inspect repository-native Caveman/Cavekit assets and RTK configuration.
+**para que:** Inspect repository-native Caveman/Cavekit assets and RTK configuration.
+
+- **por que:** protocolos host-neutral Caveman/RTK, workflows e adapters
+- **quando usar:** operações do runtime agêntico que cruzam hosts
 
 **Syntax**
 
@@ -205,7 +228,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `agentops negotiate`
 
-Resolve a capability intersection from local host declarations.
+**para que:** Resolve a capability intersection from local host declarations.
+
+- **por que:** protocolos host-neutral Caveman/RTK, workflows e adapters
+- **quando usar:** operações do runtime agêntico que cruzam hosts
 
 **Syntax**
 
@@ -226,7 +252,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `agentops parity`
 
-Audit host discovery and capability parity without invoking a host.
+**para que:** Audit host discovery and capability parity without invoking a host.
+
+- **por que:** protocolos host-neutral Caveman/RTK, workflows e adapters
+- **quando usar:** operações do runtime agêntico que cruzam hosts
 
 **Syntax**
 
@@ -244,7 +273,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `agentops projection`
 
-Declared economical projection for a host, with measured surface bytes.
+**para que:** Declared economical projection for a host, with measured surface bytes.
+
+- **por que:** protocolos host-neutral Caveman/RTK, workflows e adapters
+- **quando usar:** operações do runtime agêntico que cruzam hosts
 
 **Syntax**
 
@@ -263,7 +295,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `agentops prompt`
 
-Stable prompt prefix (hashed) and the run-specific suffix.
+**para que:** Stable prompt prefix (hashed) and the run-specific suffix.
+
+- **por que:** protocolos host-neutral Caveman/RTK, workflows e adapters
+- **quando usar:** operações do runtime agêntico que cruzam hosts
 
 **Syntax**
 
@@ -285,7 +320,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `agentops timeline`
 
-Render ordered ledger/span/token events with missing-order evidence.
+**para que:** Render ordered ledger/span/token events with missing-order evidence.
+
+- **por que:** protocolos host-neutral Caveman/RTK, workflows e adapters
+- **quando usar:** operações do runtime agêntico que cruzam hosts
 
 **Syntax**
 
@@ -305,7 +343,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `agentops tool`
 
-Inspect one Tool Adapter contract.
+**para que:** Inspect one Tool Adapter contract.
+
+- **por que:** protocolos host-neutral Caveman/RTK, workflows e adapters
+- **quando usar:** operações do runtime agêntico que cruzam hosts
 
 **Syntax**
 
@@ -324,7 +365,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `agentops tools`
 
-List typed Tool Adapters and their safety/evidence metadata.
+**para que:** List typed Tool Adapters and their safety/evidence metadata.
+
+- **por que:** protocolos host-neutral Caveman/RTK, workflows e adapters
+- **quando usar:** operações do runtime agêntico que cruzam hosts
 
 **Syntax**
 
@@ -342,7 +386,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `agentops waste`
 
-§56–§57 waste detector; every finding labeled observed/estimated/hypothesis.
+**para que:** §56–§57 waste detector; every finding labeled observed/estimated/hypothesis.
+
+- **por que:** protocolos host-neutral Caveman/RTK, workflows e adapters
+- **quando usar:** operações do runtime agêntico que cruzam hosts
 
 **Syntax**
 
@@ -364,7 +411,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `agentops workflow`
 
-Render one workflow plan; execution remains governed by TaskSpec.
+**para que:** Render one workflow plan; execution remains governed by TaskSpec.
+
+- **por que:** protocolos host-neutral Caveman/RTK, workflows e adapters
+- **quando usar:** operações do runtime agêntico que cruzam hosts
 
 **Syntax**
 
@@ -383,7 +433,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `agentops workflows`
 
-List deterministic Caveman-inspired API workflows.
+**para que:** List deterministic Caveman-inspired API workflows.
+
+- **por que:** protocolos host-neutral Caveman/RTK, workflows e adapters
+- **quando usar:** operações do runtime agêntico que cruzam hosts
 
 **Syntax**
 
@@ -403,7 +456,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `agents`
 
-Publish coordinator profiles to host-native mirrors.
+**para que:** Publish coordinator profiles to host-native mirrors.
+
+- **por que:** publica perfis de coordenadores para mirrors nativos dos hosts
+- **quando usar:** sincronizar/inspecionar o roster de agentes — mirror nunca é editado à mão
 
 **Syntax**
 
@@ -417,7 +473,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `agents audit`
 
-Anti-agentic-theater gate: unique capability/expertise/validator/tool/decision role.
+**para que:** Anti-agentic-theater gate: unique capability/expertise/validator/tool/decision role.
+
+- **por que:** publica perfis de coordenadores para mirrors nativos dos hosts
+- **quando usar:** sincronizar/inspecionar o roster de agentes — mirror nunca é editado à mão
 
 **Syntax**
 
@@ -436,7 +495,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `agents check`
 
-Report render drift for all three hosts — the release gate fails on the same check.
+**para que:** Report render drift for all three hosts — the release gate fails on the same check.
+
+- **por que:** publica perfis de coordenadores para mirrors nativos dos hosts
+- **quando usar:** sincronizar/inspecionar o roster de agentes — mirror nunca é editado à mão
 
 **Syntax**
 
@@ -455,7 +517,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `agents lint`
 
-Agent contract lint: sections, word budget, English, description, access, owned tools.
+**para que:** Agent contract lint: sections, word budget, English, description, access, owned tools.
+
+- **por que:** publica perfis de coordenadores para mirrors nativos dos hosts
+- **quando usar:** sincronizar/inspecionar o roster de agentes — mirror nunca é editado à mão
 
 **Syntax**
 
@@ -474,7 +539,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `agents references`
 
-Every agent name in rules/code/tests/evals is a coordinator or an active alias.
+**para que:** Every agent name in rules/code/tests/evals is a coordinator or an active alias.
+
+- **por que:** publica perfis de coordenadores para mirrors nativos dos hosts
+- **quando usar:** sincronizar/inspecionar o roster de agentes — mirror nunca é editado à mão
 
 **Syntax**
 
@@ -493,7 +561,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `agents sync`
 
-Render `.agents/agents/`, `.claude/agents/` and `.codex/agents/` from `agents/*.md`.
+**para que:** Render `.agents/agents/`, `.claude/agents/` and `.codex/agents/` from `agents/*.md`.
+
+- **por que:** publica perfis de coordenadores para mirrors nativos dos hosts
+- **quando usar:** sincronizar/inspecionar o roster de agentes — mirror nunca é editado à mão
 
 **Syntax**
 
@@ -514,7 +585,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `analyze`
 
-Run the full deterministic slice and persist a case.
+**para que:** Run the full deterministic slice and persist a case.
+
+- **por que:** roda a fatia determinística completa e persiste um case
+- **quando usar:** primeira passada num projeto antes de judge/next-step
 
 **Syntax**
 
@@ -541,7 +615,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `autonomy`
 
-Autonomy modes (observe->continuous) and runbooks on the policy engine.
+**para que:** Autonomy modes (observe->continuous) and runbooks on the policy engine.
+
+- **por que:** modos de autonomia (observe→continuous) e runbooks no policy engine
+- **quando usar:** entender/subir o nível de autonomia com política explícita
 
 **Syntax**
 
@@ -555,9 +632,12 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `autonomy heal`
 
-Self-healing pipeline: detect->explain->propose->authorize->execute->
+**para que:** Self-healing pipeline: detect->explain->propose->authorize->execute->
 verify->compare->accept|rollback. Every transition is policy-decided and
 ledgered; rollback restores the snapshot of --writable-path files.
+
+- **por que:** modos de autonomia (observe→continuous) e runbooks no policy engine
+- **quando usar:** entender/subir o nível de autonomia com política explícita
 
 **Syntax**
 
@@ -589,7 +669,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `autonomy ledger`
 
-Read the append-only autonomy ledger.
+**para que:** Read the append-only autonomy ledger.
+
+- **por que:** modos de autonomia (observe→continuous) e runbooks no policy engine
+- **quando usar:** entender/subir o nível de autonomia com política explícita
 
 **Syntax**
 
@@ -609,7 +692,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `autonomy run`
 
-Evaluate one action under the current mode; execute only on allow.
+**para que:** Evaluate one action under the current mode; execute only on allow.
+
+- **por que:** modos de autonomia (observe→continuous) e runbooks no policy engine
+- **quando usar:** entender/subir o nível de autonomia com política explícita
 
 **Syntax**
 
@@ -643,7 +729,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `autonomy runbook`
 
-Run a runbook under the current mode — halting is mode-defined.
+**para que:** Run a runbook under the current mode — halting is mode-defined.
+
+- **por que:** modos de autonomia (observe→continuous) e runbooks no policy engine
+- **quando usar:** entender/subir o nível de autonomia com política explícita
 
 **Syntax**
 
@@ -674,7 +763,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `autonomy set`
 
-Change the autonomy mode — itself a policy-gated action.
+**para que:** Change the autonomy mode — itself a policy-gated action.
+
+- **por que:** modos de autonomia (observe→continuous) e runbooks no policy engine
+- **quando usar:** entender/subir o nível de autonomia com política explícita
 
 **Syntax**
 
@@ -699,7 +791,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `autonomy status`
 
-Current mode, who set it, and the ledger size.
+**para que:** Current mode, who set it, and the ledger size.
+
+- **por que:** modos de autonomia (observe→continuous) e runbooks no policy engine
+- **quando usar:** entender/subir o nível de autonomia com política explícita
 
 **Syntax**
 
@@ -720,7 +815,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `blackboard`
 
-Structured append-only shared state.
+**para que:** Structured append-only shared state.
+
+- **por que:** estado compartilhado estruturado, append-only
+- **quando usar:** ver o que os agentes já publicaram no case
 
 **Syntax**
 
@@ -733,6 +831,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `blackboard append`
+
+- **por que:** estado compartilhado estruturado, append-only
+- **quando usar:** ver o que os agentes já publicaram no case
 
 **Syntax**
 
@@ -762,6 +863,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `blackboard query`
 
+- **por que:** estado compartilhado estruturado, append-only
+- **quando usar:** ver o que os agentes já publicaram no case
+
 **Syntax**
 
 ```text
@@ -786,7 +890,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `brief`
 
-Outcome Briefs — DONE is refused while mandatory gaps exist.
+**para que:** Outcome Briefs — DONE is refused while mandatory gaps exist.
+
+- **por que:** Outcome Briefs — DONE é recusado enquanto houver gaps obrigatórios
+- **quando usar:** fechar uma execução com evidência completa e gaps nomeados
 
 **Syntax**
 
@@ -800,7 +907,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `brief show`
 
-Render the Outcome Brief for a task — DONE is refused, not advised.
+**para que:** Render the Outcome Brief for a task — DONE is refused, not advised.
+
+- **por que:** Outcome Briefs — DONE é recusado enquanto houver gaps obrigatórios
+- **quando usar:** fechar uma execução com evidência completa e gaps nomeados
 
 **Syntax**
 
@@ -822,7 +932,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `build`
 
-Generate code skeletons — evaluated in the sandbox, promoted via worktree only.
+**para que:** Generate code skeletons — evaluated in the sandbox, promoted via worktree only.
+
+- **por que:** gera esqueletos de código — avaliados em sandbox, promovidos só via worktree
+- **quando usar:** scaffolding governado de código novo
 
 **Syntax**
 
@@ -836,7 +949,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `build endpoint`
 
-Synthesize a Spring endpoint skeleton; main tree is never touched.
+**para que:** Synthesize a Spring endpoint skeleton; main tree is never touched.
+
+- **por que:** gera esqueletos de código — avaliados em sandbox, promovidos só via worktree
+- **quando usar:** scaffolding governado de código novo
 
 **Syntax**
 
@@ -862,7 +978,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `cache`
 
-Advisory layered cache — reuse only fresh evidence, invalidate by dependency.
+**para que:** Advisory layered cache — reuse only fresh evidence, invalidate by dependency.
+
+- **por que:** cache em camadas, advisory — reusa só evidência fresca, invalida por dependência
+- **quando usar:** inspecionar/limpar evidência cacheada
 
 **Syntax**
 
@@ -876,7 +995,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `cache invalidate`
 
-Drop only the capsule selections whose dependencies intersect the change set.
+**para que:** Drop only the capsule selections whose dependencies intersect the change set.
+
+- **por que:** cache em camadas, advisory — reusa só evidência fresca, invalida por dependência
+- **quando usar:** inspecionar/limpar evidência cacheada
 
 **Syntax**
 
@@ -900,7 +1022,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `cache stats`
 
-Entries, bytes, expired and corrupt counts per layer and tier, plus policies.
+**para que:** Entries, bytes, expired and corrupt counts per layer and tier, plus policies.
+
+- **por que:** cache em camadas, advisory — reusa só evidência fresca, invalida por dependência
+- **quando usar:** inspecionar/limpar evidência cacheada
 
 **Syntax**
 
@@ -923,7 +1048,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `capabilities`
 
-Inspect the evidence-backed public capability matrix.
+**para que:** Inspect the evidence-backed public capability matrix.
+
+- **por que:** matriz pública de capabilities com evidência por trás
+- **quando usar:** perguntar o que a forja declara atender
 
 **Syntax**
 
@@ -937,7 +1065,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `capabilities list`
 
-List public capabilities and their explicit support boundaries.
+**para que:** List public capabilities and their explicit support boundaries.
+
+- **por que:** matriz pública de capabilities com evidência por trás
+- **quando usar:** perguntar o que a forja declara atender
 
 **Syntax**
 
@@ -956,7 +1087,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `capabilities verify`
 
-Verify documentation, limitations and evidence requirements.
+**para que:** Verify documentation, limitations and evidence requirements.
+
+- **por que:** matriz pública de capabilities com evidência por trás
+- **quando usar:** perguntar o que a forja declara atender
 
 **Syntax**
 
@@ -976,7 +1110,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `change-control`
 
-Govern API, Git and CI/CD changes with read-only evidence.
+**para que:** Govern API, Git and CI/CD changes with read-only evidence.
+
+- **por que:** governa mudanças de API, Git e CI/CD com evidência read-only
+- **quando usar:** revisar uma mudança antes de propor — mutação fica no host
 
 **Syntax**
 
@@ -990,7 +1127,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `change-control collect`
 
-Collect GitHub context with a GET-only adapter into a replay bundle.
+**para que:** Collect GitHub context with a GET-only adapter into a replay bundle.
+
+- **por que:** governa mudanças de API, Git e CI/CD com evidência read-only
+- **quando usar:** revisar uma mudança antes de propor — mutação fica no host
 
 **Syntax**
 
@@ -1018,7 +1158,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `change-control publish`
 
-Publish the canonical result to JUnit, Markdown, SARIF and HTML.
+**para que:** Publish the canonical result to JUnit, Markdown, SARIF and HTML.
+
+- **por que:** governa mudanças de API, Git e CI/CD com evidência read-only
+- **quando usar:** revisar uma mudança antes de propor — mutação fica no host
 
 **Syntax**
 
@@ -1041,7 +1184,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `change-control run`
 
-Run analyze -> next-step -> graph -> evidence -> brief from a bundle.
+**para que:** Run analyze -> next-step -> graph -> evidence -> brief from a bundle.
+
+- **por que:** governa mudanças de API, Git e CI/CD com evidência read-only
+- **quando usar:** revisar uma mudança antes de propor — mutação fica no host
 
 **Syntax**
 
@@ -1063,7 +1209,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `change-control serve`
 
-Serve a local or authenticated TLS read-only UI and IDE bridge.
+**para que:** Serve a local or authenticated TLS read-only UI and IDE bridge.
+
+- **por que:** governa mudanças de API, Git e CI/CD com evidência read-only
+- **quando usar:** revisar uma mudança antes de propor — mutação fica no host
 
 **Syntax**
 
@@ -1087,7 +1236,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `change-control surface`
 
-Export a canonical IDE/UI projection without changing its semantics.
+**para que:** Export a canonical IDE/UI projection without changing its semantics.
+
+- **por que:** governa mudanças de API, Git e CI/CD com evidência read-only
+- **quando usar:** revisar uma mudança antes de propor — mutação fica no host
 
 **Syntax**
 
@@ -1108,7 +1260,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `change-control verify`
 
-Verify that a change-control result still references existing artifacts.
+**para que:** Verify that a change-control result still references existing artifacts.
+
+- **por que:** governa mudanças de API, Git e CI/CD com evidência read-only
+- **quando usar:** revisar uma mudança antes de propor — mutação fica no host
 
 **Syntax**
 
@@ -1129,7 +1284,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `collect`
 
-Collect AWS artifacts into offline dumps (the only family that touches AWS).
+**para que:** Collect AWS artifacts into offline dumps (the only family that touches AWS).
+
+- **por que:** coleta artefatos AWS em dumps offline — única família que toca AWS
+- **quando usar:** trazer evidência de runtime para análise offline
 
 **Syntax**
 
@@ -1142,6 +1300,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `collect alb`
+
+- **por que:** coleta artefatos AWS em dumps offline — única família que toca AWS
+- **quando usar:** trazer evidência de runtime para análise offline
 
 **Syntax**
 
@@ -1162,7 +1323,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `collect api-gateway`
 
-Fetch one REST API's configuration into an offline dump.
+**para que:** Fetch one REST API's configuration into an offline dump.
+
+- **por que:** coleta artefatos AWS em dumps offline — única família que toca AWS
+- **quando usar:** trazer evidência de runtime para análise offline
 
 **Syntax**
 
@@ -1183,6 +1347,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `collect cloudwatch`
 
+- **por que:** coleta artefatos AWS em dumps offline — única família que toca AWS
+- **quando usar:** trazer evidência de runtime para análise offline
+
 **Syntax**
 
 ```text
@@ -1202,7 +1369,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `collect cognito`
 
-Fetch the user pool and its app clients into an offline dump.
+**para que:** Fetch the user pool and its app clients into an offline dump.
+
+- **por que:** coleta artefatos AWS em dumps offline — única família que toca AWS
+- **quando usar:** trazer evidência de runtime para análise offline
 
 **Syntax**
 
@@ -1223,6 +1393,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `collect docdb`
 
+- **por que:** coleta artefatos AWS em dumps offline — única família que toca AWS
+- **quando usar:** trazer evidência de runtime para análise offline
+
 **Syntax**
 
 ```text
@@ -1241,6 +1414,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `collect dynamodb`
+
+- **por que:** coleta artefatos AWS em dumps offline — única família que toca AWS
+- **quando usar:** trazer evidência de runtime para análise offline
 
 **Syntax**
 
@@ -1261,6 +1437,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `collect ec2`
 
+- **por que:** coleta artefatos AWS em dumps offline — única família que toca AWS
+- **quando usar:** trazer evidência de runtime para análise offline
+
 **Syntax**
 
 ```text
@@ -1279,6 +1458,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `collect ecs`
+
+- **por que:** coleta artefatos AWS em dumps offline — única família que toca AWS
+- **quando usar:** trazer evidência de runtime para análise offline
 
 **Syntax**
 
@@ -1299,6 +1481,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `collect eks`
 
+- **por que:** coleta artefatos AWS em dumps offline — única família que toca AWS
+- **quando usar:** trazer evidência de runtime para análise offline
+
 **Syntax**
 
 ```text
@@ -1317,6 +1502,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `collect elasticache`
+
+- **por que:** coleta artefatos AWS em dumps offline — única família que toca AWS
+- **quando usar:** trazer evidência de runtime para análise offline
 
 **Syntax**
 
@@ -1337,7 +1525,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `collect eventbridge`
 
-Fetch the bus, its rules and their targets into an offline dump.
+**para que:** Fetch the bus, its rules and their targets into an offline dump.
+
+- **por que:** coleta artefatos AWS em dumps offline — única família que toca AWS
+- **quando usar:** trazer evidência de runtime para análise offline
 
 **Syntax**
 
@@ -1358,7 +1549,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `collect iam-role`
 
-Fetch one role, its attached policies and inline policy documents.
+**para que:** Fetch one role, its attached policies and inline policy documents.
+
+- **por que:** coleta artefatos AWS em dumps offline — única família que toca AWS
+- **quando usar:** trazer evidência de runtime para análise offline
 
 **Syntax**
 
@@ -1379,6 +1573,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `collect kms`
 
+- **por que:** coleta artefatos AWS em dumps offline — única família que toca AWS
+- **quando usar:** trazer evidência de runtime para análise offline
+
 **Syntax**
 
 ```text
@@ -1398,7 +1595,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `collect lambda`
 
-Fetch one Lambda function's configuration into an offline dump.
+**para que:** Fetch one Lambda function's configuration into an offline dump.
+
+- **por que:** coleta artefatos AWS em dumps offline — única família que toca AWS
+- **quando usar:** trazer evidência de runtime para análise offline
 
 **Syntax**
 
@@ -1419,6 +1619,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `collect msk`
 
+- **por que:** coleta artefatos AWS em dumps offline — única família que toca AWS
+- **quando usar:** trazer evidência de runtime para análise offline
+
 **Syntax**
 
 ```text
@@ -1437,6 +1640,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `collect neptune`
+
+- **por que:** coleta artefatos AWS em dumps offline — única família que toca AWS
+- **quando usar:** trazer evidência de runtime para análise offline
 
 **Syntax**
 
@@ -1457,7 +1663,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `collect neptune-explain`
 
-Read-only explain/profile over the neptunedata allowlist; receipt in manifest.
+**para que:** Read-only explain/profile over the neptunedata allowlist; receipt in manifest.
+
+- **por que:** coleta artefatos AWS em dumps offline — única família que toca AWS
+- **quando usar:** trazer evidência de runtime para análise offline
 
 **Syntax**
 
@@ -1483,6 +1692,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `collect rds`
 
+- **por que:** coleta artefatos AWS em dumps offline — única família que toca AWS
+- **quando usar:** trazer evidência de runtime para análise offline
+
 **Syntax**
 
 ```text
@@ -1501,6 +1713,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `collect s3`
+
+- **por que:** coleta artefatos AWS em dumps offline — única família que toca AWS
+- **quando usar:** trazer evidência de runtime para análise offline
 
 **Syntax**
 
@@ -1521,6 +1736,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `collect secrets`
 
+- **por que:** coleta artefatos AWS em dumps offline — única família que toca AWS
+- **quando usar:** trazer evidência de runtime para análise offline
+
 **Syntax**
 
 ```text
@@ -1540,7 +1758,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `collect sns`
 
-Fetch one topic's attributes and subscriptions into an offline dump.
+**para que:** Fetch one topic's attributes and subscriptions into an offline dump.
+
+- **por que:** coleta artefatos AWS em dumps offline — única família que toca AWS
+- **quando usar:** trazer evidência de runtime para análise offline
 
 **Syntax**
 
@@ -1561,7 +1782,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `collect sqs`
 
-Fetch one queue's attribute set into an offline dump.
+**para que:** Fetch one queue's attribute set into an offline dump.
+
+- **por que:** coleta artefatos AWS em dumps offline — única família que toca AWS
+- **quando usar:** trazer evidência de runtime para análise offline
 
 **Syntax**
 
@@ -1582,6 +1806,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `collect stepfunctions`
 
+- **por que:** coleta artefatos AWS em dumps offline — única família que toca AWS
+- **quando usar:** trazer evidência de runtime para análise offline
+
 **Syntax**
 
 ```text
@@ -1600,6 +1827,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `collect vpc-endpoints`
+
+- **por que:** coleta artefatos AWS em dumps offline — única família que toca AWS
+- **quando usar:** trazer evidência de runtime para análise offline
 
 **Syntax**
 
@@ -1620,7 +1850,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `collect waf`
 
-Fetch one WebACL's configuration into an offline dump.
+**para que:** Fetch one WebACL's configuration into an offline dump.
+
+- **por que:** coleta artefatos AWS em dumps offline — única família que toca AWS
+- **quando usar:** trazer evidência de runtime para análise offline
 
 **Syntax**
 
@@ -1643,7 +1876,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `collect xray`
 
-Fetch X-Ray sampling rules and encryption config.
+**para que:** Fetch X-Ray sampling rules and encryption config.
+
+- **por que:** coleta artefatos AWS em dumps offline — única família que toca AWS
+- **quando usar:** trazer evidência de runtime para análise offline
 
 **Syntax**
 
@@ -1665,7 +1901,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `context`
 
-Measured context accounting — the funnel, in bytes per stage.
+**para que:** Measured context accounting — the funnel, in bytes per stage.
+
+- **por que:** contabilidade de contexto medida — o funil, em bytes por estágio
+- **quando usar:** montar contexto econômico para um agente/host
 
 **Syntax**
 
@@ -1679,7 +1918,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `context capsule`
 
-Minimal sufficient evidence for one operation as ctx:// refs under a byte budget.
+**para que:** Minimal sufficient evidence for one operation as ctx:// refs under a byte budget.
+
+- **por que:** contabilidade de contexto medida — o funil, em bytes por estágio
+- **quando usar:** montar contexto econômico para um agente/host
 
 **Syntax**
 
@@ -1708,7 +1950,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `context compact`
 
-Compact a command artifact while preserving critical evidence.
+**para que:** Compact a command artifact while preserving critical evidence.
+
+- **por que:** contabilidade de contexto medida — o funil, em bytes por estágio
+- **quando usar:** montar contexto econômico para um agente/host
 
 **Syntax**
 
@@ -1730,7 +1975,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `context delta`
 
-What changed, which operations it impacts and which capsules to build — delta first.
+**para que:** What changed, which operations it impacts and which capsules to build — delta first.
+
+- **por que:** contabilidade de contexto medida — o funil, em bytes por estágio
+- **quando usar:** montar contexto econômico para um agente/host
 
 **Syntax**
 
@@ -1756,7 +2004,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `context expand`
 
-Return one ctx object after verifying its sha256.
+**para que:** Return one ctx object after verifying its sha256.
+
+- **por que:** contabilidade de contexto medida — o funil, em bytes por estágio
+- **quando usar:** montar contexto econômico para um agente/host
 
 **Syntax**
 
@@ -1777,7 +2028,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `context funnel`
 
-Measure what each case stage keeps — bytes, never claims.
+**para que:** Measure what each case stage keeps — bytes, never claims.
+
+- **por que:** contabilidade de contexto medida — o funil, em bytes por estágio
+- **quando usar:** montar contexto econômico para um agente/host
 
 **Syntax**
 
@@ -1796,7 +2050,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `context gc`
 
-Expired/corrupt cache entries, orphan cache objects and unreferenced ctx objects.
+**para que:** Expired/corrupt cache entries, orphan cache objects and unreferenced ctx objects.
+
+- **por que:** contabilidade de contexto medida — o funil, em bytes por estágio
+- **quando usar:** montar contexto econômico para um agente/host
 
 **Syntax**
 
@@ -1818,7 +2075,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `context quality`
 
-Measured context quality + minimum-sufficient decision for one capsule.
+**para que:** Measured context quality + minimum-sufficient decision for one capsule.
+
+- **por que:** contabilidade de contexto medida — o funil, em bytes por estágio
+- **quando usar:** montar contexto econômico para um agente/host
 
 **Syntax**
 
@@ -1843,6 +2103,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `context resolve`
 
+- **por que:** contabilidade de contexto medida — o funil, em bytes por estágio
+- **quando usar:** montar contexto econômico para um agente/host
+
 **Syntax**
 
 ```text
@@ -1865,7 +2128,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `contract`
 
-List and inspect the canonical versioned contracts.
+**para que:** List and inspect the canonical versioned contracts.
+
+- **por que:** lista e inspeciona os contratos versionados canônicos
+- **quando usar:** conferir o contrato antes de depender dele
 
 **Syntax**
 
@@ -1879,7 +2145,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `contract list`
 
-List the registered canonical contracts.
+**para que:** List the registered canonical contracts.
+
+- **por que:** lista e inspeciona os contratos versionados canônicos
+- **quando usar:** conferir o contrato antes de depender dele
 
 **Syntax**
 
@@ -1897,7 +2166,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `contract show`
 
-Emit the JSON schema of a canonical contract.
+**para que:** Emit the JSON schema of a canonical contract.
+
+- **por que:** lista e inspeciona os contratos versionados canônicos
+- **quando usar:** conferir o contrato antes de depender dele
 
 **Syntax**
 
@@ -1918,7 +2190,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `contract-intel`
 
-Unify contract impact analysis and build an offline API Digital Twin.
+**para que:** Unify contract impact analysis and build an offline API Digital Twin.
+
+- **por que:** unifica análise de impacto de contrato e constrói o Digital Twin de API offline
+- **quando usar:** avaliar impacto de mudança de contrato de ponta a ponta
 
 **Syntax**
 
@@ -1932,7 +2207,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `contract-intel impact`
 
-Classify compatibility and expose affected contract references.
+**para que:** Classify compatibility and expose affected contract references.
+
+- **por que:** unifica análise de impacto de contrato e constrói o Digital Twin de API offline
+- **quando usar:** avaliar impacto de mudança de contrato de ponta a ponta
 
 **Syntax**
 
@@ -1953,7 +2231,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `contract-intel twin`
 
-Create a no-network Digital Twin plan and optionally simulate a scenario.
+**para que:** Create a no-network Digital Twin plan and optionally simulate a scenario.
+
+- **por que:** unifica análise de impacto de contrato e constrói o Digital Twin de API offline
+- **quando usar:** avaliar impacto de mudança de contrato de ponta a ponta
 
 **Syntax**
 
@@ -1977,7 +2258,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `control`
 
-Decision Control Plane lifecycle: shadow, assisted, active and fallback.
+**para que:** Decision Control Plane lifecycle: shadow, assisted, active and fallback.
+
+- **por que:** ciclo de vida do Decision Control Plane: shadow, assisted, active, fallback
+- **quando usar:** operar o plano de decisão governado
 
 **Syntax**
 
@@ -1991,7 +2275,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `control demote`
 
-§32: step a route back one stage — the safe direction is always open.
+**para que:** §32: step a route back one stage — the safe direction is always open.
+
+- **por que:** ciclo de vida do Decision Control Plane: shadow, assisted, active, fallback
+- **quando usar:** operar o plano de decisão governado
 
 **Syntax**
 
@@ -2011,7 +2298,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `control eval`
 
-§29-§32: who governs this evaluation under the route's mode.
+**para que:** §29-§32: who governs this evaluation under the route's mode.
+
+- **por que:** ciclo de vida do Decision Control Plane: shadow, assisted, active, fallback
+- **quando usar:** operar o plano de decisão governado
 
 **Syntax**
 
@@ -2036,7 +2326,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `control promote`
 
-§30-§31: one lifecycle step; ACTIVE requires the five requirements.
+**para que:** §30-§31: one lifecycle step; ACTIVE requires the five requirements.
+
+- **por que:** ciclo de vida do Decision Control Plane: shadow, assisted, active, fallback
+- **quando usar:** operar o plano de decisão governado
 
 **Syntax**
 
@@ -2058,7 +2351,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `control routes`
 
-§28: every declared route with its effective lifecycle mode.
+**para que:** §28: every declared route with its effective lifecycle mode.
+
+- **por que:** ciclo de vida do Decision Control Plane: shadow, assisted, active, fallback
+- **quando usar:** operar o plano de decisão governado
 
 **Syntax**
 
@@ -2077,7 +2373,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `control shadow`
 
-§29: recorded parallel-run observations for a route.
+**para que:** §29: recorded parallel-run observations for a route.
+
+- **por que:** ciclo de vida do Decision Control Plane: shadow, assisted, active, fallback
+- **quando usar:** operar o plano de decisão governado
 
 **Syntax**
 
@@ -2097,7 +2396,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `control triggers`
 
-§32: map declared signals to the closed trigger vocabulary.
+**para que:** §32: map declared signals to the closed trigger vocabulary.
+
+- **por que:** ciclo de vida do Decision Control Plane: shadow, assisted, active, fallback
+- **quando usar:** operar o plano de decisão governado
 
 **Syntax**
 
@@ -2123,7 +2425,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `debate`
 
-Record specialist disagreement — positions cite fact_ids, a referee closes.
+**para que:** Record specialist disagreement — positions cite fact_ids, a referee closes.
+
+- **por que:** registra desacordo de especialistas — posições citam fact_ids, referee fecha
+- **quando usar:** quando especialistas divergem sobre o caso
 
 **Syntax**
 
@@ -2137,7 +2442,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `debate close`
 
-Close as resolved (--decision) or unresolved (no --decision).
+**para que:** Close as resolved (--decision) or unresolved (no --decision).
+
+- **por que:** registra desacordo de especialistas — posições citam fact_ids, referee fecha
+- **quando usar:** quando especialistas divergem sobre o caso
 
 **Syntax**
 
@@ -2160,7 +2468,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `debate open`
 
-Open a debate over a question with named sides.
+**para que:** Open a debate over a question with named sides.
+
+- **por que:** registra desacordo de especialistas — posições citam fact_ids, referee fecha
+- **quando usar:** quando especialistas divergem sobre o caso
 
 **Syntax**
 
@@ -2182,7 +2493,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `debate packet`
 
-Referee input: shared capsule id + one position delta per side + disagreements.
+**para que:** Referee input: shared capsule id + one position delta per side + disagreements.
+
+- **por que:** registra desacordo de especialistas — posições citam fact_ids, referee fecha
+- **quando usar:** quando especialistas divergem sobre o caso
 
 **Syntax**
 
@@ -2204,7 +2518,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `debate submit`
 
-Append a position — every position must cite fact_id evidence.
+**para que:** Append a position — every position must cite fact_id evidence.
+
+- **por que:** registra desacordo de especialistas — posições citam fact_ids, referee fecha
+- **quando usar:** quando especialistas divergem sobre o caso
 
 **Syntax**
 
@@ -2232,7 +2549,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `devin`
 
-Generate and inspect offline-first payloads for Devin Desktop, CLI and Cloud.
+**para que:** Generate and inspect offline-first payloads for Devin Desktop, CLI and Cloud.
+
+- **por que:** payloads offline-first para Devin Desktop, CLI e Cloud
+- **quando usar:** transportar a forja para hosts Devin
 
 **Syntax**
 
@@ -2246,7 +2566,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `devin capabilities`
 
-Report Devin capability declarations plus local CLI observation.
+**para que:** Report Devin capability declarations plus local CLI observation.
+
+- **por que:** payloads offline-first para Devin Desktop, CLI e Cloud
+- **quando usar:** transportar a forja para hosts Devin
 
 **Syntax**
 
@@ -2265,7 +2588,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `devin payload`
 
-Create a Devin payload; this command never starts Devin or mutates Git.
+**para que:** Create a Devin payload; this command never starts Devin or mutates Git.
+
+- **por que:** payloads offline-first para Devin Desktop, CLI e Cloud
+- **quando usar:** transportar a forja para hosts Devin
 
 **Syntax**
 
@@ -2292,7 +2618,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `devin probe`
 
-Observe whether a local Devin CLI executable is available on PATH.
+**para que:** Observe whether a local Devin CLI executable is available on PATH.
+
+- **por que:** payloads offline-first para Devin Desktop, CLI e Cloud
+- **quando usar:** transportar a forja para hosts Devin
 
 **Syntax**
 
@@ -2312,7 +2641,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `diff`
 
-Diff OpenAPI contracts.
+**para que:** Diff OpenAPI contracts.
+
+- **por que:** diff semântico de contratos OpenAPI
+- **quando usar:** comparar duas versões de contrato com mudanças tipadas
 
 **Syntax**
 
@@ -2326,7 +2658,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `diff contract`
 
-Classify bounded breaking changes between two contracts.
+**para que:** Classify bounded breaking changes between two contracts.
+
+- **por que:** diff semântico de contratos OpenAPI
+- **quando usar:** comparar duas versões de contrato com mudanças tipadas
 
 **Syntax**
 
@@ -2348,7 +2683,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `discover`
 
-Statically inventory FastAPI routes without executing code.
+**para que:** Statically inventory FastAPI routes without executing code.
+
+- **por que:** inventaria rotas FastAPI estaticamente, sem executar código
+- **quando usar:** primeiro mapa de uma API desconhecida
 
 **Syntax**
 
@@ -2369,7 +2707,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `dispatch`
 
-Run deterministic playbook steps; pending steps name their missing inputs.
+**para que:** Run deterministic playbook steps; pending steps name their missing inputs.
+
+- **por que:** executa passos de playbook determinísticos; pendentes nomeiam inputs faltantes
+- **quando usar:** rodar um fluxo declarado passo a passo
 
 **Syntax**
 
@@ -2383,7 +2724,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `dispatch run`
 
-Run a coordinator's playbook; pending steps name their missing inputs.
+**para que:** Run a coordinator's playbook; pending steps name their missing inputs.
+
+- **por que:** executa passos de playbook determinísticos; pendentes nomeiam inputs faltantes
+- **quando usar:** rodar um fluxo declarado passo a passo
 
 **Syntax**
 
@@ -2414,7 +2758,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `distribution`
 
-Inspect the installed package, paths and hostless capabilities.
+**para que:** Inspect the installed package, paths and hostless capabilities.
+
+- **por que:** inspeciona o pacote instalado, paths e capabilities hostless
+- **quando usar:** verificar a distribuição instalada
 
 **Syntax**
 
@@ -2427,6 +2774,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `distribution doctor`
+
+- **por que:** inspeciona o pacote instalado, paths e capabilities hostless
+- **quando usar:** verificar a distribuição instalada
 
 **Syntax**
 
@@ -2444,6 +2794,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `distribution init`
+
+- **por que:** inspeciona o pacote instalado, paths e capabilities hostless
+- **quando usar:** verificar a distribuição instalada
 
 **Syntax**
 
@@ -2464,6 +2817,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `distribution inspect`
 
+- **por que:** inspeciona o pacote instalado, paths e capabilities hostless
+- **quando usar:** verificar a distribuição instalada
+
 **Syntax**
 
 ```text
@@ -2480,6 +2836,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `distribution status`
+
+- **por que:** inspeciona o pacote instalado, paths e capabilities hostless
+- **quando usar:** verificar a distribuição instalada
 
 **Syntax**
 
@@ -2500,7 +2859,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `doctor`
 
-Inspect runtime state, or the local installation when no task is supplied.
+**para que:** Inspect runtime state, or the local installation when no task is supplied.
+
+- **por que:** inspeciona estado de runtime, ou a instalação local sem task
+- **quando usar:** primeira linha de diagnóstico: ambiente, instalação, imports
 
 **Syntax**
 
@@ -2524,7 +2886,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `economy`
 
-Measured cost per call — bytes recorded, tokens unresolved without a transcript.
+**para que:** Measured cost per call — bytes recorded, tokens unresolved without a transcript.
+
+- **por que:** custo medido por chamada — bytes gravados, tokens só com transcript
+- **quando usar:** quantificar custo real de contexto antes de otimizar
 
 **Syntax**
 
@@ -2538,7 +2903,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `economy budget-check`
 
-Check a proposed spend without appending it.
+**para que:** Check a proposed spend without appending it.
+
+- **por que:** custo medido por chamada — bytes gravados, tokens só com transcript
+- **quando usar:** quantificar custo real de contexto antes de otimizar
 
 **Syntax**
 
@@ -2564,7 +2932,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `economy budget-plan`
 
-Register an immutable hierarchical budget plan.
+**para que:** Register an immutable hierarchical budget plan.
+
+- **por que:** custo medido por chamada — bytes gravados, tokens só com transcript
+- **quando usar:** quantificar custo real de contexto antes de otimizar
 
 **Syntax**
 
@@ -2584,7 +2955,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `economy budget-spend`
 
-Admit and append one measured spend receipt.
+**para que:** Admit and append one measured spend receipt.
+
+- **por que:** custo medido por chamada — bytes gravados, tokens só com transcript
+- **quando usar:** quantificar custo real de contexto antes de otimizar
 
 **Syntax**
 
@@ -2613,7 +2987,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `economy cost`
 
-Price an accounting under the declared catalog; gaps stay named.
+**para que:** Price an accounting under the declared catalog; gaps stay named.
+
+- **por que:** custo medido por chamada — bytes gravados, tokens só com transcript
+- **quando usar:** quantificar custo real de contexto antes de otimizar
 
 **Syntax**
 
@@ -2636,7 +3013,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `economy doctor`
 
-What in this setup makes runs pay more than needed, with the unlock for each.
+**para que:** What in this setup makes runs pay more than needed, with the unlock for each.
+
+- **por que:** custo medido por chamada — bytes gravados, tokens só com transcript
+- **quando usar:** quantificar custo real de contexto antes de otimizar
 
 **Syntax**
 
@@ -2655,7 +3035,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `economy explain`
 
-Why each ref of a run was spent, from recorded provenance rules only.
+**para que:** Why each ref of a run was spent, from recorded provenance rules only.
+
+- **por que:** custo medido por chamada — bytes gravados, tokens só com transcript
+- **quando usar:** quantificar custo real de contexto antes de otimizar
 
 **Syntax**
 
@@ -2675,7 +3058,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `economy ledger`
 
-Per-basis token rollup for a run — observed and estimated never mix.
+**para que:** Per-basis token rollup for a run — observed and estimated never mix.
+
+- **por que:** custo medido por chamada — bytes gravados, tokens só com transcript
+- **quando usar:** quantificar custo real de contexto antes de otimizar
 
 **Syntax**
 
@@ -2695,7 +3081,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `economy phase-budget`
 
-Profile envelope split across SDD phases; protected phases are never cut.
+**para que:** Profile envelope split across SDD phases; protected phases are never cut.
+
+- **por que:** custo medido por chamada — bytes gravados, tokens só com transcript
+- **quando usar:** quantificar custo real de contexto antes de otimizar
 
 **Syntax**
 
@@ -2715,7 +3104,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `economy pricing`
 
-List the declared pricing catalog — prices are never hardcoded.
+**para que:** List the declared pricing catalog — prices are never hardcoded.
+
+- **por que:** custo medido por chamada — bytes gravados, tokens só com transcript
+- **quando usar:** quantificar custo real de contexto antes de otimizar
 
 **Syntax**
 
@@ -2735,7 +3127,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `economy providers`
 
-Declared provider capabilities and deterministic capabilities.
+**para que:** Declared provider capabilities and deterministic capabilities.
+
+- **por que:** custo medido por chamada — bytes gravados, tokens só com transcript
+- **quando usar:** quantificar custo real de contexto antes de otimizar
 
 **Syntax**
 
@@ -2753,7 +3148,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `economy reconcile`
 
-§22 estimated vs observed for a run, with calibration error per axis.
+**para que:** §22 estimated vs observed for a run, with calibration error per axis.
+
+- **por que:** custo medido por chamada — bytes gravados, tokens só com transcript
+- **quando usar:** quantificar custo real de contexto antes de otimizar
 
 **Syntax**
 
@@ -2775,7 +3173,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `economy record-usage`
 
-Append usage rows for a run; the file is append-only.
+**para que:** Append usage rows for a run; the file is append-only.
+
+- **por que:** custo medido por chamada — bytes gravados, tokens só com transcript
+- **quando usar:** quantificar custo real de contexto antes de otimizar
 
 **Syntax**
 
@@ -2801,7 +3202,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `economy report`
 
-Aggregate recorded call sizes; detail_level_effect shows what summary saves.
+**para que:** Aggregate recorded call sizes; detail_level_effect shows what summary saves.
+
+- **por que:** custo medido por chamada — bytes gravados, tokens só com transcript
+- **quando usar:** quantificar custo real de contexto antes de otimizar
 
 **Syntax**
 
@@ -2823,7 +3227,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `economy roi`
 
-Per extra capability: calls, facts and unresolved added, outcome changed vs primary.
+**para que:** Per extra capability: calls, facts and unresolved added, outcome changed vs primary.
+
+- **por que:** custo medido por chamada — bytes gravados, tokens só com transcript
+- **quando usar:** quantificar custo real de contexto antes de otimizar
 
 **Syntax**
 
@@ -2842,7 +3249,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `economy stats`
 
-Bytes attributed per run and source; tokens stay unresolved without a transcript.
+**para que:** Bytes attributed per run and source; tokens stay unresolved without a transcript.
+
+- **por que:** custo medido por chamada — bytes gravados, tokens só com transcript
+- **quando usar:** quantificar custo real de contexto antes de otimizar
 
 **Syntax**
 
@@ -2863,7 +3273,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `economy tier`
 
-Cheapest tier the evidence proves sufficient (T0-T3), with the reason.
+**para que:** Cheapest tier the evidence proves sufficient (T0-T3), with the reason.
+
+- **por que:** custo medido por chamada — bytes gravados, tokens só com transcript
+- **quando usar:** quantificar custo real de contexto antes de otimizar
 
 **Syntax**
 
@@ -2887,7 +3300,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `evals`
 
-Declarative local eval matrix, goldens and holdout metadata.
+**para que:** Declarative local eval matrix, goldens and holdout metadata.
+
+- **por que:** matriz de avaliação declarativa local, goldens e holdout
+- **quando usar:** validar qualidade determinística antes de release
 
 **Syntax**
 
@@ -2901,7 +3317,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `evals agent-governor`
 
-§23-§27 governor primitives vs declared corpus expectations.
+**para que:** §23-§27 governor primitives vs declared corpus expectations.
+
+- **por que:** matriz de avaliação declarativa local, goldens e holdout
+- **quando usar:** validar qualidade determinística antes de release
 
 **Syntax**
 
@@ -2920,7 +3339,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `evals agent-routing`
 
-Deterministic proxy-router eval: top-1/top-3, per family, protected-role misroutes.
+**para que:** Deterministic proxy-router eval: top-1/top-3, per family, protected-role misroutes.
+
+- **por que:** matriz de avaliação declarativa local, goldens e holdout
+- **quando usar:** validar qualidade determinística antes de release
 
 **Syntax**
 
@@ -2942,7 +3364,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `evals agentic-quality`
 
-Recorded specialist verdicts vs ground truth under each profile (no model calls).
+**para que:** Recorded specialist verdicts vs ground truth under each profile (no model calls).
+
+- **por que:** matriz de avaliação declarativa local, goldens e holdout
+- **quando usar:** validar qualidade determinística antes de release
 
 **Syntax**
 
@@ -2965,7 +3390,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `evals agentops`
 
-§53–§57: seeded ledgers -> inspect/compare/waste verdicts.
+**para que:** §53–§57: seeded ledgers -> inspect/compare/waste verdicts.
+
+- **por que:** matriz de avaliação declarativa local, goldens e holdout
+- **quando usar:** validar qualidade determinística antes de release
 
 **Syntax**
 
@@ -2984,7 +3412,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `evals cache`
 
-Warm/mutate/rebuild: all-hit on unchanged, precise invalidation, zero stale reuse.
+**para que:** Warm/mutate/rebuild: all-hit on unchanged, precise invalidation, zero stale reuse.
+
+- **por que:** matriz de avaliação declarativa local, goldens e holdout
+- **quando usar:** validar qualidade determinística antes de release
 
 **Syntax**
 
@@ -3004,7 +3435,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `evals context-quality`
 
-Fixture capsule + recorded uses vs declared metrics and sufficiency gates.
+**para que:** Fixture capsule + recorded uses vs declared metrics and sufficiency gates.
+
+- **por que:** matriz de avaliação declarativa local, goldens e holdout
+- **quando usar:** validar qualidade determinística antes de release
 
 **Syntax**
 
@@ -3023,7 +3457,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `evals control-plane`
 
-§28-§32 lifecycle: shadow never governs, promotion gates, fallback.
+**para que:** §28-§32 lifecycle: shadow never governs, promotion gates, fallback.
+
+- **por que:** matriz de avaliação declarativa local, goldens e holdout
+- **quando usar:** validar qualidade determinística antes de release
 
 **Syntax**
 
@@ -3042,7 +3479,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `evals economy`
 
-Capsule bytes and evidence recall vs the recorded baseline; exit 1 when a gate fails.
+**para que:** Capsule bytes and evidence recall vs the recorded baseline; exit 1 when a gate fails.
+
+- **por que:** matriz de avaliação declarativa local, goldens e holdout
+- **quando usar:** validar qualidade determinística antes de release
 
 **Syntax**
 
@@ -3064,7 +3504,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `evals economy-extras`
 
-Verification plans, retrieval, evidence refs, doctor, tiers, prefixes and locality gates.
+**para que:** Verification plans, retrieval, evidence refs, doctor, tiers, prefixes and locality gates.
+
+- **por que:** matriz de avaliação declarativa local, goldens e holdout
+- **quando usar:** validar qualidade determinística antes de release
 
 **Syntax**
 
@@ -3084,7 +3527,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `evals economy-freshness`
 
-Freshness watch, live gating, escalation, phase budget and resume pinning gates.
+**para que:** Freshness watch, live gating, escalation, phase budget and resume pinning gates.
+
+- **por que:** matriz de avaliação declarativa local, goldens e holdout
+- **quando usar:** validar qualidade determinística antes de release
 
 **Syntax**
 
@@ -3103,7 +3549,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `evals economy-hardening`
 
-Path containment, class-pool budget, tokens, phase and delta gates on production code.
+**para que:** Path containment, class-pool budget, tokens, phase and delta gates on production code.
+
+- **por que:** matriz de avaliação declarativa local, goldens e holdout
+- **quando usar:** validar qualidade determinística antes de release
 
 **Syntax**
 
@@ -3123,7 +3572,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `evals economy-matrix`
 
-Canonical tasks x economy/balanced/deep with quality, evidence, cost, context, latency apart.
+**para que:** Canonical tasks x economy/balanced/deep with quality, evidence, cost, context, latency apart.
+
+- **por que:** matriz de avaliação declarativa local, goldens e holdout
+- **quando usar:** validar qualidade determinística antes de release
 
 **Syntax**
 
@@ -3144,7 +3596,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `evals economy-routing`
 
-Profiles vs pre-economy plans with the risk floor as invariant; exit 1 on gate failure.
+**para que:** Profiles vs pre-economy plans with the risk floor as invariant; exit 1 on gate failure.
+
+- **por que:** matriz de avaliação declarativa local, goldens e holdout
+- **quando usar:** validar qualidade determinística antes de release
 
 **Syntax**
 
@@ -3163,7 +3618,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `evals forge-protocol`
 
-§46–§48: submit/attach/inspect/result/evidence/handoff/health lifecycle.
+**para que:** §46–§48: submit/attach/inspect/result/evidence/handoff/health lifecycle.
+
+- **por que:** matriz de avaliação declarativa local, goldens e holdout
+- **quando usar:** validar qualidade determinística antes de release
 
 **Syntax**
 
@@ -3182,7 +3640,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `evals frontier`
 
-§23: quality x cost x latency frontier across profiles.
+**para que:** §23: quality x cost x latency frontier across profiles.
+
+- **por que:** matriz de avaliação declarativa local, goldens e holdout
+- **quando usar:** validar qualidade determinística antes de release
 
 **Syntax**
 
@@ -3203,7 +3664,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `evals gate`
 
-Ship only without quality, safety, holdout or mutation regression; exit 1 on reject.
+**para que:** Ship only without quality, safety, holdout or mutation regression; exit 1 on reject.
+
+- **por que:** matriz de avaliação declarativa local, goldens e holdout
+- **quando usar:** validar qualidade determinística antes de release
 
 **Syntax**
 
@@ -3224,7 +3688,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `evals graph-quality`
 
-Per-rule x language precision/recall of graph rules over the golden corpus.
+**para que:** Per-rule x language precision/recall of graph rules over the golden corpus.
+
+- **por que:** matriz de avaliação declarativa local, goldens e holdout
+- **quando usar:** validar qualidade determinística antes de release
 
 **Syntax**
 
@@ -3243,7 +3710,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `evals knowledge-drift`
 
-§29 drift verdicts over declared pack+receipt cases.
+**para que:** §29 drift verdicts over declared pack+receipt cases.
+
+- **por que:** matriz de avaliação declarativa local, goldens e holdout
+- **quando usar:** validar qualidade determinística antes de release
 
 **Syntax**
 
@@ -3262,7 +3732,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `evals list`
 
-List declarative eval cases without executing agents.
+**para que:** List declarative eval cases without executing agents.
+
+- **por que:** matriz de avaliação declarativa local, goldens e holdout
+- **quando usar:** validar qualidade determinística antes de release
 
 **Syntax**
 
@@ -3281,7 +3754,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `evals live`
 
-§23: deterministic tier observed; provider tier deferred_external.
+**para que:** §23: deterministic tier observed; provider tier deferred_external.
+
+- **por que:** matriz de avaliação declarativa local, goldens e holdout
+- **quando usar:** validar qualidade determinística antes de release
 
 **Syntax**
 
@@ -3300,7 +3776,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `evals memory-evals`
 
-§24: the eight memory axes against the real governed store.
+**para que:** §24: the eight memory axes against the real governed store.
+
+- **por que:** matriz de avaliação declarativa local, goldens e holdout
+- **quando usar:** validar qualidade determinística antes de release
 
 **Syntax**
 
@@ -3319,7 +3798,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `evals model-routing`
 
-§33-§35 router constraints, scorecard floors and promotion evidence.
+**para que:** §33-§35 router constraints, scorecard floors and promotion evidence.
+
+- **por que:** matriz de avaliação declarativa local, goldens e holdout
+- **quando usar:** validar qualidade determinística antes de release
 
 **Syntax**
 
@@ -3338,7 +3820,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `evals replay`
 
-Re-plan stored decisions under the current policy; exit 1 if a required role is removed.
+**para que:** Re-plan stored decisions under the current policy; exit 1 if a required role is removed.
+
+- **por que:** matriz de avaliação declarativa local, goldens e holdout
+- **quando usar:** validar qualidade determinística antes de release
 
 **Syntax**
 
@@ -3359,7 +3844,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `evals retrieval`
 
-§38: lexical/graph/semantic/hybrid on recall, precision, latency, cost.
+**para que:** §38: lexical/graph/semantic/hybrid on recall, precision, latency, cost.
+
+- **por que:** matriz de avaliação declarativa local, goldens e holdout
+- **quando usar:** validar qualidade determinística antes de release
 
 **Syntax**
 
@@ -3381,7 +3869,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `evals security-adversarial`
 
-§25: synthesized attacks against the platform's own defenses.
+**para que:** §25: synthesized attacks against the platform's own defenses.
+
+- **por que:** matriz de avaliação declarativa local, goldens e holdout
+- **quando usar:** validar qualidade determinística antes de release
 
 **Syntax**
 
@@ -3400,7 +3891,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `evals selective-agentics`
 
-Lazy expertise, per-role bytes, referee packets, shadow share and agent audit gates.
+**para que:** Lazy expertise, per-role bytes, referee packets, shadow share and agent audit gates.
+
+- **por que:** matriz de avaliação declarativa local, goldens e holdout
+- **quando usar:** validar qualidade determinística antes de release
 
 **Syntax**
 
@@ -3420,7 +3914,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `evals telemetry-otlp`
 
-§50-§52: ledger spans -> OTLP export -> structural acceptance.
+**para que:** §50-§52: ledger spans -> OTLP export -> structural acceptance.
+
+- **por que:** matriz de avaliação declarativa local, goldens e holdout
+- **quando usar:** validar qualidade determinística antes de release
 
 **Syntax**
 
@@ -3439,7 +3936,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `evals token-economics`
 
-Usage rows + pricing + estimate vs ledger/cost/calibration expectations.
+**para que:** Usage rows + pricing + estimate vs ledger/cost/calibration expectations.
+
+- **por que:** matriz de avaliação declarativa local, goldens e holdout
+- **quando usar:** validar qualidade determinística antes de release
 
 **Syntax**
 
@@ -3458,7 +3958,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `evals tool-economy`
 
-Compact output, gateway surface, discover/call reach and slicer recall gates.
+**para que:** Compact output, gateway surface, discover/call reach and slicer recall gates.
+
+- **por que:** matriz de avaliação declarativa local, goldens e holdout
+- **quando usar:** validar qualidade determinística antes de release
 
 **Syntax**
 
@@ -3478,7 +3981,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `evals tool-surface`
 
-§40–§43: audit findings, disclosure routing, paging, benchmark honesty.
+**para que:** §40–§43: audit findings, disclosure routing, paging, benchmark honesty.
+
+- **por que:** matriz de avaliação declarativa local, goldens e holdout
+- **quando usar:** validar qualidade determinística antes de release
 
 **Syntax**
 
@@ -3497,7 +4003,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `evals trace-grading`
 
-§23: recorded traces graded against the declared rubric.
+**para que:** §23: recorded traces graded against the declared rubric.
+
+- **por que:** matriz de avaliação declarativa local, goldens e holdout
+- **quando usar:** validar qualidade determinística antes de release
 
 **Syntax**
 
@@ -3517,7 +4026,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `evals validate`
 
-Validate closed eval vocabulary and mutation/holdout requirements.
+**para que:** Validate closed eval vocabulary and mutation/holdout requirements.
+
+- **por que:** matriz de avaliação declarativa local, goldens e holdout
+- **quando usar:** validar qualidade determinística antes de release
 
 **Syntax**
 
@@ -3538,7 +4050,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `evidence`
 
-Release evidence receipts.
+**para que:** Release evidence receipts.
+
+- **por que:** recibos de evidência de release
+- **quando usar:** produzir/verificar a cadeia de evidência de uma entrega
 
 **Syntax**
 
@@ -3552,7 +4067,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `evidence emit`
 
-Emit a receipt binding artifact paths to their sha256 contents.
+**para que:** Emit a receipt binding artifact paths to their sha256 contents.
+
+- **por que:** recibos de evidência de release
+- **quando usar:** produzir/verificar a cadeia de evidência de uma entrega
 
 **Syntax**
 
@@ -3573,7 +4091,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `evidence gate`
 
-Cheapest evidence mode for a question; live_read_only only for runtime questions.
+**para que:** Cheapest evidence mode for a question; live_read_only only for runtime questions.
+
+- **por que:** recibos de evidência de release
+- **quando usar:** produzir/verificar a cadeia de evidência de uma entrega
 
 **Syntax**
 
@@ -3594,7 +4115,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `evidence resolve`
 
-One evidence node with one-hop neighbors as further evidence:// refs.
+**para que:** One evidence node with one-hop neighbors as further evidence:// refs.
+
+- **por que:** recibos de evidência de release
+- **quando usar:** produzir/verificar a cadeia de evidência de uma entrega
 
 **Syntax**
 
@@ -3615,7 +4139,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `evidence verify`
 
-Re-hash every artifact a receipt lists.
+**para que:** Re-hash every artifact a receipt lists.
+
+- **por que:** recibos de evidência de release
+- **quando usar:** produzir/verificar a cadeia de evidência de uma entrega
 
 **Syntax**
 
@@ -3637,7 +4164,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `evolve`
 
-Execute a bounded, evidence-backed API evolution run.
+**para que:** Execute a bounded, evidence-backed API evolution run.
+
+- **por que:** executa um run de evolução de API bounded e com evidência
+- **quando usar:** evolução governada de API com limites declarados
 
 **Syntax**
 
@@ -3662,7 +4192,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `experience`
 
-Canonical execution, governance and evidence projections.
+**para que:** Canonical execution, governance and evidence projections.
+
+- **por que:** projeções canônicas de execução, governança e evidência
+- **quando usar:** consultar a visão de experiência canônica
 
 **Syntax**
 
@@ -3675,6 +4208,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `experience doctor`
+
+- **por que:** projeções canônicas de execução, governança e evidência
+- **quando usar:** consultar a visão de experiência canônica
 
 **Syntax**
 
@@ -3694,6 +4230,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `experience review`
 
+- **por que:** projeções canônicas de execução, governança e evidência
+- **quando usar:** consultar a visão de experiência canônica
+
 **Syntax**
 
 ```text
@@ -3711,6 +4250,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `experience status`
+
+- **por que:** projeções canônicas de execução, governança e evidência
+- **quando usar:** consultar a visão de experiência canônica
 
 **Syntax**
 
@@ -3732,7 +4274,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `field`
 
-Pre-registered field validation: evidence-joined run records and gap report.
+**para que:** Pre-registered field validation: evidence-joined run records and gap report.
+
+- **por que:** validação de campo pré-registrada: run records com evidência juntada e gap report
+- **quando usar:** validar em campo contra casos pré-registrados
 
 **Syntax**
 
@@ -3746,7 +4291,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `field annotate`
 
-Record human fields with closed enums.
+**para que:** Record human fields with closed enums.
+
+- **por que:** validação de campo pré-registrada: run records com evidência juntada e gap report
+- **quando usar:** validar em campo contra casos pré-registrados
 
 **Syntax**
 
@@ -3773,7 +4321,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `field export`
 
-Write anonymized verified tasks into evals/corpus/field.
+**para que:** Write anonymized verified tasks into evals/corpus/field.
+
+- **por que:** validação de campo pré-registrada: run records com evidência juntada e gap report
+- **quando usar:** validar em campo contra casos pré-registrados
 
 **Syntax**
 
@@ -3793,7 +4344,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `field record`
 
-Join ledger, summary and checkpoint of linked runs into a field-run/v1 record.
+**para que:** Join ledger, summary and checkpoint of linked runs into a field-run/v1 record.
+
+- **por que:** validação de campo pré-registrada: run records com evidência juntada e gap report
+- **quando usar:** validar em campo contra casos pré-registrados
 
 **Syntax**
 
@@ -3818,7 +4372,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `field report`
 
-Counts, Wilson 95% CI, theme qualification and H1 verdict from verified runs.
+**para que:** Counts, Wilson 95% CI, theme qualification and H1 verdict from verified runs.
+
+- **por que:** validação de campo pré-registrada: run records com evidência juntada e gap report
+- **quando usar:** validar em campo contra casos pré-registrados
 
 **Syntax**
 
@@ -3838,7 +4395,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `field verify`
 
-Blind verifier verdict; never echoes the human labels.
+**para que:** Blind verifier verdict; never echoes the human labels.
+
+- **por que:** validação de campo pré-registrada: run records com evidência juntada e gap report
+- **quando usar:** validar em campo contra casos pré-registrados
 
 **Syntax**
 
@@ -3863,7 +4423,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `forge`
 
-Forge Protocol: capabilities, task submit/inspect/result/evidence, handoff, health.
+**para que:** Forge Protocol: capabilities, task submit/inspect/result/evidence, handoff, health.
+
+- **por que:** Forge Protocol: capabilities, task submit/inspect/result/evidence, handoff, health
+- **quando usar:** interoperar com o control plane The Forge
 
 **Syntax**
 
@@ -3877,7 +4440,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `forge attach`
 
-§47 link a forge task to its governed TaskSpec execution unit.
+**para que:** §47 link a forge task to its governed TaskSpec execution unit.
+
+- **por que:** Forge Protocol: capabilities, task submit/inspect/result/evidence, handoff, health
+- **quando usar:** interoperar com o control plane The Forge
 
 **Syntax**
 
@@ -3898,7 +4464,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `forge capabilities`
 
-§46 discover: public capability descriptors other engines can call.
+**para que:** §46 discover: public capability descriptors other engines can call.
+
+- **por que:** Forge Protocol: capabilities, task submit/inspect/result/evidence, handoff, health
+- **quando usar:** interoperar com o control plane The Forge
 
 **Syntax**
 
@@ -3916,7 +4485,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `forge evidence`
 
-§47 retrieve evidence: content-addressed artifact bundle.
+**para que:** §47 retrieve evidence: content-addressed artifact bundle.
+
+- **por que:** Forge Protocol: capabilities, task submit/inspect/result/evidence, handoff, health
+- **quando usar:** interoperar com o control plane The Forge
 
 **Syntax**
 
@@ -3936,7 +4508,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `forge handoff`
 
-§47/§48 handoff: portable bundle — delivery stays a human step.
+**para que:** §47/§48 handoff: portable bundle — delivery stays a human step.
+
+- **por que:** Forge Protocol: capabilities, task submit/inspect/result/evidence, handoff, health
+- **quando usar:** interoperar com o control plane The Forge
 
 **Syntax**
 
@@ -3958,7 +4533,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `forge health`
 
-§47 health: engine, protocol version and declared task counts.
+**para que:** §47 health: engine, protocol version and declared task counts.
+
+- **por que:** Forge Protocol: capabilities, task submit/inspect/result/evidence, handoff, health
+- **quando usar:** interoperar com o control plane The Forge
 
 **Syntax**
 
@@ -3977,7 +4555,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `forge inspect`
 
-§47 inspect: live wire projection of forge + governed state.
+**para que:** §47 inspect: live wire projection of forge + governed state.
+
+- **por que:** Forge Protocol: capabilities, task submit/inspect/result/evidence, handoff, health
+- **quando usar:** interoperar com o control plane The Forge
 
 **Syntax**
 
@@ -3997,7 +4578,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `forge result`
 
-§47 retrieve result: governed OutcomeBrief mapped, gaps named.
+**para que:** §47 retrieve result: governed OutcomeBrief mapped, gaps named.
+
+- **por que:** Forge Protocol: capabilities, task submit/inspect/result/evidence, handoff, health
+- **quando usar:** interoperar com o control plane The Forge
 
 **Syntax**
 
@@ -4017,7 +4601,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `forge submit`
 
-§47 submit: validate capability + risk gate, persist the request.
+**para que:** §47 submit: validate capability + risk gate, persist the request.
+
+- **por que:** Forge Protocol: capabilities, task submit/inspect/result/evidence, handoff, health
+- **quando usar:** interoperar com o control plane The Forge
 
 **Syntax**
 
@@ -4046,7 +4633,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `governance`
 
-Fail-closed agentic decision gates.
+**para que:** Fail-closed agentic decision gates.
+
+- **por que:** gates de decisão agêntica fail-closed
+- **quando usar:** verificar política antes de uma ação governada
 
 **Syntax**
 
@@ -4060,7 +4650,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `governance decision-check`
 
-Evaluate and record a proposal; never infer approval from model text.
+**para que:** Evaluate and record a proposal; never infer approval from model text.
+
+- **por que:** gates de decisão agêntica fail-closed
+- **quando usar:** verificar política antes de uma ação governada
 
 **Syntax**
 
@@ -4084,7 +4677,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `governor`
 
-Agent Governor decisions: ceilings, gain, stop, recovery and loop checks.
+**para que:** Agent Governor decisions: ceilings, gain, stop, recovery and loop checks.
+
+- **por que:** decisões do Agent Governor: tetos, ganho, stop, recovery, loop checks
+- **quando usar:** inspecionar limites e decisões do governador
 
 **Syntax**
 
@@ -4098,7 +4694,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `governor decide`
 
-§23: profile ceilings adjusted by risk, security and budget.
+**para que:** §23: profile ceilings adjusted by risk, security and budget.
+
+- **por que:** decisões do Agent Governor: tetos, ganho, stop, recovery, loop checks
+- **quando usar:** inspecionar limites e decisões do governador
 
 **Syntax**
 
@@ -4118,7 +4717,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `governor gain`
 
-§24: pre-action expected information gain over declared signals.
+**para que:** §24: pre-action expected information gain over declared signals.
+
+- **por que:** decisões do Agent Governor: tetos, ganho, stop, recovery, loop checks
+- **quando usar:** inspecionar limites e decisões do governador
 
 **Syntax**
 
@@ -4138,7 +4740,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `governor loop-check`
 
-§27: block a strategy that repeats inside the trailing window.
+**para que:** §27: block a strategy that repeats inside the trailing window.
+
+- **por que:** decisões do Agent Governor: tetos, ganho, stop, recovery, loop checks
+- **quando usar:** inspecionar limites e decisões do governador
 
 **Syntax**
 
@@ -4159,7 +4764,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `governor recover`
 
-§26: governed recovery for a classified failure.
+**para que:** §26: governed recovery for a classified failure.
+
+- **por que:** decisões do Agent Governor: tetos, ganho, stop, recovery, loop checks
+- **quando usar:** inspecionar limites e decisões do governador
 
 **Syntax**
 
@@ -4180,7 +4788,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `governor stop`
 
-§25: explicit STOP — continue only on gain > threshold or requirement.
+**para que:** §25: explicit STOP — continue only on gain > threshold or requirement.
+
+- **por que:** decisões do Agent Governor: tetos, ganho, stop, recovery, loop checks
+- **quando usar:** inspecionar limites e decisões do governador
 
 **Syntax**
 
@@ -4204,7 +4815,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `graph`
 
-Native provenance graph — canonical JSONL store, closed-vocabulary queries.
+**para que:** Native provenance graph — canonical JSONL store, closed-vocabulary queries.
+
+- **por que:** grafo de proveniência nativo — store JSONL canônico, queries de vocabulário fechado
+- **quando usar:** perguntas de dependência, impacto ou proveniência
 
 **Syntax**
 
@@ -4218,7 +4832,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `graph build`
 
-Populate nodes.jsonl/edges.jsonl from case artifacts — deterministic bytes.
+**para que:** Populate nodes.jsonl/edges.jsonl from case artifacts — deterministic bytes.
+
+- **por que:** grafo de proveniência nativo — store JSONL canônico, queries de vocabulário fechado
+- **quando usar:** perguntas de dependência, impacto ou proveniência
 
 **Syntax**
 
@@ -4239,7 +4856,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `graph coverage`
 
-Structural gaps: unverified findings, unimplemented ops, unreferenced facts.
+**para que:** Structural gaps: unverified findings, unimplemented ops, unreferenced facts.
+
+- **por que:** grafo de proveniência nativo — store JSONL canônico, queries de vocabulário fechado
+- **quando usar:** perguntas de dependência, impacto ou proveniência
 
 **Syntax**
 
@@ -4258,7 +4878,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `graph export`
 
-jsonl copy, Neptune Gremlin CSV or RDF N-Triples, plus export.json digests.
+**para que:** jsonl copy, Neptune Gremlin CSV or RDF N-Triples, plus export.json digests.
+
+- **por que:** grafo de proveniência nativo — store JSONL canônico, queries de vocabulário fechado
+- **quando usar:** perguntas de dependência, impacto ou proveniência
 
 **Syntax**
 
@@ -4279,7 +4902,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `graph impact`
 
-Reverse traversal: everything that transitively depends on the node.
+**para que:** Reverse traversal: everything that transitively depends on the node.
+
+- **por que:** grafo de proveniência nativo — store JSONL canônico, queries de vocabulário fechado
+- **quando usar:** perguntas de dependência, impacto ou proveniência
 
 **Syntax**
 
@@ -4300,7 +4926,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `graph query`
 
-Filter nodes/edges by closed vocabulary — no free text.
+**para que:** Filter nodes/edges by closed vocabulary — no free text.
+
+- **por que:** grafo de proveniência nativo — store JSONL canônico, queries de vocabulário fechado
+- **quando usar:** perguntas de dependência, impacto ou proveniência
 
 **Syntax**
 
@@ -4322,7 +4951,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `graph trace`
 
-Shortest directed path between two nodes; absent path is named.
+**para que:** Shortest directed path between two nodes; absent path is named.
+
+- **por que:** grafo de proveniência nativo — store JSONL canônico, queries de vocabulário fechado
+- **quando usar:** perguntas de dependência, impacto ou proveniência
 
 **Syntax**
 
@@ -4343,7 +4975,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `graph ui`
 
-Open the local Graph Studio explorer for this graph.
+**para que:** Open the local Graph Studio explorer for this graph.
+
+- **por que:** grafo de proveniência nativo — store JSONL canônico, queries de vocabulário fechado
+- **quando usar:** perguntas de dependência, impacto ou proveniência
 
 **Syntax**
 
@@ -4363,7 +4998,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `graph view`
 
-Emit the ForgeGraphView/v1 document (Graph Studio contract).
+**para que:** Emit the ForgeGraphView/v1 document (Graph Studio contract).
+
+- **por que:** grafo de proveniência nativo — store JSONL canônico, queries de vocabulário fechado
+- **quando usar:** perguntas de dependência, impacto ou proveniência
 
 **Syntax**
 
@@ -4383,7 +5021,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `grpc`
 
-Offline-first gRPC contract control plane.
+**para que:** Offline-first gRPC contract control plane.
+
+- **por que:** control plane de contratos gRPC offline-first
+- **quando usar:** trabalhar contratos gRPC sem executar serviços
 
 **Syntax**
 
@@ -4397,7 +5038,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `grpc analyze`
 
-Build the canonical gRPC IR without invoking external toolchains.
+**para que:** Build the canonical gRPC IR without invoking external toolchains.
+
+- **por que:** control plane de contratos gRPC offline-first
+- **quando usar:** trabalhar contratos gRPC sem executar serviços
 
 **Syntax**
 
@@ -4416,7 +5060,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `grpc benchmark`
 
-Evaluate RPS/TPS evidence without claiming capacity from invalid runs.
+**para que:** Evaluate RPS/TPS evidence without claiming capacity from invalid runs.
+
+- **por que:** control plane de contratos gRPC offline-first
+- **quando usar:** trabalhar contratos gRPC sem executar serviços
 
 **Syntax**
 
@@ -4435,7 +5082,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `grpc capabilities`
 
-Show optional local gRPC toolchain capabilities.
+**para que:** Show optional local gRPC toolchain capabilities.
+
+- **por que:** control plane de contratos gRPC offline-first
+- **quando usar:** trabalhar contratos gRPC sem executar serviços
 
 **Syntax**
 
@@ -4453,7 +5103,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `grpc codegen`
 
-Generate deterministic local artifacts or report missing toolchains.
+**para que:** Generate deterministic local artifacts or report missing toolchains.
+
+- **por que:** control plane de contratos gRPC offline-first
+- **quando usar:** trabalhar contratos gRPC sem executar serviços
 
 **Syntax**
 
@@ -4475,7 +5128,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `grpc diff`
 
-Classify protobuf evolution using deterministic compatibility rules.
+**para que:** Classify protobuf evolution using deterministic compatibility rules.
+
+- **por que:** control plane de contratos gRPC offline-first
+- **quando usar:** trabalhar contratos gRPC sem executar serviços
 
 **Syntax**
 
@@ -4495,7 +5151,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `grpc discover`
 
-Discover a gRPC contract and expose its canonical IR.
+**para que:** Discover a gRPC contract and expose its canonical IR.
+
+- **por que:** control plane de contratos gRPC offline-first
+- **quando usar:** trabalhar contratos gRPC sem executar serviços
 
 **Syntax**
 
@@ -4514,7 +5173,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `grpc gateway`
 
-Project the contract to local gateway artifacts.
+**para que:** Project the contract to local gateway artifacts.
+
+- **por que:** control plane de contratos gRPC offline-first
+- **quando usar:** trabalhar contratos gRPC sem executar serviços
 
 **Syntax**
 
@@ -4535,7 +5197,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `grpc test`
 
-Run the offline contract test and independent verification gates.
+**para que:** Run the offline contract test and independent verification gates.
+
+- **por que:** control plane de contratos gRPC offline-first
+- **quando usar:** trabalhar contratos gRPC sem executar serviços
 
 **Syntax**
 
@@ -4555,7 +5220,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `grpc verify`
 
-Run independent local verification over a gRPC contract.
+**para que:** Run independent local verification over a gRPC contract.
+
+- **por que:** control plane de contratos gRPC offline-first
+- **quando usar:** trabalhar contratos gRPC sem executar serviços
 
 **Syntax**
 
@@ -4577,7 +5245,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `index`
 
-TokenSave: content-hash cache + local indexes over extractor output.
+**para que:** TokenSave: content-hash cache + local indexes over extractor output.
+
+- **por que:** TokenSave: cache por content-hash + índices locais sobre saída de extratores
+- **quando usar:** recuperação econômica por níveis L0-L6
 
 **Syntax**
 
@@ -4591,7 +5262,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `index build`
 
-Write the 12 index kinds under .apiforge/index/ (manifest lists all).
+**para que:** Write the 12 index kinds under .apiforge/index/ (manifest lists all).
+
+- **por que:** TokenSave: cache por content-hash + índices locais sobre saída de extratores
+- **quando usar:** recuperação econômica por níveis L0-L6
 
 **Syntax**
 
@@ -4613,7 +5287,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `index status`
 
-Name added/changed/removed source files against the built index.
+**para que:** Name added/changed/removed source files against the built index.
+
+- **por que:** TokenSave: cache por content-hash + índices locais sobre saída de extratores
+- **quando usar:** recuperação econômica por níveis L0-L6
 
 **Syntax**
 
@@ -4635,7 +5312,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `init`
 
-Create only a minimal local project or workspace manifest.
+**para que:** Create only a minimal local project or workspace manifest.
+
+- **por que:** cria só um manifesto mínimo de projeto/workspace
+- **quando usar:** primeiro passo num diretório novo
 
 **Syntax**
 
@@ -4658,7 +5338,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `inspect`
 
-Inspect installed assets and bounded project/workspace discovery.
+**para que:** Inspect installed assets and bounded project/workspace discovery.
+
+- **por que:** inspeciona assets instalados e descoberta bounded de projeto/workspace
+- **quando usar:** perguntar sobre artefatos instalados antes de ler arquivo
 
 **Syntax**
 
@@ -4679,7 +5362,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `install`
 
-Install API Forge assets into a project, workspace or the user home; manage the lifecycle (status, doctor, repair, update, uninstall).
+**para que:** Install API Forge assets into a project, workspace or the user home; manage the lifecycle (status, doctor, repair, update, uninstall).
+
+- **por que:** instala assets API Forge em projeto, workspace ou home; gerencia o ciclo de vida
+- **quando usar:** ativar a forja num escopo governado
 
 **Syntax**
 
@@ -4704,7 +5390,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `install doctor`
 
-Deep installation health: ledger, drift, mcp config, handshake.
+**para que:** Deep installation health: ledger, drift, mcp config, handshake.
+
+- **por que:** instala assets API Forge em projeto, workspace ou home; gerencia o ciclo de vida
+- **quando usar:** ativar a forja num escopo governado
 
 **Syntax**
 
@@ -4724,7 +5413,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `install repair`
 
-Rewrite managed assets that went missing or drifted.
+**para que:** Rewrite managed assets that went missing or drifted.
+
+- **por que:** instala assets API Forge em projeto, workspace ou home; gerencia o ciclo de vida
+- **quando usar:** ativar a forja num escopo governado
 
 **Syntax**
 
@@ -4745,7 +5437,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `install status`
 
-Ledger + drift + health document of the installation.
+**para que:** Ledger + drift + health document of the installation.
+
+- **por que:** instala assets API Forge em projeto, workspace ou home; gerencia o ciclo de vida
+- **quando usar:** ativar a forja num escopo governado
 
 **Syntax**
 
@@ -4765,7 +5460,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `install uninstall`
 
-Remove only what the ledger declares as managed.
+**para que:** Remove only what the ledger declares as managed.
+
+- **por que:** instala assets API Forge em projeto, workspace ou home; gerencia o ciclo de vida
+- **quando usar:** ativar a forja num escopo governado
 
 **Syntax**
 
@@ -4787,7 +5485,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `install update`
 
-Upgrade the bootstrap-installed runtime.
+**para que:** Upgrade the bootstrap-installed runtime.
+
+- **por que:** instala assets API Forge em projeto, workspace ou home; gerencia o ciclo de vida
+- **quando usar:** ativar a forja num escopo governado
 
 **Syntax**
 
@@ -4808,7 +5509,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `install verify`
 
-Real JSON-RPC handshake: initialize + tools/list on the MCP server.
+**para que:** Real JSON-RPC handshake: initialize + tools/list on the MCP server.
+
+- **por que:** instala assets API Forge em projeto, workspace ou home; gerencia o ciclo de vida
+- **quando usar:** ativar a forja num escopo governado
 
 **Syntax**
 
@@ -4828,7 +5532,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `integration`
 
-Read-only external evidence adapters and freshness receipts.
+**para que:** Read-only external evidence adapters and freshness receipts.
+
+- **por que:** adapters de evidência externa read-only e recibos de frescor
+- **quando usar:** consultar fontes externas sem mutação
 
 **Syntax**
 
@@ -4842,7 +5549,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `integration github-issues`
 
-Read GitHub issues through a GET-only adapter and emit a receipt.
+**para que:** Read GitHub issues through a GET-only adapter and emit a receipt.
+
+- **por que:** adapters de evidência externa read-only e recibos de frescor
+- **quando usar:** consultar fontes externas sem mutação
 
 **Syntax**
 
@@ -4866,7 +5576,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `integration health`
 
-Read a remote HTTP health endpoint and emit a freshness receipt.
+**para que:** Read a remote HTTP health endpoint and emit a freshness receipt.
+
+- **por que:** adapters de evidência externa read-only e recibos de frescor
+- **quando usar:** consultar fontes externas sem mutação
 
 **Syntax**
 
@@ -4888,7 +5601,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `integration json`
 
-Read a generic external JSON endpoint (Jira, Linear or similar).
+**para que:** Read a generic external JSON endpoint (Jira, Linear or similar).
+
+- **por que:** adapters de evidência externa read-only e recibos de frescor
+- **quando usar:** consultar fontes externas sem mutação
 
 **Syntax**
 
@@ -4910,7 +5626,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `integration verify-receipt`
 
-Verify external receipt correspondence and declared freshness.
+**para que:** Verify external receipt correspondence and declared freshness.
+
+- **por que:** adapters de evidência externa read-only e recibos de frescor
+- **quando usar:** consultar fontes externas sem mutação
 
 **Syntax**
 
@@ -4932,7 +5651,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `judge`
 
-Judge contract/code divergence, or catalog checks over report facts.
+**para que:** Judge contract/code divergence, or catalog checks over report facts.
+
+- **por que:** julga divergência contrato/código, ou checks de catálogo sobre facts
+- **quando usar:** depois do analyze: facts viram findings com rule_id
 
 **Syntax**
 
@@ -4955,7 +5677,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `knowledge`
 
-Domain packs — source authority, runtime matrices, declared evals.
+**para que:** Domain packs — source authority, runtime matrices, declared evals.
+
+- **por que:** domain packs — autoridade de fonte, matrizes de runtime, evals declarados
+- **quando usar:** consultar a fonte canônica de conhecimento de domínio
 
 **Syntax**
 
@@ -4969,7 +5694,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `knowledge adaptive`
 
-§36: L0→L4 ladder; escalates only while the level is insufficient.
+**para que:** §36: L0→L4 ladder; escalates only while the level is insufficient.
+
+- **por que:** domain packs — autoridade de fonte, matrizes de runtime, evals declarados
+- **quando usar:** consultar a fonte canônica de conhecimento de domínio
 
 **Syntax**
 
@@ -4992,7 +5720,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `knowledge check`
 
-Validate every pack; exit 4 when any problem is named.
+**para que:** Validate every pack; exit 4 when any problem is named.
+
+- **por que:** domain packs — autoridade de fonte, matrizes de runtime, evals declarados
+- **quando usar:** consultar a fonte canônica de conhecimento de domínio
 
 **Syntax**
 
@@ -5011,7 +5742,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `knowledge drift`
 
-§29 drift verdict across one or more read-only source receipts.
+**para que:** §29 drift verdict across one or more read-only source receipts.
+
+- **por que:** domain packs — autoridade de fonte, matrizes de runtime, evals declarados
+- **quando usar:** consultar a fonte canônica de conhecimento de domínio
 
 **Syntax**
 
@@ -5033,7 +5767,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `knowledge freshness`
 
-Verify pack freshness from a local read-only source receipt.
+**para que:** Verify pack freshness from a local read-only source receipt.
+
+- **por que:** domain packs — autoridade de fonte, matrizes de runtime, evals declarados
+- **quando usar:** consultar a fonte canônica de conhecimento de domínio
 
 **Syntax**
 
@@ -5055,7 +5792,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `knowledge impact`
 
-§29 source -> pack -> rule -> skill -> eval relation graph.
+**para que:** §29 source -> pack -> rule -> skill -> eval relation graph.
+
+- **por que:** domain packs — autoridade de fonte, matrizes de runtime, evals declarados
+- **quando usar:** consultar a fonte canônica de conhecimento de domínio
 
 **Syntax**
 
@@ -5075,7 +5815,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `knowledge list`
 
-List every pack with its areas, rules and verification date.
+**para que:** List every pack with its areas, rules and verification date.
+
+- **por que:** domain packs — autoridade de fonte, matrizes de runtime, evals declarados
+- **quando usar:** consultar a fonte canônica de conhecimento de domínio
 
 **Syntax**
 
@@ -5094,7 +5837,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `knowledge rewrite`
 
-§39: rewrite only when deterministic retrieval failed + gates allow.
+**para que:** §39: rewrite only when deterministic retrieval failed + gates allow.
+
+- **por que:** domain packs — autoridade de fonte, matrizes de runtime, evals declarados
+- **quando usar:** consultar a fonte canônica de conhecimento de domínio
 
 **Syntax**
 
@@ -5116,7 +5862,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `knowledge search`
 
-Deterministic expansion, ranked passages with signals, progressive tiers.
+**para que:** Deterministic expansion, ranked passages with signals, progressive tiers.
+
+- **por que:** domain packs — autoridade de fonte, matrizes de runtime, evals declarados
+- **quando usar:** consultar a fonte canônica de conhecimento de domínio
 
 **Syntax**
 
@@ -5137,7 +5886,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `knowledge select`
 
-Only the packs a declared trigger names; no trigger means no packs.
+**para que:** Only the packs a declared trigger names; no trigger means no packs.
+
+- **por que:** domain packs — autoridade de fonte, matrizes de runtime, evals declarados
+- **quando usar:** consultar a fonte canônica de conhecimento de domínio
 
 **Syntax**
 
@@ -5159,7 +5911,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `knowledge show`
 
-Print one pack: summary, source authority, matrix, declared evals.
+**para que:** Print one pack: summary, source authority, matrix, declared evals.
+
+- **por que:** domain packs — autoridade de fonte, matrizes de runtime, evals declarados
+- **quando usar:** consultar a fonte canônica de conhecimento de domínio
 
 **Syntax**
 
@@ -5179,7 +5934,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `knowledge watch`
 
-Packs whose upstream fingerprint, version or expiry says refresh_needed (never fetches).
+**para que:** Packs whose upstream fingerprint, version or expiry says refresh_needed (never fetches).
+
+- **por que:** domain packs — autoridade de fonte, matrizes de runtime, evals declarados
+- **quando usar:** consultar a fonte canônica de conhecimento de domínio
 
 **Syntax**
 
@@ -5202,7 +5960,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `lab`
 
-Opt-in experimental scenario catalog (§28).
+**para que:** Opt-in experimental scenario catalog (§28).
+
+- **por que:** catálogo de cenários experimentais opt-in (§28)
+- **quando usar:** cenários reproduzíveis sem tocar o real
 
 **Syntax**
 
@@ -5216,7 +5977,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `lab scenarios`
 
-§28 experimental scenario catalog with honest coverage states.
+**para que:** §28 experimental scenario catalog with honest coverage states.
+
+- **por que:** catálogo de cenários experimentais opt-in (§28)
+- **quando usar:** cenários reproduzíveis sem tocar o real
 
 **Syntax**
 
@@ -5237,7 +6001,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `mcp`
 
-MCP surface projections and their measured cost.
+**para que:** MCP surface projections and their measured cost.
+
+- **por que:** projeções de superfície MCP e seu custo medido
+- **quando usar:** servir a forja via MCP ou auditar o custo da superfície
 
 **Syntax**
 
@@ -5251,7 +6018,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `mcp audit`
 
-§40 audit: oversized schemas/outputs, weak descriptions, unbounded lists.
+**para que:** §40 audit: oversized schemas/outputs, weak descriptions, unbounded lists.
+
+- **por que:** projeções de superfície MCP e seu custo medido
+- **quando usar:** servir a forja via MCP ou auditar o custo da superfície
 
 **Syntax**
 
@@ -5271,7 +6041,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `mcp benchmark`
 
-§43 measured response bytes + labeled token estimate per sampled tool.
+**para que:** §43 measured response bytes + labeled token estimate per sampled tool.
+
+- **por que:** projeções de superfície MCP e seu custo medido
+- **quando usar:** servir a forja via MCP ou auditar o custo da superfície
 
 **Syntax**
 
@@ -5290,7 +6063,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `mcp disclose`
 
-§41 task -> capability router -> active tool set (advisory).
+**para que:** §41 task -> capability router -> active tool set (advisory).
+
+- **por que:** projeções de superfície MCP e seu custo medido
+- **quando usar:** servir a forja via MCP ou auditar o custo da superfície
 
 **Syntax**
 
@@ -5311,7 +6087,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `mcp surface`
 
-Name, description and schema bytes of every tool on a surface.
+**para que:** Name, description and schema bytes of every tool on a surface.
+
+- **por que:** projeções de superfície MCP e seu custo medido
+- **quando usar:** servir a forja via MCP ou auditar o custo da superfície
 
 **Syntax**
 
@@ -5332,7 +6111,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `memory`
 
-Governed append-only agent memory.
+**para que:** Governed append-only agent memory.
+
+- **por que:** memória de agente append-only governada
+- **quando usar:** persistir contexto entre sessões com governo
 
 **Syntax**
 
@@ -5345,6 +6127,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `memory invalidate`
+
+- **por que:** memória de agente append-only governada
+- **quando usar:** persistir contexto entre sessões com governo
 
 **Syntax**
 
@@ -5368,6 +6153,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `memory persist`
 
+- **por que:** memória de agente append-only governada
+- **quando usar:** persistir contexto entre sessões com governo
+
 **Syntax**
 
 ```text
@@ -5387,6 +6175,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `memory propose`
+
+- **por que:** memória de agente append-only governada
+- **quando usar:** persistir contexto entre sessões com governo
 
 **Syntax**
 
@@ -5417,7 +6208,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `memory quarantine-list`
 
-List pending and released quarantine rows.
+**para que:** List pending and released quarantine rows.
+
+- **por que:** memória de agente append-only governada
+- **quando usar:** persistir contexto entre sessões com governo
 
 **Syntax**
 
@@ -5436,7 +6230,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `memory quarantine-resolve`
 
-Human review boundary: release a quarantined candidate.
+**para que:** Human review boundary: release a quarantined candidate.
+
+- **por que:** memória de agente append-only governada
+- **quando usar:** persistir contexto entre sessões com governo
 
 **Syntax**
 
@@ -5461,7 +6258,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `memory rank`
 
-§15 ranked retrieval: per-record score decomposition, deterministic.
+**para que:** §15 ranked retrieval: per-record score decomposition, deterministic.
+
+- **por que:** memória de agente append-only governada
+- **quando usar:** persistir contexto entre sessões com governo
 
 **Syntax**
 
@@ -5486,6 +6286,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `memory search`
+
+- **por que:** memória de agente append-only governada
+- **quando usar:** persistir contexto entre sessões com governo
 
 **Syntax**
 
@@ -5513,7 +6316,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `migration`
 
-Offline-first runtime migration analysis and verification.
+**para que:** Offline-first runtime migration analysis and verification.
+
+- **por que:** análise e verificação de migração de runtime offline-first
+- **quando usar:** avaliar migração de runtime/framework com evidência
 
 **Syntax**
 
@@ -5527,7 +6333,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `migration analyze`
 
-Discover runtime migration impact without changing the project.
+**para que:** Discover runtime migration impact without changing the project.
+
+- **por que:** análise e verificação de migração de runtime offline-first
+- **quando usar:** avaliar migração de runtime/framework com evidência
 
 **Syntax**
 
@@ -5550,7 +6359,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `migration matrix`
 
-Project an observed compatibility matrix; missing cells remain unresolved.
+**para que:** Project an observed compatibility matrix; missing cells remain unresolved.
+
+- **por que:** análise e verificação de migração de runtime offline-first
+- **quando usar:** avaliar migração de runtime/framework com evidência
 
 **Syntax**
 
@@ -5571,7 +6383,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `migration plan`
 
-Build a closed migration TaskSpec and dependency DAG.
+**para que:** Build a closed migration TaskSpec and dependency DAG.
+
+- **por que:** análise e verificação de migração de runtime offline-first
+- **quando usar:** avaliar migração de runtime/framework com evidência
 
 **Syntax**
 
@@ -5594,7 +6409,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `migration verify`
 
-Apply conservative status gates to a migration report.
+**para que:** Apply conservative status gates to a migration report.
+
+- **por que:** análise e verificação de migração de runtime offline-first
+- **quando usar:** avaliar migração de runtime/framework com evidência
 
 **Syntax**
 
@@ -5618,7 +6436,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model`
 
-Build the canonical API-IR.
+**para que:** Build the canonical API-IR.
+
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
 
 **Syntax**
 
@@ -5631,6 +6452,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `model alb`
+
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
 
 **Syntax**
 
@@ -5649,7 +6473,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model api-gateway`
 
-Read an API Gateway dump into facts — offline, no credentials.
+**para que:** Read an API Gateway dump into facts — offline, no credentials.
+
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
 
 **Syntax**
 
@@ -5668,6 +6495,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model asyncapi`
 
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
+
 **Syntax**
 
 ```text
@@ -5685,7 +6515,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model build`
 
-Compose the API-IR and print it.
+**para que:** Compose the API-IR and print it.
+
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
 
 **Syntax**
 
@@ -5705,6 +6538,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model cloudwatch`
 
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
+
 **Syntax**
 
 ```text
@@ -5721,6 +6557,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `model cognito`
+
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
 
 **Syntax**
 
@@ -5739,6 +6578,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model coverage`
 
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
+
 **Syntax**
 
 ```text
@@ -5755,6 +6597,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `model docdb`
+
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
 
 **Syntax**
 
@@ -5773,6 +6618,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model dynamodb`
 
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
+
 **Syntax**
 
 ```text
@@ -5789,6 +6637,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `model dynamodb-access`
+
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
 
 **Syntax**
 
@@ -5807,6 +6658,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model ec2`
 
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
+
 **Syntax**
 
 ```text
@@ -5823,6 +6677,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `model ecs`
+
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
 
 **Syntax**
 
@@ -5841,6 +6698,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model eks`
 
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
+
 **Syntax**
 
 ```text
@@ -5857,6 +6717,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `model elasticache`
+
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
 
 **Syntax**
 
@@ -5875,6 +6738,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model elasticache-access`
 
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
+
 **Syntax**
 
 ```text
@@ -5891,6 +6757,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `model eventbridge`
+
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
 
 **Syntax**
 
@@ -5909,6 +6778,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model eventbridge-access`
 
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
+
 **Syntax**
 
 ```text
@@ -5925,6 +6797,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `model gatling`
+
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
 
 **Syntax**
 
@@ -5943,6 +6818,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model gitleaks`
 
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
+
 **Syntax**
 
 ```text
@@ -5960,7 +6838,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model graph-access`
 
-Graph call sites (Gremlin/openCypher/SPARQL) + GraphAccessIR and domain sketch.
+**para que:** Graph call sites (Gremlin/openCypher/SPARQL) + GraphAccessIR and domain sketch.
+
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
 
 **Syntax**
 
@@ -5980,7 +6861,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model graph-explain`
 
-Parse a Neptune/Neo4j plan dump into GraphPlanIR + data.graph.plan facts.
+**para que:** Parse a Neptune/Neo4j plan dump into GraphPlanIR + data.graph.plan facts.
+
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
 
 **Syntax**
 
@@ -6001,6 +6885,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model graphql`
 
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
+
 **Syntax**
 
 ```text
@@ -6017,6 +6904,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `model hey`
+
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
 
 **Syntax**
 
@@ -6035,6 +6925,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model iam-role`
 
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
+
 **Syntax**
 
 ```text
@@ -6051,6 +6944,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `model jfr`
+
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
 
 **Syntax**
 
@@ -6069,6 +6965,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model jmeter`
 
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
+
 **Syntax**
 
 ```text
@@ -6085,6 +6984,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `model k6`
+
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
 
 **Syntax**
 
@@ -6103,6 +7005,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model kafka-access`
 
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
+
 **Syntax**
 
 ```text
@@ -6119,6 +7024,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `model kinesis-access`
+
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
 
 **Syntax**
 
@@ -6137,6 +7045,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model kms`
 
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
+
 **Syntax**
 
 ```text
@@ -6154,7 +7065,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model lambda`
 
-Read a Lambda dump into facts — offline, no credentials.
+**para que:** Read a Lambda dump into facts — offline, no credentials.
+
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
 
 **Syntax**
 
@@ -6173,6 +7087,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model locust`
 
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
+
 **Syntax**
 
 ```text
@@ -6189,6 +7106,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `model mongo`
+
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
 
 **Syntax**
 
@@ -6207,6 +7127,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model msk`
 
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
+
 **Syntax**
 
 ```text
@@ -6223,6 +7146,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `model msk-access`
+
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
 
 **Syntax**
 
@@ -6241,6 +7167,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model mysql-access`
 
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
+
 **Syntax**
 
 ```text
@@ -6257,6 +7186,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `model nats-access`
+
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
 
 **Syntax**
 
@@ -6275,6 +7207,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model neo4j-access`
 
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
+
 **Syntax**
 
 ```text
@@ -6291,6 +7226,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `model neptune`
+
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
 
 **Syntax**
 
@@ -6309,6 +7247,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model neptune-access`
 
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
+
 **Syntax**
 
 ```text
@@ -6325,6 +7266,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `model opensearch-access`
+
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
 
 **Syntax**
 
@@ -6343,7 +7287,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model otel`
 
-OTel export -> perf.otel.* facts + a PerformanceRun — offline.
+**para que:** OTel export -> perf.otel.* facts + a PerformanceRun — offline.
+
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
 
 **Syntax**
 
@@ -6362,6 +7309,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model pact`
 
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
+
 **Syntax**
 
 ```text
@@ -6378,6 +7328,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `model postgres-access`
+
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
 
 **Syntax**
 
@@ -6396,6 +7349,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model pprof`
 
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
+
 **Syntax**
 
 ```text
@@ -6413,7 +7369,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model proto`
 
-Extract gRPC services/messages from .proto — no protoc, offline.
+**para que:** Extract gRPC services/messages from .proto — no protoc, offline.
+
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
 
 **Syntax**
 
@@ -6432,6 +7391,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model pulsar-access`
 
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
+
 **Syntax**
 
 ```text
@@ -6448,6 +7410,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `model pyroscope`
+
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
 
 **Syntax**
 
@@ -6466,6 +7431,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model pytest-benchmark`
 
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
+
 **Syntax**
 
 ```text
@@ -6482,6 +7450,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `model rabbitmq-access`
+
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
 
 **Syntax**
 
@@ -6500,6 +7471,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model rds-access`
 
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
+
 **Syntax**
 
 ```text
@@ -6517,7 +7491,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model redis`
 
-Static extraction of Redis/Valkey call sites + DataAccessIR — offline.
+**para que:** Static extraction of Redis/Valkey call sites + DataAccessIR — offline.
+
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
 
 **Syntax**
 
@@ -6536,6 +7513,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model redshift-access`
 
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
+
 **Syntax**
 
 ```text
@@ -6553,8 +7533,11 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model resilience`
 
-Static resilience scan (timeouts, retries, pools, breaker/shutdown/
+**para que:** Static resilience scan (timeouts, retries, pools, breaker/shutdown/
 idempotency declarations) — heuristic, blind spots named.
+
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
 
 **Syntax**
 
@@ -6573,6 +7556,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model s3`
 
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
+
 **Syntax**
 
 ```text
@@ -6590,7 +7576,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model sam`
 
-Extract AWS::Serverless::* resources — intrinsics become named diagnostics.
+**para que:** Extract AWS::Serverless::* resources — intrinsics become named diagnostics.
+
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
 
 **Syntax**
 
@@ -6609,6 +7598,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model schemathesis`
 
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
+
 **Syntax**
 
 ```text
@@ -6625,6 +7617,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `model secrets`
+
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
 
 **Syntax**
 
@@ -6643,6 +7638,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model semgrep`
 
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
+
 **Syntax**
 
 ```text
@@ -6659,6 +7657,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `model sns`
+
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
 
 **Syntax**
 
@@ -6677,6 +7678,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model sns-access`
 
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
+
 **Syntax**
 
 ```text
@@ -6693,6 +7697,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `model sqs`
+
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
 
 **Syntax**
 
@@ -6711,6 +7718,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model sqs-access`
 
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
+
 **Syntax**
 
 ```text
@@ -6727,6 +7737,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `model stepfunctions`
+
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
 
 **Syntax**
 
@@ -6745,7 +7758,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model terraform`
 
-Extract API Gateway + Lambda resources from HCL — offline, no terraform.
+**para que:** Extract API Gateway + Lambda resources from HCL — offline, no terraform.
+
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
 
 **Syntax**
 
@@ -6764,6 +7780,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model trivy`
 
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
+
 **Syntax**
 
 ```text
@@ -6780,6 +7799,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `model vegeta`
+
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
 
 **Syntax**
 
@@ -6798,6 +7820,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model vpc-endpoints`
 
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
+
 **Syntax**
 
 ```text
@@ -6814,6 +7839,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `model waf`
+
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
 
 **Syntax**
 
@@ -6832,6 +7860,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model wrk`
 
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
+
 **Syntax**
 
 ```text
@@ -6849,6 +7880,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `model xray`
 
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
+
 **Syntax**
 
 ```text
@@ -6865,6 +7899,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `model zap`
+
+- **por que:** constrói o API-IR canônico
+- **quando usar:** materializar a representação intermediária da API
 
 **Syntax**
 
@@ -6885,7 +7922,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `next-step`
 
-Recommend the specialist agent for the dominant finding area.
+**para que:** Recommend the specialist agent for the dominant finding area.
+
+- **por que:** recomenda o agente especialista para a área dominante dos findings
+- **quando usar:** depois de um case com findings: quem atende agora
 
 **Syntax**
 
@@ -6907,7 +7947,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `observability`
 
-Offline-first OTel, Datadog and Dynatrace control plane.
+**para que:** Offline-first OTel, Datadog and Dynatrace control plane.
+
+- **por que:** control plane OTel, Datadog e Dynatrace offline-first
+- **quando usar:** trabalhar telemetria/observabilidade com evidência exportada
 
 **Syntax**
 
@@ -6921,7 +7964,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `observability capabilities`
 
-Show provider capabilities without credentials.
+**para que:** Show provider capabilities without credentials.
+
+- **por que:** control plane OTel, Datadog e Dynatrace offline-first
+- **quando usar:** trabalhar telemetria/observabilidade com evidência exportada
 
 **Syntax**
 
@@ -6939,7 +7985,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `observability credential-check`
 
-Validate credential metadata without reading environment or secret stores.
+**para que:** Validate credential metadata without reading environment or secret stores.
+
+- **por que:** control plane OTel, Datadog e Dynatrace offline-first
+- **quando usar:** trabalhar telemetria/observabilidade com evidência exportada
 
 **Syntax**
 
@@ -6960,7 +8009,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `observability health`
 
-Correlate telemetry and SLO evidence into an incident-ready health view.
+**para que:** Correlate telemetry and SLO evidence into an incident-ready health view.
+
+- **por que:** control plane OTel, Datadog e Dynatrace offline-first
+- **quando usar:** trabalhar telemetria/observabilidade com evidência exportada
 
 **Syntax**
 
@@ -6981,7 +8033,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `observability ingest`
 
-Normalize a fixture and compute signals without external access.
+**para que:** Normalize a fixture and compute signals without external access.
+
+- **por que:** control plane OTel, Datadog e Dynatrace offline-first
+- **quando usar:** trabalhar telemetria/observabilidade com evidência exportada
 
 **Syntax**
 
@@ -7002,7 +8057,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `observability instrument`
 
-Recommend OTel instrumentation for Java, Go or Python.
+**para que:** Recommend OTel instrumentation for Java, Go or Python.
+
+- **por que:** control plane OTel, Datadog e Dynatrace offline-first
+- **quando usar:** trabalhar telemetria/observabilidade com evidência exportada
 
 **Syntax**
 
@@ -7022,7 +8080,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `observability read-plan`
 
-Create a vendor read plan without credentials or network access.
+**para que:** Create a vendor read plan without credentials or network access.
+
+- **por que:** control plane OTel, Datadog e Dynatrace offline-first
+- **quando usar:** trabalhar telemetria/observabilidade com evidência exportada
 
 **Syntax**
 
@@ -7048,7 +8109,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `perf`
 
-Compose over measured runs — compare, never interpolate.
+**para que:** Compose over measured runs — compare, never interpolate.
+
+- **por que:** compõe sobre runs medidos — compara, nunca interpola
+- **quando usar:** comparar performance entre execuções medidas
 
 **Syntax**
 
@@ -7062,11 +8126,14 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `perf chaos`
 
-List the declared controlled failure-injection scenarios (CHAOS-001..013).
+**para que:** List the declared controlled failure-injection scenarios (CHAOS-001..013).
 
 Each scenario names the fault, the expected signal, the blast-radius
 guard and the evidence a run must produce — injection itself is never
 executed by API Forge.
+
+- **por que:** compõe sobre runs medidos — compara, nunca interpola
+- **quando usar:** comparar performance entre execuções medidas
 
 **Syntax**
 
@@ -7085,7 +8152,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `perf compare`
 
-compare_runs / detect_regression over two PerformanceRun payloads.
+**para que:** compare_runs / detect_regression over two PerformanceRun payloads.
+
+- **por que:** compõe sobre runs medidos — compara, nunca interpola
+- **quando usar:** comparar performance entre execuções medidas
 
 **Syntax**
 
@@ -7108,7 +8178,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `perf memory`
 
-Append-only PerformanceRun memory — local store.
+**para que:** Append-only PerformanceRun memory — local store.
+
+- **por que:** compõe sobre runs medidos — compara, nunca interpola
+- **quando usar:** comparar performance entre execuções medidas
 
 **Syntax**
 
@@ -7122,7 +8195,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `perf memory add`
 
-Append a run to .apiforge/perf/runs.jsonl — payload hash recorded.
+**para que:** Append a run to .apiforge/perf/runs.jsonl — payload hash recorded.
+
+- **por que:** compõe sobre runs medidos — compara, nunca interpola
+- **quando usar:** comparar performance entre execuções medidas
 
 **Syntax**
 
@@ -7143,7 +8219,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `perf memory search`
 
-search_performance_memory — filters declared fields, never infers.
+**para que:** search_performance_memory — filters declared fields, never infers.
+
+- **por que:** compõe sobre runs medidos — compara, nunca interpola
+- **quando usar:** comparar performance entre execuções medidas
 
 **Syntax**
 
@@ -7166,7 +8245,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `perf plan`
 
-Create a declarative load plan; generation never executes a tool.
+**para que:** Create a declarative load plan; generation never executes a tool.
+
+- **por que:** compõe sobre runs medidos — compara, nunca interpola
+- **quando usar:** comparar performance entre execuções medidas
 
 **Syntax**
 
@@ -7192,7 +8274,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `perf scenario`
 
-Generate the tool's script for a declared scenario — never executes it.
+**para que:** Generate the tool's script for a declared scenario — never executes it.
+
+- **por que:** compõe sobre runs medidos — compara, nunca interpola
+- **quando usar:** comparar performance entre execuções medidas
 
 **Syntax**
 
@@ -7212,7 +8297,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `perf suggest`
 
-suggest_fix — emits an ActionPlan; never applies it.
+**para que:** suggest_fix — emits an ActionPlan; never applies it.
+
+- **por que:** compõe sobre runs medidos — compara, nunca interpola
+- **quando usar:** comparar performance entre execuções medidas
 
 **Syntax**
 
@@ -7232,7 +8320,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `perf verdict`
 
-passed / failed / inconclusive over a run — conditions named, never guessed.
+**para que:** passed / failed / inconclusive over a run — conditions named, never guessed.
+
+- **por que:** compõe sobre runs medidos — compara, nunca interpola
+- **quando usar:** comparar performance entre execuções medidas
 
 **Syntax**
 
@@ -7254,7 +8345,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `plan`
 
-Planning verbs — compose over facts other verbs already extracted.
+**para que:** Planning verbs — compose over facts other verbs already extracted.
+
+- **por que:** verbos de planejamento — compõem sobre facts já extraídos
+- **quando usar:** revisar passos antes de executar trabalho composto
 
 **Syntax**
 
@@ -7268,10 +8362,13 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `plan architecture`
 
-Architecture Decision Engine — rank AWS primitives per role.
+**para que:** Architecture Decision Engine — rank AWS primitives per role.
 
 Eliminates on declared hard constraints, scores survivors on the
 profile, and emits chosen + rejected-with-reason + change conditions.
+
+- **por que:** verbos de planejamento — compõem sobre facts já extraídos
+- **quando usar:** revisar passos antes de executar trabalho composto
 
 **Syntax**
 
@@ -7290,7 +8387,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `plan strangler`
 
-Per-route strangler cut plan over two code inventories.
+**para que:** Per-route strangler cut plan over two code inventories.
+
+- **por que:** verbos de planejamento — compõem sobre facts já extraídos
+- **quando usar:** revisar passos antes de executar trabalho composto
 
 **Syntax**
 
@@ -7312,7 +8412,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `platform`
 
-Run allowlisted local runtime probes for platform verticals.
+**para que:** Run allowlisted local runtime probes for platform verticals.
+
+- **por que:** probes de runtime locais allowlisted para verticais de plataforma
+- **quando usar:** prova de runtime opt-in e allowlisted — prova fixtures, não produção
 
 **Syntax**
 
@@ -7326,7 +8429,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `platform verify-runtime`
 
-Execute committed probes and emit local runtime evidence.
+**para que:** Execute committed probes and emit local runtime evidence.
+
+- **por que:** probes de runtime locais allowlisted para verticais de plataforma
+- **quando usar:** prova de runtime opt-in e allowlisted — prova fixtures, não produção
 
 **Syntax**
 
@@ -7350,9 +8456,12 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `playbook`
 
-Render the declared executor decomposition for a coordinator.
+**para que:** Render the declared executor decomposition for a coordinator.
 
 The floor on every platform — works without dispatch.
+
+- **por que:** renderiza a decomposição de executor declarada para um coordenador
+- **quando usar:** ver como um coordenador decompõe o trabalho
 
 **Syntax**
 
@@ -7373,7 +8482,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `policy`
 
-Evaluate actions against the policy catalog.
+**para que:** Evaluate actions against the policy catalog.
+
+- **por que:** avalia ações contra o catálogo de políticas
+- **quando usar:** checar veredito de política antes de agir
 
 **Syntax**
 
@@ -7387,7 +8499,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `policy check`
 
-Decide whether an action is allowed, gated or denied.
+**para que:** Decide whether an action is allowed, gated or denied.
+
+- **por que:** avalia ações contra o catálogo de políticas
+- **quando usar:** checar veredito de política antes de agir
 
 **Syntax**
 
@@ -7412,7 +8527,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `report`
 
-Release evidence bundle — sign binds hashes; verify names what diverged.
+**para que:** Release evidence bundle — sign binds hashes; verify names what diverged.
+
+- **por que:** bundle de evidência de release — sign amarra hashes; verify nomeia o que divergiu
+- **quando usar:** provar que o relatório corresponde à evidência
 
 **Syntax**
 
@@ -7426,7 +8544,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `report build`
 
-Compose the release evidence bundle for a case.
+**para que:** Compose the release evidence bundle for a case.
+
+- **por que:** bundle de evidência de release — sign amarra hashes; verify nomeia o que divergiu
+- **quando usar:** provar que o relatório corresponde à evidência
 
 **Syntax**
 
@@ -7448,7 +8569,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `report keygen`
 
-Generate an Ed25519 keypair — proves key possession, never identity.
+**para que:** Generate an Ed25519 keypair — proves key possession, never identity.
+
+- **por que:** bundle de evidência de release — sign amarra hashes; verify nomeia o que divergiu
+- **quando usar:** provar que o relatório corresponde à evidência
 
 **Syntax**
 
@@ -7468,7 +8592,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `report sign`
 
-Append the signature block binding body/evidence/catalog hashes.
+**para que:** Append the signature block binding body/evidence/catalog hashes.
+
+- **por que:** bundle de evidência de release — sign amarra hashes; verify nomeia o que divergiu
+- **quando usar:** provar que o relatório corresponde à evidência
 
 **Syntax**
 
@@ -7489,7 +8616,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `report verify`
 
-Name which part diverged: signature_version|body|evidence|catalog|signature_crypto.
+**para que:** Name which part diverged: signature_version|body|evidence|catalog|signature_crypto.
+
+- **por que:** bundle de evidência de release — sign amarra hashes; verify nomeia o que divergiu
+- **quando usar:** provar que o relatório corresponde à evidência
 
 **Syntax**
 
@@ -7512,7 +8642,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `resume`
 
-Resume only persisted, eligible work from the latest control run.
+**para que:** Resume only persisted, eligible work from the latest control run.
+
+- **por que:** retoma só trabalho persistido e elegível do último control run
+- **quando usar:** uma execução falhou no meio — continuar do ponto válido
 
 **Syntax**
 
@@ -7535,7 +8668,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `review`
 
-Render the canonical Outcome Brief for a runtime run.
+**para que:** Render the canonical Outcome Brief for a runtime run.
+
+- **por que:** renderiza o Outcome Brief canônico de um runtime run
+- **quando usar:** revisar o resultado de uma execução com gaps nomeados
 
 **Syntax**
 
@@ -7557,7 +8693,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `route`
 
-Model routing: candidates, scorecards and lifecycle promotion.
+**para que:** Model routing: candidates, scorecards and lifecycle promotion.
+
+- **por que:** roteamento de modelo: candidatos, scorecards e promoção de ciclo de vida
+- **quando usar:** decidir rota de modelo com scorecard, não chute
 
 **Syntax**
 
@@ -7571,7 +8710,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `route model`
 
-§33: rank declared model candidates; quality history is a constraint.
+**para que:** §33: rank declared model candidates; quality history is a constraint.
+
+- **por que:** roteamento de modelo: candidatos, scorecards e promoção de ciclo de vida
+- **quando usar:** decidir rota de modelo com scorecard, não chute
 
 **Syntax**
 
@@ -7595,7 +8737,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `route promote`
 
-§35: lifecycle promotion gated on scorecard evidence, not benchmarks.
+**para que:** §35: lifecycle promotion gated on scorecard evidence, not benchmarks.
+
+- **por que:** roteamento de modelo: candidatos, scorecards e promoção de ciclo de vida
+- **quando usar:** decidir rota de modelo com scorecard, não chute
 
 **Syntax**
 
@@ -7619,7 +8764,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `route scorecard`
 
-§34: fold evaluation rows into scorecards per provider/model/class.
+**para que:** §34: fold evaluation rows into scorecards per provider/model/class.
+
+- **por que:** roteamento de modelo: candidatos, scorecards e promoção de ciclo de vida
+- **quando usar:** decidir rota de modelo com scorecard, não chute
 
 **Syntax**
 
@@ -7640,7 +8788,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `rules`
 
-Read the rule catalog — the knowledge base every finding cites.
+**para que:** Read the rule catalog — the knowledge base every finding cites.
+
+- **por que:** lê o catálogo de regras — a base que todo finding cita
+- **quando usar:** inspecionar regras disponíveis e metadados
 
 **Syntax**
 
@@ -7654,7 +8805,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `rules list`
 
-List rule ids, titles and severities by area.
+**para que:** List rule ids, titles and severities by area.
+
+- **por que:** lê o catálogo de regras — a base que todo finding cita
+- **quando usar:** inspecionar regras disponíveis e metadados
 
 **Syntax**
 
@@ -7673,7 +8827,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `rules lookup`
 
-Print one rule's full guidance.
+**para que:** Print one rule's full guidance.
+
+- **por que:** lê o catálogo de regras — a base que todo finding cita
+- **quando usar:** inspecionar regras disponíveis e metadados
 
 **Syntax**
 
@@ -7694,7 +8851,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `run`
 
-Execute allowlisted scanner binaries, then read their reports.
+**para que:** Execute allowlisted scanner binaries, then read their reports.
+
+- **por que:** executa binários de scanner allowlisted e lê seus relatórios
+- **quando usar:** rodar ferramentas externas permitidas e capturar saída
 
 **Syntax**
 
@@ -7708,7 +8868,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `run list`
 
-The tool registry — declared metadata plus *measured* install status.
+**para que:** The tool registry — declared metadata plus *measured* install status.
+
+- **por que:** executa binários de scanner allowlisted e lê seus relatórios
+- **quando usar:** rodar ferramentas externas permitidas e capturar saída
 
 **Syntax**
 
@@ -7726,7 +8889,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `run tool`
 
-Execute a scanner binary (fixed argv, no shell) and read its report.
+**para que:** Execute a scanner binary (fixed argv, no shell) and read its report.
+
+- **por que:** executa binários de scanner allowlisted e lê seus relatórios
+- **quando usar:** rodar ferramentas externas permitidas e capturar saída
 
 **Syntax**
 
@@ -7753,7 +8919,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `runtime`
 
-Bounded agentic execution over sealed TaskSpecs; local and CI safe.
+**para que:** Bounded agentic execution over sealed TaskSpecs; local and CI safe.
+
+- **por que:** execução agêntica bounded sobre TaskSpecs selados; seguro local e CI
+- **quando usar:** executar trabalho agêntico com orçamento e selo
 
 **Syntax**
 
@@ -7767,7 +8936,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `runtime approve`
 
-Record a local human approval artifact for a runtime run.
+**para que:** Record a local human approval artifact for a runtime run.
+
+- **por que:** execução agêntica bounded sobre TaskSpecs selados; seguro local e CI
+- **quando usar:** executar trabalho agêntico com orçamento e selo
 
 **Syntax**
 
@@ -7789,7 +8961,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `runtime checkpoint`
 
-Budget a run already spent, as a resume will continue it.
+**para que:** Budget a run already spent, as a resume will continue it.
+
+- **por que:** execução agêntica bounded sobre TaskSpecs selados; seguro local e CI
+- **quando usar:** executar trabalho agêntico com orçamento e selo
 
 **Syntax**
 
@@ -7810,7 +8985,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `runtime control-cancel`
 
-Cancel a control-plane run and persist the actor.
+**para que:** Cancel a control-plane run and persist the actor.
+
+- **por que:** execução agêntica bounded sobre TaskSpecs selados; seguro local e CI
+- **quando usar:** executar trabalho agêntico com orçamento e selo
 
 **Syntax**
 
@@ -7831,7 +9009,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `runtime control-complete`
 
-Complete a running step with a content-hashed result.
+**para que:** Complete a running step with a content-hashed result.
+
+- **por que:** execução agêntica bounded sobre TaskSpecs selados; seguro local e CI
+- **quando usar:** executar trabalho agêntico com orçamento e selo
 
 **Syntax**
 
@@ -7853,7 +9034,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `runtime control-create`
 
-Create a persistent control-plane run without executing work.
+**para que:** Create a persistent control-plane run without executing work.
+
+- **por que:** execução agêntica bounded sobre TaskSpecs selados; seguro local e CI
+- **quando usar:** executar trabalho agêntico com orçamento e selo
 
 **Syntax**
 
@@ -7877,7 +9061,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `runtime control-plan`
 
-Show ready steps and dynamic parallel width.
+**para que:** Show ready steps and dynamic parallel width.
+
+- **por que:** execução agêntica bounded sobre TaskSpecs selados; seguro local e CI
+- **quando usar:** executar trabalho agêntico com orçamento e selo
 
 **Syntax**
 
@@ -7897,7 +9084,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `runtime control-review`
 
-Close a completed plan through an independent review verdict.
+**para que:** Close a completed plan through an independent review verdict.
+
+- **por que:** execução agêntica bounded sobre TaskSpecs selados; seguro local e CI
+- **quando usar:** executar trabalho agêntico com orçamento e selo
 
 **Syntax**
 
@@ -7919,7 +9109,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `runtime control-start`
 
-Claim one ready step and consume one bounded call.
+**para que:** Claim one ready step and consume one bounded call.
+
+- **por que:** execução agêntica bounded sobre TaskSpecs selados; seguro local e CI
+- **quando usar:** executar trabalho agêntico com orçamento e selo
 
 **Syntax**
 
@@ -7940,7 +9133,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `runtime debate`
 
-Request a debate room before the runtime makes a final decision.
+**para que:** Request a debate room before the runtime makes a final decision.
+
+- **por que:** execução agêntica bounded sobre TaskSpecs selados; seguro local e CI
+- **quando usar:** executar trabalho agêntico com orçamento e selo
 
 **Syntax**
 
@@ -7962,7 +9158,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `runtime resume`
 
-Resume by replaying the TaskSpec through the bounded supervisor.
+**para que:** Resume by replaying the TaskSpec through the bounded supervisor.
+
+- **por que:** execução agêntica bounded sobre TaskSpecs selados; seguro local e CI
+- **quando usar:** executar trabalho agêntico com orçamento e selo
 
 **Syntax**
 
@@ -7984,7 +9183,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `runtime run`
 
-Execute a sealed TaskSpec with the deterministic fake adapter.
+**para que:** Execute a sealed TaskSpec with the deterministic fake adapter.
+
+- **por que:** execução agêntica bounded sobre TaskSpecs selados; seguro local e CI
+- **quando usar:** executar trabalho agêntico com orçamento e selo
 
 **Syntax**
 
@@ -8008,6 +9210,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `runtime semantic-checkpoint`
 
+- **por que:** execução agêntica bounded sobre TaskSpecs selados; seguro local e CI
+- **quando usar:** executar trabalho agêntico com orçamento e selo
+
 **Syntax**
 
 ```text
@@ -8029,7 +9234,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `runtime status`
 
-Show the newest persisted runtime run.
+**para que:** Show the newest persisted runtime run.
+
+- **por que:** execução agêntica bounded sobre TaskSpecs selados; seguro local e CI
+- **quando usar:** executar trabalho agêntico com orçamento e selo
 
 **Syntax**
 
@@ -8049,7 +9257,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `runtime telemetry-collector-check`
 
-§52 POST the payload to a real collector and count accepted spans.
+**para que:** §52 POST the payload to a real collector and count accepted spans.
+
+- **por que:** execução agêntica bounded sobre TaskSpecs selados; seguro local e CI
+- **quando usar:** executar trabalho agêntico com orçamento e selo
 
 **Syntax**
 
@@ -8072,7 +9283,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `runtime telemetry-export`
 
-§50 export local spans as one OTLP ExportTraceServiceRequest body.
+**para que:** §50 export local spans as one OTLP ExportTraceServiceRequest body.
+
+- **por que:** execução agêntica bounded sobre TaskSpecs selados; seguro local e CI
+- **quando usar:** executar trabalho agêntico com orçamento e selo
 
 **Syntax**
 
@@ -8093,7 +9307,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `runtime telemetry-ids`
 
-§51 emit the standardized correlation id set (+ W3C traceparent).
+**para que:** §51 emit the standardized correlation id set (+ W3C traceparent).
+
+- **por que:** execução agêntica bounded sobre TaskSpecs selados; seguro local e CI
+- **quando usar:** executar trabalho agêntico com orçamento e selo
 
 **Syntax**
 
@@ -8122,7 +9339,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `runtime telemetry-query`
 
-Query local agent/tool spans without contacting an exporter.
+**para que:** Query local agent/tool spans without contacting an exporter.
+
+- **por que:** execução agêntica bounded sobre TaskSpecs selados; seguro local e CI
+- **quando usar:** executar trabalho agêntico com orçamento e selo
 
 **Syntax**
 
@@ -8147,7 +9367,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `runtime telemetry-span`
 
-Append one sanitized local agent/tool span.
+**para que:** Append one sanitized local agent/tool span.
+
+- **por que:** execução agêntica bounded sobre TaskSpecs selados; seguro local e CI
+- **quando usar:** executar trabalho agêntico com orçamento e selo
 
 **Syntax**
 
@@ -8188,7 +9411,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `runtime telemetry-validate`
 
-§52 deterministic structural acceptance of an OTLP payload.
+**para que:** §52 deterministic structural acceptance of an OTLP payload.
+
+- **por que:** execução agêntica bounded sobre TaskSpecs selados; seguro local e CI
+- **quando usar:** executar trabalho agêntico com orçamento e selo
 
 **Syntax**
 
@@ -8209,7 +9435,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `sandbox`
 
-Copy-based sandbox evaluation.
+**para que:** Copy-based sandbox evaluation.
+
+- **por que:** avaliação em sandbox por cópia
+- **quando usar:** testar uma mudança sem tocar a árvore original
 
 **Syntax**
 
@@ -8223,7 +9452,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `sandbox apply`
 
-Apply a diff to copies of the tree and report the finding delta.
+**para que:** Apply a diff to copies of the tree and report the finding delta.
+
+- **por que:** avaliação em sandbox por cópia
+- **quando usar:** testar uma mudança sem tocar a árvore original
 
 **Syntax**
 
@@ -8243,7 +9475,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `sandbox clean`
 
-Remove .apiforge/sandbox and report removed ids.
+**para que:** Remove .apiforge/sandbox and report removed ids.
+
+- **por que:** avaliação em sandbox por cópia
+- **quando usar:** testar uma mudança sem tocar a árvore original
 
 **Syntax**
 
@@ -8264,7 +9499,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `sdd`
 
-Spec-driven development artifacts and gates.
+**para que:** Spec-driven development artifacts and gates.
+
+- **por que:** artefatos e gates de spec-driven development
+- **quando usar:** trabalho não-trivial: discover→intent→contract→architecture→plan→build→verify→secure→benchmark→ship
 
 **Syntax**
 
@@ -8278,7 +9516,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `sdd check`
 
-Validate the SDD hash cascade and phase metadata.
+**para que:** Validate the SDD hash cascade and phase metadata.
+
+- **por que:** artefatos e gates de spec-driven development
+- **quando usar:** trabalho não-trivial: discover→intent→contract→architecture→plan→build→verify→secure→benchmark→ship
 
 **Syntax**
 
@@ -8299,7 +9540,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `sdd classify`
 
-Classify change risk deterministically and name the minimum SDD profile.
+**para que:** Classify change risk deterministically and name the minimum SDD profile.
+
+- **por que:** artefatos e gates de spec-driven development
+- **quando usar:** trabalho não-trivial: discover→intent→contract→architecture→plan→build→verify→secure→benchmark→ship
 
 **Syntax**
 
@@ -8324,7 +9568,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `sdd evidence`
 
-Write evidence/<kind>.json derived from a real artifact — no overrides.
+**para que:** Write evidence/<kind>.json derived from a real artifact — no overrides.
+
+- **por que:** artefatos e gates de spec-driven development
+- **quando usar:** trabalho não-trivial: discover→intent→contract→architecture→plan→build→verify→secure→benchmark→ship
 
 **Syntax**
 
@@ -8348,7 +9595,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `sdd set-phase`
 
-Transition a phase; under --strict, gates require evidence or override.
+**para que:** Transition a phase; under --strict, gates require evidence or override.
+
+- **por que:** artefatos e gates de spec-driven development
+- **quando usar:** trabalho não-trivial: discover→intent→contract→architecture→plan→build→verify→secure→benchmark→ship
 
 **Syntax**
 
@@ -8374,7 +9624,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `sdd stamp`
 
-Write the upstream sha256 into an artifact's frontmatter.
+**para que:** Write the upstream sha256 into an artifact's frontmatter.
+
+- **por que:** artefatos e gates de spec-driven development
+- **quando usar:** trabalho não-trivial: discover→intent→contract→architecture→plan→build→verify→secure→benchmark→ship
 
 **Syntax**
 
@@ -8394,7 +9647,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `sdd status`
 
-Summarize per-feature phase status.
+**para que:** Summarize per-feature phase status.
+
+- **por que:** artefatos e gates de spec-driven development
+- **quando usar:** trabalho não-trivial: discover→intent→contract→architecture→plan→build→verify→secure→benchmark→ship
 
 **Syntax**
 
@@ -8415,7 +9671,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `slice`
 
-Failures and signatures instead of whole logs; the full log stays behind ctx://.
+**para que:** Failures and signatures instead of whole logs; the full log stays behind ctx://.
+
+- **por que:** falhas e assinaturas em vez de logs inteiros; o log fica atrás de ctx://
+- **quando usar:** inspecionar falhas sem pagar o log completo em contexto
 
 **Syntax**
 
@@ -8429,7 +9688,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `slice log`
 
-Deduplicated failure signatures with frames, preceding context and environment.
+**para que:** Deduplicated failure signatures with frames, preceding context and environment.
+
+- **por que:** falhas e assinaturas em vez de logs inteiros; o log fica atrás de ctx://
+- **quando usar:** inspecionar falhas sem pagar o log completo em contexto
 
 **Syntax**
 
@@ -8449,7 +9711,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `slice tests`
 
-Counts plus every failing test with file:line and assertion.
+**para que:** Counts plus every failing test with file:line and assertion.
+
+- **por que:** falhas e assinaturas em vez de logs inteiros; o log fica atrás de ctx://
+- **quando usar:** inspecionar falhas sem pagar o log completo em contexto
 
 **Syntax**
 
@@ -8472,7 +9737,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `status`
 
-Show TaskSpec status, or project/workspace status when no task is supplied.
+**para que:** Show TaskSpec status, or project/workspace status when no task is supplied.
+
+- **por que:** status de TaskSpec, ou de projeto/workspace sem task
+- **quando usar:** visão rápida do estado atual
 
 **Syntax**
 
@@ -8494,7 +9762,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `task`
 
-Sealed, budgeted units of agentic work (TaskSpec).
+**para que:** Sealed, budgeted units of agentic work (TaskSpec).
+
+- **por que:** unidades seladas e orçadas de trabalho agêntico (TaskSpec)
+- **quando usar:** submeter/inspecionar trabalho governado
 
 **Syntax**
 
@@ -8508,7 +9779,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `task accept`
 
-Accept a supervised run; the acceptor must differ from the executor.
+**para que:** Accept a supervised run; the acceptor must differ from the executor.
+
+- **por que:** unidades seladas e orçadas de trabalho agêntico (TaskSpec)
+- **quando usar:** submeter/inspecionar trabalho governado
 
 **Syntax**
 
@@ -8531,7 +9805,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `task compile`
 
-Compile a local API intention into a verified TaskSpec draft.
+**para que:** Compile a local API intention into a verified TaskSpec draft.
+
+- **por que:** unidades seladas e orçadas de trabalho agêntico (TaskSpec)
+- **quando usar:** submeter/inspecionar trabalho governado
 
 **Syntax**
 
@@ -8555,7 +9832,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `task create`
 
-Create a task in draft; sealed only after review.
+**para que:** Create a task in draft; sealed only after review.
+
+- **por que:** unidades seladas e orçadas de trabalho agêntico (TaskSpec)
+- **quando usar:** submeter/inspecionar trabalho governado
 
 **Syntax**
 
@@ -8581,7 +9861,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `task holdout`
 
-Run deterministic local mutations and report whether proofs detect them.
+**para que:** Run deterministic local mutations and report whether proofs detect them.
+
+- **por que:** unidades seladas e orçadas de trabalho agêntico (TaskSpec)
+- **quando usar:** submeter/inspecionar trabalho governado
 
 **Syntax**
 
@@ -8603,7 +9886,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `task plan`
 
-Bind a sealed TaskSpec to a closed persisted TaskPlan.
+**para que:** Bind a sealed TaskSpec to a closed persisted TaskPlan.
+
+- **por que:** unidades seladas e orçadas de trabalho agêntico (TaskSpec)
+- **quando usar:** submeter/inspecionar trabalho governado
 
 **Syntax**
 
@@ -8623,7 +9909,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `task reject`
 
-Reject a supervised run back to reviewable state.
+**para que:** Reject a supervised run back to reviewable state.
+
+- **por que:** unidades seladas e orçadas de trabalho agêntico (TaskSpec)
+- **quando usar:** submeter/inspecionar trabalho governado
 
 **Syntax**
 
@@ -8645,7 +9934,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `task review`
 
-Mark reviewed — any --set change bumps the revision, voiding seals.
+**para que:** Mark reviewed — any --set change bumps the revision, voiding seals.
+
+- **por que:** unidades seladas e orçadas de trabalho agêntico (TaskSpec)
+- **quando usar:** submeter/inspecionar trabalho governado
 
 **Syntax**
 
@@ -8667,7 +9959,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `task run`
 
-Run the recipe within budgets; ends awaiting supervision or named stop.
+**para que:** Run the recipe within budgets; ends awaiting supervision or named stop.
+
+- **por que:** unidades seladas e orçadas de trabalho agêntico (TaskSpec)
+- **quando usar:** submeter/inspecionar trabalho governado
 
 **Syntax**
 
@@ -8689,7 +9984,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `task seal`
 
-Seal the current revision — key possession, never identity.
+**para que:** Seal the current revision — key possession, never identity.
+
+- **por que:** unidades seladas e orçadas de trabalho agêntico (TaskSpec)
+- **quando usar:** submeter/inspecionar trabalho governado
 
 **Syntax**
 
@@ -8711,7 +10009,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `task status`
 
-Task spec plus its append-only history.
+**para que:** Task spec plus its append-only history.
+
+- **por que:** unidades seladas e orçadas de trabalho agêntico (TaskSpec)
+- **quando usar:** submeter/inspecionar trabalho governado
 
 **Syntax**
 
@@ -8731,7 +10032,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `task verify`
 
-Run independent proof checks and persist a VerificationRecord.
+**para que:** Run independent proof checks and persist a VerificationRecord.
+
+- **por que:** unidades seladas e orçadas de trabalho agêntico (TaskSpec)
+- **quando usar:** submeter/inspecionar trabalho governado
 
 **Syntax**
 
@@ -8758,7 +10062,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `tui`
 
-Execution-first terminal UX with a Rich/JSON fallback.
+**para que:** Execution-first terminal UX with a Rich/JSON fallback.
+
+- **por que:** UX de terminal execution-first com fallback Rich/JSON
+- **quando usar:** operar a forja interativamente no terminal
 
 **Syntax**
 
@@ -8780,7 +10087,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `verify`
 
-Targeted verification plans (never executes).
+**para que:** Targeted verification plans (never executes).
+
+- **por que:** planos de verificação direcionados — nunca executa
+- **quando usar:** planejar verificação antes de executar
 
 **Syntax**
 
@@ -8794,7 +10104,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `verify escalate`
 
-Next verification step: static -> test -> stop; runtime read-only only if inconclusive.
+**para que:** Next verification step: static -> test -> stop; runtime read-only only if inconclusive.
+
+- **por que:** planos de verificação direcionados — nunca executa
+- **quando usar:** planejar verificação antes de executar
 
 **Syntax**
 
@@ -8816,7 +10129,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `verify plan`
 
-Ladder level for the risk plus the impacted tests and the commands to run them.
+**para que:** Ladder level for the risk plus the impacted tests and the commands to run them.
+
+- **por que:** planos de verificação direcionados — nunca executa
+- **quando usar:** planejar verificação antes de executar
 
 **Syntax**
 
@@ -8840,7 +10156,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `workspace`
 
-Register independent repositories in a local virtual workspace.
+**para que:** Register independent repositories in a local virtual workspace.
+
+- **por que:** registra repositórios independentes num workspace virtual local
+- **quando usar:** operar multi-repo num escopo declarado
 
 **Syntax**
 
@@ -8853,6 +10172,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `workspace add`
+
+- **por que:** registra repositórios independentes num workspace virtual local
+- **quando usar:** operar multi-repo num escopo declarado
 
 **Syntax**
 
@@ -8872,6 +10194,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `workspace discover`
 
+- **por que:** registra repositórios independentes num workspace virtual local
+- **quando usar:** operar multi-repo num escopo declarado
+
 **Syntax**
 
 ```text
@@ -8889,7 +10214,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `workspace graph`
 
-Workspace graph; declared relations only unless --infer is passed.
+**para que:** Workspace graph; declared relations only unless --infer is passed.
+
+- **por que:** registra repositórios independentes num workspace virtual local
+- **quando usar:** operar multi-repo num escopo declarado
 
 **Syntax**
 
@@ -8910,6 +10238,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `workspace init`
 
+- **por que:** registra repositórios independentes num workspace virtual local
+- **quando usar:** operar multi-repo num escopo declarado
+
 **Syntax**
 
 ```text
@@ -8928,7 +10259,10 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `workspace locality`
 
-Target repo first, direct neighbors next, transitive only on request.
+**para que:** Target repo first, direct neighbors next, transitive only on request.
+
+- **por que:** registra repositórios independentes num workspace virtual local
+- **quando usar:** operar multi-repo num escopo declarado
 
 **Syntax**
 
@@ -8948,6 +10282,9 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
 ### `workspace status`
+
+- **por que:** registra repositórios independentes num workspace virtual local
+- **quando usar:** operar multi-repo num escopo declarado
 
 **Syntax**
 

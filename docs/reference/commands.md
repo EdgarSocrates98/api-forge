@@ -2,7 +2,7 @@
 
 Generated from the real CLI parser by `doc_inventory.py` + `doc_reference.py`. Do not hand-edit generated sections — write between `keep:start`/`keep:end` markers. `por que`/`quando` lines come from the curated `command-rationale.json` — edit rationale there, never here. Status vocabulary: `available` unless marked otherwise.
 
-Rationale coverage: **67/68** first-level groups curated in `command-rationale.json`.
+Rationale coverage: **68/68** first-level groups curated in `command-rationale.json`.
 
 ## Groups
 
@@ -593,6 +593,9 @@ CLI exists, is logged in and sees the API Forge install, before you
 spend a session on it. When to use: after `apiforge install`, or when
 a host session does not see the MCP server. `--launch` is a human
 boundary: only one host, only on a TTY, never from MCP.
+
+- **por que:** observar um host de IA (detect→versao→auth→integracao) e abri-lo quando suportado
+- **quando usar:** depois de apiforge install, ou quando a sessao do host nao ve o MCP server; --launch e fronteira humana (TTY, um host)
 
 **Syntax**
 

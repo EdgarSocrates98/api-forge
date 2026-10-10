@@ -4,13 +4,13 @@
 |---|---|
 | repository | `api-forge` |
 | branch | `feat/ultimate-completion` |
-| commit | `c55d762` |
-| docs inventoried | 1931 (excl. GENERATED mirrors: 1338; vendored upstream: 68) |
+| commit | `0925608` |
+| docs inventoried | 1946 (excl. GENERATED mirrors: 1353; vendored upstream: 68) |
 
 ## Review levels (honest)
 
 - `INVENTORIED`: 0
-- `AUTOMATICALLY_CHECKED`: 1931
+- `AUTOMATICALLY_CHECKED`: 1946
 - `TECHNICALLY_VERIFIED`: 0
 - `SEMANTICALLY_REVIEWED`: 0
 - `USER_JOURNEY_VALIDATED`: 0
@@ -19,13 +19,13 @@ Automatic checks ran on every row; semantic review is recorded only where a huma
 
 ## Category counts
 
-- `SDD_ARTIFACT`: 731
+- `SDD_ARTIFACT`: 732
 - `GENERATED`: 593
 - `CONTRACT`: 316
 - `UNKNOWN`: 99
 - `INTERNAL`: 68
 - `USER_GUIDE`: 58
-- `HOW_TO`: 17
+- `HOW_TO`: 31
 - `TEST_EVIDENCE`: 16
 - `ADR`: 11
 - `ARCHITECTURE`: 9
@@ -41,12 +41,12 @@ Automatic checks ran on every row; semantic review is recorded only where a huma
 - duplicate groups (non-generated): 0
 - broken internal links total: 36 (active docs: 0; remainder in frozen/historical trees)
 - documented-but-missing commands: 0 (active docs: 0)
-- undocumented public commands: 1
+- undocumented public commands: 0
 
 ## Educational layer delivered
 
 - first-run/quickstart docs: 3
-- docs/learn/ entries: 4
+- docs/learn/ entries: 19
 - docs/hub/ entries: 0
 
 ## Documentation changes this program

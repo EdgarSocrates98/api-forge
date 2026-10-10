@@ -39,9 +39,9 @@ Revisado em 2026-10 contra o CLI instalado (apiforge dev v0.1.0,
 | `docs/learn/recipes/usar-agents.md` | SEMANTICALLY_REVIEWED | `agents sync/check` + mirrors observados no install real |
 | `docs/learn/recipes/usar-skills.md` | AUTOMATICALLY_CHECKED | 14 skills em `.github/skills` confirmadas no disco |
 | `docs/learn/recipes/sdd.md` | AUTOMATICALLY_CHECKED | `sdd classify/status/check/stamp` conferidos no help |
-| `docs/learn/recipes/graphfy.md` | SEMANTICALLY_REVIEWED | `graph build/query/impact` rodados: 16 nós/14 edges reais |
+| `docs/learn/recipes/graphfy.md` | SEMANTICALLY_REVIEWED | `graph build/query/impact` rodados + `graph view` emitindo `forge/ForgeGraphView/v1` (13 nós/10 edges reais) + `graph ui` servindo HTTP 200 |
 | `docs/learn/recipes/economia.md` | AUTOMATICALLY_CHECKED | verbos `economy` conferidos no help |
-| `docs/learn/recipes/verificacao.md` | AUTOMATICALLY_CHECKED | `verify plan/escalate` conferidos no help |
+| `docs/learn/recipes/verificacao.md` | SEMANTICALLY_REVIEWED | `verify plan` no case real (V5, escalada honesta "no-impacted-tests-found") + `verify escalate` (stop com razão declarada) |
 | `docs/HOST_PARITY.md` | USER_JOURNEY_VALIDATED | host-nativo real: install recommended→devin num scratch, `devin mcp list` lista `apiforge` (cmd `apiforge-mcp`), 14 skills em `.devin/skills/` descobertas pelo harness, `ai devin` → `READY` (drift_ok=50, mcp present) |
 | `docs/installation/*.md` | AUTOMATICALLY_CHECKED | install lifecycle rodado em scratch (install/status/repair/uninstall) |
 | `README.md` | AUTOMATICALLY_CHECKED | claims de superfície conferidos contra inventário (446 comandos) |
@@ -60,5 +60,7 @@ Revisado em 2026-10 contra o CLI instalado (apiforge dev v0.1.0,
   projeção de execução por TaskSpec (superfície separada, não
   substituída).
 - Codex em escopo de projeto: o host lê só `~/.codex/config.toml` —
-  MCP user-scope via `install --scope user --host codex`.
+  MCP user-scope via `install --scope user --host codex`. O recibo de
+  install declara a limitação (`mcp-scope:codex NOT_APPLICABLE`,
+  verificado em install real `--host codex`).
 - 36 links quebrados pré-existentes no índice de docs (não desta onda).

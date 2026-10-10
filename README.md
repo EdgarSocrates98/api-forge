@@ -228,6 +228,18 @@ apiforge agentops activation-plan --host devin
 apiforge agentops activation-plan --host copilot
 ```
 
+`apiforge ai` observes each host end to end — binary, version, auth
+state and the local install integration — and reports READY,
+NEEDS_LOGIN, NOT_DETECTED or a named refusal. `apiforge ai devin
+--launch` opens an interactive host session when the host is ready and
+a TTY is available; launch stays CLI-only, never behind MCP.
+
+```bash
+apiforge ai            # all hosts
+apiforge ai devin      # one host
+apiforge ai devin --launch
+```
+
 Activation plans are `plan_only` and approval-gated; they do not alter user
 configuration. Devin has an additional payload-first adapter for Desktop, CLI
 and Cloud:

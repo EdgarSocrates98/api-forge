@@ -64,6 +64,26 @@ O adapter mantém claims em `declared` até observar um executável local ou um
 artefato do repositório. Consulte também o
 [guia Devin](integrations/API_FORGE_DEVIN.md).
 
+## Abrindo uma sessão de host
+
+`apiforge ai` é o fluxo de abertura de host: observa cada binário
+(`claude`, `devin`, `codex`, `copilot`), lê a versão, consulta o
+subcomando oficial de status de autenticação (o recibo carrega só o
+booleano `logged_in`, nunca caminhos de credencial) e lê o estado da
+integração de install — saúde do ledger mais a chave gerenciada no
+`.mcp.json`.
+
+Use depois de `apiforge install`, ou quando uma sessão de host não vê o
+servidor MCP. `apiforge ai` mede os quatro hosts; `apiforge ai <host>`
+mede um e imprime o `launch_command` que o operador roda para abrir uma
+sessão no repositório. `apiforge ai <host> --launch` abre o binário aqui —
+fronteira humana: um host só, TTY obrigatório, host deslogado nunca é
+lançado (o recibo nomeia o comando oficial de login).
+
+Codex em escopo de projeto: o host lê apenas `~/.codex/config.toml` —
+o recibo de install declara `mcp-scope:codex` `NOT_APPLICABLE`; MCP via
+`apiforge install --scope user --host codex` ou `codex mcp add`.
+
 ## Limites da paridade
 
 A paridade funcional total entre Claude, Devin, Codex, Copilot e outros hosts

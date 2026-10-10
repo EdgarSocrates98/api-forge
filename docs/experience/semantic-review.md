@@ -42,7 +42,7 @@ Revisado em 2026-10 contra o CLI instalado (apiforge dev v0.1.0,
 | `docs/learn/recipes/graphfy.md` | SEMANTICALLY_REVIEWED | `graph build/query/impact` rodados: 16 nós/14 edges reais |
 | `docs/learn/recipes/economia.md` | AUTOMATICALLY_CHECKED | verbos `economy` conferidos no help |
 | `docs/learn/recipes/verificacao.md` | AUTOMATICALLY_CHECKED | `verify plan/escalate` conferidos no help |
-| `docs/HOST_PARITY.md` | SEMANTICALLY_REVIEWED | comportamento por host observado (devin/claude/codex reais) |
+| `docs/HOST_PARITY.md` | USER_JOURNEY_VALIDATED | host-nativo real: install recommended→devin num scratch, `devin mcp list` lista `apiforge` (cmd `apiforge-mcp`), 14 skills em `.devin/skills/` descobertas pelo harness, `ai devin` → `READY` (drift_ok=50, mcp present) |
 | `docs/installation/*.md` | AUTOMATICALLY_CHECKED | install lifecycle rodado em scratch (install/status/repair/uninstall) |
 | `README.md` | AUTOMATICALLY_CHECKED | claims de superfície conferidos contra inventário (446 comandos) |
 | `AGENTS.md` | SEMANTICALLY_REVIEWED | contrato de operação + roster conferidos contra `agents/*.md` |

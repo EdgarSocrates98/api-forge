@@ -358,6 +358,10 @@ tools:
     risk_classes: [read_only]
     reversible: true
     notes: deterministic read/projection; no mutation
+  graph_view:
+    risk_classes: [read_only]
+    reversible: true
+    notes: ForgeGraphView/v1 projection of a persisted graph; no mutation
   grpc_analyze:
     risk_classes: [read_only]
     reversible: true

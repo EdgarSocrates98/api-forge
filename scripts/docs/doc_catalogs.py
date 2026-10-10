@@ -43,8 +43,10 @@ def _folded_block(fm_text: str, start: int) -> str:
 
 def _summary(path: Path) -> str:
     text = path.read_text(encoding="utf-8", errors="replace")
-    fm = re.match(r"^---\n(.*?)\n---", text, re.DOTALL)
+    fm = re.match(r"^---\n(.*?)\n---\n?", text, re.DOTALL)
+    body = text
     if fm:
+        body = text[fm.end() :]
         m = re.search(r"^(?:description|summary):\s*(.+)$", fm.group(1), re.MULTILINE)
         if m:
             value = m.group(1).strip()
@@ -52,12 +54,9 @@ def _summary(path: Path) -> str:
                 line_no = fm.group(1)[: m.start()].count("\n")
                 value = _folded_block(fm.group(1), line_no)
             value = value.strip('"').strip("'")
-            if len(value) > 200:
-                cut = value.find(". ", 80)
-                value = value[: cut + 1] if 0 < cut <= 200 else value[:197] + "..."
             if value:
                 return value
-    for line in text.splitlines():
+    for line in body.splitlines():
         line = line.strip()
         if line and not line.startswith("#") and not line.startswith("---"):
             return line[:160]

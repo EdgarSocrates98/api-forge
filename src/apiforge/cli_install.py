@@ -36,9 +36,31 @@ _ROOT = typer.Option(
 
 
 def _emit(value: object, detail_level: str) -> None:
+    """TTY humans get the Rich/kit-rendered doc; pipes and CI keep the
+    JSON contract (honoring --detail-level and AF_OUTPUT)."""
+    import sys
+
     from apiforge.cli import _echo_json, _run
 
-    _echo_json(_run(lambda: value), detail_level)
+    out = _run(lambda: value)
+    import os
+
+    human = sys.stdout.isatty() or bool(os.environ.get("FORGE_TEXT_OUTPUT"))
+    if (
+        human
+        and isinstance(out, dict)
+        and (
+            str(out.get("schema", "")).startswith("forge/")
+            or "checks" in out
+            or "drift" in out
+        )
+    ):
+        from apiforge.cli_install_pretty import render_doc
+        from apiforge.core.detail import apply_detail_level
+
+        render_doc(apply_detail_level(out, detail_level))
+        return
+    _echo_json(out, detail_level)
 
 
 def _fail(exc: kit.InstallError) -> None:
@@ -79,11 +101,33 @@ def install_apply(
     """Install API Forge host assets into the resolved scope."""
     if ctx.invoked_subcommand is not None:
         return
+    import sys
+
     comps = tuple(
         c.strip() for c in components.split(",") if c.strip()
     ) if components else None
+    approved = yes
+    if (
+        not yes
+        and not dry_run
+        and sys.stdin.isatty()
+        and sys.stdout.isatty()
+    ):
+        # Interactive approval: render the real plan, confirm once,
+        # apply — one command instead of dry-run + apply.
+        from apiforge.cli_install_pretty import render_doc
+
+        plan = _call(service.install, host, scope=scope, root=root,
+                     profile=profile, yes=False, dry_run=True,
+                     components=comps)
+        render_doc(plan)
+        approved = typer.confirm("Apply this plan?", default=True)
+        if not approved:
+            typer.echo("declined — nothing written")
+            raise typer.Exit(1)
     out = _call(service.install, host, scope=scope, root=root,
-                profile=profile, yes=yes, dry_run=dry_run, components=comps)
+                profile=profile, yes=approved, dry_run=dry_run,
+                components=comps)
     _emit(out, detail_level)
 
 

@@ -71,6 +71,9 @@ repete o estado do `install status`. Uma task `analisar a api` cria
 | health `DEGRADED` | drift em asset gerenciado | `apiforge install repair` |
 | `PORTAL-PLAN-STALE` | plano mudou ou token expirou | regenere o plano na página |
 | `AF-PORTAL-AMBIGUOUS` | intenção fora dos verbos seguros | use um verbo de `safe_verbs` |
+| `PORTAL-HOST` 403 | Host não-loopback (rede/túnel/DNS rebinding) | acesse por 127.0.0.1/localhost |
+| `PORTAL-ORIGIN` 403 | POST com Origin fora do loopback | só a UI do portal muta |
+| `PORTAL-RATE-LIMITED` 429 | >10 mutações/min | aguarde a janela; envelope sinaliza retry |
 
 ## Nota
 

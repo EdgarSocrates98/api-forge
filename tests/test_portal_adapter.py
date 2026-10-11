@@ -351,13 +351,23 @@ def test_task_analyze_path_escape_recusa(server):
 
 
 def test_portal_verb_parseia():
+    # Estrutural: o help renderizado por rich trunca a coluna de opções
+    # conforme a largura do console — varia por plataforma no CI e tornava
+    # a asserção flaky. Assert nos params do click, não no texto.
+    from typer.main import get_command
     from typer.testing import CliRunner
 
     from apiforge.cli import app
 
+    cmd = get_command(app)
+    assert "portal" in cmd.commands
+    params = cmd.commands["portal"].params
+    names = {p.name for p in params}
+    opts = {opt for p in params for opt in p.opts + p.secondary_opts}
+    assert "no_browser" in names and "root" in names
+    assert "--no-browser" in opts
     result = CliRunner().invoke(app, ["portal", "--help"])
     assert result.exit_code == 0
-    assert "--no-browser" in result.output
 
 
 def test_assets_index_resolvido():

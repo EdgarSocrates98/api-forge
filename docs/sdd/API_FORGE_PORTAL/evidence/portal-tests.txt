@@ -1,0 +1,44 @@
+....................                                                     [100%]
+============================== warnings summary ===============================
+tests/test_portal_adapter.py::test_portal_verb_parseia
+  E:\projetos\FORJAS\api-forge\src\apiforge\contracts\economy_resume.py:35: UserWarning: Field name "schema" in "FreshnessWatch" shadows an attribute in parent "VersionedContract"
+    class FreshnessWatch(VersionedContract):
+
+tests/test_portal_adapter.py::test_portal_verb_parseia
+  E:\projetos\FORJAS\api-forge\src\apiforge\contracts\economy_resume.py:46: UserWarning: Field name "schema" in "LiveEvidenceDecision" shadows an attribute in parent "VersionedContract"
+    class LiveEvidenceDecision(VersionedContract):
+
+tests/test_portal_adapter.py::test_portal_verb_parseia
+  E:\projetos\FORJAS\api-forge\src\apiforge\contracts\economy_resume.py:62: UserWarning: Field name "schema" in "VerificationEscalation" shadows an attribute in parent "VersionedContract"
+    class VerificationEscalation(VersionedContract):
+
+tests/test_portal_adapter.py::test_portal_verb_parseia
+  E:\projetos\FORJAS\api-forge\src\apiforge\contracts\economy_resume.py:87: UserWarning: Field name "schema" in "PhaseBudgetPlan" shadows an attribute in parent "VersionedContract"
+    class PhaseBudgetPlan(VersionedContract):
+
+tests/test_portal_adapter.py::test_portal_verb_parseia
+  E:\projetos\FORJAS\api-forge\src\apiforge\contracts\economy_resume.py:101: UserWarning: Field name "schema" in "EconomyCheckpoint" shadows an attribute in parent "VersionedContract"
+    class EconomyCheckpoint(VersionedContract):
+
+tests/test_portal_adapter.py::test_portal_verb_parseia
+  E:\projetos\FORJAS\api-forge\src\apiforge\contracts\economy_evals.py:46: UserWarning: Field name "schema" in "BenchmarkIdentity" shadows an attribute in parent "VersionedContract"
+    class BenchmarkIdentity(VersionedContract):
+
+tests/test_portal_adapter.py::test_portal_verb_parseia
+  E:\projetos\FORJAS\api-forge\src\apiforge\contracts\economy_evals.py:67: UserWarning: Field name "schema" in "EconomyMatrix" shadows an attribute in parent "VersionedContract"
+    class EconomyMatrix(VersionedContract):
+
+tests/test_portal_adapter.py::test_portal_verb_parseia
+  E:\projetos\FORJAS\api-forge\src\apiforge\contracts\economy_evals.py:82: UserWarning: Field name "schema" in "EvaluationGate" shadows an attribute in parent "VersionedContract"
+    class EvaluationGate(VersionedContract):
+
+tests/test_portal_adapter.py::test_portal_verb_parseia
+  E:\projetos\FORJAS\api-forge\src\apiforge\contracts\economy_evals.py:96: UserWarning: Field name "schema" in "ReplayDecision" shadows an attribute in parent "VersionedContract"
+    class ReplayDecision(VersionedContract):
+
+tests/test_portal_adapter.py::test_portal_verb_parseia
+  E:\projetos\FORJAS\api-forge\src\apiforge\contracts\economy_evals.py:130: UserWarning: Field name "schema" in "ReplayReport" shadows an attribute in parent "VersionedContract"
+    class ReplayReport(VersionedContract):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+20 passed, 10 warnings in 10.82s

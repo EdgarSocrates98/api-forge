@@ -207,6 +207,10 @@
   "when": "ver como um coordenador decompõe o trabalho",
   "why": "renderiza a decomposição de executor declarada para um coordenador"
  },
+ "portal": {
+  "when": "instalar/verificar a forja, configurar Claude/Devin/Codex e rodar a primeira análise numa UI local — nunca dentro do fluxo MCP",
+  "why": "UI web local opcional (127.0.0.1 + token de sessão) sobre os mesmos serviços e recibos do CLI; CLI/TUI/MCP continuam funcionando sem ela"
+ },
  "policy": {
   "when": "checar veredito de política antes de agir",
   "why": "avalia ações contra o catálogo de políticas"

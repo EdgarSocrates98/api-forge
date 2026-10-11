@@ -553,6 +553,10 @@ from apiforge.cli_install import register as _register_install
 
 _register_install(app)
 
+from apiforge.cli_portal import register as _register_portal
+
+_register_portal(app)
+
 
 @app.command("doctor")
 def runtime_doctor(

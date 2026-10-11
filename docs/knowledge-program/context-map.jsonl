@@ -449,6 +449,7 @@
 {"path": "docs/learn/recipes/grpc.md", "title": "Receita \u2014 revisar e fazer diff de contrato gRPC", "category": "HOW_TO", "audience": "public", "related_commands": ["grpc"], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/learn/recipes/integrar-host.md", "title": "Receita \u2014 medir e abrir a sess\u00e3o do host de IA", "category": "HOW_TO", "audience": "public", "related_commands": ["ai"], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/learn/recipes/java-go.md", "title": "Receita \u2014 inventariar uma API sem contrato OpenAPI mantido", "category": "HOW_TO", "audience": "public", "related_commands": ["discover"], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/learn/recipes/portal.md", "title": "Receita \u2014 portal web local do API Forge", "category": "HOW_TO", "audience": "public", "related_commands": ["portal"], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/learn/recipes/primeiro-uso.md", "title": "Receita \u2014 primeira utiliza\u00e7\u00e3o do API Forge", "category": "HOW_TO", "audience": "public", "related_commands": ["ai", "install"], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/learn/recipes/sdd.md", "title": "Receita \u2014 conduzir uma mudan\u00e7a pelo SDD do API Forge", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": ["sdd"], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/learn/recipes/usar-agents.md", "title": "Receita \u2014 invocar um coordenador de agente do API Forge", "category": "HOW_TO", "audience": "agent", "related_commands": ["agents", "next-step"], "review_level": "AUTOMATICALLY_CHECKED"}
@@ -1017,6 +1018,16 @@
 {"path": "docs/sdd/API_FORGE_PERFORMANCE_CONTROL_PLANE_E/secure.md", "title": "secure", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_PERFORMANCE_CONTROL_PLANE_E/ship.md", "title": "ship", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_PERFORMANCE_CONTROL_PLANE_E/verify.md", "title": "verify", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_PORTAL/architecture.md", "title": "architecture", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_PORTAL/benchmark.md", "title": "benchmark", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_PORTAL/build.md", "title": "build", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_PORTAL/contract.md", "title": "contract", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_PORTAL/discover.md", "title": "discover", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_PORTAL/intent.md", "title": "intent", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_PORTAL/plan.md", "title": "plan", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_PORTAL/secure.md", "title": "secure", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_PORTAL/ship.md", "title": "ship", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_PORTAL/verify.md", "title": "verify", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_PRODUCT_DOCUMENTATION_RELEASE_H/architecture.md", "title": "architecture", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_PRODUCT_DOCUMENTATION_RELEASE_H/benchmark.md", "title": "benchmark", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_PRODUCT_DOCUMENTATION_RELEASE_H/build.md", "title": "build", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}

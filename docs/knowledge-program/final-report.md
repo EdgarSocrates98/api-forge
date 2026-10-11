@@ -4,13 +4,13 @@
 |---|---|
 | repository | `api-forge` |
 | branch | `feat/ultimate-completion` |
-| commit | `2674b17` |
-| docs inventoried | 1948 (excl. GENERATED mirrors: 1355; vendored upstream: 68) |
+| commit | `003151e` |
+| docs inventoried | 1959 (excl. GENERATED mirrors: 1366; vendored upstream: 68) |
 
 ## Review levels (honest)
 
 - `INVENTORIED`: 0
-- `AUTOMATICALLY_CHECKED`: 1948
+- `AUTOMATICALLY_CHECKED`: 1959
 - `TECHNICALLY_VERIFIED`: 0
 - `SEMANTICALLY_REVIEWED`: 0
 - `USER_JOURNEY_VALIDATED`: 0
@@ -19,13 +19,13 @@ Automatic checks ran on every row; semantic review is recorded only where a huma
 
 ## Category counts
 
-- `SDD_ARTIFACT`: 732
+- `SDD_ARTIFACT`: 742
 - `GENERATED`: 593
 - `CONTRACT`: 316
 - `UNKNOWN`: 100
 - `INTERNAL`: 68
 - `USER_GUIDE`: 58
-- `HOW_TO`: 31
+- `HOW_TO`: 32
 - `TEST_EVIDENCE`: 16
 - `ADR`: 11
 - `ARCHITECTURE`: 9
@@ -46,7 +46,7 @@ Automatic checks ran on every row; semantic review is recorded only where a huma
 ## Educational layer delivered
 
 - first-run/quickstart docs: 3
-- docs/learn/ entries: 19
+- docs/learn/ entries: 20
 - docs/hub/ entries: 0
 
 ## Documentation changes this program

@@ -138,6 +138,7 @@ _Task-oriented guides and workflows._
 - [Receita — revisar e fazer diff de contrato gRPC](learn/recipes/grpc.md)
 - [Receita — medir e abrir a sessão do host de IA](learn/recipes/integrar-host.md)
 - [Receita — inventariar uma API sem contrato OpenAPI mantido](learn/recipes/java-go.md)
+- [Receita — portal web local do API Forge](learn/recipes/portal.md)
 - [Receita — primeira utilização do API Forge](learn/recipes/primeiro-uso.md)
 - [Receita — invocar um coordenador de agente do API Forge](learn/recipes/usar-agents.md)
 - [Receita — usar as 14 skills canônicas do API Forge](learn/recipes/usar-skills.md)
@@ -1236,6 +1237,16 @@ _Historical, deprecated, generated and evidence docs (preserved, not entry point
 - [secure](sdd/API_FORGE_PERFORMANCE_CONTROL_PLANE_E/secure.md) `SDD_ARTIFACT`
 - [ship](sdd/API_FORGE_PERFORMANCE_CONTROL_PLANE_E/ship.md) `SDD_ARTIFACT`
 - [verify](sdd/API_FORGE_PERFORMANCE_CONTROL_PLANE_E/verify.md) `SDD_ARTIFACT`
+- [architecture](sdd/API_FORGE_PORTAL/architecture.md) `SDD_ARTIFACT`
+- [benchmark](sdd/API_FORGE_PORTAL/benchmark.md) `SDD_ARTIFACT`
+- [build](sdd/API_FORGE_PORTAL/build.md) `SDD_ARTIFACT`
+- [contract](sdd/API_FORGE_PORTAL/contract.md) `SDD_ARTIFACT`
+- [discover](sdd/API_FORGE_PORTAL/discover.md) `SDD_ARTIFACT`
+- [intent](sdd/API_FORGE_PORTAL/intent.md) `SDD_ARTIFACT`
+- [plan](sdd/API_FORGE_PORTAL/plan.md) `SDD_ARTIFACT`
+- [secure](sdd/API_FORGE_PORTAL/secure.md) `SDD_ARTIFACT`
+- [ship](sdd/API_FORGE_PORTAL/ship.md) `SDD_ARTIFACT`
+- [verify](sdd/API_FORGE_PORTAL/verify.md) `SDD_ARTIFACT`
 - [architecture](sdd/API_FORGE_PRODUCT_DOCUMENTATION_RELEASE_H/architecture.md) `SDD_ARTIFACT`
 - [benchmark](sdd/API_FORGE_PRODUCT_DOCUMENTATION_RELEASE_H/benchmark.md) `SDD_ARTIFACT`
 - [build](sdd/API_FORGE_PRODUCT_DOCUMENTATION_RELEASE_H/build.md) `SDD_ARTIFACT`

@@ -59,6 +59,11 @@ packages = ["src/apiforge"]
 "agents" = "apiforge/host_assets/agents"
 ".agents/skills" = "apiforge/host_assets/skills"
 "AGENT_PROTOCOL.md" = "apiforge/host_assets/AGENT_PROTOCOL.md"
+# Portal web local: os assets vendored (`portal/assets/` na raiz do clone) vão
+# para dentro do pacote, e o adapter os resolve nos dois layouts — igual ao
+# host_assets. Sem isto `apiforge portal` num pip install cairia na recusa
+# AF-PORTAL-NO-ASSETS.
+"portal/assets" = "apiforge/portal_assets"
 
 [tool.ruff]
 line-length = 100
@@ -78,6 +83,9 @@ extend-immutable-calls = ["typer.Option", "typer.Argument"]
 "src/apiforge/_installkit.py" = ["ALL"]
 "scripts/forge_bootstrap.py" = ["ALL"]
 "scripts/forge_installkit.py" = ["ALL"]
+# Vendored portal server (canonical: forge-portal/portal_core) — byte-identical
+# to the shared source, linted in the canonical repo.
+"src/apiforge/_forge_portal.py" = ["ALL"]
 # Eval fixtures are deliberately non-idiomatic analyzer inputs.
 "evals/corpus/**/fixtures/**" = ["ALL"]
 
@@ -97,6 +105,11 @@ ignore_missing_imports = true
 # Vendored engine (canonical: the-forge/scripts/installkit); typed to the
 # consumer-side contract, kept outside `strict` to stay byte-identical.
 module = "apiforge._installkit"
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+# Vendored portal server (canonical: forge-portal/portal_core) — byte-identical.
+module = "apiforge._forge_portal"
 ignore_errors = true
 
 [[tool.mypy.overrides]]

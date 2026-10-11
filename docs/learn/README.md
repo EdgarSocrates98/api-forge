@@ -15,6 +15,7 @@
 | Tenho este problema | Receita |
 |---|---|
 | "Primeira vez — instalei e agora?" | [primeiro-uso](recipes/primeiro-uso.md) |
+| "Quero uma UI local em vez do CLI" | [portal](recipes/portal.md) |
 | "Em qual host abro a sessão? Está pronto?" | [integrar-host](recipes/integrar-host.md) |
 | "O `.mcp.json` existe mas o host não vê o server" | [verificar-mcp](recipes/verificar-mcp.md) |
 

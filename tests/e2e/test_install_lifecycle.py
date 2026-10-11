@@ -46,6 +46,7 @@ def _arquivos(base: Path) -> list[str]:
 # service layer
 # --------------------------------------------------------------------------
 
+
 def test_install_sem_aprovacao_recusa(projeto):
     with pytest.raises(kit.InstallError) as exc:
         service.install("devin", scope="project", root=projeto)
@@ -66,27 +67,26 @@ def test_install_devin_escreve_skills_mcp_e_marker(projeto):
 
 
 def test_install_profile_full_inclui_agents(projeto):
-    out = service.install(
-        "devin", scope="project", root=projeto, profile="full", yes=True)
+    out = service.install("devin", scope="project", root=projeto, profile="full", yes=True)
     paths = {f["path"] for f in out["managed_files"]}
     assert any(p.startswith(".devin/agents/") for p in paths)
     assert any(p.startswith(".agents/agents/") for p in paths)
 
 
 def test_install_profile_minimal_sem_mirrors(projeto):
-    out = service.install(
-        "devin", scope="project", root=projeto, profile="minimal", yes=True)
+    out = service.install("devin", scope="project", root=projeto, profile="minimal", yes=True)
     assert out["status"] == "completed"
     assert not (projeto / ".devin").exists()
     assert (projeto / ".mcp.json").exists()
 
 
 def test_install_nao_sobrescreve_arquivo_do_usuario(projeto):
-    plano = service.install("devin", scope="project", root=projeto,
-                            dry_run=True)
-    alvo_rel = next(f["path"] for f in plano["planned_files"]
-                    if f["path"].startswith(".devin/skills/")
-                    and f["path"].endswith("SKILL.md"))
+    plano = service.install("devin", scope="project", root=projeto, dry_run=True)
+    alvo_rel = next(
+        f["path"]
+        for f in plano["planned_files"]
+        if f["path"].startswith(".devin/skills/") and f["path"].endswith("SKILL.md")
+    )
     alvo = projeto / alvo_rel
     alvo.parent.mkdir(parents=True, exist_ok=True)
     alvo.write_text("conteudo do usuario", encoding="utf-8")
@@ -95,8 +95,7 @@ def test_install_nao_sobrescreve_arquivo_do_usuario(projeto):
 
 
 def test_install_dry_run_planeja_sem_escrever(projeto):
-    out = service.install("devin", scope="project", root=projeto,
-                          dry_run=True)
+    out = service.install("devin", scope="project", root=projeto, dry_run=True)
     assert out["status"] == "planned"
     assert not (projeto / ".devin").exists()
     assert not (projeto / ".mcp.json").exists()
@@ -107,9 +106,10 @@ def test_status_e_drift(projeto):
     st = service.status(scope="project", root=projeto)
     assert st["status"] == "healthy"
     alvo = projeto / next(
-        p["path"] for p in service.status(
-            scope="project", root=projeto)["drift"]["modified"]
-        or [{"path": ".devin/skills/api-forge-core/SKILL.md"}])
+        p["path"]
+        for p in service.status(scope="project", root=projeto)["drift"]["modified"]
+        or [{"path": ".devin/skills/api-forge-core/SKILL.md"}]
+    )
     alvo = projeto / ".devin/skills/api-forge-core/SKILL.md"
     alvo.write_text("edicao manual", encoding="utf-8")
     st2 = service.status(scope="project", root=projeto)
@@ -150,36 +150,32 @@ def test_update_rejeita_latest():
 def test_mcp_verify_documento():
     out = service.mcp_verify()
     assert out["id"] == "mcp-handshake"
-    assert out["status"] in ("PASS", "FAIL", "BLOCKED", "NOT_APPLICABLE",
-                             "UNVERIFIED")
+    assert out["status"] in ("PASS", "FAIL", "BLOCKED", "NOT_APPLICABLE", "UNVERIFIED")
 
 
 # --------------------------------------------------------------------------
 # CLI
 # --------------------------------------------------------------------------
 
+
 def test_cli_install_dry_run(projeto):
     result = CliRunner().invoke(
-        app, ["install", "--host", "devin", "--root", str(projeto),
-              "--dry-run"])
+        app, ["install", "--host", "devin", "--root", str(projeto), "--dry-run"]
+    )
     assert result.exit_code == 0, result.stdout
     doc = json.loads(result.stdout)
     assert doc["status"] == "planned"
 
 
 def test_cli_install_sem_aprovacao_falha_com_recusa(projeto):
-    result = CliRunner().invoke(
-        app, ["install", "--host", "devin", "--root", str(projeto)])
+    result = CliRunner().invoke(app, ["install", "--host", "devin", "--root", str(projeto)])
     assert result.exit_code != 0
-    assert "FORGE-INSTALL-PLAN-NOT-APPROVED" in (
-        result.stdout + (result.stderr or ""))
+    assert "FORGE-INSTALL-PLAN-NOT-APPROVED" in (result.stdout + (result.stderr or ""))
 
 
 def test_cli_install_status(projeto):
-    CliRunner().invoke(
-        app, ["install", "--host", "devin", "--root", str(projeto), "--yes"])
-    result = CliRunner().invoke(
-        app, ["install", "status", "--root", str(projeto)])
+    CliRunner().invoke(app, ["install", "--host", "devin", "--root", str(projeto), "--yes"])
+    result = CliRunner().invoke(app, ["install", "status", "--root", str(projeto)])
     assert result.exit_code == 0, result.stdout
     doc = json.loads(result.stdout)
     assert doc["forge_id"] == "api-forge"
@@ -187,10 +183,8 @@ def test_cli_install_status(projeto):
 
 
 def test_cli_install_uninstall(projeto):
-    CliRunner().invoke(
-        app, ["install", "--host", "devin", "--root", str(projeto), "--yes"])
-    result = CliRunner().invoke(
-        app, ["install", "uninstall", "--root", str(projeto), "--purge"])
+    CliRunner().invoke(app, ["install", "--host", "devin", "--root", str(projeto), "--yes"])
+    result = CliRunner().invoke(app, ["install", "uninstall", "--root", str(projeto), "--purge"])
     assert result.exit_code == 0, result.stdout
     resto = [p for p in _arquivos(projeto) if not p.startswith(".git/")]
     assert resto == []

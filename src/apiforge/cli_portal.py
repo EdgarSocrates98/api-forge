@@ -6,6 +6,7 @@ and maps ``forge/PortalApi/1`` operations onto ``apiforge.install.service``,
 view over the same engine — never a second implementation, and it never
 runs inside the MCP flow.
 """
+
 from __future__ import annotations
 
 import json
@@ -18,14 +19,19 @@ import typer
 
 def _portal(
     no_browser: bool = typer.Option(
-        False, "--no-browser",
+        False,
+        "--no-browser",
         help="Only print the session URL — SSH/headless or manual open.",
     ),
     port: int = typer.Option(
-        0, "--port", help="Fixed port (default: a free port of the system).",
+        0,
+        "--port",
+        help="Fixed port (default: a free port of the system).",
     ),
     root: Path = typer.Option(
-        Path("."), "--root", help="Workspace to inspect (default: cwd).",
+        Path("."),
+        "--root",
+        help="Workspace to inspect (default: cwd).",
     ),
 ) -> None:
     """Open the API Forge local web portal (127.0.0.1, session token).
@@ -43,22 +49,30 @@ def _portal(
 
     adapter = ApiForgePortal(root.resolve())
     if adapter.assets_dir is None:
-        typer.echo(json.dumps({
-            "refusal": "AF-PORTAL-NO-ASSETS",
-            "detail": (
-                "portal assets not vendored — the clone needs "
-                "`portal/assets/` (run `python scripts/vendor.py` in "
-                "forge-portal); a pip install carries them in "
-                "apiforge/portal_assets"
-            ),
-        }))
+        typer.echo(
+            json.dumps(
+                {
+                    "refusal": "AF-PORTAL-NO-ASSETS",
+                    "detail": (
+                        "portal assets not vendored — the clone needs "
+                        "`portal/assets/` (run `python scripts/vendor.py` in "
+                        "forge-portal); a pip install carries them in "
+                        "apiforge/portal_assets"
+                    ),
+                }
+            )
+        )
         raise typer.Exit(1)
     server = fp.PortalServer(adapter, port=port, quiet=True)
     url = server.url
-    typer.echo(json.dumps({
-        "url": url,
-        "note": "portal is optional — CLI/TUI/MCP keep working without it",
-    }))
+    typer.echo(
+        json.dumps(
+            {
+                "url": url,
+                "note": "portal is optional — CLI/TUI/MCP keep working without it",
+            }
+        )
+    )
     if not no_browser:
         webbrowser.open(url)
     try:
@@ -75,4 +89,5 @@ def register(app: typer.Typer) -> None:
 
 
 if __name__ == "__main__":
-    sys.exit(_portal())
+    _portal()
+    sys.exit(0)

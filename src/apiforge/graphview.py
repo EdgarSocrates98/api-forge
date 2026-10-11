@@ -46,9 +46,7 @@ def build_view(graph_dir: str | Path) -> ForgeGraphView | None:
     )
     object.__setattr__(desc, "node_count", len(nodes))
     object.__setattr__(desc, "edge_count", len(edges))
-    object.__setattr__(
-        desc, "available_layers", tuple(sorted({n.kind.value for n in nodes}))
-    )
+    object.__setattr__(desc, "available_layers", tuple(sorted({n.kind.value for n in nodes})))
     vnode = tuple(
         GraphNodeView(
             id=n.id,

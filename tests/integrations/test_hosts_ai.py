@@ -14,6 +14,7 @@ def _runner(script: dict[tuple[str, ...], tuple[int, str]]):
     def run(argv: list[str]) -> tuple[int, str]:
         key = tuple(argv[1:])
         return script.get(key, (1, "unknown command"))
+
     return run
 
 
@@ -50,9 +51,7 @@ def test_detected_logged_out_host_needs_login(tmp_path: Path) -> None:
             ("auth", "status"): (0, "Not logged in\n"),
         }
     )
-    state = hosts.host_state(
-        "devin", root=tmp_path, which=_devin_which(), runner=runner
-    )
+    state = hosts.host_state("devin", root=tmp_path, which=_devin_which(), runner=runner)
     assert state["logged_in"] is False
     assert state["state"] == "NEEDS_LOGIN"
     assert state["login_hint"] == "devin auth login"
@@ -67,9 +66,7 @@ def test_not_logged_in_is_not_parsed_as_logged_in() -> None:
 
 
 def test_supported_host_without_install(tmp_path: Path) -> None:
-    state = hosts.host_state(
-        "devin", root=tmp_path, which=_devin_which(), runner=_devin_runner()
-    )
+    state = hosts.host_state("devin", root=tmp_path, which=_devin_which(), runner=_devin_runner())
     assert state["state"] == "SUPPORTED"
     assert state["version"] == "devin 3000.11.3 (9c803229faa4)"
     assert state["integration"]["state"] == "unverified"
@@ -80,9 +77,7 @@ def test_version_timeout_is_refused_not_crash(tmp_path: Path) -> None:
     def runner(argv: list[str]) -> tuple[int, str]:
         raise subprocess.TimeoutExpired(argv, 10)
 
-    state = hosts.host_state(
-        "devin", root=tmp_path, which=_devin_which(), runner=runner
-    )
+    state = hosts.host_state("devin", root=tmp_path, which=_devin_which(), runner=runner)
     assert state["version_refused"]["reason"] == "host_cli_timeout"
     # refused probe is recorded, never hidden — final state still lands
     # SUPPORTED via the shared state machine (parity with spark-forge-aws)
@@ -170,7 +165,8 @@ def test_healthy_install_is_ready(tmp_path: Path, monkeypatch) -> None:
     from apiforge.install import service
 
     monkeypatch.setattr(
-        service, "status",
+        service,
+        "status",
         lambda *, scope, root: {
             "status": "healthy",
             "drift": {"ok": 3},
@@ -181,8 +177,6 @@ def test_healthy_install_is_ready(tmp_path: Path, monkeypatch) -> None:
         '{"mcpServers": {"apiforge": {"command": "apiforge-mcp"}}}',
         encoding="utf-8",
     )
-    state = hosts.host_state(
-        "devin", root=tmp_path, which=_devin_which(), runner=_devin_runner()
-    )
+    state = hosts.host_state("devin", root=tmp_path, which=_devin_which(), runner=_devin_runner())
     assert state["state"] == "READY"
     assert state["integration"]["mcp"]["state"] == "present"

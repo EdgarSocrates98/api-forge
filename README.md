@@ -25,7 +25,7 @@ IR, evidence, plans, verifiable tasks and bounded decisions instead of guesses.
 ## Install
 
 ```bash
-python -m pip install -e '.[dev]'   # Python >=3.12,<3.13
+python -m pip install -e '.[dev]'   # Python >=3.12
 # Optional all-in-one local extras:
 python -m pip install -e '.[all]'
 # Optional visual terminal UX:

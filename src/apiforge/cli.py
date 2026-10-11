@@ -3361,13 +3361,22 @@ def graph_export(
 
 @graph_app.command("view")
 def graph_view(
-    graph: Path = typer.Option(..., "--graph", help="Graph directory (nodes.jsonl)."),
+    graph: Path | None = typer.Option(
+        None, "--graph", help="Graph directory (nodes.jsonl)."
+    ),
 ) -> None:
     """Emit the ForgeGraphView/v1 document (Graph Studio contract)."""
 
     def work() -> object:
         from apiforge.graphview import build_view
 
+        if graph is None:
+            # federation (`theforge graph --federated`) calls `graph view`
+            # bare — name the missing input instead of a usage error
+            raise AnalysisError(
+                "AF-GRAPH-NOT-FOUND",
+                "no --graph dir given — run `apiforge graph build --case <case> --out <dir>` first",
+            )
         view = build_view(graph)
         if view is None:
             raise AnalysisError(
@@ -3381,7 +3390,9 @@ def graph_view(
 
 @graph_app.command("ui")
 def graph_ui(
-    graph: Path = typer.Option(..., "--graph", help="Graph directory (nodes.jsonl)."),
+    graph: Path | None = typer.Option(
+        None, "--graph", help="Graph directory (nodes.jsonl)."
+    ),
     no_browser: bool = typer.Option(
         False, "--no-browser", help="Serve without opening a browser (SSH/remote)."
     ),
@@ -3392,6 +3403,11 @@ def graph_ui(
     from apiforge._graphstudio import graph_studio_enabled, open_studio
     from apiforge.graphview import build_view
 
+    if graph is None:
+        raise AnalysisError(
+            "AF-GRAPH-NOT-FOUND",
+            "no --graph dir given — run `apiforge graph build --case <case> --out <dir>` first",
+        )
     if not graph_studio_enabled(
         Path("."), state_rel=".apiforge/install", user_state_rel="~/.apiforge/install"
     ):

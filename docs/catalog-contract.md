@@ -1071,7 +1071,7 @@ writes RDF 1.1 N-Triples (`graph.nt`); both are re-validated before
 
 | Code | Meaning |
 |---|---|
-| `AF-GRAPH-NOT-FOUND` | no `nodes.jsonl` under the graph directory |
+| `AF-GRAPH-NOT-FOUND` | no `--graph` given, or no `nodes.jsonl` under the graph directory |
 | `AF-GRAPH-NO-CASE` | `graph build` found no `case.json` under `--case` |
 | `AF-GRAPH-INVALID` | a node/edge line fails the contract schema |
 | `AF-GRAPH-HASH-MISMATCH` | a node line's `sha256` diverges from its payload |

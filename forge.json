@@ -3,7 +3,7 @@
   "package": "apiforge",
   "distribution": "apiforge",
   "cli": "apiforge",
-  "python": ">=3.12,<3.13",
+  "python": ">=3.12",
   "mcp_server_name": "apiforge",
   "mcp_command": [
     "apiforge-mcp"

@@ -28,7 +28,7 @@ def _spec() -> kit.ForgeSpec:
         package="apiforge",
         distribution="apiforge",
         cli_name="apiforge",
-        python_spec=">=3.12,<3.13",
+        python_spec=">=3.12",
         state_dir=STATE_DIR,
         mcp_command=("apiforge-mcp",),
         mcp_server_name="apiforge",

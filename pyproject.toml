@@ -7,7 +7,7 @@ name = "apiforge"
 version = "0.1.0"
 description = "Deterministic, offline API evolution analysis"
 license = { file = "LICENSE" }
-requires-python = ">=3.12,<3.13"
+requires-python = ">=3.12"
 dependencies = [
     "pydantic>=2.9,<3",
     "typer>=0.12,<1",

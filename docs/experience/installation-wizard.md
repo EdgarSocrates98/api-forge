@@ -1,8 +1,8 @@
 # Installation wizard
 
 Bare `apiforge install` on a TTY opens the guided wizard. On a non-TTY it
-exits with a usage error pointing at `install apply` — scripts keep the
-flag contract.
+returns a structured approval refusal without reading stdin or writing files.
+Explicit flags keep the deterministic contract.
 
 ## Steps
 
@@ -24,10 +24,10 @@ flag contract.
 Non-interactive equivalent:
 
 ```bash
-apiforge install apply --scope project --profile recommended --host all --dry-run
-apiforge install apply --scope project --profile recommended --host all --yes
+apiforge install --scope project --profile recommended --host all --dry-run
+apiforge install --scope project --profile recommended --host all --yes
 # optional components:
-apiforge install apply --yes --components skills,mcp,tui,graph-studio
+apiforge install --yes --components skills,mcp,tui,graph-studio
 apiforge install doctor
 ```
 

@@ -1,3 +1,0 @@
-version: 1
-defaults: {read_only: allow, local_reversible: allow, sensitive: gate, external_mutation: gate, destructive: gate, irreversible: deny}
-gates: {destructive: [magic_word]}

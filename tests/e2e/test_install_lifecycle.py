@@ -199,11 +199,14 @@ def test_cli_install_uninstall(projeto):
 def test_hosts_none_e_csv():
     """GAP-003: `none` nunca vira `all`; csv subconjunto e validado."""
     import pytest
+
+    from apiforge import _installkit as kit
     from apiforge.install import render, service
+
     assert service._hosts("all") == render.HOSTS
     assert service._hosts("none") == ()
     assert service._hosts("") == ()
     assert service._hosts("claude") == ("claude",)
     assert set(service._hosts("claude,devin")) == {"claude", "devin"}
-    with pytest.raises(Exception):
+    with pytest.raises(kit.InstallError):
         service._hosts("nope")

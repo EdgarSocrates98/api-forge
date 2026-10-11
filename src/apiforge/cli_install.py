@@ -27,12 +27,9 @@ install_app = typer.Typer(
 )
 
 _SCOPE = typer.Option("project", "--scope", help="project|workspace|user.")
-_HOST = typer.Option(
-    "all", "--host", help="claude|devin|codex|copilot|all.")
-_PROFILE = typer.Option(
-    "recommended", "--profile", help="minimal|recommended|full.")
-_ROOT = typer.Option(
-    None, "--root", help="Target root (default: VCS root or cwd).")
+_HOST = typer.Option("all", "--host", help="claude|devin|codex|copilot|all.")
+_PROFILE = typer.Option("recommended", "--profile", help="minimal|recommended|full.")
+_ROOT = typer.Option(None, "--root", help="Target root (default: VCS root or cwd).")
 
 
 def _emit(value: object, detail_level: str) -> None:
@@ -49,11 +46,7 @@ def _emit(value: object, detail_level: str) -> None:
     if (
         human
         and isinstance(out, dict)
-        and (
-            str(out.get("schema", "")).startswith("forge/")
-            or "checks" in out
-            or "drift" in out
-        )
+        and (str(out.get("schema", "")).startswith("forge/") or "checks" in out or "drift" in out)
     ):
         from apiforge.cli_install_pretty import render_doc
         from apiforge.core.detail import apply_detail_level
@@ -68,9 +61,12 @@ def _fail(exc: kit.InstallError) -> None:
 
     doc = exc.document("api-forge")
     err = doc.get("error") or {}
-    _cli_fail(err.get("kind", "AF-INSTALL"), err.get("detail", str(exc)),
-              field="install",
-              unlock=err.get("unlock", "run with --dry-run or --yes"))
+    _cli_fail(
+        err.get("kind", "AF-INSTALL"),
+        err.get("detail", str(exc)),
+        field="install",
+        unlock=err.get("unlock", "run with --dry-run or --yes"),
+    )
 
 
 def _call(fn: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
@@ -89,13 +85,12 @@ def install_apply(
     profile: str = _PROFILE,
     root: Path | None = _ROOT,
     yes: bool = typer.Option(
-        False, "--yes", "-y",
-        help="Explicit approval; without it only --dry-run is allowed."),
-    dry_run: bool = typer.Option(
-        False, "--dry-run", help="Plan only — writes nothing."),
+        False, "--yes", "-y", help="Explicit approval; without it only --dry-run is allowed."
+    ),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Plan only — writes nothing."),
     components: str | None = typer.Option(
-        None, "--components",
-        help="Optional components csv: skills,agents,mcp,tui,graph-studio."),
+        None, "--components", help="Optional components csv: skills,agents,mcp,tui,graph-studio."
+    ),
     detail_level: str = typer.Option("normal", "--detail-level"),
 ) -> None:
     """Install API Forge host assets into the resolved scope."""
@@ -103,31 +98,38 @@ def install_apply(
         return
     import sys
 
-    comps = tuple(
-        c.strip() for c in components.split(",") if c.strip()
-    ) if components else None
+    comps = tuple(c.strip() for c in components.split(",") if c.strip()) if components else None
     approved = yes
-    if (
-        not yes
-        and not dry_run
-        and sys.stdin.isatty()
-        and sys.stdout.isatty()
-    ):
+    if not yes and not dry_run and sys.stdin.isatty() and sys.stdout.isatty():
         # Interactive approval: render the real plan, confirm once,
         # apply — one command instead of dry-run + apply.
         from apiforge.cli_install_pretty import render_doc
 
-        plan = _call(service.install, host, scope=scope, root=root,
-                     profile=profile, yes=False, dry_run=True,
-                     components=comps)
+        plan = _call(
+            service.install,
+            host,
+            scope=scope,
+            root=root,
+            profile=profile,
+            yes=False,
+            dry_run=True,
+            components=comps,
+        )
         render_doc(plan)
         approved = typer.confirm("Apply this plan?", default=True)
         if not approved:
             typer.echo("declined — nothing written")
             raise typer.Exit(1)
-    out = _call(service.install, host, scope=scope, root=root,
-                profile=profile, yes=approved, dry_run=dry_run,
-                components=comps)
+    out = _call(
+        service.install,
+        host,
+        scope=scope,
+        root=root,
+        profile=profile,
+        yes=approved,
+        dry_run=dry_run,
+        components=comps,
+    )
     _emit(out, detail_level)
 
 
@@ -159,22 +161,18 @@ def install_repair(
     detail_level: str = typer.Option("normal", "--detail-level"),
 ) -> None:
     """Rewrite managed assets that went missing or drifted."""
-    _emit(_call(service.repair, scope=scope, root=root, dry_run=dry_run),
-          detail_level)
+    _emit(_call(service.repair, scope=scope, root=root, dry_run=dry_run), detail_level)
 
 
 @install_app.command("update")
 def install_update(
-    to: str | None = typer.Option(
-        None, "--to", help="Pinned target version (never 'latest')."),
-    repo: Path | None = typer.Option(
-        None, "--repo", help="Checkout to install/upgrade from."),
+    to: str | None = typer.Option(None, "--to", help="Pinned target version (never 'latest')."),
+    repo: Path | None = typer.Option(None, "--repo", help="Checkout to install/upgrade from."),
     dry_run: bool = typer.Option(False, "--dry-run"),
     detail_level: str = typer.Option("normal", "--detail-level"),
 ) -> None:
     """Upgrade the bootstrap-installed runtime."""
-    _emit(_call(service.update, to=to, repo=repo, dry_run=dry_run),
-          detail_level)
+    _emit(_call(service.update, to=to, repo=repo, dry_run=dry_run), detail_level)
 
 
 @install_app.command("uninstall")
@@ -182,14 +180,15 @@ def install_uninstall(
     scope: str = _SCOPE,
     root: Path | None = _ROOT,
     purge: bool = typer.Option(
-        False, "--purge",
-        help="Also delete the state dir .apiforge/install."),
+        False, "--purge", help="Also delete the state dir .apiforge/install."
+    ),
     dry_run: bool = typer.Option(False, "--dry-run"),
     detail_level: str = typer.Option("normal", "--detail-level"),
 ) -> None:
     """Remove only what the ledger declares as managed."""
-    _emit(_call(service.uninstall, scope=scope, root=root, purge=purge,
-                dry_run=dry_run), detail_level)
+    _emit(
+        _call(service.uninstall, scope=scope, root=root, purge=purge, dry_run=dry_run), detail_level
+    )
 
 
 @install_app.command("verify")

@@ -19,6 +19,7 @@ installed versions (devin 3000.11.3, Claude Code 2.1.295, codex-cli
 A logged-out host is never launched: the receipt names the official login
 command and never prompts for a credential.
 """
+
 from __future__ import annotations
 
 import json
@@ -62,7 +63,10 @@ _HOST_CMDS: dict[str, _HostCmd] = {
 
 def _default_runner(argv: list[str]) -> tuple[int, str]:
     proc = subprocess.run(  # fixed argv from _HOST_CMDS, never shell
-        argv, check=False, capture_output=True, text=True,
+        argv,
+        check=False,
+        capture_output=True,
+        text=True,
         timeout=_TIMEOUT_S,
     )
     return proc.returncode, (proc.stdout or "") + (proc.stderr or "")
@@ -79,10 +83,7 @@ def _logged_in(host: str, output: str) -> bool | None:
             return bool(doc["loggedIn"])
     low = output.lower()
     # negative before positive: "Not logged in" contains "logged in"
-    if any(
-        frag in low
-        for frag in ("not logged", "logged out", "no credentials", "unauthorized")
-    ):
+    if any(frag in low for frag in ("not logged", "logged out", "no credentials", "unauthorized")):
         return False
     if "logged in" in low:
         return True
@@ -90,7 +91,9 @@ def _logged_in(host: str, output: str) -> bool | None:
 
 
 def _call(
-    executable: str, argv: list[str], runner: Runner,
+    executable: str,
+    argv: list[str],
+    runner: Runner,
 ) -> tuple[int, str] | dict[str, Any]:
     try:
         return runner([executable, *argv])
@@ -180,8 +183,7 @@ def host_state(
         state["version_refused"] = version
     else:
         rc, out = version
-        first = next(
-            (line.strip() for line in out.splitlines() if line.strip()), "")
+        first = next((line.strip() for line in out.splitlines() if line.strip()), "")
         state["version"] = first or None
         state["state"] = "SUPPORTED" if rc == 0 else "DETECTED"
 
@@ -210,7 +212,7 @@ def _final_state(state: dict[str, Any]) -> str:
     if integ == "healthy":
         return "READY"
     if integ in {"degraded", "broken"}:
-        return "INTEGRATION_" + integ.upper()
+        return "INTEGRATION_" + str(integ).upper()
     return "SUPPORTED"
 
 
@@ -232,10 +234,7 @@ def ai_flow(
     is false and ``launch_refused`` says why — never silence."""
     root = Path(root)
     names = list(HOSTS) if target == "all" else [target]
-    states = [
-        host_state(name, root=root, which=which, runner=runner)
-        for name in names
-    ]
+    states = [host_state(name, root=root, which=which, runner=runner) for name in names]
     receipt: dict[str, Any] = {
         "repo": root.as_posix(),
         "hosts": states,
@@ -257,8 +256,7 @@ def ai_flow(
         receipt["launch_refused"] = "no_tty"
     else:
         # Path came from shutil.which — same trust level as any REPL start.
-        exec_fn = exec_host or (
-            lambda path, cwd: subprocess.call([path], cwd=str(cwd)))
+        exec_fn = exec_host or (lambda path, cwd: subprocess.call([path], cwd=str(cwd)))
         receipt["launched"] = True
         receipt["host_exit_code"] = exec_fn(state["binary_path"], root)
     return receipt

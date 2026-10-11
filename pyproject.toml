@@ -89,6 +89,20 @@ extend-immutable-calls = ["typer.Option", "typer.Argument"]
 # Eval fixtures are deliberately non-idiomatic analyzer inputs.
 "evals/corpus/**/fixtures/**" = ["ALL"]
 
+[tool.ruff.format]
+# Vendored copies must stay byte-identical to their canonical sources —
+# formatting here would break parity (same boundary as the lint/mypy
+# vendored exemptions above).
+exclude = [
+    "src/apiforge/_forge_portal.py",
+    "src/apiforge/_graphview.py",
+    "src/apiforge/_graphstudio.py",
+    "src/apiforge/_installkit.py",
+    "scripts/forge_installkit.py",
+    "scripts/forge_bootstrap.py",
+    "src/apiforge/ui/**",
+]
+
 [tool.pytest.ini_options]
 pythonpath = ["."]
 
@@ -110,6 +124,12 @@ ignore_errors = true
 [[tool.mypy.overrides]]
 # Vendored portal server (canonical: forge-portal/portal_core) — byte-identical.
 module = "apiforge._forge_portal"
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+# Vendored Graph Studio view + Forge UI kit (canonical: the-forge) —
+# byte-identical; the canonical copies are the typecheck target.
+module = ["apiforge._graphview", "apiforge._graphstudio", "apiforge.ui.*"]
 ignore_errors = true
 
 [[tool.mypy.overrides]]

@@ -4,6 +4,7 @@ Cada teste sobe o servidor do portal contra um `tmp_path/projeto` com HOME
 isolada: nada toca o HOME real nem o checkout. O catálogo (skills/agents) vem
 do repo da forja — é o que a instalação entrega, independente do workspace.
 """
+
 from __future__ import annotations
 
 import json
@@ -49,8 +50,7 @@ def server(projeto):
     srv.server_close()
 
 
-def _call(srv, method: str, path: str, body: dict | None = None,
-          session: str | None = None):
+def _call(srv, method: str, path: str, body: dict | None = None, session: str | None = None):
     req = urllib.request.Request(
         f"http://127.0.0.1:{srv.port}/api/v1{path}",
         data=json.dumps(body).encode() if body is not None else None,
@@ -71,6 +71,7 @@ def _call(srv, method: str, path: str, body: dict | None = None,
 # bootstrap / health / catálogos
 # ---------------------------------------------------------------------------
 
+
 def test_bootstrap_workspace_vazio(server):
     code, env = _call(server, "GET", "/bootstrap")
     assert code == 200
@@ -78,7 +79,12 @@ def test_bootstrap_workspace_vazio(server):
     assert d["forge_id"] == "api-forge"
     assert env["schema"] == "forge/PortalApi/1"
     assert {c["id"] for c in d["capabilities"]} >= {
-        "install", "hosts", "mcp", "skills", "agents", "tasks",
+        "install",
+        "hosts",
+        "mcp",
+        "skills",
+        "agents",
+        "tasks",
     }
     # ledger vazio: honesto NOT_INSTALLED mesmo com doctor 'broken'
     assert env["data"]["health"]["state"] == "NOT_INSTALLED"
@@ -130,38 +136,71 @@ def test_graph_sem_indice_recusa_com_unlock(server):
 # install lifecycle — plan → confirm → apply → health
 # ---------------------------------------------------------------------------
 
+
 def test_install_plan_apply_verified(server, projeto):
-    code, env = _call(server, "POST", "/installation/plan",
-                      {"scope": "project", "host": "devin", "profile": "minimal"})
+    code, env = _call(
+        server,
+        "POST",
+        "/installation/plan",
+        {"scope": "project", "host": "devin", "profile": "minimal"},
+    )
     assert code == 200
     plan = env["data"]["plan"]
     token = env["data"]["plan_token"]
     assert plan["host"] == "devin" and token
 
     # token errado → PORTAL-PLAN-STALE
-    code, env = _call(server, "POST", "/installation/apply", {
-        "scope": "project", "host": "devin", "profile": "minimal",
-        "plan": plan, "plan_token": "forjado", "confirm": "apply"})
+    code, env = _call(
+        server,
+        "POST",
+        "/installation/apply",
+        {
+            "scope": "project",
+            "host": "devin",
+            "profile": "minimal",
+            "plan": plan,
+            "plan_token": "forjado",
+            "confirm": "apply",
+        },
+    )
     assert code == 409
     assert env["error"]["code"] == "PORTAL-PLAN-STALE"
 
     # sem confirm → PORTAL-CONFIRM
-    code, env = _call(server, "POST", "/installation/apply", {
-        "scope": "project", "host": "devin", "profile": "minimal",
-        "plan": plan, "plan_token": token})
+    code, env = _call(
+        server,
+        "POST",
+        "/installation/apply",
+        {
+            "scope": "project",
+            "host": "devin",
+            "profile": "minimal",
+            "plan": plan,
+            "plan_token": token,
+        },
+    )
     assert code == 400
     assert env["error"]["code"] == "PORTAL-CONFIRM"
 
     # fluxo correto
-    code, env = _call(server, "POST", "/installation/apply", {
-        "scope": "project", "host": "devin", "profile": "minimal",
-        "plan": plan, "plan_token": token, "confirm": "apply"})
+    code, env = _call(
+        server,
+        "POST",
+        "/installation/apply",
+        {
+            "scope": "project",
+            "host": "devin",
+            "profile": "minimal",
+            "plan": plan,
+            "plan_token": token,
+            "confirm": "apply",
+        },
+    )
     assert code == 200
     assert env["data"]["status"] == "completed"
     # instalação mínima do devin: ledger + .mcp.json + AGENTS.md gerenciados
     ledger = json.loads(
-        (projeto / ".apiforge" / "install" / "install-ledger.json")
-        .read_text(encoding="utf-8")
+        (projeto / ".apiforge" / "install" / "install-ledger.json").read_text(encoding="utf-8")
     )
     assert ".mcp.json" in ledger.get("entries", {})
     assert env["data"]["verification"]["status"] == "PASS"
@@ -180,13 +219,21 @@ def test_install_plan_scope_invalido(server):
 # tasks — intent → plan → execute, recusa nomeada para ambíguo
 # ---------------------------------------------------------------------------
 
+
 def test_task_doctor_roundtrip(server):
     code, env = _call(server, "POST", "/tasks/plan", {"intent": "doctor da instalação"})
     assert code == 200
     assert env["data"]["plan"]["verb"] == "doctor"
-    code, env = _call(server, "POST", "/tasks/execute", {
-        "plan": env["data"]["plan"], "plan_token": env["data"]["plan_token"],
-        "confirm": "execute"})
+    code, env = _call(
+        server,
+        "POST",
+        "/tasks/execute",
+        {
+            "plan": env["data"]["plan"],
+            "plan_token": env["data"]["plan_token"],
+            "confirm": "execute",
+        },
+    )
     assert code == 200
     task = env["data"]["task"]
     assert task["stage"] == "completed"
@@ -194,8 +241,7 @@ def test_task_doctor_roundtrip(server):
 
 
 def test_task_mcp_vem_antes_de_verificar(server):
-    code, env = _call(server, "POST", "/tasks/plan",
-                      {"intent": "verificar o handshake mcp"})
+    code, env = _call(server, "POST", "/tasks/plan", {"intent": "verificar o handshake mcp"})
     assert code == 200
     assert env["data"]["plan"]["verb"] == "mcp_verify"
 
@@ -211,8 +257,7 @@ def test_task_intencao_ambigua_recusa_nomeada(server):
 def test_task_execute_exige_confirm_e_token(server):
     code, env = _call(server, "POST", "/tasks/plan", {"intent": "status"})
     plan, token = env["data"]["plan"], env["data"]["plan_token"]
-    code, env = _call(server, "POST", "/tasks/execute",
-                      {"plan": plan, "plan_token": token})
+    code, env = _call(server, "POST", "/tasks/execute", {"plan": plan, "plan_token": token})
     assert code == 400
     assert env["error"]["code"] == "PORTAL-CONFIRM"
 
@@ -226,6 +271,7 @@ def test_tasks_listadas_apos_execucao(server):
 # ---------------------------------------------------------------------------
 # analyze — gate da FASE 4: análise real de API via portal
 # ---------------------------------------------------------------------------
+
 
 def _copia_fixture(projeto: Path) -> dict:
     import shutil as _sh
@@ -243,13 +289,19 @@ def _copia_fixture(projeto: Path) -> dict:
 
 def test_task_analyze_real_api(server, projeto):
     args = _copia_fixture(projeto)
-    code, env = _call(server, "POST", "/tasks/plan",
-                      {"intent": "analisar a api", "args": args})
+    code, env = _call(server, "POST", "/tasks/plan", {"intent": "analisar a api", "args": args})
     assert code == 200
     assert env["data"]["plan"]["verb"] == "analyze"
-    code, env = _call(server, "POST", "/tasks/execute", {
-        "plan": env["data"]["plan"], "plan_token": env["data"]["plan_token"],
-        "confirm": "execute"})
+    code, env = _call(
+        server,
+        "POST",
+        "/tasks/execute",
+        {
+            "plan": env["data"]["plan"],
+            "plan_token": env["data"]["plan_token"],
+            "confirm": "execute",
+        },
+    )
     assert code == 200
     task = env["data"]["task"]
     assert task["stage"] == "completed"
@@ -272,14 +324,26 @@ def test_task_analyze_sem_contract_recusa(server, projeto):
 
 
 def test_task_analyze_path_escape_recusa(server):
-    code, env = _call(server, "POST", "/tasks/plan", {
-        "intent": "analisar a api",
-        "args": {"contract": "../fora.yaml", "project": "."},
-    })
+    code, env = _call(
+        server,
+        "POST",
+        "/tasks/plan",
+        {
+            "intent": "analisar a api",
+            "args": {"contract": "../fora.yaml", "project": "."},
+        },
+    )
     assert code == 200  # o plano existe; a recusa vem na execução
-    code, env = _call(server, "POST", "/tasks/execute", {
-        "plan": env["data"]["plan"], "plan_token": env["data"]["plan_token"],
-        "confirm": "execute"})
+    code, env = _call(
+        server,
+        "POST",
+        "/tasks/execute",
+        {
+            "plan": env["data"]["plan"],
+            "plan_token": env["data"]["plan_token"],
+            "confirm": "execute",
+        },
+    )
     assert code == 200
     task = env["data"]["task"]
     assert task["stage"] == "refused"
@@ -287,13 +351,23 @@ def test_task_analyze_path_escape_recusa(server):
 
 
 def test_portal_verb_parseia():
+    # Estrutural: o help renderizado por rich trunca a coluna de opções
+    # conforme a largura do console — varia por plataforma no CI e tornava
+    # a asserção flaky. Assert nos params do click, não no texto.
+    from typer.main import get_command
     from typer.testing import CliRunner
 
     from apiforge.cli import app
 
+    cmd = get_command(app)
+    assert "portal" in cmd.commands
+    params = cmd.commands["portal"].params
+    names = {p.name for p in params}
+    opts = {opt for p in params for opt in p.opts + p.secondary_opts}
+    assert "no_browser" in names and "root" in names
+    assert "--no-browser" in opts
     result = CliRunner().invoke(app, ["portal", "--help"])
     assert result.exit_code == 0
-    assert "--no-browser" in result.output
 
 
 def test_assets_index_resolvido():
@@ -305,6 +379,7 @@ def test_assets_index_resolvido():
 # ---------------------------------------------------------------------------
 # docs
 # ---------------------------------------------------------------------------
+
 
 def test_docs_search_inventory(server):
     code, env = _call(server, "GET", "/docs/search?q=analyze")

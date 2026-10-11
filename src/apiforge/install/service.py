@@ -50,21 +50,31 @@ def _spec() -> kit.ForgeSpec:
 
 def _render_for(ctx: kit.InstallContext) -> dict[str, bytes]:
     kinds = set(kit.asset_kinds_for(ctx))
-    return render.render(
-        ctx.hosts, skills="skill" in kinds, agents="agent" in kinds)
+    return render.render(ctx.hosts, skills="skill" in kinds, agents="agent" in kinds)
 
 
-def _ctx(scope: str, root: Path | None, hosts: tuple[str, ...],
-         profile: str, dry_run: bool, cwd: Path | None = None,
-         components: tuple[str, ...] | None = None) -> kit.InstallContext:
+def _ctx(
+    scope: str,
+    root: Path | None,
+    hosts: tuple[str, ...],
+    profile: str,
+    dry_run: bool,
+    cwd: Path | None = None,
+    components: tuple[str, ...] | None = None,
+) -> kit.InstallContext:
     spec = _spec()
     base = Path(cwd or Path.cwd())
     target = kit.resolve_scope(spec, scope, base, root)
     return kit.InstallContext(
-        spec=spec, scope=scope, root=target,
+        spec=spec,
+        scope=scope,
+        root=target,
         state_dir=kit.state_dir_for(spec, scope, target),
-        profile=profile, hosts=hosts, dry_run=dry_run,
-        options=kit.component_options(profile, components))
+        profile=profile,
+        hosts=hosts,
+        dry_run=dry_run,
+        options=kit.component_options(profile, components),
+    )
 
 
 def _hosts(host: str) -> tuple[str, ...]:
@@ -78,15 +88,21 @@ def _hosts(host: str) -> tuple[str, ...]:
     desconhecidos = [h for h in nomes if h not in render.HOSTS]
     if desconhecidos:
         raise kit.InstallError(
-            kit.E_HOST,
-            f"host {desconhecidos[0]!r}; conhecidos: {list(render.HOSTS)} + all,none")
+            kit.E_HOST, f"host {desconhecidos[0]!r}; conhecidos: {list(render.HOSTS)} + all,none"
+        )
     return tuple(dict.fromkeys(nomes))
 
 
-def install(host: str = "all", *, scope: str = "project",
-            root: Path | None = None, profile: str = "recommended",
-            yes: bool = False, dry_run: bool = False,
-            components: tuple[str, ...] | None = None) -> dict[str, Any]:
+def install(
+    host: str = "all",
+    *,
+    scope: str = "project",
+    root: Path | None = None,
+    profile: str = "recommended",
+    yes: bool = False,
+    dry_run: bool = False,
+    components: tuple[str, ...] | None = None,
+) -> dict[str, Any]:
     """Aplica a instalacao no alvo resolvido. Sem ``yes`` nem ``dry_run``
     a escrita e recusada — o plano e o contrato."""
     if profile not in PROFILES:
@@ -109,23 +125,28 @@ def status(*, scope: str = "project", root: Path | None = None) -> dict[str, Any
 def doctor(*, scope: str = "project", root: Path | None = None) -> dict[str, Any]:
     ctx = _ctx(scope, root, (), "recommended", dry_run=True)
     import importlib.util
+
     if importlib.util.find_spec("mcp") is None:
         doc = kit.doctor(ctx)
         doc["checks"] = [
-            c if c["id"] != "mcp-handshake" else
-            {**c, "status": "UNVERIFIED",
-             "detail": "extra 'mcp' nao instalada — handshake nao testado"}
+            c
+            if c["id"] != "mcp-handshake"
+            else {
+                **c,
+                "status": "UNVERIFIED",
+                "detail": "extra 'mcp' nao instalada — handshake nao testado",
+            }
             for c in doc["checks"]
         ]
         if not any(c["status"] == "FAIL" for c in doc["checks"]):
-            doc["status"] = ("healthy" if doc["status"] != "broken"
-                             else doc["status"])
+            doc["status"] = "healthy" if doc["status"] != "broken" else doc["status"]
         return doc
     return kit.doctor(ctx)
 
 
-def repair(*, scope: str = "project", root: Path | None = None,
-           dry_run: bool = False) -> dict[str, Any]:
+def repair(
+    *, scope: str = "project", root: Path | None = None, dry_run: bool = False
+) -> dict[str, Any]:
     ctx = _ctx(scope, root, render.HOSTS, "full", dry_run)
     if dry_run:
         return kit.status(ctx)
@@ -133,51 +154,61 @@ def repair(*, scope: str = "project", root: Path | None = None,
         return kit.repair(ctx)
 
 
-def uninstall(*, scope: str = "project", root: Path | None = None,
-              purge: bool = False, dry_run: bool = False) -> dict[str, Any]:
+def uninstall(
+    *, scope: str = "project", root: Path | None = None, purge: bool = False, dry_run: bool = False
+) -> dict[str, Any]:
     ctx = _ctx(scope, root, (), "recommended", dry_run)
     if dry_run:
         st = kit.status(ctx)
-        return {"schema": kit.SCHEMA_RECEIPT, "forge_id": FORGE_ID,
-                "operation": "uninstall", "scope": scope, "dry_run": True,
-                "would_remove": st.get("drift", {}),
-                "status": "planned",
-                "verification": {"status": "UNVERIFIED"},
-                "created_at": kit._utc_now()}
+        return {
+            "schema": kit.SCHEMA_RECEIPT,
+            "forge_id": FORGE_ID,
+            "operation": "uninstall",
+            "scope": scope,
+            "dry_run": True,
+            "would_remove": st.get("drift", {}),
+            "status": "planned",
+            "verification": {"status": "UNVERIFIED"},
+            "created_at": kit._utc_now(),
+        }
     with kit.acquire_lock(ctx.state_dir):
         return kit.uninstall(ctx, purge_state=purge)
 
 
-def update(*, to: str | None = None, repo: Path | None = None,
-           dry_run: bool = False) -> dict[str, Any]:
+def update(
+    *, to: str | None = None, repo: Path | None = None, dry_run: bool = False
+) -> dict[str, Any]:
     """Atualiza o runtime instalado pelo bootstrap; ``to`` e sempre pinned."""
     if to == "latest":
         return _failed("version", "'latest' nunca e instalavel")
     manifest = _installation_manifest()
     src = repo or (Path(p) if (p := (manifest.get("source") or {}).get("path")) else None)
     if src is None or not src.exists():
-        return _failed("source",
-                       "sem checkout registrado — instale pelo setup", "BLOCKED")
+        return _failed("source", "sem checkout registrado — instale pelo setup", "BLOCKED")
     venv = manifest.get("venv")
     if not venv:
-        return _failed("source",
-                       "sem venv registrada; rode scripts/forge_bootstrap.py")
-    venv_py = Path(venv) / ("Scripts/python.exe" if sys.platform == "win32"
-                            else "bin/python")
+        return _failed("source", "sem venv registrada; rode scripts/forge_bootstrap.py")
+    venv_py = Path(venv) / ("Scripts/python.exe" if sys.platform == "win32" else "bin/python")
     if not venv_py.exists():
         return _failed("venv", f"venv {venv} incompleta")
     cmd = [str(venv_py), "-m", "pip", "install", "--upgrade", str(src)]
     if dry_run:
-        return _receipt("update", [{"id": "pip", "status": "UNVERIFIED",
-                                    "detail": " ".join(cmd)}], "planned")
+        return _receipt(
+            "update", [{"id": "pip", "status": "UNVERIFIED", "detail": " ".join(cmd)}], "planned"
+        )
     import subprocess
+
     proc = subprocess.run(  # venv python + fixed pip args
-        cmd, capture_output=True, text=True, timeout=900, check=False)
-    checks = [{"id": "pip",
-               "status": "PASS" if proc.returncode == 0 else "FAIL",
-               "detail": (proc.stdout or proc.stderr)[-300:]}]
-    return _receipt("update", checks,
-                    "completed" if proc.returncode == 0 else "failed")
+        cmd, capture_output=True, text=True, timeout=900, check=False
+    )
+    checks = [
+        {
+            "id": "pip",
+            "status": "PASS" if proc.returncode == 0 else "FAIL",
+            "detail": (proc.stdout or proc.stderr)[-300:],
+        }
+    ]
+    return _receipt("update", checks, "completed" if proc.returncode == 0 else "failed")
 
 
 def mcp_verify() -> dict[str, Any]:
@@ -186,22 +217,27 @@ def mcp_verify() -> dict[str, Any]:
 
 # --------------------------------------------------------------------------
 
-def _receipt(operation: str, checks: list[dict[str, Any]],
-             status: str) -> dict[str, Any]:
+
+def _receipt(operation: str, checks: list[dict[str, Any]], status: str) -> dict[str, Any]:
     return {
-        "schema": kit.SCHEMA_RECEIPT, "forge_id": FORGE_ID,
-        "operation": operation, "managed_files": [], "checks": checks,
-        "verification": {"status": "PASS" if all(
-            c["status"] in ("PASS", "NOT_APPLICABLE", "UNVERIFIED")
-            for c in checks) else "FAIL"},
-        "status": status, "created_at": kit._utc_now(),
+        "schema": kit.SCHEMA_RECEIPT,
+        "forge_id": FORGE_ID,
+        "operation": operation,
+        "managed_files": [],
+        "checks": checks,
+        "verification": {
+            "status": "PASS"
+            if all(c["status"] in ("PASS", "NOT_APPLICABLE", "UNVERIFIED") for c in checks)
+            else "FAIL"
+        },
+        "status": status,
+        "created_at": kit._utc_now(),
         "created_by": f"apiforge/{__version__}",
     }
 
 
 def _failed(check_id: str, detail: str, status: str = "FAIL") -> dict[str, Any]:
-    return _receipt("update", [{"id": check_id, "status": status,
-                                "detail": detail}], "failed")
+    return _receipt("update", [{"id": check_id, "status": status, "detail": detail}], "failed")
 
 
 def _write_receipt(state: Path, receipt: dict[str, Any]) -> None:
@@ -220,24 +256,37 @@ def _register(ctx: kit.InstallContext) -> None:
     path = kit.installations_dir() / f"{FORGE_ID}.json"
     existing = kit._load_json(path, None)
     doc = dict(existing) if isinstance(existing, dict) else {}
-    doc.update({
-        "schema": kit.SCHEMA_MANIFEST, "forge_id": FORGE_ID,
-        "package": "apiforge", "distribution": "apiforge",
-        "cli": {"name": "apiforge", "version_cmd": ["apiforge", "--version"]},
-        "version": __version__,
-        "updated_at": kit._utc_now(),
-        "installed_at": doc.get("installed_at", kit._utc_now()),
-        "installed_by": doc.get("installed_by",
-                                {"agent": "apiforge-cli",
-                                 "version": __version__}),
-        "source": doc.get("source", {"kind": "project-install",
-                                     "path": str(ctx.root)}),
-    })
+    doc.update(
+        {
+            "schema": kit.SCHEMA_MANIFEST,
+            "forge_id": FORGE_ID,
+            "package": "apiforge",
+            "distribution": "apiforge",
+            "cli": {"name": "apiforge", "version_cmd": ["apiforge", "--version"]},
+            "version": __version__,
+            "updated_at": kit._utc_now(),
+            "installed_at": doc.get("installed_at", kit._utc_now()),
+            "installed_by": doc.get(
+                "installed_by", {"agent": "apiforge-cli", "version": __version__}
+            ),
+            "source": doc.get("source", {"kind": "project-install", "path": str(ctx.root)}),
+        }
+    )
     doc.setdefault("install_root", str(kit.installs_root() / FORGE_ID))
-    doc.setdefault("mcp", {"server_name": "apiforge",
-                           "command": ["apiforge-mcp"], "verified": False})
+    doc.setdefault(
+        "mcp", {"server_name": "apiforge", "command": ["apiforge-mcp"], "verified": False}
+    )
     kit.register_installation(doc)
 
 
-__all__ = ["PROFILES", "SCOPES", "doctor", "install", "mcp_verify",
-           "repair", "status", "uninstall", "update"]
+__all__ = [
+    "PROFILES",
+    "SCOPES",
+    "doctor",
+    "install",
+    "mcp_verify",
+    "repair",
+    "status",
+    "uninstall",
+    "update",
+]

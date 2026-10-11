@@ -18,9 +18,7 @@ from apiforge.distribution.assets import package_root
 HOSTS: tuple[str, ...] = ("claude", "devin", "codex", "copilot")
 
 _CLAUDE_TOOLS = "Read, Grep, Glob, Bash, Edit, Write"
-_COPILOT_TOOLS = (
-    "read", "search", "edit", "shell", "web", "agent"
-)
+_COPILOT_TOOLS = ("read", "search", "edit", "shell", "web", "agent")
 
 
 def _repo_root() -> Path | None:
@@ -63,12 +61,7 @@ def _emit_agent(meta: dict[str, Any], body: str, host: str) -> str:
     while "  " in description:
         description = description.replace("  ", " ")
     if host == "claude":
-        head = (
-            f"name: {name}\n"
-            f"description: '{description}'\n"
-            f"tools: {_CLAUDE_TOOLS}\n"
-            f"model: opus\n"
-        )
+        head = f"name: {name}\ndescription: '{description}'\ntools: {_CLAUDE_TOOLS}\nmodel: opus\n"
     elif host == "copilot":
         head = f"name: {name}\ndescription: '{description}'\ntools: {_COPILOT_TOOLS}\n"
     else:
@@ -135,8 +128,7 @@ def render(hosts: tuple[str, ...], *, skills: bool, agents: bool) -> dict[str, b
             for path in agent_files:
                 meta, body = _frontmatter(path.read_text(encoding="utf-8"))
                 name = str(meta.get("name") or path.stem)
-                out[f".agents/agents/{name}.md"] = _emit_agent(
-                    meta, body, "devin").encode("utf-8")
+                out[f".agents/agents/{name}.md"] = _emit_agent(meta, body, "devin").encode("utf-8")
 
     if skills:
         seen: set[str] = set()

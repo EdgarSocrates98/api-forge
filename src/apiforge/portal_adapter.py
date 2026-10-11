@@ -3,6 +3,7 @@ the real install/service, integrations/hosts, application/analyze and
 graphview services. Nothing here fabricates state: every field comes
 from a real service call; unverifiable values stay `unverified`.
 """
+
 from __future__ import annotations
 
 import json
@@ -129,34 +130,52 @@ class ApiForgePortal(fp.PortalAdapter):
             fp.Operation("GET", "/docs/search", lambda ctx: self._docs_search(ctx)),
             fp.Operation("POST", "/installation/plan", self._install_plan, mutating=True),
             fp.Operation(
-                "POST", "/installation/apply", self._install_apply,
-                mutating=True, confirm="apply", needs_plan_token=True,
+                "POST",
+                "/installation/apply",
+                self._install_apply,
+                mutating=True,
+                confirm="apply",
+                needs_plan_token=True,
             ),
             fp.Operation(
-                "POST", "/installation/repair", self._install_repair,
-                mutating=True, confirm="repair",
+                "POST",
+                "/installation/repair",
+                self._install_repair,
+                mutating=True,
+                confirm="repair",
             ),
             fp.Operation(
-                "POST", "/installation/uninstall", self._install_uninstall,
-                mutating=True, confirm="uninstall",
+                "POST",
+                "/installation/uninstall",
+                self._install_uninstall,
+                mutating=True,
+                confirm="uninstall",
             ),
             fp.Operation(
-                "POST", "/profiles/apply", self._profiles_apply,
-                mutating=True, confirm="apply",
+                "POST",
+                "/profiles/apply",
+                self._profiles_apply,
+                mutating=True,
+                confirm="apply",
             ),
             fp.Operation("POST", "/hosts/launch", self._hosts_launch, mutating=False),
             fp.Operation("POST", "/mcp/verify", self._mcp_verify, mutating=True, confirm="verify"),
             fp.Operation("POST", "/tasks/plan", self._tasks_plan, mutating=True),
             fp.Operation(
-                "POST", "/tasks/execute", self._tasks_execute,
-                mutating=True, confirm="execute", needs_plan_token=True, timeout=120,
+                "POST",
+                "/tasks/execute",
+                self._tasks_execute,
+                mutating=True,
+                confirm="execute",
+                needs_plan_token=True,
+                timeout=120,
             ),
         ]
 
     # ------------------------------------------------------------------
     # descriptor / health / capabilities
     # ------------------------------------------------------------------
-    def capabilities(self) -> list[dict]:
+    def capabilities(self) -> list[dict[str, Any]]:
         return [
             {"id": "install", "state": "supported"},
             {"id": "hosts", "state": "supported"},
@@ -171,7 +190,7 @@ class ApiForgePortal(fp.PortalAdapter):
             },
         ]
 
-    def nav(self) -> list[dict]:
+    def nav(self) -> list[dict[str, Any]]:
         return [
             {
                 "id": "tasks",
@@ -187,7 +206,7 @@ class ApiForgePortal(fp.PortalAdapter):
             },
         ]
 
-    def health(self) -> dict:
+    def health(self) -> dict[str, Any]:
         status = self._status_doc()
         doctor = None
         doctor_error: str | None = None
@@ -197,11 +216,13 @@ class ApiForgePortal(fp.PortalAdapter):
             doctor_error = f"{type(e).__name__}: {e}"
         checks = []
         for c in (doctor or {}).get("checks", []):
-            checks.append({
-                "id": c.get("id", "check"),
-                "state": c.get("status", "UNVERIFIED"),
-                "detail": c.get("detail"),
-            })
+            checks.append(
+                {
+                    "id": c.get("id", "check"),
+                    "state": c.get("status", "UNVERIFIED"),
+                    "detail": c.get("detail"),
+                }
+            )
         if doctor_error:
             checks.append({"id": "doctor", "state": "UNVERIFIED", "detail": doctor_error})
         return {
@@ -212,7 +233,7 @@ class ApiForgePortal(fp.PortalAdapter):
             "updated_at": status.get("checked_at"),
         }
 
-    def installation_status(self, ctx: fp.RequestContext | None = None) -> dict:
+    def installation_status(self, ctx: fp.RequestContext | None = None) -> dict[str, Any]:
         return self.health()
 
     def _status_doc(self) -> dict[str, Any]:
@@ -224,23 +245,29 @@ class ApiForgePortal(fp.PortalAdapter):
     # ------------------------------------------------------------------
     # installation lifecycle — plan → confirm → apply, real receipts
     # ------------------------------------------------------------------
-    def _install_plan(self, ctx: fp.RequestContext) -> dict:
+    def _install_plan(self, ctx: fp.RequestContext) -> dict[str, Any]:
         scope = (ctx.body or {}).get("scope", "project")
         if scope not in _SCOPES:
             raise fp.PortalError(
-                "PORTAL-BAD-FIELD", f"scope must be one of {_SCOPES}",
+                "PORTAL-BAD-FIELD",
+                f"scope must be one of {_SCOPES}",
                 details={"field": "scope", "got": scope},
             )
         host = (ctx.body or {}).get("host", "all")
         if host != "all" and host not in _HOSTS:
             raise fp.PortalError(
-                "PORTAL-BAD-FIELD", f"host must be one of {_HOSTS + ('all',)}",
+                "PORTAL-BAD-FIELD",
+                f"host must be one of {_HOSTS + ('all',)}",
                 details={"field": "host", "got": host},
             )
         profile = (ctx.body or {}).get("profile", "recommended")
         plan_input = {"scope": scope, "profile": profile, "host": host}
         receipt = service.install(
-            host, scope=scope, root=self._root, profile=profile, dry_run=True,
+            host,
+            scope=scope,
+            root=self._root,
+            profile=profile,
+            dry_run=True,
         )
         return {
             "status": receipt.get("status", "planned"),
@@ -257,32 +284,36 @@ class ApiForgePortal(fp.PortalAdapter):
             ],
         }
 
-    def _install_apply(self, ctx: fp.RequestContext) -> dict:
+    def _install_apply(self, ctx: fp.RequestContext) -> dict[str, Any]:
         # The echoed plan is the source of truth — the token binds to it.
         plan = (ctx.body or {}).get("plan") or {}
-        if not ctx.handler.server.check_plan(ctx.body["plan_token"], plan):
+        if not ctx.handler.server.check_plan((ctx.body or {})["plan_token"], plan):
             raise fp.PortalError(
                 "PORTAL-PLAN-STALE",
                 "plan token does not match this plan or expired — regenerate the plan",
-                http=409, retryable=True, action="regenerate_plan",
+                http=409,
+                retryable=True,
+                action="regenerate_plan",
             )
         return service.install(
             plan.get("host", "all"),
-            scope=plan.get("scope", "project"), root=self._root,
+            scope=plan.get("scope", "project"),
+            root=self._root,
             profile=plan.get("profile", "recommended"),
-            dry_run=False, yes=True,
+            dry_run=False,
+            yes=True,
         )
 
-    def _install_repair(self, ctx: fp.RequestContext) -> dict:
+    def _install_repair(self, ctx: fp.RequestContext) -> dict[str, Any]:
         return service.repair(scope="project", root=self._root)
 
-    def _install_uninstall(self, ctx: fp.RequestContext) -> dict:
+    def _install_uninstall(self, ctx: fp.RequestContext) -> dict[str, Any]:
         return service.uninstall(scope="project", root=self._root)
 
     # ------------------------------------------------------------------
     # profiles
     # ------------------------------------------------------------------
-    def _profiles(self) -> list[dict]:
+    def _profiles(self) -> list[dict[str, Any]]:
         current = self._installed_profile()
         return [
             {
@@ -291,8 +322,11 @@ class ApiForgePortal(fp.PortalAdapter):
                 "description_key": "profiles.economy.desc",
                 "current": current == "economy",
                 "components": {
-                    "skills": False, "agents": False, "mcp": True,
-                    "tui": False, "graph_studio": False,
+                    "skills": False,
+                    "agents": False,
+                    "mcp": True,
+                    "tui": False,
+                    "graph_studio": False,
                 },
             },
             {
@@ -301,8 +335,11 @@ class ApiForgePortal(fp.PortalAdapter):
                 "description_key": "profiles.balanced.desc",
                 "current": current == "balanced",
                 "components": {
-                    "skills": True, "agents": True, "mcp": True,
-                    "tui": True, "graph_studio": False,
+                    "skills": True,
+                    "agents": True,
+                    "mcp": True,
+                    "tui": True,
+                    "graph_studio": False,
                 },
             },
             {
@@ -311,8 +348,11 @@ class ApiForgePortal(fp.PortalAdapter):
                 "description_key": "profiles.full.desc",
                 "current": current == "full",
                 "components": {
-                    "skills": True, "agents": True, "mcp": True,
-                    "tui": True, "graph_studio": True,
+                    "skills": True,
+                    "agents": True,
+                    "mcp": True,
+                    "tui": True,
+                    "graph_studio": True,
                 },
             },
         ]
@@ -327,11 +367,13 @@ class ApiForgePortal(fp.PortalAdapter):
                 continue
             if doc.get("operation") == "install" and doc.get("status") == "completed":
                 return {
-                    "minimal": "economy", "recommended": "balanced", "full": "full",
+                    "minimal": "economy",
+                    "recommended": "balanced",
+                    "full": "full",
                 }.get(str(doc.get("profile") or "").lower(), "")
         return ""
 
-    def _profiles_apply(self, ctx: fp.RequestContext) -> dict:
+    def _profiles_apply(self, ctx: fp.RequestContext) -> dict[str, Any]:
         profile = (ctx.body or {}).get("profile", "balanced")
         real = {"economy": "minimal", "balanced": "recommended", "full": "full"}.get(profile)
         if real is None:
@@ -341,51 +383,64 @@ class ApiForgePortal(fp.PortalAdapter):
                 details={"field": "profile", "got": profile},
             )
         return service.install(
-            "all", scope="project", root=self._root, profile=real,
-            dry_run=False, yes=True,
+            "all",
+            scope="project",
+            root=self._root,
+            profile=real,
+            dry_run=False,
+            yes=True,
         )
 
     # ------------------------------------------------------------------
     # hosts — observe-only; launch returns the command to copy
     # ------------------------------------------------------------------
-    def _hosts(self) -> list[dict]:
+    def _hosts(self) -> list[dict[str, Any]]:
         from apiforge.integrations import hosts as host_probe
 
-        out: list[dict] = []
+        out: list[dict[str, Any]] = []
         for host in _HOSTS:
             try:
                 flow = host_probe.ai_flow(host, root=self._root, launch=False)
             except Exception as e:  # noqa: BLE001 — per-host probe degrades honestly
-                out.append({
-                    "host": host, "detected": False, "version": None,
-                    "supported": False, "logged_in": None,
-                    "integration": "unverified", "launchable": False,
-                    "detail": f"probe failed: {type(e).__name__}",
-                })
+                out.append(
+                    {
+                        "host": host,
+                        "detected": False,
+                        "version": None,
+                        "supported": False,
+                        "logged_in": None,
+                        "integration": "unverified",
+                        "launchable": False,
+                        "detail": f"probe failed: {type(e).__name__}",
+                    }
+                )
                 continue
             for h in flow.get("hosts", []):
                 integration = h.get("integration") or {}
                 # state: NOT_DETECTED|DETECTED|SUPPORTED|READY|NEEDS_LOGIN|
                 # INTEGRATION_DEGRADED|INTEGRATION_BROKEN (hosts.ai_flow)
                 detected = h.get("binary_path") is not None
-                out.append({
-                    "host": h.get("host", host),
-                    "detected": detected,
-                    "version": h.get("version"),
-                    "supported": h.get("state") in ("READY", "SUPPORTED"),
-                    "logged_in": h.get("logged_in"),
-                    "integration": integration.get("state", "unverified"),
-                    "launchable": detected,
-                    "command_hint": h.get("launch_command") if detected else None,
-                    "detail": h.get("detail") or h.get("login_hint"),
-                })
+                out.append(
+                    {
+                        "host": h.get("host", host),
+                        "detected": detected,
+                        "version": h.get("version"),
+                        "supported": h.get("state") in ("READY", "SUPPORTED"),
+                        "logged_in": h.get("logged_in"),
+                        "integration": integration.get("state", "unverified"),
+                        "launchable": detected,
+                        "command_hint": h.get("launch_command") if detected else None,
+                        "detail": h.get("detail") or h.get("login_hint"),
+                    }
+                )
         return out
 
-    def _hosts_launch(self, ctx: fp.RequestContext) -> dict:
+    def _hosts_launch(self, ctx: fp.RequestContext) -> dict[str, Any]:
         host = (ctx.body or {}).get("host")
         if host not in _HOSTS:
             raise fp.PortalError(
-                "PORTAL-BAD-FIELD", f"host must be one of {_HOSTS}",
+                "PORTAL-BAD-FIELD",
+                f"host must be one of {_HOSTS}",
                 details={"field": "host", "got": host},
             )
         from apiforge.integrations import hosts as host_probe
@@ -421,7 +476,7 @@ class ApiForgePortal(fp.PortalAdapter):
                 "tools": [],
             }
 
-    def _mcp_servers(self) -> list[dict]:
+    def _mcp_servers(self) -> list[dict[str, Any]]:
         doc = self._mcp_verify_doc()
         status = doc.get("status", "FAIL")
         tools = doc.get("tools") or []
@@ -430,16 +485,18 @@ class ApiForgePortal(fp.PortalAdapter):
             "HANDSHAKE": "HANDSHAKE_VERIFIED",
             "FAIL": "FAILED",
         }.get(status, "DEGRADED")
-        return [{
-            "id": "apiforge",
-            "state": state,
-            "host": None,
-            "tools_count": len(tools) or None,
-            "last_verify": doc.get("checked_at"),
-            "detail": doc.get("detail"),
-        }]
+        return [
+            {
+                "id": "apiforge",
+                "state": state,
+                "host": None,
+                "tools_count": len(tools) or None,
+                "last_verify": doc.get("checked_at"),
+                "detail": doc.get("detail"),
+            }
+        ]
 
-    def _mcp_verify(self, ctx: fp.RequestContext) -> dict:
+    def _mcp_verify(self, ctx: fp.RequestContext) -> dict[str, Any]:
         doc = self._mcp_verify_doc()
         return {
             "status": doc.get("status", "FAIL"),
@@ -463,50 +520,55 @@ class ApiForgePortal(fp.PortalAdapter):
         raise fp.PortalError(
             "PORTAL-CATALOG-UNAVAILABLE",
             f"{kind} catalog not found in clone or installed bundle",
-            http=503, retryable=True,
+            http=503,
+            retryable=True,
             details={"candidates": [str(d) for d in candidates]},
         )
 
-    def _skills(self) -> list[dict]:
+    def _skills(self) -> list[dict[str, Any]]:
         base = self._catalog_dir(_SKILLS_CANDIDATES, "skill")
-        out = []
+        out: list[dict[str, Any]] = []
         for skill_md in sorted(base.glob("*/SKILL.md")):
             try:
                 text = skill_md.read_text(encoding="utf-8", errors="replace")
             except OSError:
                 continue
             sid = skill_md.parent.name
-            out.append({
-                "id": sid,
-                "name": _frontmatter_field(text, "name") or sid,
-                "domain": _frontmatter_field(text, "domain"),
-                "description": _frontmatter_field(text, "description") or "",
-                "state": "available",
-                "hosts": [],
-                "source": "catalog",
-            })
+            out.append(
+                {
+                    "id": sid,
+                    "name": _frontmatter_field(text, "name") or sid,
+                    "domain": _frontmatter_field(text, "domain"),
+                    "description": _frontmatter_field(text, "description") or "",
+                    "state": "available",
+                    "hosts": [],
+                    "source": "catalog",
+                }
+            )
         return out
 
-    def _agents(self) -> list[dict]:
+    def _agents(self) -> list[dict[str, Any]]:
         base = self._catalog_dir(_AGENTS_CANDIDATES, "agent")
-        out = []
+        out: list[dict[str, Any]] = []
         for agent_md in sorted(base.glob("*.md")):
             try:
                 text = agent_md.read_text(encoding="utf-8", errors="replace")
             except OSError:
                 continue
             aid = agent_md.stem
-            out.append({
-                "id": aid,
-                "name": _frontmatter_field(text, "name") or aid,
-                "role": _frontmatter_field(text, "role") or "agent",
-                "description": _frontmatter_field(text, "description") or "",
-                "authority": None,
-                "domains": [],
-                "skills": [],
-                "hosts": [],
-                "state": "available",
-            })
+            out.append(
+                {
+                    "id": aid,
+                    "name": _frontmatter_field(text, "name") or aid,
+                    "role": _frontmatter_field(text, "role") or "agent",
+                    "description": _frontmatter_field(text, "description") or "",
+                    "authority": None,
+                    "domains": [],
+                    "skills": [],
+                    "hosts": [],
+                    "state": "available",
+                }
+            )
         return out
 
     # ------------------------------------------------------------------
@@ -532,12 +594,13 @@ class ApiForgePortal(fp.PortalAdapter):
                 return verb, label
         return None
 
-    def _tasks_plan(self, ctx: fp.RequestContext) -> dict:
+    def _tasks_plan(self, ctx: fp.RequestContext) -> dict[str, Any]:
         intent = ((ctx.body or {}).get("intent") or "").strip()
         args = (ctx.body or {}).get("args") or {}
         if not intent:
             raise fp.PortalError(
-                "PORTAL-MISSING-FIELD", "field 'intent' is required",
+                "PORTAL-MISSING-FIELD",
+                "field 'intent' is required",
                 details={"field": "intent"},
             )
         mapped = self._intent_to_task(intent)
@@ -566,20 +629,26 @@ class ApiForgePortal(fp.PortalAdapter):
             "status": "planned",
         }
 
-    def _tasks_execute(self, ctx: fp.RequestContext) -> dict:
+    def _tasks_execute(self, ctx: fp.RequestContext) -> dict[str, Any]:
         plan = (ctx.body or {}).get("plan") or {}
         verb = plan.get("verb", "")
-        if not ctx.handler.server.check_plan(ctx.body["plan_token"], plan):
+        if not ctx.handler.server.check_plan((ctx.body or {})["plan_token"], plan):
             raise fp.PortalError(
                 "PORTAL-PLAN-STALE",
                 "plan token does not match — regenerate the plan",
-                http=409, retryable=True, action="regenerate_plan",
+                http=409,
+                retryable=True,
+                action="regenerate_plan",
             )
         self._task_seq += 1
         task_id = f"task-{self._task_seq}"
         record: dict[str, Any] = {
-            "id": task_id, "verb": verb, "label": plan.get("label", verb),
-            "stage": "running", "started_at": _now(), "finished_at": None,
+            "id": task_id,
+            "verb": verb,
+            "label": plan.get("label", verb),
+            "stage": "running",
+            "started_at": _now(),
+            "finished_at": None,
             "exit_code": None,
         }
         try:
@@ -617,7 +686,8 @@ class ApiForgePortal(fp.PortalAdapter):
             view = self._graph_view()
             if view is None:
                 raise fp.PortalError(
-                    "AF-PORTAL-NO-GRAPH", "no graph built in this workspace",
+                    "AF-PORTAL-NO-GRAPH",
+                    "no graph built in this workspace",
                     action="build the graph first",
                 )
             return view
@@ -652,18 +722,21 @@ class ApiForgePortal(fp.PortalAdapter):
     def _resolve_in_workspace(self, raw: Any, field: str) -> Path:
         if not raw or not isinstance(raw, str):
             raise fp.PortalError(
-                "AF-PORTAL-INPUT", f"args.{field} is required for analyze",
+                "AF-PORTAL-INPUT",
+                f"args.{field} is required for analyze",
                 details={"field": field},
             )
-        p = (self._root / raw).resolve()
+        p: Path = (self._root / raw).resolve()
         if not str(p).startswith(str(self._root.resolve())):
             raise fp.PortalError(
-                "AF-PORTAL-INPUT", f"args.{field} escapes the workspace",
+                "AF-PORTAL-INPUT",
+                f"args.{field} escapes the workspace",
                 details={"field": field, "got": raw},
             )
         if not p.exists():
             raise fp.PortalError(
-                "AF-PORTAL-INPUT", f"args.{field} not found: {raw}",
+                "AF-PORTAL-INPUT",
+                f"args.{field} not found: {raw}",
                 details={"field": field, "got": raw},
             )
         return p
@@ -679,11 +752,15 @@ class ApiForgePortal(fp.PortalAdapter):
         for gdir in _graph_dirs(self._root):
             view = _try_view(build_view, gdir)
             if view is not None:
-                return view.to_dict() if hasattr(view, "to_dict") else json.loads(
-                    json.dumps(view, default=str))
+                doc: dict[str, Any] = (
+                    view.to_dict()
+                    if hasattr(view, "to_dict")
+                    else json.loads(json.dumps(view, default=str))
+                )
+                return doc
         return None
 
-    def _graphs(self) -> dict:
+    def _graphs(self) -> dict[str, Any]:
         view = self._graph_view()
         if view is None:
             return {
@@ -704,12 +781,12 @@ class ApiForgePortal(fp.PortalAdapter):
     # ------------------------------------------------------------------
     # docs search — inventory.jsonl title/excerpt, offline
     # ------------------------------------------------------------------
-    def _docs_search(self, ctx: fp.RequestContext) -> list[dict]:
+    def _docs_search(self, ctx: fp.RequestContext) -> list[dict[str, Any]]:
         query = (ctx.query.get("q") or [""])[0].strip().lower()
         limit = int((ctx.query.get("limit") or ["20"])[0])
         if not query or not _INVENTORY.is_file():
             return []
-        hits: list[dict] = []
+        hits: list[dict[str, Any]] = []
         terms = query.split()
         for line in _INVENTORY.read_text(encoding="utf-8").splitlines():
             if not line.strip():
@@ -723,12 +800,14 @@ class ApiForgePortal(fp.PortalAdapter):
             hay = " ".join(str(row.get(k) or "") for k in ("title", "path", "category")).lower()
             if not all(t in hay for t in terms):
                 continue
-            hits.append({
-                "path": row.get("path", ""),
-                "title": row.get("title") or Path(row.get("path", "")).stem,
-                "excerpt": "",
-                "category": row.get("category") or "doc",
-            })
+            hits.append(
+                {
+                    "path": row.get("path", ""),
+                    "title": row.get("title") or Path(row.get("path", "")).stem,
+                    "excerpt": "",
+                    "category": row.get("category") or "doc",
+                }
+            )
             if len(hits) >= limit:
                 break
         return hits
@@ -753,7 +832,8 @@ def main(argv: list[str] | None = None) -> int:
         description="Serve the API Forge portal locally (127.0.0.1).",
     )
     ap.add_argument(
-        "--no-browser", action="store_true",
+        "--no-browser",
+        action="store_true",
         help="print the URL without opening the browser",
     )
     ap.add_argument("--port", type=int, default=0, help="port (0 = free port)")
@@ -763,22 +843,27 @@ def main(argv: list[str] | None = None) -> int:
     adapter = ApiForgePortal(Path(args.root) if args.root else Path.cwd())
     if adapter.assets_dir is None:
         print(
-            json.dumps({
-                "refusal": "AF-PORTAL-NO-ASSETS",
-                "detail": (
-                    "portal assets not vendored — run `apiforge portal` "
-                    "after `python scripts/vendor.py` in forge-portal"
-                ),
-            })
+            json.dumps(
+                {
+                    "refusal": "AF-PORTAL-NO-ASSETS",
+                    "detail": (
+                        "portal assets not vendored — run `apiforge portal` "
+                        "after `python scripts/vendor.py` in forge-portal"
+                    ),
+                }
+            )
         )
         return 1
     server = fp.PortalServer(adapter, port=args.port, quiet=True)
     url = server.url
     print(
-        json.dumps({
-            "url": url,
-            "note": "portal is optional — CLI/TUI/MCP keep working without it",
-        }), flush=True
+        json.dumps(
+            {
+                "url": url,
+                "note": "portal is optional — CLI/TUI/MCP keep working without it",
+            }
+        ),
+        flush=True,
     )
     if not args.no_browser:
         webbrowser.open(url)

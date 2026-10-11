@@ -10,12 +10,29 @@ from __future__ import annotations
 
 from typing import Any
 
-_GOOD = {"ok", "pass", "healthy", "completed", "installed", "detected",
-         "ready", "done", "supported"}
-_BAD = {"fail", "failed", "broken", "missing", "unsupported", "refused",
-        "blocked"}
-_WARN = {"degraded", "unverified", "planned", "skipped", "vendored",
-         "not_installed", "pending", "modified", "declined"}
+_GOOD = {
+    "ok",
+    "pass",
+    "healthy",
+    "completed",
+    "installed",
+    "detected",
+    "ready",
+    "done",
+    "supported",
+}
+_BAD = {"fail", "failed", "broken", "missing", "unsupported", "refused", "blocked"}
+_WARN = {
+    "degraded",
+    "unverified",
+    "planned",
+    "skipped",
+    "vendored",
+    "not_installed",
+    "pending",
+    "modified",
+    "declined",
+}
 
 
 def _style(state: str) -> str:
@@ -54,7 +71,9 @@ def render_doc_rich(doc: dict[str, Any]) -> bool:
     )
 
     for key, label in (
-        ("target_root", "target"), ("scope", "scope"), ("version", "version"),
+        ("target_root", "target"),
+        ("scope", "scope"),
+        ("version", "version"),
         ("state_dir", "state dir"),
     ):
         if doc.get(key):
@@ -75,14 +94,15 @@ def render_doc_rich(doc: dict[str, Any]) -> bool:
         for c in checks:
             st = str(c.get("status", "?"))
             mark = {
-                "PASS": "[green]✓[/]", "OK": "[green]✓[/]",
-                "FAIL": "[red]✗[/]", "NOT_APPLICABLE": "[dim]—[/]",
+                "PASS": "[green]✓[/]",
+                "OK": "[green]✓[/]",
+                "FAIL": "[red]✗[/]",
+                "NOT_APPLICABLE": "[dim]—[/]",
             }.get(st.upper(), "[yellow]◇[/]")
             detail = str(c.get("detail") or "")
             if c.get("repairable"):
                 detail += " [cyan](repairable)[/]"
-            table.add_row(mark, str(c.get("id", "?")),
-                          f"[{_style(st)}]{st}[/]", detail)
+            table.add_row(mark, str(c.get("id", "?")), f"[{_style(st)}]{st}[/]", detail)
         console.print(table)
 
     drift = doc.get("drift")
@@ -99,8 +119,7 @@ def render_doc_rich(doc: dict[str, Any]) -> bool:
 
     files = doc.get("managed_files") or doc.get("planned_files")
     if files:
-        label = "managed files" if doc.get("managed_files") is not None \
-            else "planned files"
+        label = "managed files" if doc.get("managed_files") is not None else "planned files"
         console.print(f"  [dim]{label}[/] {len(files)}")
         for f in files[:5]:
             path = f.get("path") if isinstance(f, dict) else str(f)
@@ -112,9 +131,11 @@ def render_doc_rich(doc: dict[str, Any]) -> bool:
     if isinstance(portal, dict):
         state = str(portal.get("state", "?"))
         where = portal.get("install_root") or portal.get("manifest") or ""
-        suffix = f"  {where}" if where else (
-            "  [dim]vendored assets — no local install[/]"
-            if state == "vendored" else "")
+        suffix = (
+            f"  {where}"
+            if where
+            else ("  [dim]vendored assets — no local install[/]" if state == "vendored" else "")
+        )
         console.print(f"  [dim]forge portal[/] [{_style(state)}]{state}[/]{suffix}")
 
     verification = doc.get("verification")

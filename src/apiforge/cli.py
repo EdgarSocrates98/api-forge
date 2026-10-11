@@ -632,9 +632,7 @@ def ai_open(
     """
     from apiforge.integrations.hosts import ai_flow
 
-    _echo_json(
-        _run(lambda: ai_flow(host, root=root, launch=launch)), detail_level
-    )
+    _echo_json(_run(lambda: ai_flow(host, root=root, launch=launch)), detail_level)
 
 
 @app.command("init")
@@ -3362,12 +3360,9 @@ def graph_export(
     _echo_json(_run(work), detail_level)
 
 
-
 @graph_app.command("view")
 def graph_view(
-    graph: Path | None = typer.Option(
-        None, "--graph", help="Graph directory (nodes.jsonl)."
-    ),
+    graph: Path | None = typer.Option(None, "--graph", help="Graph directory (nodes.jsonl)."),
 ) -> None:
     """Emit the ForgeGraphView/v1 document (Graph Studio contract)."""
 
@@ -3394,9 +3389,7 @@ def graph_view(
 
 @graph_app.command("ui")
 def graph_ui(
-    graph: Path | None = typer.Option(
-        None, "--graph", help="Graph directory (nodes.jsonl)."
-    ),
+    graph: Path | None = typer.Option(None, "--graph", help="Graph directory (nodes.jsonl)."),
     no_browser: bool = typer.Option(
         False, "--no-browser", help="Serve without opening a browser (SSH/remote)."
     ),

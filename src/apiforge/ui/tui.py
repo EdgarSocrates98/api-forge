@@ -22,6 +22,15 @@ _SUSPEND_VERBS = {"analyze", "judge", "collect", "migrate", "graph", "sdd"}
 
 _LEARN_DOC: dict[str, str] = {
     "analyze": "docs/learn/recipes/analyze-contract.md",
+    "discover": "docs/learn/recipes/primeiro-uso.md",
+    "contract": "docs/learn/recipes/contract-diff.md",
+    "capabilities": "docs/learn/recipes/usar-skills.md",
+    "evals": "docs/learn/recipes/verificacao.md",
+    "verify": "docs/learn/recipes/verificacao.md",
+    "graph": "docs/learn/recipes/graphfy.md",
+    "ai": "docs/learn/recipes/integrar-host.md",
+    "install": "docs/learn/recipes/verificar-mcp.md",
+    "agents": "docs/learn/recipes/usar-agents.md",
 }
 
 

@@ -19,21 +19,25 @@ runtime vai para `apiforge runtime` com evidência exportada.
 ## Passo a passo
 
 ```bash
+# --out-dir fica FORA do projeto analisado (obrigatório aqui — o default
+# .apiforge dentro do root é recusado por AF-CASE-INPUT-OUTPUT-OVERLAP)
 apiforge analyze --contract api/openapi.yaml --project . \
+  --out-dir /caminho/absoluto/fora/do/projeto \
   --fail-on high          # exit 4 se findings >= high
-apiforge next-step        # o que fazer com os findings do case
+apiforge next-step --findings <out-dir>/findings.json --phase verify
 ```
 
 ## Saída esperada / interpretação
 
-Findings com severidade + refs em `.apiforge/case/` (preservados com hashes;
+Findings com severidade + refs no `--out-dir` (preservados com hashes;
 a saída compacta é projeção, nunca fonte). Exit code: 0 ok, 4 gate
 `--fail-on`, envelope `{error, exit_code}` em recusa.
 
 ## Verificação
 
-`apiforge next-step` deve listar os findings persistidos — se o case sumiu,
-o analyze não persistiu (verifique `--out-dir`).
+`apiforge next-step --findings <out-dir>/findings.json --phase verify` deve
+rotear os findings persistidos — se `AF-ROUTING-NO-FINDINGS`, o analyze
+não persistiu (verifique `--out-dir`).
 
 ## Limitações
 

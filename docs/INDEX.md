@@ -128,7 +128,22 @@ _Task-oriented guides and workflows._
 ### learn/
 
 - [API Forge — trilha de aprendizado](learn/README.md)
+- [Receita — ler um contrato AsyncAPI em IR canônico](learn/recipes/asyncapi.md)
+- [Receita — medir antes de alegar economia de tokens](learn/recipes/economia.md)
+- [Receita — evoluir um contrato sem quebrar consumidores](learn/recipes/evolucao-api.md)
+- [Receita — descobrir o que um projeto FastAPI realmente expõe](learn/recipes/fastapi.md)
 - [Receita — trabalho governado com evidência persistida](learn/recipes/governed-case.md)
+- [Receita — consultar o grafo de proveniência do case](learn/recipes/graphfy.md)
+- [Receita — ler um schema GraphQL SDL em IR canônico](learn/recipes/graphql.md)
+- [Receita — revisar e fazer diff de contrato gRPC](learn/recipes/grpc.md)
+- [Receita — medir e abrir a sessão do host de IA](learn/recipes/integrar-host.md)
+- [Receita — inventariar uma API sem contrato OpenAPI mantido](learn/recipes/java-go.md)
+- [Receita — portal web local do API Forge](learn/recipes/portal.md)
+- [Receita — primeira utilização do API Forge](learn/recipes/primeiro-uso.md)
+- [Receita — invocar um coordenador de agente do API Forge](learn/recipes/usar-agents.md)
+- [Receita — usar as 14 skills canônicas do API Forge](learn/recipes/usar-skills.md)
+- [Receita — decidir o que testar antes de declarar pronto](learn/recipes/verificacao.md)
+- [Receita — provar que o MCP server funciona de verdade](learn/recipes/verificar-mcp.md)
 
 ## Reference
 
@@ -622,7 +637,9 @@ _Historical, deprecated, generated and evidence docs (preserved, not entry point
 
 - [Accessibility](experience/accessibility.md) `UNKNOWN`
 - [Automation mode](experience/automation-mode.md) `UNKNOWN`
+- [FASE 2 — API Forge como plataforma agentic de referência](experience/fase2-report.md) `RELEASE_REPORT`
 - [Interactive CLI](experience/interactive-cli.md) `UNKNOWN`
+- [Revisão semântica — API Forge (FASE 2 §12-equivalente)](experience/semantic-review.md) `UNKNOWN`
 - [Themes and visual identity](experience/themes.md) `UNKNOWN`
 
 ### field/
@@ -649,6 +666,10 @@ _Historical, deprecated, generated and evidence docs (preserved, not entry point
 - [Duplicate content report](knowledge-program/duplicate-content-report.md) `UNKNOWN`
 - [Forge Knowledge Program — final report](knowledge-program/final-report.md) `UNKNOWN`
 - [Obsolete document report](knowledge-program/obsolete-document-report.md) `UNKNOWN`
+
+### learn/
+
+- [Receita — conduzir uma mudança pelo SDD do API Forge](learn/recipes/sdd.md) `SDD_ARTIFACT`
 
 ### plans/
 
@@ -1216,6 +1237,16 @@ _Historical, deprecated, generated and evidence docs (preserved, not entry point
 - [secure](sdd/API_FORGE_PERFORMANCE_CONTROL_PLANE_E/secure.md) `SDD_ARTIFACT`
 - [ship](sdd/API_FORGE_PERFORMANCE_CONTROL_PLANE_E/ship.md) `SDD_ARTIFACT`
 - [verify](sdd/API_FORGE_PERFORMANCE_CONTROL_PLANE_E/verify.md) `SDD_ARTIFACT`
+- [architecture](sdd/API_FORGE_PORTAL/architecture.md) `SDD_ARTIFACT`
+- [benchmark](sdd/API_FORGE_PORTAL/benchmark.md) `SDD_ARTIFACT`
+- [build](sdd/API_FORGE_PORTAL/build.md) `SDD_ARTIFACT`
+- [contract](sdd/API_FORGE_PORTAL/contract.md) `SDD_ARTIFACT`
+- [discover](sdd/API_FORGE_PORTAL/discover.md) `SDD_ARTIFACT`
+- [intent](sdd/API_FORGE_PORTAL/intent.md) `SDD_ARTIFACT`
+- [plan](sdd/API_FORGE_PORTAL/plan.md) `SDD_ARTIFACT`
+- [secure](sdd/API_FORGE_PORTAL/secure.md) `SDD_ARTIFACT`
+- [ship](sdd/API_FORGE_PORTAL/ship.md) `SDD_ARTIFACT`
+- [verify](sdd/API_FORGE_PORTAL/verify.md) `SDD_ARTIFACT`
 - [architecture](sdd/API_FORGE_PRODUCT_DOCUMENTATION_RELEASE_H/architecture.md) `SDD_ARTIFACT`
 - [benchmark](sdd/API_FORGE_PRODUCT_DOCUMENTATION_RELEASE_H/benchmark.md) `SDD_ARTIFACT`
 - [build](sdd/API_FORGE_PRODUCT_DOCUMENTATION_RELEASE_H/build.md) `SDD_ARTIFACT`

@@ -144,7 +144,10 @@ Devin-native `.devin/` layer:
   Devin task; `.devin/agents/api-forge-reviewer.md` is a read-only reviewer.
 - `apiforge devin payload` emits a portable prompt for `desktop`, `cli` or
   `cloud`; `apiforge devin probe` only observes a local `devin` executable;
-  `apiforge devin capabilities` reports declared versus observed support.
+  `apiforge devin capabilities` reports declared versus observed support;
+- `apiforge ai` observes each host (binary, version, auth, install
+  integration) and `apiforge ai <host> --launch` opens an interactive
+  session — human boundary, CLI-only, never through MCP.
 
 Use `/plan` or `--permission-mode normal` for discovery and planning. Use
 `accept-edits` only after the plan and writable paths are reviewed. Use

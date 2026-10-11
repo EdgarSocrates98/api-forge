@@ -553,6 +553,10 @@ from apiforge.cli_install import register as _register_install
 
 _register_install(app)
 
+from apiforge.cli_portal import register as _register_portal
+
+_register_portal(app)
+
 
 @app.command("doctor")
 def runtime_doctor(
@@ -605,6 +609,32 @@ def portable_inspect(
     from apiforge.application.portable import inspect
 
     _echo_json(_run(lambda: inspect(root)), detail_level)
+
+
+@app.command("ai")
+def ai_open(
+    host: str = typer.Argument(
+        "all", help="claude, devin, codex, copilot — or `all` to measure the four."
+    ),
+    launch: bool = typer.Option(
+        False, "--launch", help="Open the selected host binary here; needs a TTY."
+    ),
+    root: Path = typer.Option(Path("."), "--root"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Observe an AI host (detect -> version -> auth -> integration) and open it.
+
+    Why: the §1.2 host-open flow — one receipt tells you whether the host
+    CLI exists, is logged in and sees the API Forge install, before you
+    spend a session on it. When to use: after `apiforge install`, or when
+    a host session does not see the MCP server. `--launch` is a human
+    boundary: only one host, only on a TTY, never from MCP.
+    """
+    from apiforge.integrations.hosts import ai_flow
+
+    _echo_json(
+        _run(lambda: ai_flow(host, root=root, launch=launch)), detail_level
+    )
 
 
 @app.command("init")
@@ -3335,13 +3365,22 @@ def graph_export(
 
 @graph_app.command("view")
 def graph_view(
-    graph: Path = typer.Option(..., "--graph", help="Graph directory (nodes.jsonl)."),
+    graph: Path | None = typer.Option(
+        None, "--graph", help="Graph directory (nodes.jsonl)."
+    ),
 ) -> None:
     """Emit the ForgeGraphView/v1 document (Graph Studio contract)."""
 
     def work() -> object:
         from apiforge.graphview import build_view
 
+        if graph is None:
+            # federation (`theforge graph --federated`) calls `graph view`
+            # bare — name the missing input instead of a usage error
+            raise AnalysisError(
+                "AF-GRAPH-NOT-FOUND",
+                "no --graph dir given — run `apiforge graph build --case <case> --out <dir>` first",
+            )
         view = build_view(graph)
         if view is None:
             raise AnalysisError(
@@ -3355,7 +3394,9 @@ def graph_view(
 
 @graph_app.command("ui")
 def graph_ui(
-    graph: Path = typer.Option(..., "--graph", help="Graph directory (nodes.jsonl)."),
+    graph: Path | None = typer.Option(
+        None, "--graph", help="Graph directory (nodes.jsonl)."
+    ),
     no_browser: bool = typer.Option(
         False, "--no-browser", help="Serve without opening a browser (SSH/remote)."
     ),
@@ -3366,6 +3407,11 @@ def graph_ui(
     from apiforge._graphstudio import graph_studio_enabled, open_studio
     from apiforge.graphview import build_view
 
+    if graph is None:
+        raise AnalysisError(
+            "AF-GRAPH-NOT-FOUND",
+            "no --graph dir given — run `apiforge graph build --case <case> --out <dir>` first",
+        )
     if not graph_studio_enabled(
         Path("."), state_rel=".apiforge/install", user_state_rel="~/.apiforge/install"
     ):

@@ -3047,6 +3047,21 @@ def forge_health(root: str = ".", detail_level: str = "normal") -> dict[str, Any
     )
 
 
+def ai_observe(host: str = "all", root: str = ".", detail_level: str = "normal") -> dict[str, Any]:
+    """Observed AI host state (binary, version, auth, integration). Read-only;
+    interactive launch is CLI-only and never reachable through MCP."""
+    from apiforge.integrations.hosts import ai_flow
+
+    return cast(
+        dict[str, Any],
+        _call(
+            "ai_observe",
+            lambda: ai_flow(host, root=Path(root), launch=False),
+            detail_level,
+        ),
+    )
+
+
 def knowledge_drift(
     domain: str,
     now: str,
@@ -3248,6 +3263,7 @@ TOOLS: tuple[Callable[..., Any], ...] = (
     forge_result,
     forge_evidence,
     forge_health,
+    ai_observe,
     knowledge_drift,
     knowledge_impact,
     lab_scenarios,

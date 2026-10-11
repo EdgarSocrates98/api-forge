@@ -13,7 +13,8 @@ ciclo `analyze → next-step → graph → evidence → brief` do AGENTS.md.
 ## Passo a passo
 
 ```bash
-apiforge analyze --contract api/openapi.yaml --project .
+apiforge analyze --contract api/openapi.yaml --project . \
+  --out-dir /caminho/absoluto/fora/do/projeto
 apiforge next-step            # especialista determinístico p/ os findings
 apiforge evidence gate        # antes de qualquer fonte viva
 apiforge brief                # outcome brief com gaps não resolvidos

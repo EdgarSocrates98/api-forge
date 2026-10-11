@@ -322,6 +322,10 @@ tools:
     risk_classes: [read_only]
     reversible: true
     notes: deterministic read/projection; no mutation
+  ai_observe:
+    risk_classes: [read_only]
+    reversible: true
+    notes: observes host binary/version/auth/integration; launch is CLI-only
   forge_inspect:
     risk_classes: [read_only]
     reversible: true

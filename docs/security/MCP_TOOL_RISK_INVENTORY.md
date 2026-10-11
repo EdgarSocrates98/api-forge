@@ -41,6 +41,7 @@ tool | risk classes | reversible | domain gate | MCP exposed
 | agentops_timeline | read_only | yes | core | yes |
 | agentops_waste | read_only | yes | core | yes |
 | agents_audit | read_only | yes | core | yes |
+| ai_observe | read_only | yes | core | yes |
 | analyze | write | yes | core | yes |
 | autonomy_status | read_only | yes | core | yes |
 | blackboard_append | write | yes | core | yes |

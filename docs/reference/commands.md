@@ -2,12 +2,13 @@
 
 Generated from the real CLI parser by `doc_inventory.py` + `doc_reference.py`. Do not hand-edit generated sections — write between `keep:start`/`keep:end` markers. `por que`/`quando` lines come from the curated `command-rationale.json` — edit rationale there, never here. Status vocabulary: `available` unless marked otherwise.
 
-Rationale coverage: **67/67** first-level groups curated in `command-rationale.json`.
+Rationale coverage: **69/69** first-level groups curated in `command-rationale.json`.
 
 ## Groups
 
 - [`agentops`](#agentops) — 17 command(s)
 - [`agents`](#agents) — 6 command(s)
+- [`ai`](#ai) — 1 command(s)
 - [`analyze`](#analyze) — 1 command(s)
 - [`autonomy`](#autonomy) — 7 command(s)
 - [`blackboard`](#blackboard) — 3 command(s)
@@ -58,6 +59,7 @@ Rationale coverage: **67/67** first-level groups curated in `command-rationale.j
 - [`platform`](#platform) — 2 command(s)
 - [`playbook`](#playbook) — 1 command(s)
 - [`policy`](#policy) — 2 command(s)
+- [`portal`](#portal) — 1 command(s)
 - [`report`](#report) — 5 command(s)
 - [`resume`](#resume) — 1 command(s)
 - [`review`](#review) — 1 command(s)
@@ -575,6 +577,38 @@ apiforge agents sync [root] [detail_level]
 | argument/flag | required | default | description |
 |---|---|---|---|
 | `root` | no | — | Repository root. |
+| `detail_level` | no | — | Payload level: summary|normal|full. |
+
+<!-- keep:start -->
+_free notes — errors, examples, next steps (hand-written, preserved)_
+<!-- keep:end -->
+
+## ai
+
+### `ai`
+
+**para que:** Observe an AI host (detect -> version -> auth -> integration) and open it.
+
+Why: the §1.2 host-open flow — one receipt tells you whether the host
+CLI exists, is logged in and sees the API Forge install, before you
+spend a session on it. When to use: after `apiforge install`, or when
+a host session does not see the MCP server. `--launch` is a human
+boundary: only one host, only on a TTY, never from MCP.
+
+- **por que:** observar um host de IA (detect→versao→auth→integracao) e abri-lo quando suportado
+- **quando usar:** depois de apiforge install, ou quando a sessao do host nao ve o MCP server; --launch e fronteira humana (TTY, um host)
+
+**Syntax**
+
+```text
+apiforge ai [host] [launch] [root] [detail_level]
+```
+
+| argument/flag | required | default | description |
+|---|---|---|---|
+| `host` | no | — | claude, devin, codex, copilot — or `all` to measure the four. |
+| `launch` | no | — | Open the selected host binary here; needs a TTY. |
+| `root` | no | — | — |
 | `detail_level` | no | — | Payload level: summary|normal|full. |
 
 <!-- keep:start -->
@@ -4983,12 +5017,12 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 **Syntax**
 
 ```text
-apiforge graph ui <graph> [no_browser] [port]
+apiforge graph ui [graph] [no_browser] [port]
 ```
 
 | argument/flag | required | default | description |
 |---|---|---|---|
-| `graph` | yes | — | Graph directory (nodes.jsonl). |
+| `graph` | no | — | Graph directory (nodes.jsonl). |
 | `no_browser` | no | — | Serve without opening a browser (SSH/remote). |
 | `port` | no | — | Port to bind (default ephemeral). |
 
@@ -5006,12 +5040,12 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 **Syntax**
 
 ```text
-apiforge graph view <graph>
+apiforge graph view [graph]
 ```
 
 | argument/flag | required | default | description |
 |---|---|---|---|
-| `graph` | yes | — | Graph directory (nodes.jsonl). |
+| `graph` | no | — | Graph directory (nodes.jsonl). |
 
 <!-- keep:start -->
 _free notes — errors, examples, next steps (hand-written, preserved)_
@@ -8518,6 +8552,39 @@ apiforge policy check <verb> [action_class] [args] [target] [policy] [detail_lev
 | `target` | no | — | Action target. |
 | `policy` | no | — | Policy YAML; defaults to the packaged catalog. |
 | `detail_level` | no | — | Payload level. |
+
+<!-- keep:start -->
+_free notes — errors, examples, next steps (hand-written, preserved)_
+<!-- keep:end -->
+
+## portal
+
+### `portal`
+
+**para que:** Open the API Forge local web portal (127.0.0.1, session token).
+
+Why: the §portal surface — one local UI with the installation
+dashboard, AI hosts, MCP handshake, skills/agents catalogs, tasks
+(incl. real API analysis), graph and docs, reusing the same engine
+and receipts as the CLI. When to use: to install and verify the
+forge, configure Claude/Devin/Codex, run the first analysis — or to
+audit state without learning verb flags. Optional: CLI, TUI and MCP
+keep working without it, and it never runs during MCP use.
+
+- **por que:** UI web local opcional (127.0.0.1 + token de sessão) sobre os mesmos serviços e recibos do CLI; CLI/TUI/MCP continuam funcionando sem ela
+- **quando usar:** instalar/verificar a forja, configurar Claude/Devin/Codex e rodar a primeira análise numa UI local — nunca dentro do fluxo MCP
+
+**Syntax**
+
+```text
+apiforge portal [no_browser] [port] [root]
+```
+
+| argument/flag | required | default | description |
+|---|---|---|---|
+| `no_browser` | no | — | Only print the session URL — SSH/headless or manual open. |
+| `port` | no | — | Fixed port (default: a free port of the system). |
+| `root` | no | — | Workspace to inspect (default: cwd). |
 
 <!-- keep:start -->
 _free notes — errors, examples, next steps (hand-written, preserved)_

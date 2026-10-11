@@ -89,7 +89,12 @@ def test_fallback_executes_declared_candidate(tmp_path: Path) -> None:
 def test_escalate_raises_human_gate_without_extra_calls(tmp_path: Path) -> None:
     make_task(tmp_path)
     adapter = _FailAllAdapter("security violation forbidden")
-    result = run_runtime(tmp_path, "evolve-orders-api", adapter=adapter)
+    # economy_enabled=False keeps the sampled shadow challenger out — it makes
+    # real adapter calls, which would break the per-capability uniqueness
+    # asserted here at a ~shadow_share rate.
+    result = run_runtime(
+        tmp_path, "evolve-orders-api", adapter=adapter, economy_enabled=False
+    )
 
     receipts = _receipts(result)
     escalations = [r for r in receipts if r["decision"] == "escalate"]
@@ -106,7 +111,9 @@ def test_escalate_raises_human_gate_without_extra_calls(tmp_path: Path) -> None:
 def test_stop_is_terminal_and_makes_no_extra_calls(tmp_path: Path) -> None:
     make_task(tmp_path)
     adapter = _FailAllAdapter("budget exhausted: AF-CONTROL-BUDGET")
-    result = run_runtime(tmp_path, "evolve-orders-api", adapter=adapter)
+    result = run_runtime(
+        tmp_path, "evolve-orders-api", adapter=adapter, economy_enabled=False
+    )
 
     receipts = _receipts(result)
     stops = [r for r in receipts if r["decision"] == "stop"]

@@ -49,9 +49,7 @@ def test_github_host_retries_transient_gateway(monkeypatch) -> None:
     def fake_run(command, **kwargs):
         calls.append(command)
         if len(calls) < 3:
-            raise subprocess.CalledProcessError(
-                1, command, stderr="HTTP 504: 504 Gateway Timeout"
-            )
+            raise subprocess.CalledProcessError(1, command, stderr="HTTP 504: 504 Gateway Timeout")
         return subprocess.CompletedProcess(command, 0, stdout="ok\n", stderr="")
 
     monkeypatch.setattr(module.subprocess, "run", fake_run)

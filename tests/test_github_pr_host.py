@@ -42,6 +42,42 @@ def test_github_pr_host_dry_run_is_non_mutating(tmp_path: Path) -> None:
     assert json.loads(receipt.read_text(encoding="utf-8"))["operation"] == "create_or_reuse"
 
 
+def test_github_host_retries_transient_gateway(monkeypatch) -> None:
+    module = _host_module()
+    calls: list[list[str]] = []
+
+    def fake_run(command, **kwargs):
+        calls.append(command)
+        if len(calls) < 3:
+            raise subprocess.CalledProcessError(1, command, stderr="HTTP 504: 504 Gateway Timeout")
+        return subprocess.CompletedProcess(command, 0, stdout="ok\n", stderr="")
+
+    monkeypatch.setattr(module.subprocess, "run", fake_run)
+    monkeypatch.setattr(module.time, "sleep", lambda _seconds: None)
+
+    assert module._run_gh(["pr", "list"]) == "ok"
+    assert len(calls) == 3
+
+
+def test_find_pr_falls_back_to_rest_on_graphql_gateway(monkeypatch) -> None:
+    module = _host_module()
+    calls: list[list[str]] = []
+
+    def fake_run(args: list[str]) -> str:
+        calls.append(args)
+        if args[:2] == ["pr", "list"]:
+            raise subprocess.CalledProcessError(1, args, stderr="HTTP 502: 502 Bad Gateway")
+        assert args[0] == "api"
+        return json.dumps([{"number": 7, "url": "https://github.com/example/repo/pull/7"}])
+
+    monkeypatch.setattr(module, "_run_gh", fake_run)
+
+    result = module._find_pr("example/repo", "feature", "main")
+
+    assert result and result["number"] == 7
+    assert calls[1][0] == "api"
+
+
 def test_auto_merge_receipt_contains_post_mutation_readback(monkeypatch) -> None:
     module = _host_module()
     monkeypatch.setenv("APIFORGE_HOST_APPROVED", "true")

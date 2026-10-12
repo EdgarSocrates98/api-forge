@@ -13,20 +13,40 @@ import json
 import os
 import subprocess
 import sys
+import time
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+_TRANSIENT_GITHUB_ERRORS = (
+    "HTTP 502",
+    "HTTP 503",
+    "HTTP 504",
+    "502 Bad Gateway",
+    "503 Service Unavailable",
+    "504 Gateway Timeout",
+)
+
 
 def _run_gh(args: list[str]) -> str:
-    completed = subprocess.run(
-        ["gh", *args],
-        check=True,
-        capture_output=True,
-        text=True,
-        env=os.environ.copy(),
-    )
-    return completed.stdout.strip()
+    """Run one host mutation/read with bounded retry for transient GitHub errors."""
+    for attempt in range(3):
+        try:
+            completed = subprocess.run(
+                ["gh", *args],
+                check=True,
+                capture_output=True,
+                text=True,
+                env=os.environ.copy(),
+            )
+            return completed.stdout.strip()
+        except subprocess.CalledProcessError as exc:
+            detail = exc.stderr or str(exc)
+            transient = any(marker in detail for marker in _TRANSIENT_GITHUB_ERRORS)
+            if not transient or attempt == 2:
+                raise
+            time.sleep(2**attempt)
+    raise AssertionError("unreachable")
 
 
 def _write_receipt(path: Path, payload: dict[str, Any]) -> None:
@@ -42,22 +62,34 @@ def _require_approval(operation: str) -> None:
 
 
 def _find_pr(repository: str, head: str, base: str) -> dict[str, Any] | None:
-    raw = _run_gh(
-        [
-            "pr",
-            "list",
-            "--repo",
-            repository,
-            "--state",
-            "open",
-            "--head",
-            head,
-            "--base",
-            base,
-            "--json",
-            "number,url,headRefName,baseRefName,state",
-        ]
-    )
+    try:
+        raw = _run_gh(
+            [
+                "pr",
+                "list",
+                "--repo",
+                repository,
+                "--state",
+                "open",
+                "--head",
+                head,
+                "--base",
+                base,
+                "--json",
+                "number,url,headRefName,baseRefName,state",
+            ]
+        )
+    except subprocess.CalledProcessError as exc:
+        detail = exc.stderr or str(exc)
+        if not any(marker in detail for marker in _TRANSIENT_GITHUB_ERRORS):
+            raise
+        owner, _repo = repository.split("/", 1)
+        raw = _run_gh(
+            [
+                "api",
+                f"repos/{repository}/pulls?state=open&head={owner}:{head}&base={base}",
+            ]
+        )
     rows = json.loads(raw or "[]")
     return rows[0] if isinstance(rows, list) and rows else None
 

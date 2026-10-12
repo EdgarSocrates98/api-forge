@@ -59,6 +59,25 @@ def test_github_host_retries_transient_gateway(monkeypatch) -> None:
     assert len(calls) == 3
 
 
+def test_find_pr_falls_back_to_rest_on_graphql_gateway(monkeypatch) -> None:
+    module = _host_module()
+    calls: list[list[str]] = []
+
+    def fake_run(args: list[str]) -> str:
+        calls.append(args)
+        if args[:2] == ["pr", "list"]:
+            raise subprocess.CalledProcessError(1, args, stderr="HTTP 502: 502 Bad Gateway")
+        assert args[0] == "api"
+        return json.dumps([{"number": 7, "url": "https://github.com/example/repo/pull/7"}])
+
+    monkeypatch.setattr(module, "_run_gh", fake_run)
+
+    result = module._find_pr("example/repo", "feature", "main")
+
+    assert result and result["number"] == 7
+    assert calls[1][0] == "api"
+
+
 def test_auto_merge_receipt_contains_post_mutation_readback(monkeypatch) -> None:
     module = _host_module()
     monkeypatch.setenv("APIFORGE_HOST_APPROVED", "true")

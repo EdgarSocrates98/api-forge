@@ -62,22 +62,34 @@ def _require_approval(operation: str) -> None:
 
 
 def _find_pr(repository: str, head: str, base: str) -> dict[str, Any] | None:
-    raw = _run_gh(
-        [
-            "pr",
-            "list",
-            "--repo",
-            repository,
-            "--state",
-            "open",
-            "--head",
-            head,
-            "--base",
-            base,
-            "--json",
-            "number,url,headRefName,baseRefName,state",
-        ]
-    )
+    try:
+        raw = _run_gh(
+            [
+                "pr",
+                "list",
+                "--repo",
+                repository,
+                "--state",
+                "open",
+                "--head",
+                head,
+                "--base",
+                base,
+                "--json",
+                "number,url,headRefName,baseRefName,state",
+            ]
+        )
+    except subprocess.CalledProcessError as exc:
+        detail = exc.stderr or str(exc)
+        if not any(marker in detail for marker in _TRANSIENT_GITHUB_ERRORS):
+            raise
+        owner, _repo = repository.split("/", 1)
+        raw = _run_gh(
+            [
+                "api",
+                f"repos/{repository}/pulls?state=open&head={owner}:{head}&base={base}",
+            ]
+        )
     rows = json.loads(raw or "[]")
     return rows[0] if isinstance(rows, list) and rows else None
 

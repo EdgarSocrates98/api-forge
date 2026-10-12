@@ -87,6 +87,7 @@ def _bare_install_requested(
     yes: bool,
     dry_run: bool,
     components: str | None,
+    gateway_profile: str,
 ) -> bool:
     """Detect exact default invocation without guessing explicit flags."""
     if (scope, host, profile, root, yes, dry_run, components) != (
@@ -104,7 +105,16 @@ def _bare_install_requested(
         return True
     return all(
         getattr(source(name), "name", "") == "DEFAULT"
-        for name in ("scope", "host", "profile", "root", "yes", "dry_run", "components")
+        for name in (
+            "scope",
+            "host",
+            "profile",
+            "root",
+            "yes",
+            "dry_run",
+            "components",
+            "gateway_profile",
+        )
     )
 
 
@@ -121,6 +131,9 @@ def install_apply(
     dry_run: bool = typer.Option(False, "--dry-run", help="Plan only — writes nothing."),
     components: str | None = typer.Option(
         None, "--components", help="Optional components csv: skills,agents,mcp,tui,graph-studio."
+    ),
+    gateway_profile: str = typer.Option(
+        "balanced", "--gateway-profile", help="Execution profile: economy|balanced|deep."
     ),
     detail_level: str = typer.Option("normal", "--detail-level"),
 ) -> None:
@@ -140,6 +153,7 @@ def install_apply(
             yes=yes,
             dry_run=dry_run,
             components=components,
+            gateway_profile=gateway_profile,
         )
         and sys.stdin.isatty()
         and sys.stdout.isatty()
@@ -167,6 +181,7 @@ def install_apply(
             scope=scope,
             root=root,
             profile=profile,
+            gateway_profile=gateway_profile,
             yes=False,
             dry_run=True,
             components=comps,
@@ -182,6 +197,7 @@ def install_apply(
         scope=scope,
         root=root,
         profile=profile,
+        gateway_profile=gateway_profile,
         yes=approved,
         dry_run=dry_run,
         components=comps,

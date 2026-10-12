@@ -19,6 +19,7 @@ from apiforge.install import render
 FORGE_ID = "api-forge"
 STATE_DIR = ".apiforge/install"
 PROFILES: tuple[str, ...] = ("minimal", "recommended", "full")
+GATEWAY_PROFILES: tuple[str, ...] = ("economy", "balanced", "deep")
 SCOPES: tuple[str, ...] = ("project", "workspace", "user")
 
 
@@ -61,10 +62,13 @@ def _ctx(
     dry_run: bool,
     cwd: Path | None = None,
     components: tuple[str, ...] | None = None,
+    gateway_profile: str = "balanced",
 ) -> kit.InstallContext:
     spec = _spec()
     base = Path(cwd or Path.cwd())
     target = kit.resolve_scope(spec, scope, base, root)
+    options = kit.component_options(profile, components)
+    options["execution_profile"] = gateway_profile
     return kit.InstallContext(
         spec=spec,
         scope=scope,
@@ -73,7 +77,7 @@ def _ctx(
         profile=profile,
         hosts=hosts,
         dry_run=dry_run,
-        options=kit.component_options(profile, components),
+        options=options,
     )
 
 
@@ -102,12 +106,26 @@ def install(
     yes: bool = False,
     dry_run: bool = False,
     components: tuple[str, ...] | None = None,
+    gateway_profile: str = "balanced",
 ) -> dict[str, Any]:
     """Aplica a instalacao no alvo resolvido. Sem ``yes`` nem ``dry_run``
     a escrita e recusada — o plano e o contrato."""
     if profile not in PROFILES:
         raise kit.InstallError(kit.E_PROFILE, f"profile {profile!r}; {PROFILES}")
-    ctx = _ctx(scope, root, _hosts(host), profile, dry_run, components=components)
+    if gateway_profile not in GATEWAY_PROFILES:
+        raise kit.InstallError(
+            kit.E_PROFILE,
+            f"gateway_profile {gateway_profile!r}; {GATEWAY_PROFILES}",
+        )
+    ctx = _ctx(
+        scope,
+        root,
+        _hosts(host),
+        profile,
+        dry_run,
+        components=components,
+        gateway_profile=gateway_profile,
+    )
     state = ctx.state_dir
     with kit.acquire_lock(state):
         receipt = kit.apply_install(ctx, approved=yes)

@@ -1,5 +1,5 @@
 from apiforge.ui import screen
-from apiforge.ui.app import ActionData, Entry, ForgeApp, TableData, TextData
+from apiforge.ui.app import ActionData, Entry, ForgeApp, TextData
 from apiforge.ui.kit import UIContext
 from apiforge.ui.screen import Buffer, Column, Theme, table
 

@@ -910,7 +910,7 @@ def apply_install(ctx: InstallContext, *, approved: bool = False) -> dict[str, A
                 "id": "mcp-scope:codex",
                 "status": "NOT_APPLICABLE",
                 "detail": "codex does not read project .mcp.json; MCP needs "
-                          "--scope user or `codex mcp add`",
+                "--scope user or `codex mcp add`",
             }
         )
     receipt = {
@@ -1054,9 +1054,11 @@ def doctor(ctx: InstallContext) -> dict[str, Any]:
             "id": "forge-portal",
             "status": "PASS" if found else "NOT_APPLICABLE",
             "detail": presence["install_root"]
-            or ("vendored assets only — no local forge-portal install found"
+            or (
+                "vendored assets only — no local forge-portal install found"
                 if not found
-                else presence["manifest"]),
+                else presence["manifest"]
+            ),
             "repairable": False,
         }
     )

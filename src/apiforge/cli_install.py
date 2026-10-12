@@ -106,8 +106,14 @@ def _bare_install_requested(
     return all(
         getattr(source(name), "name", "") == "DEFAULT"
         for name in (
-            "scope", "host", "profile", "root", "yes", "dry_run",
-            "components", "gateway_profile",
+            "scope",
+            "host",
+            "profile",
+            "root",
+            "yes",
+            "dry_run",
+            "components",
+            "gateway_profile",
         )
     )
 

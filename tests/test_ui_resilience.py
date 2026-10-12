@@ -1,7 +1,15 @@
-from apiforge.ui import screen, tui
+import sys
+
+from apiforge.ui import screen, tui, wizard
 from apiforge.ui.app import ActionData, Entry, ForgeApp, TextData
 from apiforge.ui.kit import UIContext
 from apiforge.ui.screen import Buffer, Column, Theme, key_bar, table
+
+
+def test_family_wizard_is_explicitly_optional(monkeypatch, capsys):
+    monkeypatch.setitem(sys.modules, "theforge", None)
+    assert wizard.run_setup_wizard() == 2
+    assert "native API Forge commands remain available" in capsys.readouterr().out
 
 
 def _ctx(width=60, height=16):

@@ -1,0 +1,9 @@
+sources:
+  - name: "cursor.limit"
+    url: https://www.mongodb.com/docs/manual/reference/method/cursor.limit/
+    authority: vendor-docs
+    verified: "2026-09-21"
+  - name: "deleteMany"
+    url: https://www.mongodb.com/docs/manual/reference/method/db.collection.deleteMany/
+    authority: vendor-docs
+    verified: "2026-09-21"

@@ -1,0 +1,4 @@
+id: discover-expertise
+kind: discover
+query: select expertise knowledge packs
+expect_tool: knowledge_select

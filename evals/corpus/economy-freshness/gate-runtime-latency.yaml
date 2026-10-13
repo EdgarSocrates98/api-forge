@@ -1,0 +1,5 @@
+id: gate-runtime-latency
+kind: gate
+question: "did the p99 latency of POST /payments grow after the deploy?"
+expect_mode: live_read_only
+expect_live: true

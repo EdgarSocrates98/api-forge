@@ -1,0 +1,131 @@
+{
+  "cases": 18,
+  "gates": {
+    "budget": true,
+    "budget_invariant": true,
+    "delta": true,
+    "path": true,
+    "phase": true,
+    "tokens": true
+  },
+  "passed": true,
+  "rows": [
+    {
+      "capsule": true,
+      "case_id": "budget-five-specialists",
+      "context_bytes": 16000,
+      "kind": "budget",
+      "passed": true,
+      "total_bytes": 10045
+    },
+    {
+      "case_id": "budget-invariant",
+      "kind": "budget_invariant",
+      "passed": true,
+      "refused": true
+    },
+    {
+      "capsule": true,
+      "case_id": "budget-two-specialists",
+      "context_bytes": 32000,
+      "kind": "budget",
+      "passed": true,
+      "total_bytes": 8899
+    },
+    {
+      "case_id": "delta-docs",
+      "kind": "delta",
+      "passed": true,
+      "status": "ready",
+      "unmapped_source": false
+    },
+    {
+      "case_id": "delta-mapped-handler",
+      "kind": "delta",
+      "passed": true,
+      "status": "ready",
+      "unmapped_source": false
+    },
+    {
+      "case_id": "delta-traversal",
+      "kind": "delta",
+      "passed": true,
+      "status": "unresolved",
+      "unmapped_source": false
+    },
+    {
+      "case_id": "delta-unmapped-source",
+      "kind": "delta",
+      "passed": true,
+      "status": "degraded",
+      "unmapped_source": true
+    },
+    {
+      "case_id": "path-absolute",
+      "kind": "path",
+      "outcome": "refuse",
+      "passed": true
+    },
+    {
+      "case_id": "path-declared-repo",
+      "kind": "path",
+      "outcome": "allow",
+      "passed": true
+    },
+    {
+      "case_id": "path-nested",
+      "kind": "path",
+      "outcome": "allow",
+      "passed": true
+    },
+    {
+      "case_id": "path-parent",
+      "kind": "path",
+      "outcome": "refuse",
+      "passed": true
+    },
+    {
+      "case_id": "path-unc",
+      "kind": "path",
+      "outcome": "refuse",
+      "passed": true
+    },
+    {
+      "case_id": "path-undeclared-repo",
+      "kind": "path",
+      "outcome": "refuse",
+      "passed": true
+    },
+    {
+      "budget_status": "exceeded",
+      "case_id": "phase-exceeded",
+      "kind": "phase",
+      "passed": true
+    },
+    {
+      "budget_status": "protected_overrun",
+      "case_id": "phase-protected",
+      "kind": "phase",
+      "passed": true
+    },
+    {
+      "case_id": "tokens-complete",
+      "coverage": "complete",
+      "kind": "tokens",
+      "passed": true
+    },
+    {
+      "case_id": "tokens-partial",
+      "coverage": "partial",
+      "kind": "tokens",
+      "passed": true
+    },
+    {
+      "case_id": "tokens-unresolved",
+      "coverage": "unresolved",
+      "kind": "tokens",
+      "passed": true
+    }
+  ],
+  "schema": "apiforge/economy-hardening-eval/v1"
+}

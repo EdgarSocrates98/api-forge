@@ -1,0 +1,9 @@
+# §38 gold case: query "oauth" should surface the oauth-oidc pack; all four
+# strategies are compared on recall/precision/latency/tokens/cost.
+id: oauth-gold
+query: oauth
+gold: [oauth-oidc]
+strategies: [lexical, graph, semantic, hybrid]
+expect:
+  lexical: {recall: 0.9}
+  graph: {recall: 0.9}

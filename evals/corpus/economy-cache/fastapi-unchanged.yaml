@@ -1,0 +1,5 @@
+id: fastapi-unchanged
+fixture: tests/fixtures/economy_payments/fastapi
+contract: tests/fixtures/economy_payments/openapi.yaml
+reanalyze: true
+expect_invalidated: []

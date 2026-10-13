@@ -1,0 +1,20 @@
+..........................s                                              [100%]
+============================== warnings summary ===============================
+tests/mcp/test_tools.py::test_new_read_tools_mirror_cli
+  E:\projetos\api-forge\src\apiforge\contracts\tool_host.py:29: UserWarning: Field name "schema" in "TestSlice" shadows an attribute in parent "VersionedContract"
+    class TestSlice(VersionedContract):
+
+tests/mcp/test_tools.py::test_new_read_tools_mirror_cli
+  E:\projetos\api-forge\src\apiforge\contracts\tool_host.py:58: UserWarning: Field name "schema" in "ErrorSlice" shadows an attribute in parent "VersionedContract"
+    class ErrorSlice(VersionedContract):
+
+tests/mcp/test_tools.py::test_new_read_tools_mirror_cli
+  E:\projetos\api-forge\src\apiforge\contracts\tool_host.py:75: UserWarning: Field name "schema" in "ToolSurface" shadows an attribute in parent "VersionedContract"
+    class ToolSurface(VersionedContract):
+
+tests/mcp/test_tools.py::test_new_read_tools_mirror_cli
+  E:\projetos\api-forge\src\apiforge\contracts\tool_host.py:87: UserWarning: Field name "schema" in "HostProjection" shadows an attribute in parent "VersionedContract"
+    class HostProjection(VersionedContract):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+26 passed, 1 skipped, 4 warnings in 6.68s

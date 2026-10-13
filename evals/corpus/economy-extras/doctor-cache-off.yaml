@@ -1,0 +1,3 @@
+id: doctor-cache-off
+kind: doctor
+expect_code: AF-ECONOMY-DOCTOR-CACHE-OFF

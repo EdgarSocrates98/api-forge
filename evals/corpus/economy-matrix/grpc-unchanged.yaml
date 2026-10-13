@@ -1,0 +1,8 @@
+id: grpc-unchanged
+protocol: grpc
+expected: compatible
+holdout: false
+outcome: evaluate grpc unchanged
+mutants: []
+baseline: tests/fixtures/grpc/orders.proto
+candidate: tests/fixtures/grpc/orders.proto

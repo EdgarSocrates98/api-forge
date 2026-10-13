@@ -1,0 +1,5 @@
+runtime: graph
+constraints:
+  - component: language
+    set: ["gremlin", "opencypher", "sparql"]
+    note: SPARQL extraction is Python-only; Java/Go/TypeScript are pattern heuristics

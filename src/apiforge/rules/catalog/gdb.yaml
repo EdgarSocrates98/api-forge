@@ -1,0 +1,233 @@
+catalog_version: 1
+schema_version: 1
+area: GDB
+retrieved: "2026-10-01"
+rules:
+  - id: AF-GDB-001
+    title: "Gremlin repeat() without times() or until()"
+    severity: high
+    rationale: >
+      A repeat() step with no declared stop expands until the frontier is
+      exhausted; on a connected graph the number of paths grows
+      combinatorially with depth.
+    remediation: "Bound the loop with .times(n) or .until(<predicate>) and keep a .limit() on the result."
+    reference: "https://tinkerpop.apache.org/docs/current/reference/#repeat-step"
+    runtime_scope: "neptune"
+    check:
+      kind: data.graph.query
+      path: measures.repeat_without_stop
+      op: eq
+      value: true
+  - id: AF-GDB-002
+    title: "Fan-out step without an edge label"
+    severity: medium
+    rationale: >
+      out()/in()/both()/outE()/inE()/bothE() with no edge label touches every
+      edge of the vertex; Neptune warns that unlabeled reverse traversals get
+      slower as the number of predicates grows.
+    remediation: "Name the edge label in the step (out('follows')) so only the needed edges are read."
+    reference: "https://docs.aws.amazon.com/neptune/latest/userguide/gremlin-explain-api.html"
+    runtime_scope: "neptune"
+    check:
+      kind: data.graph.query
+      path: measures.fanout_without_edge_label
+      op: eq
+      value: true
+  - id: AF-GDB-003
+    title: "Traversal starts from every vertex or edge"
+    severity: high
+    rationale: >
+      g.V()/g.E() with no id and no hasLabel/has filter as the next step starts
+      from the whole graph; cost scales with graph size, not with the request.
+    remediation: "Start from ids or filter immediately with hasLabel/has on an indexed property."
+    reference: "https://tinkerpop.apache.org/docs/current/reference/#graph-step"
+    runtime_scope: "neptune"
+    check:
+      kind: data.graph.query
+      path: measures.unfiltered_start
+      op: eq
+      value: true
+  - id: AF-GDB-004
+    title: "openCypher variable-length path without an upper bound"
+    severity: high
+    rationale: >
+      A relationship pattern such as [*] or [*2..] has no maximum hop count;
+      path enumeration explodes on dense neighborhoods.
+    remediation: "Declare an upper bound ([*1..3]) sized to the access pattern and keep a LIMIT."
+    reference: "https://neo4j.com/docs/cypher-manual/current/patterns/variable-length-patterns/"
+    runtime_scope: "neptune|neo4j"
+    check:
+      kind: data.graph.query
+      path: measures.open_variable_length_path
+      op: eq
+      value: true
+  - id: AF-GDB-005
+    title: "openCypher MATCH with no label or property anchor"
+    severity: medium
+    rationale: >
+      A MATCH whose node patterns carry no label, no inline properties and no
+      previously bound variable scans every node (Neptune explain shows label
+      'ALL').
+    remediation: "Anchor the pattern with a label and an indexed property, or reuse a bound variable."
+    reference: "https://docs.aws.amazon.com/neptune/latest/userguide/access-graph-opencypher-explain.html"
+    runtime_scope: "neptune|neo4j"
+    check:
+      kind: data.graph.query
+      path: measures.unlabeled_node_pattern
+      op: eq
+      value: true
+  - id: AF-GDB-006
+    title: "openCypher disconnected patterns form a cartesian product"
+    severity: medium
+    rationale: >
+      Comma-separated MATCH patterns that share no variable multiply their
+      result sets; rows grow as the product of both sides.
+    remediation: "Connect the patterns through a shared variable or split them into separate queries."
+    reference: "https://neo4j.com/docs/cypher-manual/current/planning-and-tuning/operators/operators-detail/#query-plan-cartesian-product"
+    runtime_scope: "neptune|neo4j"
+    check:
+      kind: data.graph.query
+      path: measures.cartesian_pattern
+      op: eq
+      value: true
+  - id: AF-GDB-007
+    title: "SPARQL property path with + or * and no bound"
+    severity: medium
+    rationale: >
+      A property path such as :knows+ or <p>* follows the predicate to any
+      depth; on RDF graphs with cycles or hubs the closure is large.
+    remediation: "Replace with fixed-length paths or bounded unions, and add LIMIT."
+    reference: "https://www.w3.org/TR/sparql11-query/#propertypaths"
+    runtime_scope: "neptune"
+    check:
+      kind: data.graph.query
+      path: measures.unbounded_property_path
+      op: eq
+      value: true
+  - id: AF-GDB-008
+    title: "Graph query text built by concatenation or interpolation"
+    severity: medium
+    rationale: >
+      Query strings assembled with f-strings, format(), + or template literals
+      open Gremlin/Cypher/SPARQL injection and defeat query-plan caching.
+    remediation: "Pass values as bindings or parameters ($param, Bindings) and keep the query text constant."
+    reference: "https://docs.aws.amazon.com/neptune/latest/userguide/opencypher-parameterized-queries.html"
+    runtime_scope: "neptune|neo4j"
+    check:
+      kind: data.graph.query
+      path: measures.dynamic_query_text
+      op: eq
+      value: true
+  - id: AF-GDB-009
+    title: "Neptune Analytics algorithm with no scoping MATCH"
+    severity: medium
+    rationale: >
+      CALL neptune.algo.* with no preceding MATCH runs the algorithm over the
+      whole graph; memory and latency follow graph size.
+    remediation: "Bind source nodes with MATCH (and a label/property filter) before CALL, or run it as a scheduled job."
+    reference: "https://docs.aws.amazon.com/neptune-analytics/latest/userguide/algorithms.html"
+    runtime_scope: "neptune"
+    check:
+      kind: data.graph.query
+      path: measures.analytics_unscoped_algorithm
+      op: eq
+      value: true
+  - id: AF-GDB-010
+    title: "Neptune Analytics vector search without topK"
+    severity: medium
+    rationale: >
+      A neptune.algo.vectors.* call with no topK parameter leaves the result
+      size to the default instead of the request's need.
+    remediation: "Declare topK sized to the response page."
+    reference: "https://docs.aws.amazon.com/neptune-analytics/latest/userguide/vector-similarity.html"
+    runtime_scope: "neptune"
+    check:
+      kind: data.graph.query
+      path: measures.vector_search_without_topk
+      op: eq
+      value: true
+  - id: AF-GDB-020
+    title: "Plan falls back to non-native TinkerPop steps"
+    severity: medium
+    rationale: >
+      Neptune explain reports steps 'not converted into Neptune steps'; from
+      that point the whole traversal runs in the slower TinkerPop engine.
+    remediation: "Rewrite the unsupported step (fold/unfold, lambdas, some predicates) with native equivalents."
+    reference: "https://docs.aws.amazon.com/neptune/latest/userguide/gremlin-explain-api.html"
+    runtime_scope: "neptune"
+    check:
+      kind: data.graph.plan
+      path: measures.non_native_steps
+      op: eq
+      value: true
+  - id: AF-GDB-021
+    title: "Plan carries an unbounded cardinality estimate"
+    severity: medium
+    rationale: >
+      estimatedCardinality=INFINITY or a maximal rangeCountEstimate means the
+      optimizer had no bound for a pattern; it will scan.
+    remediation: "Add a label/id anchor or a selective property filter before the pattern."
+    reference: "https://docs.aws.amazon.com/neptune/latest/userguide/gremlin-explain-api.html"
+    runtime_scope: "neptune"
+    check:
+      kind: data.graph.plan
+      path: measures.unbounded_estimate
+      op: eq
+      value: true
+  - id: AF-GDB-022
+    title: "Plan warns about the number of predicates"
+    severity: low
+    rationale: >
+      Neptune flags queries whose cost depends on the number of distinct
+      predicates (edge labels/properties), typical of unlabeled reverse steps.
+    remediation: "Name edge labels in in()/both() steps."
+    reference: "https://docs.aws.amazon.com/neptune/latest/userguide/gremlin-explain-api.html"
+    runtime_scope: "neptune"
+    check:
+      kind: data.graph.plan
+      path: measures.predicate_warning
+      op: eq
+      value: true
+  - id: AF-GDB-023
+    title: "Plan scans all labels"
+    severity: medium
+    rationale: >
+      A DFEPipelineScan/PipelineJoin over label 'ALL' reads every node or
+      edge before filtering.
+    remediation: "Add the node label to the pattern (n:Label) so the scan uses the label index."
+    reference: "https://docs.aws.amazon.com/neptune/latest/userguide/access-graph-opencypher-explain.html"
+    runtime_scope: "neptune"
+    check:
+      kind: data.graph.plan
+      path: measures.all_label_scan
+      op: eq
+      value: true
+  - id: AF-GDB-024
+    title: "Neo4j plan uses AllNodesScan or CartesianProduct"
+    severity: medium
+    rationale: >
+      AllNodesScan reads every node; CartesianProduct multiplies two
+      independent result sets.
+    remediation: "Add labels/indexed predicates and connect disconnected patterns."
+    reference: "https://neo4j.com/docs/cypher-manual/current/planning-and-tuning/operators/"
+    runtime_scope: "neo4j"
+    check:
+      kind: data.graph.plan
+      path: measures.full_scan_operator
+      op: eq
+      value: true
+  - id: AF-GDB-025
+    title: "Executed plan shows a high fan-out ratio"
+    severity: low
+    rationale: >
+      An operator emitting at least 1000 rows per input row in an executed
+      plan (profile/dynamic explain) points at a supernode or an unselective
+      expansion.
+    remediation: "Filter edges before expanding, partition the supernode, or cap the expansion."
+    reference: "https://docs.aws.amazon.com/neptune/latest/userguide/access-graph-opencypher-explain.html"
+    runtime_scope: "neptune|neo4j"
+    check:
+      kind: data.graph.plan
+      path: measures.max_fanout_ratio
+      op: ge
+      value: 1000

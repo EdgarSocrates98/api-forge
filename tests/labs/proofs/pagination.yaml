@@ -1,0 +1,5 @@
+kind: pagination
+status: covered
+input: page_size=2,total=5,cursor=2
+expected: next_cursor=4,has_more=true
+evidence: deterministic cursor fixture only; no datastore plan claim

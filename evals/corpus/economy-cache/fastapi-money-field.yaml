@@ -1,0 +1,14 @@
+id: fastapi-money-field
+fixture: tests/fixtures/economy_payments/fastapi
+contract: tests/fixtures/economy_payments/openapi.yaml
+mutation:
+  file: proj/app/models.py
+  replace:
+    old: "amount: int = Field(ge=0)"
+    new: "amount: int = Field(ge=1)"
+reanalyze: true
+expect_invalidated:
+  - GET /payments
+  - GET /payments/{payment_id}
+  - POST /payments
+  - POST /payments/{payment_id}/refunds

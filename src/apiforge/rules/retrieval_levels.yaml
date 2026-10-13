@@ -1,0 +1,12 @@
+version: 1
+# §36 adaptive retrieval ladder thresholds. Escalate only while the current
+# level is insufficient: hits < min_hits or top_score < level_min_score.
+levels:
+  L0: {min_hits: 1, min_score: 0.0}
+  L1: {min_hits: 3, min_score: 3.0}
+  L2: {min_hits: 3, min_score: 0.5}
+  L3: {min_hits: 3, min_score: 0.30}
+  L4: {min_hits: 1, min_score: 0.0}
+# L3 hybrid blend and L4 reranker weights (deterministic, declared).
+hybrid: {lexical: 0.6, semantic: 0.4}
+rerank: {lexical: 0.45, graph: 0.25, semantic: 0.30}

@@ -1,0 +1,17 @@
+# A tainted security state strips provider mode and non-read-only tools.
+id: security-clamp
+govern:
+  profile: deep
+  risk: local_reversible
+  security_state: tainted
+  confidence: 0.8
+  evidence_completeness: 0.9
+  context_sufficiency: 0.7
+  task_complexity: medium
+expect:
+  decision:
+    profile: deep
+    allowed_execution_modes: [deterministic, sandbox]
+    allowed_tools: [read_only]
+    unresolved: []
+  clamped_by: ["security:tainted"]

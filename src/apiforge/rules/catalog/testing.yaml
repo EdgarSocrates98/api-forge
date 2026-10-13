@@ -1,0 +1,142 @@
+catalog_version: 1
+schema_version: 1
+area: TESTING
+retrieved: 2026-09-21
+rules:
+  - id: AF-TEST-001
+    title: The contract is executable — provider and consumer sides
+    severity: high
+    rationale: >-
+      An OpenAPI file that nothing verifies drifts silently; contract tests
+      prove the provider serves what it publishes and consumers only use
+      what is published — the two failure modes the judge already detects
+      statically.
+    remediation: >-
+      Run provider-side schema validation on real responses and
+      consumer-driven contract tests (Pact/Schemathesis) in CI; gate merges
+      on divergence findings, not on "docs updated".
+    reference: docs/specs/2026-09-21-api-forge-agentic-platform.md
+  - id: AF-TEST-002
+    title: Fuzz the boundary the contract declares
+    severity: medium
+    rationale: >-
+      Hand-written tests cover the cases the author imagined; property/
+      schema fuzzing (Schemathesis, restler) covers the space the contract
+      admits — malformed types, boundary values, unexpected nulls.
+    remediation: >-
+      Fuzz every operation against its declared schema in CI; treat 5xx on
+      contract-valid input as a defect and on contract-invalid input as a
+      validation gap.
+    reference: https://schemathesis.readthedocs.io/
+  - id: AF-TEST-003
+    title: Happy paths do not prove validation
+    severity: medium
+    rationale: >-
+      Suites that only exercise valid requests cannot catch missing
+      validation — the negative space (missing fields, wrong types, extra
+      properties, oversized strings) is where mass assignment and
+      constraint bugs live.
+    remediation: >-
+      For every operation assert at least one rejected-input case per
+      required property and per bounded constraint; mutation-test the
+      validation layer.
+    reference: docs/specs/2026-09-21-api-forge-agentic-platform.md
+  - id: AF-TEST-004
+    title: Mutation testing grades the suite, not the code
+    severity: low
+    rationale: >-
+      Coverage counts executed lines, not asserted behavior; mutating the
+      code (flip a condition, drop a check) and watching tests still pass
+      proves which assertions are actually load-bearing.
+    remediation: >-
+      Run a mutation tool (mutmut/pitest) on validation and authorization
+      code first; treat surviving auth mutants as critical gaps.
+    reference: https://pitest.org/
+  - id: AF-TEST-005
+    title: Load tests answer questions, not dashboards
+    severity: medium
+    rationale: >-
+      A load run without a stated hypothesis produces numbers nobody can
+      act on; the benchmark discipline is baseline -> hypothesis -> one
+      variable -> measured delta.
+    remediation: >-
+      State the question first (p99 under target RPS, saturation point,
+      error budget burn); change one variable per run; record load shape
+      (ramp, duration, mix) next to results.
+    reference: docs/specs/2026-09-21-api-forge-agentic-platform.md
+  - id: AF-TEST-006
+    title: Failure injection covers the dependencies, not just the code
+    severity: medium
+    rationale: >-
+      Unit-tested services still fail on dependency latency, partial
+      outages and stale caches; chaos/failure-injection exercises the paths
+      that unit tests structurally cannot reach.
+    remediation: >-
+      Inject latency/failure on each dependency in staging; verify timeouts
+      fire before retries amplify; assert degradation is graceful and
+      observable.
+    reference: docs/security/threat-model-mvp.md
+  - id: AF-TEST-007
+    title: Contract-breaking changes are detected before merge
+    severity: high
+    rationale: >-
+      A breaking change discovered by consumers after deploy costs a
+      rollback or a forced migration; diffing baseline vs candidate contract
+      in CI makes the decision explicit and cheap.
+    remediation: >-
+      Run `apiforge diff contract --baseline v1 --candidate v2` (or the
+      equivalent) on every contract change; fail on unclassified breaking
+      changes, require an approved ADR for classified ones.
+    reference: docs/decisions/ADR-002-api-ir-provenance.md
+  - id: AF-TEST-101
+    title: k6 reports a failing-request rate above 5%
+    severity: high
+    rationale: >-
+      `http_req_failed.rate` counts real 4xx/5xx under load; above 5% the
+      load run is measuring failure, not capacity — capacity numbers from a
+      failing run do not transfer to production.
+    remediation: >-
+      Fix the dominant error before trusting latency percentiles; only then
+      re-run for capacity. If the rate is an intentional negative-test mix,
+      declare it in the run report.
+    reference: https://k6.io/docs/using-k6/metrics/reference/
+    check: {kind: test.k6.summary, path: attrs.failed_rate, op: gt, value: 0.05}
+  - id: AF-TEST-104
+    title: k6 dropped iterations — the generator was the bottleneck
+    severity: high
+    rationale: >-
+      `dropped_iterations.count` above zero means the load generator could
+      not keep up with its own schedule — the run measured the generator's
+      ceiling, not the API's. Capacity numbers from a saturated generator
+      are inconclusive by definition.
+    remediation: >-
+      Scale or distribute the generator (more VUs than needed, separate
+      host, k6 cloud/distributed mode) and re-run; a run with dropped
+      iterations can only be inconclusive.
+    reference: https://grafana.com/docs/k6/latest/using-k6/metrics/reference/
+    check: {kind: test.k6.summary, path: measures.dropped_iterations, op: gt, value: 0}
+  - id: AF-TEST-102
+    title: Schemathesis found contract-violating responses
+    severity: high
+    rationale: >-
+      Schemathesis failures are responses the contract does not allow —
+      missing validation, wrong status codes, or schema drift; each is a
+      client-visible defect already proven against the spec.
+    remediation: >-
+      Reproduce the failing check cases; fix the serializer/validator first,
+      then re-run — a clean schemathesis run is the floor for contract
+      conformance.
+    reference: https://schemathesis.readthedocs.io/
+    check: {kind: test.schemathesis.run, path: attrs.failure, op: gt, value: 0}
+  - id: AF-TEST-103
+    title: coverage.py reports below 80% line coverage
+    severity: medium
+    rationale: >-
+      Below ~80% line coverage the untested surface grows faster than
+      confidence; the number is a floor signal, not proof of correctness —
+      but its absence names the blind spot.
+    remediation: >-
+      Cover the missing lines on changed code first; raise the floor
+      gradually rather than chasing a global number.
+    reference: https://coverage.readthedocs.io/
+    check: {kind: test.coverage.py, path: measures.percent_covered, op: lt, value: 80}

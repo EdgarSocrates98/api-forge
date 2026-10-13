@@ -1,0 +1,3 @@
+command: pytest tests/runtime/test_economy_plan.py tests/runtime/test_economy_supervisor.py tests/contracts/test_economy_routing_contracts.py tests/sdd/test_risk_classify.py tests/evals/test_economy_routing_eval.py tests/application/test_runtime_experience.py
+result: 57 passed in 9.72s
+full suite: 1109 passed, 1 skipped, 1 failed (pre-existing orphan .claude/agents/README.md in release gate)

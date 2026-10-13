@@ -1,0 +1,8 @@
+id: select-high-risk
+kind: selection
+changed:
+- proj/app/routes/payments.py
+risk: high
+expect_level: V5
+expect_tests:
+- proj/tests/test_payments.py

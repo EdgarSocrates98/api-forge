@@ -1,0 +1,19 @@
+# A deep-reasoning, tool-using task with a large context selects the
+# strongest candidate; cheaper models are ineligible with named reasons.
+id: deep-task-selects-strongest
+inputs:
+  task_complexity: high
+  risk: sensitive
+  reasoning_needs: deep
+  needs_tool_support: true
+  needs_structured_output: true
+  context_size: 150000
+candidates:
+  - {provider: local, model: small, tool_support: false, structured_output: true, context_window: 32000, reasoning_tier: none, availability: available, cost_per_1k: 0.0, latency_p50_ms: 800}
+  - {provider: mid, model: mid-v1, tool_support: true, structured_output: true, context_window: 200000, reasoning_tier: light, availability: available, cost_per_1k: 0.01, latency_p50_ms: 2500}
+  - {provider: top, model: top-v1, tool_support: true, structured_output: true, context_window: 1000000, reasoning_tier: deep, availability: available, cost_per_1k: 0.06, latency_p50_ms: 9000}
+expect:
+  selected: top/top-v1
+  ineligible:
+    small: [tool-support-required, reasoning-tier-insufficient, context-window-too-small]
+    mid-v1: [reasoning-tier-insufficient]

@@ -1,0 +1,9 @@
+id: small-deep
+shape: small
+risk: read_only
+size: S
+profile: deep
+expected:
+  effective: deep
+  minimum_roles:
+  - reviewer

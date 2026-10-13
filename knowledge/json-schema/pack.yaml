@@ -1,0 +1,7 @@
+domain: json-schema
+version: 1
+areas: [CONTRACT]
+rule_ids: []
+summary: >-
+  JSON Schema vocabulary used inside OpenAPI 3.1 contracts - types, formats, required and additionalProperties semantics.
+verified: "2026-09-21"

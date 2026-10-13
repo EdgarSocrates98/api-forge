@@ -1,0 +1,21 @@
+evals:
+  - id: graph/e1
+    prompt: "g.V().hasLabel('person').repeat(out('knows')).limit(5) with no times() or until() - which rule fires?"
+    type: golden
+    expect: {kind: rule, id: AF-GDB-001}
+  - id: graph/e2
+    prompt: "A Gremlin chain split over four lines ending in .limit(25) - is it bounded?"
+    type: regression
+    expect: {kind: fact-kind, id: data.graph.query}
+  - id: graph/e3
+    prompt: "MATCH (a:Person)-[:KNOWS*2..]->(b) RETURN b - which rule fires?"
+    type: golden
+    expect: {kind: rule, id: AF-GDB-004}
+  - id: graph/e4
+    prompt: "session.run with an f-string query embedding a user id - which rule fires, and is the bound inferred?"
+    type: adversarial
+    expect: {kind: rule, id: AF-GDB-008}
+  - id: graph/e5
+    prompt: "A Java comment containing g.V().out() - does it produce a call site?"
+    type: adversarial
+    expect: {kind: fact-kind, id: data.graph.query}

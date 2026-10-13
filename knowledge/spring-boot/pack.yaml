@@ -1,0 +1,8 @@
+domain: spring-boot
+version: 1
+areas: [REST, TESTING]
+rule_ids: [AF-CODE-001, AF-CODE-002, AF-CODE-003]
+summary: >-
+  Spring MVC conventions the adapter extracts (annotations, validation,
+  Jackson) plus the Boot x Java compatibility guard.
+verified: "2026-09-21"

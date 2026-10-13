@@ -1,0 +1,25 @@
+cases:
+  - id: local-golden
+    kind: golden
+    mode: local
+    required_evidence: [task_spec, routing_decision]
+    available_evidence: [task_spec, routing_decision]
+    expected_state: active
+  - id: replay-holdout
+    kind: holdout
+    mode: replay
+    required_evidence: [task_spec, routing_decision]
+    available_evidence: [task_spec, routing_decision]
+    expected_state: simulated
+  - id: shadow-mutation
+    kind: mutation
+    mode: shadow
+    required_evidence: [task_spec, routing_decision]
+    available_evidence: [task_spec, routing_decision]
+    expected_state: observed
+  - id: external-read-mutation
+    kind: mutation
+    mode: external-read
+    required_evidence: [task_spec, receipt]
+    available_evidence: [task_spec]
+    expected_state: blocked

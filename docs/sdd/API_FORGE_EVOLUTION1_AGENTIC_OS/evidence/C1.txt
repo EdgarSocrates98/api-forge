@@ -1,0 +1,2 @@
+pytest -q tests/agentic_state/test_memory_blackboard.py
+C1: semantic checkpoint serialized, loaded in a fresh object and matched effective state.

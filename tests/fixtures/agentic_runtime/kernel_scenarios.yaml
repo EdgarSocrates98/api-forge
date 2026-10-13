@@ -1,0 +1,16 @@
+scenarios:
+  - id: timeout
+    expected: REVIEW
+    error_code: AF-RUNTIME-TIMEOUT
+  - id: invalid-output
+    expected: REVIEW
+    error_code: AF-RUNTIME-SCHEMA
+  - id: rollback-conflict
+    expected: BLOCKED
+    error_code: AF-HEAL-ROLLBACK-CONFLICT
+  - id: lease-expired
+    expected: REVIEW
+    error_code: AF-CONTROL-LEASE-EXPIRED
+  - id: resume
+    expected: REVIEW
+    evidence: [control-replay]

@@ -1,0 +1,12 @@
+id: cross-task-leakage
+axis: cross_task_leakage
+setup:
+  records:
+    - {scope: case, origin: system, trust_level: verified, evidence_refs: ["ctx://e1"], payload: {note: "case-scoped fact"}}
+    - {scope: task, origin: system, trust_level: verified, evidence_refs: ["ctx://e2"], payload: {note: "task-scoped fact"}}
+action:
+  type: query
+  query: {scopes: [task]}
+expect:
+  memory_ids: ["memory:0000000000000001"]
+  absent_ids: ["memory:0000000000000000"]

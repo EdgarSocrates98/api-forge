@@ -1,0 +1,9 @@
+sources:
+  - name: "AWS Builders' Library - timeouts, retries, backoff with jitter"
+    url: https://aws.amazon.com/builders-library/timeouts-retries-and-backoff-with-jitter/
+    authority: aws-docs
+    verified: "2026-09-21"
+  - name: "API Forge data rules"
+    url: docs/catalog-contract.md
+    authority: project-docs
+    verified: "2026-09-21"

@@ -1,0 +1,13 @@
+id: usefulness-ranked
+axis: memory_usefulness
+setup:
+  records:
+    - {scope: task, origin: system, trust_level: verified, evidence_refs: ["ctx://e1"], payload: {note: "redis pool exhaustion fix: raise max_connections"}, environment_fingerprint: "env-a"}
+    - {scope: task, origin: system, trust_level: verified, evidence_refs: ["ctx://e2"], payload: {note: "unrelated housekeeping entry"}}
+action:
+  type: query
+  scored: true
+  query: {terms: [redis]}
+expect:
+  count: 1
+  memory_ids: ["memory:0000000000000000"]

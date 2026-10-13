@@ -1,0 +1,39 @@
+# Host projections (economy wave 5, prompt §92-93). Declared host behavior
+# picks an economical projection; the core never branches on host.
+# deferred_tools: the host loads tool schemas on demand (e.g. ToolSearch),
+# so a smaller registered surface saves less there — measure, do not assume.
+schema: apiforge/host-projections/v1
+hosts:
+  claude:
+    instruction_file: CLAUDE.md
+    mcp_surface: compact
+    output: compact
+    deferred_tools: true
+    notes: ["deferred tool schemas: surface savings are bounded by what the host loads"]
+  gpt-codex:
+    instruction_file: AGENTS.md
+    mcp_surface: compact
+    output: compact
+    deferred_tools: false
+    notes: ["capabilities discovered lazily through apiforge_discover"]
+  devin:
+    instruction_file: AGENTS.md
+    mcp_surface: compact
+    output: compact
+    deferred_tools: false
+    notes: ["gateway tools keep the session tool list short"]
+  copilot:
+    instruction_file: AGENTS.md
+    mcp_surface: full
+    output: json
+    deferred_tools: false
+    notes: ["no MCP support declared; CLI verbs only"]
+# Artifact question -> Forge verb first (§40-41); read files only after these.
+verb_map:
+  "what evidence does this operation need": "apiforge context capsule --target 'METHOD /path'"
+  "what does this change impact": "apiforge context delta --base <ref> | --changed <file>"
+  "does this contract change break clients": "apiforge diff contract <baseline> <candidate>"
+  "which expertise applies": "apiforge knowledge select --intent '...'"
+  "why did CI fail": "apiforge slice log --input <ci.log>"
+  "which tests failed": "apiforge slice tests --input <pytest.log|junit.xml>"
+  "what did this run spend": "apiforge economy stats --run-id <run>"

@@ -1,0 +1,19 @@
+id: spring-payments-refund
+fixture: tests/fixtures/economy_payments/spring
+contract: tests/fixtures/economy_payments/openapi.yaml
+target: POST /payments/{payment_id}/refunds
+level: L3
+budget_bytes: 16000
+required_refs:
+- path: openapi.yaml
+  symbol: refundPayment
+  kind: contract
+- path: openapi.yaml
+  symbol: requested_by_customer
+  kind: schema
+- path: proj/src/main/java/com/example/payments/PaymentController.java
+  symbol: refund exceeds payment
+  kind: code
+- path: proj/src/test/java/com/example/payments/PaymentControllerTest.java
+  symbol: refundUnknownPaymentIsNotFound
+  kind: test

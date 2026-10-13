@@ -1,0 +1,13 @@
+id: go-orders-list
+fixture: tests/fixtures/go_orders
+contract: tests/fixtures/openapi/orders-v1.yaml
+target: GET /orders
+level: L3
+budget_bytes: 16000
+required_refs:
+- path: openapi.yaml
+  symbol: listOrders
+  kind: contract
+- path: proj/internal/orders/chi.go
+  symbol: listOrders
+  kind: code

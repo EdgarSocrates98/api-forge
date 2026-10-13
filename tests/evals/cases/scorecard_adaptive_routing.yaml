@@ -1,0 +1,38 @@
+version: 1
+cases:
+  - id: scorecard-adaptive-golden
+    domain: routing
+    input: fixtures/agentic_runtime/scorecard_adaptive_cases.yaml#scorecard-fresh-champion
+    expected: PASS
+    required_evidence: [scorecard-assessment, routing-plan, shadow-evaluation]
+    mutation: none
+    quality_axes: [champion-selection]
+    kind: golden
+    mandatory: true
+  - id: scorecard-adaptive-holdout
+    domain: routing
+    input: fixtures/agentic_runtime/scorecard_adaptive_cases.yaml#scorecard-missing-challenger
+    expected: PASS
+    required_evidence: [scorecard-assessment, challenger-bound]
+    mutation: reorder
+    quality_axes: [anti-starvation, replay]
+    kind: holdout
+    mandatory: true
+  - id: scorecard-adaptive-mutation
+    domain: routing
+    input: fixtures/agentic_runtime/scorecard_adaptive_cases.yaml#scorecard-stale-unresolved
+    expected: BLOCKED
+    required_evidence: [scorecard-assessment, freshness-gap]
+    mutation: stale-to-fresh
+    quality_axes: [freshness-safety]
+    kind: mutation
+    mandatory: true
+  - id: scorecard-adaptive-adversarial
+    domain: routing
+    input: fixtures/agentic_runtime/scorecard_adaptive_cases.yaml#scorecard-permutation-replay
+    expected: PASS
+    required_evidence: [scorecard-assessment, replay]
+    mutation: reorder-scorecards
+    quality_axes: [provenance, determinism]
+    kind: adversarial
+    mandatory: true

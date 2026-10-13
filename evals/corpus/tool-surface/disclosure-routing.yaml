@@ -1,0 +1,10 @@
+id: disclosure-routing
+disclose:
+  task: oauth security gate review
+  task_class: security_governance
+  active:
+    - decision_check
+    - memory_quarantine_list
+  dropped:
+    - grpc_benchmark
+    - migration_analyze

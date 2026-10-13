@@ -1,0 +1,17 @@
+      "passed": true
+    }
+  ],
+  "corpus": "evals\\corpus\\agent-governor",
+  "passed": true,
+  "schema": "apiforge/agent-governor-evals/v1",
+  "totals": {
+    "cases": 4,
+    "failed": 0,
+    "failed_ids": []
+  }
+}
+Usage: apiforge governor decide [OPTIONS]
+Try 'apiforge governor decide --help' for help.
++- Error ---------------------------------------------------------------------+
+| No such option: --profile                                                   |
++-----------------------------------------------------------------------------+

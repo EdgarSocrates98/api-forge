@@ -1,0 +1,25 @@
+schema: apiforge/field-ground-truth/v1
+status: draft
+source: open-telemetry/opentelemetry-demo
+commit: UNPINNED
+unresolved:
+  - Relations below are a draft from the demo's published architecture and must be re-checked against the pinned commit before inference is tuned.
+  - Most service-to-service calls in the demo are gRPC; the HTTP inference track does not extract gRPC stubs yet, so recall on this corpus is expected to be low until that gap is measured.
+relations:
+  - {from: frontend, to: checkout, relation: calls, transport: grpc}
+  - {from: frontend, to: cart, relation: calls, transport: grpc}
+  - {from: frontend, to: product-catalog, relation: calls, transport: grpc}
+  - {from: frontend, to: currency, relation: calls, transport: grpc}
+  - {from: frontend, to: recommendation, relation: calls, transport: grpc}
+  - {from: frontend, to: ad, relation: calls, transport: grpc}
+  - {from: frontend, to: shipping, relation: calls, transport: http}
+  - {from: checkout, to: cart, relation: calls, transport: grpc}
+  - {from: checkout, to: payment, relation: calls, transport: grpc}
+  - {from: checkout, to: currency, relation: calls, transport: grpc}
+  - {from: checkout, to: product-catalog, relation: calls, transport: grpc}
+  - {from: checkout, to: shipping, relation: calls, transport: http}
+  - {from: checkout, to: email, relation: calls, transport: http}
+  - {from: recommendation, to: product-catalog, relation: calls, transport: grpc}
+  - {from: shipping, to: quote, relation: calls, transport: http}
+  - {from: checkout, to: accounting, relation: publishes_to_consumer, topic: orders}
+  - {from: checkout, to: fraud-detection, relation: publishes_to_consumer, topic: orders}

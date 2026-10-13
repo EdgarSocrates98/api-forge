@@ -1,0 +1,9 @@
+sources:
+  - name: Spring Boot system requirements
+    url: https://docs.spring.io/spring-boot/system-requirements.html
+    authority: vendor-docs
+    verified: "2026-09-21"
+  - name: Spring Framework reference
+    url: https://docs.spring.io/spring-framework/reference/
+    authority: vendor-docs
+    verified: "2026-09-21"

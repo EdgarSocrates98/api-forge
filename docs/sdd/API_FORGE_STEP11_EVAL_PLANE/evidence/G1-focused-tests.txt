@@ -1,0 +1,32 @@
+..............                                                           [100%]
+============================== warnings summary ===============================
+tests/evals/test_eval_plane.py::test_live_report_defers_provider_honestly
+  E:\projetos\api-forge\src\apiforge\contracts\economy_extras.py:19: UserWarning: Field name "schema" in "VerificationPlan" shadows an attribute in parent "VersionedContract"
+    class VerificationPlan(VersionedContract):
+
+tests/evals/test_eval_plane.py::test_live_report_defers_provider_honestly
+  E:\projetos\api-forge\src\apiforge\contracts\economy_extras.py:44: UserWarning: Field name "schema" in "RetrievalResult" shadows an attribute in parent "VersionedContract"
+    class RetrievalResult(VersionedContract):
+
+tests/evals/test_eval_plane.py::test_live_report_defers_provider_honestly
+  E:\projetos\api-forge\src\apiforge\contracts\economy_extras.py:58: UserWarning: Field name "schema" in "EvidenceNode" shadows an attribute in parent "VersionedContract"
+    class EvidenceNode(VersionedContract):
+
+tests/evals/test_eval_plane.py::test_live_report_defers_provider_honestly
+  E:\projetos\api-forge\src\apiforge\contracts\economy_extras.py:78: UserWarning: Field name "schema" in "EconomyDoctor" shadows an attribute in parent "VersionedContract"
+    class EconomyDoctor(VersionedContract):
+
+tests/evals/test_eval_plane.py::test_live_report_defers_provider_honestly
+  E:\projetos\api-forge\src\apiforge\contracts\economy_extras.py:101: UserWarning: Field name "schema" in "TierDecision" shadows an attribute in parent "VersionedContract"
+    class TierDecision(VersionedContract):
+
+tests/evals/test_eval_plane.py::test_live_report_defers_provider_honestly
+  E:\projetos\api-forge\src\apiforge\contracts\economy_extras.py:113: UserWarning: Field name "schema" in "PromptEnvelope" shadows an attribute in parent "VersionedContract"
+    class PromptEnvelope(VersionedContract):
+
+tests/evals/test_eval_plane.py::test_live_report_defers_provider_honestly
+  E:\projetos\api-forge\src\apiforge\contracts\economy_extras.py:132: UserWarning: Field name "schema" in "LocalityPlan" shadows an attribute in parent "VersionedContract"
+    class LocalityPlan(VersionedContract):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+14 passed, 7 warnings in 46.57s

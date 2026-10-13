@@ -1,0 +1,4 @@
+id: path-unc
+kind: path
+candidate: "//host/share/credentials"
+expect: refuse

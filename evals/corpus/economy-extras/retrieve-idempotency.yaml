@@ -1,0 +1,4 @@
+id: retrieve-idempotency
+kind: retrieval
+query: idempotency key retries on POST
+expect_pack: idempotency

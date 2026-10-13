@@ -1,0 +1,11 @@
+id: fastapi-contract-operation
+fixture: tests/fixtures/economy_payments/fastapi
+contract: tests/fixtures/economy_payments/openapi.yaml
+mutation:
+  file: openapi.yaml
+  replace:
+    old: "operationId: listPayments"
+    new: "operationId: listPaymentsV2"
+reanalyze: true
+expect_invalidated:
+  - GET /payments

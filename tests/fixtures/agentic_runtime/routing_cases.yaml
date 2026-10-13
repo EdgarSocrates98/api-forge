@@ -1,0 +1,17 @@
+cases:
+  - id: efficiency-observed
+    expected: api-performance-review
+    signals:
+      api-contract-review:
+        duration: 40
+      api-performance-review:
+        duration: 10
+    evidence: [task_spec]
+  - id: unknown-signals
+    expected: api-contract-review
+    signals: {}
+    evidence: [task_spec]
+  - id: safety-gate
+    expected: api-security-review
+    risk: sensitive
+    evidence: [task_spec]

@@ -1,0 +1,10 @@
+id: unknown-tool
+attack_class: tool_abuse
+vector:
+  type: tool_authorize
+  params:
+    subject: specialist
+    tool: undeclared_mutation_tool
+expect:
+  verdict: refused
+  code: AF-TOOL-PROFILE-MISSING

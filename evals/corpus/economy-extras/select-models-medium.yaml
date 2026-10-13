@@ -1,0 +1,8 @@
+id: select-models-medium
+kind: selection
+changed:
+- proj/app/models.py
+risk: medium
+expect_level: V4
+expect_tests:
+- proj/tests/test_payments.py

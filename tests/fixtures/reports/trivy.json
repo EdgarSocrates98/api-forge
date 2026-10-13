@@ -1,0 +1,9 @@
+{"Results": [
+  {"Target": "requirements.txt", "Class": "lang-pkgs",
+   "Vulnerabilities": [
+     {"VulnerabilityID": "CVE-2024-0001", "PkgName": "requests", "Severity": "HIGH"},
+     {"VulnerabilityID": "CVE-2024-0002", "PkgName": "urllib3", "Severity": "CRITICAL"}
+   ]},
+  {"Target": "Dockerfile", "Class": "config",
+   "Misconfigurations": [{"ID": "DS002", "Severity": "HIGH"}]}
+]}

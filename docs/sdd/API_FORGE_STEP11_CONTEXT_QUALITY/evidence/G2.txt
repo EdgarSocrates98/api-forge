@@ -1,0 +1,4 @@
+G2: apiforge evals context-quality passes 4/4 corpus cases including
+minimum-sufficient pruning under strict, permissive and vetoed gates; the
+focused suite tests/context/ + tests/economy/test_selective_agentics.py
+reports 74 passed; ruff and mypy strict are clean.

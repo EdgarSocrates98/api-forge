@@ -1,0 +1,1513 @@
+{
+  "version": 1,
+  "schema": "apiforge/economy-matrix/v1",
+  "tasks": 16,
+  "profiles": [
+    "economy",
+    "balanced",
+    "deep"
+  ],
+  "rows": [
+    {
+      "version": 1,
+      "case_id": "grpc-breaking-field",
+      "profile": "economy",
+      "holdout": false,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "breaking",
+        "expected": "breaking",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [
+        "GRPC-FIELD-REMOVED",
+        "GRPC-FIELD-TYPE-CHANGED",
+        "GRPC-RPC-REMOVED"
+      ],
+      "cost": {
+        "version": 1,
+        "calls": 3,
+        "invocations": 3,
+        "fanout": 0,
+        "trimmed_roles": []
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 741,
+      "latency_ms": 346
+    },
+    {
+      "version": 1,
+      "case_id": "grpc-breaking-field",
+      "profile": "balanced",
+      "holdout": false,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "breaking",
+        "expected": "breaking",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [
+        "GRPC-FIELD-REMOVED",
+        "GRPC-FIELD-TYPE-CHANGED",
+        "GRPC-RPC-REMOVED"
+      ],
+      "cost": {
+        "version": 1,
+        "calls": 3,
+        "invocations": 3,
+        "fanout": 0,
+        "trimmed_roles": []
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 741,
+      "latency_ms": 128
+    },
+    {
+      "version": 1,
+      "case_id": "grpc-breaking-field",
+      "profile": "deep",
+      "holdout": false,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "breaking",
+        "expected": "breaking",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [
+        "GRPC-FIELD-REMOVED",
+        "GRPC-FIELD-TYPE-CHANGED",
+        "GRPC-RPC-REMOVED"
+      ],
+      "cost": {
+        "version": 1,
+        "calls": 3,
+        "invocations": 3,
+        "fanout": 0,
+        "trimmed_roles": []
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 741,
+      "latency_ms": 135
+    },
+    {
+      "version": 1,
+      "case_id": "grpc-unchanged",
+      "profile": "economy",
+      "holdout": false,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "compatible",
+        "expected": "compatible",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [],
+      "cost": {
+        "version": 1,
+        "calls": 2,
+        "invocations": 2,
+        "fanout": 0,
+        "trimmed_roles": [
+          "api-architecture-review",
+          "api-contract-review",
+          "api-data-review",
+          "api-performance-review",
+          "api-security-review"
+        ]
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 224,
+      "latency_ms": 119
+    },
+    {
+      "version": 1,
+      "case_id": "grpc-unchanged",
+      "profile": "balanced",
+      "holdout": false,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "compatible",
+        "expected": "compatible",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [],
+      "cost": {
+        "version": 1,
+        "calls": 3,
+        "invocations": 3,
+        "fanout": 1,
+        "trimmed_roles": [
+          "api-data-review",
+          "api-performance-review",
+          "api-security-review"
+        ]
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 224,
+      "latency_ms": 117
+    },
+    {
+      "version": 1,
+      "case_id": "grpc-unchanged",
+      "profile": "deep",
+      "holdout": false,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "compatible",
+        "expected": "compatible",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [],
+      "cost": {
+        "version": 1,
+        "calls": 4,
+        "invocations": 4,
+        "fanout": 2,
+        "trimmed_roles": [
+          "api-performance-review",
+          "api-security-review"
+        ]
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 224,
+      "latency_ms": 133
+    },
+    {
+      "version": 1,
+      "case_id": "openapi-add-operation",
+      "profile": "economy",
+      "holdout": false,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "compatible",
+        "expected": "compatible",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [
+        "AF-COMPAT-OPERATION-ADDED:get:/orders/{id}"
+      ],
+      "cost": {
+        "version": 1,
+        "calls": 2,
+        "invocations": 2,
+        "fanout": 0,
+        "trimmed_roles": [
+          "api-architecture-review",
+          "api-contract-review",
+          "api-data-review",
+          "api-performance-review",
+          "api-security-review"
+        ]
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 287,
+      "latency_ms": 114
+    },
+    {
+      "version": 1,
+      "case_id": "openapi-add-operation",
+      "profile": "balanced",
+      "holdout": false,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "compatible",
+        "expected": "compatible",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [
+        "AF-COMPAT-OPERATION-ADDED:get:/orders/{id}"
+      ],
+      "cost": {
+        "version": 1,
+        "calls": 3,
+        "invocations": 3,
+        "fanout": 1,
+        "trimmed_roles": [
+          "api-data-review",
+          "api-performance-review",
+          "api-security-review"
+        ]
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 287,
+      "latency_ms": 123
+    },
+    {
+      "version": 1,
+      "case_id": "openapi-add-operation",
+      "profile": "deep",
+      "holdout": false,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "compatible",
+        "expected": "compatible",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [
+        "AF-COMPAT-OPERATION-ADDED:get:/orders/{id}"
+      ],
+      "cost": {
+        "version": 1,
+        "calls": 4,
+        "invocations": 4,
+        "fanout": 2,
+        "trimmed_roles": [
+          "api-performance-review",
+          "api-security-review"
+        ]
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 287,
+      "latency_ms": 131
+    },
+    {
+      "version": 1,
+      "case_id": "openapi-add-optional-response-field",
+      "profile": "economy",
+      "holdout": false,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "compatible",
+        "expected": "compatible",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [
+        "AF-COMPAT-REQUEST-OPTIONAL-ADDED:post:/orders",
+        "AF-COMPAT-RESPONSE-OPTIONAL-ADDED:post:/orders",
+        "AF-COMPAT-RESPONSE-OPTIONAL-ADDED:post:/orders"
+      ],
+      "cost": {
+        "version": 1,
+        "calls": 2,
+        "invocations": 2,
+        "fanout": 0,
+        "trimmed_roles": [
+          "api-architecture-review",
+          "api-contract-review",
+          "api-data-review",
+          "api-performance-review",
+          "api-security-review"
+        ]
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 1068,
+      "latency_ms": 110
+    },
+    {
+      "version": 1,
+      "case_id": "openapi-add-optional-response-field",
+      "profile": "balanced",
+      "holdout": false,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "compatible",
+        "expected": "compatible",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [
+        "AF-COMPAT-REQUEST-OPTIONAL-ADDED:post:/orders",
+        "AF-COMPAT-RESPONSE-OPTIONAL-ADDED:post:/orders",
+        "AF-COMPAT-RESPONSE-OPTIONAL-ADDED:post:/orders"
+      ],
+      "cost": {
+        "version": 1,
+        "calls": 3,
+        "invocations": 3,
+        "fanout": 1,
+        "trimmed_roles": [
+          "api-data-review",
+          "api-performance-review",
+          "api-security-review"
+        ]
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 1068,
+      "latency_ms": 120
+    },
+    {
+      "version": 1,
+      "case_id": "openapi-add-optional-response-field",
+      "profile": "deep",
+      "holdout": false,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "compatible",
+        "expected": "compatible",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [
+        "AF-COMPAT-REQUEST-OPTIONAL-ADDED:post:/orders",
+        "AF-COMPAT-RESPONSE-OPTIONAL-ADDED:post:/orders",
+        "AF-COMPAT-RESPONSE-OPTIONAL-ADDED:post:/orders"
+      ],
+      "cost": {
+        "version": 1,
+        "calls": 4,
+        "invocations": 4,
+        "fanout": 2,
+        "trimmed_roles": [
+          "api-performance-review",
+          "api-security-review"
+        ]
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 1068,
+      "latency_ms": 124
+    },
+    {
+      "version": 1,
+      "case_id": "openapi-add-query-param",
+      "profile": "economy",
+      "holdout": true,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "compatible",
+        "expected": "compatible",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [],
+      "cost": {
+        "version": 1,
+        "calls": 2,
+        "invocations": 2,
+        "fanout": 0,
+        "trimmed_roles": [
+          "api-architecture-review",
+          "api-contract-review",
+          "api-data-review",
+          "api-performance-review",
+          "api-security-review"
+        ]
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 2,
+      "latency_ms": 106
+    },
+    {
+      "version": 1,
+      "case_id": "openapi-add-query-param",
+      "profile": "balanced",
+      "holdout": true,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "compatible",
+        "expected": "compatible",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [],
+      "cost": {
+        "version": 1,
+        "calls": 3,
+        "invocations": 3,
+        "fanout": 1,
+        "trimmed_roles": [
+          "api-data-review",
+          "api-performance-review",
+          "api-security-review"
+        ]
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 2,
+      "latency_ms": 121
+    },
+    {
+      "version": 1,
+      "case_id": "openapi-add-query-param",
+      "profile": "deep",
+      "holdout": true,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "compatible",
+        "expected": "compatible",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [],
+      "cost": {
+        "version": 1,
+        "calls": 4,
+        "invocations": 4,
+        "fanout": 2,
+        "trimmed_roles": [
+          "api-performance-review",
+          "api-security-review"
+        ]
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 2,
+      "latency_ms": 135
+    },
+    {
+      "version": 1,
+      "case_id": "openapi-add-required-property",
+      "profile": "economy",
+      "holdout": false,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "breaking",
+        "expected": "breaking",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [
+        "AF-BREAKING-REQUEST-REQUIRED-ADDED:post:/orders",
+        "AF-BREAKING-RESPONSE-REQUIRED-ADDED:post:/orders",
+        "AF-BREAKING-RESPONSE-REQUIRED-ADDED:post:/orders"
+      ],
+      "cost": {
+        "version": 1,
+        "calls": 3,
+        "invocations": 3,
+        "fanout": 0,
+        "trimmed_roles": []
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 1088,
+      "latency_ms": 124
+    },
+    {
+      "version": 1,
+      "case_id": "openapi-add-required-property",
+      "profile": "balanced",
+      "holdout": false,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "breaking",
+        "expected": "breaking",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [
+        "AF-BREAKING-REQUEST-REQUIRED-ADDED:post:/orders",
+        "AF-BREAKING-RESPONSE-REQUIRED-ADDED:post:/orders",
+        "AF-BREAKING-RESPONSE-REQUIRED-ADDED:post:/orders"
+      ],
+      "cost": {
+        "version": 1,
+        "calls": 3,
+        "invocations": 3,
+        "fanout": 0,
+        "trimmed_roles": []
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 1088,
+      "latency_ms": 130
+    },
+    {
+      "version": 1,
+      "case_id": "openapi-add-required-property",
+      "profile": "deep",
+      "holdout": false,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "breaking",
+        "expected": "breaking",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [
+        "AF-BREAKING-REQUEST-REQUIRED-ADDED:post:/orders",
+        "AF-BREAKING-RESPONSE-REQUIRED-ADDED:post:/orders",
+        "AF-BREAKING-RESPONSE-REQUIRED-ADDED:post:/orders"
+      ],
+      "cost": {
+        "version": 1,
+        "calls": 3,
+        "invocations": 3,
+        "fanout": 0,
+        "trimmed_roles": []
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 1088,
+      "latency_ms": 122
+    },
+    {
+      "version": 1,
+      "case_id": "openapi-add-response-status",
+      "profile": "economy",
+      "holdout": false,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "compatible",
+        "expected": "compatible",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [
+        "AF-COMPAT-RESPONSE-ADDED:post:/orders"
+      ],
+      "cost": {
+        "version": 1,
+        "calls": 2,
+        "invocations": 2,
+        "fanout": 0,
+        "trimmed_roles": [
+          "api-architecture-review",
+          "api-contract-review",
+          "api-data-review",
+          "api-performance-review",
+          "api-security-review"
+        ]
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 309,
+      "latency_ms": 108
+    },
+    {
+      "version": 1,
+      "case_id": "openapi-add-response-status",
+      "profile": "balanced",
+      "holdout": false,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "compatible",
+        "expected": "compatible",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [
+        "AF-COMPAT-RESPONSE-ADDED:post:/orders"
+      ],
+      "cost": {
+        "version": 1,
+        "calls": 3,
+        "invocations": 3,
+        "fanout": 1,
+        "trimmed_roles": [
+          "api-data-review",
+          "api-performance-review",
+          "api-security-review"
+        ]
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 309,
+      "latency_ms": 121
+    },
+    {
+      "version": 1,
+      "case_id": "openapi-add-response-status",
+      "profile": "deep",
+      "holdout": false,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "compatible",
+        "expected": "compatible",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [
+        "AF-COMPAT-RESPONSE-ADDED:post:/orders"
+      ],
+      "cost": {
+        "version": 1,
+        "calls": 4,
+        "invocations": 4,
+        "fanout": 2,
+        "trimmed_roles": [
+          "api-performance-review",
+          "api-security-review"
+        ]
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 309,
+      "latency_ms": 134
+    },
+    {
+      "version": 1,
+      "case_id": "openapi-description-only",
+      "profile": "economy",
+      "holdout": false,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "compatible",
+        "expected": "compatible",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [],
+      "cost": {
+        "version": 1,
+        "calls": 2,
+        "invocations": 2,
+        "fanout": 0,
+        "trimmed_roles": [
+          "api-architecture-review",
+          "api-contract-review",
+          "api-data-review",
+          "api-performance-review",
+          "api-security-review"
+        ]
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 2,
+      "latency_ms": 109
+    },
+    {
+      "version": 1,
+      "case_id": "openapi-description-only",
+      "profile": "balanced",
+      "holdout": false,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "compatible",
+        "expected": "compatible",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [],
+      "cost": {
+        "version": 1,
+        "calls": 3,
+        "invocations": 3,
+        "fanout": 1,
+        "trimmed_roles": [
+          "api-data-review",
+          "api-performance-review",
+          "api-security-review"
+        ]
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 2,
+      "latency_ms": 115
+    },
+    {
+      "version": 1,
+      "case_id": "openapi-description-only",
+      "profile": "deep",
+      "holdout": false,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "compatible",
+        "expected": "compatible",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [],
+      "cost": {
+        "version": 1,
+        "calls": 4,
+        "invocations": 4,
+        "fanout": 2,
+        "trimmed_roles": [
+          "api-performance-review",
+          "api-security-review"
+        ]
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 2,
+      "latency_ms": 127
+    },
+    {
+      "version": 1,
+      "case_id": "openapi-relax-required-shared-schema",
+      "profile": "economy",
+      "holdout": false,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "breaking",
+        "expected": "breaking",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [
+        "AF-BREAKING-RESPONSE-REQUIRED-REMOVED:post:/orders",
+        "AF-BREAKING-RESPONSE-REQUIRED-REMOVED:post:/orders",
+        "AF-COMPAT-REQUEST-REQUIRED-REMOVED:post:/orders"
+      ],
+      "cost": {
+        "version": 1,
+        "calls": 3,
+        "invocations": 3,
+        "fanout": 0,
+        "trimmed_roles": []
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 1063,
+      "latency_ms": 121
+    },
+    {
+      "version": 1,
+      "case_id": "openapi-relax-required-shared-schema",
+      "profile": "balanced",
+      "holdout": false,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "breaking",
+        "expected": "breaking",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [
+        "AF-BREAKING-RESPONSE-REQUIRED-REMOVED:post:/orders",
+        "AF-BREAKING-RESPONSE-REQUIRED-REMOVED:post:/orders",
+        "AF-COMPAT-REQUEST-REQUIRED-REMOVED:post:/orders"
+      ],
+      "cost": {
+        "version": 1,
+        "calls": 3,
+        "invocations": 3,
+        "fanout": 0,
+        "trimmed_roles": []
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 1063,
+      "latency_ms": 123
+    },
+    {
+      "version": 1,
+      "case_id": "openapi-relax-required-shared-schema",
+      "profile": "deep",
+      "holdout": false,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "breaking",
+        "expected": "breaking",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [
+        "AF-BREAKING-RESPONSE-REQUIRED-REMOVED:post:/orders",
+        "AF-BREAKING-RESPONSE-REQUIRED-REMOVED:post:/orders",
+        "AF-COMPAT-REQUEST-REQUIRED-REMOVED:post:/orders"
+      ],
+      "cost": {
+        "version": 1,
+        "calls": 3,
+        "invocations": 3,
+        "fanout": 0,
+        "trimmed_roles": []
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 1063,
+      "latency_ms": 126
+    },
+    {
+      "version": 1,
+      "case_id": "openapi-remove-create-operation",
+      "profile": "economy",
+      "holdout": false,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "breaking",
+        "expected": "breaking",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [
+        "AF-BREAKING-OPERATION-REMOVED:post:/orders"
+      ],
+      "cost": {
+        "version": 1,
+        "calls": 3,
+        "invocations": 3,
+        "fanout": 0,
+        "trimmed_roles": []
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 279,
+      "latency_ms": 119
+    },
+    {
+      "version": 1,
+      "case_id": "openapi-remove-create-operation",
+      "profile": "balanced",
+      "holdout": false,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "breaking",
+        "expected": "breaking",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [
+        "AF-BREAKING-OPERATION-REMOVED:post:/orders"
+      ],
+      "cost": {
+        "version": 1,
+        "calls": 3,
+        "invocations": 3,
+        "fanout": 0,
+        "trimmed_roles": []
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 279,
+      "latency_ms": 121
+    },
+    {
+      "version": 1,
+      "case_id": "openapi-remove-create-operation",
+      "profile": "deep",
+      "holdout": false,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "breaking",
+        "expected": "breaking",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [
+        "AF-BREAKING-OPERATION-REMOVED:post:/orders"
+      ],
+      "cost": {
+        "version": 1,
+        "calls": 3,
+        "invocations": 3,
+        "fanout": 0,
+        "trimmed_roles": []
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 279,
+      "latency_ms": 118
+    },
+    {
+      "version": 1,
+      "case_id": "openapi-remove-list-operation",
+      "profile": "economy",
+      "holdout": false,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "breaking",
+        "expected": "breaking",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [
+        "AF-BREAKING-OPERATION-REMOVED:get:/orders"
+      ],
+      "cost": {
+        "version": 1,
+        "calls": 3,
+        "invocations": 3,
+        "fanout": 0,
+        "trimmed_roles": []
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 276,
+      "latency_ms": 130
+    },
+    {
+      "version": 1,
+      "case_id": "openapi-remove-list-operation",
+      "profile": "balanced",
+      "holdout": false,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "breaking",
+        "expected": "breaking",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [
+        "AF-BREAKING-OPERATION-REMOVED:get:/orders"
+      ],
+      "cost": {
+        "version": 1,
+        "calls": 3,
+        "invocations": 3,
+        "fanout": 0,
+        "trimmed_roles": []
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 276,
+      "latency_ms": 123
+    },
+    {
+      "version": 1,
+      "case_id": "openapi-remove-list-operation",
+      "profile": "deep",
+      "holdout": false,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "breaking",
+        "expected": "breaking",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [
+        "AF-BREAKING-OPERATION-REMOVED:get:/orders"
+      ],
+      "cost": {
+        "version": 1,
+        "calls": 3,
+        "invocations": 3,
+        "fanout": 0,
+        "trimmed_roles": []
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 276,
+      "latency_ms": 123
+    },
+    {
+      "version": 1,
+      "case_id": "openapi-remove-optional-property",
+      "profile": "economy",
+      "holdout": false,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "breaking",
+        "expected": "breaking",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [
+        "AF-BREAKING-REQUEST-PROPERTY-REMOVED:post:/orders",
+        "AF-BREAKING-RESPONSE-PROPERTY-REMOVED:post:/orders",
+        "AF-BREAKING-RESPONSE-PROPERTY-REMOVED:post:/orders"
+      ],
+      "cost": {
+        "version": 1,
+        "calls": 3,
+        "invocations": 3,
+        "fanout": 0,
+        "trimmed_roles": []
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 1028,
+      "latency_ms": 118
+    },
+    {
+      "version": 1,
+      "case_id": "openapi-remove-optional-property",
+      "profile": "balanced",
+      "holdout": false,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "breaking",
+        "expected": "breaking",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [
+        "AF-BREAKING-REQUEST-PROPERTY-REMOVED:post:/orders",
+        "AF-BREAKING-RESPONSE-PROPERTY-REMOVED:post:/orders",
+        "AF-BREAKING-RESPONSE-PROPERTY-REMOVED:post:/orders"
+      ],
+      "cost": {
+        "version": 1,
+        "calls": 3,
+        "invocations": 3,
+        "fanout": 0,
+        "trimmed_roles": []
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 1028,
+      "latency_ms": 124
+    },
+    {
+      "version": 1,
+      "case_id": "openapi-remove-optional-property",
+      "profile": "deep",
+      "holdout": false,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "breaking",
+        "expected": "breaking",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [
+        "AF-BREAKING-REQUEST-PROPERTY-REMOVED:post:/orders",
+        "AF-BREAKING-RESPONSE-PROPERTY-REMOVED:post:/orders",
+        "AF-BREAKING-RESPONSE-PROPERTY-REMOVED:post:/orders"
+      ],
+      "cost": {
+        "version": 1,
+        "calls": 3,
+        "invocations": 3,
+        "fanout": 0,
+        "trimmed_roles": []
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 1028,
+      "latency_ms": 119
+    },
+    {
+      "version": 1,
+      "case_id": "openapi-remove-request-body",
+      "profile": "economy",
+      "holdout": false,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "breaking",
+        "expected": "breaking",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [
+        "AF-BREAKING-REQUEST-BODY-REMOVED:post:/orders"
+      ],
+      "cost": {
+        "version": 1,
+        "calls": 3,
+        "invocations": 3,
+        "fanout": 0,
+        "trimmed_roles": []
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 309,
+      "latency_ms": 123
+    },
+    {
+      "version": 1,
+      "case_id": "openapi-remove-request-body",
+      "profile": "balanced",
+      "holdout": false,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "breaking",
+        "expected": "breaking",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [
+        "AF-BREAKING-REQUEST-BODY-REMOVED:post:/orders"
+      ],
+      "cost": {
+        "version": 1,
+        "calls": 3,
+        "invocations": 3,
+        "fanout": 0,
+        "trimmed_roles": []
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 309,
+      "latency_ms": 120
+    },
+    {
+      "version": 1,
+      "case_id": "openapi-remove-request-body",
+      "profile": "deep",
+      "holdout": false,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "breaking",
+        "expected": "breaking",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [
+        "AF-BREAKING-REQUEST-BODY-REMOVED:post:/orders"
+      ],
+      "cost": {
+        "version": 1,
+        "calls": 3,
+        "invocations": 3,
+        "fanout": 0,
+        "trimmed_roles": []
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 309,
+      "latency_ms": 119
+    },
+    {
+      "version": 1,
+      "case_id": "openapi-remove-required-property",
+      "profile": "economy",
+      "holdout": true,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "breaking",
+        "expected": "breaking",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [
+        "AF-BREAKING-REQUEST-PROPERTY-REMOVED:post:/orders",
+        "AF-BREAKING-RESPONSE-PROPERTY-REMOVED:post:/orders",
+        "AF-BREAKING-RESPONSE-PROPERTY-REMOVED:post:/orders",
+        "AF-BREAKING-RESPONSE-REQUIRED-REMOVED:post:/orders",
+        "AF-BREAKING-RESPONSE-REQUIRED-REMOVED:post:/orders",
+        "AF-COMPAT-REQUEST-REQUIRED-REMOVED:post:/orders"
+      ],
+      "cost": {
+        "version": 1,
+        "calls": 3,
+        "invocations": 3,
+        "fanout": 0,
+        "trimmed_roles": []
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 2097,
+      "latency_ms": 119
+    },
+    {
+      "version": 1,
+      "case_id": "openapi-remove-required-property",
+      "profile": "balanced",
+      "holdout": true,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "breaking",
+        "expected": "breaking",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [
+        "AF-BREAKING-REQUEST-PROPERTY-REMOVED:post:/orders",
+        "AF-BREAKING-RESPONSE-PROPERTY-REMOVED:post:/orders",
+        "AF-BREAKING-RESPONSE-PROPERTY-REMOVED:post:/orders",
+        "AF-BREAKING-RESPONSE-REQUIRED-REMOVED:post:/orders",
+        "AF-BREAKING-RESPONSE-REQUIRED-REMOVED:post:/orders",
+        "AF-COMPAT-REQUEST-REQUIRED-REMOVED:post:/orders"
+      ],
+      "cost": {
+        "version": 1,
+        "calls": 3,
+        "invocations": 3,
+        "fanout": 0,
+        "trimmed_roles": []
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 2097,
+      "latency_ms": 133
+    },
+    {
+      "version": 1,
+      "case_id": "openapi-remove-required-property",
+      "profile": "deep",
+      "holdout": true,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "breaking",
+        "expected": "breaking",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [
+        "AF-BREAKING-REQUEST-PROPERTY-REMOVED:post:/orders",
+        "AF-BREAKING-RESPONSE-PROPERTY-REMOVED:post:/orders",
+        "AF-BREAKING-RESPONSE-PROPERTY-REMOVED:post:/orders",
+        "AF-BREAKING-RESPONSE-REQUIRED-REMOVED:post:/orders",
+        "AF-BREAKING-RESPONSE-REQUIRED-REMOVED:post:/orders",
+        "AF-COMPAT-REQUEST-REQUIRED-REMOVED:post:/orders"
+      ],
+      "cost": {
+        "version": 1,
+        "calls": 3,
+        "invocations": 3,
+        "fanout": 0,
+        "trimmed_roles": []
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 2097,
+      "latency_ms": 124
+    },
+    {
+      "version": 1,
+      "case_id": "openapi-remove-response-status",
+      "profile": "economy",
+      "holdout": false,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "breaking",
+        "expected": "breaking",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [
+        "AF-BREAKING-RESPONSE-REMOVED:post:/orders"
+      ],
+      "cost": {
+        "version": 1,
+        "calls": 3,
+        "invocations": 3,
+        "fanout": 0,
+        "trimmed_roles": []
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 314,
+      "latency_ms": 120
+    },
+    {
+      "version": 1,
+      "case_id": "openapi-remove-response-status",
+      "profile": "balanced",
+      "holdout": false,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "breaking",
+        "expected": "breaking",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [
+        "AF-BREAKING-RESPONSE-REMOVED:post:/orders"
+      ],
+      "cost": {
+        "version": 1,
+        "calls": 3,
+        "invocations": 3,
+        "fanout": 0,
+        "trimmed_roles": []
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 314,
+      "latency_ms": 126
+    },
+    {
+      "version": 1,
+      "case_id": "openapi-remove-response-status",
+      "profile": "deep",
+      "holdout": false,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "breaking",
+        "expected": "breaking",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [
+        "AF-BREAKING-RESPONSE-REMOVED:post:/orders"
+      ],
+      "cost": {
+        "version": 1,
+        "calls": 3,
+        "invocations": 3,
+        "fanout": 0,
+        "trimmed_roles": []
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 314,
+      "latency_ms": 121
+    },
+    {
+      "version": 1,
+      "case_id": "openapi-version-bump",
+      "profile": "economy",
+      "holdout": true,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "compatible",
+        "expected": "compatible",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [],
+      "cost": {
+        "version": 1,
+        "calls": 2,
+        "invocations": 2,
+        "fanout": 0,
+        "trimmed_roles": [
+          "api-architecture-review",
+          "api-contract-review",
+          "api-data-review",
+          "api-performance-review",
+          "api-security-review"
+        ]
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 2,
+      "latency_ms": 113
+    },
+    {
+      "version": 1,
+      "case_id": "openapi-version-bump",
+      "profile": "balanced",
+      "holdout": true,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "compatible",
+        "expected": "compatible",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [],
+      "cost": {
+        "version": 1,
+        "calls": 3,
+        "invocations": 3,
+        "fanout": 1,
+        "trimmed_roles": [
+          "api-data-review",
+          "api-performance-review",
+          "api-security-review"
+        ]
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 2,
+      "latency_ms": 125
+    },
+    {
+      "version": 1,
+      "case_id": "openapi-version-bump",
+      "profile": "deep",
+      "holdout": true,
+      "status": "REVIEW",
+      "quality": {
+        "version": 1,
+        "verdict": "compatible",
+        "expected": "compatible",
+        "verdict_ok": true,
+        "safety_ok": true,
+        "missing_roles": []
+      },
+      "evidence": [],
+      "cost": {
+        "version": 1,
+        "calls": 4,
+        "invocations": 4,
+        "fanout": 2,
+        "trimmed_roles": [
+          "api-performance-review",
+          "api-security-review"
+        ]
+      },
+      "context_bytes": 0,
+      "evidence_bytes": 2,
+      "latency_ms": 141
+    }
+  ],
+  "axes": {
+    "economy": {
+      "quality_rate": 1.0,
+      "safety_violations": 0.0,
+      "evidence_ids_mean": 1.69,
+      "calls_mean": 2.56,
+      "invocations_mean": 2.56,
+      "fanout_mean": 0.0,
+      "context_bytes_mean": 0.0,
+      "latency_ms_median": 119.0
+    },
+    "balanced": {
+      "quality_rate": 1.0,
+      "safety_violations": 0.0,
+      "evidence_ids_mean": 1.69,
+      "calls_mean": 3.0,
+      "invocations_mean": 3.0,
+      "fanout_mean": 0.44,
+      "context_bytes_mean": 0.0,
+      "latency_ms_median": 123.0
+    },
+    "deep": {
+      "quality_rate": 1.0,
+      "safety_violations": 0.0,
+      "evidence_ids_mean": 1.69,
+      "calls_mean": 3.44,
+      "invocations_mean": 3.44,
+      "fanout_mean": 0.88,
+      "context_bytes_mean": 0.0,
+      "latency_ms_median": 125.0
+    }
+  },
+  "mutation": {
+    "total": 10,
+    "detected": 10
+  },
+  "gates": {
+    "quality_every_profile": true,
+    "safety_zero_violations": true,
+    "cost_monotone": true,
+    "mutation_score": true,
+    "holdout_pass": true
+  },
+  "passed": true,
+  "tokens": "unresolved"
+}

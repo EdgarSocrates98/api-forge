@@ -1,0 +1,8 @@
+domain: api-dx
+version: 1
+areas: [REST]
+rule_ids:
+  - AF-REST-008
+summary: >-
+  Developer experience of the published surface - consistent naming, trailing-slash semantics, error shape, pagination affordances.
+verified: "2026-09-21"

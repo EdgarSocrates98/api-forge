@@ -1,0 +1,9 @@
+sources:
+  - name: "JSON Schema Core 2020-12"
+    url: https://json-schema.org/draft/2020-12/json-schema-core
+    authority: vendor-docs
+    verified: "2026-09-21"
+  - name: "JSON Schema Validation 2020-12"
+    url: https://json-schema.org/draft/2020-12/json-schema-validation
+    authority: vendor-docs
+    verified: "2026-09-21"

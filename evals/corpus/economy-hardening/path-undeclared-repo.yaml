@@ -1,0 +1,4 @@
+id: path-undeclared-repo
+kind: path
+candidate: "{work}/undeclared/api.py"
+expect: refuse

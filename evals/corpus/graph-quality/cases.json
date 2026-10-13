@@ -1,0 +1,665 @@
+{
+  "schema": "apiforge/graph-quality-corpus/v1",
+  "cases": [
+    {
+      "id": "python/g-repeat",
+      "language": "python",
+      "file": "fixtures/python/g-repeat.py",
+      "expect": [
+        "AF-GDB-001",
+        "AF-GDB-003"
+      ]
+    },
+    {
+      "id": "python/g-repeat-both",
+      "language": "python",
+      "file": "fixtures/python/g-repeat-both.py",
+      "expect": [
+        "AF-GDB-001",
+        "AF-GDB-002"
+      ]
+    },
+    {
+      "id": "python/g-fanout",
+      "language": "python",
+      "file": "fixtures/python/g-fanout.py",
+      "expect": [
+        "AF-DATA-013",
+        "AF-GDB-002"
+      ]
+    },
+    {
+      "id": "python/g-scan",
+      "language": "python",
+      "file": "fixtures/python/g-scan.py",
+      "expect": [
+        "AF-DATA-013",
+        "AF-GDB-003"
+      ]
+    },
+    {
+      "id": "python/g-ok",
+      "language": "python",
+      "file": "fixtures/python/g-ok.py",
+      "expect": []
+    },
+    {
+      "id": "python/g-ok-loop",
+      "language": "python",
+      "file": "fixtures/python/g-ok-loop.py",
+      "expect": []
+    },
+    {
+      "id": "python/g-multiline",
+      "language": "python",
+      "file": "fixtures/python/g-multiline.py",
+      "expect": []
+    },
+    {
+      "id": "python/c-varlen",
+      "language": "python",
+      "file": "fixtures/python/c-varlen.py",
+      "expect": [
+        "AF-GDB-004"
+      ]
+    },
+    {
+      "id": "python/c-varlen-open",
+      "language": "python",
+      "file": "fixtures/python/c-varlen-open.py",
+      "expect": [
+        "AF-DATA-013",
+        "AF-GDB-004"
+      ]
+    },
+    {
+      "id": "python/c-unlabeled",
+      "language": "python",
+      "file": "fixtures/python/c-unlabeled.py",
+      "expect": [
+        "AF-GDB-005"
+      ]
+    },
+    {
+      "id": "python/c-unlabeled-unbounded",
+      "language": "python",
+      "file": "fixtures/python/c-unlabeled-unbounded.py",
+      "expect": [
+        "AF-DATA-013",
+        "AF-GDB-005"
+      ]
+    },
+    {
+      "id": "python/c-cartesian",
+      "language": "python",
+      "file": "fixtures/python/c-cartesian.py",
+      "expect": [
+        "AF-GDB-006"
+      ]
+    },
+    {
+      "id": "python/c-cartesian-unbounded",
+      "language": "python",
+      "file": "fixtures/python/c-cartesian-unbounded.py",
+      "expect": [
+        "AF-DATA-013",
+        "AF-GDB-006"
+      ]
+    },
+    {
+      "id": "python/c-ok",
+      "language": "python",
+      "file": "fixtures/python/c-ok.py",
+      "expect": []
+    },
+    {
+      "id": "python/c-ok-count",
+      "language": "python",
+      "file": "fixtures/python/c-ok-count.py",
+      "expect": []
+    },
+    {
+      "id": "python/c-fstring",
+      "language": "python",
+      "file": "fixtures/python/c-fstring.py",
+      "expect": [
+        "AF-GDB-008"
+      ]
+    },
+    {
+      "id": "python/c-format",
+      "language": "python",
+      "file": "fixtures/python/c-format.py",
+      "expect": [
+        "AF-GDB-008"
+      ]
+    },
+    {
+      "id": "python/c-param-ok",
+      "language": "python",
+      "file": "fixtures/python/c-param-ok.py",
+      "expect": []
+    },
+    {
+      "id": "python/s-path",
+      "language": "python",
+      "file": "fixtures/python/s-path.py",
+      "expect": [
+        "AF-GDB-007"
+      ]
+    },
+    {
+      "id": "python/s-path-unbounded",
+      "language": "python",
+      "file": "fixtures/python/s-path-unbounded.py",
+      "expect": [
+        "AF-DATA-013",
+        "AF-GDB-007"
+      ]
+    },
+    {
+      "id": "python/s-ok",
+      "language": "python",
+      "file": "fixtures/python/s-ok.py",
+      "expect": []
+    },
+    {
+      "id": "python/s-ok-count",
+      "language": "python",
+      "file": "fixtures/python/s-ok-count.py",
+      "expect": []
+    },
+    {
+      "id": "python/a-unscoped",
+      "language": "python",
+      "file": "fixtures/python/a-unscoped.py",
+      "expect": [
+        "AF-DATA-013",
+        "AF-GDB-009"
+      ]
+    },
+    {
+      "id": "python/a-unscoped-limit",
+      "language": "python",
+      "file": "fixtures/python/a-unscoped-limit.py",
+      "expect": [
+        "AF-GDB-009"
+      ]
+    },
+    {
+      "id": "python/a-ok",
+      "language": "python",
+      "file": "fixtures/python/a-ok.py",
+      "expect": []
+    },
+    {
+      "id": "python/v-notopk",
+      "language": "python",
+      "file": "fixtures/python/v-notopk.py",
+      "expect": [
+        "AF-GDB-010"
+      ]
+    },
+    {
+      "id": "python/v-notopk-unbounded",
+      "language": "python",
+      "file": "fixtures/python/v-notopk-unbounded.py",
+      "expect": [
+        "AF-DATA-013",
+        "AF-GDB-010"
+      ]
+    },
+    {
+      "id": "python/v-ok",
+      "language": "python",
+      "file": "fixtures/python/v-ok.py",
+      "expect": []
+    },
+    {
+      "id": "java/g-repeat",
+      "language": "java",
+      "file": "fixtures/java/g-repeat.java",
+      "expect": [
+        "AF-GDB-001",
+        "AF-GDB-003"
+      ]
+    },
+    {
+      "id": "java/g-repeat-both",
+      "language": "java",
+      "file": "fixtures/java/g-repeat-both.java",
+      "expect": [
+        "AF-GDB-001",
+        "AF-GDB-002"
+      ]
+    },
+    {
+      "id": "java/g-fanout",
+      "language": "java",
+      "file": "fixtures/java/g-fanout.java",
+      "expect": [
+        "AF-DATA-013",
+        "AF-GDB-002"
+      ]
+    },
+    {
+      "id": "java/g-scan",
+      "language": "java",
+      "file": "fixtures/java/g-scan.java",
+      "expect": [
+        "AF-DATA-013",
+        "AF-GDB-003"
+      ]
+    },
+    {
+      "id": "java/g-ok",
+      "language": "java",
+      "file": "fixtures/java/g-ok.java",
+      "expect": []
+    },
+    {
+      "id": "java/g-ok-loop",
+      "language": "java",
+      "file": "fixtures/java/g-ok-loop.java",
+      "expect": []
+    },
+    {
+      "id": "java/g-multiline",
+      "language": "java",
+      "file": "fixtures/java/g-multiline.java",
+      "expect": [
+        "AF-DATA-013",
+        "AF-GDB-002"
+      ]
+    },
+    {
+      "id": "java/c-varlen",
+      "language": "java",
+      "file": "fixtures/java/c-varlen.java",
+      "expect": [
+        "AF-GDB-004"
+      ]
+    },
+    {
+      "id": "java/c-varlen-open",
+      "language": "java",
+      "file": "fixtures/java/c-varlen-open.java",
+      "expect": [
+        "AF-DATA-013",
+        "AF-GDB-004"
+      ]
+    },
+    {
+      "id": "java/c-unlabeled",
+      "language": "java",
+      "file": "fixtures/java/c-unlabeled.java",
+      "expect": [
+        "AF-GDB-005"
+      ]
+    },
+    {
+      "id": "java/c-unlabeled-unbounded",
+      "language": "java",
+      "file": "fixtures/java/c-unlabeled-unbounded.java",
+      "expect": [
+        "AF-DATA-013",
+        "AF-GDB-005"
+      ]
+    },
+    {
+      "id": "java/c-cartesian",
+      "language": "java",
+      "file": "fixtures/java/c-cartesian.java",
+      "expect": [
+        "AF-GDB-006"
+      ]
+    },
+    {
+      "id": "java/c-cartesian-unbounded",
+      "language": "java",
+      "file": "fixtures/java/c-cartesian-unbounded.java",
+      "expect": [
+        "AF-DATA-013",
+        "AF-GDB-006"
+      ]
+    },
+    {
+      "id": "java/c-ok",
+      "language": "java",
+      "file": "fixtures/java/c-ok.java",
+      "expect": []
+    },
+    {
+      "id": "java/c-ok-count",
+      "language": "java",
+      "file": "fixtures/java/c-ok-count.java",
+      "expect": []
+    },
+    {
+      "id": "java/c-concat",
+      "language": "java",
+      "file": "fixtures/java/c-concat.java",
+      "expect": [
+        "AF-GDB-008"
+      ]
+    },
+    {
+      "id": "java/c-concat-limit",
+      "language": "java",
+      "file": "fixtures/java/c-concat-limit.java",
+      "expect": [
+        "AF-GDB-008"
+      ]
+    },
+    {
+      "id": "go/g-repeat",
+      "language": "go",
+      "file": "fixtures/go/g-repeat.go",
+      "expect": [
+        "AF-GDB-001",
+        "AF-GDB-003"
+      ]
+    },
+    {
+      "id": "go/g-repeat-both",
+      "language": "go",
+      "file": "fixtures/go/g-repeat-both.go",
+      "expect": [
+        "AF-GDB-001",
+        "AF-GDB-002"
+      ]
+    },
+    {
+      "id": "go/g-fanout",
+      "language": "go",
+      "file": "fixtures/go/g-fanout.go",
+      "expect": [
+        "AF-DATA-013",
+        "AF-GDB-002"
+      ]
+    },
+    {
+      "id": "go/g-scan",
+      "language": "go",
+      "file": "fixtures/go/g-scan.go",
+      "expect": [
+        "AF-DATA-013",
+        "AF-GDB-003"
+      ]
+    },
+    {
+      "id": "go/g-ok",
+      "language": "go",
+      "file": "fixtures/go/g-ok.go",
+      "expect": []
+    },
+    {
+      "id": "go/g-ok-loop",
+      "language": "go",
+      "file": "fixtures/go/g-ok-loop.go",
+      "expect": []
+    },
+    {
+      "id": "go/c-varlen",
+      "language": "go",
+      "file": "fixtures/go/c-varlen.go",
+      "expect": [
+        "AF-GDB-004"
+      ]
+    },
+    {
+      "id": "go/c-varlen-open",
+      "language": "go",
+      "file": "fixtures/go/c-varlen-open.go",
+      "expect": [
+        "AF-DATA-013",
+        "AF-GDB-004"
+      ]
+    },
+    {
+      "id": "go/c-unlabeled",
+      "language": "go",
+      "file": "fixtures/go/c-unlabeled.go",
+      "expect": [
+        "AF-GDB-005"
+      ]
+    },
+    {
+      "id": "go/c-unlabeled-unbounded",
+      "language": "go",
+      "file": "fixtures/go/c-unlabeled-unbounded.go",
+      "expect": [
+        "AF-DATA-013",
+        "AF-GDB-005"
+      ]
+    },
+    {
+      "id": "go/c-cartesian",
+      "language": "go",
+      "file": "fixtures/go/c-cartesian.go",
+      "expect": [
+        "AF-GDB-006"
+      ]
+    },
+    {
+      "id": "go/c-cartesian-unbounded",
+      "language": "go",
+      "file": "fixtures/go/c-cartesian-unbounded.go",
+      "expect": [
+        "AF-DATA-013",
+        "AF-GDB-006"
+      ]
+    },
+    {
+      "id": "go/c-ok",
+      "language": "go",
+      "file": "fixtures/go/c-ok.go",
+      "expect": []
+    },
+    {
+      "id": "go/c-ok-count",
+      "language": "go",
+      "file": "fixtures/go/c-ok-count.go",
+      "expect": []
+    },
+    {
+      "id": "go/c-sprintf",
+      "language": "go",
+      "file": "fixtures/go/c-sprintf.go",
+      "expect": [
+        "AF-GDB-008"
+      ]
+    },
+    {
+      "id": "go/c-sprintf-limit",
+      "language": "go",
+      "file": "fixtures/go/c-sprintf-limit.go",
+      "expect": [
+        "AF-GDB-008"
+      ]
+    },
+    {
+      "id": "typescript/g-repeat",
+      "language": "typescript",
+      "file": "fixtures/typescript/g-repeat.ts",
+      "expect": [
+        "AF-GDB-001",
+        "AF-GDB-003"
+      ]
+    },
+    {
+      "id": "typescript/g-repeat-both",
+      "language": "typescript",
+      "file": "fixtures/typescript/g-repeat-both.ts",
+      "expect": [
+        "AF-GDB-001",
+        "AF-GDB-002"
+      ]
+    },
+    {
+      "id": "typescript/g-fanout",
+      "language": "typescript",
+      "file": "fixtures/typescript/g-fanout.ts",
+      "expect": [
+        "AF-DATA-013",
+        "AF-GDB-002"
+      ]
+    },
+    {
+      "id": "typescript/g-scan",
+      "language": "typescript",
+      "file": "fixtures/typescript/g-scan.ts",
+      "expect": [
+        "AF-DATA-013",
+        "AF-GDB-003"
+      ]
+    },
+    {
+      "id": "typescript/g-ok",
+      "language": "typescript",
+      "file": "fixtures/typescript/g-ok.ts",
+      "expect": []
+    },
+    {
+      "id": "typescript/g-ok-loop",
+      "language": "typescript",
+      "file": "fixtures/typescript/g-ok-loop.ts",
+      "expect": []
+    },
+    {
+      "id": "typescript/g-multiline",
+      "language": "typescript",
+      "file": "fixtures/typescript/g-multiline.ts",
+      "expect": []
+    },
+    {
+      "id": "typescript/c-varlen",
+      "language": "typescript",
+      "file": "fixtures/typescript/c-varlen.ts",
+      "expect": [
+        "AF-GDB-004"
+      ]
+    },
+    {
+      "id": "typescript/c-varlen-open",
+      "language": "typescript",
+      "file": "fixtures/typescript/c-varlen-open.ts",
+      "expect": [
+        "AF-DATA-013",
+        "AF-GDB-004"
+      ]
+    },
+    {
+      "id": "typescript/c-unlabeled",
+      "language": "typescript",
+      "file": "fixtures/typescript/c-unlabeled.ts",
+      "expect": [
+        "AF-GDB-005"
+      ]
+    },
+    {
+      "id": "typescript/c-unlabeled-unbounded",
+      "language": "typescript",
+      "file": "fixtures/typescript/c-unlabeled-unbounded.ts",
+      "expect": [
+        "AF-DATA-013",
+        "AF-GDB-005"
+      ]
+    },
+    {
+      "id": "typescript/c-cartesian",
+      "language": "typescript",
+      "file": "fixtures/typescript/c-cartesian.ts",
+      "expect": [
+        "AF-GDB-006"
+      ]
+    },
+    {
+      "id": "typescript/c-cartesian-unbounded",
+      "language": "typescript",
+      "file": "fixtures/typescript/c-cartesian-unbounded.ts",
+      "expect": [
+        "AF-DATA-013",
+        "AF-GDB-006"
+      ]
+    },
+    {
+      "id": "typescript/c-ok",
+      "language": "typescript",
+      "file": "fixtures/typescript/c-ok.ts",
+      "expect": []
+    },
+    {
+      "id": "typescript/c-ok-count",
+      "language": "typescript",
+      "file": "fixtures/typescript/c-ok-count.ts",
+      "expect": []
+    },
+    {
+      "id": "typescript/c-template",
+      "language": "typescript",
+      "file": "fixtures/typescript/c-template.ts",
+      "expect": [
+        "AF-GDB-008"
+      ]
+    },
+    {
+      "id": "typescript/c-concat",
+      "language": "typescript",
+      "file": "fixtures/typescript/c-concat.ts",
+      "expect": [
+        "AF-GDB-008"
+      ]
+    },
+    {
+      "id": "typescript/c-not-cypher",
+      "language": "typescript",
+      "file": "fixtures/typescript/c-not-cypher.ts",
+      "expect": []
+    },
+    {
+      "id": "python/x-subprocess",
+      "language": "python",
+      "file": "fixtures/python/x-subprocess.py",
+      "expect": [],
+      "holdout": true
+    },
+    {
+      "id": "python/x-limit-in-literal",
+      "language": "python",
+      "file": "fixtures/python/x-limit-in-literal.py",
+      "expect": [
+        "AF-DATA-013"
+      ],
+      "holdout": true
+    },
+    {
+      "id": "python/x-next",
+      "language": "python",
+      "file": "fixtures/python/x-next.py",
+      "expect": [],
+      "holdout": true
+    },
+    {
+      "id": "java/x-comment",
+      "language": "java",
+      "file": "fixtures/java/x-comment.java",
+      "expect": [],
+      "holdout": true
+    },
+    {
+      "id": "typescript/x-run-var",
+      "language": "typescript",
+      "file": "fixtures/typescript/x-run-var.ts",
+      "expect": [],
+      "holdout": true
+    },
+    {
+      "id": "go/x-order-skip",
+      "language": "go",
+      "file": "fixtures/go/x-order-skip.go",
+      "expect": [],
+      "holdout": true
+    }
+  ]
+}

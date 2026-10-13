@@ -1,0 +1,4 @@
+vertical: messaging
+status: unresolved
+case: broker_lag_missing
+reason: lag and delivery guarantees require broker evidence

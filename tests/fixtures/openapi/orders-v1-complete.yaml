@@ -1,0 +1,28 @@
+openapi: 3.1.0
+info:
+  title: Complete Orders API
+  version: 1.0.0
+paths:
+  /v1/orders:
+    get:
+      operationId: listOrders
+      responses:
+        "200":
+          description: List orders
+    post:
+      operationId: createOrder
+      responses:
+        "201":
+          description: Order created
+  /v1/orders/{order_id}:
+    get:
+      operationId: getOrder
+      parameters:
+        - name: order_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Order found

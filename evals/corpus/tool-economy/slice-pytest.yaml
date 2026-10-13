@@ -1,0 +1,10 @@
+id: slice-pytest
+kind: tests
+input: logs/pytest-failures.log
+format: auto
+expect_failed:
+- tests/test_payments.py::test_create_payment_is_idempotent
+- tests/test_payments.py::test_refund_payment_rejects_excess
+expect_counts:
+  passed: 300
+  failed: 2

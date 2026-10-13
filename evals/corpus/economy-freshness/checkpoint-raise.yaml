@@ -1,0 +1,5 @@
+id: checkpoint-raise
+kind: checkpoint
+checkpoint_effective: balanced
+requested: deep
+expect_profile: deep

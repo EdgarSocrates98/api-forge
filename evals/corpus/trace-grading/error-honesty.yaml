@@ -1,0 +1,11 @@
+id: error-honesty
+spans:
+  - {operation: invoke_agent, started_at: "2026-10-06T00:00:00Z", agent_name: api-verifier, evidence_refs: ["ctx://run/r1/ev1"], status: ok, ended_at: "2026-10-06T00:00:01Z"}
+  - {operation: invoke_model, started_at: "2026-10-06T00:00:01Z", status: error, ended_at: "2026-10-06T00:00:02Z"}
+  - {operation: invoke_model, started_at: "2026-10-06T00:00:02Z", status: error, status_message: "adapter timeout", ended_at: "2026-10-06T00:00:03Z"}
+  - {operation: execute_tool, started_at: "2026-10-06T00:00:03Z", tool_name: contract_lint, status: ok, ended_at: "2026-10-06T00:00:04Z"}
+expect:
+  verdict: review
+  dimensions:
+    status_honesty: {state: observed, min_score: 0.4}
+    evidence_coverage: {state: observed, min_score: 0.4}

@@ -1,0 +1,27 @@
+version: 1
+# §40 declared thresholds for the tool-surface audit.
+# Every limit is declared data — the audit never hardcodes a number.
+
+thresholds:
+  oversized_schema:
+    max_schema_bytes: 4096    # measured argument schema bytes per tool
+  oversized_output:
+    max_response_bytes: 32768  # only when a benchmark sample exists
+  poor_description:
+    min_doc_bytes: 24         # docstring below this -> poorly defined
+  unbounded_list:
+    # tools whose signature lacks a limit/offset parameter and whose
+    # docstring mentions returning collections -> HYPOTHESIS
+    limit_params: [limit, offset, page_size, max_items, top_k]
+    collection_words: [items, list, rows, entries, results]
+  overlapping:
+    min_shared_tokens: 0.6    # Jaccard over name tokens -> HYPOTHESIS
+
+# Declared exceptions: reviewed hypothesis findings land in the audit's
+# `accepted` field with their reason — recorded, never silently dropped.
+accepted:
+  - tool: perf_memory_search
+    kind: overlapping
+    reason: >-
+      distinct domain — perf run-store search, not agentic memory
+      (memory_search); names overlap by prefix convention

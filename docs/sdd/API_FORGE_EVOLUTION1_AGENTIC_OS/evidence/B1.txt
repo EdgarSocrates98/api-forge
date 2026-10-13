@@ -1,0 +1,2 @@
+pytest -q tests/agentic_state/test_memory_blackboard.py
+B1: append-only blackboard query returned bounded task-scoped taint-visible state.

@@ -1,0 +1,20 @@
+  "passed": true,
+  "schema": "apiforge/control-plane-evals/v1",
+  "totals": {
+    "cases": 3,
+    "failed": 0,
+    "failed_ids": []
+  }
+}
+{
+  "fallback": null,
+  "governing": "legacy",
+  "mode": "shadow",
+  "reason": "candidate ran in parallel and was recorded; legacy governs",
+  "recommendation": null,
+  "route": "model_routing",
+  "schema": "apiforge/route-decision/v1",
+  "shadow": true,
+  "unresolved": [],
+  "version": 1
+}

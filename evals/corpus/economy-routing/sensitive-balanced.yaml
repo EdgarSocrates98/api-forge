@@ -1,0 +1,10 @@
+id: sensitive-balanced
+shape: sensitive
+risk: sensitive
+size: M
+profile: balanced
+expected:
+  effective: balanced
+  minimum_roles:
+  - critic
+  - reviewer

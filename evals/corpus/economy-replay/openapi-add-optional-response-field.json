@@ -1,0 +1,695 @@
+{
+  "case_id": "openapi-add-optional-response-field",
+  "economy": {
+    "diagnostics": [],
+    "effective": "balanced",
+    "envelope": {
+      "challenger_slots": 1,
+      "context_bytes": 32000,
+      "debate_rounds": 1,
+      "fallbacks": 1,
+      "fanout": 1,
+      "ladder_ceiling": "L4",
+      "on_exhaustion": "unresolved",
+      "profile": "balanced",
+      "provider_calls": 8,
+      "shadow_share": 0.1,
+      "silent_downgrade": false,
+      "verification_share": 0.25,
+      "version": 1
+    },
+    "escalation_reason": null,
+    "escalation_reviewer": null,
+    "floor": "economy",
+    "minimum_roles": [
+      "reviewer"
+    ],
+    "requested": "balanced",
+    "requested_source": "flag",
+    "schema": "apiforge/economy-plan/v1",
+    "stop_when": [
+      "deterministic_proof",
+      "no_unresolved_critical"
+    ],
+    "trimmed_roles": [
+      "api-data-review",
+      "api-performance-review",
+      "api-security-review"
+    ],
+    "version": 1
+  },
+  "profile": "balanced",
+  "routing": {
+    "candidates": [
+      {
+        "agent": "api-architecture-reviewer",
+        "capability": "api-architecture-review",
+        "eligible": true,
+        "expertise_packs": [],
+        "family": "api-contract-review",
+        "implementation": "architecture",
+        "ranking_key": [
+          "1",
+          "unknown",
+          "1",
+          "1",
+          "unknown",
+          "1",
+          "unknown",
+          "api-architecture-review"
+        ],
+        "rejection": null,
+        "signals": [
+          {
+            "evidence_refs": [],
+            "expires_at": null,
+            "freshness_state": "unknown",
+            "name": "cost",
+            "observed_at": null,
+            "source": "unknown",
+            "status": "unknown",
+            "unit": "",
+            "value": null,
+            "version": 1
+          },
+          {
+            "evidence_refs": [],
+            "expires_at": null,
+            "freshness_state": "unknown",
+            "name": "duration",
+            "observed_at": null,
+            "source": "unknown",
+            "status": "unknown",
+            "unit": "",
+            "value": null,
+            "version": 1
+          },
+          {
+            "evidence_refs": [],
+            "expires_at": null,
+            "freshness_state": "unknown",
+            "name": "quality",
+            "observed_at": null,
+            "source": "unknown",
+            "status": "unknown",
+            "unit": "",
+            "value": null,
+            "version": 1
+          }
+        ],
+        "version": 1
+      },
+      {
+        "agent": "api-contract-architect",
+        "capability": "api-contract-review",
+        "eligible": true,
+        "expertise_packs": [],
+        "family": "api-contract-review",
+        "implementation": "contract",
+        "ranking_key": [
+          "1",
+          "unknown",
+          "1",
+          "1",
+          "unknown",
+          "1",
+          "unknown",
+          "api-contract-review"
+        ],
+        "rejection": null,
+        "signals": [
+          {
+            "evidence_refs": [],
+            "expires_at": null,
+            "freshness_state": "unknown",
+            "name": "cost",
+            "observed_at": null,
+            "source": "unknown",
+            "status": "unknown",
+            "unit": "",
+            "value": null,
+            "version": 1
+          },
+          {
+            "evidence_refs": [],
+            "expires_at": null,
+            "freshness_state": "unknown",
+            "name": "duration",
+            "observed_at": null,
+            "source": "unknown",
+            "status": "unknown",
+            "unit": "",
+            "value": null,
+            "version": 1
+          },
+          {
+            "evidence_refs": [],
+            "expires_at": null,
+            "freshness_state": "unknown",
+            "name": "quality",
+            "observed_at": null,
+            "source": "unknown",
+            "status": "unknown",
+            "unit": "",
+            "value": null,
+            "version": 1
+          }
+        ],
+        "version": 1
+      },
+      {
+        "agent": "api-data-access-architect",
+        "capability": "api-data-review",
+        "eligible": true,
+        "expertise_packs": [],
+        "family": null,
+        "implementation": null,
+        "ranking_key": [
+          "1",
+          "unknown",
+          "1",
+          "1",
+          "unknown",
+          "1",
+          "unknown",
+          "api-data-review"
+        ],
+        "rejection": null,
+        "signals": [
+          {
+            "evidence_refs": [],
+            "expires_at": null,
+            "freshness_state": "unknown",
+            "name": "cost",
+            "observed_at": null,
+            "source": "unknown",
+            "status": "unknown",
+            "unit": "",
+            "value": null,
+            "version": 1
+          },
+          {
+            "evidence_refs": [],
+            "expires_at": null,
+            "freshness_state": "unknown",
+            "name": "duration",
+            "observed_at": null,
+            "source": "unknown",
+            "status": "unknown",
+            "unit": "",
+            "value": null,
+            "version": 1
+          },
+          {
+            "evidence_refs": [],
+            "expires_at": null,
+            "freshness_state": "unknown",
+            "name": "quality",
+            "observed_at": null,
+            "source": "unknown",
+            "status": "unknown",
+            "unit": "",
+            "value": null,
+            "version": 1
+          }
+        ],
+        "version": 1
+      },
+      {
+        "agent": "api-performance-engineer",
+        "capability": "api-performance-review",
+        "eligible": true,
+        "expertise_packs": [],
+        "family": null,
+        "implementation": null,
+        "ranking_key": [
+          "1",
+          "unknown",
+          "1",
+          "1",
+          "unknown",
+          "1",
+          "unknown",
+          "api-performance-review"
+        ],
+        "rejection": null,
+        "signals": [
+          {
+            "evidence_refs": [],
+            "expires_at": null,
+            "freshness_state": "unknown",
+            "name": "cost",
+            "observed_at": null,
+            "source": "unknown",
+            "status": "unknown",
+            "unit": "",
+            "value": null,
+            "version": 1
+          },
+          {
+            "evidence_refs": [],
+            "expires_at": null,
+            "freshness_state": "unknown",
+            "name": "duration",
+            "observed_at": null,
+            "source": "unknown",
+            "status": "unknown",
+            "unit": "",
+            "value": null,
+            "version": 1
+          },
+          {
+            "evidence_refs": [],
+            "expires_at": null,
+            "freshness_state": "unknown",
+            "name": "quality",
+            "observed_at": null,
+            "source": "unknown",
+            "status": "unknown",
+            "unit": "",
+            "value": null,
+            "version": 1
+          }
+        ],
+        "version": 1
+      },
+      {
+        "agent": "api-security-reviewer",
+        "capability": "api-security-review",
+        "eligible": true,
+        "expertise_packs": [],
+        "family": null,
+        "implementation": null,
+        "ranking_key": [
+          "1",
+          "unknown",
+          "1",
+          "1",
+          "unknown",
+          "1",
+          "unknown",
+          "api-security-review"
+        ],
+        "rejection": null,
+        "signals": [
+          {
+            "evidence_refs": [],
+            "expires_at": null,
+            "freshness_state": "unknown",
+            "name": "cost",
+            "observed_at": null,
+            "source": "unknown",
+            "status": "unknown",
+            "unit": "",
+            "value": null,
+            "version": 1
+          },
+          {
+            "evidence_refs": [],
+            "expires_at": null,
+            "freshness_state": "unknown",
+            "name": "duration",
+            "observed_at": null,
+            "source": "unknown",
+            "status": "unknown",
+            "unit": "",
+            "value": null,
+            "version": 1
+          },
+          {
+            "evidence_refs": [],
+            "expires_at": null,
+            "freshness_state": "unknown",
+            "name": "quality",
+            "observed_at": null,
+            "source": "unknown",
+            "status": "unknown",
+            "unit": "",
+            "value": null,
+            "version": 1
+          }
+        ],
+        "version": 1
+      },
+      {
+        "agent": "api-task-spec-reviewer",
+        "capability": "task-review",
+        "eligible": true,
+        "expertise_packs": [],
+        "family": null,
+        "implementation": null,
+        "ranking_key": [
+          "1",
+          "unknown",
+          "1",
+          "1",
+          "unknown",
+          "1",
+          "unknown",
+          "task-review"
+        ],
+        "rejection": null,
+        "signals": [
+          {
+            "evidence_refs": [],
+            "expires_at": null,
+            "freshness_state": "unknown",
+            "name": "cost",
+            "observed_at": null,
+            "source": "unknown",
+            "status": "unknown",
+            "unit": "",
+            "value": null,
+            "version": 1
+          },
+          {
+            "evidence_refs": [],
+            "expires_at": null,
+            "freshness_state": "unknown",
+            "name": "duration",
+            "observed_at": null,
+            "source": "unknown",
+            "status": "unknown",
+            "unit": "",
+            "value": null,
+            "version": 1
+          },
+          {
+            "evidence_refs": [],
+            "expires_at": null,
+            "freshness_state": "unknown",
+            "name": "quality",
+            "observed_at": null,
+            "source": "unknown",
+            "status": "unknown",
+            "unit": "",
+            "value": null,
+            "version": 1
+          }
+        ],
+        "version": 1
+      }
+    ],
+    "decision_id": "routing:827298f814a1dd7e",
+    "economy": {
+      "diagnostics": [],
+      "effective": "balanced",
+      "envelope": {
+        "challenger_slots": 1,
+        "context_bytes": 32000,
+        "debate_rounds": 1,
+        "fallbacks": 1,
+        "fanout": 1,
+        "ladder_ceiling": "L4",
+        "on_exhaustion": "unresolved",
+        "profile": "balanced",
+        "provider_calls": 8,
+        "shadow_share": 0.1,
+        "silent_downgrade": false,
+        "verification_share": 0.25,
+        "version": 1
+      },
+      "escalation_reason": null,
+      "escalation_reviewer": null,
+      "floor": "economy",
+      "minimum_roles": [
+        "reviewer"
+      ],
+      "requested": "balanced",
+      "requested_source": "flag",
+      "schema": "apiforge/economy-plan/v1",
+      "stop_when": [
+        "deterministic_proof",
+        "no_unresolved_critical"
+      ],
+      "trimmed_roles": [
+        "api-data-review",
+        "api-performance-review",
+        "api-security-review"
+      ],
+      "version": 1
+    },
+    "evidence": [
+      "task_spec"
+    ],
+    "fallback_order": [
+      "api-architecture-review",
+      "api-contract-review",
+      "api-data-review",
+      "api-performance-review",
+      "api-security-review",
+      "task-review"
+    ],
+    "graph_impact": null,
+    "policy_id": "routing/v1",
+    "revision": 1,
+    "risk_complexity": {
+      "assessment_id": "risk-assessment:e451fcabb8c25ef7",
+      "complexity": "moderate",
+      "evidence": [
+        "task_spec"
+      ],
+      "factors": [
+        "rule:expected-proofs-present"
+      ],
+      "gate_state": "review",
+      "objective_order": [
+        "quality",
+        "efficiency"
+      ],
+      "policy_id": "routing/v1",
+      "policy_version": "risk-complexity/v1",
+      "required_roles": [
+        "reviewer"
+      ],
+      "revision": 1,
+      "risk": "read_only",
+      "task_id": "economy-matrix-case",
+      "unresolved": [],
+      "verification_depth": "elevated",
+      "version": 1
+    },
+    "scorecard_routing": {
+      "assessment_id": "scorecard-routing:76a61040c6481ed8",
+      "candidates": [
+        {
+          "candidate": "api-architecture-review",
+          "computed_from": [],
+          "eligible": true,
+          "evaluation_count": 0,
+          "evidence": [],
+          "freshness_state": "unknown",
+          "gaps": [],
+          "lane": "challenger",
+          "profile_id": null,
+          "quality_promoted": false,
+          "quality_score": null,
+          "reason_codes": [
+            "scorecard-missing"
+          ],
+          "version": 1
+        },
+        {
+          "candidate": "api-contract-review",
+          "computed_from": [],
+          "eligible": true,
+          "evaluation_count": 0,
+          "evidence": [],
+          "freshness_state": "unknown",
+          "gaps": [],
+          "lane": "challenger",
+          "profile_id": null,
+          "quality_promoted": false,
+          "quality_score": null,
+          "reason_codes": [
+            "scorecard-missing"
+          ],
+          "version": 1
+        },
+        {
+          "candidate": "api-data-review",
+          "computed_from": [],
+          "eligible": true,
+          "evaluation_count": 0,
+          "evidence": [],
+          "freshness_state": "unknown",
+          "gaps": [],
+          "lane": "challenger",
+          "profile_id": null,
+          "quality_promoted": false,
+          "quality_score": null,
+          "reason_codes": [
+            "scorecard-missing"
+          ],
+          "version": 1
+        },
+        {
+          "candidate": "api-performance-review",
+          "computed_from": [],
+          "eligible": true,
+          "evaluation_count": 0,
+          "evidence": [],
+          "freshness_state": "unknown",
+          "gaps": [],
+          "lane": "challenger",
+          "profile_id": null,
+          "quality_promoted": false,
+          "quality_score": null,
+          "reason_codes": [
+            "scorecard-missing"
+          ],
+          "version": 1
+        },
+        {
+          "candidate": "api-security-review",
+          "computed_from": [],
+          "eligible": true,
+          "evaluation_count": 0,
+          "evidence": [],
+          "freshness_state": "unknown",
+          "gaps": [],
+          "lane": "challenger",
+          "profile_id": null,
+          "quality_promoted": false,
+          "quality_score": null,
+          "reason_codes": [
+            "scorecard-missing"
+          ],
+          "version": 1
+        },
+        {
+          "candidate": "task-review",
+          "computed_from": [],
+          "eligible": true,
+          "evaluation_count": 0,
+          "evidence": [],
+          "freshness_state": "unknown",
+          "gaps": [],
+          "lane": "challenger",
+          "profile_id": null,
+          "quality_promoted": false,
+          "quality_score": null,
+          "reason_codes": [
+            "scorecard-missing"
+          ],
+          "version": 1
+        }
+      ],
+      "challenger_order": [
+        "api-architecture-review",
+        "api-contract-review",
+        "api-data-review",
+        "api-performance-review",
+        "api-security-review",
+        "task-review"
+      ],
+      "challenger_slots": 1,
+      "champion_order": [],
+      "evidence": [],
+      "ordered_candidates": [
+        "api-architecture-review",
+        "api-contract-review",
+        "api-data-review",
+        "api-performance-review",
+        "api-security-review",
+        "task-review"
+      ],
+      "policy_version": "scorecard-routing/v1",
+      "selected_challengers": [
+        "api-architecture-review"
+      ],
+      "unresolved": [],
+      "unresolved_order": [],
+      "version": 1
+    },
+    "selected": "api-architecture-review",
+    "shadow_evaluation": {
+      "adaptive_order": [
+        "api-architecture-review",
+        "api-contract-review",
+        "api-data-review",
+        "api-performance-review",
+        "api-security-review",
+        "task-review"
+      ],
+      "adaptive_policy_version": "scorecard-routing/v1",
+      "adaptive_selected": "api-architecture-review",
+      "assessment_id": "scorecard-routing:76a61040c6481ed8",
+      "baseline_order": [
+        "api-architecture-review",
+        "api-contract-review",
+        "api-data-review",
+        "api-performance-review",
+        "api-security-review",
+        "task-review"
+      ],
+      "baseline_policy_version": "routing/v1",
+      "baseline_selected": "api-architecture-review",
+      "changed_candidates": [],
+      "comparison": "challenger-selected",
+      "evaluation_id": "scorecard-shadow:67cbe8078628487e",
+      "evidence": [],
+      "executed": false,
+      "limitations": [
+        "offline-only",
+        "no-capability-invocation"
+      ],
+      "selected_changed": false,
+      "unresolved": [],
+      "version": 1
+    },
+    "task_id": "economy-matrix-case",
+    "unresolved": [
+      "api-architecture-review:cost:unresolved",
+      "api-architecture-review:duration:unresolved",
+      "api-architecture-review:quality:unresolved",
+      "api-contract-review:cost:unresolved",
+      "api-contract-review:duration:unresolved",
+      "api-contract-review:quality:unresolved",
+      "api-data-review:cost:unresolved",
+      "api-data-review:duration:unresolved",
+      "api-data-review:quality:unresolved",
+      "api-performance-review:cost:unresolved",
+      "api-performance-review:duration:unresolved",
+      "api-performance-review:quality:unresolved",
+      "api-security-review:cost:unresolved",
+      "api-security-review:duration:unresolved",
+      "api-security-review:quality:unresolved",
+      "task-review:cost:unresolved",
+      "task-review:duration:unresolved",
+      "task-review:quality:unresolved"
+    ],
+    "version": 1
+  },
+  "task": {
+    "acceptance_criteria": [
+      "findings are evidence bound"
+    ],
+    "budgets": {
+      "deadline": null,
+      "max_calls": 20,
+      "max_rounds": 3,
+      "version": 1
+    },
+    "capability_covered": null,
+    "dependencies": [],
+    "expected_proofs": [
+      "specialist artifact"
+    ],
+    "id": "economy-matrix-case",
+    "inputs": [
+      "project=project"
+    ],
+    "outcome": "evaluate openapi add optional response field",
+    "preconditions": [],
+    "revision": 1,
+    "risk": "read_only",
+    "rollback": "discard local run artifacts",
+    "size": "S",
+    "state": "sealed",
+    "strategy": "direct",
+    "tests": [],
+    "version": 1,
+    "writable_paths": []
+  }
+}

@@ -1,0 +1,238 @@
+{
+  "accuracy": {
+    "balanced": 1.0,
+    "deep": 1.0,
+    "economy": 1.0
+  },
+  "baseline_accuracy": null,
+  "baseline_scope": null,
+  "baseline_sha256": null,
+  "benchmark_identity": {
+    "case_count": 6,
+    "case_ids_sha256": "73f089618faafdaa6685df4e3e0d6397cdeb51c58996a92dfa6a49ed1f9c593d",
+    "claim_scope": "recorded-agentic-outputs",
+    "corpus_sha256": "cf30554dbb9069922d529fa93878f17150e95f857876efab892bac9effa65439",
+    "evaluator_version": "agentic-quality/2+apiforge-0.1.0",
+    "profiles": [
+      "economy",
+      "balanced",
+      "deep"
+    ],
+    "schema": "apiforge/benchmark-identity/v1",
+    "version": 1
+  },
+  "cases": 6,
+  "claim_scope": "recorded-agentic-outputs",
+  "gates": {
+    "balanced_not_below_deep": true,
+    "balanced_quality_floor": true,
+    "deep_quality_floor": true,
+    "economy_not_below_deep": true,
+    "economy_quality_floor": true,
+    "every_case_answered": true,
+    "no_blocked_runs": true
+  },
+  "min_accuracy": 1.0,
+  "passed": true,
+  "rows": [
+    {
+      "answer": "compatible",
+      "answered": true,
+      "calls": 2,
+      "case_id": "add-optional-field",
+      "correct": true,
+      "expected": "compatible",
+      "primary": "api-architecture-review",
+      "profile": "economy",
+      "status": "REVIEW"
+    },
+    {
+      "answer": "compatible",
+      "answered": true,
+      "calls": 3,
+      "case_id": "add-optional-field",
+      "correct": true,
+      "expected": "compatible",
+      "primary": "api-architecture-review",
+      "profile": "balanced",
+      "status": "REVIEW"
+    },
+    {
+      "answer": "compatible",
+      "answered": true,
+      "calls": 4,
+      "case_id": "add-optional-field",
+      "correct": true,
+      "expected": "compatible",
+      "primary": "api-architecture-review",
+      "profile": "deep",
+      "status": "REVIEW"
+    },
+    {
+      "answer": "compatible",
+      "answered": true,
+      "calls": 2,
+      "case_id": "new-endpoint",
+      "correct": true,
+      "expected": "compatible",
+      "primary": "api-architecture-review",
+      "profile": "economy",
+      "status": "REVIEW"
+    },
+    {
+      "answer": "compatible",
+      "answered": true,
+      "calls": 3,
+      "case_id": "new-endpoint",
+      "correct": true,
+      "expected": "compatible",
+      "primary": "api-architecture-review",
+      "profile": "balanced",
+      "status": "REVIEW"
+    },
+    {
+      "answer": "compatible",
+      "answered": true,
+      "calls": 4,
+      "case_id": "new-endpoint",
+      "correct": true,
+      "expected": "compatible",
+      "primary": "api-architecture-review",
+      "profile": "deep",
+      "status": "REVIEW"
+    },
+    {
+      "answer": "breaking",
+      "answered": true,
+      "calls": 3,
+      "case_id": "remove-response-field",
+      "correct": true,
+      "expected": "breaking",
+      "primary": "api-security-review",
+      "profile": "economy",
+      "status": "REVIEW"
+    },
+    {
+      "answer": "breaking",
+      "answered": true,
+      "calls": 3,
+      "case_id": "remove-response-field",
+      "correct": true,
+      "expected": "breaking",
+      "primary": "api-security-review",
+      "profile": "balanced",
+      "status": "REVIEW"
+    },
+    {
+      "answer": "breaking",
+      "answered": true,
+      "calls": 3,
+      "case_id": "remove-response-field",
+      "correct": true,
+      "expected": "breaking",
+      "primary": "api-security-review",
+      "profile": "deep",
+      "status": "REVIEW"
+    },
+    {
+      "answer": "breaking",
+      "answered": true,
+      "calls": 3,
+      "case_id": "rename-operation-id",
+      "correct": true,
+      "expected": "breaking",
+      "primary": "api-security-review",
+      "profile": "economy",
+      "status": "REVIEW"
+    },
+    {
+      "answer": "breaking",
+      "answered": true,
+      "calls": 3,
+      "case_id": "rename-operation-id",
+      "correct": true,
+      "expected": "breaking",
+      "primary": "api-security-review",
+      "profile": "balanced",
+      "status": "REVIEW"
+    },
+    {
+      "answer": "breaking",
+      "answered": true,
+      "calls": 3,
+      "case_id": "rename-operation-id",
+      "correct": true,
+      "expected": "breaking",
+      "primary": "api-security-review",
+      "profile": "deep",
+      "status": "REVIEW"
+    },
+    {
+      "answer": "breaking",
+      "answered": true,
+      "calls": 3,
+      "case_id": "require-request-field",
+      "correct": true,
+      "expected": "breaking",
+      "primary": "api-security-review",
+      "profile": "economy",
+      "status": "REVIEW"
+    },
+    {
+      "answer": "breaking",
+      "answered": true,
+      "calls": 3,
+      "case_id": "require-request-field",
+      "correct": true,
+      "expected": "breaking",
+      "primary": "api-security-review",
+      "profile": "balanced",
+      "status": "REVIEW"
+    },
+    {
+      "answer": "breaking",
+      "answered": true,
+      "calls": 3,
+      "case_id": "require-request-field",
+      "correct": true,
+      "expected": "breaking",
+      "primary": "api-security-review",
+      "profile": "deep",
+      "status": "REVIEW"
+    },
+    {
+      "answer": "unresolved",
+      "answered": true,
+      "calls": 2,
+      "case_id": "unresolved-external-ref",
+      "correct": true,
+      "expected": "unresolved",
+      "primary": "api-architecture-review",
+      "profile": "economy",
+      "status": "REVIEW"
+    },
+    {
+      "answer": "unresolved",
+      "answered": true,
+      "calls": 3,
+      "case_id": "unresolved-external-ref",
+      "correct": true,
+      "expected": "unresolved",
+      "primary": "api-architecture-review",
+      "profile": "balanced",
+      "status": "REVIEW"
+    },
+    {
+      "answer": "unresolved",
+      "answered": true,
+      "calls": 4,
+      "case_id": "unresolved-external-ref",
+      "correct": true,
+      "expected": "unresolved",
+      "primary": "api-architecture-review",
+      "profile": "deep",
+      "status": "REVIEW"
+    }
+  ],
+  "schema": "apiforge/agentic-quality-eval/v1"
+}

@@ -1,0 +1,9 @@
+sources:
+  - name: IAM least-privilege best practices
+    url: https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html#grant-least-privilege
+    authority: aws-docs
+    verified: "2026-09-21"
+  - name: Cognito MFA configuration
+    url: https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-settings-mfa.html
+    authority: aws-docs
+    verified: "2026-09-21"

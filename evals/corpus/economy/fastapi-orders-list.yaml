@@ -1,0 +1,13 @@
+id: fastapi-orders-list
+fixture: tests/fixtures/fastapi_orders_complete
+contract: tests/fixtures/openapi/orders-v1-complete.yaml
+target: GET /v1/orders
+level: L3
+budget_bytes: 16000
+required_refs:
+- path: openapi.yaml
+  symbol: listOrders
+  kind: contract
+- path: proj/app/routes/orders.py
+  symbol: def list_orders
+  kind: code

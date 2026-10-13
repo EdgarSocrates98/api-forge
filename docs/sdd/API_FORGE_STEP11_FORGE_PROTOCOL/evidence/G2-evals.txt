@@ -1,0 +1,32 @@
+{
+  "cases": [
+    {
+      "failures": [],
+      "id": "completed-run",
+      "passed": true
+    },
+    {
+      "failures": [],
+      "id": "lifecycle",
+      "passed": true
+    },
+    {
+      "failures": [],
+      "id": "refusals",
+      "passed": true
+    },
+    {
+      "failures": [],
+      "id": "risk-and-unresolved",
+      "passed": true
+    }
+  ],
+  "corpus": "evals\\corpus\\forge-protocol",
+  "passed": true,
+  "schema": "apiforge/forge-protocol-evals/v1",
+  "totals": {
+    "cases": 4,
+    "failed": 0,
+    "failed_ids": []
+  }
+}

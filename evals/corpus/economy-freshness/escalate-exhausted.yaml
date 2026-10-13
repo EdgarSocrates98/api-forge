@@ -1,0 +1,6 @@
+id: escalate-exhausted
+kind: escalate
+static: likely
+test: inconclusive
+runtime: inconclusive
+expect_action: unresolved

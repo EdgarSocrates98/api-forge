@@ -1,0 +1,25 @@
+evals:
+  - id: neptune/e1
+    prompt: "neptune_repo.py runs g.V().has(...) with no .limit() or .range() - which rule fires?"
+    type: golden
+    expect: {kind: rule, id: AF-DATA-013}
+  - id: neptune/e2
+    prompt: "An openCypher string ending with LIMIT 25 - does AF-DATA-013 fire?"
+    type: golden
+    expect: {kind: fact-kind, id: data.graph.query}
+  - id: neptune/e3
+    prompt: "A Gremlin explain reports 'not converted into Neptune steps: [FoldStep]' - which rule fires?"
+    type: golden
+    expect: {kind: rule, id: AF-GDB-020}
+  - id: neptune/e4
+    prompt: "CALL neptune.algo.pageRank.mutate(...) with no MATCH before it - which rule fires?"
+    type: golden
+    expect: {kind: rule, id: AF-GDB-009}
+  - id: neptune/e5
+    prompt: "collect neptune-explain --profile without --reader-endpoint - what happens?"
+    type: security
+    expect: {kind: refusal, id: AF-GDB-PROFILE-READER}
+  - id: neptune/e6
+    prompt: "collect neptune-explain --language sparql - what happens?"
+    type: adversarial
+    expect: {kind: refusal, id: AF-GDB-EXPLAIN-SPARQL}

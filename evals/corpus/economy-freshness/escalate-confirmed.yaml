@@ -1,0 +1,5 @@
+id: escalate-confirmed
+kind: escalate
+static: likely
+test: failed
+expect_action: stop

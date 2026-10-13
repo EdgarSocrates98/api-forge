@@ -1,0 +1,28 @@
+cases:
+  - id: kernel-control-replay
+    domain: runtime
+    input: persisted control run with completed checkpoints
+    expected: REVIEW
+    required_evidence: [control-replay]
+    mutation: alter-result-hash
+    quality_axes: [status, evidence]
+    kind: golden
+    mandatory: true
+  - id: kernel-lease-holdout
+    domain: runtime
+    input: expired lease with an eligible worker
+    expected: REVIEW
+    required_evidence: [lease-recovery]
+    mutation: expire-lease
+    quality_axes: [status, evidence]
+    kind: holdout
+    mandatory: true
+  - id: kernel-rollback-mutation
+    domain: runtime
+    input: target changed after self-healing execution
+    expected: BLOCKED
+    required_evidence: [rollback-conflict]
+    mutation: concurrent-write
+    quality_axes: [status, safety]
+    kind: mutation
+    mandatory: true

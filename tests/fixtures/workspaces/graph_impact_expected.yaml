@@ -1,0 +1,10 @@
+version: 1
+contract: GraphImpactAssessment/v1
+ordering:
+  nodes: [depth, node_id]
+  evidence: lexical
+  unresolved: lexical
+conservative_rules:
+  missing_target: unresolved
+  stale_snapshot: elevated
+  budget_cutoff: partial

@@ -1,0 +1,12 @@
+id: benchmark-samples
+benchmark:
+  repeats: 1
+  samples:
+    rules_list: {kwargs: {}}
+    mcp_surface: {kwargs: {surface: compact}}
+    no_such_tool: {kwargs: {}}
+  measured:
+    - rules_list
+    - mcp_surface
+  unresolved:
+    - no_such_tool

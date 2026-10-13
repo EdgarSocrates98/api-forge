@@ -1,0 +1,19 @@
+id: spring-payments-create
+fixture: tests/fixtures/economy_payments/spring
+contract: tests/fixtures/economy_payments/openapi.yaml
+target: POST /payments
+level: L3
+budget_bytes: 16000
+required_refs:
+- path: openapi.yaml
+  symbol: createPayment
+  kind: contract
+- path: openapi.yaml
+  symbol: idempotency_key
+  kind: schema
+- path: proj/src/main/java/com/example/payments/PaymentController.java
+  symbol: idempotency conflict
+  kind: code
+- path: proj/src/main/java/com/example/payments/PaymentRequest.java
+  symbol: class PaymentRequest
+  kind: code

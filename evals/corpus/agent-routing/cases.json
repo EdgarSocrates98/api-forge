@@ -1,0 +1,572 @@
+{
+ "schema": "apiforge/agent-routing-cases/v1",
+ "cases": [
+  {
+   "id": "R001",
+   "question": "Coordinate a multi-step agentic run: fan out capabilities, enforce budgets and hand off between specialists.",
+   "expected": "api-orchestrator",
+   "family": "planning",
+   "source": "agents/api-agentic-orchestrator.md"
+  },
+  {
+   "id": "R002",
+   "question": "Supervise the running agent workflow and keep the TaskSpec, debates and evidence trail observable.",
+   "expected": "api-orchestrator",
+   "family": "planning",
+   "source": "agents/api-agentic-observability-engineer.md"
+  },
+  {
+   "id": "R003",
+   "question": "Plan and route the agent tasks for a gRPC change across reviewers and verification.",
+   "expected": "api-orchestrator",
+   "family": "planning",
+   "source": "agents/api-grpc-agentic-engineer.md"
+  },
+  {
+   "id": "R004",
+   "question": "Where do we start? Turn this discovery into a workload profile and a sealed task plan.",
+   "expected": "api-planner",
+   "family": "planning",
+   "source": "agents/api-planner.md"
+  },
+  {
+   "id": "R005",
+   "question": "Compile the runtime discovery into a migration spec and a DAG of migration tasks without widening scope.",
+   "expected": "api-planner",
+   "family": "planning",
+   "source": "agents/api-runtime-migration-planner.md"
+  },
+  {
+   "id": "R006",
+   "question": "Break this API feature into ordered tasks with risk and workload type identified.",
+   "expected": "api-planner",
+   "family": "planning",
+   "source": "agents/api-planner.md"
+  },
+  {
+   "id": "R007",
+   "question": "Review this TaskSpec: is the scope closed, are proofs, rollback and acceptance criteria present?",
+   "expected": "api-task-spec-reviewer",
+   "family": "planning",
+   "source": "agents/api-task-spec-reviewer.md"
+  },
+  {
+   "id": "R008",
+   "question": "Does this task spec declare its dependencies, risk and allowed paths correctly?",
+   "expected": "api-task-spec-reviewer",
+   "family": "planning",
+   "source": "agents/api-task-spec-reviewer.md"
+  },
+  {
+   "id": "R009",
+   "question": "Check whether the acceptance criteria in this task specification are testable before execution.",
+   "expected": "api-task-spec-reviewer",
+   "family": "planning",
+   "source": "agents/api-task-spec-reviewer.md"
+  },
+  {
+   "id": "R010",
+   "question": "Should this workload run on Lambda, ECS or EKS? Give a ranked recommendation with rejected options.",
+   "expected": "api-platform-selector",
+   "family": "architecture",
+   "source": "agents/api-platform-selector.md"
+  },
+  {
+   "id": "R011",
+   "question": "Run the architecture decision engine for edge, compute, async and data roles of this workload profile.",
+   "expected": "api-platform-selector",
+   "family": "architecture",
+   "source": "agents/api-platform-selector.md"
+  },
+  {
+   "id": "R012",
+   "question": "Pick the compute platform for this API and state the assumptions that would change the choice.",
+   "expected": "api-platform-selector",
+   "family": "architecture",
+   "source": "agents/api-platform-selector.md"
+  },
+  {
+   "id": "R013",
+   "question": "Is this existing architecture right? Review the AWS dumps for ALB, ECS and ElastiCache posture.",
+   "expected": "api-architecture-reviewer",
+   "family": "architecture",
+   "source": "agents/api-architecture-reviewer.md"
+  },
+  {
+   "id": "R014",
+   "question": "Review the deployed architecture against evidence from observability facts and infrastructure dumps.",
+   "expected": "api-architecture-reviewer",
+   "family": "architecture",
+   "source": "agents/api-architecture-reviewer.md"
+  },
+  {
+   "id": "R015",
+   "question": "Assess whether the current service topology with MSK and EC2 is sound.",
+   "expected": "api-architecture-reviewer",
+   "family": "architecture",
+   "source": "agents/api-architecture-reviewer.md"
+  },
+  {
+   "id": "R016",
+   "question": "Review this Terraform and SAM template offline and flag unresolved references.",
+   "expected": "api-infra-reviewer",
+   "family": "architecture",
+   "source": "agents/terraform-reviewer.md"
+  },
+  {
+   "id": "R017",
+   "question": "Check the API Gateway stage: authorization type, API keys, usage plans, throttling and access logs.",
+   "expected": "api-infra-reviewer",
+   "family": "architecture",
+   "source": "agents/aws-api-infra-reviewer.md"
+  },
+  {
+   "id": "R018",
+   "question": "Compare observed infrastructure state with the desired state and produce a stable drift diff with rollback.",
+   "expected": "api-infra-reviewer",
+   "family": "architecture",
+   "source": "agents/api-drift-reconciliation-engineer.md"
+  },
+  {
+   "id": "R019",
+   "question": "How should this OpenAPI contract look? Resource naming, pagination, idempotency and Problem Details.",
+   "expected": "api-contract-architect",
+   "family": "contract",
+   "source": "agents/api-contract-architect.md"
+  },
+  {
+   "id": "R020",
+   "question": "Parse this protobuf file offline and build the canonical gRPC contract with provenance.",
+   "expected": "api-contract-architect",
+   "family": "contract",
+   "source": "agents/api-grpc-parser-engineer.md"
+  },
+  {
+   "id": "R021",
+   "question": "Design the gRPC-Gateway and Envoy projection of these proto services to REST and OpenAPI.",
+   "expected": "api-contract-architect",
+   "family": "contract",
+   "source": "agents/api-grpc-gateway-engineer.md"
+  },
+  {
+   "id": "R022",
+   "question": "Is this change to POST /orders a breaking change for clients of the published contract?",
+   "expected": "api-governance-reviewer",
+   "family": "contract",
+   "source": "agents/api-governance-reviewer.md"
+  },
+  {
+   "id": "R023",
+   "question": "Is changing this protobuf field type a safe evolution or a breaking change?",
+   "expected": "api-governance-reviewer",
+   "family": "contract",
+   "source": "agents/api-grpc-compatibility-engineer.md"
+  },
+  {
+   "id": "R024",
+   "question": "The code diverges from the published contract; review versioning and deprecation.",
+   "expected": "api-governance-reviewer",
+   "family": "contract",
+   "source": "agents/api-governance-reviewer.md"
+  },
+  {
+   "id": "R025",
+   "question": "Generate the Python, Go and Java stubs from this proto and check the generated artifacts.",
+   "expected": "api-codegen-engineer",
+   "family": "contract",
+   "source": "agents/api-grpc-codegen-engineer.md"
+  },
+  {
+   "id": "R026",
+   "question": "Which protoc, Buf and Envoy plugin capabilities are available to build this toolchain?",
+   "expected": "api-codegen-engineer",
+   "family": "contract",
+   "source": "agents/api-grpc-toolchain-engineer.md"
+  },
+  {
+   "id": "R027",
+   "question": "Regenerate client SDK code from the contract into the worktree.",
+   "expected": "api-codegen-engineer",
+   "family": "contract",
+   "source": "agents/api-grpc-codegen-engineer.md"
+  },
+  {
+   "id": "R028",
+   "question": "How does a consumer discover this API? Review the docs, runnable examples and onboarding.",
+   "expected": "api-dx-docs-reviewer",
+   "family": "contract",
+   "source": "agents/api-dx-docs-reviewer.md"
+  },
+  {
+   "id": "R029",
+   "question": "Do the SDK examples compile and are error messages useful for developers integrating the API?",
+   "expected": "api-dx-docs-reviewer",
+   "family": "contract",
+   "source": "agents/api-dx-docs-reviewer.md"
+  },
+  {
+   "id": "R030",
+   "question": "Review the developer experience of the sandbox and getting-started guide.",
+   "expected": "api-dx-docs-reviewer",
+   "family": "contract",
+   "source": "agents/api-dx-docs-reviewer.md"
+  },
+  {
+   "id": "R031",
+   "question": "What can be exploited here? Check BOLA, broken function level authorization and SSRF.",
+   "expected": "api-security-reviewer",
+   "family": "security",
+   "source": "agents/api-security-reviewer.md"
+  },
+  {
+   "id": "R032",
+   "question": "Review mTLS and authentication metadata handling of this gRPC service.",
+   "expected": "api-security-reviewer",
+   "family": "security",
+   "source": "agents/api-grpc-security-engineer.md"
+  },
+  {
+   "id": "R033",
+   "question": "Are PII, credentials or high-cardinality secrets leaking into logs and telemetry?",
+   "expected": "api-security-reviewer",
+   "family": "security",
+   "source": "agents/api-observability-security-engineer.md"
+  },
+  {
+   "id": "R034",
+   "question": "What does this code do to the database? Review access patterns for DynamoDB and Redis.",
+   "expected": "api-data-access-architect",
+   "family": "data",
+   "source": "agents/api-data-access-architect.md"
+  },
+  {
+   "id": "R035",
+   "question": "Review the PostgreSQL queries, connection pool and transactions for N+1 and pagination risk.",
+   "expected": "api-data-access-architect",
+   "family": "data",
+   "source": "agents/api-relational-data-architect.md"
+  },
+  {
+   "id": "R036",
+   "question": "Check the OpenSearch aggregations and Redshift partitioning used by this reporting endpoint.",
+   "expected": "api-data-access-architect",
+   "family": "data",
+   "source": "agents/api-analytical-data-architect.md"
+  },
+  {
+   "id": "R037",
+   "question": "Review this SQS and EventBridge flow: DLQ, retries, ordering and consumer lag.",
+   "expected": "api-event-driven-architect",
+   "family": "data",
+   "source": "agents/api-event-driven-architect.md"
+  },
+  {
+   "id": "R038",
+   "question": "Analyze the Kafka producers and consumer groups: acks, retry, DLQ and ordering.",
+   "expected": "api-event-driven-architect",
+   "family": "data",
+   "source": "agents/api-streaming-platform-architect.md"
+  },
+  {
+   "id": "R039",
+   "question": "Is the Step Functions orchestration of this asynchronous workflow sound?",
+   "expected": "api-event-driven-architect",
+   "family": "data",
+   "source": "agents/api-event-driven-architect.md"
+  },
+  {
+   "id": "R040",
+   "question": "What happens when the payment dependency fails? Check timeouts, retry with jitter and circuit breakers.",
+   "expected": "api-resilience-engineer",
+   "family": "runtime",
+   "source": "agents/api-resilience-engineer.md"
+  },
+  {
+   "id": "R041",
+   "question": "Define the SLI, SLO, error budget and burn-rate alerts for this endpoint.",
+   "expected": "api-resilience-engineer",
+   "family": "runtime",
+   "source": "agents/api-slo-reliability-engineer.md"
+  },
+  {
+   "id": "R042",
+   "question": "Review gRPC deadlines, retries, status codes and health checks for streaming calls.",
+   "expected": "api-resilience-engineer",
+   "family": "runtime",
+   "source": "agents/api-grpc-runtime-engineer.md"
+  },
+  {
+   "id": "R043",
+   "question": "Why is latency high on this endpoint? Start from a measured baseline and a hypothesis.",
+   "expected": "api-performance-engineer",
+   "family": "runtime",
+   "source": "agents/api-performance-engineer.md"
+  },
+  {
+   "id": "R044",
+   "question": "Analyze gRPC throughput, latency and saturation for this service.",
+   "expected": "api-performance-engineer",
+   "family": "runtime",
+   "source": "agents/api-grpc-performance-engineer.md"
+  },
+  {
+   "id": "R045",
+   "question": "Reduce the cost per request of this API with a benchmarked change.",
+   "expected": "api-performance-engineer",
+   "family": "runtime",
+   "source": "agents/api-performance-engineer.md"
+  },
+  {
+   "id": "R046",
+   "question": "Write a k6 or Locust load test scenario for this API and import the report.",
+   "expected": "api-load-capacity-engineer",
+   "family": "runtime",
+   "source": "agents/api-load-test-engineer.md"
+  },
+  {
+   "id": "R047",
+   "question": "Does the service support 2000 TPS? Give a verdict against the preserved baseline.",
+   "expected": "api-load-capacity-engineer",
+   "family": "runtime",
+   "source": "agents/api-capacity-engineer.md"
+  },
+  {
+   "id": "R048",
+   "question": "Separate received RPS from completed TPS in this load test result.",
+   "expected": "api-load-capacity-engineer",
+   "family": "runtime",
+   "source": "agents/api-capacity-engineer.md"
+  },
+  {
+   "id": "R049",
+   "question": "How do I know this is happening? Add RED metrics per operation and end-to-end tracing.",
+   "expected": "api-observability-engineer",
+   "family": "observability",
+   "source": "agents/api-observability-engineer.md"
+  },
+  {
+   "id": "R050",
+   "question": "Recommend OpenTelemetry instrumentation for this Java and Python service.",
+   "expected": "api-observability-engineer",
+   "family": "observability",
+   "source": "agents/api-instrumentation-engineer.md"
+  },
+  {
+   "id": "R051",
+   "question": "Normalize these OTel exports into canonical telemetry with provenance.",
+   "expected": "api-observability-engineer",
+   "family": "observability",
+   "source": "agents/api-telemetry-normalization-engineer.md"
+  },
+  {
+   "id": "R052",
+   "question": "Project this monitor to Datadog without coupling the core to credentials.",
+   "expected": "api-observability-integration-engineer",
+   "family": "observability",
+   "source": "agents/api-datadog-integration-engineer.md"
+  },
+  {
+   "id": "R053",
+   "question": "Verify the Dynatrace projection using OTel as the canonical contract.",
+   "expected": "api-observability-integration-engineer",
+   "family": "observability",
+   "source": "agents/api-dynatrace-integration-engineer.md"
+  },
+  {
+   "id": "R054",
+   "question": "Coordinate observability discovery, planning and gates across vendors.",
+   "expected": "api-observability-integration-engineer",
+   "family": "observability",
+   "source": "agents/api-observability-control-plane.md"
+  },
+  {
+   "id": "R055",
+   "question": "What proves this works? Plan contract tests, fuzzing and negative cases.",
+   "expected": "api-test-strategist",
+   "family": "quality",
+   "source": "agents/api-test-strategist.md"
+  },
+  {
+   "id": "R056",
+   "question": "Design a mutation and fault-injection test strategy for this API.",
+   "expected": "api-test-strategist",
+   "family": "quality",
+   "source": "agents/api-test-strategist.md"
+  },
+  {
+   "id": "R057",
+   "question": "Which tests should cover the negative space of this schema?",
+   "expected": "api-test-strategist",
+   "family": "quality",
+   "source": "agents/api-test-strategist.md"
+  },
+  {
+   "id": "R058",
+   "question": "How do we migrate this monolith route by route with a strangler fig?",
+   "expected": "api-modernization-specialist",
+   "family": "architecture",
+   "source": "agents/api-modernization-specialist.md"
+  },
+  {
+   "id": "R059",
+   "question": "Plan the upgrade from Spring Boot 2 to 3 with verified parity.",
+   "expected": "api-modernization-specialist",
+   "family": "architecture",
+   "source": "agents/api-modernization-specialist.md"
+  },
+  {
+   "id": "R060",
+   "question": "Should we move this REST API to gRPC, and how do we migrate the contract safely?",
+   "expected": "api-modernization-specialist",
+   "family": "architecture",
+   "source": "agents/api-modernization-specialist.md"
+  },
+  {
+   "id": "R061",
+   "question": "Which runbook applies and should the autonomy mode move from observe to supervised?",
+   "expected": "api-operations-engineer",
+   "family": "operations",
+   "source": "agents/api-operations-engineer.md"
+  },
+  {
+   "id": "R062",
+   "question": "Review the CloudWatch and X-Ray operational posture and the audit ledger.",
+   "expected": "api-operations-engineer",
+   "family": "operations",
+   "source": "agents/api-operations-engineer.md"
+  },
+  {
+   "id": "R063",
+   "question": "Declare a runbook for this incident response in the policy engine.",
+   "expected": "api-operations-engineer",
+   "family": "operations",
+   "source": "agents/api-operations-engineer.md"
+  },
+  {
+   "id": "R064",
+   "question": "Independently verify these receipts, diffs and evidence before we call it done.",
+   "expected": "api-verifier",
+   "family": "assurance",
+   "source": "agents/api-verification-engineer.md"
+  },
+  {
+   "id": "R065",
+   "question": "Verify the runtime migration status and block a false DONE.",
+   "expected": "api-verifier",
+   "family": "assurance",
+   "source": "agents/api-runtime-migration-verifier.md"
+  },
+  {
+   "id": "R066",
+   "question": "Check the capability matrix, vertical coverage and surface parity before release.",
+   "expected": "api-verifier",
+   "family": "assurance",
+   "source": "agents/api-platform-completion-reviewer.md"
+  },
+  {
+   "id": "R067",
+   "question": "Try to refute this high-risk plan: look for gaps, excessive agency and a false done.",
+   "expected": "api-adversarial-critic",
+   "family": "assurance",
+   "source": "agents/api-adversarial-critic.md"
+  },
+  {
+   "id": "R068",
+   "question": "Challenge the evidence behind this migration plan before it goes to the referee.",
+   "expected": "api-adversarial-critic",
+   "family": "assurance",
+   "source": "agents/api-adversarial-critic.md"
+  },
+  {
+   "id": "R069",
+   "question": "Find what is wrong with this proposal and which mutations it hides.",
+   "expected": "api-adversarial-critic",
+   "family": "assurance",
+   "source": "agents/api-adversarial-critic.md"
+  },
+  {
+   "id": "R070",
+   "question": "Close this debate room: quorum, evidence and dissent, resolved or unresolved.",
+   "expected": "api-debate-referee",
+   "family": "assurance",
+   "source": "agents/api-debate-referee.md"
+  },
+  {
+   "id": "R071",
+   "question": "Two reviewers disagree; referee the decision without turning opinion into fact.",
+   "expected": "api-debate-referee",
+   "family": "assurance",
+   "source": "agents/api-debate-referee.md"
+  },
+  {
+   "id": "R072",
+   "question": "Record the dissent and final ruling of this debate.",
+   "expected": "api-debate-referee",
+   "family": "assurance",
+   "source": "agents/api-debate-referee.md"
+  },
+  {
+   "id": "R073",
+   "question": "Is this ready to release? Check evidence per gate, build and sign the report bundle.",
+   "expected": "api-release-guardian",
+   "family": "operations",
+   "source": "agents/api-release-guardian.md"
+  },
+  {
+   "id": "R074",
+   "question": "Sign and verify the release report and refuse done without independent acceptance.",
+   "expected": "api-release-guardian",
+   "family": "operations",
+   "source": "agents/api-release-guardian.md"
+  },
+  {
+   "id": "R075",
+   "question": "Guard the release gate for this version with the SDD evidence.",
+   "expected": "api-release-guardian",
+   "family": "operations",
+   "source": "agents/api-release-guardian.md"
+  },
+  {
+   "id": "R076",
+   "question": "Our recommendation endpoint walks friends-of-friends in Gremlin and times out on popular users. Review the traversal.",
+   "expected": "api-graph-data-architect",
+   "family": "graph",
+   "source": "agents/api-graph-data-architect.md"
+  },
+  {
+   "id": "R077",
+   "question": "Is this openCypher MATCH with an unbounded hop count safe to ship against Neo4j?",
+   "expected": "api-graph-data-architect",
+   "family": "graph",
+   "source": "agents/api-graph-data-architect.md"
+  },
+  {
+   "id": "R078",
+   "question": "Should we model order line items as vertices or as edge properties in our Neptune property graph?",
+   "expected": "api-graph-data-architect",
+   "family": "graph",
+   "source": "agents/api-graph-data-architect.md"
+  },
+  {
+   "id": "R079",
+   "question": "Here is a Neptune explain output with steps not converted to native execution; what does it tell us?",
+   "expected": "api-graph-data-architect",
+   "family": "graph",
+   "source": "agents/api-graph-data-architect.md"
+  },
+  {
+   "id": "R080",
+   "question": "We want to load the service dependency graph produced by apiforge into Amazon Neptune as RDF.",
+   "expected": "api-graph-data-architect",
+   "family": "graph",
+   "source": "agents/api-graph-data-architect.md"
+  },
+  {
+   "id": "R081",
+   "question": "A SPARQL query with a transitive property path over our ontology is slow; where is the risk?",
+   "expected": "api-graph-data-architect",
+   "family": "graph",
+   "source": "agents/api-graph-data-architect.md"
+  }
+ ]
+}

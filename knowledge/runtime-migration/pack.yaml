@@ -1,0 +1,8 @@
+domain: runtime-migration
+version: 1
+areas: [BREAKING, CONTRACT, TESTING, SECURITY]
+rule_ids: []
+summary: >-
+  Runtime migration guidance for Java, Python and Go with offline evidence,
+  conservative status and sandbox-only execution.
+verified: "2026-09-22"

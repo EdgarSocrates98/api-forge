@@ -1,0 +1,8 @@
+id: grpc-breaking-field
+protocol: grpc
+expected: breaking
+holdout: false
+outcome: evaluate grpc breaking field
+mutants: []
+baseline: tests/fixtures/grpc/orders.proto
+candidate: tests/fixtures/grpc/orders-breaking.proto

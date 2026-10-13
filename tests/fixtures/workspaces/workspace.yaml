@@ -1,0 +1,15 @@
+schema: apiforge/workspace/v1
+workspace_id: workspace:fixture
+name: fixture-workspace
+root: .
+repositories:
+  - repository_id: repository:service-a
+    name: service-a
+    root: service-a
+    repository_type: service
+    evidence_level: observed
+  - repository_id: repository:contract-a
+    name: contract-a
+    root: contract-a
+    repository_type: contract
+    evidence_level: declared

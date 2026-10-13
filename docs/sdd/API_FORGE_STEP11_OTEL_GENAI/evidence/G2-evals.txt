@@ -1,0 +1,12 @@
+=== evals telemetry-otlp ===
+  "totals": {
+    "cases": 3,
+    "failed": 0,
+    "failed_ids": []
+  }
+}
+=== otlp-only collector check ===
+    "status": "unresolved",
+  "seeded_spans": 9,
+    "accepted": true,
+    "span_count": 9,

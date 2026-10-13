@@ -1,0 +1,10 @@
+id: missing-run
+run_id: ghost
+inspect:
+  unresolved:
+    - no ledger rows, spans or token usage
+  metrics:
+    context:
+      bytes: {value: 0}
+      context_precision: {state: unresolved}
+waste: {}

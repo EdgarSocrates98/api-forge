@@ -1,0 +1,9 @@
+sources:
+  - name: "HTTP Semantics (RFC 9110)"
+    url: https://www.rfc-editor.org/rfc/rfc9110
+    authority: ietf-rfc
+    verified: "2026-09-21"
+  - name: "API Forge REST rules"
+    url: docs/catalog-contract.md
+    authority: project-docs
+    verified: "2026-09-21"

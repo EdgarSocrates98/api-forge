@@ -1,0 +1,10 @@
+id: malformed-timestamp-stays-honest
+summary: an unparseable timestamp exports the span but names it unresolved
+spans:
+  - operation: retrieval
+    started_at: "not-a-timestamp"
+expect:
+  accepted: true
+  span_count: 1
+  export_unresolved:
+    - "unparseable timestamp"

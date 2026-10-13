@@ -1,0 +1,8 @@
+# Code owners for API Forge. The `protect` ruleset requires code-owner review;
+# this file materializes it. Protect this file itself (see
+# docs/guides/API_FORGE_GITHUB_GOVERNANCE.md).
+*                         @EdgarSocrates98
+/src/apiforge/security/   @EdgarSocrates98
+/src/apiforge/economy/    @EdgarSocrates98
+/.github/                 @EdgarSocrates98
+/.github/CODEOWNERS       @EdgarSocrates98

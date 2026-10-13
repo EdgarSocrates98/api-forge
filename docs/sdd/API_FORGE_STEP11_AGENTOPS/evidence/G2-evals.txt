@@ -1,0 +1,32 @@
+{
+  "cases": [
+    {
+      "failures": [],
+      "id": "compare-runs",
+      "passed": true
+    },
+    {
+      "failures": [],
+      "id": "inspect-sections",
+      "passed": true
+    },
+    {
+      "failures": [],
+      "id": "missing-run",
+      "passed": true
+    },
+    {
+      "failures": [],
+      "id": "waste-detection",
+      "passed": true
+    }
+  ],
+  "corpus": "evals\\corpus\\agentops",
+  "passed": true,
+  "schema": "apiforge/agentops-evals/v1",
+  "totals": {
+    "cases": 4,
+    "failed": 0,
+    "failed_ids": []
+  }
+}

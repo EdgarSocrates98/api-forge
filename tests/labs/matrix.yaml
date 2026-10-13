@@ -1,0 +1,592 @@
+# Declared lab matrix — 12 technologies x 16 cases from the v1 spec.
+# A cell either points at a real fixture (+ optional pack eval) or names
+# its gap. Empty pointers are declared gaps, never fabricated coverage.
+cells:
+  - technology: fastapi
+    case: correct_case
+    fixture: tests/fixtures/fastapi_orders
+  - technology: fastapi
+    case: route_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: fastapi
+    case: schema_incompatible
+    gap: "no fixture or eval covering this cell"
+  - technology: fastapi
+    case: auth_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: fastapi
+    case: pagination_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: fastapi
+    case: wrong_index
+    gap: "no fixture or eval covering this cell"
+  - technology: fastapi
+    case: hot_partition
+    gap: "no fixture or eval covering this cell"
+  - technology: fastapi
+    case: unbounded_query
+    gap: "no fixture or eval covering this cell"
+  - technology: fastapi
+    case: timeout_absent
+    fixture: tests/fixtures/resilience_app
+    eval: "resilience:resilience/timeout-missing"
+  - technology: fastapi
+    case: unsafe_retry
+    fixture: tests/fixtures/resilience_app
+    eval: "resilience:resilience/retry-mutating"
+  - technology: fastapi
+    case: contract_test_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: fastapi
+    case: false_positive_finding
+    fixture: tests/fixtures/resilience_app
+    eval: "resilience:resilience/no-surface-negative"
+  - technology: fastapi
+    case: insufficient_information
+    gap: "no fixture or eval covering this cell"
+  - technology: fastapi
+    case: breaking_change
+    gap: "no fixture or eval covering this cell"
+  - technology: fastapi
+    case: incomplete_telemetry
+    gap: "no fixture or eval covering this cell"
+  - technology: fastapi
+    case: inconclusive_benchmark
+    gap: "no fixture or eval covering this cell"
+  - technology: spring-boot
+    case: correct_case
+    fixture: tests/labs/orders-spring
+  - technology: spring-boot
+    case: route_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: spring-boot
+    case: schema_incompatible
+    gap: "no fixture or eval covering this cell"
+  - technology: spring-boot
+    case: auth_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: spring-boot
+    case: pagination_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: spring-boot
+    case: wrong_index
+    gap: "no fixture or eval covering this cell"
+  - technology: spring-boot
+    case: hot_partition
+    gap: "no fixture or eval covering this cell"
+  - technology: spring-boot
+    case: unbounded_query
+    gap: "no fixture or eval covering this cell"
+  - technology: spring-boot
+    case: timeout_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: spring-boot
+    case: unsafe_retry
+    gap: "no fixture or eval covering this cell"
+  - technology: spring-boot
+    case: contract_test_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: spring-boot
+    case: false_positive_finding
+    gap: "no fixture or eval covering this cell"
+  - technology: spring-boot
+    case: insufficient_information
+    gap: "no fixture or eval covering this cell"
+  - technology: spring-boot
+    case: breaking_change
+    gap: "no fixture or eval covering this cell"
+  - technology: spring-boot
+    case: incomplete_telemetry
+    gap: "no fixture or eval covering this cell"
+  - technology: spring-boot
+    case: inconclusive_benchmark
+    gap: "no fixture or eval covering this cell"
+  - technology: go-chi
+    case: correct_case
+    fixture: tests/labs/orders-go
+  - technology: go-chi
+    case: route_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: go-chi
+    case: schema_incompatible
+    gap: "no fixture or eval covering this cell"
+  - technology: go-chi
+    case: auth_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: go-chi
+    case: pagination_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: go-chi
+    case: wrong_index
+    gap: "no fixture or eval covering this cell"
+  - technology: go-chi
+    case: hot_partition
+    gap: "no fixture or eval covering this cell"
+  - technology: go-chi
+    case: unbounded_query
+    gap: "no fixture or eval covering this cell"
+  - technology: go-chi
+    case: timeout_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: go-chi
+    case: unsafe_retry
+    gap: "no fixture or eval covering this cell"
+  - technology: go-chi
+    case: contract_test_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: go-chi
+    case: false_positive_finding
+    gap: "no fixture or eval covering this cell"
+  - technology: go-chi
+    case: insufficient_information
+    gap: "no fixture or eval covering this cell"
+  - technology: go-chi
+    case: breaking_change
+    gap: "no fixture or eval covering this cell"
+  - technology: go-chi
+    case: incomplete_telemetry
+    gap: "no fixture or eval covering this cell"
+  - technology: go-chi
+    case: inconclusive_benchmark
+    gap: "no fixture or eval covering this cell"
+  - technology: redis
+    case: correct_case
+    fixture: tests/fixtures/redis_app
+  - technology: redis
+    case: route_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: redis
+    case: schema_incompatible
+    gap: "no fixture or eval covering this cell"
+  - technology: redis
+    case: auth_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: redis
+    case: pagination_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: redis
+    case: wrong_index
+    gap: "no fixture or eval covering this cell"
+  - technology: redis
+    case: hot_partition
+    gap: "no fixture or eval covering this cell"
+  - technology: redis
+    case: unbounded_query
+    fixture: tests/fixtures/redis_app
+    eval: "redis-valkey:redis/e1"
+  - technology: redis
+    case: timeout_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: redis
+    case: unsafe_retry
+    gap: "no fixture or eval covering this cell"
+  - technology: redis
+    case: contract_test_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: redis
+    case: false_positive_finding
+    gap: "no fixture or eval covering this cell"
+  - technology: redis
+    case: insufficient_information
+    gap: "no fixture or eval covering this cell"
+  - technology: redis
+    case: breaking_change
+    gap: "no fixture or eval covering this cell"
+  - technology: redis
+    case: incomplete_telemetry
+    gap: "no fixture or eval covering this cell"
+  - technology: redis
+    case: inconclusive_benchmark
+    gap: "no fixture or eval covering this cell"
+  - technology: mongodb
+    case: correct_case
+    fixture: tests/fixtures/dbaccess_app
+  - technology: mongodb
+    case: route_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: mongodb
+    case: schema_incompatible
+    gap: "no fixture or eval covering this cell"
+  - technology: mongodb
+    case: auth_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: mongodb
+    case: pagination_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: mongodb
+    case: wrong_index
+    gap: "no fixture or eval covering this cell"
+  - technology: mongodb
+    case: hot_partition
+    gap: "no fixture or eval covering this cell"
+  - technology: mongodb
+    case: unbounded_query
+    fixture: tests/fixtures/dbaccess_app
+    eval: "mongodb:mongo/e1"
+  - technology: mongodb
+    case: timeout_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: mongodb
+    case: unsafe_retry
+    gap: "no fixture or eval covering this cell"
+  - technology: mongodb
+    case: contract_test_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: mongodb
+    case: false_positive_finding
+    fixture: tests/fixtures/dbaccess_app
+    eval: "mongodb:mongo/e3"
+  - technology: mongodb
+    case: insufficient_information
+    gap: "no fixture or eval covering this cell"
+  - technology: mongodb
+    case: breaking_change
+    gap: "no fixture or eval covering this cell"
+  - technology: mongodb
+    case: incomplete_telemetry
+    gap: "no fixture or eval covering this cell"
+  - technology: mongodb
+    case: inconclusive_benchmark
+    gap: "no fixture or eval covering this cell"
+  - technology: documentdb
+    case: correct_case
+    gap: "no fixture or eval covering this cell"
+  - technology: documentdb
+    case: route_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: documentdb
+    case: schema_incompatible
+    gap: "no fixture or eval covering this cell"
+  - technology: documentdb
+    case: auth_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: documentdb
+    case: pagination_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: documentdb
+    case: wrong_index
+    gap: "no fixture or eval covering this cell"
+  - technology: documentdb
+    case: hot_partition
+    gap: "no fixture or eval covering this cell"
+  - technology: documentdb
+    case: unbounded_query
+    fixture: tests/fixtures/dbaccess_app
+    eval: "documentdb:docdb/e1"
+  - technology: documentdb
+    case: timeout_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: documentdb
+    case: unsafe_retry
+    gap: "no fixture or eval covering this cell"
+  - technology: documentdb
+    case: contract_test_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: documentdb
+    case: false_positive_finding
+    gap: "no fixture or eval covering this cell"
+  - technology: documentdb
+    case: insufficient_information
+    gap: "no fixture or eval covering this cell"
+  - technology: documentdb
+    case: breaking_change
+    gap: "no fixture or eval covering this cell"
+  - technology: documentdb
+    case: incomplete_telemetry
+    gap: "no fixture or eval covering this cell"
+  - technology: documentdb
+    case: inconclusive_benchmark
+    gap: "no fixture or eval covering this cell"
+  - technology: dynamodb
+    case: correct_case
+    fixture: tests/fixtures/dbaccess_app
+  - technology: dynamodb
+    case: route_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: dynamodb
+    case: schema_incompatible
+    gap: "no fixture or eval covering this cell"
+  - technology: dynamodb
+    case: auth_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: dynamodb
+    case: pagination_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: dynamodb
+    case: wrong_index
+    gap: "no fixture or eval covering this cell"
+  - technology: dynamodb
+    case: hot_partition
+    fixture: tests/fixtures/dbaccess_app
+    eval: "dynamodb:dynamo/e2"
+  - technology: dynamodb
+    case: unbounded_query
+    fixture: tests/fixtures/dbaccess_app
+    eval: "dynamodb:dynamo/e1"
+  - technology: dynamodb
+    case: timeout_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: dynamodb
+    case: unsafe_retry
+    gap: "no fixture or eval covering this cell"
+  - technology: dynamodb
+    case: contract_test_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: dynamodb
+    case: false_positive_finding
+    gap: "no fixture or eval covering this cell"
+  - technology: dynamodb
+    case: insufficient_information
+    gap: "no fixture or eval covering this cell"
+  - technology: dynamodb
+    case: breaking_change
+    gap: "no fixture or eval covering this cell"
+  - technology: dynamodb
+    case: incomplete_telemetry
+    gap: "no fixture or eval covering this cell"
+  - technology: dynamodb
+    case: inconclusive_benchmark
+    gap: "no fixture or eval covering this cell"
+  - technology: neptune
+    case: correct_case
+    fixture: tests/fixtures/dbaccess_app
+    eval: "neptune:neptune/e2"
+  - technology: neptune
+    case: route_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: neptune
+    case: schema_incompatible
+    gap: "no fixture or eval covering this cell"
+  - technology: neptune
+    case: auth_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: neptune
+    case: pagination_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: neptune
+    case: wrong_index
+    gap: "no fixture or eval covering this cell"
+  - technology: neptune
+    case: hot_partition
+    gap: "no fixture or eval covering this cell"
+  - technology: neptune
+    case: unbounded_query
+    fixture: tests/fixtures/dbaccess_app
+    eval: "neptune:neptune/e1"
+  - technology: neptune
+    case: timeout_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: neptune
+    case: unsafe_retry
+    gap: "no fixture or eval covering this cell"
+  - technology: neptune
+    case: contract_test_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: neptune
+    case: false_positive_finding
+    gap: "no fixture or eval covering this cell"
+  - technology: neptune
+    case: insufficient_information
+    gap: "no fixture or eval covering this cell"
+  - technology: neptune
+    case: breaking_change
+    gap: "no fixture or eval covering this cell"
+  - technology: neptune
+    case: incomplete_telemetry
+    gap: "no fixture or eval covering this cell"
+  - technology: neptune
+    case: inconclusive_benchmark
+    gap: "no fixture or eval covering this cell"
+  - technology: terraform
+    case: correct_case
+    fixture: tests/fixtures/terraform_api
+  - technology: terraform
+    case: route_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: terraform
+    case: schema_incompatible
+    gap: "no fixture or eval covering this cell"
+  - technology: terraform
+    case: auth_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: terraform
+    case: pagination_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: terraform
+    case: wrong_index
+    gap: "no fixture or eval covering this cell"
+  - technology: terraform
+    case: hot_partition
+    gap: "no fixture or eval covering this cell"
+  - technology: terraform
+    case: unbounded_query
+    gap: "no fixture or eval covering this cell"
+  - technology: terraform
+    case: timeout_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: terraform
+    case: unsafe_retry
+    gap: "no fixture or eval covering this cell"
+  - technology: terraform
+    case: contract_test_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: terraform
+    case: false_positive_finding
+    gap: "no fixture or eval covering this cell"
+  - technology: terraform
+    case: insufficient_information
+    gap: "no fixture or eval covering this cell"
+  - technology: terraform
+    case: breaking_change
+    gap: "no fixture or eval covering this cell"
+  - technology: terraform
+    case: incomplete_telemetry
+    gap: "no fixture or eval covering this cell"
+  - technology: terraform
+    case: inconclusive_benchmark
+    gap: "no fixture or eval covering this cell"
+  - technology: sam
+    case: correct_case
+    fixture: tests/fixtures/sam
+  - technology: sam
+    case: route_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: sam
+    case: schema_incompatible
+    gap: "no fixture or eval covering this cell"
+  - technology: sam
+    case: auth_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: sam
+    case: pagination_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: sam
+    case: wrong_index
+    gap: "no fixture or eval covering this cell"
+  - technology: sam
+    case: hot_partition
+    gap: "no fixture or eval covering this cell"
+  - technology: sam
+    case: unbounded_query
+    gap: "no fixture or eval covering this cell"
+  - technology: sam
+    case: timeout_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: sam
+    case: unsafe_retry
+    gap: "no fixture or eval covering this cell"
+  - technology: sam
+    case: contract_test_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: sam
+    case: false_positive_finding
+    gap: "no fixture or eval covering this cell"
+  - technology: sam
+    case: insufficient_information
+    gap: "no fixture or eval covering this cell"
+  - technology: sam
+    case: breaking_change
+    gap: "no fixture or eval covering this cell"
+  - technology: sam
+    case: incomplete_telemetry
+    gap: "no fixture or eval covering this cell"
+  - technology: sam
+    case: inconclusive_benchmark
+    gap: "no fixture or eval covering this cell"
+  - technology: api-gateway
+    case: correct_case
+    fixture: tests/fixtures/aws/apigateway
+    eval: "aws-api-gateway:aws-api-gateway/AF-GW-001"
+  - technology: api-gateway
+    case: route_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: api-gateway
+    case: schema_incompatible
+    gap: "no fixture or eval covering this cell"
+  - technology: api-gateway
+    case: auth_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: api-gateway
+    case: pagination_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: api-gateway
+    case: wrong_index
+    gap: "no fixture or eval covering this cell"
+  - technology: api-gateway
+    case: hot_partition
+    gap: "no fixture or eval covering this cell"
+  - technology: api-gateway
+    case: unbounded_query
+    gap: "no fixture or eval covering this cell"
+  - technology: api-gateway
+    case: timeout_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: api-gateway
+    case: unsafe_retry
+    gap: "no fixture or eval covering this cell"
+  - technology: api-gateway
+    case: contract_test_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: api-gateway
+    case: false_positive_finding
+    gap: "no fixture or eval covering this cell"
+  - technology: api-gateway
+    case: insufficient_information
+    gap: "no fixture or eval covering this cell"
+  - technology: api-gateway
+    case: breaking_change
+    gap: "no fixture or eval covering this cell"
+  - technology: api-gateway
+    case: incomplete_telemetry
+    gap: "no fixture or eval covering this cell"
+  - technology: api-gateway
+    case: inconclusive_benchmark
+    gap: "no fixture or eval covering this cell"
+  - technology: lambda
+    case: correct_case
+    fixture: tests/fixtures/lambda_dump
+  - technology: lambda
+    case: route_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: lambda
+    case: schema_incompatible
+    gap: "no fixture or eval covering this cell"
+  - technology: lambda
+    case: auth_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: lambda
+    case: pagination_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: lambda
+    case: wrong_index
+    gap: "no fixture or eval covering this cell"
+  - technology: lambda
+    case: hot_partition
+    gap: "no fixture or eval covering this cell"
+  - technology: lambda
+    case: unbounded_query
+    gap: "no fixture or eval covering this cell"
+  - technology: lambda
+    case: timeout_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: lambda
+    case: unsafe_retry
+    gap: "no fixture or eval covering this cell"
+  - technology: lambda
+    case: contract_test_absent
+    gap: "no fixture or eval covering this cell"
+  - technology: lambda
+    case: false_positive_finding
+    gap: "no fixture or eval covering this cell"
+  - technology: lambda
+    case: insufficient_information
+    gap: "no fixture or eval covering this cell"
+  - technology: lambda
+    case: breaking_change
+    gap: "no fixture or eval covering this cell"
+  - technology: lambda
+    case: incomplete_telemetry
+    gap: "no fixture or eval covering this cell"
+  - technology: lambda
+    case: inconclusive_benchmark
+    gap: "no fixture or eval covering this cell"

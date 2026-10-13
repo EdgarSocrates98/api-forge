@@ -1,0 +1,4 @@
+id: tokens-partial
+kind: tokens
+rows: [1000, null, null]
+expect: partial

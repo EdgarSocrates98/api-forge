@@ -1,0 +1,7 @@
+command: pytest -q (full suite, serial) + mypy src
+branch: sdd/agent-roster
+result: 1311 passed, 1 skipped, 1 failed
+failed: tests/scripts/test_check_release.py::test_release_gate_accepts_complete_repository
+cause: pre-existing untracked .claude/agents/README.md, now reported as (non-agent file); not created or modified by this feature
+mypy src: Success: no issues found in 459 source files
+host check: Claude Code reloaded the rendered agents with tools projected from access (read-only: Read, Grep, Glob, Bash; writer: + Edit, Write)

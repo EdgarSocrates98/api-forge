@@ -1,0 +1,5 @@
+kind: rate limit
+status: covered
+input: limit=10,window_seconds=1,requests=11
+expected: admitted=10,rejected=1
+evidence: deterministic admission fixture only; no live quota claim

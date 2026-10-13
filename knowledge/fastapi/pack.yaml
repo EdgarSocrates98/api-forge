@@ -1,0 +1,9 @@
+domain: fastapi
+version: 1
+areas: [REST, TESTING]
+rule_ids: []
+summary: >-
+  FastAPI surface the adapter extracts: decorators, Depends injection,
+  Pydantic models, status codes - plus the FastAPI x Pydantic x Python
+  version guard.
+verified: "2026-09-21"

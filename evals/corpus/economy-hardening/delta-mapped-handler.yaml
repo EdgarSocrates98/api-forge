@@ -1,0 +1,5 @@
+id: delta-mapped-handler
+kind: delta
+path: proj/app/routes/payments.py
+expect_status: ready
+expect_unmapped_source: false

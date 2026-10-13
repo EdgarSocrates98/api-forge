@@ -1,0 +1,18 @@
+id: completed-run
+setup:
+  submits:
+    - {task_id: done-task, capability_id: api.analyze, intent: "completed path"}
+  attachments:
+    - {task_id: done-task, governed: done-gov, governed_state: accepted}
+inspect:
+  task_id: done-task
+  state: completed
+  governed_state: accepted
+result:
+  task_id: done-task
+  status: ok
+handoff:
+  task_id: done-task
+  to: spark-forge
+  delivery: prepared
+  evidence_refs: true

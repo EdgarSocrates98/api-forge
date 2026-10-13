@@ -1,0 +1,14 @@
+domain: neo4j
+version: 1
+areas: [GDB, DATA]
+rule_ids:
+  - AF-DATA-013
+  - AF-GDB-004
+  - AF-GDB-005
+  - AF-GDB-006
+  - AF-GDB-008
+  - AF-GDB-024
+  - AF-GDB-025
+summary: >-
+  Neo4j openCypher access through the official drivers (Python, Java, Go, JavaScript) - bounded, anchored, parameterized queries, and EXPLAIN/PROFILE plans imported as dumps (AllNodesScan, CartesianProduct, fan-out).
+verified: "2026-10-01"

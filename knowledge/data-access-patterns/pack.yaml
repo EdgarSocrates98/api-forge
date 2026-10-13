@@ -1,0 +1,20 @@
+domain: data-access-patterns
+version: 1
+areas: [DATA]
+rule_ids:
+  - AF-DATA-001
+  - AF-DATA-002
+  - AF-DATA-003
+  - AF-DATA-004
+  - AF-DATA-005
+  - AF-DATA-006
+  - AF-DATA-007
+  - AF-DATA-008
+  - AF-DATA-009
+  - AF-DATA-010
+  - AF-DATA-011
+  - AF-DATA-012
+  - AF-DATA-013
+summary: >-
+  Cache-aside/read-through/write-through, TTL and invalidation, N+1, bounded reads and idempotent writes - the pattern vocabulary the data.* facts classify into.
+verified: "2026-09-21"

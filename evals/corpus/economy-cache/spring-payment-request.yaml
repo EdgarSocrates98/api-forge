@@ -1,0 +1,8 @@
+id: spring-payment-request
+fixture: tests/fixtures/economy_payments/spring
+contract: tests/fixtures/economy_payments/openapi.yaml
+mutation:
+  file: proj/src/main/java/com/example/payments/PaymentRequest.java
+  append: "\n// reviewed\n"
+reanalyze: true
+expect_invalidated: []

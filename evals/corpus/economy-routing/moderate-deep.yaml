@@ -1,0 +1,9 @@
+id: moderate-deep
+shape: moderate
+risk: read_only
+size: M
+profile: deep
+expected:
+  effective: deep
+  minimum_roles:
+  - reviewer

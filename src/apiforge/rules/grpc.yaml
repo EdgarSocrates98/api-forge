@@ -1,0 +1,16 @@
+version: 1
+source_mode: proto_or_descriptor
+compatibility_policy: strict-evidence
+targets:
+  python: true
+  go: true
+  java: true
+gateways:
+  envoy: true
+  grpc_gateway: true
+  grpc_web: true
+performance:
+  min_samples: 100
+  max_generator_saturation: 0.8
+governance:
+  external_mutation: approval_and_broker

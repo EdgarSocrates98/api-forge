@@ -1,0 +1,5 @@
+sources:
+  - name: "AWS SAM specification"
+    url: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-specification.html
+    authority: aws-docs
+    verified: "2026-09-21"

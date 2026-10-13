@@ -1,0 +1,19 @@
+id: spring-payments-get
+fixture: tests/fixtures/economy_payments/spring
+contract: tests/fixtures/economy_payments/openapi.yaml
+target: GET /payments/{payment_id}
+level: L3
+budget_bytes: 16000
+required_refs:
+- path: openapi.yaml
+  symbol: getPayment
+  kind: contract
+- path: openapi.yaml
+  symbol: authorized
+  kind: schema
+- path: proj/src/main/java/com/example/payments/PaymentController.java
+  symbol: public Payment get(
+  kind: code
+- path: proj/src/test/java/com/example/payments/PaymentControllerTest.java
+  symbol: getUnknownPaymentIsNotFound
+  kind: test

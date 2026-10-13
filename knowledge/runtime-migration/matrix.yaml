@@ -1,0 +1,19 @@
+schema_version: "1"
+ecosystems:
+  java:
+    versions: ["11", "17", "21", "25"]
+    build_tools: [maven, gradle]
+  python:
+    versions: ["2", "3", "3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
+    package_managers: [pip, poetry, uv]
+  go:
+    versions: ["1.18", "1.19", "1.20", "1.21", "1.22", "1.23", "1.24", "1.25", "1.26", "1.27"]
+    tools: [go, gofmt, govulncheck]
+policies:
+  allow_external_mutation: false
+  require_independent_verifier: true
+  critical_statuses: [contract_breaking, destructive_change, missing_toolchain]
+constraints:
+  - {component: java, set: ["11", "17", "21", "25"]}
+  - {component: python, range: "2, 3.8-3.14"}
+  - {component: go, range: "1.18-1.27"}

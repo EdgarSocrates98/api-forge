@@ -1,0 +1,4 @@
+id: discover-capsule
+kind: discover
+query: context capsule for an operation
+expect_tool: context_capsule

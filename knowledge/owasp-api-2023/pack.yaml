@@ -1,0 +1,9 @@
+domain: owasp-api-2023
+version: 1
+areas: [SECURITY]
+rule_ids: [AF-SEC-001, AF-SEC-002, AF-SEC-003, AF-SEC-004, AF-SEC-005, AF-SEC-006, AF-SEC-007, AF-SEC-008]
+summary: >-
+  OWASP API Security Top 10 (2023): object-level authorization, broken
+  authentication, property-level exposure, rate limiting and the rest of
+  the list every SECURITY finding cites.
+verified: "2026-09-21"

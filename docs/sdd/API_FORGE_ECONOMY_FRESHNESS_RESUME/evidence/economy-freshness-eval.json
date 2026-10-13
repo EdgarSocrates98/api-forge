@@ -1,0 +1,138 @@
+{
+  "cases": 16,
+  "gates": {
+    "checkpoint": true,
+    "escalate": true,
+    "gate": true,
+    "phase": true,
+    "watch": true
+  },
+  "passed": true,
+  "rows": [
+    {
+      "case_id": "checkpoint-pinned",
+      "codes": [
+        "AF-ECONOMY-RESUME-PINNED"
+      ],
+      "kind": "checkpoint",
+      "passed": true,
+      "profile": "deep"
+    },
+    {
+      "case_id": "checkpoint-raise",
+      "codes": [],
+      "kind": "checkpoint",
+      "passed": true,
+      "profile": "deep"
+    },
+    {
+      "action": "stop",
+      "case_id": "escalate-confirmed",
+      "kind": "escalate",
+      "next_mode": null,
+      "passed": true
+    },
+    {
+      "action": "unresolved",
+      "case_id": "escalate-exhausted",
+      "kind": "escalate",
+      "next_mode": null,
+      "passed": true
+    },
+    {
+      "action": "escalate",
+      "case_id": "escalate-inconclusive",
+      "kind": "escalate",
+      "next_mode": "live_read_only",
+      "passed": true
+    },
+    {
+      "action": "run_tests",
+      "case_id": "escalate-run-tests",
+      "kind": "escalate",
+      "next_mode": "test",
+      "passed": true
+    },
+    {
+      "case_id": "gate-mutation-refused",
+      "code": "AF-EVIDENCE-MUTATION-REFUSED",
+      "kind": "gate",
+      "passed": true
+    },
+    {
+      "case_id": "gate-runtime-latency",
+      "kind": "gate",
+      "live_allowed": true,
+      "mode": "live_read_only",
+      "passed": true
+    },
+    {
+      "case_id": "gate-runtime-offline",
+      "kind": "gate",
+      "live_allowed": false,
+      "mode": "fixture",
+      "passed": true
+    },
+    {
+      "case_id": "gate-runtime-prod",
+      "kind": "gate",
+      "live_allowed": true,
+      "mode": "live_read_only",
+      "passed": true
+    },
+    {
+      "case_id": "gate-static-breaking",
+      "kind": "gate",
+      "live_allowed": false,
+      "mode": "static",
+      "passed": true
+    },
+    {
+      "case_id": "gate-static-removed",
+      "kind": "gate",
+      "live_allowed": false,
+      "mode": "static",
+      "passed": true
+    },
+    {
+      "case_id": "phase-exceeded",
+      "codes": [
+        "AF-BUDGET-PHASE-EXCEEDED"
+      ],
+      "kind": "phase",
+      "passed": true,
+      "status": "unresolved"
+    },
+    {
+      "case_id": "phase-protected",
+      "codes": [
+        "AF-BUDGET-PHASE-PROTECTED"
+      ],
+      "kind": "phase",
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "case_id": "phase-within",
+      "codes": [],
+      "kind": "phase",
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "case_id": "watch-all",
+      "kind": "watch",
+      "passed": true,
+      "states": {
+        "expired-pack": "refresh_needed",
+        "fingerprint-changed": "refresh_needed",
+        "fresh-pack": "fresh",
+        "no-metadata": "unknown",
+        "no-upstream-entry": "unresolved",
+        "version-changed": "refresh_needed",
+        "window-exceeded": "refresh_needed"
+      }
+    }
+  ],
+  "schema": "apiforge/economy-freshness-eval/v1"
+}

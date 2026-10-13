@@ -1,0 +1,12 @@
+G2 — Tool authorization + memory security v2
+=============================================
+tests/trust/test_tools.py: 6 passed
+tests/memory/test_security.py: 5 passed
+
+Proven: every runnable registry tool has a declared risk profile; default deny
+covers unknown tools (AF-TOOL-PROFILE-MISSING), unknown subjects
+(AF-TOOL-AUTHZ-DENIED), explicit denies (AF-TOOL-DENIED) and risk classes
+outside the grant (AF-TOOL-RISK-DENIED). Memory gates keep historical hard
+rejections, quarantine trust-insufficient candidates (invisible to retrieval),
+reject already-expired payloads, and review_quarantine releases only when the
+full pipeline passes under the reviewed policy.

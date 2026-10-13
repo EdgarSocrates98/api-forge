@@ -1,0 +1,5 @@
+id: gate-static-removed
+kind: gate
+question: "o campo foi removido?"
+expect_mode: static
+expect_live: false

@@ -1,0 +1,20 @@
+API_GRAPH_NEPTUNE build gates — 2026-10-01, branch feature/graph_evo (base 4ebd286)
+
+ruff check src tests: All checks passed
+ruff format --check src tests: 851 files already formatted
+mypy src/apiforge: Success: no issues found in 473 source files
+pytest (full suite, --basetemp E:/afpt/full2): 1420 passed, 1 skipped, 1 failed
+  failed: tests/scripts/test_check_release.py::test_release_gate_accepts_complete_repository
+    cause 1 (fixed after the run): GraphAccessIR/v1 and GraphPlanIR/v1 docs not registered -> registered in contracts/registry.py
+    cause 2 (pre-existing, not part of this change): untracked .claude/agents/README.md present before the session
+  rerun: tests/scripts + tests/contracts 76 passed; with the untracked file moved aside: release gate PASS, 1 passed
+apiforge agents lint: ok, 26 agents, 0 findings
+python scripts/validate_skills.py: skills: ok
+apiforge knowledge check: problems []
+apiforge evals graph-quality: passed, 85 cases (79 golden + 6 holdout), precision python/java/go/typescript 1.0, recall 1.0, bounded_false_positives 0
+  holdout found a real bug before passing: Gremlin chain inside a Java comment produced a call site (fixed by blank_comments)
+apiforge evals agent-routing: 81 cases, top1 0.9753, top3 1.0 (baseline HEAD 75 cases top1 0.9733; 6/6 graph cases top1; 2 misses pre-existing R027/R074)
+apiforge evals agentic-quality --baseline (HEAD worktree report): passed, accuracy balanced/deep/economy 1.0 vs baseline 1.0
+apiforge evals economy-hardening: passed, 18 cases
+synthetic plan fixtures: tests/fixtures/graph_explain (7 formats) — synthetic, never field evidence
+field cycle: unresolved — no graph-backed target repository

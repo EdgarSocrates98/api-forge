@@ -1,0 +1,113 @@
+id: openapi-version-bump
+protocol: openapi
+expected: compatible
+holdout: true
+outcome: evaluate openapi version bump
+mutants:
+- remove_response_status
+baseline:
+  openapi: 3.1.0
+  info:
+    title: Orders API
+    version: 1.0.0
+  paths:
+    /orders:
+      get:
+        operationId: listOrders
+        responses:
+          '200':
+            description: List orders
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Order'
+      post:
+        operationId: createOrder
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        responses:
+          '200':
+            description: Order created (sync)
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Order'
+          '201':
+            description: Order created
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Order'
+  components:
+    schemas:
+      Order:
+        type: object
+        required:
+        - id
+        - total
+        properties:
+          id:
+            type: string
+          total:
+            type: number
+          note:
+            type: string
+candidate:
+  openapi: 3.1.0
+  info:
+    title: Orders API
+    version: 1.1.0
+  paths:
+    /orders:
+      get:
+        operationId: listOrders
+        responses:
+          '200':
+            description: List orders
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Order'
+      post:
+        operationId: createOrder
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        responses:
+          '200':
+            description: Order created (sync)
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Order'
+          '201':
+            description: Order created
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Order'
+  components:
+    schemas:
+      Order:
+        type: object
+        required:
+        - id
+        - total
+        properties:
+          id:
+            type: string
+          total:
+            type: number
+          note:
+            type: string

@@ -1,0 +1,11 @@
+id: watch-all
+kind: watch
+now: "2026-09-28T00:00:00+00:00"
+expect:
+  fresh-pack: fresh
+  fingerprint-changed: refresh_needed
+  version-changed: refresh_needed
+  expired-pack: refresh_needed
+  window-exceeded: refresh_needed
+  no-metadata: unknown
+  no-upstream-entry: unresolved

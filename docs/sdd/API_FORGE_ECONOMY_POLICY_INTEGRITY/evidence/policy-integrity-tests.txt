@@ -1,0 +1,4 @@
+full suite: 1248 passed, 1 skipped
+tests/economy/test_policy_integrity.py: benchmark identity, same/cross corpus baseline, malformed baselines, fail-closed eligibility (5 mutations), unmeasured provider partial
+tests/test_github_governance.py: 8 passed (CODEOWNERS, plan target/checks/warnings, idempotent, bypass/drop, malformed refusal, no mutation imports)
+economy evals: 10/10 passed

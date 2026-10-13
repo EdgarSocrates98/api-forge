@@ -1,0 +1,9 @@
+id: moderate-balanced
+shape: moderate
+risk: read_only
+size: M
+profile: balanced
+expected:
+  effective: balanced
+  minimum_roles:
+  - reviewer

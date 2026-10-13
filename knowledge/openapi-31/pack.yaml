@@ -1,0 +1,8 @@
+domain: openapi-31
+version: 1
+areas: [CONTRACT]
+rule_ids: [AF-CONTRACT-001]
+summary: >-
+  OpenAPI 3.1 as the canonical API contract: JSON Schema 2020-12 alignment,
+  webhooks, pathItems and the contract-first workflow the platform enforces.
+verified: "2026-09-21"

@@ -1,0 +1,15 @@
+Screen {
+    layout: vertical;
+}
+
+#execution-card, #governance-card {
+    width: 1fr;
+    height: 1fr;
+    border: round $accent;
+    padding: 1 2;
+}
+
+.heading {
+    text-style: bold;
+    color: $accent;
+}

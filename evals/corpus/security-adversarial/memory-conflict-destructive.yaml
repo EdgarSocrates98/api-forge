@@ -1,0 +1,9 @@
+id: memory-conflict-destructive
+attack_class: memory_conflict_destructive
+vector:
+  type: memory_conflict
+  params:
+    risk: destructive
+    values: [300, 30]
+expect:
+  verdict: contained

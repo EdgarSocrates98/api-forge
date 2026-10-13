@@ -1,0 +1,9 @@
+sources:
+  - name: Redis commands reference
+    url: https://redis.io/docs/latest/commands/
+    authority: vendor-docs
+    verified: "2026-09-21"
+  - name: Valkey commands reference
+    url: https://valkey.io/commands/
+    authority: vendor-docs
+    verified: "2026-09-21"

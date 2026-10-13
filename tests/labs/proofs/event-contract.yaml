@@ -1,0 +1,5 @@
+kind: event contract
+status: covered
+input: required=[event_id,type,payload],actual=[event_id,type,payload]
+expected: compatible=true
+evidence: deterministic envelope fixture only; no broker delivery claim

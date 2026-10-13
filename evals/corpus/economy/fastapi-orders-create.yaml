@@ -1,0 +1,13 @@
+id: fastapi-orders-create
+fixture: tests/fixtures/fastapi_orders_complete
+contract: tests/fixtures/openapi/orders-v1-complete.yaml
+target: POST /v1/orders
+level: L3
+budget_bytes: 16000
+required_refs:
+- path: openapi.yaml
+  symbol: createOrder
+  kind: contract
+- path: proj/app/routes/orders.py
+  symbol: def create_order
+  kind: code

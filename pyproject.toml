@@ -1,0 +1,137 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "apiforge"
+version = "0.1.0"
+description = "Deterministic, offline API evolution analysis"
+license = { file = "LICENSE" }
+requires-python = ">=3.12"
+dependencies = [
+    "pydantic>=2.9,<3",
+    "typer>=0.12,<1",
+    "PyYAML>=6.0.2,<7",
+    "tree-sitter>=0.24,<0.27",
+    "tree-sitter-java>=0.23.4,<0.24",
+    "tree-sitter-go>=0.23.4,<0.24",
+    "python-hcl2>=4.3,<8",
+    "graphql-core>=3.2,<3.3",
+    "cryptography>=43,<47",
+]
+
+[project.optional-dependencies]
+all = [
+    "boto3>=1.34,<2",
+    "mcp>=2.2,<3",
+    "textual>=8.2,<9",
+    "rich>=13,<15",
+]
+aws = [
+    "boto3>=1.34,<2",
+]
+mcp = [
+    "mcp>=2.2,<3",
+]
+dev = [
+    "mypy>=1.13,<2",
+    "pytest>=8,<9",
+    "ruff>=0.7,<1",
+    "types-PyYAML>=6.0.12,<7",
+]
+tui = [
+    "textual>=8.2,<9",
+    "rich>=13,<15",
+]
+
+[project.scripts]
+apiforge = "apiforge.cli:app"
+apiforge-mcp = "apiforge.mcp.main:main"
+apiforge-tui = "apiforge.cli_tui:tui_app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/apiforge"]
+
+# As arvores canonicas `agents/` e `.agents/skills/` vivem na raiz do repo; o
+# wheel as copia para `apiforge/host_assets/` — e o que `apiforge install` le
+# quando nao ha checkout (mesmo padrao do `integrate/bundle` no SparkForge).
+[tool.hatch.build.targets.wheel.force-include]
+"agents" = "apiforge/host_assets/agents"
+".agents/skills" = "apiforge/host_assets/skills"
+"AGENT_PROTOCOL.md" = "apiforge/host_assets/AGENT_PROTOCOL.md"
+# Portal web local: os assets vendored (`portal/assets/` na raiz do clone) vão
+# para dentro do pacote, e o adapter os resolve nos dois layouts — igual ao
+# host_assets. Sem isto `apiforge portal` num pip install cairia na recusa
+# AF-PORTAL-NO-ASSETS.
+"portal/assets" = "apiforge/portal_assets"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = ["typer.Option", "typer.Argument"]
+
+[tool.ruff.lint.per-file-ignores]
+# Vendored Graph Studio kit (canonical: the-forge/src/theforge)
+"src/apiforge/_graphview.py" = ["ALL"]
+"src/apiforge/_graphstudio.py" = ["ALL"]
+# Vendored Forge UI kit (canonical: the-forge/src/theforge/ui)
+"src/apiforge/ui/**/*.py" = ["ALL"]
+# Vendored engine (canonical: the-forge/scripts/installkit) — kept
+# byte-identical to the shared source; linted in the canonical repo.
+"src/apiforge/_installkit.py" = ["ALL"]
+"scripts/forge_bootstrap.py" = ["ALL"]
+"scripts/forge_installkit.py" = ["ALL"]
+# Vendored portal server (canonical: forge-portal/portal_core) — byte-identical
+# to the shared source, linted in the canonical repo.
+"src/apiforge/_forge_portal.py" = ["ALL"]
+# Eval fixtures are deliberately non-idiomatic analyzer inputs.
+"evals/corpus/**/fixtures/**" = ["ALL"]
+
+[tool.ruff.format]
+# Vendored copies must stay byte-identical to their canonical sources —
+# formatting here would break parity (same boundary as the lint/mypy
+# vendored exemptions above).
+exclude = [
+    "src/apiforge/_forge_portal.py",
+    "src/apiforge/_graphview.py",
+    "src/apiforge/_graphstudio.py",
+    "src/apiforge/_installkit.py",
+    "scripts/forge_installkit.py",
+    "scripts/forge_bootstrap.py",
+    "src/apiforge/ui/**",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["src/apiforge"]
+
+[[tool.mypy.overrides]]
+module = "mcp.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+# Vendored engine (canonical: the-forge/scripts/installkit); typed to the
+# consumer-side contract, kept outside `strict` to stay byte-identical.
+module = "apiforge._installkit"
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+# Vendored portal server (canonical: forge-portal/portal_core) — byte-identical.
+module = "apiforge._forge_portal"
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+# Vendored Graph Studio view + Forge UI kit (canonical: the-forge) —
+# byte-identical; the canonical copies are the typecheck target.
+module = ["apiforge._graphview", "apiforge._graphstudio", "apiforge.ui.*"]
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = "apiforge.tui.*"
+ignore_errors = true

@@ -1,0 +1,76 @@
+version: 1
+# §41 declared task-class -> active tool set mapping.
+# The host decides what it loads; this is the deterministic advisory router.
+
+task_classes:
+  context_economy:
+    - context_capsule
+    - context_expand
+    - context_delta
+    - context_gc
+    - economy_report
+    - economy_ledger
+    - economy_explain
+    - agentops_inspect
+    - agentops_waste
+  security_governance:
+    - decision_check
+    - governor_decide
+    - governor_stop
+    - governor_recover
+    - control_routes
+    - control_shadow
+    - memory_quarantine_list
+    - memory_quarantine_resolve
+    - memory_rank
+    - agentops_waste
+  knowledge_retrieval:
+    - knowledge_search
+    - knowledge_select
+    - knowledge_adaptive
+    - knowledge_watch
+    - route_model
+    - evals_replay
+  telemetry_ops:
+    - agent_span_append
+    - agent_span_query
+    - telemetry_export
+    - telemetry_validate
+    - agentops_inspect
+    - agentops_compare
+    - agentops_waste
+    - mcp_surface
+  migration_contracts:
+    - analyze
+    - contract_show
+    - contract_list
+    - diff_contract
+    - migration_analyze
+    - migration_plan
+    - migration_verify
+    - evals_gate
+    - verify_plan
+  workspace_discovery:
+    - discover
+    - next_step
+    - workspace_discover
+    - workspace_status
+    - workspace_graph
+    - graph_trace
+    - graph_coverage
+    - graph_query
+    - graph_impact
+    - capabilities_list
+    - capabilities_verify
+    - rules_list
+    - mcp_surface
+
+# deterministic classifier: first class whose keyword appears in the task
+# string wins; order in this file is the declaration order.
+keywords:
+  context_economy: [context, capsule, token, cost, economy, budget, compact]
+  security_governance: [oauth, security, auth, gate, governor, trust, quarantine, decision]
+  knowledge_retrieval: [search, knowledge, retrieval, query, select, route]
+  telemetry_ops: [telemetry, span, trace, otel, inspect, agentops, compare]
+  migration_contracts: [migration, migrate, contract, breaking, openapi, grpc, diff]
+  workspace_discovery: [discover, workspace, graph, capability, inventory, analyze]

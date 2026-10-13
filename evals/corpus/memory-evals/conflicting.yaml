@@ -1,0 +1,12 @@
+id: conflicting-surfaced
+axis: conflicting_memory
+setup:
+  records:
+    - {scope: task, origin: system, trust_level: verified, evidence_refs: ["ctx://e1"], payload: {claim: "max_connections = 100"}}
+    - {scope: task, origin: system, trust_level: verified, evidence_refs: ["ctx://e2"], payload: {claim: "max_connections = 400"}, provenance: ["source:b"]}
+action:
+  type: invalidate_suggest
+  trigger: contradicting_evidence
+  memory_ids: ["memory:0000000000000001"]
+expect:
+  memory_ids: ["memory:0000000000000001"]

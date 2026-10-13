@@ -1,0 +1,10 @@
+id: privilege-escalation
+attack_class: privilege_escalation
+vector:
+  type: tool_authorize
+  params:
+    subject: referee
+    tool: memory_quarantine_resolve
+expect:
+  verdict: refused
+  code: AF-TOOL-DENIED

@@ -1,0 +1,4 @@
+vertical: cicd
+status: unresolved
+case: provider_execution_missing
+reason: configuration does not prove a completed run

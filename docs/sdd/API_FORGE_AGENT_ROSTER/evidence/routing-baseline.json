@@ -1,0 +1,283 @@
+{
+  "agents": 52,
+  "alias_mapping_applied": true,
+  "by_family": [
+    [
+      "architecture",
+      0.6667
+    ],
+    [
+      "assurance",
+      0.4444
+    ],
+    [
+      "contract",
+      0.8333
+    ],
+    [
+      "data",
+      1.0
+    ],
+    [
+      "observability",
+      0.3333
+    ],
+    [
+      "operations",
+      1.0
+    ],
+    [
+      "planning",
+      0.7778
+    ],
+    [
+      "quality",
+      0.6667
+    ],
+    [
+      "runtime",
+      0.8889
+    ],
+    [
+      "security",
+      0.6667
+    ]
+  ],
+  "cases": 75,
+  "limitations": [
+    "lexical proxy of the host router; hosts route with a model over the same descriptions"
+  ],
+  "misses": [
+    {
+      "expected": "api-task-spec-reviewer",
+      "id": "R007",
+      "predicted": "api-orchestrator",
+      "top3": [
+        "api-orchestrator",
+        "api-task-spec-reviewer",
+        "api-infra-reviewer"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-task-spec-reviewer",
+      "id": "R009",
+      "predicted": "api-release-guardian",
+      "top3": [
+        "api-release-guardian",
+        "api-adversarial-critic",
+        "api-orchestrator"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-platform-selector",
+      "id": "R010",
+      "predicted": "api-architecture-reviewer",
+      "top3": [
+        "api-architecture-reviewer",
+        "api-platform-selector",
+        "api-planner"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-platform-selector",
+      "id": "R012",
+      "predicted": "api-architecture-reviewer",
+      "top3": [
+        "api-architecture-reviewer",
+        "api-planner",
+        "api-platform-selector"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-architecture-reviewer",
+      "id": "R014",
+      "predicted": "api-data-access-architect",
+      "top3": [
+        "api-data-access-architect",
+        "api-platform-selector",
+        "api-release-guardian"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-infra-reviewer",
+      "id": "R018",
+      "predicted": "api-load-capacity-engineer",
+      "top3": [
+        "api-load-capacity-engineer",
+        "api-infra-reviewer",
+        "api-task-spec-reviewer"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-codegen-engineer",
+      "id": "R027",
+      "predicted": "api-dx-docs-reviewer",
+      "top3": [
+        "api-dx-docs-reviewer",
+        "api-governance-reviewer",
+        "api-modernization-specialist"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-dx-docs-reviewer",
+      "id": "R030",
+      "predicted": "api-orchestrator",
+      "top3": [
+        "api-orchestrator",
+        "api-adversarial-critic",
+        "api-data-access-architect"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-security-reviewer",
+      "id": "R033",
+      "predicted": "api-observability-engineer",
+      "top3": [
+        "api-observability-engineer",
+        "api-security-reviewer",
+        "api-infra-reviewer"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-performance-engineer",
+      "id": "R045",
+      "predicted": "api-governance-reviewer",
+      "top3": [
+        "api-governance-reviewer",
+        "api-architecture-reviewer",
+        "api-contract-architect"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-observability-engineer",
+      "id": "R051",
+      "predicted": "api-contract-architect",
+      "top3": [
+        "api-contract-architect",
+        "api-observability-engineer",
+        "api-observability-integration-engineer"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-observability-integration-engineer",
+      "id": "R052",
+      "predicted": "api-orchestrator",
+      "top3": [
+        "api-orchestrator",
+        "api-observability-integration-engineer",
+        "api-adversarial-critic"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-observability-integration-engineer",
+      "id": "R053",
+      "predicted": "api-test-strategist",
+      "top3": [
+        "api-test-strategist",
+        "api-observability-integration-engineer",
+        "api-contract-architect"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-observability-integration-engineer",
+      "id": "R054",
+      "predicted": "api-orchestrator",
+      "top3": [
+        "api-orchestrator",
+        "api-planner",
+        "api-observability-integration-engineer"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-test-strategist",
+      "id": "R056",
+      "predicted": "api-contract-architect",
+      "top3": [
+        "api-contract-architect",
+        "api-test-strategist",
+        "api-security-reviewer"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-verifier",
+      "id": "R064",
+      "predicted": "api-release-guardian",
+      "top3": [
+        "api-release-guardian",
+        "api-verifier",
+        "api-infra-reviewer"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-verifier",
+      "id": "R065",
+      "predicted": "api-release-guardian",
+      "top3": [
+        "api-release-guardian",
+        "api-verifier",
+        "api-resilience-engineer"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-verifier",
+      "id": "R066",
+      "predicted": "api-release-guardian",
+      "top3": [
+        "api-release-guardian",
+        "api-codegen-engineer",
+        "api-verifier"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-adversarial-critic",
+      "id": "R068",
+      "predicted": "api-release-guardian",
+      "top3": [
+        "api-release-guardian",
+        "api-adversarial-critic",
+        "api-platform-selector"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-debate-referee",
+      "id": "R071",
+      "predicted": "api-adversarial-critic",
+      "top3": [
+        "api-adversarial-critic",
+        "api-platform-selector",
+        "api-infra-reviewer"
+      ],
+      "version": 1
+    }
+  ],
+  "protected_misroutes": [
+    "R064",
+    "R065",
+    "R066",
+    "R068",
+    "R071"
+  ],
+  "schema": "apiforge/agent-routing-eval/v1",
+  "top1": 0.7333,
+  "top3": 0.92,
+  "version": 1
+}

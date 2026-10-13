@@ -1,0 +1,12 @@
+id: retrieval-scoped
+axis: memory_retrieval
+setup:
+  records:
+    - {scope: task, origin: system, trust_level: verified, evidence_refs: ["ctx://e1"], payload: {note: "kafka consumer lag tuning"}}
+    - {scope: task, origin: system, trust_level: verified, evidence_refs: ["ctx://e2"], payload: {note: "postgres index notes"}}
+action:
+  type: query
+  query: {terms: [kafka]}
+expect:
+  count: 1
+  memory_ids: ["memory:0000000000000000"]

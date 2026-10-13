@@ -1,0 +1,5 @@
+kind: context missing evidence
+status: covered
+input: required=[contract,policy],available=[contract]
+expected: state=partial,missing=[policy]
+evidence: deterministic evidence denominator fixture only; no source availability claim

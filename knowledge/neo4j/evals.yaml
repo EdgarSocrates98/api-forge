@@ -1,0 +1,13 @@
+evals:
+  - id: neo4j/e1
+    prompt: "MATCH (a:P), (b:Q) RETURN a, b through session.run - which rule fires?"
+    type: golden
+    expect: {kind: rule, id: AF-GDB-006}
+  - id: neo4j/e2
+    prompt: "A PROFILE dump with AllNodesScan imported by model graph-explain - which rule fires?"
+    type: golden
+    expect: {kind: rule, id: AF-GDB-024}
+  - id: neo4j/e3
+    prompt: "app.run(3000) in a file that imports neo4j-driver - is it a call site?"
+    type: adversarial
+    expect: {kind: fact-kind, id: data.graph.query}

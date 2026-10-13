@@ -1,0 +1,10 @@
+id: expertise-capability-framework
+kind: expertise
+intent: review the pagination cursor of GET /payments
+capability: api-contract-review
+frameworks:
+- fastapi
+expect_packs:
+- fastapi
+- openapi-31
+- pagination

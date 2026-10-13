@@ -1,0 +1,39 @@
+id: debate-retry-semantics
+kind: debate
+question: Should POST /payments retry on 409?
+sides:
+- retry
+- no-retry
+capsule_bytes: 12000
+max_packet_ratio: 0.5
+submissions:
+- side: retry
+  position: retry once with the same Idempotency-Key
+  evidence:
+  - fact:route-create
+  - fact:idem-header
+  disagreements:
+  - point: retry semantics
+    reason: 409 means in-flight
+  risks:
+  - duplicate charge if key is regenerated
+  confidence: 0.7
+- side: no-retry
+  position: surface 409 to the caller
+  evidence:
+  - fact:route-create
+  - fact:problem-details
+  disagreements:
+  - point: retry semantics
+    reason: client owns retries
+  confidence: 0.65
+- side: retry
+  position: retry once with the same key after 200 ms
+  evidence:
+  - fact:route-create
+  - fact:idem-header
+  - fact:timeout
+  disagreements:
+  - point: backoff
+    reason: bounded by SLO
+  confidence: 0.75

@@ -1,0 +1,33 @@
+sources:
+  - name: "Neptune Gremlin access"
+    url: https://docs.aws.amazon.com/neptune/latest/userguide/access-graph-gremlin.html
+    authority: aws-docs
+    verified: "2026-09-21"
+  - name: "Neptune encryption at rest"
+    url: https://docs.aws.amazon.com/neptune/latest/userguide/encrypt.html
+    authority: aws-docs
+    verified: "2026-09-21"
+  - name: "Neptune Gremlin explain API"
+    url: https://docs.aws.amazon.com/neptune/latest/userguide/gremlin-explain-api.html
+    authority: aws-docs
+    verified: "2026-10-01"
+  - name: "Neptune openCypher explain"
+    url: https://docs.aws.amazon.com/neptune/latest/userguide/access-graph-opencypher-explain.html
+    authority: aws-docs
+    verified: "2026-10-01"
+  - name: "Neptune SPARQL explain"
+    url: https://docs.aws.amazon.com/neptune/latest/userguide/sparql-explain-using.html
+    authority: aws-docs
+    verified: "2026-10-01"
+  - name: "Neptune openCypher parameterized queries"
+    url: https://docs.aws.amazon.com/neptune/latest/userguide/opencypher-parameterized-queries.html
+    authority: aws-docs
+    verified: "2026-10-01"
+  - name: "Neptune Analytics algorithms"
+    url: https://docs.aws.amazon.com/neptune-analytics/latest/userguide/algorithms.html
+    authority: aws-docs
+    verified: "2026-10-01"
+  - name: "Neptune Analytics vector similarity"
+    url: https://docs.aws.amazon.com/neptune-analytics/latest/userguide/vector-similarity.html
+    authority: aws-docs
+    verified: "2026-10-01"

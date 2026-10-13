@@ -1,0 +1,19 @@
+id: fastapi-payments-get
+fixture: tests/fixtures/economy_payments/fastapi
+contract: tests/fixtures/economy_payments/openapi.yaml
+target: GET /payments/{payment_id}
+level: L3
+budget_bytes: 16000
+required_refs:
+- path: openapi.yaml
+  symbol: getPayment
+  kind: contract
+- path: openapi.yaml
+  symbol: authorized
+  kind: schema
+- path: proj/app/routes/payments.py
+  symbol: def get_payment
+  kind: code
+- path: proj/tests/test_payments.py
+  symbol: test_get_payment_returns_created
+  kind: test

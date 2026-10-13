@@ -1,0 +1,450 @@
+=== evals knowledge-drift ===
+{
+  "cases": [
+    {
+      "conflicts": 1,
+      "id": "conflicted",
+      "passed": true,
+      "problems": [],
+      "state": "conflicted"
+    },
+    {
+      "conflicts": 0,
+      "id": "deprecated",
+      "passed": true,
+      "problems": [],
+      "state": "deprecated"
+    },
+    {
+      "conflicts": 0,
+      "id": "stale-hash",
+      "passed": true,
+      "problems": [],
+      "state": "stale"
+    },
+    {
+      "conflicts": 0,
+      "id": "unresolved",
+      "passed": true,
+      "problems": [],
+      "state": "unresolved"
+    },
+    {
+      "conflicts": 0,
+      "id": "verified",
+      "passed": true,
+      "problems": [],
+      "state": "verified"
+    }
+  ],
+  "passed": true,
+  "schema": "apiforge/knowledge-drift-evals/v1",
+  "totals": {
+    "cases": 5,
+    "failed": 0,
+    "failed_ids": []
+  }
+}
+
+=== lab scenarios ===
+{
+  "scenarios": [
+    {
+      "eval_id": null,
+      "fixture": "tests/fixtures/openapi/orders-v2-breaking.yaml",
+      "gap": null,
+      "kind": "breaking change",
+      "note": "contract-intel diff classifies orders-v1 -> v2 as breaking",
+      "proof": "tests/contract_intel/test_contract_intel.py",
+      "state": "covered",
+      "version": 1
+    },
+    {
+      "eval_id": null,
+      "fixture": "tests/fixtures/openapi/orders-v1-complete.yaml",
+      "gap": null,
+      "kind": "schema evolution",
+      "note": "unified impact report covers additive vs breaking schema moves",
+      "proof": "tests/contract_intel/test_contract_intel.py",
+      "state": "covered",
+      "version": 1
+    },
+    {
+      "eval_id": null,
+      "fixture": "tests/fixtures/openapi/orders-v1.yaml",
+      "gap": null,
+      "kind": "backward compatibility",
+      "note": "compat classification is the same deterministic diff path",
+      "proof": "tests/contract_intel/test_contract_intel.py",
+      "state": "covered",
+      "version": 1
+    },
+    {
+      "eval_id": null,
+      "fixture": null,
+      "gap": "no replayable latency fixture \u2014 perf evals need recorded baselines",
+      "kind": "latency regression",
+      "note": null,
+      "proof": null,
+      "state": "declared-gap",
+      "version": 1
+    },
+    {
+      "eval_id": null,
+      "fixture": null,
+      "gap": "no auth-migration fixture or eval declared",
+      "kind": "auth migration",
+      "note": null,
+      "proof": null,
+      "state": "declared-gap",
+      "version": 1
+    },
+    {
+      "eval_id": null,
+      "fixture": null,
+      "gap": "no rate-limit scenario fixture or eval declared",
+      "kind": "rate limit",
+      "note": null,
+      "proof": null,
+      "state": "declared-gap",
+      "version": 1
+    },
+    {
+      "eval_id": "resilience:resilience/retry-mutating",
+      "fixture": "tests/fixtures/resilience_app",
+      "gap": null,
+      "kind": "retry storm",
+      "note": "mutating retry without guard triggers AF-PERF-104",
+      "proof": null,
+      "state": "covered",
+      "version": 1
+    },
+    {
+      "eval_id": "resilience:resilience/timeout-missing",
+      "fixture": "tests/fixtures/resilience_app",
+      "gap": null,
+      "kind": "timeout",
+      "note": "missing call-site timeout triggers AF-PERF-101",
+      "proof": null,
+      "state": "covered",
+      "version": 1
+    },
+    {
+      "eval_id": "resilience:resilience/breaker-gap",
+      "fixture": "tests/fixtures/resilience_app",
+      "gap": null,
+      "kind": "circuit breaker",
+      "note": "absent breaker triggers AF-PERF-105",
+      "proof": null,
+      "state": "covered",
+      "version": 1
+    },
+    {
+      "eval_id": null,
+      "fixture": null,
+      "gap": "no AsyncAPI/event-contract fixture or eval declared",
+      "kind": "event contract",
+      "note": null,
+      "proof": null,
+      "state": "declared-gap",
+      "version": 1
+    },
+    {
+      "eval_id": "economy-extras:retrieve-idempotency",
+      "fixture": "evals/corpus/economy-extras/retrieve-idempotency.yaml",
+      "gap": null,
+      "kind": "idempotency",
+      "note": "idempotency retrieval semantics exercised by the economy corpus",
+      "proof": null,
+      "state": "covered",
+      "version": 1
+    },
+    {
+      "eval_id": null,
+      "fixture": null,
+      "gap": "pagination_absent cell stays a declared gap in the lab matrix",
+      "kind": "pagination",
+      "note": null,
+      "proof": null,
+      "state": "declared-gap",
+      "version": 1
+    },
+    {
+      "eval_id": null,
+      "fixture": "tests/fixtures/migrations",
+      "gap": null,
+      "kind": "version migration",
+      "note": "go/java/python/platform-data migration fixtures drive migration tests",
+      "proof": "tests/migration",
+      "state": "covered",
+      "version": 1
+    }
+  ],
+  "schema": "apiforge/lab-scenarios/v1",
+  "totals": {
+    "covered": 8,
+    "declared_gap": 5,
+    "scenarios": 13
+  },
+  "unresolved": [],
+  "version": 1
+}
+
+=== doctor --agentic ===
+{
+  "findings": [
+    {
+      "code": "AF-DOCTOR-SDD-CHAIN-GAP",
+      "detail": "API_FORGE_STEP11_LAB_KNOWLEDGE: missing discover.md \u2014 hash chain incomplete",
+      "severity": "warning",
+      "unlock": "complete the SDD phase chain and restamp upstreams",
+      "version": 1
+    },
+    {
+      "code": "AF-DOCTOR-SDD-CHAIN-GAP",
+      "detail": "API_FORGE_STEP11_LAB_KNOWLEDGE: missing ship.md \u2014 hash chain incomplete",
+      "severity": "warning",
+      "unlock": "complete the SDD phase chain and restamp upstreams",
+      "version": 1
+    },
+    {
+      "code": "AF-ECONOMY-DOCTOR-VERBOSE-OUTPUT",
+      "detail": "CLI payloads are pretty-printed json",
+      "severity": "info",
+      "unlock": "set APIFORGE_OUTPUT=compact for agent hosts",
+      "version": 1
+    },
+    {
+      "code": "AF-ECONOMY-DOCTOR-NO-SHARED-CACHE",
+      "detail": "no shared cache tier; identical inputs in other roots are recomputed",
+      "severity": "info",
+      "unlock": "set APIFORGE_CACHE_HOME to a user or workspace directory",
+      "version": 1
+    }
+  ],
+  "schema": "apiforge/agentic-doctor/v1",
+  "sections": [
+    {
+      "checks": [
+        "case-persistence"
+      ],
+      "findings": [],
+      "plane": "case",
+      "state": "ok",
+      "unresolved": [],
+      "version": 1
+    },
+    {
+      "checks": [
+        "memory-store",
+        "quarantine-backlog"
+      ],
+      "findings": [],
+      "plane": "memory",
+      "state": "unresolved",
+      "unresolved": [
+        "no .apiforge/memory store yet \u2014 first governed write creates it"
+      ],
+      "version": 1
+    },
+    {
+      "checks": [
+        "tool-risk-policy",
+        "trust-policy-parse"
+      ],
+      "findings": [],
+      "plane": "trust",
+      "state": "ok",
+      "unresolved": [],
+      "version": 1
+    },
+    {
+      "checks": [
+        "span-store"
+      ],
+      "findings": [],
+      "plane": "telemetry",
+      "state": "unresolved",
+      "unresolved": [
+        "no agent-spans.jsonl yet \u2014 spans appear after governed runs"
+      ],
+      "version": 1
+    },
+    {
+      "checks": [
+        "corpus-presence",
+        "corpus-parse",
+        "corpora-observed:29"
+      ],
+      "findings": [],
+      "plane": "evals",
+      "state": "ok",
+      "unresolved": [],
+      "version": 1
+    },
+    {
+      "checks": [
+        "sdd-root",
+        "features-observed:70"
+      ],
+      "findings": [
+        {
+          "code": "AF-DOCTOR-SDD-CHAIN-GAP",
+          "detail": "API_FORGE_STEP11_LAB_KNOWLEDGE: missing discover.md \u2014 hash chain incomplete",
+          "severity": "warning",
+          "unlock": "complete the SDD phase chain and restamp upstreams",
+          "version": 1
+        },
+        {
+          "code": "AF-DOCTOR-SDD-CHAIN-GAP",
+          "detail": "API_FORGE_STEP11_LAB_KNOWLEDGE: missing ship.md \u2014 hash chain incomplete",
+          "severity": "warning",
+          "unlock": "complete the SDD phase chain and restamp upstreams",
+          "version": 1
+        }
+      ],
+      "plane": "sdd",
+      "state": "attention",
+      "unresolved": [],
+      "version": 1
+    },
+    {
+      "checks": [
+        "tool-registry",
+        "tools-declared:139"
+      ],
+      "findings": [],
+      "plane": "mcp",
+      "state": "ok",
+      "unresolved": [],
+      "version": 1
+    },
+    {
+      "checks": [
+        "cache-enabled",
+        "default-profile",
+        "capsule-usage",
+        "output-mode",
+        "shared-cache",
+        "knowledge-freshness",
+        "token-receipts",
+        "escalation-rate",
+        "repeated-parsing"
+      ],
+      "findings": [
+        {
+          "code": "AF-ECONOMY-DOCTOR-VERBOSE-OUTPUT",
+          "detail": "CLI payloads are pretty-printed json",
+          "severity": "info",
+          "unlock": "set APIFORGE_OUTPUT=compact for agent hosts",
+          "version": 1
+        },
+        {
+          "code": "AF-ECONOMY-DOCTOR-NO-SHARED-CACHE",
+          "detail": "no shared cache tier; identical inputs in other roots are recomputed",
+          "severity": "info",
+          "unlock": "set APIFORGE_CACHE_HOME to a user or workspace directory",
+          "version": 1
+        }
+      ],
+      "plane": "economy",
+      "state": "attention",
+      "unresolved": [],
+      "version": 1
+    }
+  ],
+  "status": "attention",
+  "unresolved": [
+    "no .apiforge/memory store yet \u2014 first governed write creates it",
+    "no agent-spans.jsonl yet \u2014 spans appear after governed runs"
+  ],
+  "version": 1
+}
+
+=== knowledge impact (summary) ===
+{
+  "edges": [
+    {
+      "from_id": "pack:api-dx",
+      "kind": "backed_by",
+      "props": {},
+      "to_id": "source:ietf-rfc:HTTP Semantics (RFC 9110)",
+      "version": 1
+    },
+    {
+      "from_id": "pack:api-dx",
+      "kind": "backed_by",
+
+=== mcp audit ===
+  "findings": [],
+  "schema": "apiforge/tool-surface-audit/v1",
+  "surface": "full",
+  "tool_count": 151,
+  "total_bytes": 68319,
+  "unresolved": [
+    "oversized_output requires a benchmark sample \u2014 run mcp benchmark"
+  ],
+  "version": 1
+}
+
+=== supply_chain_audit ===
+{
+  "schema": "apiforge/supply-chain-audit/v1",
+  "checks": {
+    "dependency_inventory": {
+      "dependencies": [
+        "pydantic>=2.9,<3",
+        "typer>=0.12,<1",
+        "PyYAML>=6.0.2,<7",
+        "tree-sitter>=0.24,<0.27",
+        "tree-sitter-java>=0.23.4,<0.24",
+        "tree-sitter-go>=0.23.4,<0.24",
+        "python-hcl2>=4.3,<8",
+        "graphql-core>=3.2,<3.3",
+        "cryptography>=43,<47"
+      ],
+      "extras": {
+        "all": [
+          "boto3>=1.34,<2",
+          "mcp>=1.12,<2",
+          "textual>=8.2,<9",
+          "rich>=13,<15"
+        ],
+        "aws": [
+          "boto3>=1.34,<2"
+        ],
+        "mcp": [
+          "mcp>=1.12,<2"
+        ],
+        "dev": [
+          "mypy>=1.13,<2",
+          "pytest>=8,<9",
+          "ruff>=0.7,<1",
+          "types-PyYAML>=6.0.12,<7"
+        ],
+        "tui": [
+          "textual>=8.2,<9",
+          "rich>=13,<15"
+        ]
+      },
+      "requires_python": ">=3.12,<3.13",
+      "unpinned": []
+    },
+    "pip_check": "skipped: no pip module in this interpreter",
+    "vendor_parity": "vendor/ matches MANIFEST.sha256",
+    "eval_corpus": {
+      "corpora": 29,
+      "cases": 195
+    },
+    "surface_lock": {
+      "mcp_tools": 139
+    }
+  },
+  "unresolved": [
+    "CVE/advisory scanning requires an external vulnerability database — declared external boundary, never faked offline",
+    "pip check unavailable in this interpreter (uv venv without pip); the CI job runs it where pip exists"
+  ],
+  "failed": 0,
+  "ok": true,
+  "failures": []
+}

@@ -1,0 +1,10 @@
+domain: api-lifecycle
+version: 1
+areas: [CONTRACT, BREAKING]
+rule_ids:
+  - AF-BREAK-005
+  - AF-BREAK-006
+  - AF-CONTRACT-001
+summary: >-
+  Lifecycle from draft to deprecation - contract-first, dated deprecation, measured retirement.
+verified: "2026-09-21"

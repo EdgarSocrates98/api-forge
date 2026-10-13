@@ -1,0 +1,13 @@
+id: cross-agent-injection
+attack_class: cross_agent_injection
+vector:
+  type: trust_propagate
+  params:
+    transform: system_synthesis
+    sources:
+      - {subject: agent-output-a, boundary: agent_handoff, origin: model_generated, trust_level: observed, instruction_authority: none}
+      - {subject: injected-handoff, boundary: agent_handoff, origin: external_untrusted, trust_level: untrusted, taint: [external], instruction_authority: none}
+    expect_authority_none: true
+    max_trust_level: untrusted
+expect:
+  verdict: contained

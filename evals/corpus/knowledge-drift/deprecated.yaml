@@ -1,0 +1,8 @@
+id: deprecated
+pack:
+  domain: eval-pack
+  freshness: {window_days: 30, source_hash: abc123, expires_at: "2026-09-01T00:00:00Z"}
+receipts:
+  - {observed_at: "2026-09-29T00:00:00+00:00", source_hash: abc123}
+now: "2026-10-01T00:00:00+00:00"
+expect: {state: deprecated}

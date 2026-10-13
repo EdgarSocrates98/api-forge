@@ -1,0 +1,4 @@
+ruff check src tests: PASS
+mypy src/apiforge: PASS
+pytest tests/test_data_governance.py -q: 4 passed
+python scripts/check_release.py: PASS

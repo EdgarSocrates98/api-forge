@@ -1,0 +1,11 @@
+version: 1
+mode: local-ci-safe
+redaction:
+  deny_keys: [authorization, api_key, token, password, secret, cookie]
+  max_cardinality: 100
+vendors:
+  datadog: {read_only: true, apply_requires_broker: true}
+  dynatrace: {read_only: true, apply_requires_broker: true}
+gates:
+  external_mutation_requires_approval: true
+  missing_telemetry_is_inconclusive: true

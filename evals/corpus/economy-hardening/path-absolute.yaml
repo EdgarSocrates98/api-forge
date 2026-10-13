@@ -1,0 +1,4 @@
+id: path-absolute
+kind: path
+candidate: "/etc/passwd"
+expect: refuse

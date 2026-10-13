@@ -1,0 +1,5 @@
+id: unresolved-external-ref
+outcome: point the Order schema at an external $ref that is not vendored
+risk: read_only
+ground_truth: unresolved
+default_verdict: unresolved

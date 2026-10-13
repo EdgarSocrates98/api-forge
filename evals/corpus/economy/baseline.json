@@ -1,0 +1,65 @@
+{
+  "cases": {
+    "fastapi-orders-create": {
+      "baseline_bytes": 2853,
+      "baseline_recall": 1.0,
+      "fixture_sha256": "97ddac1bb084d52e1b51a8188e6e038e98375e1233b74b2a5bedb55c3159489e"
+    },
+    "fastapi-orders-list": {
+      "baseline_bytes": 2853,
+      "baseline_recall": 1.0,
+      "fixture_sha256": "97ddac1bb084d52e1b51a8188e6e038e98375e1233b74b2a5bedb55c3159489e"
+    },
+    "fastapi-payments-create": {
+      "baseline_bytes": 10926,
+      "baseline_recall": 1.0,
+      "fixture_sha256": "d602cf6e0766de5c83764d5e2c2d107d26982a91ffd04e03d4c3c8afc253c8f1"
+    },
+    "fastapi-payments-get": {
+      "baseline_bytes": 10173,
+      "baseline_recall": 1.0,
+      "fixture_sha256": "d602cf6e0766de5c83764d5e2c2d107d26982a91ffd04e03d4c3c8afc253c8f1"
+    },
+    "fastapi-payments-refund": {
+      "baseline_bytes": 10173,
+      "baseline_recall": 1.0,
+      "fixture_sha256": "d602cf6e0766de5c83764d5e2c2d107d26982a91ffd04e03d4c3c8afc253c8f1"
+    },
+    "go-orders-create": {
+      "baseline_bytes": 3391,
+      "baseline_recall": 1.0,
+      "fixture_sha256": "d72bdb405ebc2df5f9470a7d35a37633fa72026490865888ae506f1faf15078b"
+    },
+    "go-orders-list": {
+      "baseline_bytes": 3391,
+      "baseline_recall": 1.0,
+      "fixture_sha256": "d72bdb405ebc2df5f9470a7d35a37633fa72026490865888ae506f1faf15078b"
+    },
+    "spring-orders-create": {
+      "baseline_bytes": 4013,
+      "baseline_recall": 1.0,
+      "fixture_sha256": "e27ef604b6f1a4922297696d0b73c1508e09d44db20fd4dfdaa575106f1ab553"
+    },
+    "spring-orders-list": {
+      "baseline_bytes": 4013,
+      "baseline_recall": 1.0,
+      "fixture_sha256": "e27ef604b6f1a4922297696d0b73c1508e09d44db20fd4dfdaa575106f1ab553"
+    },
+    "spring-payments-create": {
+      "baseline_bytes": 10463,
+      "baseline_recall": 1.0,
+      "fixture_sha256": "7d58dab82cf4cffa2b3fbd2023f3c173b91f0c1d91b8364db819cd26833e8f50"
+    },
+    "spring-payments-get": {
+      "baseline_bytes": 10797,
+      "baseline_recall": 1.0,
+      "fixture_sha256": "7d58dab82cf4cffa2b3fbd2023f3c173b91f0c1d91b8364db819cd26833e8f50"
+    },
+    "spring-payments-refund": {
+      "baseline_bytes": 10797,
+      "baseline_recall": 1.0,
+      "fixture_sha256": "7d58dab82cf4cffa2b3fbd2023f3c173b91f0c1d91b8364db819cd26833e8f50"
+    }
+  },
+  "schema": "apiforge/economy-baseline/v1"
+}

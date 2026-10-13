@@ -1,0 +1,5 @@
+id: rename-operation-id
+outcome: rename the createOrder operationId used by generated SDKs
+risk: sensitive
+ground_truth: breaking
+default_verdict: breaking

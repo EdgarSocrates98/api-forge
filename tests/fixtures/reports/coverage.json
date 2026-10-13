@@ -1,0 +1,8 @@
+{
+  "totals": {"covered_lines": 420, "num_statements": 500, "percent_covered": 84.0,
+             "missing_lines": 80, "num_branches": 40, "covered_branches": 30},
+  "files": {
+    "app/routes.py": {"summary": {"percent_covered": 92.0, "missing_lines": 4}},
+    "app/models.py": {"summary": {"percent_covered": 76.0, "missing_lines": 76}}
+  }
+}

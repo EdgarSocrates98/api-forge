@@ -1,0 +1,37 @@
+id: inspect-sections
+run_id: run-eval-1
+ledger:
+  - run_id: run-eval-1
+    verb: context capsule
+    source: contract
+    cost: {context_bytes: 500, cache_hits: 2, duration_ms: 120, observed_tokens: 300}
+    refs:
+      - {hash: a, label: "schema:Order"}
+      - {hash: b, label: "schema:Item"}
+usage:
+  - run_id: run-eval-1
+    agent: builder
+    task_id: task-eval
+    model: m1
+    model_call_id: model-call-1
+    tokens: {input_tokens: 100, output_tokens: 50}
+inspect:
+  metrics:
+    run:
+      entries: {value: 1}
+      task_id: {value: task-eval}
+    agents:
+      agents: {value: 1}
+    context:
+      bytes: {value: 500}
+      tokens: {value: 300}
+      cache_hits: {value: 2}
+      context_precision: {state: unresolved}
+    models:
+      calls: {value: 1}
+      input_tokens: {value: 100}
+      cost: {state: unresolved}
+    memory:
+      records: {state: unresolved}
+  unresolved:
+    - memory store absent

@@ -1,0 +1,84 @@
+..........................s                                              [100%]
+============================== warnings summary ===============================
+tests/mcp/test_tools.py::test_new_read_tools_mirror_cli
+  E:\projetos\api-forge\src\apiforge\contracts\economy_evals.py:46: UserWarning: Field name "schema" in "BenchmarkIdentity" shadows an attribute in parent "VersionedContract"
+    class BenchmarkIdentity(VersionedContract):
+
+tests/mcp/test_tools.py::test_new_read_tools_mirror_cli
+  E:\projetos\api-forge\src\apiforge\contracts\economy_evals.py:67: UserWarning: Field name "schema" in "EconomyMatrix" shadows an attribute in parent "VersionedContract"
+    class EconomyMatrix(VersionedContract):
+
+tests/mcp/test_tools.py::test_new_read_tools_mirror_cli
+  E:\projetos\api-forge\src\apiforge\contracts\economy_evals.py:82: UserWarning: Field name "schema" in "EvaluationGate" shadows an attribute in parent "VersionedContract"
+    class EvaluationGate(VersionedContract):
+
+tests/mcp/test_tools.py::test_new_read_tools_mirror_cli
+  E:\projetos\api-forge\src\apiforge\contracts\economy_evals.py:108: UserWarning: Field name "schema" in "ReplayReport" shadows an attribute in parent "VersionedContract"
+    class ReplayReport(VersionedContract):
+
+tests/mcp/test_tools.py::test_new_read_tools_mirror_cli
+  E:\projetos\api-forge\src\apiforge\contracts\economy_extras.py:19: UserWarning: Field name "schema" in "VerificationPlan" shadows an attribute in parent "VersionedContract"
+    class VerificationPlan(VersionedContract):
+
+tests/mcp/test_tools.py::test_new_read_tools_mirror_cli
+  E:\projetos\api-forge\src\apiforge\contracts\economy_extras.py:44: UserWarning: Field name "schema" in "RetrievalResult" shadows an attribute in parent "VersionedContract"
+    class RetrievalResult(VersionedContract):
+
+tests/mcp/test_tools.py::test_new_read_tools_mirror_cli
+  E:\projetos\api-forge\src\apiforge\contracts\economy_extras.py:58: UserWarning: Field name "schema" in "EvidenceNode" shadows an attribute in parent "VersionedContract"
+    class EvidenceNode(VersionedContract):
+
+tests/mcp/test_tools.py::test_new_read_tools_mirror_cli
+  E:\projetos\api-forge\src\apiforge\contracts\economy_extras.py:78: UserWarning: Field name "schema" in "EconomyDoctor" shadows an attribute in parent "VersionedContract"
+    class EconomyDoctor(VersionedContract):
+
+tests/mcp/test_tools.py::test_new_read_tools_mirror_cli
+  E:\projetos\api-forge\src\apiforge\contracts\economy_extras.py:101: UserWarning: Field name "schema" in "TierDecision" shadows an attribute in parent "VersionedContract"
+    class TierDecision(VersionedContract):
+
+tests/mcp/test_tools.py::test_new_read_tools_mirror_cli
+  E:\projetos\api-forge\src\apiforge\contracts\economy_extras.py:113: UserWarning: Field name "schema" in "PromptEnvelope" shadows an attribute in parent "VersionedContract"
+    class PromptEnvelope(VersionedContract):
+
+tests/mcp/test_tools.py::test_new_read_tools_mirror_cli
+  E:\projetos\api-forge\src\apiforge\contracts\economy_extras.py:132: UserWarning: Field name "schema" in "LocalityPlan" shadows an attribute in parent "VersionedContract"
+    class LocalityPlan(VersionedContract):
+
+tests/mcp/test_tools.py::test_new_read_tools_mirror_cli
+  E:\projetos\api-forge\src\apiforge\contracts\economy_resume.py:35: UserWarning: Field name "schema" in "FreshnessWatch" shadows an attribute in parent "VersionedContract"
+    class FreshnessWatch(VersionedContract):
+
+tests/mcp/test_tools.py::test_new_read_tools_mirror_cli
+  E:\projetos\api-forge\src\apiforge\contracts\economy_resume.py:46: UserWarning: Field name "schema" in "LiveEvidenceDecision" shadows an attribute in parent "VersionedContract"
+    class LiveEvidenceDecision(VersionedContract):
+
+tests/mcp/test_tools.py::test_new_read_tools_mirror_cli
+  E:\projetos\api-forge\src\apiforge\contracts\economy_resume.py:62: UserWarning: Field name "schema" in "VerificationEscalation" shadows an attribute in parent "VersionedContract"
+    class VerificationEscalation(VersionedContract):
+
+tests/mcp/test_tools.py::test_new_read_tools_mirror_cli
+  E:\projetos\api-forge\src\apiforge\contracts\economy_resume.py:87: UserWarning: Field name "schema" in "PhaseBudgetPlan" shadows an attribute in parent "VersionedContract"
+    class PhaseBudgetPlan(VersionedContract):
+
+tests/mcp/test_tools.py::test_new_read_tools_mirror_cli
+  E:\projetos\api-forge\src\apiforge\contracts\economy_resume.py:101: UserWarning: Field name "schema" in "EconomyCheckpoint" shadows an attribute in parent "VersionedContract"
+    class EconomyCheckpoint(VersionedContract):
+
+tests/mcp/test_tools.py::test_new_read_tools_mirror_cli
+  E:\projetos\api-forge\src\apiforge\contracts\tool_host.py:29: UserWarning: Field name "schema" in "TestSlice" shadows an attribute in parent "VersionedContract"
+    class TestSlice(VersionedContract):
+
+tests/mcp/test_tools.py::test_new_read_tools_mirror_cli
+  E:\projetos\api-forge\src\apiforge\contracts\tool_host.py:58: UserWarning: Field name "schema" in "ErrorSlice" shadows an attribute in parent "VersionedContract"
+    class ErrorSlice(VersionedContract):
+
+tests/mcp/test_tools.py::test_new_read_tools_mirror_cli
+  E:\projetos\api-forge\src\apiforge\contracts\tool_host.py:75: UserWarning: Field name "schema" in "ToolSurface" shadows an attribute in parent "VersionedContract"
+    class ToolSurface(VersionedContract):
+
+tests/mcp/test_tools.py::test_new_read_tools_mirror_cli
+  E:\projetos\api-forge\src\apiforge\contracts\tool_host.py:87: UserWarning: Field name "schema" in "HostProjection" shadows an attribute in parent "VersionedContract"
+    class HostProjection(VersionedContract):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+26 passed, 1 skipped, 20 warnings in 4.43s

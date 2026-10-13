@@ -1,0 +1,12 @@
+id: mcp-target-unknown
+attack_class: mcp_dynamic_target_escalation
+vector:
+  type: tool_authorize
+  params:
+    subject: mcp-gateway
+    tool: undeclared_rogue_tool
+    target: true
+    known_targets: []
+expect:
+  verdict: refused
+  code: AF-MCP-TOOL-UNKNOWN

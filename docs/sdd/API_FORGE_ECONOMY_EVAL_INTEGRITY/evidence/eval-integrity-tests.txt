@@ -1,0 +1,3 @@
+full suite: 1227 passed, 1 skipped
+tests/economy/test_eval_integrity.py: 9 passed (floor, baseline, eligibility, run scope, production oracle mutation, changed-path never read, case dir refused)
+economy evals: 10/10 passed

@@ -1,0 +1,9 @@
+cases:
+  - id: sealed-evolution
+    input: sealed TaskSpec with an existing API project
+    expected: REVIEW
+    proof: runtime artifact and replay bundle
+  - id: missing-proof
+    input: draft TaskSpec without acceptance or rollback
+    expected: BLOCKED
+    proof: named review findings

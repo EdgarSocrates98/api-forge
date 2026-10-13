@@ -1,0 +1,2 @@
+G3: Catalog, contract docs, focused tests, full release gate and SDD evidence
+preserve refusal codes, unresolved token state and append-only spend receipts.

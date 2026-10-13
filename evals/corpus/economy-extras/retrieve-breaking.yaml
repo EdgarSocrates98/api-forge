@@ -1,0 +1,5 @@
+id: retrieve-breaking
+kind: retrieval
+query: breaking endpoint
+expect_pack: api-lifecycle
+expect_expansion: true

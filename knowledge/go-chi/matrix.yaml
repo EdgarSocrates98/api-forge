@@ -1,0 +1,8 @@
+runtime: go-chi
+constraints:
+  - component: chi
+    range: ">=5.0"
+    note: chi v5 is the module path the adapter recognizes
+  - component: go
+    min: "1.21"
+    verified: "2026-09-21"

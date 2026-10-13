@@ -1,0 +1,216 @@
+version: 1
+routes:
+  - phase: discover
+    dominant_area: CONTRACT
+    recommended_agent: api-governance-reviewer
+    rationale: Normalize API contract and change evidence before selecting implementation work.
+  - phase: contract
+    dominant_area: CONTRACT
+    recommended_agent: api-contract-architect
+    rationale: >-
+      Contract findings while the contract is being written belong to the
+      contract architect, not to a downstream reviewer.
+  - phase: architecture
+    dominant_area: CONTRACT
+    recommended_agent: api-contract-architect
+    rationale: >-
+      Contract shape is the input to architecture decisions; unresolved
+      contract findings must be settled first.
+  - phase: verify
+    dominant_area: CONTRACT
+    recommended_agent: api-governance-reviewer
+    rationale: >-
+      Contract/code divergence surfacing at verify time is the governance
+      question: style, compatibility, and lifecycle policy.
+  - phase: build
+    dominant_area: TESTING
+    recommended_agent: api-test-strategist
+    rationale: >-
+      Findings about missing or weak tests during build belong to the
+      testing strategist.
+  - phase: verify
+    dominant_area: TESTING
+    recommended_agent: api-test-strategist
+    rationale: >-
+      Contract and coverage gaps found while verifying are the testing
+      strategist's domain.
+  - phase: secure
+    dominant_area: SECURITY
+    recommended_agent: api-security-reviewer
+    rationale: >-
+      AuthN/Z, OWASP API and exposure findings route to the security
+      reviewer.
+  - phase: benchmark
+    dominant_area: PERF
+    recommended_agent: api-performance-engineer
+    rationale: >-
+      Baseline/hypothesis/benchmark work belongs to the performance
+      engineer.
+  - phase: build
+    dominant_area: DATA
+    recommended_agent: api-data-access-architect
+    rationale: >-
+      Dangerous commands, unbounded reads and unfiltered writes found in
+      source are data-access posture — the data-access architect's domain.
+  - phase: verify
+    dominant_area: DATA
+    recommended_agent: api-data-access-architect
+    rationale: >-
+      Data-access findings at verify time are access-pattern questions,
+      judged by the data-access architect.
+  - phase: benchmark
+    dominant_area: DATA
+    recommended_agent: api-performance-engineer
+    rationale: >-
+      Data-access findings surfacing under performance work (KEYS, blocking
+      SAVE) route to the performance engineer.
+  - phase: build
+    dominant_area: MESSAGING
+    recommended_agent: api-resilience-engineer
+    rationale: >-
+      Missing DLQs, unconfirmed subscriptions and targetless rules are
+      delivery-failure modes — the reliability engineer's domain.
+  - phase: verify
+    dominant_area: MESSAGING
+    recommended_agent: api-resilience-engineer
+    rationale: >-
+      Messaging findings at verify time are delivery guarantees, judged
+      by the reliability engineer.
+  - phase: secure
+    dominant_area: IDENTITY
+    recommended_agent: api-security-reviewer
+    rationale: >-
+      Wildcard policies, session duration and pool posture are identity
+      security — routed to the security reviewer.
+  - phase: build
+    dominant_area: STORAGE
+    recommended_agent: api-infra-reviewer
+    rationale: >-
+      Datastore posture (PITR, encryption, deletion protection) is
+      infrastructure configuration — routed to the AWS infra reviewer.
+  - phase: verify
+    dominant_area: STORAGE
+    recommended_agent: api-infra-reviewer
+    rationale: >-
+      Storage findings at verify time are infra configuration, judged by
+      the AWS infra reviewer.
+  - phase: build
+    dominant_area: OBSERVE
+    recommended_agent: api-observability-engineer
+    rationale: >-
+      Silent alarms and missing tracing are observability gaps — the
+      observability engineer's domain.
+  - phase: verify
+    dominant_area: OBSERVE
+    recommended_agent: api-observability-engineer
+    rationale: >-
+      Observability findings at verify time belong to the observability
+      engineer.
+  - phase: contract
+    dominant_area: REST
+    recommended_agent: api-contract-architect
+    rationale: >-
+      REST surface findings while the contract is being written are design
+      questions — resource naming, methods, status codes.
+  - phase: verify
+    dominant_area: REST
+    recommended_agent: api-governance-reviewer
+    rationale: >-
+      REST style and lifecycle findings at verify time are governance:
+      consistency and compatibility policy.
+  - phase: build
+    dominant_area: REST
+    recommended_agent: api-dx-docs-reviewer
+    rationale: >-
+      REST findings surfacing during build are usability of the published
+      surface — the DX/docs reviewer's domain.
+  - phase: architecture
+    dominant_area: BREAKING
+    recommended_agent: api-modernization-specialist
+    rationale: >-
+      Breaking-change findings at design time are evolution decisions —
+      the modernization specialist owns them.
+  - phase: verify
+    dominant_area: BREAKING
+    recommended_agent: api-governance-reviewer
+    rationale: >-
+      Compatibility findings at verify time are lifecycle policy — the
+      governance reviewer decides accept/version/reject.
+  - phase: build
+    dominant_area: GATEWAY
+    recommended_agent: api-infra-reviewer
+    rationale: >-
+      Gateway findings during build are edge infrastructure posture —
+      the AWS infra reviewer's domain.
+  - phase: verify
+    dominant_area: GATEWAY
+    recommended_agent: api-infra-reviewer
+    rationale: >-
+      Gateway findings at verify time stay infra configuration, judged by
+      the AWS infra reviewer.
+  - phase: secure
+    dominant_area: GATEWAY
+    recommended_agent: api-security-reviewer
+    rationale: >-
+      Gateway findings under the secure phase are edge auth and exposure —
+      the security reviewer's domain.
+  - phase: plan
+    dominant_area: REST
+    recommended_agent: api-planner
+    rationale: >-
+      Planning before architecture: the planner turns discovery into a
+      declared WorkloadProfile and a sealed task decomposition.
+  - phase: plan
+    dominant_area: CONTRACT
+    recommended_agent: api-planner
+    rationale: >-
+      Contract risk feeds the plan; the planner names it before any
+      platform decision.
+  - phase: architecture
+    dominant_area: GATEWAY
+    recommended_agent: api-platform-selector
+    rationale: >-
+      Edge/compute selection at architecture time is the decision engine's
+      job — declared profile in, ranked roles out.
+  - phase: architecture
+    dominant_area: STORAGE
+    recommended_agent: api-platform-selector
+    rationale: >-
+      Datastore choice is a platform decision driven by the declared
+      data_model, never a default.
+  - phase: architecture
+    dominant_area: MESSAGING
+    recommended_agent: api-event-driven-architect
+    rationale: >-
+      Async topology (queues, topics, event buses, orchestration) is the
+      event-driven specialist's domain.
+  - phase: architecture
+    dominant_area: OBSERVE
+    recommended_agent: api-operations-engineer
+    rationale: >-
+      Operational posture (runbooks, autonomy modes, telemetry surfaces)
+      belongs in the architecture before build.
+  - phase: verify
+    dominant_area: PERF
+    recommended_agent: api-load-capacity-engineer
+    rationale: >-
+      A measured run at verify time is a capacity question — verdict over
+      baseline, RPS distinct from TPS.
+  - phase: benchmark
+    dominant_area: TESTING
+    recommended_agent: api-load-capacity-engineer
+    rationale: >-
+      Load scenarios, tool reports and generator saturation are the load
+      engineer's evidence surface.
+  - phase: build
+    dominant_area: IDENTITY
+    recommended_agent: api-infra-reviewer
+    rationale: >-
+      Identity declared in IaC (roles, pools, policies) is reviewed as
+      code before it is reviewed as a dump.
+  - phase: verify
+    dominant_area: SECURITY
+    recommended_agent: api-release-guardian
+    rationale: >-
+      Security findings at verify time block release; the guardian ties
+      the evidence to the gate, not to an opinion.

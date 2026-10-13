@@ -1,0 +1,6 @@
+[
+  {"RuleID": "aws-access-key", "File": "config/prod.yaml", "StartLine": 12,
+   "Secret": "AKIA...REDACTED-NEVER-EMIT", "Match": "AKIAIOSFODNN7EXAMPLE"},
+  {"RuleID": "generic-api-key", "File": "src/app.py", "StartLine": 88,
+   "Secret": "sk_live_never", "Match": "api_key=sk_live_never"}
+]

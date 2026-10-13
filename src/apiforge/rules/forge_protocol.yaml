@@ -1,0 +1,8 @@
+version: 1
+# §46-§48 declared Forge protocol policy — wire identity, risk gate, peers.
+engine: api-forge
+protocol_version: forge-protocol/v1
+# Risks that require explicit --acknowledge-risk at submit.
+risk_gate: [sensitive, external_mutation, destructive, irreversible]
+# Declared interop peers — `forge handoff` refuses undeclared targets.
+engines: [spark-forge, the-forger]

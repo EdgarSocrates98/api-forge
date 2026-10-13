@@ -1,0 +1,19 @@
+id: fastapi-payments-refund
+fixture: tests/fixtures/economy_payments/fastapi
+contract: tests/fixtures/economy_payments/openapi.yaml
+target: POST /payments/{payment_id}/refunds
+level: L3
+budget_bytes: 16000
+required_refs:
+- path: openapi.yaml
+  symbol: refundPayment
+  kind: contract
+- path: openapi.yaml
+  symbol: requested_by_customer
+  kind: schema
+- path: proj/app/routes/payments.py
+  symbol: refund exceeds payment
+  kind: code
+- path: proj/tests/test_payments.py
+  symbol: test_refund_payment_rejects_excess
+  kind: test

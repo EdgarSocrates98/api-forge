@@ -1,0 +1,8 @@
+runtime: aws-api-gateway
+constraints:
+  - component: integration-timeout
+    max: "29s"
+    note: REST API integration ceiling - declared, not configurable beyond
+  - component: payload-format
+    set: ["1.0", "2.0"]
+    note: HTTP API uses 2.0; REST API uses 1.0 - findings differ per format

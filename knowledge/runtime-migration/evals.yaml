@@ -1,0 +1,17 @@
+evals:
+  - id: runtime-migration/java-11-to-21
+    prompt: "Analyze a Java 11 to 21 project with a Maven manifest."
+    type: compatibility
+    expect: {kind: fact-kind, id: migration-finding}
+  - id: runtime-migration/python-2-to-3
+    prompt: "Analyze a Python 2 to 3 project with legacy syntax."
+    type: adversarial
+    expect: {kind: refusal, id: false-done}
+  - id: runtime-migration/go-1-21-to-1-24
+    prompt: "Analyze a Go 1.21 to 1.24 project with go.mod."
+    type: integration
+    expect: {kind: fact-kind, id: migration-plan}
+  - id: runtime-migration/missing-toolchain
+    prompt: "Do not mark a migration done when the target toolchain is absent."
+    type: holdout
+    expect: {kind: refusal, id: false-done}

@@ -1,0 +1,6 @@
+id: expertise-idempotency
+kind: expertise
+intent: add an Idempotency-Key header to POST /payments with retries and a timeout
+expect_packs:
+- idempotency
+- resilience

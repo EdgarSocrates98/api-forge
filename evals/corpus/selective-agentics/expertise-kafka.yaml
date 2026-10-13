@@ -1,0 +1,5 @@
+id: expertise-kafka
+kind: expertise
+intent: Kafka consumer schema migration
+expect_packs:
+- aws-messaging

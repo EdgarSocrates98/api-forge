@@ -1,0 +1,7 @@
+command: pytest -q (full suite, serial)
+commit-base: 6f9d02d (branch sdd/new-forge)
+result: 1284 passed, 1 skipped, 1 failed
+failed: tests/scripts/test_check_release.py::test_release_gate_accepts_complete_repository
+cause: pre-existing untracked .claude/agents/README.md (orphan agent mirror), present before this feature; not modified by this build
+mypy src: Success: no issues found in 452 source files
+ruff check/format: pass

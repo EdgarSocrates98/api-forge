@@ -1,0 +1,6 @@
+id: expertise-owasp
+kind: expertise
+intent: check BOLA on GET /customers/{customer_id}
+capability: api-security-review
+expect_packs:
+- owasp-api-2023

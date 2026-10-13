@@ -1,0 +1,7 @@
+policy:
+  max_participants: 3
+  max_rounds: 2
+  preserve_dissent: true
+cases:
+  - risk: high
+    expected: bounded

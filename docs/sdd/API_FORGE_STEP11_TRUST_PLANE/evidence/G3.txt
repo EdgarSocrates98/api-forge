@@ -1,0 +1,14 @@
+G3 — Retrieval v2, invalidation triggers, checkpoint parity
+===========================================================
+tests/memory/test_retrieval.py: 3 passed
+tests/memory/test_invalidation.py: 6 passed
+tests/runtime/test_checkpoint_parity.py: 2 passed
+tests/agentic_state/test_memory_blackboard.py: 5 passed (unchanged)
+tests/contracts/test_agentic_memory.py: 3 passed (unchanged)
+
+Proven: deterministic per-signal ranking orders query_memory identically;
+semantic bonus is additive and optional. Advisory plans flag stale
+environments, touched provenance/contract dependencies and explicit outcomes
+without mutating the store. The parity test resumes from a freshly loaded
+checkpoint only — decisions, facts, unresolved items, tool path and result
+match the continuous run exactly.

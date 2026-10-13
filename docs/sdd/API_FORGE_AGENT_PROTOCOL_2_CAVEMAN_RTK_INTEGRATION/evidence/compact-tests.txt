@@ -1,0 +1,4 @@
+pytest tests/agentops/test_compact.py -q
+5 passed
+ruff check src/apiforge tests/agentops/test_compact.py: All checks passed
+mypy src/apiforge: no issues found in 233 source files

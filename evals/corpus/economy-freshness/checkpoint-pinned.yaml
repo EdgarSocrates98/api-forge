@@ -1,0 +1,6 @@
+id: checkpoint-pinned
+kind: checkpoint
+checkpoint_effective: deep
+requested: economy
+expect_profile: deep
+expect_code: AF-ECONOMY-RESUME-PINNED

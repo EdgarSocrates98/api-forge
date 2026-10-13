@@ -1,0 +1,5 @@
+kind: recovery timeout
+status: covered
+input: failure_class=timeout,attempt=99
+expected: terminal_action!=retry
+evidence: deterministic governance fixture only; no provider outage claim

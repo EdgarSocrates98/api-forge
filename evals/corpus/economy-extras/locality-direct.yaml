@@ -1,0 +1,22 @@
+id: locality-direct
+kind: locality
+repositories:
+- payments
+- customers
+- contracts
+- sdk
+- billing
+relations:
+- - payments
+  - contracts
+- - sdk
+  - payments
+- - contracts
+  - billing
+target: payments
+expect_direct:
+- contracts
+- sdk
+expect_excluded:
+- billing
+- customers

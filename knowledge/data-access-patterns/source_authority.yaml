@@ -1,0 +1,9 @@
+sources:
+  - name: "AWS database caching strategies"
+    url: https://docs.aws.amazon.com/whitepapers/latest/database-caching-strategies-using-redis/welcome.html
+    authority: aws-docs
+    verified: "2026-09-21"
+  - name: "API Forge data rules"
+    url: docs/catalog-contract.md
+    authority: project-docs
+    verified: "2026-09-21"

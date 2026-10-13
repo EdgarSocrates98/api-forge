@@ -1,0 +1,294 @@
+catalog_version: 1
+schema_version: 1
+area: SECURITY
+retrieved: 2026-09-21
+rules:
+  - id: AF-SEC-001
+    title: Object-level authorization on every ID-bearing request (BOLA)
+    severity: critical
+    rationale: >-
+      OWASP API1 — Broken Object Level Authorization is the top API breach
+      vector: `GET /orders/{id}` that authenticates the caller but never
+      checks the caller owns `id` leaks any order to anyone.
+    remediation: >-
+      Authorize per object, not per endpoint: scope queries by subject
+      (`WHERE owner = :subject`), deny by default when the object lookup
+      bypasses the owner filter, and test cross-tenant access explicitly.
+    reference: https://owasp.org/API-Security/editions/2023/en/0xa1-broken-object-level-authorization/
+  - id: AF-SEC-002
+    title: Authentication is verified per operation, not per service
+    severity: high
+    rationale: >-
+      OWASP API2 — a service that "sits behind the gateway" still serves
+      internal networks, health probes and misrouted traffic; assuming the
+      edge authenticates everything leaves methods unauthenticated when
+      routing changes.
+    remediation: >-
+      Verify tokens at the resource server as well as the edge; pin issuer,
+      audience, expiry and signature algorithm; reject `alg: none` and
+      algorithm confusion (RS256->HS256).
+    reference: https://owasp.org/API-Security/editions/2023/en/0xa2-broken-authentication/
+  - id: AF-SEC-003
+    title: Response fields are filtered by the caller's authority
+    severity: high
+    rationale: >-
+      OWASP API3 — returning the ORM entity wholesale exposes
+      `internal_notes`/`cost`/`owner_email` to any caller who passes BOLA
+      checks; property-level authorization is a separate question from
+      object-level.
+    remediation: >-
+      Serialize a response DTO per audience, never the domain object;
+      whitelist writable properties on input (mass assignment is the same
+      failure, inbound).
+    reference: https://owasp.org/API-Security/editions/2023/en/0xa3-broken-object-property-level-authorization/
+  - id: AF-SEC-004
+    title: Resource consumption is bounded (rate limits, payload, timeouts)
+    severity: high
+    rationale: >-
+      OWASP API4 — endpoints with no rate limit, unbounded `limit` params,
+      unbounded request bodies or expensive unauthenticated work are a
+      self-serve denial-of-wallet/denial-of-service.
+    remediation: >-
+      Enforce per-subject rate limits, cap pagination `limit`, reject bodies
+      over a declared size, time-bound expensive operations — and state the
+      bounds in the contract.
+    reference: https://owasp.org/API-Security/editions/2023/en/0xa4-unrestricted-resource-consumption/
+  - id: AF-SEC-005
+    title: Function-level authorization on admin and internal paths (BFLA)
+    severity: critical
+    rationale: >-
+      OWASP API5 — `/admin/*`, debug and management endpoints relying on
+      obscurity or client-side hiding are callable by any authenticated
+      (or unauthenticated) user.
+    remediation: >-
+      Put admin functions behind a distinct scope/role checked server-side;
+      keep them out of the public contract or publish them with explicit
+      authorization requirements.
+    reference: https://owasp.org/API-Security/editions/2023/en/0xa5-broken-function-level-authorization/
+  - id: AF-SEC-006
+    title: Server-side fetches are allow-listed (SSRF)
+    severity: high
+    rationale: >-
+      OWASP API7 — any parameter that becomes a URL the server fetches
+      (webhooks, import-by-URL, image fetch) is a path to metadata services
+      (`169.254.169.254`) and internal hosts.
+    remediation: >-
+      Allow-list schemes/hosts, resolve+pin DNS, block link-local and RFC1918
+      ranges for untrusted input, and fetch through an egress policy.
+    reference: https://owasp.org/API-Security/editions/2023/en/0xa7-server-side-request-forgery/
+  - id: AF-SEC-007
+    title: API inventory is managed — no shadow or zombie versions
+    severity: medium
+    rationale: >-
+      OWASP API9 — undocumented versions (`/v1` kept alive "just in case"),
+      staging endpoints reachable publicly and forgotten debug routes form
+      the attack surface nobody is watching.
+    remediation: >-
+      Keep the deployed surface equal to the published contract; retire old
+      versions with a dated sunset; flag deployed-but-undocumented routes
+      (the judge's `code route missing from contract` is the mechanical check).
+    reference: https://owasp.org/API-Security/editions/2023/en/0xa9-improper-inventory-management/
+  - id: AF-SEC-008
+    title: Secrets and identifiers stay out of URLs
+    severity: medium
+    rationale: >-
+      Query strings land in access logs, proxies, browser history and
+      Referer headers; `?token=`/`?api_key=` distributes the credential to
+      every log pipeline downstream.
+    remediation: >-
+      Carry credentials in `Authorization` headers; carry sensitive object
+      ids in the path only when BOLA checks exist; never log query strings
+      containing secrets.
+    reference: docs/security/threat-model-mvp.md
+  - id: AF-SEC-101
+    title: gitleaks found committed secrets
+    severity: critical
+    rationale: >-
+      Every gitleaks entry is a credential already in history — it is
+      compromised by definition; the only question is rotation latency, not
+      whether it matters.
+    remediation: >-
+      Revoke and rotate each leaked credential, purge history or accept the
+      residue explicitly; add the repo to the gitleaks baseline so the
+      finding does not regress silently.
+    reference: https://github.com/gitleaks/gitleaks
+    check: {kind: sec.gitleaks.report, path: measures.leaks, op: gt, value: 0}
+  - id: AF-SEC-102
+    title: trivy reports critical findings
+    severity: critical
+    rationale: >-
+      Critical-severity vulnerabilities, misconfigurations or secrets in
+      deployed artifacts are reachable risk, not backlog — the trivy
+      severity is the scanner's own triage, not ours.
+    remediation: >-
+      Patch the critical findings first by target; pin base images and
+      re-scan on every build so the count cannot regress unnoticed.
+    reference: https://aquasecurity.github.io/trivy/
+    check: {kind: sec.trivy.report, path: attrs.by_severity.critical, op: gt, value: 0}
+  - id: AF-SEC-103
+    title: ZAP reports high-risk alerts
+    severity: high
+    rationale: >-
+      ZAP high-risk alerts are actively-exercised findings from a running
+      scan — auth bypasses, injections, exposed content — proven against the
+      live surface rather than inferred from code.
+    remediation: >-
+      Triage each high alert to a fix or a documented false-positive;
+      re-scan the same endpoints and require zero high before release.
+    reference: https://www.zaproxy.org/docs/
+    check: {kind: sec.zap.report, path: attrs.by_risk.high, op: gt, value: 0}
+  - id: AF-SEC-104
+    title: semgrep reports error-severity findings
+    severity: medium
+    rationale: >-
+      Semgrep `ERROR` severity marks findings the rule authors classified
+      as security-relevant — injection sinks, weak crypto, disabled
+      verification — at a higher certainty than warnings.
+    remediation: >-
+      Fix or suppress-with-reason each error-severity finding; keep the
+      suppressed set visible in the report rather than filtered out.
+    reference: https://semgrep.dev/docs/
+    check: {kind: sec.semgrep.report, path: attrs.by_severity.error, op: gt, value: 0}
+  - id: AF-SEC-105
+    title: WebACL default action lets unmatched requests through
+    severity: high
+    rationale: >-
+      `DefaultAction: Allow` means every request no rule blocks reaches
+      the API — the ACL is a deny-list, and anything not enumerated is
+      admitted. The dump declares the action; the rule reads it.
+    remediation: >-
+      Prefer `DefaultAction: Block` with allow-rules for known-good
+      traffic, or keep Allow only when the attached rules are a verified
+      complete deny-list — recorded as a decision, not assumed.
+    reference: https://docs.aws.amazon.com/waf/latest/developerguide/web-acl-default-action.html
+    check: {kind: aws.waf.web_acl, path: measures.default_action, op: eq, value: Allow}
+  - id: AF-SEC-106
+    title: WebACL uses no AWS managed rule groups
+    severity: medium
+    rationale: >-
+      Without a managed rule group the ACL carries only hand-maintained
+      rules — the baseline protections (OWASP core, known bad inputs,
+      IP reputation) are absent unless every one was rewritten by hand.
+    remediation: >-
+      Attach `AWSManagedRulesCommonRuleSet` at minimum, sized in
+      count-then-block order against real traffic before enforcing.
+    reference: https://docs.aws.amazon.com/waf/latest/developerguide/aws-managed-rule-groups.html
+    check: {kind: aws.waf.web_acl, path: measures.has_managed_rules, op: eq, value: false}
+  - id: AF-SEC-107
+    title: Customer-managed KMS key has rotation disabled
+    severity: high
+    rationale: >-
+      `KeyManager: CUSTOMER` with `KeyRotationEnabled: false` leaves the
+      same material wrapping data indefinitely — rotation is one flag and
+      the dump declares both fields.
+    remediation: >-
+      Enable automatic rotation (`EnableKeyRotation`) on symmetric CMKs;
+      AWS-managed keys are excluded by construction of the measure.
+    reference: https://docs.aws.amazon.com/kms/latest/developerguide/rotate-keys.html
+    check: {kind: aws.kms.key, path: measures.customer_key_without_rotation, op: eq, value: true}
+  - id: AF-SEC-108
+    title: Secrets Manager secret has rotation disabled
+    severity: medium
+    rationale: >-
+      `RotationEnabled: false` means the credential's lifetime is unbounded
+      — a leak has no expiry. The describe output declares the flag.
+    remediation: >-
+      Attach a rotation Lambda with a window matching the credential's
+      exposure risk, or record why the secret legitimately never rotates.
+    reference: https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_overview.html
+    check: {kind: aws.secrets.secret, path: measures.rotation_enabled, op: eq, value: false}
+  - id: AF-SEC-109
+    title: S3 bucket public access block is incomplete or absent
+    severity: critical
+    rationale: >-
+      All four `PublicAccessBlock` flags must be true to close the public
+      surface; any false or a missing configuration is measured the same —
+      `public_access_blocked` is only true when all four are set.
+    remediation: >-
+      Enable all four public-access-block flags at bucket level (or
+      account level) unless the bucket is deliberately public — recorded
+      as a decision, never assumed.
+    reference: https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-control-block-public-access.html
+    check: {kind: aws.s3.bucket, path: measures.public_access_blocked, op: eq, value: false}
+  - id: AF-SEC-110
+    title: S3 bucket declares no server-side encryption configuration
+    severity: medium
+    rationale: >-
+      A missing `ServerSideEncryptionConfiguration` is recorded as
+      measured absence (the API's named error becomes the artifact);
+      buckets created after Jan-2023 get SSE-S3 by default, but the dump
+      does not prove which default the account applies.
+    remediation: >-
+      Set bucket default encryption explicitly (SSE-KMS for regulated
+      data) so the posture is declared, not defaulted.
+    reference: https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-encryption.html
+    check: {kind: aws.s3.bucket, path: measures.has_encryption, op: eq, value: false}
+  - id: AF-SEC-111
+    title: Internet-facing ALB listener serves plain HTTP
+    severity: high
+    rationale: >-
+      An HTTP listener on an internet-facing load balancer serves the API
+      in cleartext at the edge — credentials and payloads cross the public
+      network unencrypted.
+    remediation: >-
+      Terminate TLS at the listener (HTTPS with an ACM certificate) and
+      redirect port 80; internal schemes may keep HTTP listeners.
+    reference: https://docs.aws.amazon.com/elasticloadbalancing/latest/application/https-listener-certificates.html
+    check: {kind: aws.alb.listener, path: measures.internet_facing_plain_http, op: eq, value: true}
+  - id: AF-SEC-112
+    title: ALB access logging is disabled
+    severity: medium
+    rationale: >-
+      Without `access_logs.s3.enabled` the edge keeps no request record —
+      incident forensics and abuse analysis lose their primary source.
+    remediation: >-
+      Enable access logs to an S3 bucket with a retention matching the
+      incident-review window.
+    reference: https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-access-logs.html
+    check: {kind: aws.alb.loadbalancer, path: measures.access_logs_enabled, op: eq, value: false}
+  - id: AF-SEC-113
+    title: EC2 instance does not require IMDSv2
+    severity: high
+    rationale: >-
+      `MetadataOptions.HttpTokens: optional` leaves IMDSv1 enabled —
+      SSRF through the API can read instance credentials directly.
+    remediation: >-
+      Set HttpTokens=required so token-holding IMDSv2 is the only path to
+      instance metadata.
+    reference: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-service.html
+    check: {kind: aws.ec2.instance, path: measures.imdsv2_required, op: eq, value: false}
+  - id: AF-SEC-114
+    title: EC2 instance carries a public IP
+    severity: medium
+    rationale: >-
+      A public address on an API host widens the attack surface past the
+      load balancer — direct exposure is reachable whether intended or not.
+    remediation: >-
+      Move the instance behind an ALB/NLB without a public IP; reach it
+      through the load balancer's security group only.
+    reference: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-instance-addressing.html
+    check: {kind: aws.ec2.instance, path: measures.public_ip, op: eq, value: true}
+  - id: AF-SEC-115
+    title: EKS cluster endpoint is public
+    severity: medium
+    rationale: >-
+      `endpointPublicAccess: true` exposes the Kubernetes API to the
+      internet — authentication still applies, but the control plane is
+      reachable from anywhere.
+    remediation: >-
+      Disable public access or restrict it with CIDR blocks; keep the
+      private endpoint for cluster-internal traffic.
+    reference: https://docs.aws.amazon.com/eks/latest/userguide/cluster-endpoint.html
+    check: {kind: aws.eks.cluster, path: measures.public_endpoint, op: eq, value: true}
+  - id: AF-SEC-116
+    title: MSK cluster allows plaintext client-broker traffic
+    severity: high
+    rationale: >-
+      `ClientBroker: PLAINTEXT` or `TLS_PLAINTEXT` permits unencrypted
+      broker connections — consumer lag, offsets and payloads cross the
+      network readable.
+    remediation: >-
+      Set ClientBroker=TLS (and require SASL/IAM auth) so no plaintext
+      listener exists.
+    reference: https://docs.aws.amazon.com/msk/latest/developerguide/msk-encryption.html
+    check: {kind: aws.msk.cluster, path: measures.plaintext_allowed, op: eq, value: true}

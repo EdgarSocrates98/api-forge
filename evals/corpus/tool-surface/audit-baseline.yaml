@@ -1,0 +1,12 @@
+id: audit-baseline
+audit:
+  unresolved:
+    - oversized_output requires a benchmark
+  absent:
+    - poor_description
+    - unbounded_list
+    - overlapping
+  accepted:
+    - tool: perf_memory_search
+      kind: overlapping
+  max_findings: 0

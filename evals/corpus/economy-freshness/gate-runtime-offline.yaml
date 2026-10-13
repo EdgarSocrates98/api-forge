@@ -1,0 +1,6 @@
+id: gate-runtime-offline
+kind: gate
+question: "did the removal cause 5xx in production?"
+offline: true
+expect_mode: fixture
+expect_live: false

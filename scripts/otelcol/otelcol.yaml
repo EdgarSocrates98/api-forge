@@ -1,0 +1,20 @@
+# §52 real-collector CI config: OTLP/HTTP receiver -> file exporter.
+# The acceptance script POSTs to :4318 and counts span ids in /out/spans.json.
+
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:4318
+
+exporters:
+  file:
+    path: /out/spans.json
+  debug:
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: []
+      exporters: [file, debug]

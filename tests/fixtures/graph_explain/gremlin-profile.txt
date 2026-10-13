@@ -1,0 +1,36 @@
+*******************************************************
+                Neptune Gremlin Profile
+*******************************************************
+
+Query String
+==================
+g.V().hasLabel('airport').out('route').limit(10)
+
+Original Traversal
+==================
+[GraphStep(vertex,[]), HasStep([~label.eq(airport)]), VertexStep(OUT,[route],vertex), RangeGlobalStep(0,10)]
+
+Optimized Traversal
+===================
+Neptune steps:
+[
+    NeptuneGraphQueryStep(Vertex) {
+        JoinGroupNode {
+            PatternNode[(?1, <~label>, ?2=<airport>, <~>) . project distinct ?1 .], {estimatedCardinality=3500}
+            PatternNode[(?1, ?5=<route>, ?3, ?6) . project ?1,?3 . IsEdgeIdFilter(?6) .], {estimatedCardinality=50000}
+        }, finishers=[limit(10)], annotations={path=[Vertex(?1):GraphStep, Vertex(?3):VertexStep], maxVarId=7}
+    },
+    NeptuneTraverserConverterStep
+]
+
+Runtime (ms)
+============
+Query Execution:  12.512
+
+Traversal Metrics
+=================
+Step                                                               Count  Traversers       Time (ms)    % Dur
+-------------------------------------------------------------------------------------------------------------
+NeptuneGraphQueryStep(Vertex)                                         10          10          11.101    88.72
+NeptuneTraverserConverterStep                                         10          10           1.411    11.28
+                                            >TOTAL                     -           -          12.512        -

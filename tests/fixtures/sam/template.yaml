@@ -1,0 +1,22 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Resources:
+  OrdersFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Runtime: python3.12
+      MemorySize: 256
+      Timeout: !Ref GlobalTimeout
+      Handler: app.handler
+      Events:
+        CreateOrder:
+          Type: Api
+          Properties:
+            Path: /orders
+            Method: post
+  OrdersApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      Auth:
+        DefaultAuthorizer: AWS_IAM

@@ -1,0 +1,542 @@
+{
+  "agents": 25,
+  "alias_mapping_applied": true,
+  "by_family": [
+    [
+      "architecture",
+      0.2857
+    ],
+    [
+      "assurance",
+      0.0
+    ],
+    [
+      "contract",
+      0.7143
+    ],
+    [
+      "data",
+      0.625
+    ],
+    [
+      "observability",
+      0.625
+    ],
+    [
+      "operations",
+      0.5
+    ],
+    [
+      "planning",
+      0.3636
+    ],
+    [
+      "quality",
+      0.5
+    ],
+    [
+      "runtime",
+      0.4545
+    ],
+    [
+      "security",
+      0.25
+    ]
+  ],
+  "cases": 80,
+  "leakage_4gram": 0.0,
+  "limitations": [
+    "lexical proxy of the host router; hosts route with a model over the same descriptions",
+    "leakage_4gram is the share of cases sharing a 4-word sequence with the expected agent"
+  ],
+  "misses": [
+    {
+      "expected": "api-orchestrator",
+      "id": "holdout_haiku:H001",
+      "predicted": "api-verifier",
+      "top3": [
+        "api-verifier",
+        "api-adversarial-critic",
+        "api-modernization-specialist"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-planner",
+      "id": "holdout_haiku:H003",
+      "predicted": "api-modernization-specialist",
+      "top3": [
+        "api-modernization-specialist",
+        "api-contract-architect",
+        "api-performance-engineer"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-planner",
+      "id": "holdout_haiku:H004",
+      "predicted": "api-verifier",
+      "top3": [
+        "api-verifier",
+        "api-planner",
+        "api-adversarial-critic"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-platform-selector",
+      "id": "holdout_haiku:H006",
+      "predicted": "api-event-driven-architect",
+      "top3": [
+        "api-event-driven-architect",
+        "api-adversarial-critic",
+        "api-architecture-reviewer"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-platform-selector",
+      "id": "holdout_haiku:H007",
+      "predicted": "api-data-access-architect",
+      "top3": [
+        "api-data-access-architect",
+        "api-planner",
+        "api-platform-selector"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-architecture-reviewer",
+      "id": "holdout_haiku:H008",
+      "predicted": "api-contract-architect",
+      "top3": [
+        "api-contract-architect",
+        "api-resilience-engineer",
+        "api-test-strategist"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-architecture-reviewer",
+      "id": "holdout_haiku:H009",
+      "predicted": "api-observability-engineer",
+      "top3": [
+        "api-observability-engineer",
+        "api-infra-reviewer",
+        "api-security-reviewer"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-infra-reviewer",
+      "id": "holdout_haiku:H010",
+      "predicted": "api-data-access-architect",
+      "top3": [
+        "api-data-access-architect",
+        "api-infra-reviewer",
+        "api-orchestrator"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-modernization-specialist",
+      "id": "holdout_haiku:H011",
+      "predicted": "api-observability-integration-engineer",
+      "top3": [
+        "api-observability-integration-engineer",
+        "api-governance-reviewer",
+        "api-architecture-reviewer"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-contract-architect",
+      "id": "holdout_haiku:H012",
+      "predicted": "api-governance-reviewer",
+      "top3": [
+        "api-governance-reviewer",
+        "api-observability-integration-engineer",
+        "api-contract-architect"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-contract-architect",
+      "id": "holdout_haiku:H013",
+      "predicted": "api-governance-reviewer",
+      "top3": [
+        "api-governance-reviewer",
+        "api-contract-architect",
+        "api-architecture-reviewer"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-governance-reviewer",
+      "id": "holdout_haiku:H015",
+      "predicted": "api-contract-architect",
+      "top3": [
+        "api-contract-architect",
+        "api-modernization-specialist",
+        "api-performance-engineer"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-security-reviewer",
+      "id": "holdout_haiku:H018",
+      "predicted": "api-resilience-engineer",
+      "top3": [
+        "api-resilience-engineer",
+        "api-load-capacity-engineer",
+        "api-observability-engineer"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-security-reviewer",
+      "id": "holdout_haiku:H019",
+      "predicted": "api-dx-docs-reviewer",
+      "top3": [
+        "api-dx-docs-reviewer",
+        "api-resilience-engineer",
+        "api-planner"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-event-driven-architect",
+      "id": "holdout_haiku:H022",
+      "predicted": "api-adversarial-critic",
+      "top3": [
+        "api-adversarial-critic",
+        "api-architecture-reviewer",
+        "api-codegen-engineer"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-event-driven-architect",
+      "id": "holdout_haiku:H023",
+      "predicted": "api-resilience-engineer",
+      "top3": [
+        "api-resilience-engineer",
+        "api-adversarial-critic",
+        "api-architecture-reviewer"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-resilience-engineer",
+      "id": "holdout_haiku:H025",
+      "predicted": "api-architecture-reviewer",
+      "top3": [
+        "api-architecture-reviewer",
+        "api-load-capacity-engineer",
+        "api-observability-engineer"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-performance-engineer",
+      "id": "holdout_haiku:H026",
+      "predicted": "api-data-access-architect",
+      "top3": [
+        "api-data-access-architect",
+        "api-operations-engineer",
+        "api-performance-engineer"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-performance-engineer",
+      "id": "holdout_haiku:H027",
+      "predicted": "api-planner",
+      "top3": [
+        "api-planner",
+        "api-performance-engineer",
+        "api-observability-engineer"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-load-capacity-engineer",
+      "id": "holdout_haiku:H028",
+      "predicted": "api-adversarial-critic",
+      "top3": [
+        "api-adversarial-critic",
+        "api-architecture-reviewer",
+        "api-codegen-engineer"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-observability-engineer",
+      "id": "holdout_haiku:H029",
+      "predicted": "api-governance-reviewer",
+      "top3": [
+        "api-governance-reviewer",
+        "api-architecture-reviewer",
+        "api-contract-architect"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-observability-engineer",
+      "id": "holdout_haiku:H030",
+      "predicted": "api-event-driven-architect",
+      "top3": [
+        "api-event-driven-architect",
+        "api-resilience-engineer",
+        "api-data-access-architect"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-test-strategist",
+      "id": "holdout_haiku:H034",
+      "predicted": "api-infra-reviewer",
+      "top3": [
+        "api-infra-reviewer",
+        "api-test-strategist",
+        "api-data-access-architect"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-verifier",
+      "id": "holdout_haiku:H035",
+      "predicted": "api-adversarial-critic",
+      "top3": [
+        "api-adversarial-critic",
+        "api-architecture-reviewer",
+        "api-codegen-engineer"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-adversarial-critic",
+      "id": "holdout_haiku:H036",
+      "predicted": "api-contract-architect",
+      "top3": [
+        "api-contract-architect",
+        "api-data-access-architect",
+        "api-platform-selector"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-debate-referee",
+      "id": "holdout_haiku:H037",
+      "predicted": "api-dx-docs-reviewer",
+      "top3": [
+        "api-dx-docs-reviewer",
+        "api-security-reviewer",
+        "api-resilience-engineer"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-debate-referee",
+      "id": "holdout_haiku:H038",
+      "predicted": "api-test-strategist",
+      "top3": [
+        "api-test-strategist",
+        "api-contract-architect",
+        "api-debate-referee"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-operations-engineer",
+      "id": "holdout_haiku:H039",
+      "predicted": "api-data-access-architect",
+      "top3": [
+        "api-data-access-architect",
+        "api-adversarial-critic",
+        "api-architecture-reviewer"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-orchestrator",
+      "id": "holdout_sonnet:H001",
+      "predicted": "api-contract-architect",
+      "top3": [
+        "api-contract-architect",
+        "api-test-strategist",
+        "api-operations-engineer"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-orchestrator",
+      "id": "holdout_sonnet:H002",
+      "predicted": "api-task-spec-reviewer",
+      "top3": [
+        "api-task-spec-reviewer",
+        "api-data-access-architect",
+        "api-orchestrator"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-planner",
+      "id": "holdout_sonnet:H004",
+      "predicted": "api-dx-docs-reviewer",
+      "top3": [
+        "api-dx-docs-reviewer",
+        "api-contract-architect",
+        "api-performance-engineer"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-task-spec-reviewer",
+      "id": "holdout_sonnet:H006",
+      "predicted": "api-observability-integration-engineer",
+      "top3": [
+        "api-observability-integration-engineer",
+        "api-adversarial-critic",
+        "api-architecture-reviewer"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-platform-selector",
+      "id": "holdout_sonnet:H008",
+      "predicted": "api-codegen-engineer",
+      "top3": [
+        "api-codegen-engineer",
+        "api-infra-reviewer",
+        "api-performance-engineer"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-architecture-reviewer",
+      "id": "holdout_sonnet:H009",
+      "predicted": "api-adversarial-critic",
+      "top3": [
+        "api-adversarial-critic",
+        "api-modernization-specialist",
+        "api-observability-integration-engineer"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-architecture-reviewer",
+      "id": "holdout_sonnet:H010",
+      "predicted": "api-contract-architect",
+      "top3": [
+        "api-contract-architect",
+        "api-planner",
+        "api-adversarial-critic"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-infra-reviewer",
+      "id": "holdout_sonnet:H012",
+      "predicted": "api-contract-architect",
+      "top3": [
+        "api-contract-architect",
+        "api-security-reviewer",
+        "api-data-access-architect"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-contract-architect",
+      "id": "holdout_sonnet:H016",
+      "predicted": "api-governance-reviewer",
+      "top3": [
+        "api-governance-reviewer",
+        "api-contract-architect",
+        "api-security-reviewer"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-security-reviewer",
+      "id": "holdout_sonnet:H024",
+      "predicted": "api-observability-integration-engineer",
+      "top3": [
+        "api-observability-integration-engineer",
+        "api-operations-engineer",
+        "api-adversarial-critic"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-data-access-architect",
+      "id": "holdout_sonnet:H026",
+      "predicted": "api-architecture-reviewer",
+      "top3": [
+        "api-architecture-reviewer",
+        "api-data-access-architect",
+        "api-observability-integration-engineer"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-resilience-engineer",
+      "id": "holdout_sonnet:H030",
+      "predicted": "api-data-access-architect",
+      "top3": [
+        "api-data-access-architect",
+        "api-resilience-engineer",
+        "api-infra-reviewer"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-load-capacity-engineer",
+      "id": "holdout_sonnet:H033",
+      "predicted": "api-governance-reviewer",
+      "top3": [
+        "api-governance-reviewer",
+        "api-operations-engineer",
+        "api-contract-architect"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-observability-engineer",
+      "id": "holdout_sonnet:H036",
+      "predicted": "api-platform-selector",
+      "top3": [
+        "api-platform-selector",
+        "api-observability-engineer",
+        "api-security-reviewer"
+      ],
+      "version": 1
+    },
+    {
+      "expected": "api-test-strategist",
+      "id": "holdout_sonnet:H040",
+      "predicted": "api-load-capacity-engineer",
+      "top3": [
+        "api-load-capacity-engineer",
+        "api-test-strategist",
+        "api-adversarial-critic"
+      ],
+      "version": 1
+    }
+  ],
+  "protected_misroutes": [
+    "holdout_haiku:H001",
+    "holdout_haiku:H004",
+    "holdout_haiku:H022",
+    "holdout_haiku:H028",
+    "holdout_haiku:H035",
+    "holdout_haiku:H036",
+    "holdout_haiku:H037",
+    "holdout_haiku:H038",
+    "holdout_sonnet:H009"
+  ],
+  "schema": "apiforge/agent-routing-eval/v1",
+  "top1": 0.4625,
+  "top3": 0.65,
+  "version": 1
+}

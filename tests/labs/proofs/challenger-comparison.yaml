@@ -1,0 +1,5 @@
+kind: challenger comparison
+status: covered
+input: baseline=[champion,new],adaptive=[new,champion]
+expected: executed=false,comparison=reordered
+evidence: deterministic shadow fixture only; no live route promotion claim

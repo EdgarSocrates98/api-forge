@@ -1,0 +1,7 @@
+id: refusals
+submit:
+  task_id: bad-task
+  capability_id: no.such.capability
+  refuse: AF-FORGE-CAPABILITY-UNKNOWN
+health:
+  state: ok

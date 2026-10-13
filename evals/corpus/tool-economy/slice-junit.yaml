@@ -1,0 +1,12 @@
+id: slice-junit
+kind: tests
+input: logs/junit-payments.xml
+format: auto
+expect_failed:
+- com.example.payments.PaymentControllerTest::createRejectsMissingKey
+- com.example.payments.RefundTest::refundTimesOut
+expect_counts:
+  passed: 80
+  failed: 1
+  errors: 1
+  skipped: 1

@@ -1,0 +1,8 @@
+domain: rest-design
+version: 1
+areas: [REST]
+rule_ids: [AF-REST-001, AF-REST-002, AF-REST-003, AF-REST-004, AF-REST-005, AF-REST-006, AF-REST-007, AF-REST-008]
+summary: >-
+  Resource modelling, method semantics, status codes, idempotency and
+  collection handling per HTTP semantics and common API style guides.
+verified: "2026-09-21"

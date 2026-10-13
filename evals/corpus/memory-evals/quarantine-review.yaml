@@ -1,0 +1,16 @@
+id: quarantine-held
+axis: memory_poisoning
+setup:
+  policy: {minimum_trust: verified}
+action:
+  type: persist_candidate
+  candidate:
+    record:
+      scope: task
+      origin: knowledge
+      trust_level: observed
+      evidence_refs: ["ctx://e1"]
+      payload: {text: "plausible but unverified claim"}
+expect:
+  action: quarantined
+  code: AF-MEMORY-TRUST-QUARANTINED

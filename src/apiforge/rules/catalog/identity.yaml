@@ -1,0 +1,84 @@
+catalog_version: 1
+schema_version: 1
+area: IDENTITY
+retrieved: 2026-09-21
+rules:
+  - id: AF-IAM-001
+    title: Inline role policy grants wildcard actions
+    severity: high
+    rationale: >-
+      `"Action": "*"` in an Allow statement grants every present and
+      future action in the matched service scope — least privilege is
+      broken by construction, and the policy document in the dump proves
+      it directly.
+    remediation: >-
+      Enumerate the actions the role actually calls (start from
+      CloudTrail `LookupEvents` on the role's sessions) and replace the
+      wildcard with the observed set.
+    reference: https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html#grant-least-privilege
+    check:
+      kind: aws.iam.inline_policy
+      path: measures.wildcard_action
+      op: eq
+      value: true
+  - id: AF-IAM-002
+    title: Inline role policy grants wildcard resources
+    severity: high
+    rationale: >-
+      `"Resource": "*"` applies the grant to every resource the action
+      accepts — including resources created after the policy was written.
+    remediation: >-
+      Scope `Resource` to the ARNs the workload touches; where the ARN
+      set is genuinely dynamic, use condition keys to bound it.
+    reference: https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html#grant-least-privilege
+    check:
+      kind: aws.iam.inline_policy
+      path: measures.wildcard_resource
+      op: eq
+      value: true
+  - id: AF-IAM-003
+    title: Role session duration exceeds 12 hours
+    severity: low
+    rationale: >-
+      `MaxSessionDuration` above 43200 stretches the window a leaked
+      session credential stays valid; the dump declares the number.
+    remediation: >-
+      Keep `MaxSessionDuration` at the 1-hour default unless a measured
+      workload requires longer, and record the requirement.
+    reference: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use.html
+    check:
+      kind: aws.iam.role
+      path: measures.max_session_duration
+      op: gt
+      value: 43200
+  - id: AF-IAM-004
+    title: Cognito user pool has MFA off
+    severity: medium
+    rationale: >-
+      `MfaConfiguration: OFF` removes the second factor for every user
+      in the pool — a declared posture, not an inference.
+    remediation: >-
+      Set `OPTIONAL` or `ON` per the pool's risk profile; if OFF is
+      deliberate (machine-only pool), record the exception.
+    reference: https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-settings-mfa.html
+    check:
+      kind: aws.cognito.user_pool
+      path: measures.mfa
+      op: eq
+      value: "OFF"
+  - id: AF-IAM-005
+    title: Cognito user pool has deletion protection inactive
+    severity: low
+    rationale: >-
+      `DeletionProtection` not ACTIVE leaves the pool deletable by any
+      caller with `cognito-idp:DeleteUserPool` — one API call destroys
+      the identity store.
+    remediation: >-
+      Activate deletion protection on pools that hold real identities;
+      recreating a pool does not recreate the users.
+    reference: https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-settings-deletion-protection.html
+    check:
+      kind: aws.cognito.user_pool
+      path: measures.deletion_protection
+      op: eq
+      value: false

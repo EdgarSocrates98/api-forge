@@ -1,0 +1,44 @@
+*******************************************************
+                Neptune Gremlin Explain
+*******************************************************
+
+Query String
+============
+g.V().fold().unfold().out()
+
+Original Traversal
+==================
+[GraphStep(vertex,[]), FoldStep, UnfoldStep, VertexStep(OUT,vertex)]
+
+Converted Traversal
+===================
+Neptune steps:
+[
+    NeptuneGraphQueryStep(Vertex) {
+        JoinGroupNode {
+            PatternNode[(?1, <~label>, ?2, <~>) . project distinct ?1 .]
+        }, annotations={path=[Vertex(?1):GraphStep], maxVarId=3}
+    },
+    NeptuneTraverserConverterStep
+]
++ not converted into Neptune steps: [FoldStep, UnfoldStep, VertexStep(OUT,vertex)]
+
+Optimized Traversal
+===================
+Neptune steps:
+[
+    NeptuneGraphQueryStep(Vertex) {
+        JoinGroupNode {
+            PatternNode[(?1, <~label>, ?2, <~>) . project distinct ?1 .], {estimatedCardinality=INFINITY}
+        }, annotations={path=[Vertex(?1):GraphStep], maxVarId=3}
+    },
+    NeptuneTraverserConverterStep,
+    NeptuneMemoryTrackerStep
+]
++ not converted into Neptune steps: [FoldStep, UnfoldStep, VertexStep(OUT,vertex)]
+
+WARNING: >> FoldStep << is not supported natively yet
+
+Predicates
+==========
+# of predicates: 18

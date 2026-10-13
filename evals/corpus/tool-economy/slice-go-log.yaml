@@ -1,0 +1,6 @@
+id: slice-go-log
+kind: log
+input: logs/go-panic.log
+expect_signatures:
+- 'panic: runtime error'
+- FAIL

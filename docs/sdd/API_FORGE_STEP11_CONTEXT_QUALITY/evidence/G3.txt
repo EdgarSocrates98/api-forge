@@ -1,0 +1,4 @@
+G3: RoleContext v2 policies are deny-first data validated by closed contracts;
+unknown roles refuse at load; denied kinds, origin floors, required-kind
+violations, tool allowlists and visibility levels carry cataloged
+AF-ROLE-CONTEXT-* notes; v1 policy files load unchanged.

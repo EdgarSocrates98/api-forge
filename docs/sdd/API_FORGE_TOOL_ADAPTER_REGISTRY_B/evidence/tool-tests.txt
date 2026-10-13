@@ -1,0 +1,8 @@
+pytest tests/agentops/test_tools.py -q
+2 passed
+pytest tests/agentops tests/runtime -q
+32 passed
+ruff check src/apiforge tests/agentops tests/runtime/test_control_plane.py
+All checks passed
+mypy src/apiforge
+no issues found in 239 source files

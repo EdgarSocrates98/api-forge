@@ -1,0 +1,19 @@
+{
+  "sources": {
+    "spec-a": {
+      "fingerprint": "sha-a1",
+      "observed_at": "2026-09-20T00:00:00+00:00",
+      "version": "1.0"
+    },
+    "spec-b": {
+      "fingerprint": "sha-b2",
+      "observed_at": "2026-09-20T00:00:00+00:00",
+      "version": "1.0"
+    },
+    "spec-c": {
+      "fingerprint": "sha-c1",
+      "observed_at": "2026-09-20T00:00:00+00:00",
+      "version": "2.1"
+    }
+  }
+}

@@ -1,0 +1,5 @@
+id: gate-runtime-prod
+kind: gate
+question: "isso causou erros em produção?"
+expect_mode: live_read_only
+expect_live: true

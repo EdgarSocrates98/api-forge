@@ -1,0 +1,9 @@
+id: select-breaking-raises
+kind: selection
+changed:
+- proj/app/routes/payments.py
+risk: low
+breaking: true
+expect_level: V4
+expect_tests:
+- proj/tests/test_payments.py

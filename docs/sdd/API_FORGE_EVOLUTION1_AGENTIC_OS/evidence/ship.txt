@@ -1,0 +1,2 @@
+Wave 1 evidence bundle: focused tests passed, ruff passed, mypy passed.
+This receipt does not claim full prompt completion, production runtime proof or Spark Forge parity.

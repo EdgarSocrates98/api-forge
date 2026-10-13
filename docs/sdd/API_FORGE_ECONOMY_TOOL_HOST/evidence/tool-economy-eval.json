@@ -1,0 +1,188 @@
+{
+  "cases": 10,
+  "gates": {
+    "capability_reachable": true,
+    "compact_output": true,
+    "compact_surface": true,
+    "discover_top5": true,
+    "slicer_recall_and_size": true
+  },
+  "passed": true,
+  "rows": [
+    {
+      "case_id": "discover-capsule",
+      "kind": "discover",
+      "passed": true,
+      "top5": [
+        "context_capsule",
+        "context_delta",
+        "context_funnel",
+        "context_expand",
+        "context_gc"
+      ]
+    },
+    {
+      "case_id": "discover-delta",
+      "kind": "discover",
+      "passed": true,
+      "top5": [
+        "context_delta",
+        "change_control_run",
+        "debate_packet",
+        "economy_report",
+        "index_status"
+      ]
+    },
+    {
+      "case_id": "discover-expertise",
+      "kind": "discover",
+      "passed": true,
+      "top5": [
+        "knowledge_select",
+        "knowledge_check",
+        "knowledge_list",
+        "knowledge_show"
+      ]
+    },
+    {
+      "case_id": "discover-grpc",
+      "kind": "discover",
+      "passed": true,
+      "top5": [
+        "grpc_diff",
+        "diff_contract",
+        "grpc_analyze",
+        "grpc_benchmark",
+        "grpc_capabilities"
+      ]
+    },
+    {
+      "case_id": "discover-slice",
+      "kind": "discover",
+      "passed": true,
+      "top5": [
+        "slice_tests",
+        "slice_log",
+        "analyze"
+      ]
+    },
+    {
+      "case_id": "output-payloads",
+      "kind": "output",
+      "passed": true,
+      "payloads": [
+        {
+          "compact_bytes": 3074,
+          "json_bytes": 4106,
+          "lossless": true,
+          "payload": "context capsule"
+        },
+        {
+          "compact_bytes": 1098,
+          "json_bytes": 1511,
+          "lossless": true,
+          "payload": "economy stats"
+        },
+        {
+          "compact_bytes": 1053,
+          "json_bytes": 1593,
+          "lossless": true,
+          "payload": "cache stats"
+        },
+        {
+          "compact_bytes": 236,
+          "json_bytes": 414,
+          "lossless": true,
+          "payload": "context delta"
+        },
+        {
+          "compact_bytes": 285,
+          "json_bytes": 445,
+          "lossless": true,
+          "payload": "knowledge select"
+        },
+        {
+          "compact_bytes": 23840,
+          "json_bytes": 38895,
+          "lossless": true,
+          "payload": "agents audit"
+        },
+        {
+          "compact_bytes": 755,
+          "json_bytes": 1091,
+          "lossless": true,
+          "payload": "mcp surface"
+        }
+      ],
+      "ratio": 0.6314
+    },
+    {
+      "case_id": "slice-go-log",
+      "kind": "log",
+      "original_bytes": 8036,
+      "passed": true,
+      "ratio": 0.1175,
+      "signatures": [
+        "1x panic: runtime error: invalid memory address or nil pointer dereference",
+        "1x FAIL\texample.com/payments/handlers\t0.012s"
+      ],
+      "slice_bytes": 944
+    },
+    {
+      "case_id": "slice-java-log",
+      "kind": "log",
+      "original_bytes": 21218,
+      "passed": true,
+      "ratio": 0.069,
+      "signatures": [
+        "3x 2026-09-28T10:00:01Z ERROR PaymentService - java.lang.IllegalStateException: ide",
+        "1x [INFO] BUILD FAILURE"
+      ],
+      "slice_bytes": 1463
+    },
+    {
+      "case_id": "slice-junit",
+      "counts": {
+        "errors": 1,
+        "failed": 1,
+        "passed": 80,
+        "skipped": 1
+      },
+      "failures": [
+        "com.example.payments.PaymentControllerTest::createRejectsMissingKey",
+        "com.example.payments.RefundTest::refundTimesOut"
+      ],
+      "kind": "tests",
+      "original_bytes": 8124,
+      "passed": true,
+      "ratio": 0.0928,
+      "slice_bytes": 754
+    },
+    {
+      "case_id": "slice-pytest",
+      "counts": {
+        "failed": 2,
+        "passed": 300
+      },
+      "failures": [
+        "tests/test_payments.py::test_create_payment_is_idempotent",
+        "tests/test_payments.py::test_refund_payment_rejects_excess"
+      ],
+      "kind": "tests",
+      "original_bytes": 16972,
+      "passed": true,
+      "ratio": 0.0487,
+      "slice_bytes": 826
+    }
+  ],
+  "schema": "apiforge/tool-economy-eval/v1",
+  "surface": {
+    "compact_bytes": 2193,
+    "compact_tools": 6,
+    "full_bytes": 34603,
+    "full_tools": 90,
+    "ratio": 0.0634,
+    "reachable": 90
+  },
+  "tokens": "unresolved"
+}

@@ -1,0 +1,11 @@
+id: critical-balanced
+shape: critical
+risk: irreversible
+size: S
+profile: balanced
+expected:
+  effective: deep
+  minimum_roles:
+  - critic
+  - referee
+  - reviewer

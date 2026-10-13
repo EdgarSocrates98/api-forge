@@ -1,0 +1,36 @@
+version: 1
+cases:
+  - id: direct-chain
+    target: service:orders
+    nodes:
+      - {id: service:orders, kind: service}
+      - {id: operation:orders, kind: operation, props: {evidence_refs: [fixture:operation]}}
+      - {id: route:orders, kind: route}
+    edges:
+      - {from_id: operation:orders, to_id: service:orders, kind: depends_on}
+      - {from_id: route:orders, to_id: operation:orders, kind: calls}
+    expected:
+      direct: [operation:orders]
+      transitive: [operation:orders, route:orders]
+      all: [operation:orders, route:orders]
+  - id: cycle-and-budget
+    target: service:cycle
+    nodes:
+      - {id: service:cycle, kind: service}
+      - {id: operation:cycle, kind: operation}
+      - {id: route:cycle, kind: route}
+    edges:
+      - {from_id: operation:cycle, to_id: service:cycle, kind: depends_on}
+      - {from_id: route:cycle, to_id: operation:cycle, kind: calls}
+      - {from_id: service:cycle, to_id: route:cycle, kind: contains}
+    expected:
+      has_cycle: true
+      bounded_nodes: [operation:cycle]
+  - id: unresolved-target
+    target: service:missing
+    nodes:
+      - {id: service:known, kind: service}
+    edges: []
+    expected:
+      coverage: missing
+      verification_depth: elevated

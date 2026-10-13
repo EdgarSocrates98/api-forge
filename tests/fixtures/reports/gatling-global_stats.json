@@ -1,0 +1,1 @@
+{"name": "Global Information", "numberOfRequests": {"total": 5000, "ok": 4950, "ko": 50}, "minResponseTime": {"total": 12}, "maxResponseTime": {"total": 820}, "meanResponseTime": {"total": 61}, "standardDeviation": {"total": 30}, "percentiles3": {"total": 140}, "percentiles4": {"total": 260}}

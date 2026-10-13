@@ -1,0 +1,8 @@
+id: fastapi-models
+fixture: tests/fixtures/economy_payments/fastapi
+contract: tests/fixtures/economy_payments/openapi.yaml
+mutation:
+  file: proj/app/models.py
+  append: "\n\nclass AuditTrail(BaseModel):\n    actor: str\n"
+reanalyze: true
+expect_invalidated: []

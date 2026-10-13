@@ -1,0 +1,25 @@
+id: debate-nullable
+kind: debate
+question: Can description become nullable without a new version?
+sides:
+- compatible
+- breaking
+capsule_bytes: 8000
+max_packet_ratio: 0.5
+submissions:
+- side: compatible
+  position: widening a response field is compatible
+  evidence:
+  - fact:schema-payment-request
+  confidence: 0.8
+- side: breaking
+  position: generated SDKs treat null as a breaking change
+  evidence:
+  - fact:schema-payment-request
+  - fact:sdk-java
+  disagreements:
+  - point: sdk impact
+    reason: java client non-null
+  risks:
+  - NPE in java sdk
+  confidence: 0.6

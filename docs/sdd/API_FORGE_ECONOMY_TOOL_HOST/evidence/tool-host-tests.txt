@@ -1,0 +1,2 @@
+command: pytest tests/agentops tests/mcp tests/contracts tests/economy tests/cache tests/context tests/runtime
+result: 294 passed, 1 skipped in 19.76s

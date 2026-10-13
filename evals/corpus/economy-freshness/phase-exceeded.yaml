@@ -1,0 +1,7 @@
+id: phase-exceeded
+kind: phase
+profile: economy
+usage:
+  build: {calls: 5, context_bytes: 1000}
+expect_status: unresolved
+expect_phase: {build: exceeded}

@@ -1,0 +1,10 @@
+id: sensitive-economy
+shape: sensitive
+risk: sensitive
+size: M
+profile: economy
+expected:
+  effective: balanced
+  minimum_roles:
+  - critic
+  - reviewer

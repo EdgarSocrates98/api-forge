@@ -1,0 +1,12 @@
+id: stale-flagged
+axis: stale_memory
+setup:
+  records:
+    - {scope: task, origin: system, trust_level: verified, evidence_refs: ["ctx://e1"], expires_at: "2026-12-01T00:00:00Z", created_at: "2026-01-01T00:00:00Z", payload: {note: "old cert rotation note"}}
+    - {scope: task, origin: system, trust_level: verified, evidence_refs: ["ctx://e2"], payload: {note: "current guidance"}}
+action:
+  type: query
+  query: {now: "2027-01-01T00:00:00Z"}
+expect:
+  status: degraded
+  count: 2

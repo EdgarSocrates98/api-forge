@@ -1,0 +1,9 @@
+id: conflicted
+pack:
+  domain: eval-pack
+  freshness: {window_days: 7, source_hash: abc123}
+receipts:
+  - {observed_at: "2026-09-28T00:00:00+00:00", source_hash: abc123}
+  - {observed_at: "2026-09-29T00:00:00+00:00", source_hash: fff999}
+now: "2026-10-01T00:00:00+00:00"
+expect: {state: conflicted, conflicts_min: 1}

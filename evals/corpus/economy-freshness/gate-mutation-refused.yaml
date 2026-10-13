@@ -1,0 +1,5 @@
+id: gate-mutation-refused
+kind: gate
+question: "fix the throttling in production"
+mode: live_mutation
+expect_code: AF-EVIDENCE-MUTATION-REFUSED

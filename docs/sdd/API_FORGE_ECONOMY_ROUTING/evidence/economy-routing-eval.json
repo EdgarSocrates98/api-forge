@@ -1,0 +1,477 @@
+{
+  "cases": 15,
+  "critical_not_deep": [],
+  "economy_not_cheaper": [],
+  "gates": {
+    "critical_is_deep": true,
+    "economy_cheaper_low_risk": true,
+    "effective_profile": true,
+    "role_invariant": true
+  },
+  "passed": true,
+  "profile_mismatch": [],
+  "role_violations": [],
+  "rows": [
+    {
+      "baseline_calls": 7,
+      "baseline_fanout": 5,
+      "baseline_roles": [
+        "critic",
+        "reviewer"
+      ],
+      "case_id": "complex-balanced",
+      "economy_calls": 4,
+      "economy_fanout": 2,
+      "economy_roles": [
+        "critic",
+        "reviewer"
+      ],
+      "economy_status": "ok",
+      "effective": "balanced",
+      "expected_effective": "balanced",
+      "expected_minimum_roles": [
+        "critic",
+        "reviewer"
+      ],
+      "minimum_roles": [
+        "critic",
+        "reviewer"
+      ],
+      "profile": "balanced",
+      "runtime": "ran",
+      "shape": "complex",
+      "stopped_at": "L4",
+      "trimmed_roles": [
+        "api-data-review",
+        "api-performance-review",
+        "api-security-review"
+      ]
+    },
+    {
+      "baseline_calls": 7,
+      "baseline_fanout": 5,
+      "baseline_roles": [
+        "critic",
+        "reviewer"
+      ],
+      "case_id": "complex-deep",
+      "economy_calls": 5,
+      "economy_fanout": 3,
+      "economy_roles": [
+        "critic",
+        "reviewer"
+      ],
+      "economy_status": "ok",
+      "effective": "deep",
+      "expected_effective": "deep",
+      "expected_minimum_roles": [
+        "critic",
+        "reviewer"
+      ],
+      "minimum_roles": [
+        "critic",
+        "reviewer"
+      ],
+      "profile": "deep",
+      "runtime": "ran",
+      "shape": "complex",
+      "stopped_at": "L4",
+      "trimmed_roles": [
+        "api-performance-review",
+        "api-security-review"
+      ]
+    },
+    {
+      "baseline_calls": 7,
+      "baseline_fanout": 5,
+      "baseline_roles": [
+        "critic",
+        "reviewer"
+      ],
+      "case_id": "complex-economy",
+      "economy_calls": 4,
+      "economy_fanout": 2,
+      "economy_roles": [
+        "critic",
+        "reviewer"
+      ],
+      "economy_status": "ok",
+      "effective": "balanced",
+      "expected_effective": "balanced",
+      "expected_minimum_roles": [
+        "critic",
+        "reviewer"
+      ],
+      "minimum_roles": [
+        "critic",
+        "reviewer"
+      ],
+      "profile": "economy",
+      "runtime": "ran",
+      "shape": "complex",
+      "stopped_at": "L4",
+      "trimmed_roles": [
+        "api-data-review",
+        "api-performance-review",
+        "api-security-review"
+      ]
+    },
+    {
+      "baseline_calls": null,
+      "baseline_fanout": 1,
+      "baseline_roles": [],
+      "case_id": "critical-balanced",
+      "economy_calls": null,
+      "economy_fanout": 1,
+      "economy_roles": [],
+      "economy_status": null,
+      "effective": "deep",
+      "expected_effective": "deep",
+      "expected_minimum_roles": [
+        "critic",
+        "referee",
+        "reviewer"
+      ],
+      "minimum_roles": [
+        "critic",
+        "referee",
+        "reviewer"
+      ],
+      "profile": "balanced",
+      "runtime": "review-blocked",
+      "shape": "critical",
+      "stopped_at": null,
+      "trimmed_roles": []
+    },
+    {
+      "baseline_calls": null,
+      "baseline_fanout": 1,
+      "baseline_roles": [],
+      "case_id": "critical-deep",
+      "economy_calls": null,
+      "economy_fanout": 1,
+      "economy_roles": [],
+      "economy_status": null,
+      "effective": "deep",
+      "expected_effective": "deep",
+      "expected_minimum_roles": [
+        "critic",
+        "referee",
+        "reviewer"
+      ],
+      "minimum_roles": [
+        "critic",
+        "referee",
+        "reviewer"
+      ],
+      "profile": "deep",
+      "runtime": "review-blocked",
+      "shape": "critical",
+      "stopped_at": null,
+      "trimmed_roles": []
+    },
+    {
+      "baseline_calls": null,
+      "baseline_fanout": 1,
+      "baseline_roles": [],
+      "case_id": "critical-economy",
+      "economy_calls": null,
+      "economy_fanout": 1,
+      "economy_roles": [],
+      "economy_status": null,
+      "effective": "deep",
+      "expected_effective": "deep",
+      "expected_minimum_roles": [
+        "critic",
+        "referee",
+        "reviewer"
+      ],
+      "minimum_roles": [
+        "critic",
+        "referee",
+        "reviewer"
+      ],
+      "profile": "economy",
+      "runtime": "review-blocked",
+      "shape": "critical",
+      "stopped_at": null,
+      "trimmed_roles": []
+    },
+    {
+      "baseline_calls": 6,
+      "baseline_fanout": 5,
+      "baseline_roles": [
+        "reviewer"
+      ],
+      "case_id": "moderate-balanced",
+      "economy_calls": 3,
+      "economy_fanout": 2,
+      "economy_roles": [
+        "reviewer"
+      ],
+      "economy_status": "ok",
+      "effective": "balanced",
+      "expected_effective": "balanced",
+      "expected_minimum_roles": [
+        "reviewer"
+      ],
+      "minimum_roles": [
+        "reviewer"
+      ],
+      "profile": "balanced",
+      "runtime": "ran",
+      "shape": "moderate",
+      "stopped_at": "L4",
+      "trimmed_roles": [
+        "api-data-review",
+        "api-performance-review",
+        "api-security-review"
+      ]
+    },
+    {
+      "baseline_calls": 6,
+      "baseline_fanout": 5,
+      "baseline_roles": [
+        "reviewer"
+      ],
+      "case_id": "moderate-deep",
+      "economy_calls": 4,
+      "economy_fanout": 3,
+      "economy_roles": [
+        "reviewer"
+      ],
+      "economy_status": "ok",
+      "effective": "deep",
+      "expected_effective": "deep",
+      "expected_minimum_roles": [
+        "reviewer"
+      ],
+      "minimum_roles": [
+        "reviewer"
+      ],
+      "profile": "deep",
+      "runtime": "ran",
+      "shape": "moderate",
+      "stopped_at": "L4",
+      "trimmed_roles": [
+        "api-performance-review",
+        "api-security-review"
+      ]
+    },
+    {
+      "baseline_calls": 6,
+      "baseline_fanout": 5,
+      "baseline_roles": [
+        "reviewer"
+      ],
+      "case_id": "moderate-economy",
+      "economy_calls": 2,
+      "economy_fanout": 0,
+      "economy_roles": [
+        "reviewer"
+      ],
+      "economy_status": "unresolved",
+      "effective": "economy",
+      "expected_effective": "economy",
+      "expected_minimum_roles": [
+        "reviewer"
+      ],
+      "minimum_roles": [
+        "reviewer"
+      ],
+      "profile": "economy",
+      "runtime": "ran",
+      "shape": "moderate",
+      "stopped_at": "L2",
+      "trimmed_roles": [
+        "api-architecture-review",
+        "api-contract-review",
+        "api-data-review",
+        "api-performance-review",
+        "api-security-review"
+      ]
+    },
+    {
+      "baseline_calls": 2,
+      "baseline_fanout": 1,
+      "baseline_roles": [
+        "critic"
+      ],
+      "case_id": "sensitive-balanced",
+      "economy_calls": 2,
+      "economy_fanout": 1,
+      "economy_roles": [
+        "critic"
+      ],
+      "economy_status": "ok",
+      "effective": "balanced",
+      "expected_effective": "balanced",
+      "expected_minimum_roles": [
+        "critic",
+        "reviewer"
+      ],
+      "minimum_roles": [
+        "critic",
+        "reviewer"
+      ],
+      "profile": "balanced",
+      "runtime": "ran",
+      "shape": "sensitive",
+      "stopped_at": "L4",
+      "trimmed_roles": []
+    },
+    {
+      "baseline_calls": 2,
+      "baseline_fanout": 1,
+      "baseline_roles": [
+        "critic"
+      ],
+      "case_id": "sensitive-deep",
+      "economy_calls": 2,
+      "economy_fanout": 1,
+      "economy_roles": [
+        "critic"
+      ],
+      "economy_status": "ok",
+      "effective": "deep",
+      "expected_effective": "deep",
+      "expected_minimum_roles": [
+        "critic",
+        "reviewer"
+      ],
+      "minimum_roles": [
+        "critic",
+        "reviewer"
+      ],
+      "profile": "deep",
+      "runtime": "ran",
+      "shape": "sensitive",
+      "stopped_at": "L4",
+      "trimmed_roles": []
+    },
+    {
+      "baseline_calls": 2,
+      "baseline_fanout": 1,
+      "baseline_roles": [
+        "critic"
+      ],
+      "case_id": "sensitive-economy",
+      "economy_calls": 2,
+      "economy_fanout": 1,
+      "economy_roles": [
+        "critic"
+      ],
+      "economy_status": "ok",
+      "effective": "balanced",
+      "expected_effective": "balanced",
+      "expected_minimum_roles": [
+        "critic",
+        "reviewer"
+      ],
+      "minimum_roles": [
+        "critic",
+        "reviewer"
+      ],
+      "profile": "economy",
+      "runtime": "ran",
+      "shape": "sensitive",
+      "stopped_at": "L4",
+      "trimmed_roles": []
+    },
+    {
+      "baseline_calls": 6,
+      "baseline_fanout": 5,
+      "baseline_roles": [
+        "reviewer"
+      ],
+      "case_id": "small-balanced",
+      "economy_calls": 3,
+      "economy_fanout": 2,
+      "economy_roles": [
+        "reviewer"
+      ],
+      "economy_status": "ok",
+      "effective": "balanced",
+      "expected_effective": "balanced",
+      "expected_minimum_roles": [
+        "reviewer"
+      ],
+      "minimum_roles": [
+        "reviewer"
+      ],
+      "profile": "balanced",
+      "runtime": "ran",
+      "shape": "small",
+      "stopped_at": "L4",
+      "trimmed_roles": [
+        "api-data-review",
+        "api-performance-review",
+        "api-security-review"
+      ]
+    },
+    {
+      "baseline_calls": 6,
+      "baseline_fanout": 5,
+      "baseline_roles": [
+        "reviewer"
+      ],
+      "case_id": "small-deep",
+      "economy_calls": 4,
+      "economy_fanout": 3,
+      "economy_roles": [
+        "reviewer"
+      ],
+      "economy_status": "ok",
+      "effective": "deep",
+      "expected_effective": "deep",
+      "expected_minimum_roles": [
+        "reviewer"
+      ],
+      "minimum_roles": [
+        "reviewer"
+      ],
+      "profile": "deep",
+      "runtime": "ran",
+      "shape": "small",
+      "stopped_at": "L4",
+      "trimmed_roles": [
+        "api-performance-review",
+        "api-security-review"
+      ]
+    },
+    {
+      "baseline_calls": 6,
+      "baseline_fanout": 5,
+      "baseline_roles": [
+        "reviewer"
+      ],
+      "case_id": "small-economy",
+      "economy_calls": 2,
+      "economy_fanout": 0,
+      "economy_roles": [
+        "reviewer"
+      ],
+      "economy_status": "unresolved",
+      "effective": "economy",
+      "expected_effective": "economy",
+      "expected_minimum_roles": [
+        "reviewer"
+      ],
+      "minimum_roles": [
+        "reviewer"
+      ],
+      "profile": "economy",
+      "runtime": "ran",
+      "shape": "small",
+      "stopped_at": "L2",
+      "trimmed_roles": [
+        "api-architecture-review",
+        "api-contract-review",
+        "api-data-review",
+        "api-performance-review",
+        "api-security-review"
+      ]
+    }
+  ],
+  "schema": "apiforge/economy-routing-eval/v1"
+}

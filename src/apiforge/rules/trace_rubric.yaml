@@ -1,0 +1,30 @@
+version: 1
+# §23 declared trace-grading rubric — dimensions are declared data, not
+# hardcoded thresholds. Signals are checked deterministically over
+# AgentSpan records of one trace.
+rubric_id: agentic-trace/v1
+pass_score: 0.8
+review_score: 0.5
+dimensions:
+  evidence_coverage:
+    weight: 0.3
+    # Fraction of evidence-bearing operations whose spans carry
+    # evidence_refs. Operations outside `applies_to` are ignored.
+    applies_to: [invoke_agent, execute_tool, review, debate, security_decision, retrieval]
+  status_honesty:
+    weight: 0.2
+    # Error-status spans must carry a status_message; absent messages
+    # drop the score. Traces without error spans score 1.0.
+  unresolved_reporting:
+    weight: 0.2
+    # Spans the case marks expected-unresolved must carry non-empty
+    # `unresolved`; unexpected unresolved entries lower the score.
+  operation_coverage:
+    weight: 0.15
+    # Fraction of `require_operations` present in the trace.
+    require_operations: [invoke_model, execute_tool]
+  retry_justification:
+    weight: 0.15
+    # Retry-shaped spans (attribute retry=true or an event mentioning
+    # retry) must carry a parent_span_id and a reason via
+    # status_message or attributes.reason.

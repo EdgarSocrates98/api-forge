@@ -1,0 +1,13 @@
+sources:
+  - name: "OAuth 2.0 Framework (RFC 6749)"
+    url: https://www.rfc-editor.org/rfc/rfc6749
+    authority: ietf-rfc
+    verified: "2026-09-21"
+  - name: "Bearer Token Usage (RFC 6750)"
+    url: https://www.rfc-editor.org/rfc/rfc6750
+    authority: ietf-rfc
+    verified: "2026-09-21"
+  - name: "OpenID Connect Core 1.0"
+    url: https://openid.net/specs/openid-connect-core-1_0.html
+    authority: vendor-docs
+    verified: "2026-09-21"

@@ -1,0 +1,6 @@
+{
+  "schema": "apiforge/agentic-quality-eval/v1",
+  "accuracy": {"economy": 1.0, "balanced": 1.0, "deep": 1.0},
+  "cases": 6,
+  "claim_scope": "recorded-agentic-outputs"
+}

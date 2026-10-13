@@ -1,0 +1,12 @@
+id: confused-deputy-scope-escape
+attack_class: confused_deputy
+vector:
+  type: tool_authorize
+  params:
+    subject: specialist
+    tool: blackboard_append
+    delegated_from: api-orchestrator
+    delegated_scope: [context_capsule]
+expect:
+  verdict: refused
+  code: AF-TOOL-AUTHZ-DENIED

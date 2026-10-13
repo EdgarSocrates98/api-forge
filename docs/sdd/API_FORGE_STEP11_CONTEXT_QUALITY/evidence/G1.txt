@@ -1,0 +1,4 @@
+G1: ContextUseRecord, ContextQualityMetric, ContextQualityReport,
+ContextSufficiencyResult, RoleContextPolicy, RoleContextQuality and
+RoleContextTelemetry are registered closed contracts; unresolved metrics carry
+no value and reports must emit all 13 metric kinds.

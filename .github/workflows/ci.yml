@@ -323,11 +323,42 @@ jobs:
               --base main \
               --receipt .apiforge/pr/auto-merge-receipt.json
           }
-          if [ -n "${PR_TOKEN:-}" ] && request "$PR_TOKEN"; then
+          # Owner-only review rules intentionally require manual merge. GitHub
+          # may also disable auto-merge at repository level. Treat those two
+          # policy responses as an explicit no-op; unexpected host failures
+          # remain hard failures.
+          request_expected_or_fail() {
+            local token="$1"
+            local output
+            local status
+            set +e
+            output=$(request "$token" 2>&1)
+            status=$?
+            set -e
+            printf '%s\n' "$output"
+            if [ "$status" -eq 0 ]; then
+              return 0
+            fi
+            if printf '%s' "$output" | grep -Eiq \
+              'Resource not accessible.*enablePullRequestAutoMerge|Auto merge is not allowed'; then
+              return 2
+            fi
+            return "$status"
+          }
+          if [ -n "${PR_TOKEN:-}" ] && request_expected_or_fail "$PR_TOKEN"; then
             exit 0
           fi
-          echo "::warning::auto-merge not enabled with APIFORGE_PR_TOKEN (unset or lacking contents/pull-requests write); using the workflow token, so main is validated by the scheduled run"
-          request "$WORKFLOW_TOKEN"
+          echo "::warning::auto-merge unavailable or disallowed by repository policy; owner approval and manual merge remain required"
+          if request_expected_or_fail "$WORKFLOW_TOKEN"; then
+            status=0
+          else
+            status=$?
+          fi
+          if [ "$status" -eq 2 ]; then
+            echo "::notice::auto-merge disabled; validation remains green for manual owner merge"
+            exit 0
+          fi
+          exit "$status"
 
       - name: Upload auto-merge receipt
         if: always()

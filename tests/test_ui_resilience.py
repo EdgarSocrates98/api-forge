@@ -18,6 +18,12 @@ def _ctx(width=60, height=16):
     )
 
 
+def test_fresh_directory_hides_repository_scope(tmp_path, monkeypatch, capsys):
+    monkeypatch.chdir(tmp_path)
+    assert wizard._scope_choices(_ctx()) == ["workspace", "user"]
+    assert "No repository detected" in capsys.readouterr().out
+
+
 def test_narrow_table_keeps_flexible_column_visible():
     buf = Buffer(_ctx(), 31, 10)
     table(

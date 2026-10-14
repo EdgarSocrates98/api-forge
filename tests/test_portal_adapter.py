@@ -107,6 +107,33 @@ def test_catalogo_skills_e_agents_do_repo(server):
     assert primeiro["id"] and primeiro["name"]
 
 
+def test_catalogo_descreve_block_scalars(server):
+    # frontmatter dos catálogos usa `description: >-` — o adapter deve
+    # devolver o texto dobrado, nunca o marcador YAML literal.
+    code, env = _call(server, "GET", "/skills")
+    assert code == 200
+    descs = [s["description"] for s in env["data"]]
+    assert any(d.strip() for d in descs)
+    assert all(not d.lstrip().startswith((">", "|")) for d in descs)
+    code, env = _call(server, "GET", "/agents")
+    assert code == 200
+    descs = [a["description"] for a in env["data"]]
+    assert any(d.strip() for d in descs)
+    assert all(not d.lstrip().startswith((">", "|")) for d in descs)
+
+
+def test_frontmatter_field_block_scalar_e_scalar():
+    folded = "---\nname: x\ndescription: >-\n  linha um\n  linha dois\noutra: v\n---\n"
+    assert pa._frontmatter_field(folded, "description") == "linha um linha dois"
+    literal = "---\ndescription: |\n  l1\n  l2\n---\n"
+    assert pa._frontmatter_field(literal, "description") == "l1\nl2"
+    plain = "---\ndescription: texto simples\n---\n"
+    assert pa._frontmatter_field(plain, "description") == "texto simples"
+    nested = "---\nmetadata:\n  inner: v\n---\n"
+    assert pa._frontmatter_field(nested, "metadata") is None
+    assert pa._frontmatter_field(folded, "inexistente") is None
+
+
 def test_hosts_observe_sem_binario(server):
     # shutil.which stubbed → nenhum host detectado; unverified, nunca inventado
     code, env = _call(server, "GET", "/hosts")

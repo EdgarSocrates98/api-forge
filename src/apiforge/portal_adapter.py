@@ -72,16 +72,36 @@ def _health_state(status: dict[str, Any], doctor: dict[str, Any] | None) -> str:
 
 
 def _frontmatter_field(text: str, key: str) -> str | None:
-    """`key: value` of a YAML frontmatter block, without a yaml dependency."""
+    """`key: value` of a YAML frontmatter block, without a yaml dependency.
+
+    Covers the two shapes the catalogs use: `key: scalar` and block
+    scalars (`key: >-`, `key: |` …) whose content is the following,
+    more-indented lines. Anything nested deeper (maps, sequences) is
+    not parsed — the caller sees None instead of a guessed value."""
     if not text.startswith("---"):
         return None
     end = text.find("\n---", 3)
     if end < 0:
         return None
-    for line in text[3:end].splitlines():
+    lines = text[3:end].splitlines()
+    for i, line in enumerate(lines):
         name, sep, value = line.partition(":")
-        if sep and name.strip() == key:
-            return value.strip().strip("'\"") or None
+        if not sep or name.strip() != key:
+            continue
+        scalar = value.strip().strip("'\"")
+        if not scalar or scalar[0] not in ">|" or not set(scalar) <= set(">|+-"):
+            # plain scalar — or an empty/nested value we cannot parse
+            # without a yaml dependency; None keeps it honest.
+            return scalar or None
+        # block scalar: content is the following, more-indented lines
+        indent = len(line) - len(line.lstrip())
+        body: list[str] = []
+        for cont in lines[i + 1 :]:
+            if cont.strip() and (len(cont) - len(cont.lstrip())) <= indent:
+                break
+            body.append(cont.strip())
+        joined = ("\n" if scalar[0] == "|" else " ").join(b for b in body if b)
+        return joined.strip() or None
     return None
 
 

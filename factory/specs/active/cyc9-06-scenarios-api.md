@@ -1,7 +1,7 @@
 ---
 id: cyc9-06
 title: scenarios-api-engineering
-status: inbox
+status: active
 created: 2026-10-15
 owner: api-forge
 scope: repo

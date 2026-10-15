@@ -15,7 +15,7 @@ try {
             break
         }
     }
-    if (-not $py) { throw "install: no Python executable on PATH (need >=3.10)" }
+    if (-not $py) { throw "install: no Python executable on PATH (need >=3.12)" }
     $installArgs = @("--editable", "--persist-env", "--allow-download") + $args
     & $py @pyArgs scripts/forge_bootstrap.py @installArgs
     $status = $LASTEXITCODE

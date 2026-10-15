@@ -9,7 +9,9 @@ from apiforge.ui.screen import Buffer, Column, Theme, key_bar, table
 def test_family_wizard_is_explicitly_optional(monkeypatch, capsys):
     monkeypatch.setitem(sys.modules, "theforge", None)
     assert wizard.run_setup_wizard() == 2
-    assert "native API Forge commands remain available" in capsys.readouterr().out
+    # Canonical ui-kit message (theforge/ui/wizard.py vendored byte-parity —
+    # per-product branding would belong in the canonical template, not here)
+    assert "native Forge commands remain available" in capsys.readouterr().out
 
 
 def _ctx(width=60, height=16):

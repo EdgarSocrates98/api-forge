@@ -434,7 +434,7 @@ while refusal codes and `fact_id`s survive.
 | `apiforge platform verify-runtime --out runtime-receipt.json` | Execute allowlisted local probes for six verticals |
 | `apiforge rules list [--area SECURITY]` | List catalog rules — the knowledge base every finding cites |
 | `apiforge rules lookup AF-SEC-001` | Print one rule's rationale/remediation/reference |
-| `apiforge collect api-gateway --api-id X --out dump/` | Fetch API Gateway config into an offline dump (needs `pip install apiforge[aws]`; the only family that touches AWS) |
+| `apiforge collect api-gateway --api-id X --out dump/` | Fetch API Gateway config into an offline dump (needs `pip install apiforge-af-af[aws]`; the only family that touches AWS) |
 | `apiforge model api-gateway --path dump/` | Read the dump into facts — offline, no credentials |
 | `apiforge build endpoint --contract c.yaml --operation-id X --project .` | Synthesize a Spring skeleton, prove it in the sandbox (main tree untouched) |
 | `apiforge build endpoint ... --into-worktree NAME --approve` | Promote generated files into a policy-gated git worktree |
@@ -515,7 +515,7 @@ while refusal codes and `fact_id`s survive.
 | `apiforge evals economy-freshness` | 16 cases across the five wave-8 verbs |
 | `apiforge evals economy-hardening [--repo-root .]` | Path containment, class-pool budget via `plan_roles`, contract envelope invariant, token coverage, phase status and `build_delta` on the analyzed fixture — the oracle runs production code |
 | `apiforge evals agentic-quality [--responses-dir D] [--min-accuracy F] [--baseline R]` | Recorded specialist verdicts vs ground truth under each profile; absolute floor per profile (default 1.0) plus non-regression vs deep and an optional baseline report; `claim_scope: recorded-agentic-outputs` |
-| `apiforge-mcp` | MCP server for the read/compose verbs (needs `pip install apiforge[mcp]`; every tool takes `detail_level`) |
+| `apiforge-mcp` | MCP server for the read/compose verbs (needs `pip install apiforge-af-af[mcp]`; every tool takes `detail_level`) |
 | `apiforge collect lambda --function-name X --out dump/` | Fetch Lambda config into a dump (Code.Location never persisted) |
 | `apiforge collect sqs\|sns\|eventbridge\|iam-role\|cognito\|waf ... --out dump/` | Messaging/identity collectors — same offline-dump contract |
 | `apiforge collect dynamodb\|docdb\|neptune\|stepfunctions\|cloudwatch\|xray\|kms\|secrets\|vpc-endpoints\|s3 ... --out dump/` | Datastore/ops collectors — secrets reads metadata only, S3 posture only (objects never listed), unset S3 config recorded as measured absence |

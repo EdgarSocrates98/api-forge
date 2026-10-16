@@ -16,7 +16,7 @@ possa gravar. Não é necessário instalar no sistema nem usar symlink.
 
 ```powershell
 uv venv E:\tools\api-forge-env
-E:\tools\api-forge-env\Scripts\python.exe -m pip install 'apiforge[all]'
+E:\tools\api-forge-env\Scripts\python.exe -m pip install 'apiforge-af[all]'
 $env:PATH = "E:\tools\api-forge-env\Scripts;$env:PATH"
 ```
 
@@ -30,7 +30,7 @@ E:\tools\api-forge-env\Scripts\apiforge.exe --help
 
 ```bash
 uv venv "$HOME/.local/share/api-forge-env"
-"$HOME/.local/share/api-forge-env/bin/python" -m pip install 'apiforge[all]'
+"$HOME/.local/share/api-forge-env/bin/python" -m pip install 'apiforge-af[all]'
 export PATH="$HOME/.local/share/api-forge-env/bin:$PATH"
 ```
 
@@ -229,7 +229,7 @@ produção.
 | Sem permissão no diretório padrão | Defina `APIFORGE_HOME` e `APIFORGE_CACHE` para paths do usuário. |
 | Executável não está no `PATH` | Use o caminho absoluto do virtual environment. |
 | Rede bloqueada | Mantenha operação offline; `doctor` nomeia a limitação. |
-| MCP ausente | Instale `apiforge[mcp]` somente se precisar de MCP local. |
+| MCP ausente | Instale `apiforge-af[mcp]` somente se precisar de MCP local. |
 | Manifesto inválido | Preserve o arquivo, leia `AF-MANIFEST-INVALID` e corrija o campo indicado. |
 | Arquivo de host em conflito | Revise o plano/hash; não use sincronização automática. |
 | Nenhuma raiz encontrada | Execute a partir do repositório ou passe `--root` explicitamente. |

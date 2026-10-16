@@ -76,7 +76,7 @@ The project contains a committed `.devin/` configuration:
   contracts, security and verification.
 - `mcp_config.example.json` is opt-in only. Copy it to
   `.devin/mcp_config.local.json` or use `devin mcp add` after installing the
-  optional `apiforge[mcp]` extra. Do not commit credentials.
+  optional `apiforge-af[mcp]` extra. Do not commit credentials.
 
 Devin CLI automatically loads the root `AGENTS.md`; the API Forge operating
 contract therefore remains the single source of truth for case loading,

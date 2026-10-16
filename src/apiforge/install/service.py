@@ -27,7 +27,7 @@ def _spec() -> kit.ForgeSpec:
     return kit.ForgeSpec(
         forge_id=FORGE_ID,
         package="apiforge",
-        distribution="apiforge",
+        distribution="apiforge-af",
         cli_name="apiforge",
         python_spec=">=3.12",
         state_dir=STATE_DIR,

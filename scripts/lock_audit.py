@@ -36,7 +36,7 @@ def main() -> int:
         (
             item.get("metadata", {})
             for item in packages
-            if isinstance(item, dict) and item.get("name") == "apiforge"
+            if isinstance(item, dict) and item.get("name") == "apiforge-af"
         ),
         {},
     )
@@ -57,7 +57,7 @@ def main() -> int:
             failures.append(f"declared dependency is absent from lock metadata: {dependency}")
     hashed_registry_packages = 0
     for item in packages:
-        if not isinstance(item, dict) or item.get("name") == "apiforge":
+        if not isinstance(item, dict) or item.get("name") == "apiforge-af":
             continue
         source = item.get("source") or {}
         if not isinstance(source, dict) or source.get("registry") is None:

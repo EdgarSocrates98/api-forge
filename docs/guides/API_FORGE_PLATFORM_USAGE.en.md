@@ -30,7 +30,7 @@ does not need a copied Forge tree.
 
 ```bash
 uv venv "$HOME/.local/share/api-forge-env"
-"$HOME/.local/share/api-forge-env/bin/python" -m pip install 'apiforge[all]'
+"$HOME/.local/share/api-forge-env/bin/python" -m pip install 'apiforge-af[all]'
 export PATH="$HOME/.local/share/api-forge-env/bin:$PATH"
 
 apiforge inspect

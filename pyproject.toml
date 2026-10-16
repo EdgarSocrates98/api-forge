@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "apiforge"
+name = "apiforge-af"
 version = "0.1.0"
 description = "Deterministic, offline API evolution analysis"
 license = { file = "LICENSE" }

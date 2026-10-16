@@ -28,7 +28,7 @@ def build(lock_path: Path) -> dict[str, Any]:
         version = str(item.get("version", "editable"))
         ref = _purl(name, version)
         component: dict[str, Any] = {
-            "type": "application" if name == "apiforge" else "library",
+            "type": "application" if name == "apiforge-af" else "library",
             "bom-ref": ref,
             "name": name,
             "version": version,

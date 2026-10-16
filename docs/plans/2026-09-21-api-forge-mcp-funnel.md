@@ -4,7 +4,7 @@
 
 **Goal:** Complete plan 9 — the MCP surface (`apiforge-mcp`, extra `[mcp]`) exposing the read/compose verbs with `detail_level`, and a **measured** context funnel showing what each stage of the case keeps and drops, in bytes.
 
-**Architecture:** `src/apiforge/mcp/` holds a thin FastMCP layer: every tool calls an existing application service (never duplicating logic), applies `apply_detail_level`, and records `payload_bytes` to the economy ledger — the same accounting the CLI has. The `mcp` package is an optional extra; its absence is `AF-MCP-UNAVAILABLE` with the unlock (`pip install apiforge[mcp]`). The funnel verb `context funnel --case <dir>` measures byte sizes at each persisted stage (api-ir → facts → findings → summary projection) — the funnel is reported, not asserted.
+**Architecture:** `src/apiforge/mcp/` holds a thin FastMCP layer: every tool calls an existing application service (never duplicating logic), applies `apply_detail_level`, and records `payload_bytes` to the economy ledger — the same accounting the CLI has. The `mcp` package is an optional extra; its absence is `AF-MCP-UNAVAILABLE` with the unlock (`pip install apiforge-af-af[mcp]`). The funnel verb `context funnel --case <dir>` measures byte sizes at each persisted stage (api-ir → facts → findings → summary projection) — the funnel is reported, not asserted.
 
 **Bounded decision (recorded):** the first MCP slice exposes **read/compose** verbs only — `discover`, `analyze`, `judge`, `model build`, `model api-gateway`, `diff contract`, `next-step`, `rules list`, `rules lookup`, `playbook`, `economy report`, `context funnel`. Mutating verbs (`build endpoint`, sandbox/worktree) stay CLI-only until policy-gating through MCP is designed.
 

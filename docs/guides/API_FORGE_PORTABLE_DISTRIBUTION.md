@@ -35,7 +35,7 @@ system directory:
 
 ```powershell
 uv venv E:\tools\api-forge-env
-E:\tools\api-forge-env\Scripts\python.exe -m pip install apiforge-af-af[all]
+E:\tools\api-forge-env\Scripts\python.exe -m pip install apiforge-af[all]
 $env:PATH = "E:\tools\api-forge-env\Scripts;$env:PATH"
 ```
 

@@ -52,7 +52,7 @@ o check sai `BLOCKED` — é declaração honesta, não falha do install.
 | Sintoma | Causa | Ação |
 |---|---|---|
 | `ai` → `NOT_DETECTED` | host CLI fora do PATH | instale o host ou aceite o estado |
-| `BLOCKED` no handshake | extra `mcp` ausente | `pip install apiforge-af-af[mcp]` / extra no venv |
+| `BLOCKED` no handshake | extra `mcp` ausente | `pip install apiforge-af[mcp]` / extra no venv |
 | `degraded` no status | asset gerenciado editado/removido | `apiforge install repair` |
 
 ## Nota — `apiforge analyze`

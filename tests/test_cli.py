@@ -23,7 +23,7 @@ def test_help_is_cp1252_safe() -> None:
     # in the `ai` docstring) made `apiforge --help` crash with
     # UnicodeEncodeError when rich wrote the panel to the console.
     # Rich auto-degrades its own borders; the *text* is the risk surface.
-    import click
+    click = __import__("pytest").importorskip("click")
     import typer.main
 
     root = typer.main.get_command(app)

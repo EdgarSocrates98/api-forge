@@ -39,9 +39,15 @@ def test_missing_extra_prints_named_refusal_and_exits_2(
 def test_missing_extra_via_importerror_also_exits_2(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    _stub_build_server(monkeypatch, ImportError("No module named 'mcp'"))
+    _stub_build_server(monkeypatch, ImportError("No module named 'mcp'", name="mcp"))
     assert mcp_main.main([]) == 2
     assert "apiforge-af[mcp]" in capsys.readouterr().err
+
+
+def test_unrelated_importerror_propagates(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_build_server(monkeypatch, ImportError("No module named 'yaml'", name="yaml"))
+    with pytest.raises(ImportError, match="yaml"):
+        mcp_main.main([])
 
 
 def test_unrelated_runtimeerror_propagates(monkeypatch: pytest.MonkeyPatch) -> None:

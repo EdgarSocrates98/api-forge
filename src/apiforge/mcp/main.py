@@ -50,7 +50,10 @@ def main(argv: list[str] | None = None) -> int:
         from apiforge.mcp.server import MCP_OPTIONAL_UNAVAILABLE, build_server
 
         server = build_server(surface, protocol=protocol)
-    except ImportError:
+    except ImportError as exc:
+        missing = exc.name or ""
+        if missing != "mcp" and not missing.startswith("mcp."):
+            raise  # unrelated transitive import failure — not the extra
         print(
             f"{MCP_UNAVAILABLE}: the mcp package is not installed; "
             "unlock: pip install 'apiforge-af[mcp]'",

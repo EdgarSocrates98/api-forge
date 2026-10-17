@@ -47,7 +47,7 @@ def main(argv: list[str] | None = None) -> int:
     surface = resolve_surface(argv)
     protocol = resolve_protocol(argv)
     try:
-        from apiforge.mcp.server import build_server
+        from apiforge.mcp.server import MCP_OPTIONAL_UNAVAILABLE, build_server
 
         server = build_server(surface, protocol=protocol)
     except ImportError:
@@ -58,7 +58,7 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 2
     except RuntimeError as exc:
-        if "AF-MCP-OPTIONAL-UNAVAILABLE" not in str(exc):
+        if MCP_OPTIONAL_UNAVAILABLE not in str(exc):
             raise
         print(
             f"{MCP_UNAVAILABLE}: the mcp package is not installed; "

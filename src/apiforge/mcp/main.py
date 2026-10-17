@@ -50,10 +50,10 @@ def main(argv: list[str] | None = None) -> int:
         from apiforge.mcp.server import build_server
 
         server = build_server(surface, protocol=protocol)
-    except ImportError:
+    except (ImportError, RuntimeError):
         print(
             f"{MCP_UNAVAILABLE}: the mcp package is not installed; "
-            "unlock: pip install 'apiforge[mcp]'",
+            "unlock: pip install 'apiforge-af[mcp]'",
             file=sys.stderr,
         )
         return 2

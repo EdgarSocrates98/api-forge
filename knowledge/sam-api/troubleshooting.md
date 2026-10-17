@@ -9,7 +9,7 @@ AWS::Serverless::Api/Function resources - !Ref/!Sub become AF-SAM-UNRESOLVED, ne
 |---|---|
 | `AF-CATALOG-DUPLICATE-RULE` | the same rule id appears in two files |
 | `AF-XRAY-DUMP` | `sampling-rules.json`/`encryption-config.json` missing or invalid |
-| `AF-MCP-UNAVAILABLE` | `mcp` package absent; unlock: `pip install apiforge[mcp]` |
+| `AF-MCP-UNAVAILABLE` | `mcp` package absent; unlock: `pip install apiforge-af[mcp]` |
 | `AF-SAM-INVALID` | the template is malformed or has no `Resources` mapping |
 | `AF-SAM-UNRESOLVED` | a property is an intrinsic tag — named, never resolved |
 | `AF-ASYNC-INVALID` | malformed YAML or missing `asyncapi` version key |

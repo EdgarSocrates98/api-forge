@@ -16,13 +16,13 @@ agentes — sempre com evidência, contratos e decisões reproduzíveis.
 
 ```powershell
 uv venv E:\tools\api-forge-env
-E:\tools\api-forge-env\Scripts\python.exe -m pip install 'apiforge[all]'
+E:\tools\api-forge-env\Scripts\python.exe -m pip install 'apiforge-af[all]'
 $env:PATH = "E:\tools\api-forge-env\Scripts;$env:PATH"
 ```
 
 ```bash
 uv venv "$HOME/.local/share/api-forge-env"
-"$HOME/.local/share/api-forge-env/bin/python" -m pip install 'apiforge[all]'
+"$HOME/.local/share/api-forge-env/bin/python" -m pip install 'apiforge-af[all]'
 export PATH="$HOME/.local/share/api-forge-env/bin:$PATH"
 ```
 

@@ -1,17 +1,17 @@
 
-> Instalação portátil: [`docs/installation/quickstart.md`](docs/installation/quickstart.md) — clone → setup → install. Delegação agêntica: [forge.agentic.json](forge.agentic.json) (SpecialistAgenticManifest/v1).
-> Docs: [commands](docs/reference/commands.md) · [skills](docs/reference/skills.md) · [agents](docs/reference/agents.md) · [tutorial](docs/tutorials/first-run.md) · [economy](docs/economy.md) · [troubleshooting](docs/installation/troubleshooting.md)
+> Instalação portátil: [`docs/installation/quickstart.md`](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/installation/quickstart.md) — clone → setup → install. Delegação agêntica: [forge.agentic.json](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/forge.agentic.json) (SpecialistAgenticManifest/v1).
+> Docs: [commands](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/reference/commands.md) · [skills](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/reference/skills.md) · [agents](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/reference/agents.md) · [tutorial](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/tutorials/first-run.md) · [economy](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/economy.md) · [troubleshooting](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/installation/troubleshooting.md)
 <p align="center">
-  <img src="docs/assets/api-forge-logo.jpg" alt="API Forge logo" width="420" />
+  <img src="https://raw.githubusercontent.com/EdgarSocrates98/api-forge/v0.1.0/docs/assets/api-forge-logo.jpg" alt="API Forge logo" width="420" />
 </p>
 
 <h1 align="center">API Forge</h1>
 
 <p align="center">Deterministic, offline-first and local-first agentic API engineering.</p>
 
-[Português (Brasil)](README.pt-BR.md) · [Portable distribution in English](docs/guides/API_FORGE_PORTABLE_DISTRIBUTION.md) · [Distribuição portátil em português](docs/guides/API_FORGE_PORTABLE_DISTRIBUTION.pt-BR.md)
+[Português (Brasil)](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/README.pt-BR.md) · [Portable distribution in English](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/guides/API_FORGE_PORTABLE_DISTRIBUTION.md) · [Distribuição portátil em português](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/guides/API_FORGE_PORTABLE_DISTRIBUTION.pt-BR.md)
 
-[Documentation index](docs/README.md) · [Índice de documentação em PT-BR](docs/README.pt-BR.md)
+[Documentation index](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/README.md) · [Índice de documentação em PT-BR](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/README.pt-BR.md)
 
 [![CI](https://github.com/EdgarSocrates98/api-forge/actions/workflows/ci.yml/badge.svg)](https://github.com/EdgarSocrates98/api-forge/actions/workflows/ci.yml)
 
@@ -25,6 +25,13 @@ IR, evidence, plans, verifiable tasks and bounded decisions instead of guesses.
 ## Install
 
 ```bash
+python -m pip install apiforge-af   # from PyPI — Python >=3.12
+# Optional extras: apiforge-af[all] · apiforge-af[mcp] · apiforge-af[tui]
+```
+
+From a checkout (development):
+
+```bash
 python -m pip install -e '.[dev]'   # Python >=3.12
 # Optional all-in-one local extras:
 python -m pip install -e '.[all]'
@@ -36,7 +43,7 @@ The package can live in a user-selected virtual environment, prefix, mounted
 volume or container. Add its executable directory to `PATH`, or invoke it by
 absolute path. Set `APIFORGE_HOME`, `APIFORGE_CONFIG` and `APIFORGE_CACHE` when
 the default project state location is not writable. See
-[the portable distribution guide](docs/guides/API_FORGE_PORTABLE_DISTRIBUTION.md).
+[the portable distribution guide](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/guides/API_FORGE_PORTABLE_DISTRIBUTION.md).
 
 ### Bootstrap and project install
 
@@ -83,34 +90,34 @@ apiforge context resolve --scope repo
 The portable/workspace feature has paired English and Brazilian Portuguese
 guides. Start with the step-by-step guide for your language:
 
-- [Portable distribution and workspace — English](docs/guides/API_FORGE_PORTABLE_DISTRIBUTION.md)
-- [Distribuição portátil e workspace — PT-BR](docs/guides/API_FORGE_PORTABLE_DISTRIBUTION.pt-BR.md)
-- [Platform usage — English](docs/guides/API_FORGE_PLATFORM_USAGE.en.md)
-- [Uso da plataforma — PT-BR](docs/guides/API_FORGE_PLATFORM_USAGE.md)
-- [Experience and interoperability — English](docs/guides/API_FORGE_EXPERIENCE_INTEROPERABILITY.en.md)
-- [Experiência e interoperabilidade — PT-BR](docs/guides/API_FORGE_EXPERIENCE_INTEROPERABILITY.md)
-- [Economy guide — English](docs/guides/API_FORGE_ECONOMY.en.md)
-- [Guia de economia — PT-BR](docs/guides/API_FORGE_ECONOMY.md)
-- [Host parity — English](docs/HOST_PARITY.md)
-- [Paridade entre hosts — PT-BR](docs/HOST_PARITY.pt-BR.md)
-- [Evolution map — English](docs/API_FORGE_EVOLUTION_MAP.en.md)
-- [Mapa de evolução — PT-BR](docs/API_FORGE_EVOLUTION_MAP.md)
-- [Security policy — English](SECURITY.md)
-- [Política de segurança — PT-BR](SECURITY.pt-BR.md)
-- [Product closure specification — English](SPEC.md)
-- [Especificação de encerramento — PT-BR](SPEC.pt-BR.md)
-- [Architecture and MVP boundaries — English](docs/architecture/API_FORGE_PLATFORM_COMPLETION.md)
-- [Arquitetura e fronteiras do MVP — PT-BR](docs/architecture/API_FORGE_PLATFORM_COMPLETION.pt-BR.md)
-- [Capability matrix — English](docs/capabilities/API_FORGE_CAPABILITY_MATRIX.md)
-- [Matriz de capacidades — PT-BR](docs/capabilities/API_FORGE_CAPABILITY_MATRIX.pt-BR.md)
-- [Change-control host — English](docs/integrations/API_FORGE_CHANGE_CONTROL_HOST.md)
-- [Host de change-control — PT-BR](docs/integrations/API_FORGE_CHANGE_CONTROL_HOST.pt-BR.md)
-- [Devin integration — English](docs/integrations/API_FORGE_DEVIN.md)
-- [Integração Devin — PT-BR](docs/integrations/API_FORGE_DEVIN.pt-BR.md)
-- [Observability integrations — English](docs/OBSERVABILITY_INTEGRATIONS.en.md)
-- [Integrações de observabilidade — PT-BR](docs/OBSERVABILITY_INTEGRATIONS.md)
-- [Priority roadmap — English](docs/roadmaps/API_FORGE_PRIORITY_EXECUTION_ROADMAP.en.md)
-- [Roadmap prioritário — PT-BR](docs/roadmaps/API_FORGE_PRIORITY_EXECUTION_ROADMAP.md)
+- [Portable distribution and workspace — English](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/guides/API_FORGE_PORTABLE_DISTRIBUTION.md)
+- [Distribuição portátil e workspace — PT-BR](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/guides/API_FORGE_PORTABLE_DISTRIBUTION.pt-BR.md)
+- [Platform usage — English](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/guides/API_FORGE_PLATFORM_USAGE.en.md)
+- [Uso da plataforma — PT-BR](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/guides/API_FORGE_PLATFORM_USAGE.md)
+- [Experience and interoperability — English](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/guides/API_FORGE_EXPERIENCE_INTEROPERABILITY.en.md)
+- [Experiência e interoperabilidade — PT-BR](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/guides/API_FORGE_EXPERIENCE_INTEROPERABILITY.md)
+- [Economy guide — English](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/guides/API_FORGE_ECONOMY.en.md)
+- [Guia de economia — PT-BR](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/guides/API_FORGE_ECONOMY.md)
+- [Host parity — English](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/HOST_PARITY.md)
+- [Paridade entre hosts — PT-BR](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/HOST_PARITY.pt-BR.md)
+- [Evolution map — English](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/API_FORGE_EVOLUTION_MAP.en.md)
+- [Mapa de evolução — PT-BR](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/API_FORGE_EVOLUTION_MAP.md)
+- [Security policy — English](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/SECURITY.md)
+- [Política de segurança — PT-BR](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/SECURITY.pt-BR.md)
+- [Product closure specification — English](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/SPEC.md)
+- [Especificação de encerramento — PT-BR](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/SPEC.pt-BR.md)
+- [Architecture and MVP boundaries — English](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/architecture/API_FORGE_PLATFORM_COMPLETION.md)
+- [Arquitetura e fronteiras do MVP — PT-BR](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/architecture/API_FORGE_PLATFORM_COMPLETION.pt-BR.md)
+- [Capability matrix — English](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/capabilities/API_FORGE_CAPABILITY_MATRIX.md)
+- [Matriz de capacidades — PT-BR](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/capabilities/API_FORGE_CAPABILITY_MATRIX.pt-BR.md)
+- [Change-control host — English](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/integrations/API_FORGE_CHANGE_CONTROL_HOST.md)
+- [Host de change-control — PT-BR](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/integrations/API_FORGE_CHANGE_CONTROL_HOST.pt-BR.md)
+- [Devin integration — English](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/integrations/API_FORGE_DEVIN.md)
+- [Integração Devin — PT-BR](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/integrations/API_FORGE_DEVIN.pt-BR.md)
+- [Observability integrations — English](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/OBSERVABILITY_INTEGRATIONS.en.md)
+- [Integrações de observabilidade — PT-BR](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/OBSERVABILITY_INTEGRATIONS.md)
+- [Priority roadmap — English](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/roadmaps/API_FORGE_PRIORITY_EXECUTION_ROADMAP.en.md)
+- [Roadmap prioritário — PT-BR](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/roadmaps/API_FORGE_PRIORITY_EXECUTION_ROADMAP.md)
 
 It works offline and without a configured agent host. Claude, Codex, Devin,
 Copilot and MCP are optional adapters; unavailable capabilities remain explicit
@@ -157,8 +164,8 @@ SDD shipments:
 A, B and C remain additive: C cannot weaken A's risk/complexity gate or B's
 scorecard evidence. The canonical C assessment is persisted as
 `graph-impact.json`; stale, missing and unresolved graph evidence remains
-visible and conservative. See the [GraphImpactAssessment/v1 contract](docs/contracts/GraphImpactAssessment-v1.md)
-and the [C archive](.claude/sdd/archive/GRAPH_AWARE_IMPACT/SHIPPED_2026-09-25.md).
+visible and conservative. See the [GraphImpactAssessment/v1 contract](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/contracts/GraphImpactAssessment-v1.md)
+and the [C archive](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/.claude/sdd/archive/GRAPH_AWARE_IMPACT/SHIPPED_2026-09-25.md).
 
 ```bash
 python scripts/vendor_caveman.py --check
@@ -188,14 +195,14 @@ are:
 - advanced observed-risk profiles for Redis, DynamoDB, MongoDB/DocumentDB and Neptune.
 
 The complete gap analysis and sequencing are maintained in
-[docs/API_FORGE_EVOLUTION_MAP.md](docs/API_FORGE_EVOLUTION_MAP.md). It maps the
+[docs/API_FORGE_EVOLUTION_MAP.md](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/API_FORGE_EVOLUTION_MAP.md). It maps the
 remaining work across the agentic runtime, contracts, Java/Go/Python evolution,
 performance, observability, AWS, databases, security, evals and host parity.
 The next cycle is selected by dependencies and risk, not by an ad-hoc sequence
 of isolated “next steps”.
 
 The execution sequence and acceptance gates are tracked in
-[docs/roadmaps/API_FORGE_PRIORITY_EXECUTION_ROADMAP.md](docs/roadmaps/API_FORGE_PRIORITY_EXECUTION_ROADMAP.md).
+[docs/roadmaps/API_FORGE_PRIORITY_EXECUTION_ROADMAP.md](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/roadmaps/API_FORGE_PRIORITY_EXECUTION_ROADMAP.md).
 Adapters now expose an explicit execution envelope (`static`, `fixture`,
 `live_read_only` or `live_mutation`) with evidence level, input hashes,
 limitations and unresolved diagnostics. Static analysis is never reported as
@@ -250,8 +257,8 @@ apiforge devin capabilities
 apiforge devin payload "Review the current API evolution slice" --surface cli --task-kind review
 ```
 
-See [docs/HOST_PARITY.md](docs/HOST_PARITY.md) and
-[docs/integrations/API_FORGE_DEVIN.md](docs/integrations/API_FORGE_DEVIN.md).
+See [docs/HOST_PARITY.md](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/HOST_PARITY.md) and
+[docs/integrations/API_FORGE_DEVIN.md](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/integrations/API_FORGE_DEVIN.md).
 
 ## Platform completion workflow
 
@@ -297,9 +304,9 @@ analyze -> next-step -> graph -> evidence -> brief
 
 The detailed commands, six vertical proof cells, agent output contract and
 Git/CI/CD/IDE/UI integration limits are documented in
-[docs/guides/API_FORGE_PLATFORM_USAGE.md](docs/guides/API_FORGE_PLATFORM_USAGE.md),
-[docs/capabilities/API_FORGE_CAPABILITY_MATRIX.md](docs/capabilities/API_FORGE_CAPABILITY_MATRIX.md)
-and [docs/architecture/API_FORGE_PLATFORM_COMPLETION.md](docs/architecture/API_FORGE_PLATFORM_COMPLETION.md).
+[docs/guides/API_FORGE_PLATFORM_USAGE.md](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/guides/API_FORGE_PLATFORM_USAGE.md),
+[docs/capabilities/API_FORGE_CAPABILITY_MATRIX.md](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/capabilities/API_FORGE_CAPABILITY_MATRIX.md)
+and [docs/architecture/API_FORGE_PLATFORM_COMPLETION.md](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/architecture/API_FORGE_PLATFORM_COMPLETION.md).
 
 The supported production boundary is explicit: local/static and authenticated
 read-only remote paths are available; provider-specific freshness, live runtime
@@ -434,7 +441,7 @@ while refusal codes and `fact_id`s survive.
 | `apiforge platform verify-runtime --out runtime-receipt.json` | Execute allowlisted local probes for six verticals |
 | `apiforge rules list [--area SECURITY]` | List catalog rules — the knowledge base every finding cites |
 | `apiforge rules lookup AF-SEC-001` | Print one rule's rationale/remediation/reference |
-| `apiforge collect api-gateway --api-id X --out dump/` | Fetch API Gateway config into an offline dump (needs `pip install apiforge-af-af[aws]`; the only family that touches AWS) |
+| `apiforge collect api-gateway --api-id X --out dump/` | Fetch API Gateway config into an offline dump (needs `pip install apiforge-af[aws]`; the only family that touches AWS) |
 | `apiforge model api-gateway --path dump/` | Read the dump into facts — offline, no credentials |
 | `apiforge build endpoint --contract c.yaml --operation-id X --project .` | Synthesize a Spring skeleton, prove it in the sandbox (main tree untouched) |
 | `apiforge build endpoint ... --into-worktree NAME --approve` | Promote generated files into a policy-gated git worktree |
@@ -515,7 +522,7 @@ while refusal codes and `fact_id`s survive.
 | `apiforge evals economy-freshness` | 16 cases across the five wave-8 verbs |
 | `apiforge evals economy-hardening [--repo-root .]` | Path containment, class-pool budget via `plan_roles`, contract envelope invariant, token coverage, phase status and `build_delta` on the analyzed fixture — the oracle runs production code |
 | `apiforge evals agentic-quality [--responses-dir D] [--min-accuracy F] [--baseline R]` | Recorded specialist verdicts vs ground truth under each profile; absolute floor per profile (default 1.0) plus non-regression vs deep and an optional baseline report; `claim_scope: recorded-agentic-outputs` |
-| `apiforge-mcp` | MCP server for the read/compose verbs (needs `pip install apiforge-af-af[mcp]`; every tool takes `detail_level`) |
+| `apiforge-mcp` | MCP server for the read/compose verbs (needs `pip install apiforge-af[mcp]`; every tool takes `detail_level`) |
 | `apiforge collect lambda --function-name X --out dump/` | Fetch Lambda config into a dump (Code.Location never persisted) |
 | `apiforge collect sqs\|sns\|eventbridge\|iam-role\|cognito\|waf ... --out dump/` | Messaging/identity collectors — same offline-dump contract |
 | `apiforge collect dynamodb\|docdb\|neptune\|stepfunctions\|cloudwatch\|xray\|kms\|secrets\|vpc-endpoints\|s3 ... --out dump/` | Datastore/ops collectors — secrets reads metadata only, S3 posture only (objects never listed), unset S3 config recorded as measured absence |
@@ -609,12 +616,12 @@ capsules, economy profiles with risk floors, layered cache and deltas,
 selective agentics, compact tool output, economy evals, targeted
 verification, live-evidence gating, knowledge freshness watch, per-SDD-phase
 budgets and resume checkpoints. See the
-[economy guide](docs/guides/API_FORGE_ECONOMY.en.md); safety and evidence
+[economy guide](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/guides/API_FORGE_ECONOMY.en.md); safety and evidence
 never enter the budget.
 
 Three hardening rounds followed an external review (the program is now
 closed; GitHub governance lives in
-[docs/guides/API_FORGE_GITHUB_GOVERNANCE.en.md](docs/guides/API_FORGE_GITHUB_GOVERNANCE.en.md)): every case, fact, graph
+[docs/guides/API_FORGE_GITHUB_GOVERNANCE.en.md](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/docs/guides/API_FORGE_GITHUB_GOVERNANCE.en.md)): every case, fact, graph
 and caller-supplied path is confined to the project and declared workspace
 repositories; context, call and token budgets are contract invariants
 (class pools, one ControlPlane counter including shadow challengers, token
@@ -681,7 +688,7 @@ python -m pytest -q
 python scripts/check_release.py
 ```
 
-The same commands run in [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
+The same commands run in [`.github/workflows/ci.yml`](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/.github/workflows/ci.yml)
 on every push, every pull request targeting `main` and manual
 workflow dispatch. The workflow is read-only, uses Python 3.12, cancels stale
 runs for the same ref and uploads the JUnit test report when available. A push
@@ -695,9 +702,9 @@ to create and approve pull requests.
 
 ## Security and license
 
-Security reports belong in [`SECURITY.md`](SECURITY.md), preferably through a
+Security reports belong in [`SECURITY.md`](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/SECURITY.md), preferably through a
 private GitHub Security Advisory. API Forge is released under the
-[`MIT License`](LICENSE).
+[`MIT License`](https://github.com/EdgarSocrates98/api-forge/blob/v0.1.0/LICENSE).
 
 ## Graph Studio
 

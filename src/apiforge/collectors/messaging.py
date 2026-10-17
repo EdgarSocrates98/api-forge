@@ -19,7 +19,7 @@ def _boto3(service: str) -> Any:
     except ImportError as exc:
         raise CollectError(
             "AF-COLLECT-AWS",
-            "boto3 is not installed; install the 'aws' extra (pip install apiforge[aws])",
+            "boto3 is not installed; install the 'aws' extra (pip install apiforge-af[aws])",
         ) from exc
     return boto3.client(service)
 

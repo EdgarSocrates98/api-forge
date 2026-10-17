@@ -8,6 +8,6 @@ REST vs HTTP API differences that change findings: authorizers, payload format, 
 | Code | Meaning |
 |---|---|
 | `AF-COLLECT-AWS` | the AWS call failed; the named operation is in the detail |
-| `AF-MCP-UNAVAILABLE` | `mcp` package absent; unlock: `pip install apiforge[mcp]` |
+| `AF-MCP-UNAVAILABLE` | `mcp` package absent; unlock: `pip install apiforge-af[mcp]` |
 | `AF-ASYNC-INVALID` | malformed YAML or missing `asyncapi` version key |
 | `AF-TASK-MUTATION-GATED` | mutation verb outside the task runner, or the task lacks policy `allow` / a `.apiforge` writable scope |

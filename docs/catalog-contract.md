@@ -369,7 +369,7 @@ a zero silently reported.
 
 | Code | Meaning |
 |---|---|
-| `AF-MCP-UNAVAILABLE` | `mcp` package absent; unlock: `pip install apiforge-af-af[mcp]` |
+| `AF-MCP-UNAVAILABLE` | `mcp` package absent; unlock: `pip install apiforge-af[mcp]` |
 | `AF-FUNNEL-ARTIFACT-MISSING` | a stage file is absent from the case directory |
 
 ## AWS slice 2 — Lambda / Terraform / SAM

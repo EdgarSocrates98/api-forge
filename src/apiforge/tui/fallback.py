@@ -14,7 +14,7 @@ def render_fallback(root: Path, task_id: str, *, emit: bool = True) -> dict[str,
     snapshot = project_status(root, task_id, surface="fallback")
     payload = snapshot.model_dump(mode="json") | {
         "code": "AF-TUI-UNAVAILABLE",
-        "unlock": "install the optional dependency with `pip install apiforge[tui]`",
+        "unlock": "install the optional dependency with `pip install apiforge-af[tui]`",
     }
     if emit:
         try:

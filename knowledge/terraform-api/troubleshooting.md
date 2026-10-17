@@ -7,6 +7,6 @@ aws_api_gateway_* and aws_lambda_function resources from HCL - interpolation bec
 
 | Code | Meaning |
 |---|---|
-| `AF-MCP-UNAVAILABLE` | `mcp` package absent; unlock: `pip install apiforge[mcp]` |
+| `AF-MCP-UNAVAILABLE` | `mcp` package absent; unlock: `pip install apiforge-af[mcp]` |
 | `AF-ASYNC-INVALID` | malformed YAML or missing `asyncapi` version key |
 | `AF-TASK-MUTATION-GATED` | mutation verb outside the task runner, or the task lacks policy `allow` / a `.apiforge` writable scope |

@@ -104,6 +104,7 @@ extend-immutable-calls = ["typer.Option", "typer.Argument"]
 # Vendored portal server (canonical: forge-portal/portal_core) — byte-identical
 # to the shared source, linted in the canonical repo.
 "src/apiforge/_forge_portal.py" = ["ALL"]
+"src/apiforge/_portal_telemetry.py" = ["ALL"]
 # Eval fixtures are deliberately non-idiomatic analyzer inputs.
 "evals/corpus/**/fixtures/**" = ["ALL"]
 
@@ -113,6 +114,7 @@ extend-immutable-calls = ["typer.Option", "typer.Argument"]
 # vendored exemptions above).
 exclude = [
     "src/apiforge/_forge_portal.py",
+    "src/apiforge/_portal_telemetry.py",
     "src/apiforge/_graphview.py",
     "src/apiforge/_graphstudio.py",
     "src/apiforge/_installkit.py",
@@ -142,6 +144,11 @@ ignore_errors = true
 [[tool.mypy.overrides]]
 # Vendored portal server (canonical: forge-portal/portal_core) — byte-identical.
 module = "apiforge._forge_portal"
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+# Vendored portal telemetry (canonical: forge-portal/portal_core) — byte-identical.
+module = "apiforge._portal_telemetry"
 ignore_errors = true
 
 [[tool.mypy.overrides]]

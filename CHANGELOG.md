@@ -27,6 +27,11 @@ All notable changes to this project are documented here. Format follows
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-10-20
+
+### Changed
+- Cycle 12.1: vendored `scripts/forge_bootstrap.py` re-stamped to the canonical ruff-formatted source; `install.windows.sh` added as the Git Bash/MSYS install route; CI gains a `bash -n` gate for it; `docs/installation/account-installation.md` documents the Windows-without-PowerShell path.
+
 ### Fixed
 
 - `apiforge-mcp` / `apiforge mcp` without the `mcp` extra now exits 2 with

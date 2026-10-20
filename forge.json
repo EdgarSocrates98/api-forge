@@ -1,7 +1,7 @@
 {
   "forge_id": "api-forge",
   "package": "apiforge",
-  "distribution": "apiforge",
+  "distribution": "apiforge-af",
   "cli": "apiforge",
   "python": ">=3.12",
   "mcp_server_name": "apiforge",

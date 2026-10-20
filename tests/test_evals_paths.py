@@ -72,3 +72,10 @@ def test_absolute_missing_path_is_not_remapped(layouts: dict[str, Path]) -> None
 def test_non_evals_path_is_not_remapped(layouts: dict[str, Path]) -> None:
     missing = Path("corpus/suite-x/cases.json")
     assert resolve_evals_path(missing) == missing
+
+
+def test_midpath_evals_segment_is_not_remapped(layouts: dict[str, Path]) -> None:
+    """`mydata/evals/x` merely contains an `evals` segment — not a CLI
+    default shape — so a missing workspace path must stay missing."""
+    missing = Path("mydata/evals/corpus/suite-x/cases.json")
+    assert resolve_evals_path(missing) == missing

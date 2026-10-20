@@ -28,16 +28,19 @@ def resolve_evals_path(path: Path | str) -> Path:
     if value.exists() or value.is_absolute():
         return value
     parts = value.parts
-    if "evals" not in parts:
+    # Anchor at the FIRST segment only: `evals/...` is the CLI default shape,
+    # while `mydata/evals/x` is a workspace path that merely contains an
+    # `evals` segment — remapping it would mask a typo with packaged data.
+    if not parts or parts[0] != "evals":
         return value
     from apiforge.distribution.assets import package_root
 
-    packaged = package_root() / "_data" / Path(*parts[parts.index("evals") :])
+    packaged = package_root() / "_data" / value
     if packaged.exists():
         return packaged
     repo = package_root().parent.parent
     if (repo / "pyproject.toml").is_file():
-        checkout = repo / Path(*parts[parts.index("evals") :])
+        checkout = repo / value
         if checkout.exists():
             return checkout
     return value

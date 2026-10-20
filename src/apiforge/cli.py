@@ -4729,9 +4729,10 @@ def knowledge_freshness(
     from apiforge.contracts.knowledge import SourceObservation
     from apiforge.knowledge.freshness import verify_pack_freshness
     from apiforge.knowledge.loader import load_pack
+    from apiforge.knowledge.selector import default_root
 
     def work() -> object:
-        pack = load_pack(root / domain)
+        pack = load_pack(default_root(root) / domain)
         observation = (
             SourceObservation.model_validate(json.loads(receipt.read_text(encoding="utf-8")))
             if receipt
@@ -4756,9 +4757,10 @@ def knowledge_drift(
     from apiforge.contracts.knowledge import SourceObservation
     from apiforge.knowledge.drift import detect_pack_drift
     from apiforge.knowledge.loader import load_pack
+    from apiforge.knowledge.selector import default_root
 
     def work() -> object:
-        pack = load_pack(root / domain)
+        pack = load_pack(default_root(root) / domain)
         observations = tuple(
             SourceObservation.model_validate(json.loads(path.read_text(encoding="utf-8")))
             for path in receipts

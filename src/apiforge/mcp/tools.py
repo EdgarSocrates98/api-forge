@@ -1926,13 +1926,14 @@ def knowledge_list(
 
 
 def knowledge_show(
-    domain: str, root: str = "knowledge", detail_level: str = "normal"
+    domain: str, root: str | None = None, detail_level: str = "normal"
 ) -> dict[str, Any]:
     """One pack: summary, source authority, matrix, declared evals."""
     from apiforge.knowledge.loader import load_pack
+    from apiforge.knowledge.selector import default_root
 
     def work() -> dict[str, Any]:
-        pack = load_pack(Path(root) / domain)
+        pack = load_pack(default_root(Path(root) if root is not None else None) / domain)
         return {
             "areas": list(pack.areas),
             "domain": pack.domain,
@@ -1949,13 +1950,14 @@ def knowledge_show(
     return out
 
 
-def knowledge_check(root: str = "knowledge", detail_level: str = "normal") -> dict[str, Any]:
+def knowledge_check(root: str | None = None, detail_level: str = "normal") -> dict[str, Any]:
     """Validate every pack — problems are named, never raised away."""
     from apiforge.application.analyze import AnalysisError
     from apiforge.knowledge.loader import check_packs
+    from apiforge.knowledge.selector import default_root
 
     def work() -> dict[str, Any]:
-        result = check_packs(Path(root))
+        result = check_packs(default_root(Path(root) if root is not None else None))
         if not result["ok"]:
             raise AnalysisError(
                 "AF-KNOW-CHECK",
@@ -3067,16 +3069,17 @@ def knowledge_drift(
     domain: str,
     now: str,
     receipts: list[str] | None = None,
-    root: str = "knowledge",
+    root: str | None = None,
     detail_level: str = "normal",
 ) -> dict[str, Any]:
     """§29 drift verdict over read-only source receipts; unresolved without receipts."""
     from apiforge.contracts.knowledge import SourceObservation
     from apiforge.knowledge.drift import detect_pack_drift
     from apiforge.knowledge.loader import load_pack
+    from apiforge.knowledge.selector import default_root
 
     def work() -> dict[str, Any]:
-        pack = load_pack(Path(root) / domain)
+        pack = load_pack(default_root(Path(root) if root is not None else None) / domain)
         observations = tuple(
             SourceObservation.model_validate(json.loads(Path(path).read_text(encoding="utf-8")))
             for path in receipts or []
@@ -3087,12 +3090,13 @@ def knowledge_drift(
 
 
 def knowledge_impact(
-    root: str = "knowledge",
+    root: str | None = None,
     skills: str = ".claude/skills",
     detail_level: str = "normal",
 ) -> dict[str, Any]:
     """§29 source -> pack -> rule -> skill -> eval relation graph."""
     from apiforge.knowledge.impact import build_knowledge_impact
+    from apiforge.knowledge.selector import default_root
     from apiforge.rules.catalog import load_catalog
 
     return cast(
@@ -3100,7 +3104,9 @@ def knowledge_impact(
         _call(
             "knowledge_impact",
             lambda: build_knowledge_impact(
-                Path(root), skills_root=Path(skills), catalog=load_catalog()
+                default_root(Path(root) if root is not None else None),
+                skills_root=Path(skills),
+                catalog=load_catalog(),
             ).model_dump(mode="json"),
             detail_level,
         ),

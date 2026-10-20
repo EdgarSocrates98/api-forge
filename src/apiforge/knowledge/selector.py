@@ -124,7 +124,7 @@ def pack_dir(root: Path | None, domain: str) -> Path:
     """
     from apiforge.knowledge.loader import KnowledgeError
 
-    if not domain or Path(domain).name != domain:
+    if not domain or domain in (".", "..") or Path(domain).name != domain:
         raise KnowledgeError(
             "AF-KNOW-DOMAIN",
             f"domain deve ser nome de pack (sem separadores/..): {domain!r}",

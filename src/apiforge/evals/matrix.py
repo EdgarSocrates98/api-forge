@@ -29,6 +29,7 @@ from apiforge.contracts.economy_evals import (
     QualityAxis,
     Verdict,
 )
+from apiforge.evals.paths import resolve_evals_path, resolve_task_resource
 
 PROFILES = ("economy", "balanced", "deep")
 NOW = "2026-09-28T00:00:00+00:00"
@@ -86,8 +87,6 @@ def verdict_for(
     task: Mapping[str, Any], repo_root: Path, work: Path
 ) -> tuple[Verdict, tuple[str, ...], int]:
     if task["protocol"] == "grpc":
-        from apiforge.evals.paths import resolve_task_resource
-
         baseline = resolve_task_resource(str(task["baseline"]), repo_root)
         candidate = resolve_task_resource(str(task["candidate"]), repo_root)
         return _grpc_verdict(baseline, candidate)
@@ -251,8 +250,6 @@ def run_matrix(
     *,
     runner: Callable[[Mapping[str, Any], Verdict, str, Path], dict[str, Any]] = _run,
 ) -> EconomyMatrix:
-    from apiforge.evals.paths import resolve_evals_path
-
     tasks = load_tasks(Path(resolve_evals_path(corpus)))
     rows: list[MatrixRow] = []
     mutants_total = 0

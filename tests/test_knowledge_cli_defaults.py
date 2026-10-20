@@ -80,7 +80,7 @@ def test_pack_dir_refuses_traversal():
 
     from apiforge.knowledge.selector import pack_dir
 
-    for bad in ("../etc", "/abs/path", "a/b", ""):
+    for bad in ("..", ".", "../etc", "/abs/path", "a/b", ""):
         with pytest.raises(Exception) as exc:
             pack_dir(None, bad)
         assert getattr(exc.value, "code", None) == "AF-KNOW-DOMAIN"

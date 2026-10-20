@@ -17,6 +17,7 @@ import yaml
 
 from apiforge.contracts.base import ContractError
 from apiforge.contracts.knowledge import SourceObservation
+from apiforge.evals.paths import resolve_evals_path
 from apiforge.knowledge.drift import detect_pack_drift
 from apiforge.knowledge.loader import load_pack
 
@@ -60,8 +61,6 @@ def _receipt(raw: dict[str, Any]) -> SourceObservation:
 
 
 def run_knowledge_drift(corpus: Path) -> dict[str, Any]:
-    from apiforge.evals.paths import resolve_evals_path
-
     corpus = resolve_evals_path(corpus)
     case_paths = sorted(Path(corpus).glob("*.yaml"))
     if not case_paths:

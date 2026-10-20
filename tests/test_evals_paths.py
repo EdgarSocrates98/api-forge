@@ -140,3 +140,14 @@ def test_resolve_task_resource_non_tests_ref_untouched(tmp_path):
 
     out = resolve_task_resource("data/foo.yaml", tmp_path)
     assert out == tmp_path / "data" / "foo.yaml"
+
+
+def test_dotdot_never_remaps(tmp_path, monkeypatch):
+    """evals/../x nao escapa a raiz do corpus para site-packages."""
+    from apiforge.evals.paths import resolve_evals_path, resolve_task_resource
+
+    monkeypatch.chdir(tmp_path)
+    out = resolve_evals_path(Path("evals/../../otherpkg/file"))
+    assert out == Path("evals/../../otherpkg/file")
+    out2 = resolve_task_resource("tests/../secret.yaml", tmp_path)
+    assert out2 == tmp_path / "tests" / ".." / "secret.yaml"

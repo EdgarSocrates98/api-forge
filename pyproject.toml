@@ -56,6 +56,9 @@ dev = [
     "pytest>=8,<9",
     "ruff>=0.7,<1",
     "types-PyYAML>=6.0.12,<7",
+    # Sem isto `.[dev]` nao traz `python -m build` e
+    # tests/test_artifact_contents.py pula as assercoes de _data no CI.
+    "build>=1.0",
 ]
 tui = [
     "textual>=8.2,<9",

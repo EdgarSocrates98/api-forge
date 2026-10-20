@@ -28,10 +28,10 @@ def resolve_evals_path(path: Path | str) -> Path:
     if value.exists() or value.is_absolute():
         return value
     parts = value.parts
-    # Anchor at the FIRST segment only: `evals/...` is the CLI default shape,
-    # while `mydata/evals/x` is a workspace path that merely contains an
-    # `evals` segment — remapping it would mask a typo with packaged data.
-    if not parts or parts[0] != "evals":
+    # `..` nunca remapeia: `evals/../../x` escaparia a raiz do corpus para
+    # dentro de site-packages. O path segue intacto e o caller reporta o
+    # ENOENT honesto (mesma fronteira de suite_dir no spark-forge-aws).
+    if not parts or parts[0] != "evals" or ".." in parts:
         return value
     from apiforge.distribution.assets import package_root
 
@@ -60,7 +60,7 @@ def resolve_task_resource(ref: Path | str, repo_root: Path | str) -> Path:
     base = Path(repo_root)
     if value.is_absolute() or (base / value).exists():
         return base / value
-    if value.parts and value.parts[0] == "tests":
+    if value.parts and value.parts[0] == "tests" and ".." not in value.parts:
         from apiforge.distribution.assets import package_root
 
         packaged = package_root() / "_data" / value

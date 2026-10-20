@@ -1,0 +1,3 @@
+G3 — disposable-environment E2E
+/tmp/c12-e2e: clean venv installs apiforge wheel; apiforge --version and
+knowledge list return 40 packaged packs with no checkout present.

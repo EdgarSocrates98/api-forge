@@ -1,0 +1,3 @@
+G2 — knowledge/MCP tests
+23 knowledge tests + 122 knowledge/MCP tests green.
+pack_dir traversal refusal verified (AF-KNOW-DOMAIN) for ../ and absolute domains.

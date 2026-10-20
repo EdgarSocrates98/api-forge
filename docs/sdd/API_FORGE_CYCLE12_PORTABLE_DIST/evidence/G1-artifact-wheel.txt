@@ -1,0 +1,4 @@
+G1 — artifact wheel test
+tests/test_artifact_contents.py builds the real wheel via python -m build
+and asserts _data/{knowledge,evals,tests/fixtures} file-by-file parity
+with the checkout. Result: PASS (5 tests).

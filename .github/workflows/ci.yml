@@ -47,6 +47,12 @@ jobs:
       - name: Check vendored assets
         run: python scripts/vendor_caveman.py --check
 
+      # lf-0019 B2 — install.windows.sh é a rota Git Bash no Windows;
+      # o gate de sintaxe é barato e pega CRLF/erro de cópia vendored.
+      - name: Git Bash installer syntax (lf-0019)
+        shell: bash
+        run: bash -n install.windows.sh
+
       - name: Check Python dependency consistency
         run: python -m pip check
 

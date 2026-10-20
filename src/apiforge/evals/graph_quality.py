@@ -63,7 +63,9 @@ def _load(corpus: Path) -> tuple[list[dict[str, Any]], dict[str, Any]]:
 
 def run_graph_quality(corpus: Path) -> dict[str, Any]:
     """Score every case and compare against the declared thresholds."""
-    corpus = Path(corpus)
+    from apiforge.evals.paths import resolve_evals_path
+
+    corpus = Path(resolve_evals_path(corpus))
     cases, thresholds = _load(corpus)
     support: dict[str, list[str]] = thresholds["support"]
     counts: dict[tuple[str, str], dict[str, int]] = defaultdict(

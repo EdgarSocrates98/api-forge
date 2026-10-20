@@ -4782,7 +4782,9 @@ def knowledge_impact(
     from apiforge.rules.catalog import load_catalog
 
     def work() -> object:
-        return build_knowledge_impact(default_root(root), skills_root=skills, catalog=load_catalog())
+        return build_knowledge_impact(
+            default_root(root), skills_root=skills, catalog=load_catalog()
+        )
 
     _echo_json(_run(work), detail_level)
 

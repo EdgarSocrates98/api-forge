@@ -7,6 +7,7 @@ ships a wheel missing `apiforge/_data/`, and `apiforge knowledge list` then
 fails `AF-KNOW-ROOT` in a clean install. Building the real wheel is the only
 honest gate.
 """
+
 import subprocess
 import sys
 import zipfile
@@ -24,6 +25,7 @@ def wheel(tmp_path_factory) -> zipfile.ZipFile:
         [sys.executable, "-m", "build", "--wheel", "--outdir", str(out), str(ROOT)],
         capture_output=True,
         text=True,
+        check=False,
     )
     if result.returncode != 0:
         pytest.skip(f"`python -m build` unavailable or failed: {result.stderr[-400:]}")
@@ -54,7 +56,7 @@ class TestWheelCarriesDataLayer:
     def test_knowledge_packs(self, wheel):
         knowledge = _names(wheel, "apiforge/_data/knowledge/")
         assert knowledge
-        assert any(n.endswith(".md") or n.endswith(".yaml") for n in knowledge)
+        assert any(n.endswith((".md", ".yaml")) for n in knowledge)
 
     def test_evals_corpus(self, wheel):
         evals = _names(wheel, "apiforge/_data/evals/")

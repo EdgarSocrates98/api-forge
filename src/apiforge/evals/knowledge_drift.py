@@ -60,9 +60,17 @@ def _receipt(raw: dict[str, Any]) -> SourceObservation:
 
 
 def run_knowledge_drift(corpus: Path) -> dict[str, Any]:
+    from apiforge.evals.paths import resolve_evals_path
+
+    corpus = resolve_evals_path(corpus)
+    case_paths = sorted(Path(corpus).glob("*.yaml"))
+    if not case_paths:
+        raise ContractError(
+            "AF-EVALS-INVALID", f"knowledge-drift corpus {corpus} empty — no *.yaml cases"
+        )
     results: list[dict[str, Any]] = []
     failed: list[str] = []
-    for case_path in sorted(Path(corpus).glob("*.yaml")):
+    for case_path in case_paths:
         raw = yaml.safe_load(case_path.read_text(encoding="utf-8")) or {}
         case_id = str(raw.get("id", case_path.stem))
         with tempfile.TemporaryDirectory(prefix="af-drift-eval-") as tmp:

@@ -79,3 +79,64 @@ def test_midpath_evals_segment_is_not_remapped(layouts: dict[str, Path]) -> None
     default shape — so a missing workspace path must stay missing."""
     missing = Path("mydata/evals/corpus/suite-x/cases.json")
     assert resolve_evals_path(missing) == missing
+
+
+def test_run_knowledge_drift_uses_packaged_fallback(monkeypatch, tmp_path):
+    """Wheel-only: corpus relativo inexistente cai no _data packaged."""
+    from apiforge.evals import knowledge_drift
+
+    monkeypatch.chdir(tmp_path)
+    out = knowledge_drift.run_knowledge_drift(Path("evals/corpus/knowledge-drift"))
+    assert out["totals"]["cases"] > 0
+
+
+def test_run_knowledge_drift_empty_corpus_refuses(tmp_path):
+    import pytest
+
+    from apiforge.contracts.base import ContractError
+    from apiforge.evals import knowledge_drift
+
+    with pytest.raises(ContractError, match="AF-EVALS-INVALID"):
+        knowledge_drift.run_knowledge_drift(tmp_path)
+
+
+def test_run_graph_quality_uses_packaged_fallback(monkeypatch, tmp_path):
+    from apiforge.evals import graph_quality
+
+    monkeypatch.chdir(tmp_path)
+    out = graph_quality.run_graph_quality(Path("evals/corpus/graph-quality"))
+    assert out["cases"] > 0
+
+
+def test_run_matrix_uses_packaged_fallback(monkeypatch, tmp_path):
+    from apiforge.evals import matrix
+
+    monkeypatch.chdir(tmp_path)
+    report = matrix.run_matrix(Path("evals/corpus/economy-matrix"), tmp_path)
+    assert report.tasks > 0
+
+
+def test_resolve_task_resource_workspace_wins(tmp_path):
+    from apiforge.evals.paths import resolve_task_resource
+
+    f = tmp_path / "tests" / "fixtures" / "x.proto"
+    f.parent.mkdir(parents=True)
+    f.write_text("x")
+    assert resolve_task_resource("tests/fixtures/x.proto", tmp_path) == f
+
+
+def test_resolve_task_resource_packaged_fallback(tmp_path):
+    from apiforge.evals.paths import resolve_task_resource
+
+    out = resolve_task_resource("tests/fixtures/grpc/orders.proto", tmp_path)
+    if "_data" in str(out):
+        assert out.is_file()
+    else:  # checkout dev — repo_root e o proprio repo
+        assert str(out).endswith("tests/fixtures/grpc/orders.proto")
+
+
+def test_resolve_task_resource_non_tests_ref_untouched(tmp_path):
+    from apiforge.evals.paths import resolve_task_resource
+
+    out = resolve_task_resource("data/foo.yaml", tmp_path)
+    assert out == tmp_path / "data" / "foo.yaml"

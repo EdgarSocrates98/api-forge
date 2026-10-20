@@ -88,6 +88,9 @@ packages = ["src/apiforge"]
 # no cwd (evals/paths.resolve_evals_path, knowledge/selector.default_root).
 "knowledge" = "apiforge/_data/knowledge"
 "evals" = "apiforge/_data/evals"
+# Fixtures dos casos de eval (economy-matrix referencia `tests/fixtures/…`):
+# resolve_task_resource cai para `_data/tests` quando o checkout nao existe.
+"tests/fixtures" = "apiforge/_data/tests/fixtures"
 
 [tool.ruff]
 line-length = 100

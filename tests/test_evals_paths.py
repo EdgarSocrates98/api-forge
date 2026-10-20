@@ -132,7 +132,7 @@ def test_resolve_task_resource_packaged_fallback(tmp_path):
     if "_data" in str(out):
         assert out.is_file()
     else:  # checkout dev — repo_root e o proprio repo
-        assert str(out).endswith("tests/fixtures/grpc/orders.proto")
+        assert out.as_posix().endswith("tests/fixtures/grpc/orders.proto")
 
 
 def test_resolve_task_resource_non_tests_ref_untouched(tmp_path):

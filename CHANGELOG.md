@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+## [0.1.3] - 2026-10-20
+
+### Changed
+- Cycle 12 portable distribution: `_data/{knowledge,evals,tests/fixtures}` +
+  host/portal assets packaged in the wheel; resolvers env → cwd →
+  repo-marker → packaged (`importlib.resources`, zipimport-safe).
+- `pack_dir` refuses traversal in `knowledge <domain>` (`AF-KNOW-DOMAIN`),
+  including bare `..`/`.`; CLI and MCP call sites wired through it.
+- `forge.json.distribution` corrected to the real PyPI name `apiforge-af`.
+- New SDD feature record `API_FORGE_CYCLE12_PORTABLE_DIST` (retroactive).
 
 ## [0.1.2] - 2026-10-18
 

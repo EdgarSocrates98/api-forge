@@ -151,6 +151,9 @@ def _telemetry_section(root: Path) -> AgenticDoctorSection:
 def _evals_section(root: Path) -> AgenticDoctorSection:
     from apiforge.evals.paths import resolve_evals_path
 
+    # --root absoluto nunca e remapeado (resolve_evals_path preserva paths
+    # explicitos) — o fallback empacotado so dispara para o root relativo
+    # default. Intencional: um --root informado deve falhar honesto.
     corpus_root = resolve_evals_path(root / "evals" / "corpus")
     if not corpus_root.is_dir():
         return AgenticDoctorSection(

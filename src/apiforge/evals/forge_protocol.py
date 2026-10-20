@@ -15,6 +15,7 @@ import yaml
 from apiforge.contracts.base import ContractError
 from apiforge.contracts.forge_protocol import ForgeTaskRequest
 from apiforge.contracts.task import TaskSpec, TaskState
+from apiforge.evals.paths import resolve_evals_path
 from apiforge.forge.protocol import (
     attach_task,
     discover_capabilities,
@@ -30,6 +31,7 @@ from apiforge.taskspec.service import create_task as governed_create
 
 
 def load_cases(corpus: Path) -> list[dict[str, Any]]:
+    corpus = resolve_evals_path(corpus)
     cases = [
         yaml.safe_load(path.read_text(encoding="utf-8"))
         for path in sorted(Path(corpus).glob("*.yaml"))

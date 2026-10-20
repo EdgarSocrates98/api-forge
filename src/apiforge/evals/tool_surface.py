@@ -8,6 +8,7 @@ from typing import Any
 import yaml
 
 from apiforge.contracts.base import ContractError
+from apiforge.evals.paths import resolve_evals_path
 from apiforge.mcp.audit import audit_surface
 from apiforge.mcp.benchmark import benchmark_tools
 from apiforge.mcp.disclosure import disclose
@@ -15,6 +16,7 @@ from apiforge.output.page import paged
 
 
 def load_cases(corpus: Path) -> list[dict[str, Any]]:
+    corpus = resolve_evals_path(corpus)
     cases = [
         yaml.safe_load(path.read_text(encoding="utf-8"))
         for path in sorted(Path(corpus).glob("*.yaml"))

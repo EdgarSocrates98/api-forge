@@ -24,6 +24,7 @@ from apiforge.contracts.agentic_memory import (
 )
 from apiforge.contracts.base import ContractError
 from apiforge.contracts.eval_plane import MemoryEvalCaseResult, MemoryEvalReport
+from apiforge.evals.paths import resolve_evals_path
 from apiforge.memory import store as memory_store
 from apiforge.memory.invalidation import suggest_invalidations
 from apiforge.memory.retrieval import query_memory_scored
@@ -43,6 +44,7 @@ AXES = {
 
 
 def load_cases(corpus: Path) -> list[dict[str, Any]]:
+    corpus = resolve_evals_path(corpus)
     cases = [
         yaml.safe_load(path.read_text(encoding="utf-8"))
         for path in sorted(Path(corpus).glob("*.yaml"))

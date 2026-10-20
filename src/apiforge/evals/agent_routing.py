@@ -25,6 +25,7 @@ from apiforge.contracts.agents import (
 from apiforge.contracts.base import ContractError
 from apiforge.dispatch.agent_source import load_roster, sections
 from apiforge.dispatch.aliases import AliasTable, load_table
+from apiforge.evals.paths import resolve_evals_path
 
 CORPUS = Path("evals") / "corpus" / "agent-routing" / "cases.json"
 PROTECTED = frozenset({"api-adversarial-critic", "api-debate-referee", "api-verifier"})
@@ -128,6 +129,7 @@ def leakage(roster: tuple[AgentSource, ...], cases: tuple[AgentRoutingCase, ...]
 
 
 def load_cases(path: Path) -> tuple[AgentRoutingCase, ...]:
+    path = resolve_evals_path(path)
     if not path.is_file():
         raise ContractError("AF-EVAL-AGENT-ROUTING", f"{path} is missing")
     data = json.loads(path.read_text(encoding="utf-8"))

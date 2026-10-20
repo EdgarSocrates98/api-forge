@@ -272,7 +272,7 @@ def load_packaged_packs() -> dict[str, Pack]:
 
     from apiforge.distribution.assets import package_root
 
-    packaged = package_root() / "knowledge"
+    packaged = package_root() / "_data" / "knowledge"
     if packaged.is_dir():
         return load_packs(packaged)
     raise _err("AF-KNOW-PACKAGED-MISSING", f"installed package has no knowledge assets: {packaged}")

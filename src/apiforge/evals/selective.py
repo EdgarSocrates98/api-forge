@@ -26,6 +26,7 @@ from typing import Any
 import yaml
 
 from apiforge.contracts.base import ContractError
+from apiforge.evals.paths import resolve_evals_path
 
 _IGNORED = shutil.ignore_patterns(".apiforge", "__pycache__", "*.pyc", "conftest.py")
 SHADOW_TOLERANCE = 0.02
@@ -40,6 +41,7 @@ class SelectiveCase:
 
 
 def load_corpus(corpus: Path) -> list[SelectiveCase]:
+    corpus = resolve_evals_path(corpus)
     cases = []
     for path in sorted(Path(corpus).glob("*.yaml")):
         raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}

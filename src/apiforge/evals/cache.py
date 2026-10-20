@@ -22,6 +22,7 @@ import yaml
 
 from apiforge.cache.errors import CacheError
 from apiforge.contracts.cache import CacheDecision
+from apiforge.evals.paths import resolve_evals_path
 
 _IGNORED = shutil.ignore_patterns(".apiforge", "__pycache__", "*.pyc", "conftest.py")
 _REUSE = {"reuse", "reuse_warn"}
@@ -40,6 +41,7 @@ class CacheCase:
 
 
 def load_corpus(corpus: Path) -> list[CacheCase]:
+    corpus = resolve_evals_path(corpus)
     cases: list[CacheCase] = []
     for path in sorted(Path(corpus).glob("*.yaml")):
         raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}

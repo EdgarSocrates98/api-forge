@@ -26,6 +26,7 @@ from apiforge.contracts.agentic_memory import (
 from apiforge.contracts.base import ContractError
 from apiforge.contracts.eval_plane import AdversarialCaseResult, SecurityAdversarialReport
 from apiforge.contracts.trust import TrustUnit
+from apiforge.evals.paths import resolve_evals_path
 from apiforge.memory.security import evaluate_gates
 from apiforge.trust.plane import trust_unit
 from apiforge.trust.propagation import propagate
@@ -35,6 +36,7 @@ NOW = "2026-10-06T00:00:00+00:00"
 
 
 def load_cases(corpus: Path) -> list[dict[str, Any]]:
+    corpus = resolve_evals_path(corpus)
     cases = [
         yaml.safe_load(path.read_text(encoding="utf-8"))
         for path in sorted(Path(corpus).glob("*.yaml"))

@@ -12,9 +12,11 @@ from typing import Any
 import yaml
 
 from apiforge.contracts.base import ContractError
+from apiforge.evals.paths import resolve_evals_path
 
 
 def load_cases(corpus: Path) -> list[dict[str, Any]]:
+    corpus = resolve_evals_path(corpus)
     rows = [
         yaml.safe_load(path.read_text(encoding="utf-8")) or {}
         for path in sorted(Path(corpus).glob("*.yaml"))

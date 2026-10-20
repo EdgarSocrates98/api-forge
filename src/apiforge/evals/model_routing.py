@@ -13,11 +13,13 @@ from apiforge.contracts.model_routing import (
     ModelEvaluation,
     ModelRouteInputs,
 )
+from apiforge.evals.paths import resolve_evals_path
 from apiforge.runtime.model_router import route_model
 from apiforge.runtime.model_scorecard import aggregate_scorecards, scorecard_map
 
 
 def load_cases(corpus: Path) -> list[dict[str, Any]]:
+    corpus = resolve_evals_path(corpus)
     cases = [
         yaml.safe_load(path.read_text(encoding="utf-8"))
         for path in sorted(Path(corpus).glob("*.yaml"))

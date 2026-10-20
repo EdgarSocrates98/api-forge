@@ -23,6 +23,7 @@ import yaml
 
 from apiforge.context.gateway.canonical import dumps
 from apiforge.context.gateway.errors import GatewayError
+from apiforge.evals.paths import resolve_evals_path
 
 BASELINE_FILE = "baseline.json"
 DEFAULT_MIN_REDUCTION = 0.40
@@ -48,6 +49,7 @@ class EconomyCase:
 
 
 def load_corpus(corpus: Path) -> list[EconomyCase]:
+    corpus = resolve_evals_path(corpus)
     cases: list[EconomyCase] = []
     for path in sorted(Path(corpus).glob("*.yaml")):
         raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}

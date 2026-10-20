@@ -149,7 +149,9 @@ def _telemetry_section(root: Path) -> AgenticDoctorSection:
 
 
 def _evals_section(root: Path) -> AgenticDoctorSection:
-    corpus_root = root / "evals" / "corpus"
+    from apiforge.evals.paths import resolve_evals_path
+
+    corpus_root = resolve_evals_path(root / "evals" / "corpus")
     if not corpus_root.is_dir():
         return AgenticDoctorSection(
             plane="evals",

@@ -19,6 +19,7 @@ import yaml
 
 from apiforge.contracts.routing import RoutingPlan
 from apiforge.contracts.task import TaskRisk, TaskSize, TaskSpec, TaskState
+from apiforge.evals.paths import resolve_evals_path
 
 NOW = "2026-09-27T00:00:00+00:00"
 TASK_ID = "economy-routing-case"
@@ -37,6 +38,7 @@ class RoutingCase:
 
 
 def load_cases(corpus: Path) -> list[RoutingCase]:
+    corpus = resolve_evals_path(corpus)
     cases: list[RoutingCase] = []
     for path in sorted(Path(corpus).glob("*.yaml")):
         raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}

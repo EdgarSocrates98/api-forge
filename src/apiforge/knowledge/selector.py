@@ -106,7 +106,14 @@ def default_root(root: Path | None = None) -> Path:
         return local
     from apiforge.distribution.assets import package_root
 
-    return package_root() / "knowledge"
+    package = package_root()
+    # Checkout: o corpus mora na raiz do repo, ao lado de pyproject.toml
+    # (o marcador impede ler um `site-packages/knowledge` estranho no wheel).
+    repo = package.parent.parent
+    if (repo / "pyproject.toml").is_file() and (repo / "knowledge").is_dir():
+        return repo / "knowledge"
+    # No wheel o corpus mora em `apiforge/_data/knowledge` (force-include).
+    return package / "_data" / "knowledge"
 
 
 @lru_cache(maxsize=8)

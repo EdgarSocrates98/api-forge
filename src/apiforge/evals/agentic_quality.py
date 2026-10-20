@@ -26,6 +26,7 @@ import yaml
 
 from apiforge.contracts.base import ContractError
 from apiforge.contracts.economy_evals import BenchmarkIdentity
+from apiforge.evals.paths import resolve_evals_path
 
 PROFILES = ("economy", "balanced", "deep")
 NOW = "2026-09-28T00:00:00+00:00"
@@ -35,6 +36,7 @@ VERDICTS = {"breaking", "compatible", "unresolved"}
 
 
 def load_cases(corpus: Path) -> list[dict[str, Any]]:
+    corpus = resolve_evals_path(corpus)
     rows = [
         yaml.safe_load(path.read_text(encoding="utf-8")) or {}
         for path in sorted(Path(corpus).glob("*.yaml"))

@@ -82,6 +82,12 @@ packages = ["src/apiforge"]
 # host_assets. Sem isto `apiforge portal` num pip install cairia na recusa
 # AF-PORTAL-NO-ASSETS.
 "portal/assets" = "apiforge/portal_assets"
+# Corpora de evals e o corpus de knowledge sao dados de runtime (Cycle 12):
+# sem eles `apiforge evals *` e `knowledge select` instalados por pip dependem
+# de cwd. Os resolvers leem `apiforge/_data/` quando o path relativo nao existe
+# no cwd (evals/paths.resolve_evals_path, knowledge/selector.default_root).
+"knowledge" = "apiforge/_data/knowledge"
+"evals" = "apiforge/_data/evals"
 
 [tool.ruff]
 line-length = 100

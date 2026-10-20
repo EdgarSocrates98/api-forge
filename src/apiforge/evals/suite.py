@@ -9,6 +9,8 @@ from typing import Any
 
 import yaml
 
+from apiforge.evals.paths import resolve_evals_path
+
 
 @dataclass(frozen=True)
 class EvalCase:
@@ -62,6 +64,7 @@ class EvalResult:
 
 def load_cases(path: Path) -> tuple[EvalCase, ...]:
     """Load only the closed declarative case shape; no model is invoked."""
+    path = resolve_evals_path(path)
     document = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
     raw_cases = document.get("cases", []) if isinstance(document, dict) else []
     cases: list[EvalCase] = []

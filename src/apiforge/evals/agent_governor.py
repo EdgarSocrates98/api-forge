@@ -9,6 +9,7 @@ import yaml
 
 from apiforge.contracts.agentic_governance import GovernorInputs
 from apiforge.contracts.base import ContractError
+from apiforge.evals.paths import resolve_evals_path
 from apiforge.governance.gain import expected_gain
 from apiforge.governance.governor import govern
 from apiforge.governance.loop import check_loop, strategy_fingerprint
@@ -17,6 +18,7 @@ from apiforge.governance.stop import decide_stop
 
 
 def load_cases(corpus: Path) -> list[dict[str, Any]]:
+    corpus = resolve_evals_path(corpus)
     cases = [
         yaml.safe_load(path.read_text(encoding="utf-8"))
         for path in sorted(Path(corpus).glob("*.yaml"))

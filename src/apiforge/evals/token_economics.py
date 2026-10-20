@@ -18,9 +18,11 @@ from apiforge.contracts.token_economics import (
 from apiforge.economy.pricing import cost_for, price_for
 from apiforge.economy.reconciliation import reconcile
 from apiforge.economy.token_ledger import build_ledger, entry_id
+from apiforge.evals.paths import resolve_evals_path
 
 
 def load_cases(corpus: Path) -> list[dict[str, Any]]:
+    corpus = resolve_evals_path(corpus)
     cases = [
         yaml.safe_load(path.read_text(encoding="utf-8"))
         for path in sorted(Path(corpus).glob("*.yaml"))

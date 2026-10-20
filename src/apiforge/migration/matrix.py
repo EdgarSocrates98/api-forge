@@ -19,13 +19,26 @@ from apiforge.contracts.compatibility import (
 from apiforge.contracts.evidence import EvidenceRecord
 from apiforge.core.ids import stable_id
 
-_DEFAULT_MATRIX = (
-    Path(__file__).resolve().parents[3] / "knowledge" / "runtime-migration" / "matrix.yaml"
-)
+_MATRIX_REL = Path("knowledge") / "runtime-migration" / "matrix.yaml"
+
+
+def _default_matrix() -> Path:
+    """`knowledge/runtime-migration/matrix.yaml` nos dois layouts.
+
+    `parents[3]` so existe no checkout (raiz do repo, ao lado de
+    `pyproject.toml`); num wheel instalado a matriz mora em
+    `apiforge/_data/knowledge/` pelo force-include.
+    """
+    repo = Path(__file__).resolve().parents[3]
+    if (repo / "pyproject.toml").is_file() and (repo / _MATRIX_REL).is_file():
+        return repo / _MATRIX_REL
+    from apiforge.distribution.assets import package_root
+
+    return package_root() / "_data" / _MATRIX_REL
 
 
 def load_matrix(path: Path | None = None) -> dict[str, Any]:
-    source = path or _DEFAULT_MATRIX
+    source = path or _default_matrix()
     try:
         document = yaml.safe_load(source.read_text(encoding="utf-8"))
     except (OSError, UnicodeDecodeError, yaml.YAMLError) as exc:

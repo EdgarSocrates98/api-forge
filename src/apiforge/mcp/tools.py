@@ -1894,13 +1894,14 @@ def autonomy_status(root: str = ".", detail_level: str = "normal") -> dict[str, 
 
 
 def knowledge_list(
-    root: str = "knowledge", limit: int | None = None, detail_level: str = "normal"
+    root: str | None = None, limit: int | None = None, detail_level: str = "normal"
 ) -> dict[str, Any]:
     """List every pack with areas, rules and verification date; ``limit`` bounds rows."""
     from apiforge.knowledge.loader import load_packs
+    from apiforge.knowledge.selector import default_root
 
     def work() -> dict[str, Any]:
-        packs = load_packs(Path(root))
+        packs = load_packs(default_root(Path(root) if root is not None else None))
         selected = list(packs.values())
         if limit is not None:
             selected = selected[:limit]

@@ -14,6 +14,7 @@ from apiforge.context.sufficiency import minimum_sufficient
 from apiforge.contracts.base import ContractError
 from apiforge.contracts.context import ContextRef
 from apiforge.contracts.context_quality import ContextUseRecord
+from apiforge.evals.paths import resolve_evals_path
 
 
 def _uri(case_id: str, index: int) -> str:
@@ -21,6 +22,7 @@ def _uri(case_id: str, index: int) -> str:
 
 
 def load_cases(corpus: Path) -> list[dict[str, Any]]:
+    corpus = resolve_evals_path(corpus)
     cases = [
         yaml.safe_load(path.read_text(encoding="utf-8"))
         for path in sorted(Path(corpus).glob("*.yaml"))

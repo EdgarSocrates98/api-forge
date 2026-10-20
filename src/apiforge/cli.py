@@ -4622,7 +4622,7 @@ def rules_lookup(
 
 @knowledge_app.command("list")
 def knowledge_list(
-    root: Path = typer.Option(Path("knowledge"), "--root", help="Directory of knowledge packs."),
+    root: Path | None = typer.Option(None, "--root", help="Directory of knowledge packs."),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
     """List every pack with its areas, rules and verification date."""
@@ -4630,9 +4630,10 @@ def knowledge_list(
     def work() -> dict[str, object]:
         from apiforge.contracts.base import ContractError
         from apiforge.knowledge.loader import load_packs
+        from apiforge.knowledge.selector import default_root
 
         try:
-            packs = load_packs(root)
+            packs = load_packs(default_root(root))
         except ContractError as exc:
             raise AnalysisError(exc.code, exc.detail) from exc
         return {
@@ -4659,7 +4660,7 @@ def knowledge_list(
 @knowledge_app.command("show")
 def knowledge_show(
     domain: str = typer.Argument(..., help="Pack directory name, e.g. rest-design."),
-    root: Path = typer.Option(Path("knowledge"), "--root", help="Directory of knowledge packs."),
+    root: Path | None = typer.Option(None, "--root", help="Directory of knowledge packs."),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
     """Print one pack: summary, source authority, matrix, declared evals."""
@@ -4667,9 +4668,10 @@ def knowledge_show(
     def work() -> dict[str, object]:
         from apiforge.contracts.base import ContractError
         from apiforge.knowledge.loader import load_pack
+        from apiforge.knowledge.selector import default_root
 
         try:
-            pack = load_pack(root / domain)
+            pack = load_pack(default_root(root) / domain)
         except ContractError as exc:
             raise AnalysisError(exc.code, exc.detail) from exc
         return {
@@ -4691,7 +4693,7 @@ def knowledge_show(
 
 @knowledge_app.command("check")
 def knowledge_check(
-    root: Path = typer.Option(Path("knowledge"), "--root", help="Directory of knowledge packs."),
+    root: Path | None = typer.Option(None, "--root", help="Directory of knowledge packs."),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
     """Validate every pack; exit 4 when any problem is named."""
@@ -4699,9 +4701,10 @@ def knowledge_check(
     def work() -> dict[str, object]:
         from apiforge.contracts.base import ContractError
         from apiforge.knowledge.loader import check_packs
+        from apiforge.knowledge.selector import default_root
 
         try:
-            result = check_packs(root)
+            result = check_packs(default_root(root))
         except ContractError as exc:
             raise AnalysisError(exc.code, exc.detail) from exc
         if not result["ok"]:
@@ -4718,7 +4721,7 @@ def knowledge_check(
 def knowledge_freshness(
     domain: str = typer.Argument(..., help="Pack directory name."),
     receipt: Path | None = typer.Option(None, "--receipt", help="Read-only observation JSON."),
-    root: Path = typer.Option(Path("knowledge"), "--root"),
+    root: Path | None = typer.Option(None, "--root"),
     now: str = typer.Option(..., "--now", help="Explicit ISO8601 clock."),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
@@ -4745,7 +4748,7 @@ def knowledge_drift(
     receipts: list[Path] = typer.Option(
         [], "--receipt", help="Read-only observation JSON; repeatable."
     ),
-    root: Path = typer.Option(Path("knowledge"), "--root"),
+    root: Path | None = typer.Option(None, "--root"),
     now: str = typer.Option(..., "--now", help="Explicit ISO8601 clock."),
     detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
 ) -> None:
@@ -4767,7 +4770,7 @@ def knowledge_drift(
 
 @knowledge_app.command("impact")
 def knowledge_impact(
-    root: Path = typer.Option(Path("knowledge"), "--root"),
+    root: Path | None = typer.Option(None, "--root"),
     skills: Path = typer.Option(
         Path(".claude/skills"), "--skills", help="Skill manifests directory."
     ),
@@ -4775,10 +4778,11 @@ def knowledge_impact(
 ) -> None:
     """§29 source -> pack -> rule -> skill -> eval relation graph."""
     from apiforge.knowledge.impact import build_knowledge_impact
+    from apiforge.knowledge.selector import default_root
     from apiforge.rules.catalog import load_catalog
 
     def work() -> object:
-        return build_knowledge_impact(root, skills_root=skills, catalog=load_catalog())
+        return build_knowledge_impact(default_root(root), skills_root=skills, catalog=load_catalog())
 
     _echo_json(_run(work), detail_level)
 

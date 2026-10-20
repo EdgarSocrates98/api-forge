@@ -16,6 +16,7 @@ import yaml
 from apiforge.contracts.base import ContractError
 from apiforge.contracts.economy_extras import Passage
 from apiforge.contracts.model_routing import RetrievalComparison
+from apiforge.evals.paths import resolve_evals_path
 from apiforge.knowledge.levels import _graph, _hybrid, _lexical, _rerank, load_level_policy
 from apiforge.knowledge.semantic import HashFeatureSimilarityAdapter
 
@@ -23,6 +24,7 @@ _STRATEGIES = ("lexical", "graph", "semantic", "hybrid")
 
 
 def load_cases(corpus: Path) -> list[dict[str, Any]]:
+    corpus = resolve_evals_path(corpus)
     cases = [
         yaml.safe_load(path.read_text(encoding="utf-8"))
         for path in sorted(Path(corpus).glob("*.yaml"))

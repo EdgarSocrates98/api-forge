@@ -73,3 +73,20 @@ def test_mcp_knowledge_show_explicit_root_missing_refuses(tmp_path, monkeypatch)
     # Recusa nomeada (AF-KNOW-*) — nao cai silenciosamente no corpus empacotado.
     with pytest.raises(KnowledgeError, match="AF-KNOW"):
         tools.knowledge_show("api-lifecycle", root=str(tmp_path / "nada"))
+
+
+def test_pack_dir_refuses_traversal():
+    import pytest
+
+    from apiforge.knowledge.selector import pack_dir
+
+    for bad in ("../etc", "/abs/path", "a/b", ""):
+        with pytest.raises(Exception) as exc:
+            pack_dir(None, bad)
+        assert getattr(exc.value, "code", None) == "AF-KNOW-DOMAIN"
+
+
+def test_pack_dir_accepts_pack_name():
+    from apiforge.knowledge.selector import pack_dir
+
+    assert pack_dir(None, "api-design").name == "api-design"

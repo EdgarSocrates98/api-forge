@@ -116,6 +116,22 @@ def default_root(root: Path | None = None) -> Path:
     return package / "_data" / "knowledge"
 
 
+def pack_dir(root: Path | None, domain: str) -> Path:
+    """Dir de UM pack por nome — `domain` é identificador, nunca path.
+
+    `../x` ou `/abs` escapariam do root do corpus; a recusa usa o code
+    catalogado `AF-KNOW-DOMAIN` (mesmo contrato de `pack.yaml` mismatch).
+    """
+    from apiforge.knowledge.loader import KnowledgeError
+
+    if not domain or Path(domain).name != domain:
+        raise KnowledgeError(
+            "AF-KNOW-DOMAIN",
+            f"domain deve ser nome de pack (sem separadores/..): {domain!r}",
+        )
+    return default_root(root) / domain
+
+
 @lru_cache(maxsize=8)
 def _catalog(root: str, generation: str = "") -> tuple[dict[str, Pack], dict[str, int]]:
     packs = load_packs(Path(root))

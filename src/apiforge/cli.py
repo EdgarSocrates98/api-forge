@@ -4668,10 +4668,10 @@ def knowledge_show(
     def work() -> dict[str, object]:
         from apiforge.contracts.base import ContractError
         from apiforge.knowledge.loader import load_pack
-        from apiforge.knowledge.selector import default_root
+        from apiforge.knowledge.selector import pack_dir
 
         try:
-            pack = load_pack(default_root(root) / domain)
+            pack = load_pack(pack_dir(root, domain))
         except ContractError as exc:
             raise AnalysisError(exc.code, exc.detail) from exc
         return {
@@ -4729,10 +4729,10 @@ def knowledge_freshness(
     from apiforge.contracts.knowledge import SourceObservation
     from apiforge.knowledge.freshness import verify_pack_freshness
     from apiforge.knowledge.loader import load_pack
-    from apiforge.knowledge.selector import default_root
+    from apiforge.knowledge.selector import pack_dir
 
     def work() -> object:
-        pack = load_pack(default_root(root) / domain)
+        pack = load_pack(pack_dir(root, domain))
         observation = (
             SourceObservation.model_validate(json.loads(receipt.read_text(encoding="utf-8")))
             if receipt
@@ -4757,10 +4757,10 @@ def knowledge_drift(
     from apiforge.contracts.knowledge import SourceObservation
     from apiforge.knowledge.drift import detect_pack_drift
     from apiforge.knowledge.loader import load_pack
-    from apiforge.knowledge.selector import default_root
+    from apiforge.knowledge.selector import pack_dir
 
     def work() -> object:
-        pack = load_pack(default_root(root) / domain)
+        pack = load_pack(pack_dir(root, domain))
         observations = tuple(
             SourceObservation.model_validate(json.loads(path.read_text(encoding="utf-8")))
             for path in receipts

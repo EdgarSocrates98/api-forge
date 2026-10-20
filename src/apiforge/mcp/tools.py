@@ -1930,10 +1930,10 @@ def knowledge_show(
 ) -> dict[str, Any]:
     """One pack: summary, source authority, matrix, declared evals."""
     from apiforge.knowledge.loader import load_pack
-    from apiforge.knowledge.selector import default_root
+    from apiforge.knowledge.selector import pack_dir
 
     def work() -> dict[str, Any]:
-        pack = load_pack(default_root(Path(root) if root is not None else None) / domain)
+        pack = load_pack(pack_dir(Path(root) if root is not None else None, domain))
         return {
             "areas": list(pack.areas),
             "domain": pack.domain,
@@ -3076,10 +3076,10 @@ def knowledge_drift(
     from apiforge.contracts.knowledge import SourceObservation
     from apiforge.knowledge.drift import detect_pack_drift
     from apiforge.knowledge.loader import load_pack
-    from apiforge.knowledge.selector import default_root
+    from apiforge.knowledge.selector import pack_dir
 
     def work() -> dict[str, Any]:
-        pack = load_pack(default_root(Path(root) if root is not None else None) / domain)
+        pack = load_pack(pack_dir(Path(root) if root is not None else None, domain))
         observations = tuple(
             SourceObservation.model_validate(json.loads(Path(path).read_text(encoding="utf-8")))
             for path in receipts or []

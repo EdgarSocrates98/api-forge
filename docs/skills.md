@@ -35,6 +35,7 @@ Devin e Copilot.
 | `api-forge-observability` | OTel, SLO/alertas, vendors (Datadog/Dynatrace/CloudWatch) e autonomia/runbooks |
 | `api-forge-sdd` | Risco e perfil, fases, TaskSpecs, gates por evidência e field validation |
 | `api-forge-context` | Funnel, capsules, delta, grafo, handoff e economia (detalhe em `references/economy.md`) |
+| `api-forge-delegate-doctor` | Delegação opcional `forge doctor` ao forge-doctor-api: drift, breaking, migração, `UNKNOWN` e `AF-DELEG-*` |
 | `api-forge-platform-completion` | Prontidão da plataforma, capability matrix, change-control e manutenção de agents/skills |
 
 ## Formato de uma skill

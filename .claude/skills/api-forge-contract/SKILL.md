@@ -57,7 +57,11 @@ compatibilidade declarada (semver, data de deprecação, janela de suporte).
    em vez de falhar em silêncio).
 7. **Simule antes de publicar** mudanças arriscadas:
    `apiforge contract-intel twin` cria um Digital Twin sem rede.
-8. **Proponha a correção como contrato/diff.** Não altere código sem TaskSpec
+8. **Verificação independente opcional** — drift ou breaking sob disputa:
+   `apiforge forge doctor scan|compare` delega um scan read-only ao
+   forge-doctor-api; veja `api-forge-delegate-doctor` para quando delegar,
+   linhas `UNKNOWN` e recusas `AF-DELEG-*`.
+9. **Proponha a correção como contrato/diff.** Não altere código sem TaskSpec
    e sandbox.
 
 ## Regras de honestidade

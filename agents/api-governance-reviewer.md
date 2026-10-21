@@ -9,7 +9,7 @@ write_scope: case directories produced by analyze and change-control run
 model_tier: deep
 rule_areas: [CONTRACT, BREAKING, REST]
 executors: [af-inventory, af-extractor, af-judge, af-verifier, af-synthesizer]
-apiforge_tools: [analyze, diff contract, grpc diff, contract-intel impact, change-control run, change-control verify]
+apiforge_tools: [analyze, diff contract, grpc diff, contract-intel impact, change-control run, change-control verify, forge doctor scan, forge doctor compare]
 replaces: [api-grpc-compatibility-engineer]
 ---
 
@@ -40,7 +40,8 @@ Follow `AGENT_PROTOCOL.md`. Two artefacts to compare are the entry ticket.
 2. `diff contract` or `grpc diff` for versions; classify each operation.
 3. `contract-intel impact` for consumers and projections affected.
 4. For change bundles, `change-control run` then `change-control verify`; separate observed contract and code, CI checks, premises and missing external evidence.
-5. Recommend versioning or deprecation with alternatives, trade-offs, risks and `unresolved`.
+5. When drift or a breaking call is disputed, optionally delegate an independent read-only scan with `forge doctor scan` and revalidate before/after with `forge doctor compare`; the doctor lane and its `AF-DELEG-*` refusals are documented in the `api-forge-delegate-doctor` skill. `UNKNOWN` rows are evidence of gaps — preserve them.
+6. Recommend versioning or deprecation with alternatives, trade-offs, risks and `unresolved`.
 
 ## Output
 

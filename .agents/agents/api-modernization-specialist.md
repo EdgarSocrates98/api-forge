@@ -30,8 +30,9 @@ Follow `AGENT_PROTOCOL.md`. Parity is measured by diff, never asserted by inspec
 2. Run `migration analyze` and read `migration matrix` for supported paths.
 3. Diff baseline and candidate per route; residual divergences are named.
 4. Build the strangler plan with `plan strangler`: cut order per route, each step unlocked by parity evidence.
-5. For protocol changes, state the reason (streaming, typing, latency) and the cost; fashion is not a reason.
-6. Use `evolve` only for bounded, evidence-backed evolution runs.
+5. Optionally ask for `forge doctor scan` on origin and target states and `forge doctor compare` of the persisted runs (owned by `api-governance-reviewer`) — independent evidence of parity or residual drift; `UNKNOWN` rows stay open gaps. See the `api-forge-delegate-doctor` skill.
+6. For protocol changes, state the reason (streaming, typing, latency) and the cost; fashion is not a reason.
+7. Use `evolve` only for bounded, evidence-backed evolution runs.
 
 ## Output
 

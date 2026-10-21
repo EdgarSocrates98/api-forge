@@ -73,6 +73,7 @@ nomear um especialista, ele prevalece sobre esta tabela.
 | carga, stress, TPS, RPS, p95/p99, capacidade, regressão | `api-forge-performance` |
 | OTel, logs, métricas, traces, SLO, Datadog, Dynatrace, runbooks | `api-forge-observability` |
 | contexto grande, handoff, TokenSave, Graphify, economia de tokens | `api-forge-context` |
+| drift/breaking/migração confirmados por scan externo, `forge doctor`, revisão independente | `api-forge-delegate-doctor` |
 | feature nova, SDD, tasks, gates, ship, field validation | `api-forge-sdd` |
 | prontidão da plataforma, capability matrix, change-control Git/CI | `api-forge-platform-completion` |
 

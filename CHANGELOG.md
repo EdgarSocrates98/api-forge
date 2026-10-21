@@ -33,6 +33,13 @@ All notable changes to this project are documented here. Format follows
 
 ## [Unreleased]
 
+
+## [0.1.6] - 2026-10-21
+
+### Added
+
+- Integrations cycle (lf-0030): `apiforge forge doctor` delegation lane to forge-doctor-api — evidence-backed discover/verify, closed argv scan, bounded output, env scrub, refusal/failure persistence, before/after compare; `api-forge-delegate-doctor` skill; Windows-safe doctor test fixture; portal bundle re-vendored with explorer pages.
+
 ## [0.1.4] - 2026-10-20
 
 ### Changed

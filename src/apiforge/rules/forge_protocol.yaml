@@ -5,4 +5,26 @@ protocol_version: forge-protocol/v1
 # Risks that require explicit --acknowledge-risk at submit.
 risk_gate: [sensitive, external_mutation, destructive, irreversible]
 # Declared interop peers — `forge handoff` refuses undeclared targets.
-engines: [spark-forge, the-forger]
+engines: [spark-forge, the-forger, forge-doctor-api]
+# lf-0030 declared delegation surface (SpecialistDelegation semantics):
+# evidence-collection only — the doctor diagnoses, api-forge owns the changes.
+delegation:
+  forge-doctor-api:
+    optional: true
+    intents:
+      - contract-drift
+      - breaking-changes
+      - endpoint-review
+      - migrations
+      - architecture-verification
+      - version-evolution
+      - implementation-validation
+    policy:
+      discovery: runtime        # shutil.which → importlib.metadata → --version
+      execution: governed       # argv-only exec through the policy gate
+      preserve_evidence: true
+      fallback: native-analysis # absent doctor degrades to local verbs, never a guess
+    risk: read_only             # scan --format agent; no mutating surface exists here
+    read_only: true
+    max_hops: 4
+    timeout_s: 300

@@ -169,5 +169,135 @@ def register(app: typer.Typer) -> None:
 
         _echo_json(_run(lambda: health(root).model_dump(mode="json")), detail_level)
 
+    doctor_app = typer.Typer(
+        name="doctor",
+        help="forge-doctor-api delegation: discover, governed read-only scan, before/after compare.",
+        no_args_is_help=True,
+    )
+    forge_app.add_typer(doctor_app)
+
+    @doctor_app.command("discover")
+    def doctor_discover_cmd(
+        detail_level: str = typer.Option("normal", "--detail-level"),
+    ) -> None:
+        """Measured presence of forge-doctor-api: absent | untrusted | verified."""
+        from apiforge.cli import _echo_json, _run
+        from apiforge.forge.doctor import discover_doctor
+
+        _echo_json(_run(lambda: discover_doctor().model_dump(mode="json")), detail_level)
+
+    @doctor_app.command("scan")
+    def doctor_scan_cmd(
+        target: Path = typer.Option(
+            Path("."), "--target", help="Project directory the doctor scans."
+        ),
+        correlation_id: str | None = typer.Option(None, "--correlation-id"),
+        fail_on: str | None = typer.Option(
+            None,
+            "--fail-on",
+            help="Doctor gate categories, comma-separated: breaking,security,policy.",
+        ),
+        timeout: int = typer.Option(300, "--timeout", help="Seconds before the scan is refused."),
+        max_hops: int = typer.Option(4, "--max-hops", help="Chain hop ceiling."),
+        allow_unverified: bool = typer.Option(
+            False,
+            "--allow-unverified",
+            help="Run when the doctor identity is discovered but not verified.",
+        ),
+        root: Path = typer.Option(Path("."), "--root"),
+        detail_level: str = typer.Option("normal", "--detail-level"),
+    ) -> None:
+        """Governed read-only delegation: `forge-doctor-api scan --format agent`.
+
+        The doctor diagnoses; plan/implement stay with the host. Every refusal
+        persists a refused record under .apiforge/forge/delegations/.
+        """
+        from apiforge.cli import _echo_json, _run
+        from apiforge.forge.doctor import DelegationError, delegate_doctor_scan
+
+        def work() -> dict[str, object]:
+            categories = [p.strip() for p in (fail_on or "").split(",") if p.strip()]
+            try:
+                return delegate_doctor_scan(
+                    root,
+                    target,
+                    correlation_id=correlation_id,
+                    fail_on=categories,
+                    timeout=timeout,
+                    max_hops=max_hops,
+                    allow_unverified=allow_unverified,
+                ).model_dump(mode="json")
+            except DelegationError as exc:
+                from apiforge.application.analyze import AnalysisError
+
+                raise AnalysisError(exc.code, str(exc).split(": ", 1)[-1]) from exc
+
+        _echo_json(_run(work), detail_level)
+
+    @doctor_app.command("compare")
+    def doctor_compare_cmd(
+        baseline: str = typer.Option(..., "--baseline", help="Baseline delegation run id."),
+        current: str = typer.Option(..., "--current", help="Current delegation run id."),
+        root: Path = typer.Option(Path("."), "--root"),
+        detail_level: str = typer.Option("normal", "--detail-level"),
+    ) -> None:
+        """Before/after revalidation: diff two persisted doctor scans."""
+        from apiforge.cli import _echo_json, _run
+        from apiforge.forge.doctor import DelegationError, compare_delegations
+
+        def work() -> dict[str, object]:
+            try:
+                return compare_delegations(root, baseline, current).model_dump(mode="json")
+            except DelegationError as exc:
+                from apiforge.application.analyze import AnalysisError
+
+                raise AnalysisError(exc.code, str(exc).split(": ", 1)[-1]) from exc
+
+        _echo_json(_run(work), detail_level)
+
+    @doctor_app.command("list")
+    def doctor_list_cmd(
+        root: Path = typer.Option(Path("."), "--root"),
+        detail_level: str = typer.Option("normal", "--detail-level"),
+    ) -> None:
+        """List persisted delegation runs (completed and refused)."""
+        from apiforge.cli import _echo_json, _run
+        from apiforge.forge import store
+
+        def work() -> dict[str, object]:
+            rows = []
+            for run_id in store.delegation_ids(root):
+                try:
+                    record = store.load_delegation(root, run_id)
+                    rows.append(
+                        {
+                            "run_id": run_id,
+                            "status": record.status,
+                            "created_at": record.created_at,
+                            "findings": len(record.findings),
+                            "error": record.error.code if record.error else None,
+                        }
+                    )
+                except Exception as exc:  # noqa: BLE001 — corrupt row is data, not a crash
+                    rows.append({"run_id": run_id, "status": "unresolved", "error": str(exc)[:200]})
+            return {"delegations": rows}
+
+        _echo_json(_run(work), detail_level)
+
+    @doctor_app.command("show")
+    def doctor_show_cmd(
+        run_id: str = typer.Option(..., "--run", help="Delegation run id."),
+        root: Path = typer.Option(Path("."), "--root"),
+        detail_level: str = typer.Option("normal", "--detail-level"),
+    ) -> None:
+        """Show a persisted delegation record (refusals included)."""
+        from apiforge.cli import _echo_json, _run
+        from apiforge.forge import store
+
+        _echo_json(
+            _run(lambda: store.load_delegation(root, run_id).model_dump(mode="json")),
+            detail_level,
+        )
+
 
 __all__ = ["register"]

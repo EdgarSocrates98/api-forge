@@ -1190,6 +1190,37 @@ values and `delta_pct`. Operations on only one side are named
 | `AF-FORGE-HANDOFF-EXISTS` | `forge handoff` re-run for the same task+engine pair |
 | `AF-FORGE-HANDOFF-NOT-FOUND` | handoff lookup on an unknown id |
 | `AF-FORGE-STORE` | persisted forge row fails contract validation or is unreadable |
+
+### Doctor delegation (`forge doctor`, lf-0030 PHASE 7)
+
+`forge doctor scan` delegates `forge-doctor-api scan <target> --format agent`
+through governed argv-only exec (env-scrubbed, timeout, output cap) and
+publishes a `apiforge/doctor-delegation/v1` record under
+`.apiforge/forge/delegations/<run_id>/` — severity and confidence are the
+doctor's declared tokens, echoed verbatim. Evidence-collection only: the
+lane never mutates, and every refusal persists a `refused`/`failed` record
+before raising.
+
+| Code | Meaning |
+|---|---|
+| `AF-DELEG-ABSENT` | forge-doctor-api neither on PATH nor importable — unlock: install it or add the CLI to PATH |
+| `AF-DELEG-INCOMPATIBLE` | doctor discovered but unverified (`--version` did not answer `forge-doctor-api <semver>`), or the agent payload names an unsupported schema major — unlock: `--allow-unverified`, or align the doctor version |
+| `AF-DELEG-TARGET` | `--target` is not a directory |
+| `AF-DELEG-INVALID-INPUT` | bad `--fail-on` category or malformed `--correlation-id` |
+| `AF-DELEG-POLICY` | the policy engine did not allow `delegation.doctor.scan` |
+| `AF-DELEG-READ-ONLY` | argv escaped the closed read-only scan template — the lane never mutates |
+| `AF-DELEG-TIMEOUT` | the scan exceeded `--timeout` |
+| `AF-DELEG-USAGE` | doctor exit 2 — it refused the invocation |
+| `AF-DELEG-FAILED` | doctor exited non-zero outside 0/1/2 |
+| `AF-DELEG-INVALID-OUTPUT` | agent output failed the frozen line schema (`id\|sev\|conf\|subject[:line]\|desc`, `UNKNOWN\|subject\|missing`) |
+| `AF-DELEG-OUTPUT-LIMIT` | doctor stdout exceeded the 8 MiB cap — evidence is never silently truncated |
+| `AF-DELEG-CYCLE` | the provider is already in `visited_providers` — cycle refused at admission |
+| `AF-DELEG-BUDGET` | hop count or timeout budget exhausted on the delegation chain |
+| `AF-DELEG-CANCELLED` | a cancelled chain attempted another hop |
+| `AF-DELEG-RUN-ID` | delegation run id fails the bounded id pattern |
+| `AF-DELEG-EXISTS` | delegation record already persisted for that run id |
+| `AF-DELEG-NOT-FOUND` | `forge doctor compare|show` on an unknown run, or a refused run without `scan.json` |
+| `AF-DELEG-STORE` | persisted delegation row fails contract validation or is unreadable |
 | `AF-PERF-RUN-INVALID` | compare input is not a PerformanceRun payload |
 | `AF-PERF-MEMORY-CORRUPT` | a `runs.jsonl` line is malformed — the store refuses, never skips |
 | `AF-PERF-SUGGEST-INPUT` | `perf suggest` got neither a readable case dir nor a findings file |

@@ -6,6 +6,10 @@ Layout::
     forge/tasks/<task_id>/status.json    ForgeTaskStatus (last persisted)
     forge/tasks/<task_id>/events.jsonl   append-only transitions
     forge/handoffs/<handoff_id>.json     ForgeHandoff bundles
+    forge/delegations/<run_id>/record.json    DoctorDelegationRecord (lf-0030)
+    forge/delegations/<run_id>/scan.json      parsed doctor scan (when it ran)
+    forge/delegations/<run_id>/scan.agent.txt parsed-row projection of stdout
+    forge/delegations/<run_id>/compare-*.json before/after ScanDelta artifacts
 """
 
 from __future__ import annotations
@@ -15,6 +19,7 @@ import re
 from pathlib import Path
 
 from apiforge.contracts.base import ContractError
+from apiforge.contracts.delegation import DoctorDelegationRecord
 from apiforge.contracts.forge_protocol import (
     ForgeHandoff,
     ForgeTaskRequest,
@@ -113,15 +118,82 @@ def load_handoff(root: Path, handoff_id: str) -> ForgeHandoff:
         raise ContractError("AF-FORGE-STORE", f"{path}: {exc}") from exc
 
 
+# ---------------------------------------------------------------------------
+# Doctor delegation records (lf-0030) — same append-only discipline
+# ---------------------------------------------------------------------------
+
+_RUN_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$")
+
+
+def delegation_dir(root: Path, run_id: str) -> Path:
+    return forge_root(root) / "delegations" / run_id
+
+
+def _valid_run_id(run_id: str) -> None:
+    if not _RUN_ID.match(run_id):
+        raise ContractError(
+            "AF-DELEG-RUN-ID",
+            f"delegation run id {run_id!r} must match {_RUN_ID.pattern}",
+        )
+
+
+def write_delegation(root: Path, record: DoctorDelegationRecord) -> Path:
+    """Persist a delegation record; an existing run id is refused."""
+    _valid_run_id(record.run_id)
+    directory = delegation_dir(root, record.run_id)
+    if directory.exists():
+        raise ContractError("AF-DELEG-EXISTS", f"delegation run {record.run_id!r} already exists")
+    directory.mkdir(parents=True)
+    (directory / "record.json").write_text(record.model_dump_json(indent=2), encoding="utf-8")
+    append_event(
+        directory,
+        {"event": "delegation-recorded", "status": record.status, "at": record.created_at},
+    )
+    return directory
+
+
+def rewrite_delegation(root: Path, record: DoctorDelegationRecord) -> Path:
+    """Rewrite the record of an existing run — only for result_refs sealing."""
+    directory = delegation_dir(root, record.run_id)
+    if not directory.is_dir():
+        raise ContractError(
+            "AF-DELEG-NOT-FOUND", f"no delegation run {record.run_id!r} under {root}"
+        )
+    (directory / "record.json").write_text(record.model_dump_json(indent=2), encoding="utf-8")
+    return directory
+
+
+def load_delegation(root: Path, run_id: str) -> DoctorDelegationRecord:
+    path = delegation_dir(root, run_id) / "record.json"
+    if not path.is_file():
+        raise ContractError("AF-DELEG-NOT-FOUND", f"no delegation run {run_id!r} under {root}")
+    try:
+        return DoctorDelegationRecord.model_validate(json.loads(path.read_text(encoding="utf-8")))
+    except (OSError, ValueError) as exc:
+        raise ContractError("AF-DELEG-STORE", f"{path}: {exc}") from exc
+
+
+def delegation_ids(root: Path) -> list[str]:
+    base = forge_root(root) / "delegations"
+    if not base.is_dir():
+        return []
+    return sorted(path.name for path in base.iterdir() if path.is_dir())
+
+
 __all__ = [
     "append_event",
     "create_task",
+    "delegation_dir",
+    "delegation_ids",
     "forge_root",
+    "load_delegation",
     "load_handoff",
     "load_request",
     "load_status",
+    "rewrite_delegation",
     "task_dir",
     "task_ids",
+    "write_delegation",
     "write_handoff",
     "write_status",
 ]

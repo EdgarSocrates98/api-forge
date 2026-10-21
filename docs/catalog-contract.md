@@ -1221,6 +1221,10 @@ before raising.
 | `AF-DELEG-EXISTS` | delegation record already persisted for that run id |
 | `AF-DELEG-NOT-FOUND` | `forge doctor compare|show` on an unknown run, or a refused run without `scan.json` |
 | `AF-DELEG-STORE` | persisted delegation row fails contract validation or is unreadable |
+
+Live E2E evidence of this lane (scans, persisted refusal, derived
+compare): `forge-cli/docs/integration/cases/c/` in the integrations
+cycle.
 | `AF-PERF-RUN-INVALID` | compare input is not a PerformanceRun payload |
 | `AF-PERF-MEMORY-CORRUPT` | a `runs.jsonl` line is malformed — the store refuses, never skips |
 | `AF-PERF-SUGGEST-INPUT` | `perf suggest` got neither a readable case dir nor a findings file |

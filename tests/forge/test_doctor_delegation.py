@@ -11,6 +11,7 @@ from __future__ import annotations
 import json
 import os
 import stat
+import sys
 from pathlib import Path
 
 import pytest
@@ -57,8 +58,12 @@ AGENT_OUT = (
 def _fake_doctor(tmp_path: Path, body: str) -> Path:
     tmp_path.mkdir(parents=True, exist_ok=True)
     script = tmp_path / "forge-doctor-api"
-    script.write_text(f"#!/bin/sh\n{body}\n", encoding="utf-8")
+    script.write_text(f"#!{sys.executable}\n{body}\n", encoding="utf-8")
     script.chmod(script.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+    if os.name == "nt":
+        shim = script.with_name(script.name + ".cmd")
+        shim.write_text(f'@echo off\r\n"{sys.executable}" "{script}" %*\r\n', encoding="utf-8")
+        return shim
     return script
 
 
@@ -69,17 +74,16 @@ def _script(
     stderr_secret_probe: bool = False,
 ) -> str:
     lines = [
-        'if [ "$1" = "--version" ]; then echo "forge-doctor-api 0.2.5"; exit 0; fi',
-        'if [ "$1" = "scan" ]; then',
+        "import os, sys",
+        'if len(sys.argv) > 1 and sys.argv[1] == "--version":',
+        '    print("forge-doctor-api 0.2.5"); sys.exit(0)',
+        'if len(sys.argv) > 1 and sys.argv[1] == "scan":',
     ]
     if stderr_secret_probe:
-        lines.append('  echo "SECRET=$SECRET_MARKER" >&2')
-    lines.append("  cat <<'EOF'")
-    lines.append(payload.rstrip("\n"))
-    lines.append("EOF")
-    lines.append(f"  exit {exit_code}")
-    lines.append("fi")
-    lines.append("exit 2")
+        lines.append('    print("SECRET=" + os.environ.get("SECRET_MARKER", ""), file=sys.stderr)')
+    lines.append(f"    sys.stdout.write({payload.rstrip()!r} + chr(10))")
+    lines.append(f"    sys.exit({exit_code})")
+    lines.append("sys.exit(2)")
     return "\n".join(lines)
 
 
@@ -152,14 +156,14 @@ def test_discover_package_fallback_runs_module() -> None:
 
 
 def test_version_probe_parses_identity(tmp_path: Path) -> None:
-    script = _fake_doctor(tmp_path, 'echo "forge-doctor-api 0.2.5"')
+    script = _fake_doctor(tmp_path, 'print("forge-doctor-api 0.2.5")')
     from apiforge.forge.doctor import _probe_cli_version
 
     assert _probe_cli_version((str(script),)) == "0.2.5"
 
 
 def test_version_probe_rejects_foreign_binary(tmp_path: Path) -> None:
-    script = _fake_doctor(tmp_path, 'echo "totally-not-doctor 9.9"')
+    script = _fake_doctor(tmp_path, 'print("totally-not-doctor 9.9")')
     from apiforge.forge.doctor import _probe_cli_version
 
     assert _probe_cli_version((str(script),)) is None
@@ -284,7 +288,7 @@ def test_run_scan_exit1_gate_tripped(tmp_path: Path) -> None:
 
 
 def test_run_scan_exit2_usage_refused(tmp_path: Path) -> None:
-    script = _fake_doctor(tmp_path, "exit 2")
+    script = _fake_doctor(tmp_path, "raise SystemExit(2)")
     with pytest.raises(DelegationError, match="AF-DELEG-USAGE"):
         run_doctor_scan(tmp_path, argv_prefix=(str(script),))
 
@@ -296,14 +300,17 @@ def test_run_scan_other_exit_failed(tmp_path: Path) -> None:
 
 
 def test_run_scan_timeout(tmp_path: Path) -> None:
-    script = _fake_doctor(tmp_path, 'if [ "$1" = "scan" ]; then sleep 5; fi\nexit 0')
+    script = _fake_doctor(
+        tmp_path,
+        "import sys, time\nif len(sys.argv) > 1 and sys.argv[1] == 'scan': time.sleep(5)\nsys.exit(0)",
+    )
     with pytest.raises(DelegationError, match="AF-DELEG-TIMEOUT"):
         run_doctor_scan(tmp_path, argv_prefix=(str(script),), timeout=1)
 
 
 def test_run_scan_output_cap_refused(tmp_path: Path) -> None:
     """A stdout flood is refused AF-DELEG-OUTPUT-LIMIT — never truncated."""
-    body = 'if [ "$1" = "scan" ]; then head -c 9000000 /dev/zero | tr "\\0" "x"; fi\nexit 0'
+    body = "import sys\nif len(sys.argv) > 1 and sys.argv[1] == 'scan': sys.stdout.write('x' * 9000000)\nsys.exit(0)"
     script = _fake_doctor(tmp_path, body)
     with pytest.raises(DelegationError, match="AF-DELEG-OUTPUT-LIMIT"):
         run_doctor_scan(tmp_path, argv_prefix=(str(script),))
@@ -466,7 +473,10 @@ def test_delegate_invalid_output_persists_failed(tmp_path: Path) -> None:
 
 
 def test_delegate_timeout_persists_retryable_failure(tmp_path: Path) -> None:
-    script = _fake_doctor(tmp_path, 'if [ "$1" = "scan" ]; then sleep 5; fi\nexit 0')
+    script = _fake_doctor(
+        tmp_path,
+        "import sys, time\nif len(sys.argv) > 1 and sys.argv[1] == 'scan': time.sleep(5)\nsys.exit(0)",
+    )
     target = tmp_path / "proj"
     target.mkdir()
     with pytest.raises(DelegationError, match="AF-DELEG-TIMEOUT"):

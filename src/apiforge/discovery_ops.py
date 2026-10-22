@@ -43,6 +43,7 @@ def domain_prefixes(domain: str) -> tuple[str, ...]:
     norm = domain.strip().lower().replace("_", "-")
     return DOMAIN_PREFIXES.get(norm, (norm,))
 
+
 PROTOCOLS: tuple[dict[str, str], ...] = (
     {"id": "forge/v1", "version": "1"},
     {"id": "forge/context/v1", "version": "1"},
@@ -71,8 +72,18 @@ OPS: dict[str, dict[str, Any]] = {
     "rules.search": {
         "id": "rules-search",
         "argv": [
-            "rules", "search", "--query", "{term}", "--area", "{area}",
-            "--severity", "{severity}", "--limit", "{limit}", "--cursor", "{cursor}",
+            "rules",
+            "search",
+            "--query",
+            "{term}",
+            "--area",
+            "{area}",
+            "--severity",
+            "{severity}",
+            "--limit",
+            "{limit}",
+            "--cursor",
+            "{cursor}",
         ],
         "mode": "direct-capability",
         "description": "keyword/area/severity filter over the rule catalog, paginated",
@@ -86,8 +97,15 @@ OPS: dict[str, dict[str, Any]] = {
     "knowledge.search": {
         "id": "knowledge-search",
         "argv": [
-            "knowledge", "search", "{term}", "--domain", "{domain}",
-            "--limit", "{limit}", "--cursor", "{cursor}",
+            "knowledge",
+            "search",
+            "{term}",
+            "--domain",
+            "{domain}",
+            "--limit",
+            "{limit}",
+            "--cursor",
+            "{cursor}",
         ],
         "mode": "direct-capability",
         "description": "offline text search over knowledge packs, one hit per doc",
@@ -150,15 +168,21 @@ OPS: dict[str, dict[str, Any]] = {
         "argv": ["verify", "plan", "--changed", "{paths}", "--risk", "{risk}"],
         "mode": "direct-capability",
         "description": (
-            "§7.4 select applicable verifications and emit the validation "
-            "plan — never executes"
+            "§7.4 select applicable verifications and emit the validation plan — never executes"
         ),
     },
     "verification.run": {
         "id": "task-verify",
         "argv": [
-            "task", "verify", "{task_id}", "--project", "{project}",
-            "--contract", "{contract}", "--manifest", "{manifest}",
+            "task",
+            "verify",
+            "{task_id}",
+            "--project",
+            "{project}",
+            "--contract",
+            "{contract}",
+            "--manifest",
+            "{manifest}",
         ],
         "mode": "specialist-workflow",
         "read_only": False,
@@ -196,6 +220,5 @@ def ops() -> dict[str, str]:
 
 def ops_expanded() -> dict[str, dict[str, Any]]:
     return {
-        op: {"command": entry["id"], "argv": [CLI, *entry["argv"]]}
-        for op, entry in OPS.items()
+        op: {"command": entry["id"], "argv": [CLI, *entry["argv"]]} for op, entry in OPS.items()
     }

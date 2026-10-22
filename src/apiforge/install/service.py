@@ -173,19 +173,20 @@ def repair(
         # Consumer docs: re-assert dos blocos `forge:*` a partir dos
         # manifests em `.forge/context/`; recusa nomeada vira check.
         try:
-            out_docs = fctx.repair_docs(
-                ctx.root, legacy_tags=_LEGACY_DOC_TAGS)
-            receipt["repaired"].extend(
-                f"docs:{w}" for w in out_docs["written"])
+            out_docs = fctx.repair_docs(ctx.root, legacy_tags=_LEGACY_DOC_TAGS)
+            receipt["repaired"].extend(f"docs:{w}" for w in out_docs["written"])
             receipt.setdefault("checks", []).append(
-                {"id": "consumer-docs", "status": "PASS",
-                 "detail": f"{out_docs['status']} "
-                           f"({len(out_docs['written'])} writes)"})
+                {
+                    "id": "consumer-docs",
+                    "status": "PASS",
+                    "detail": f"{out_docs['status']} ({len(out_docs['written'])} writes)",
+                }
+            )
         except fctx.ContextError as exc:
             receipt["skipped"].append(f"docs:{exc.kind}")
             receipt.setdefault("checks", []).append(
-                {"id": "consumer-docs", "status": "BLOCKED",
-                 "detail": f"{exc.kind}: {exc.detail}"})
+                {"id": "consumer-docs", "status": "BLOCKED", "detail": f"{exc.kind}: {exc.detail}"}
+            )
         return receipt
 
 
@@ -209,10 +210,8 @@ def uninstall(
     with kit.acquire_lock(ctx.state_dir):
         receipt = kit.uninstall(ctx, purge_state=purge)
         if _docs_leftovers(ctx.root):
-            receipt.setdefault("checks", []).append(
-                _unregister_context(ctx.root))
-            receipt.setdefault("checks", []).append(
-                _uninstall_docs(ctx.root))
+            receipt.setdefault("checks", []).append(_unregister_context(ctx.root))
+            receipt.setdefault("checks", []).append(_uninstall_docs(ctx.root))
         return receipt
 
 
@@ -364,6 +363,7 @@ def _drop_stale_doc_entries(ctx: kit.InstallContext) -> None:
     if changed:
         ledger.save()
 
+
 _API_DOMAINS: tuple[str, ...] = (
     "api-design",
     "api-contract",
@@ -384,6 +384,7 @@ def _context_manifest(ctx: kit.InstallContext) -> dict[str, Any]:
     """Manifesto forge/context/v1 montado das fontes reais: `forge.json` +
     `forge.agentic.json` no checkout e os assets que o install usou
     (`render.content_dirs`, `_data/knowledge|evals`, `rules/`)."""
+
     def _bundled_json(name: str) -> dict[str, Any] | None:
         for cand in (_PKG_DIR / "_data" / name, _REPO_DIR / name):
             data = kit._load_json(cand, None)
@@ -587,16 +588,13 @@ def _register_context(ctx: kit.InstallContext, receipt: dict[str, Any]) -> None:
         )
         return
     try:
-        docs = fctx.install_docs(
-            ctx.root, manifest, owner=FORGE_ID, legacy_tags=_LEGACY_DOC_TAGS
-        )
+        docs = fctx.install_docs(ctx.root, manifest, owner=FORGE_ID, legacy_tags=_LEGACY_DOC_TAGS)
         receipt.setdefault("checks", []).append(
             {
                 "id": "consumer-docs",
                 "status": "PASS",
                 "detail": (
-                    f"{docs['status']}: {len(docs['written'])} written, "
-                    f"{len(docs['kept'])} kept"
+                    f"{docs['status']}: {len(docs['written'])} written, {len(docs['kept'])} kept"
                 ),
             }
         )
@@ -630,8 +628,10 @@ def _docs_leftovers(root: Path) -> bool:
     if (root / fctx.CONTEXT_DIR).exists():
         return True
     needles = (
-        f"forge:{FORGE_ID}:", f"{fctx.DOC_TAG_ECOSYSTEM}:",
-        fctx.PROTOCOL_SENTINEL, *_LEGACY_DOC_TAGS,
+        f"forge:{FORGE_ID}:",
+        f"{fctx.DOC_TAG_ECOSYSTEM}:",
+        fctx.PROTOCOL_SENTINEL,
+        *_LEGACY_DOC_TAGS,
     )
     for name in _CONSUMER_DOCS:
         path = root / name
@@ -650,9 +650,7 @@ def _uninstall_docs(root: Path) -> dict[str, Any]:
     """Retira os blocos `forge:api-forge` (+ markers legados) dos consumer
     docs; roda depois do unregister para o protocolo sair sem nos."""
     try:
-        out = fctx.uninstall_docs(
-            root, FORGE_ID, owner=FORGE_ID, legacy_tags=_LEGACY_DOC_TAGS
-        )
+        out = fctx.uninstall_docs(root, FORGE_ID, owner=FORGE_ID, legacy_tags=_LEGACY_DOC_TAGS)
         return {
             "id": "consumer-docs",
             "status": "PASS",

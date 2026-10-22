@@ -668,7 +668,6 @@ _Historical, deprecated, generated and evidence docs (preserved, not entry point
 
 ### factory/
 
-- [Run — cyc9-06 Forge Lab emitter (api-forge)](../factory/runs/2026-10-15.cyc9-06.md) `UNKNOWN`
 - [Cenários Forge Lab — API Engineering](../factory/specs/archive/2026/cyc9-06-scenarios-api.md) `HISTORICAL`
 
 ### field/

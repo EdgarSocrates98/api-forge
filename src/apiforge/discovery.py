@@ -116,12 +116,10 @@ def rules_search(
         metas = [
             m
             for m in metas
-            if q
-            in " ".join([m.rule_id, m.title or "", m.area or "", m.rationale or ""]).lower()
+            if q in " ".join([m.rule_id, m.title or "", m.area or "", m.rationale or ""]).lower()
         ]
     items = [
-        _rule_index(m) if index else (m.model_dump(mode="json") | {"id": m.rule_id})
-        for m in metas
+        _rule_index(m) if index else (m.model_dump(mode="json") | {"id": m.rule_id}) for m in metas
     ]
     page = _paginate(items, limit, cursor)
     return {
@@ -170,15 +168,11 @@ def _doc_meta(root: Path, path: Path, *, term: str | None = None) -> dict[str, A
     text = path.read_text(encoding="utf-8", errors="replace")
     needle = term.lower()
     hits = [
-        (n, line.strip())
-        for n, line in enumerate(text.splitlines(), 1)
-        if needle in line.lower()
+        (n, line.strip()) for n, line in enumerate(text.splitlines(), 1) if needle in line.lower()
     ]
     meta["matched_lines"] = len(hits)
     meta["name_hit"] = needle in rel.lower()
-    meta["snippets"] = [
-        {"line": n, "text": s[:_SNIPPET_WIDTH]} for n, s in hits[:_SNIPPET_MAX]
-    ]
+    meta["snippets"] = [{"line": n, "text": s[:_SNIPPET_WIDTH]} for n, s in hits[:_SNIPPET_MAX]]
     meta["snippets_truncated"] = len(hits) > _SNIPPET_MAX
     return meta
 
@@ -197,8 +191,7 @@ def knowledge_search(
     for path in _knowledge_docs(root):
         rel = path.relative_to(root).as_posix()
         if domain and not any(
-            rel.split("/", 1)[0].startswith(p)
-            for p in discovery_ops.domain_prefixes(domain)
+            rel.split("/", 1)[0].startswith(p) for p in discovery_ops.domain_prefixes(domain)
         ):
             continue
         try:
@@ -235,14 +228,12 @@ def knowledge_get(file: str) -> dict[str, Any]:
 
     root = _knowledge_root().resolve()
     target = (root / file).resolve()
-    if not str(target).startswith(str(root) + "/") or target == root:
+    if not target.is_relative_to(root) or target == root:
         raise AnalysisError("AF-PATH-OUTSIDE-ROOT", f"path escapes knowledge root: {file!r}")
     if not target.is_file():
         from apiforge.knowledge.loader import KnowledgeError
 
-        raise KnowledgeError(
-            "AF-KNOW-DOMAIN", f"{file!r} not present in knowledge root {root}"
-        )
+        raise KnowledgeError("AF-KNOW-DOMAIN", f"{file!r} not present in knowledge root {root}")
     return {
         "status": "ok",
         "knowledge_root": str(root),
@@ -281,9 +272,7 @@ def capabilities() -> dict[str, Any]:
             evals_root = cand
             break
     eval_suites = (
-        sorted(d.name for d in evals_root.iterdir() if d.is_dir())
-        if evals_root is not None
-        else []
+        sorted(d.name for d in evals_root.iterdir() if d.is_dir()) if evals_root is not None else []
     )
     return {
         "status": "ok",
@@ -326,20 +315,14 @@ def context_pack(
     metas = _rules()
     if prefixes:
         metas = [
-            m
-            for m in metas
-            if any(
-                p in m.area.lower() or p in m.rule_id.lower() for p in prefixes
-            )
+            m for m in metas if any(p in m.area.lower() or p in m.rule_id.lower() for p in prefixes)
         ]
     rlim = _clamp_limit(rules_limit)
     root = _knowledge_root()
     docs = _knowledge_docs(root)
     if prefixes:
         docs = [
-            p
-            for p in docs
-            if any(p.relative_to(root).parts[0].startswith(px) for px in prefixes)
+            p for p in docs if any(p.relative_to(root).parts[0].startswith(px) for px in prefixes)
         ]
     klim = _clamp_limit(knowledge_limit)
     pack: dict[str, Any] = {

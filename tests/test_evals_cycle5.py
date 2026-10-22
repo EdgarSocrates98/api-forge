@@ -30,7 +30,9 @@ def test_catalog_covers_all_four_kinds():
     for row in rows:
         counts[row["kind"]] = counts.get(row["kind"], 0) + 1
     assert counts["developer"] >= 10
-    assert all(counts[k] >= 3 for k in ("runtime-decision", "output-verification", "host-conformance"))
+    assert all(
+        counts[k] >= 3 for k in ("runtime-decision", "output-verification", "host-conformance")
+    )
 
 
 def test_catalog_is_metadata_only():

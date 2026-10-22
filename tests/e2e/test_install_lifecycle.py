@@ -305,9 +305,15 @@ def test_install_escreve_consumer_docs(projeto):
     assert "<!-- forge:api-forge:begin -->" in agents
     assert "@AGENTS.md" in claude
     for sec in (
-        "1. Discovery", "2. Classification", "3. Routing",
-        "4. Context Retrieval", "5. Planning", "6. Execution",
-        "7. Evaluation", "8. Verification", "9. Reporting",
+        "1. Discovery",
+        "2. Classification",
+        "3. Routing",
+        "4. Context Retrieval",
+        "5. Planning",
+        "6. Execution",
+        "7. Evaluation",
+        "8. Verification",
+        "9. Reporting",
     ):
         assert sec in proto
     assert proto.startswith("<!-- forge:agent-protocol:v1 -->")
@@ -319,8 +325,10 @@ def test_referencias_protocolo_resolvem(projeto):
     service.install("devin", scope="project", root=projeto, yes=True)
     assert (projeto / "AGENT_PROTOCOL.md").is_file()
     refs = [
-        p for p in projeto.rglob("*.md")
-        if p.is_file() and "AGENT_PROTOCOL.md" in p.read_text(encoding="utf-8")
+        p
+        for p in projeto.rglob("*.md")
+        if p.is_file()
+        and "AGENT_PROTOCOL.md" in p.read_text(encoding="utf-8")
         and ".forge" not in p.parts
     ]
     # refs dentro de mirrors instalados resolvem para a raiz do workspace
@@ -329,8 +337,7 @@ def test_referencias_protocolo_resolvem(projeto):
 
 
 def test_install_docs_preserva_conteudo_do_usuario(projeto):
-    (projeto / "AGENTS.md").write_text("# Minhas regras\n\nTexto do usuario.\n",
-                                       encoding="utf-8")
+    (projeto / "AGENTS.md").write_text("# Minhas regras\n\nTexto do usuario.\n", encoding="utf-8")
     service.install("devin", scope="project", root=projeto, yes=True)
     agents = (projeto / "AGENTS.md").read_text(encoding="utf-8")
     assert agents.startswith("# Minhas regras\n\nTexto do usuario.\n")
@@ -350,9 +357,15 @@ def test_dois_forges_e_uninstall_seletivo(projeto):
 
     service.install("devin", scope="project", root=projeto, yes=True)
     alheio = fctx.build_manifest(
-        forge_id="forge-alheia", name="Forge Alheia", version="1.0.0",
-        cli="forge-alheia", package="forge_alheia", distribution="forge-alheia",
-        python_spec=">=3.10", scope="project", domains=("dominio-alheio",),
+        forge_id="forge-alheia",
+        name="Forge Alheia",
+        version="1.0.0",
+        cli="forge-alheia",
+        package="forge_alheia",
+        distribution="forge-alheia",
+        python_spec=">=3.10",
+        scope="project",
+        domains=("dominio-alheio",),
         skills=("skill-alheia",),
     )
     fctx.register_forge(projeto, alheio, owner="forge-alheia")
@@ -375,10 +388,10 @@ def test_install_recusa_marcador_ambiguo(projeto):
     (projeto / "AGENTS.md").write_text(
         "# x\n<!-- forge:api-forge:begin -->\na\n"
         "<!-- forge:api-forge:begin -->\nb\n<!-- forge:api-forge:end -->\n",
-        encoding="utf-8")
+        encoding="utf-8",
+    )
     out = service.install("devin", scope="project", root=projeto, yes=True)
-    check = next(
-        (c for c in out["checks"] if c["id"] == "consumer-docs"), None)
+    check = next((c for c in out["checks"] if c["id"] == "consumer-docs"), None)
     assert check is not None and check["status"] == "BLOCKED"
     assert "FORGE-CONTEXT-CONFLICT" in check["detail"]
 
@@ -387,7 +400,8 @@ def test_install_converge_marker_legado(projeto):
     (projeto / "AGENTS.md").write_text(
         "# minhas regras\n\n<!-- api-forge:managed:begin -->\nold\n"
         "<!-- api-forge:managed:end -->\n",
-        encoding="utf-8")
+        encoding="utf-8",
+    )
     service.install("devin", scope="project", root=projeto, yes=True)
     agents = (projeto / "AGENTS.md").read_text(encoding="utf-8")
     assert "managed:begin" not in agents
@@ -399,10 +413,9 @@ def test_repair_reconstroi_doc_bloco(projeto):
     service.install("devin", scope="project", root=projeto, yes=True)
     alvo = projeto / "AGENTS.md"
     alvo.write_text(
-        alvo.read_text(encoding="utf-8").replace("API Forge", "ADULTERADO"),
-        encoding="utf-8")
+        alvo.read_text(encoding="utf-8").replace("API Forge", "ADULTERADO"), encoding="utf-8"
+    )
     rep = service.repair(scope="project", root=projeto)
-    check = next(
-        (c for c in rep["checks"] if c["id"] == "consumer-docs"), None)
+    check = next((c for c in rep["checks"] if c["id"] == "consumer-docs"), None)
     assert check is not None and check["status"] == "PASS"
     assert "ADULTERADO" not in alvo.read_text(encoding="utf-8")

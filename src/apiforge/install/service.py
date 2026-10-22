@@ -37,15 +37,12 @@ def _spec() -> kit.ForgeSpec:
         mcp_verify_tool="portable_status",
         version_cmd=("--version",),
         render_assets=_render_for,
-        marker_files=("AGENTS.md", "CLAUDE.md"),
-        marker_body=(
-            "**API Forge** esta instalado neste projeto.\n\n"
-            "- MCP server: `apiforge` (chave gerenciada em `.mcp.json`)\n"
-            "- Skills/agents: mirrors gerenciados nos diretorios de host\n"
-            "- Ciclo de vida: `apiforge install status|doctor|repair|uninstall`\n\n"
-            "Conteudo entre os marcadores `api-forge:managed` e gerenciado; "
-            "o que estiver fora e do usuario."
-        ),
+        # Consumer docs (AGENTS.md/CLAUDE.md/AGENT_PROTOCOL.md) sao da camada
+        # forge_context — blocos `forge:<forge-id>` + protocolo consolidado,
+        # nao markers `api-forge:managed` (lf-0036). O ledger generico nao
+        # escreve mais esses arquivos.
+        marker_files=(),
+        marker_body="",
         user_state_dir="~/.apiforge",
     )
 
@@ -132,6 +129,7 @@ def install(
         receipt = kit.apply_install(ctx, approved=yes)
     if not dry_run and receipt.get("status") == "completed":
         _register_context(ctx, receipt)
+        _drop_stale_doc_entries(ctx)
         _write_receipt(state, receipt)
         _register(ctx)
     return receipt
@@ -171,7 +169,24 @@ def repair(
     if dry_run:
         return kit.status(ctx)
     with kit.acquire_lock(ctx.state_dir):
-        return kit.repair(ctx)
+        receipt = kit.repair(ctx)
+        # Consumer docs: re-assert dos blocos `forge:*` a partir dos
+        # manifests em `.forge/context/`; recusa nomeada vira check.
+        try:
+            out_docs = fctx.repair_docs(
+                ctx.root, legacy_tags=_LEGACY_DOC_TAGS)
+            receipt["repaired"].extend(
+                f"docs:{w}" for w in out_docs["written"])
+            receipt.setdefault("checks", []).append(
+                {"id": "consumer-docs", "status": "PASS",
+                 "detail": f"{out_docs['status']} "
+                           f"({len(out_docs['written'])} writes)"})
+        except fctx.ContextError as exc:
+            receipt["skipped"].append(f"docs:{exc.kind}")
+            receipt.setdefault("checks", []).append(
+                {"id": "consumer-docs", "status": "BLOCKED",
+                 "detail": f"{exc.kind}: {exc.detail}"})
+        return receipt
 
 
 def uninstall(
@@ -193,7 +208,11 @@ def uninstall(
         }
     with kit.acquire_lock(ctx.state_dir):
         receipt = kit.uninstall(ctx, purge_state=purge)
-        receipt.setdefault("checks", []).append(_unregister_context(ctx.root))
+        if _docs_leftovers(ctx.root):
+            receipt.setdefault("checks", []).append(
+                _unregister_context(ctx.root))
+            receipt.setdefault("checks", []).append(
+                _uninstall_docs(ctx.root))
         return receipt
 
 
@@ -324,6 +343,26 @@ __all__ = [
 
 _PKG_DIR = Path(__file__).resolve().parents[1]
 _REPO_DIR = _PKG_DIR.parent.parent  # src/apiforge -> repo root
+
+# Markers de geracoes anteriores (`api-forge:managed:begin` do installkit
+# generico); `install_docs` os remove ao convergir para `forge:<tag>`.
+_LEGACY_DOC_TAGS: tuple[str, ...] = ("api-forge:managed",)
+_CONSUMER_DOCS: tuple[str, ...] = ("AGENTS.md", "CLAUDE.md", "AGENT_PROTOCOL.md")
+
+
+def _drop_stale_doc_entries(ctx: kit.InstallContext) -> None:
+    """Remove entradas antigas de ledger para os consumer docs: os arquivos
+    agora sao gerenciados pela camada forge_context (blocos `forge:*`), nao
+    por hash de arquivo inteiro — conteudo do usuario fora dos marcadores
+    nao e drift."""
+    ledger = kit.Ledger.load(ctx.state_dir)
+    changed = False
+    for name in _CONSUMER_DOCS:
+        if ledger.get(name) is not None:
+            ledger.drop(name)
+            changed = True
+    if changed:
+        ledger.save()
 
 _API_DOMAINS: tuple[str, ...] = (
     "api-design",
@@ -539,6 +578,25 @@ def _register_context(ctx: kit.InstallContext, receipt: dict[str, Any]) -> None:
         receipt.setdefault("checks", []).append(
             {"id": "context-registry", "status": "BLOCKED", "detail": f"{exc.kind}: {exc.detail}"}
         )
+        return
+    try:
+        docs = fctx.install_docs(
+            ctx.root, manifest, owner=FORGE_ID, legacy_tags=_LEGACY_DOC_TAGS
+        )
+        receipt.setdefault("checks", []).append(
+            {
+                "id": "consumer-docs",
+                "status": "PASS",
+                "detail": (
+                    f"{docs['status']}: {len(docs['written'])} written, "
+                    f"{len(docs['kept'])} kept"
+                ),
+            }
+        )
+    except fctx.ContextError as exc:
+        receipt.setdefault("checks", []).append(
+            {"id": "consumer-docs", "status": "BLOCKED", "detail": f"{exc.kind}: {exc.detail}"}
+        )
 
 
 def _unregister_context(root: Path) -> dict[str, Any]:
@@ -553,6 +611,49 @@ def _unregister_context(root: Path) -> dict[str, Any]:
     except fctx.ContextError as exc:
         return {
             "id": "context-registry",
+            "status": "BLOCKED",
+            "detail": f"{exc.kind}: {exc.detail}",
+        }
+
+
+def _docs_leftovers(root: Path) -> bool:
+    """True quando o alvo ainda carrega resíduo forge_context — leitura sem
+    lock; só um hit justifica o caminho de escrita (nunca criamos
+    `.forge/context/` num root pristino)."""
+    if (root / fctx.CONTEXT_DIR).exists():
+        return True
+    needles = (
+        f"forge:{FORGE_ID}:", f"{fctx.DOC_TAG_ECOSYSTEM}:",
+        fctx.PROTOCOL_SENTINEL, *_LEGACY_DOC_TAGS,
+    )
+    for name in _CONSUMER_DOCS:
+        path = root / name
+        if not path.is_file():
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        if any(n in text for n in needles):
+            return True
+    return False
+
+
+def _uninstall_docs(root: Path) -> dict[str, Any]:
+    """Retira os blocos `forge:api-forge` (+ markers legados) dos consumer
+    docs; roda depois do unregister para o protocolo sair sem nos."""
+    try:
+        out = fctx.uninstall_docs(
+            root, FORGE_ID, owner=FORGE_ID, legacy_tags=_LEGACY_DOC_TAGS
+        )
+        return {
+            "id": "consumer-docs",
+            "status": "PASS",
+            "detail": f"{out['status']}: {len(out['written'])} changed",
+        }
+    except fctx.ContextError as exc:
+        return {
+            "id": "consumer-docs",
             "status": "BLOCKED",
             "detail": f"{exc.kind}: {exc.detail}",
         }

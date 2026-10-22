@@ -61,7 +61,7 @@ def test_install_devin_escreve_skills_mcp_e_marker(projeto):
     assert any(p.startswith(".agents/skills/") for p in paths)
     mcp = json.loads((projeto / ".mcp.json").read_text(encoding="utf-8"))
     assert "apiforge" in mcp["mcpServers"]
-    assert "api-forge:managed" in (projeto / "AGENTS.md").read_text("utf-8")
+    assert "forge:api-forge:begin" in (projeto / "AGENTS.md").read_text("utf-8")
     receipts = list((projeto / ".apiforge" / "install" / "receipts").glob("*.json"))
     assert receipts
 
@@ -285,3 +285,124 @@ def test_uninstall_desregistra_so_o_proprio_forge(projeto):
     assert {e["forge_id"] for e in registry["forges"]} == {"forge-alheia"}
     assert not (ctx / "capabilities" / "api-forge.json").exists()
     assert (ctx / "capabilities" / "forge-alheia.json").exists()
+
+
+# --------------------------------------------------------------------------
+# consumer docs — install-2.0 ciclo 3 (lf-0036)
+# --------------------------------------------------------------------------
+
+
+def test_install_escreve_consumer_docs(projeto):
+    out = service.install("devin", scope="project", root=projeto, yes=True)
+    assert out["status"] == "completed"
+    check = next(c for c in out["checks"] if c["id"] == "consumer-docs")
+    assert check["status"] == "PASS"
+
+    agents = (projeto / "AGENTS.md").read_text(encoding="utf-8")
+    claude = (projeto / "CLAUDE.md").read_text(encoding="utf-8")
+    proto = (projeto / "AGENT_PROTOCOL.md").read_text(encoding="utf-8")
+    assert "<!-- forge:ecosystem:begin -->" in agents
+    assert "<!-- forge:api-forge:begin -->" in agents
+    assert "@AGENTS.md" in claude
+    for sec in (
+        "1. Discovery", "2. Classification", "3. Routing",
+        "4. Context Retrieval", "5. Planning", "6. Execution",
+        "7. Evaluation", "8. Verification", "9. Reporting",
+    ):
+        assert sec in proto
+    assert proto.startswith("<!-- forge:agent-protocol:v1 -->")
+
+
+def test_referencias_protocolo_resolvem(projeto):
+    """Refs a AGENT_PROTOCOL.md em assets instalados devem resolver (lf-0034
+    achou 113 refs mortas). O doc consumer existe na raiz do workspace."""
+    service.install("devin", scope="project", root=projeto, yes=True)
+    assert (projeto / "AGENT_PROTOCOL.md").is_file()
+    refs = [
+        p for p in projeto.rglob("*.md")
+        if p.is_file() and "AGENT_PROTOCOL.md" in p.read_text(encoding="utf-8")
+        and ".forge" not in p.parts
+    ]
+    # refs dentro de mirrors instalados resolvem para a raiz do workspace
+    for p in refs:
+        assert (projeto / "AGENT_PROTOCOL.md").exists(), p
+
+
+def test_install_docs_preserva_conteudo_do_usuario(projeto):
+    (projeto / "AGENTS.md").write_text("# Minhas regras\n\nTexto do usuario.\n",
+                                       encoding="utf-8")
+    service.install("devin", scope="project", root=projeto, yes=True)
+    agents = (projeto / "AGENTS.md").read_text(encoding="utf-8")
+    assert agents.startswith("# Minhas regras\n\nTexto do usuario.\n")
+    assert "forge:api-forge:begin" in agents
+
+
+def test_install_docs_idempotente_byte_a_byte(projeto):
+    service.install("devin", scope="project", root=projeto, yes=True)
+    nomes = ("AGENTS.md", "CLAUDE.md", "AGENT_PROTOCOL.md")
+    snap = {n: (projeto / n).read_bytes() for n in nomes}
+    service.install("devin", scope="project", root=projeto, yes=True)
+    assert {n: (projeto / n).read_bytes() for n in nomes} == snap
+
+
+def test_dois_forges_e_uninstall_seletivo(projeto):
+    from apiforge import _forgecontext as fctx
+
+    service.install("devin", scope="project", root=projeto, yes=True)
+    alheio = fctx.build_manifest(
+        forge_id="forge-alheia", name="Forge Alheia", version="1.0.0",
+        cli="forge-alheia", package="forge_alheia", distribution="forge-alheia",
+        python_spec=">=3.10", scope="project", domains=("dominio-alheio",),
+        skills=("skill-alheia",),
+    )
+    fctx.register_forge(projeto, alheio, owner="forge-alheia")
+    fctx.install_docs(projeto, alheio, owner="forge-alheia")
+
+    agents = (projeto / "AGENTS.md").read_text(encoding="utf-8")
+    assert agents.count("forge:ecosystem:begin") == 1
+    assert "forge:api-forge:begin" in agents
+    assert "forge:forge-alheia:begin" in agents
+
+    service.uninstall(scope="project", root=projeto, purge=True)
+    agents = (projeto / "AGENTS.md").read_text(encoding="utf-8")
+    assert "forge:api-forge" not in agents
+    assert "forge:forge-alheia:begin" in agents
+    proto = (projeto / "AGENT_PROTOCOL.md").read_text(encoding="utf-8")
+    assert "forge:forge-alheia" in proto and "api-forge" not in proto
+
+
+def test_install_recusa_marcador_ambiguo(projeto):
+    (projeto / "AGENTS.md").write_text(
+        "# x\n<!-- forge:api-forge:begin -->\na\n"
+        "<!-- forge:api-forge:begin -->\nb\n<!-- forge:api-forge:end -->\n",
+        encoding="utf-8")
+    out = service.install("devin", scope="project", root=projeto, yes=True)
+    check = next(
+        (c for c in out["checks"] if c["id"] == "consumer-docs"), None)
+    assert check is not None and check["status"] == "BLOCKED"
+    assert "FORGE-CONTEXT-CONFLICT" in check["detail"]
+
+
+def test_install_converge_marker_legado(projeto):
+    (projeto / "AGENTS.md").write_text(
+        "# minhas regras\n\n<!-- api-forge:managed:begin -->\nold\n"
+        "<!-- api-forge:managed:end -->\n",
+        encoding="utf-8")
+    service.install("devin", scope="project", root=projeto, yes=True)
+    agents = (projeto / "AGENTS.md").read_text(encoding="utf-8")
+    assert "managed:begin" not in agents
+    assert "forge:api-forge:begin" in agents
+    assert agents.startswith("# minhas regras\n")
+
+
+def test_repair_reconstroi_doc_bloco(projeto):
+    service.install("devin", scope="project", root=projeto, yes=True)
+    alvo = projeto / "AGENTS.md"
+    alvo.write_text(
+        alvo.read_text(encoding="utf-8").replace("API Forge", "ADULTERADO"),
+        encoding="utf-8")
+    rep = service.repair(scope="project", root=projeto)
+    check = next(
+        (c for c in rep["checks"] if c["id"] == "consumer-docs"), None)
+    assert check is not None and check["status"] == "PASS"
+    assert "ADULTERADO" not in alvo.read_text(encoding="utf-8")

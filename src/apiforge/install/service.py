@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from apiforge import __version__
+from apiforge import _forgecontext as fctx
 from apiforge import _installkit as kit
 from apiforge.install import render
 
@@ -130,6 +131,7 @@ def install(
     with kit.acquire_lock(state):
         receipt = kit.apply_install(ctx, approved=yes)
     if not dry_run and receipt.get("status") == "completed":
+        _register_context(ctx, receipt)
         _write_receipt(state, receipt)
         _register(ctx)
     return receipt
@@ -190,7 +192,9 @@ def uninstall(
             "created_at": kit._utc_now(),
         }
     with kit.acquire_lock(ctx.state_dir):
-        return kit.uninstall(ctx, purge_state=purge)
+        receipt = kit.uninstall(ctx, purge_state=purge)
+        receipt.setdefault("checks", []).append(_unregister_context(ctx.root))
+        return receipt
 
 
 def update(
@@ -308,3 +312,247 @@ __all__ = [
     "uninstall",
     "update",
 ]
+
+
+# --------------------------------------------------------------------------
+# forge-context/v1 wiring (install-2.0 ciclo 2, the-forge ADR-0061)
+# `.forge/context/` e o registry de workspace compartilhado entre forges —
+# camada diferente de `~/.forge/installations/` (conta) e de
+# `.apiforge/install/` (ledger). Este forge so registra e desregistra o
+# proprio `forge_id`.
+# --------------------------------------------------------------------------
+
+_PKG_DIR = Path(__file__).resolve().parents[1]
+_REPO_DIR = _PKG_DIR.parent.parent  # src/apiforge -> repo root
+
+_API_DOMAINS: tuple[str, ...] = (
+    "api-design",
+    "api-contract",
+    "api-testing",
+    "api-performance",
+    "api-observability",
+    "api-migration",
+    "data-access",
+    "messaging",
+)
+
+
+def _mds(base: Path) -> list[str]:
+    return sorted(p.stem for p in base.glob("*.md")) if base.is_dir() else []
+
+
+def _context_manifest(ctx: kit.InstallContext) -> dict[str, Any]:
+    """Manifesto forge/context/v1 montado das fontes reais: `forge.json` +
+    `forge.agentic.json` no checkout e os assets que o install usou
+    (`render.content_dirs`, `_data/knowledge|evals`, `rules/`)."""
+    forge_json = kit._load_json(_REPO_DIR / "forge.json", None)
+    forge_json = forge_json if isinstance(forge_json, dict) else None
+    agentic = kit._load_json(_REPO_DIR / "forge.agentic.json", None)
+    agentic = agentic if isinstance(agentic, dict) else None
+
+    dirs = render.content_dirs()
+    skills: list[str] = []
+    coordinators: list[str] = []
+    executors: list[str] = []
+    if dirs is not None:
+        agents_src, skills_src = dirs
+        skills = sorted(d.name for d in skills_src.iterdir() if d.is_dir())
+        coordinators = _mds(agents_src)
+        executors = _mds(agents_src / "executors")
+
+    rules_root = _PKG_DIR / "rules"
+    rule_areas = (
+        sorted(p.stem for p in rules_root.glob("*.yaml"))
+        + sorted(p.stem for p in (rules_root / "catalog").glob("*.yaml"))
+        if rules_root.is_dir()
+        else []
+    )
+    rule_areas = sorted(set(rule_areas))
+
+    def _data_or_repo(name: str) -> Path | None:
+        for cand in (_PKG_DIR / "_data" / name, _REPO_DIR / name):
+            if cand.is_dir():
+                return cand
+        return None
+
+    providers = (
+        [{"id": "knowledge-base", "interface": "bundled"}]
+        if _data_or_repo("knowledge") is not None
+        else []
+    )
+    evals_root = _data_or_repo("evals")
+    eval_suites = (
+        [
+            {"id": p.name, "kind": "output-verification"}
+            for p in sorted(evals_root.iterdir())
+            if p.is_dir()
+        ]
+        if evals_root is not None
+        else []
+    )
+
+    checks: list[dict[str, Any]] = [
+        {
+            "id": "skills-bundle",
+            "status": "PASS" if skills else "UNVERIFIED",
+            "detail": f"{len(skills)} skills",
+        },
+        {
+            "id": "agent-specs",
+            "status": "PASS" if coordinators else "UNVERIFIED",
+            "detail": f"{len(coordinators)} coordinators, {len(executors)} executors",
+        },
+        {
+            "id": "rules-catalog",
+            "status": "PASS" if rule_areas else "UNVERIFIED",
+            "detail": f"{len(rule_areas)} rule areas",
+        },
+    ]
+    return fctx.build_manifest(
+        forge_id=FORGE_ID,
+        name="API Forge",
+        version=__version__,
+        cli="apiforge",
+        package="apiforge",
+        distribution="apiforge-af",
+        python_spec=">=3.12",
+        scope=ctx.scope,
+        profile=ctx.profile,
+        hosts=ctx.hosts,
+        forge_json=forge_json,
+        agentic=agentic,
+        domains=_API_DOMAINS,
+        skills=skills,
+        coordinators=coordinators,
+        agents=executors,
+        rule_areas=rule_areas,
+        knowledge_providers=providers,
+        eval_suites=eval_suites,
+        protocols=(
+            {"id": "forge/v1", "version": "1"},
+            {"id": "forge/context/v1", "version": "1"},
+            {"id": "forge/context-registry/v1", "version": "1"},
+        ),
+        discovery_commands=(
+            {
+                "id": "analyze",
+                "argv": ["apiforge", "analyze", "{target}"],
+                "mode": "direct-capability",
+                "read_only": True,
+                "description": "analyze API/contract surfaces",
+            },
+            {
+                "id": "next-step",
+                "argv": ["apiforge", "next-step"],
+                "mode": "specialist-workflow",
+                "read_only": True,
+                "description": "case-driven specialist recommendation",
+            },
+            {
+                "id": "knowledge-select",
+                "argv": ["apiforge", "knowledge", "select"],
+                "mode": "direct-capability",
+                "read_only": True,
+                "description": "deterministic knowledge selection",
+            },
+            {
+                "id": "doctor",
+                "argv": ["apiforge", "doctor"],
+                "mode": "diagnostic-only",
+                "read_only": True,
+                "description": "environment + installation health",
+            },
+        ),
+        mcp={
+            "server_name": "apiforge",
+            "command": ["apiforge-mcp"],
+            "verify_tool": "portable_status",
+        },
+        resources={
+            "skills-bundle": {
+                "kind": "bundled",
+                "location": "apiforge/host_assets/skills",
+                "optional": False,
+            },
+            "agents-bundle": {
+                "kind": "bundled",
+                "location": "apiforge/host_assets/agents",
+                "optional": False,
+            },
+            "rules-catalog": {
+                "kind": "bundled",
+                "location": "apiforge/rules",
+                "optional": False,
+            },
+            "knowledge-base": {
+                "kind": "bundled",
+                "location": "apiforge/_data/knowledge",
+                "optional": True,
+            },
+            "evals-data": {
+                "kind": "bundled",
+                "location": "apiforge/_data/evals",
+                "optional": True,
+            },
+            "install-ledger": {
+                "kind": "referenced",
+                "location": ".apiforge/install",
+                "optional": True,
+            },
+        },
+        mutating_verbs=(
+            "install",
+            "uninstall",
+            "repair",
+            "integrate",
+            "detach",
+            "collect",
+            "change apply",
+            "case update",
+            "task run",
+        ),
+        requires_approval=("install", "uninstall", "integrate", "detach", "change apply"),
+        offline_available=True,
+        health={
+            "status": ("healthy" if skills and coordinators and rule_areas else "degraded"),
+            "checks": checks,
+        },
+        components=ctx.options or None,
+        recorded_by="apiforge",
+    )
+
+
+def _register_context(ctx: kit.InstallContext, receipt: dict[str, Any]) -> None:
+    """Grava `.forge/context/` — manifesto + entrada no registry +
+    ROUTING.md. Falha vira check BLOCKED nomeado no recibo."""
+    try:
+        manifest = _context_manifest(ctx)
+        out = fctx.register_forge(ctx.root, manifest, owner=FORGE_ID)
+        receipt.setdefault("checks", []).append(
+            {
+                "id": "context-registry",
+                "status": "PASS",
+                "detail": f".forge/context {out['status']} ({len(out['written'])} writes)",
+            }
+        )
+    except fctx.ContextError as exc:
+        receipt.setdefault("checks", []).append(
+            {"id": "context-registry", "status": "BLOCKED", "detail": f"{exc.kind}: {exc.detail}"}
+        )
+
+
+def _unregister_context(root: Path) -> dict[str, Any]:
+    """Remove somente o manifesto/entry deste forge."""
+    try:
+        out = fctx.unregister_forge(root, FORGE_ID, owner=FORGE_ID)
+        return {
+            "id": "context-registry",
+            "status": "PASS",
+            "detail": f".forge/context {out['status']}",
+        }
+    except fctx.ContextError as exc:
+        return {
+            "id": "context-registry",
+            "status": "BLOCKED",
+            "detail": f"{exc.kind}: {exc.detail}",
+        }

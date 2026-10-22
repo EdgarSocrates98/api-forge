@@ -131,7 +131,11 @@ def test_uninstall_reverte_tudo(projeto):
     un = service.uninstall(scope="project", root=projeto, purge=True)
     assert un["status"] == "completed"
     resto = [p for p in _arquivos(projeto) if not p.startswith(".git/")]
-    assert resto == []
+    # `.forge/context/` e shared workspace state, nao state deste forge.
+    assert sorted(resto) == [
+        ".forge/context/ROUTING.md",
+        ".forge/context/registry.json",
+    ]
 
 
 def test_uninstall_preserva_conteudo_do_usuario(projeto):
@@ -187,7 +191,11 @@ def test_cli_install_uninstall(projeto):
     result = CliRunner().invoke(app, ["install", "uninstall", "--root", str(projeto), "--purge"])
     assert result.exit_code == 0, result.stdout
     resto = [p for p in _arquivos(projeto) if not p.startswith(".git/")]
-    assert resto == []
+    # `.forge/context/` e shared workspace state, nao state deste forge.
+    assert sorted(resto) == [
+        ".forge/context/ROUTING.md",
+        ".forge/context/registry.json",
+    ]
 
 
 def test_hosts_none_e_csv():
@@ -204,3 +212,76 @@ def test_hosts_none_e_csv():
     assert set(service._hosts("claude,devin")) == {"claude", "devin"}
     with pytest.raises(kit.InstallError):
         service._hosts("nope")
+
+
+# --------------------------------------------------------------------------
+# forge/context/v1 — workspace registry (install-2.0 ciclo 2)
+# --------------------------------------------------------------------------
+
+
+def test_install_escreve_forge_context(projeto):
+    from apiforge import _forgecontext as fctx
+
+    out = service.install("devin", scope="project", root=projeto, yes=True)
+    assert out["status"] == "completed"
+    check = next(c for c in out["checks"] if c["id"] == "context-registry")
+    assert check["status"] == "PASS"
+
+    ctx = projeto / ".forge" / "context"
+    registry = json.loads((ctx / "registry.json").read_text(encoding="utf-8"))
+    assert registry["schema"] == "forge/context-registry/v1"
+    entry = next(e for e in registry["forges"] if e["forge_id"] == "api-forge")
+    assert entry["scope"] == "project"
+
+    manifest = json.loads((ctx / "capabilities" / "api-forge.json").read_text(encoding="utf-8"))
+    assert manifest["schema"] == "forge/context/v1"
+    assert fctx.validate_manifest(manifest) == []
+    assert manifest["skills"], "manifesto sem skills reais"
+    assert manifest["rule_areas"], "manifesto sem rule areas"
+    assert manifest["coordinators"], "manifesto sem coordinators"
+    assert manifest["integrity"]["files"]["forge.json"].startswith("sha256:")
+
+    routing = (ctx / "ROUTING.md").read_text(encoding="utf-8")
+    assert "api-forge" in routing
+    assert "api-design" in routing
+
+
+def test_install_context_idempotente_byte_a_byte(projeto):
+    service.install("devin", scope="project", root=projeto, yes=True)
+    ctx = projeto / ".forge" / "context"
+    snap = {
+        p.relative_to(ctx).as_posix(): p.read_bytes() for p in sorted(ctx.rglob("*")) if p.is_file()
+    }
+    service.install("devin", scope="project", root=projeto, yes=True)
+    depois = {
+        p.relative_to(ctx).as_posix(): p.read_bytes() for p in sorted(ctx.rglob("*")) if p.is_file()
+    }
+    assert snap == depois
+
+
+def test_uninstall_desregistra_so_o_proprio_forge(projeto):
+    from apiforge import _forgecontext as fctx
+
+    service.install("devin", scope="project", root=projeto, yes=True)
+    estrangeiro = fctx.build_manifest(
+        forge_id="forge-alheia",
+        name="Forge Alheia",
+        version="1.0.0",
+        cli="forge-alheia",
+        package="forge_alheia",
+        distribution="forge-alheia",
+        python_spec=">=3.10",
+        scope="project",
+        domains=("dominio-alheio",),
+        skills=("skill-alheia",),
+    )
+    fctx.register_forge(projeto, estrangeiro, owner="forge-alheia")
+
+    un = service.uninstall(scope="project", root=projeto, purge=True)
+    assert un["status"] == "completed"
+
+    ctx = projeto / ".forge" / "context"
+    registry = json.loads((ctx / "registry.json").read_text(encoding="utf-8"))
+    assert {e["forge_id"] for e in registry["forges"]} == {"forge-alheia"}
+    assert not (ctx / "capabilities" / "api-forge.json").exists()
+    assert (ctx / "capabilities" / "forge-alheia.json").exists()

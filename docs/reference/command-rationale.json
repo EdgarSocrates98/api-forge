@@ -99,6 +99,22 @@
   "when": "validar qualidade determinística antes de release",
   "why": "matriz de avaliação declarativa local, goldens e holdout"
  },
+ "evals catalog": {
+  "when": "descobrir quais suítes existem e a que categoria pertencem (install-2.0 §7.1)",
+  "why": "catálogo classificado das suítes de eval — só metadados, nunca respostas esperadas"
+ },
+ "evals describe": {
+  "when": "antes de executar uma suíte: ver kind, inputs exigidos, ambiente e baselines/holdouts pinados por sha256",
+  "why": "metadados de uma suíte sem expor respostas esperadas (§7.3)"
+ },
+ "evals run": {
+  "when": "executar uma suíte declarada pelo runner nativo e gravar o resultado com o marcador de ambiente",
+  "why": "dispatch único para os ~30 runners nativos; inputs faltantes são recusa nomeada, nunca skip"
+ },
+ "evals result": {
+  "when": "relatar a um host o resultado de um run já gravado — schema, verdict e ambiente",
+  "why": "lê um relatório persistido de volta, distinguindo evidência simulada de prova real"
+ },
  "evidence": {
   "when": "produzir/verificar a cadeia de evidência de uma entrega",
   "why": "recibos de evidência de release"

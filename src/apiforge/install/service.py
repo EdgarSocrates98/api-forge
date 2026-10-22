@@ -424,16 +424,12 @@ def _context_manifest(ctx: kit.InstallContext) -> dict[str, Any]:
         if _data_or_repo("knowledge") is not None
         else []
     )
-    evals_root = _data_or_repo("evals")
-    eval_suites = (
-        [
-            {"id": p.name, "kind": "output-verification"}
-            for p in sorted(evals_root.iterdir())
-            if p.is_dir()
-        ]
-        if evals_root is not None
-        else []
-    )
+    # §7.1 (lf-0038): the declared, classified eval catalog — never a bare
+    # directory listing. `evals/` subdirs are corpus data; the suites that
+    # run them are declared in apiforge.evals.catalog with their §7.1 kind.
+    from apiforge.evals.catalog import manifest_suites
+
+    eval_suites = manifest_suites()
 
     checks: list[dict[str, Any]] = [
         {

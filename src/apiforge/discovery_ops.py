@@ -1,5 +1,6 @@
 # apiforge/discovery_ops.py
-"""§6.2 conceptual-op map -> real ``apiforge`` verbs (lf-0037).
+"""§6.2 conceptual-op map -> real ``apiforge`` verbs (lf-0037), extended by
+the §7.2 evals/verification ops (lf-0038).
 
 Single source for the ``forge/context/v1`` manifest ``discovery.ops`` /
 ``discovery.commands`` and the ``apiforge capabilities`` verb — the table is
@@ -109,6 +110,64 @@ OPS: dict[str, dict[str, Any]] = {
         "mode": "diagnostic-only",
         "description": "environment + installation health",
     },
+    # --- §7.2 evals / verification ops (lf-0038) ------------------------------
+    "evals.list": {
+        "id": "evals-catalog",
+        "argv": ["evals", "catalog"],
+        "mode": "direct-capability",
+        "description": "§7.1 classified catalog of eval suites — metadata only",
+    },
+    "evals.describe": {
+        "id": "evals-describe",
+        "argv": ["evals", "describe", "{suite}"],
+        "mode": "direct-capability",
+        "description": (
+            "one suite's kind, inputs, environment and hash-pinned "
+            "baselines/holdouts — never expected answers"
+        ),
+    },
+    "evals.run": {
+        "id": "evals-run",
+        "argv": ["evals", "run", "{suite}", "--set", "{name=value}"],
+        "mode": "specialist-workflow",
+        "read_only": False,
+        "description": (
+            "dispatch a declared suite's native runner; missing inputs are a "
+            "named refusal (AF-EVALS-RUN-INPUT), never a silent skip"
+        ),
+    },
+    "evals.result": {
+        "id": "evals-result",
+        "argv": ["evals", "result", "--report", "{report}"],
+        "mode": "direct-capability",
+        "description": (
+            "read a persisted eval report back — schema, verdict and the "
+            "simulated-vs-real environment marker"
+        ),
+    },
+    "verification.plan": {
+        "id": "verify-plan",
+        "argv": ["verify", "plan", "--changed", "{paths}", "--risk", "{risk}"],
+        "mode": "direct-capability",
+        "description": (
+            "§7.4 select applicable verifications and emit the validation "
+            "plan — never executes"
+        ),
+    },
+    "verification.run": {
+        "id": "task-verify",
+        "argv": [
+            "task", "verify", "{task_id}", "--project", "{project}",
+            "--contract", "{contract}", "--manifest", "{manifest}",
+        ],
+        "mode": "specialist-workflow",
+        "read_only": False,
+        "description": (
+            "§7.4 execute the authorized proof checks and persist the "
+            "VerificationRecord — `verify escalate` adjudicates inconclusive "
+            "evidence without ever upgrading it to a pass"
+        ),
+    },
 }
 
 
@@ -124,7 +183,7 @@ def commands() -> list[dict[str, Any]]:
                 "id": entry["id"],
                 "argv": [CLI, *entry["argv"]],
                 "mode": entry["mode"],
-                "read_only": True,
+                "read_only": entry.get("read_only", True),
                 "description": entry["description"],
             }
         )

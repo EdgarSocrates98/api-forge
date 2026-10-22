@@ -1,5 +1,21 @@
 {"path": ".caveman/README.md", "title": "`.caveman/` \u2014 modo caveman fixado no reposit\u00f3rio", "category": "USER_GUIDE", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": ".github/ISSUE_TEMPLATE/bug_report.md", "title": "bug_report", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": ".github/ISSUE_TEMPLATE/feature_request.md", "title": "feature_request", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": ".github/PULL_REQUEST_TEMPLATE.md", "title": "PULL_REQUEST_TEMPLATE", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "AGENTS.md", "title": "API Forge Agent Instructions", "category": "AGENT_INSTRUCTIONS", "audience": "agent", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "AGENT_PROTOCOL.md", "title": "Agent protocol \u2014 API Forge", "category": "AGENT_INSTRUCTIONS", "audience": "agent", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "CHANGELOG.md", "title": "Changelog", "category": "USER_GUIDE", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "CLAUDE.md", "title": "API Forge \u2014 Claude Operating Guide", "category": "AGENT_INSTRUCTIONS", "audience": "agent", "related_commands": ["agentops", "economy"], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "CODE_OF_CONDUCT.md", "title": "C\u00f3digo de Conduta \u2014 Contributor Covenant 2.1", "category": "USER_GUIDE", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "CONTRIBUTING.md", "title": "Contribuindo", "category": "INTERNAL", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "README.md", "title": "Optional extras: apiforge-af[all] \u00b7 apiforge-af[mcp] \u00b7 apiforge-af[tui]", "category": "USER_GUIDE", "audience": "public", "related_commands": ["agentops", "agents", "ai", "analyze", "capabilities", "change-control", "context", "contract-intel", "devin", "doctor", "init", "inspect", "install", "model", "observability", "perf", "status"], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "README.pt-BR.md", "title": "README.pt-BR", "category": "USER_GUIDE", "audience": "public", "related_commands": ["agentops", "context", "doctor", "evals", "evidence", "init", "inspect", "runtime", "status", "verify", "workspace"], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "RTK.md", "title": "API Forge RTK contract", "category": "USER_GUIDE", "audience": "public", "related_commands": ["context", "economy"], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "SECURITY.md", "title": "Security Policy", "category": "USER_GUIDE", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "SECURITY.pt-BR.md", "title": "Pol\u00edtica de seguran\u00e7a", "category": "USER_GUIDE", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "SPEC.md", "title": "SPEC.md \u2014 API_FORGE_V1_CLOSURE", "category": "USER_GUIDE", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "SPEC.pt-BR.md", "title": "SPEC.md \u2014 API_FORGE_V1_CLOSURE", "category": "USER_GUIDE", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "SUPPORT.md", "title": "Suporte", "category": "USER_GUIDE", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "agents/api-adversarial-critic.md", "title": "api-adversarial-critic", "category": "UNKNOWN", "audience": "agent", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "agents/api-architecture-reviewer.md", "title": "api-architecture-reviewer", "category": "ARCHITECTURE", "audience": "agent", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "agents/api-codegen-engineer.md", "title": "api-codegen-engineer", "category": "UNKNOWN", "audience": "agent", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
@@ -31,11 +47,15 @@
 {"path": "agents/executors/af-judge.md", "title": "af-judge", "category": "UNKNOWN", "audience": "agent", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "agents/executors/af-synthesizer.md", "title": "af-synthesizer", "category": "UNKNOWN", "audience": "agent", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "agents/executors/af-verifier.md", "title": "af-verifier", "category": "UNKNOWN", "audience": "agent", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "AGENTS.md", "title": "API Forge Agent Instructions", "category": "AGENT_INSTRUCTIONS", "audience": "agent", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "CLAUDE.md", "title": "API Forge \u2014 Claude Operating Guide", "category": "AGENT_INSTRUCTIONS", "audience": "agent", "related_commands": ["agentops", "economy"], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/agents/AGENT_OUTPUT_CONTRACT.md", "title": "Agent Output Contract", "category": "CONTRACT", "audience": "agent", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/API_FORGE_EVOLUTION_MAP.en.md", "title": "API Forge \u2014 Evolution Map (English)", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/API_FORGE_EVOLUTION_MAP.md", "title": "API Forge \u2014 mapa de evolu\u00e7\u00e3o", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/HOST_PARITY.md", "title": "Host parity", "category": "UNKNOWN", "audience": "public", "related_commands": ["agentops"], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/HOST_PARITY.pt-BR.md", "title": "Paridade entre hosts", "category": "UNKNOWN", "audience": "public", "related_commands": ["agentops", "devin"], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/OBSERVABILITY_INTEGRATIONS.en.md", "title": "Observability and external integrations", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/OBSERVABILITY_INTEGRATIONS.md", "title": "Observabilidade e integra\u00e7\u00f5es externas", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/README.md", "title": "README", "category": "USER_GUIDE", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/README.pt-BR.md", "title": "README.pt-BR", "category": "USER_GUIDE", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/agents/AGENT_OUTPUT_CONTRACT.md", "title": "Agent Output Contract", "category": "CONTRACT", "audience": "agent", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/architecture/API_FORGE_API_GIT_CICD_CONTROL_PLANE.md", "title": "API Forge API + Git + CI/CD Control Plane", "category": "ARCHITECTURE", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/architecture/API_FORGE_API_GIT_CICD_CONTROL_PLANE.pt-BR.md", "title": "API Forge \u2014 control plane de API, Git e CI/CD", "category": "ARCHITECTURE", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/architecture/API_FORGE_PLATFORM_COMPLETION.md", "title": "API Forge Platform Completion Architecture", "category": "ARCHITECTURE", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
@@ -43,6 +63,7 @@
 {"path": "docs/architecture/forge-kernel-boundary.md", "title": "Forge kernel boundary analysis (prompt \u00a749)", "category": "ARCHITECTURE", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/architecture/mvp-boundaries.md", "title": "MVP boundaries", "category": "ARCHITECTURE", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/architecture/mvp-boundaries.pt-BR.md", "title": "Fronteiras do MVP", "category": "ARCHITECTURE", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/audits/FORGE_CONTEXT_BASELINE.md", "title": "FORGE_CONTEXT_BASELINE \u2014 api-forge", "category": "UNKNOWN", "audience": "public", "related_commands": ["install"], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/capabilities/API_FORGE_CAPABILITY_MATRIX.md", "title": "API Forge Capability Matrix", "category": "UNKNOWN", "audience": "public", "related_commands": ["change-control"], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/capabilities/API_FORGE_CAPABILITY_MATRIX.pt-BR.md", "title": "Matriz de capacidades do API Forge", "category": "UNKNOWN", "audience": "public", "related_commands": ["change-control"], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/catalog-contract.md", "title": "Catalog, routing and adapter contract", "category": "CONTRACT", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
@@ -52,13 +73,6 @@
 {"path": "docs/contracts/AdaptiveRetrievalResult-v1.md", "title": "AdaptiveRetrievalResult/v1", "category": "CONTRACT", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/contracts/AdversarialCaseResult-v1.md", "title": "AdversarialCaseResult-v1", "category": "CONTRACT", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/contracts/AgentArtifact-v1.md", "title": "AgentArtifact/v1", "category": "CONTRACT", "audience": "agent", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/contracts/AgenticBudgetPlan-v1.md", "title": "AgenticBudgetPlan/v1", "category": "CONTRACT", "audience": "agent", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/contracts/AgenticDoctorReport-v1.md", "title": "AgenticDoctorReport-v1", "category": "CONTRACT", "audience": "agent", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/contracts/AgenticDoctorSection-v1.md", "title": "AgenticDoctorSection-v1", "category": "CONTRACT", "audience": "agent", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/contracts/AgenticPolicy-v1.md", "title": "AgenticPolicy/v1", "category": "CONTRACT", "audience": "agent", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/contracts/AgenticQualityAssessment-v1.md", "title": "AgenticQualityAssessment/v1", "category": "CONTRACT", "audience": "agent", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/contracts/AgenticRun-v1.md", "title": "AgenticRun/v1", "category": "CONTRACT", "audience": "agent", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/contracts/AgenticRuntime-v1.md", "title": "AgenticRuntime/v1", "category": "CONTRACT", "audience": "agent", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/contracts/AgentInvocation-v1.md", "title": "AgentInvocation/v1", "category": "CONTRACT", "audience": "agent", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/contracts/AgentOpsTimeline-v1.md", "title": "AgentOpsTimeline/v1", "category": "CONTRACT", "audience": "agent", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/contracts/AgentPermissionSet-v1.md", "title": "AgentPermissionSet/v1", "category": "CONTRACT", "audience": "agent", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
@@ -66,6 +80,13 @@
 {"path": "docs/contracts/AgentSpanQuery-v1.md", "title": "AgentSpanQuery/v1", "category": "CONTRACT", "audience": "agent", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/contracts/AgentSpanResult-v1.md", "title": "AgentSpanResult/v1", "category": "CONTRACT", "audience": "agent", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/contracts/AgentUniqueness-v1.md", "title": "AgentUniqueness/v1", "category": "CONTRACT", "audience": "agent", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/contracts/AgenticBudgetPlan-v1.md", "title": "AgenticBudgetPlan/v1", "category": "CONTRACT", "audience": "agent", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/contracts/AgenticDoctorReport-v1.md", "title": "AgenticDoctorReport-v1", "category": "CONTRACT", "audience": "agent", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/contracts/AgenticDoctorSection-v1.md", "title": "AgenticDoctorSection-v1", "category": "CONTRACT", "audience": "agent", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/contracts/AgenticPolicy-v1.md", "title": "AgenticPolicy/v1", "category": "CONTRACT", "audience": "agent", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/contracts/AgenticQualityAssessment-v1.md", "title": "AgenticQualityAssessment/v1", "category": "CONTRACT", "audience": "agent", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/contracts/AgenticRun-v1.md", "title": "AgenticRun/v1", "category": "CONTRACT", "audience": "agent", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/contracts/AgenticRuntime-v1.md", "title": "AgenticRuntime/v1", "category": "CONTRACT", "audience": "agent", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/contracts/AnalyticalAccessIR-v1.md", "title": "AnalyticalAccessIR/v1", "category": "CONTRACT", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/contracts/ApiSafetyAssessment-v1.md", "title": "ApiSafetyAssessment/v1", "category": "CONTRACT", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/contracts/ApprovalGate-v1.md", "title": "ApprovalGate/v1", "category": "CONTRACT", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
@@ -299,6 +320,8 @@
 {"path": "docs/contracts/RuntimeCapability-v1.md", "title": "RuntimeCapability/v1", "category": "CONTRACT", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/contracts/RuntimeMatrix-v1.md", "title": "RuntimeMatrix/v1", "category": "CONTRACT", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/contracts/RuntimeReview-v1.md", "title": "RuntimeReview/v1", "category": "CONTRACT", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/contracts/SLODefinition-v1.md", "title": "SLODefinition/v1", "category": "CONTRACT", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/contracts/SLOResult-v1.md", "title": "SLOResult/v1", "category": "CONTRACT", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/contracts/ScorecardCandidateAssessment-v1.md", "title": "ScorecardCandidateAssessment/v1", "category": "CONTRACT", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/contracts/ScorecardFeedback-v1.md", "title": "ScorecardFeedback/v1", "category": "CONTRACT", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/contracts/ScorecardRoutingAssessment-v1.md", "title": "ScorecardRoutingAssessment/v1", "category": "CONTRACT", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
@@ -309,8 +332,6 @@
 {"path": "docs/contracts/ShadowDecision-v1.md", "title": "ShadowDecision/v1", "category": "CONTRACT", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/contracts/ShadowRecord-v1.md", "title": "ShadowRecord/v1", "category": "CONTRACT", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/contracts/SignalSummary-v1.md", "title": "SignalSummary/v1", "category": "CONTRACT", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/contracts/SLODefinition-v1.md", "title": "SLODefinition/v1", "category": "CONTRACT", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/contracts/SLOResult-v1.md", "title": "SLOResult/v1", "category": "CONTRACT", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/contracts/StopDecision-v1.md", "title": "StopDecision/v1", "category": "CONTRACT", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/contracts/StreamingAccessIR-v1.md", "title": "StreamingAccessIR/v1", "category": "CONTRACT", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/contracts/SurfaceFinding-v1.md", "title": "SurfaceFinding/v1", "category": "CONTRACT", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
@@ -340,9 +361,9 @@
 {"path": "docs/contracts/TraceGradeDimension-v1.md", "title": "TraceGradeDimension-v1", "category": "CONTRACT", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/contracts/TraceGradingReport-v1.md", "title": "TraceGradingReport-v1", "category": "CONTRACT", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/contracts/TrajectoryEvent-v1.md", "title": "TrajectoryEvent/v1", "category": "CONTRACT", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/contracts/TrustedRef-v1.md", "title": "TrustedRef/v1", "category": "CONTRACT", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/contracts/TrustPropagation-v1.md", "title": "TrustPropagation/v1", "category": "CONTRACT", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/contracts/TrustUnit-v1.md", "title": "TrustUnit/v1", "category": "CONTRACT", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/contracts/TrustedRef-v1.md", "title": "TrustedRef/v1", "category": "CONTRACT", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/contracts/VendorIntent-v1.md", "title": "VendorIntent/v1", "category": "CONTRACT", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/contracts/Verification-v1.md", "title": "Verification/v1", "category": "CONTRACT", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/contracts/VerificationCheck-v1.md", "title": "VerificationCheck/v1", "category": "CONTRACT", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
@@ -368,10 +389,10 @@
 {"path": "docs/decisions/ADR-011-dependency-locking.md", "title": "ADR-011: dependency locking strategy \u2014 declared ranges + vendored assets", "category": "ADR", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/decisions/ADR-012-uv-lock-and-mcp-protocol.md", "title": "ADR-012: uv lock and MCP protocol freshness", "category": "ADR", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/decisions/API_FORGE_CONTROL_PLANE_MIGRATION_MAP.md", "title": "API Forge \u2014 Decision Control Plane Migration Map", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/decisions/API_FORGE_EVOLUTION1_OUTCOME_BRIEF.md", "title": "API Forge Evolution 1 \u2014 Outcome Brief", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/decisions/API_FORGE_EVO_CONVERGENCE_BASELINE.md", "title": "API Forge \u2014 Evo Convergence Baseline", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/decisions/API_FORGE_EVO_CONVERGENCE_GAP_MATRIX.md", "title": "API Forge \u2014 Evo Convergence Gap Matrix", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/decisions/API_FORGE_EVO_CONVERGENCE_OUTCOME_BRIEF.md", "title": "API Forge \u2014 Evo Convergence Outcome Brief", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/decisions/API_FORGE_EVOLUTION1_OUTCOME_BRIEF.md", "title": "API Forge Evolution 1 \u2014 Outcome Brief", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/decisions/API_FORGE_FINAL_CONVERGENCE_BASELINE.md", "title": "API Forge \u2014 Final Runtime Convergence Baseline", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/decisions/API_FORGE_FINAL_CONVERGENCE_GAP_MATRIX.md", "title": "API Forge \u2014 Final Runtime Convergence Gap Matrix", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/decisions/API_FORGE_FINAL_CONVERGENCE_OUTCOME_BRIEF.md", "title": "API Forge \u2014 Final Runtime Convergence \u2014 Outcome Brief", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
@@ -383,6 +404,8 @@
 {"path": "docs/decisions/API_FORGE_STEP11_GAP_MATRIX.md", "title": "API Forge \u2014 step11 baseline & capability gap matrix", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/decisions/API_FORGE_STEP11_OUTCOME_BRIEF.md", "title": "API Forge Step 11 \u2014 Outcome Brief", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/economy.md", "title": "Economia de tokens e contexto \u2014 API Forge", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/engineering-excellence/federation-readiness.md", "title": "API Forge federation readiness", "category": "UNKNOWN", "audience": "public", "related_commands": ["capabilities", "sdd"], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/evals-taxonomy.md", "title": "Evals taxonomy & verification \u2014 api-forge (install-2.0 \u00a77, lf-0038)", "category": "UNKNOWN", "audience": "public", "related_commands": ["evals", "task", "verify"], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/experience/accessibility.md", "title": "Accessibility", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/experience/automation-mode.md", "title": "Automation mode", "category": "UNKNOWN", "audience": "public", "related_commands": ["doctor", "install"], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/experience/fase2-report.md", "title": "FASE 2 \u2014 API Forge como plataforma agentic de refer\u00eancia", "category": "RELEASE_REPORT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
@@ -390,11 +413,11 @@
 {"path": "docs/experience/interactive-cli.md", "title": "Interactive CLI", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/experience/semantic-review.md", "title": "Revis\u00e3o sem\u00e2ntica \u2014 API Forge (FASE 2 \u00a712-equivalente)", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/experience/themes.md", "title": "Themes and visual identity", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/field/hypothesis.md", "title": "Field validation \u2014 pre-registered hypothesis", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/field/README.md", "title": "Field validation protocol", "category": "USER_GUIDE", "audience": "public", "related_commands": ["field", "workspace"], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/guides/API_FORGE_AGENT_TELEMETRY.md", "title": "Local agent telemetry", "category": "HOW_TO", "audience": "agent", "related_commands": ["runtime"], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/field/hypothesis.md", "title": "Field validation \u2014 pre-registered hypothesis", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/guides/API_FORGE_AGENTIC_GOVERNANCE.md", "title": "Governed agentic budgets", "category": "HOW_TO", "audience": "agent", "related_commands": ["economy"], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/guides/API_FORGE_AGENTIC_STATE.md", "title": "Governed agentic state", "category": "HOW_TO", "audience": "agent", "related_commands": ["blackboard", "memory"], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/guides/API_FORGE_AGENT_TELEMETRY.md", "title": "Local agent telemetry", "category": "HOW_TO", "audience": "agent", "related_commands": ["runtime"], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/guides/API_FORGE_DECISION_GOVERNANCE.md", "title": "Decision governance", "category": "HOW_TO", "audience": "public", "related_commands": ["governance"], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/guides/API_FORGE_DEPENDENCY_LOCKING.md", "title": "Dependency locking and optional MCP", "category": "HOW_TO", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/guides/API_FORGE_ECONOMY.en.md", "title": "API Forge Economy \u2014 spend only what is needed, with proof", "category": "HOW_TO", "audience": "public", "related_commands": ["evals"], "review_level": "AUTOMATICALLY_CHECKED"}
@@ -407,8 +430,8 @@
 {"path": "docs/guides/API_FORGE_PLATFORM_USAGE.md", "title": "API Forge Platform Usage", "category": "HOW_TO", "audience": "public", "related_commands": ["agents", "analyze", "brief", "capabilities", "change-control", "context", "doctor", "economy", "evals", "evidence", "graph", "init", "inspect", "integration", "knowledge", "next-step", "platform", "runtime", "sdd", "status", "task", "verify", "workspace"], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/guides/API_FORGE_PORTABLE_DISTRIBUTION.md", "title": "API Forge Portable Distribution and Workspace", "category": "HOW_TO", "audience": "public", "related_commands": ["agentops", "context", "doctor", "init", "inspect", "runtime", "status", "workspace"], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/guides/API_FORGE_PORTABLE_DISTRIBUTION.pt-BR.md", "title": "Distribui\u00e7\u00e3o port\u00e1til e workspace do API Forge", "category": "HOW_TO", "audience": "public", "related_commands": ["agentops", "analyze", "brief", "context", "doctor", "evidence", "graph", "init", "inspect", "next-step", "runtime", "status", "task", "workspace"], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/HOST_PARITY.md", "title": "Host parity", "category": "UNKNOWN", "audience": "public", "related_commands": ["agentops"], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/HOST_PARITY.pt-BR.md", "title": "Paridade entre hosts", "category": "UNKNOWN", "audience": "public", "related_commands": ["agentops", "devin"], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/install/DISTRIBUTION_PARITY.md", "title": "Distribution parity \u2014 API Forge", "category": "USER_GUIDE", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/installation/account-installation.md", "title": "Account-scoped installation", "category": "USER_GUIDE", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/installation/claude-code.md", "title": "api-forge + Claude Code", "category": "USER_GUIDE", "audience": "public", "related_commands": ["install"], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/installation/codex-cli.md", "title": "api-forge + Codex CLI", "category": "USER_GUIDE", "audience": "public", "related_commands": ["install"], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/installation/copilot-cli.md", "title": "api-forge + GitHub Copilot CLI", "category": "USER_GUIDE", "audience": "public", "related_commands": ["install"], "review_level": "AUTOMATICALLY_CHECKED"}
@@ -457,8 +480,6 @@
 {"path": "docs/learn/recipes/verificacao.md", "title": "Receita \u2014 decidir o que testar antes de declarar pronto", "category": "HOW_TO", "audience": "public", "related_commands": ["verify"], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/learn/recipes/verificar-mcp.md", "title": "Receita \u2014 provar que o MCP server funciona de verdade", "category": "HOW_TO", "audience": "public", "related_commands": ["ai", "install"], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/mcp-compliance.md", "title": "MCP compliance matrix \u2014 spec revision 2026-07-28", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/OBSERVABILITY_INTEGRATIONS.en.md", "title": "Observability and external integrations", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/OBSERVABILITY_INTEGRATIONS.md", "title": "Observabilidade e integra\u00e7\u00f5es externas", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/plans/2026-09-21-api-forge-agentic-layer.md", "title": "API Forge Agentic Layer Plan", "category": "UNKNOWN", "audience": "agent", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/plans/2026-09-21-api-forge-asyncapi.md", "title": "Plan 12 \u2014 AsyncAPI adapter", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/plans/2026-09-21-api-forge-aws-collect.md", "title": "API Forge AWS Collect/Analyze Slice Plan", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
@@ -483,32 +504,11 @@
 {"path": "docs/plans/2026-09-21-api-forge-test-security-reports.md", "title": "API Forge Plans 7+8 \u2014 Test & Security Report Adapters", "category": "TEST_EVIDENCE", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/plans/2026-09-21-api-forge-tokens.md", "title": "Plan 20 \u2014 provider tokens and cost", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/policy-contract.md", "title": "Policy contract", "category": "CONTRACT", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/README.md", "title": "README", "category": "USER_GUIDE", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/README.pt-BR.md", "title": "README.pt-BR", "category": "USER_GUIDE", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/reference/commands.md", "title": "`apiforge` command reference", "category": "REFERENCE", "audience": "public", "related_commands": ["agentops", "agents", "ai", "analyze", "autonomy", "blackboard", "brief", "build", "cache", "capabilities", "change-control", "collect", "context", "contract", "contract-intel", "control", "debate", "devin", "diff", "discover", "dispatch", "distribution", "doctor", "economy", "evals", "evidence", "evolve", "experience", "field", "forge", "governance", "governor", "graph", "grpc", "index", "init", "inspect", "install", "integration", "judge"], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/releasing/pypi-patch-plan.md", "title": "PyPI patch plan \u2014 apiforge-af", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/reports/experience-3.md", "title": "Forge Experience 3.0 \u2014 report", "category": "RELEASE_REPORT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/roadmaps/API_FORGE_PRIORITY_EXECUTION_ROADMAP.en.md", "title": "API Forge \u2014 priority execution roadmap", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/roadmaps/API_FORGE_PRIORITY_EXECUTION_ROADMAP.md", "title": "API Forge \u2014 Priority Execution Roadmap", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_AGENT_PROTOCOL_2_CAVEMAN_RTK_INTEGRATION/architecture.md", "title": "architecture", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_AGENT_PROTOCOL_2_CAVEMAN_RTK_INTEGRATION/benchmark.md", "title": "benchmark", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_AGENT_PROTOCOL_2_CAVEMAN_RTK_INTEGRATION/build.md", "title": "build", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_AGENT_PROTOCOL_2_CAVEMAN_RTK_INTEGRATION/contract.md", "title": "contract", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_AGENT_PROTOCOL_2_CAVEMAN_RTK_INTEGRATION/discover.md", "title": "discover", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_AGENT_PROTOCOL_2_CAVEMAN_RTK_INTEGRATION/intent.md", "title": "intent", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_AGENT_PROTOCOL_2_CAVEMAN_RTK_INTEGRATION/plan.md", "title": "plan", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_AGENT_PROTOCOL_2_CAVEMAN_RTK_INTEGRATION/secure.md", "title": "secure", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_AGENT_PROTOCOL_2_CAVEMAN_RTK_INTEGRATION/ship.md", "title": "ship", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_AGENT_PROTOCOL_2_CAVEMAN_RTK_INTEGRATION/verify.md", "title": "verify", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_AGENT_ROSTER/architecture.md", "title": "architecture", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_AGENT_ROSTER/benchmark.md", "title": "benchmark", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_AGENT_ROSTER/build.md", "title": "build", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_AGENT_ROSTER/contract.md", "title": "contract", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_AGENT_ROSTER/discover.md", "title": "discover", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_AGENT_ROSTER/intent.md", "title": "intent", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_AGENT_ROSTER/plan.md", "title": "plan", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_AGENT_ROSTER/secure.md", "title": "secure", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_AGENT_ROSTER/ship.md", "title": "ship", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_AGENT_ROSTER/verify.md", "title": "verify", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_AGENTIC_PLATFORM/architecture.md", "title": "architecture", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_AGENTIC_PLATFORM/benchmark.md", "title": "benchmark", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_AGENTIC_PLATFORM/build.md", "title": "build", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
@@ -549,6 +549,26 @@
 {"path": "docs/sdd/API_FORGE_AGENTOPS_CONTROL_PLANE_2/secure.md", "title": "secure", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_AGENTOPS_CONTROL_PLANE_2/ship.md", "title": "ship", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_AGENTOPS_CONTROL_PLANE_2/verify.md", "title": "verify", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_AGENT_PROTOCOL_2_CAVEMAN_RTK_INTEGRATION/architecture.md", "title": "architecture", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_AGENT_PROTOCOL_2_CAVEMAN_RTK_INTEGRATION/benchmark.md", "title": "benchmark", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_AGENT_PROTOCOL_2_CAVEMAN_RTK_INTEGRATION/build.md", "title": "build", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_AGENT_PROTOCOL_2_CAVEMAN_RTK_INTEGRATION/contract.md", "title": "contract", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_AGENT_PROTOCOL_2_CAVEMAN_RTK_INTEGRATION/discover.md", "title": "discover", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_AGENT_PROTOCOL_2_CAVEMAN_RTK_INTEGRATION/intent.md", "title": "intent", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_AGENT_PROTOCOL_2_CAVEMAN_RTK_INTEGRATION/plan.md", "title": "plan", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_AGENT_PROTOCOL_2_CAVEMAN_RTK_INTEGRATION/secure.md", "title": "secure", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_AGENT_PROTOCOL_2_CAVEMAN_RTK_INTEGRATION/ship.md", "title": "ship", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_AGENT_PROTOCOL_2_CAVEMAN_RTK_INTEGRATION/verify.md", "title": "verify", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_AGENT_ROSTER/architecture.md", "title": "architecture", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_AGENT_ROSTER/benchmark.md", "title": "benchmark", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_AGENT_ROSTER/build.md", "title": "build", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_AGENT_ROSTER/contract.md", "title": "contract", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_AGENT_ROSTER/discover.md", "title": "discover", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_AGENT_ROSTER/intent.md", "title": "intent", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_AGENT_ROSTER/plan.md", "title": "plan", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_AGENT_ROSTER/secure.md", "title": "secure", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_AGENT_ROSTER/ship.md", "title": "ship", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_AGENT_ROSTER/verify.md", "title": "verify", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_ANALYTICAL_DATA_SPECIALIZATION_5/architecture.md", "title": "architecture", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_ANALYTICAL_DATA_SPECIALIZATION_5/benchmark.md", "title": "benchmark", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_ANALYTICAL_DATA_SPECIALIZATION_5/build.md", "title": "build", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
@@ -589,6 +609,16 @@
 {"path": "docs/sdd/API_FORGE_CONTRACT_INTELLIGENCE_DIGITAL_TWIN_D/secure.md", "title": "secure", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_CONTRACT_INTELLIGENCE_DIGITAL_TWIN_D/ship.md", "title": "ship", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_CONTRACT_INTELLIGENCE_DIGITAL_TWIN_D/verify.md", "title": "verify", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_CYCLE12_PORTABLE_DIST/architecture.md", "title": "architecture", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_CYCLE12_PORTABLE_DIST/benchmark.md", "title": "benchmark", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_CYCLE12_PORTABLE_DIST/build.md", "title": "build", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_CYCLE12_PORTABLE_DIST/contract.md", "title": "contract", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_CYCLE12_PORTABLE_DIST/discover.md", "title": "discover", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_CYCLE12_PORTABLE_DIST/intent.md", "title": "intent", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_CYCLE12_PORTABLE_DIST/plan.md", "title": "plan", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_CYCLE12_PORTABLE_DIST/secure.md", "title": "secure", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_CYCLE12_PORTABLE_DIST/ship.md", "title": "ship", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_CYCLE12_PORTABLE_DIST/verify.md", "title": "verify", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_DATA_ACCESS_GOVERNED_ADAPTERS_E/architecture.md", "title": "architecture", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_DATA_ACCESS_GOVERNED_ADAPTERS_E/benchmark.md", "title": "benchmark", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_DATA_ACCESS_GOVERNED_ADAPTERS_E/build.md", "title": "build", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
@@ -638,6 +668,15 @@
 {"path": "docs/sdd/API_FORGE_ECONOMY_CONTEXT_GATEWAY/secure.md", "title": "secure", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_ECONOMY_CONTEXT_GATEWAY/ship.md", "title": "ship", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_ECONOMY_CONTEXT_GATEWAY/verify.md", "title": "verify", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_ECONOMY_EVALS/architecture.md", "title": "architecture", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_ECONOMY_EVALS/build.md", "title": "build", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_ECONOMY_EVALS/contract.md", "title": "contract", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_ECONOMY_EVALS/discover.md", "title": "discover", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_ECONOMY_EVALS/intent.md", "title": "intent", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_ECONOMY_EVALS/plan.md", "title": "plan", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_ECONOMY_EVALS/secure.md", "title": "secure", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_ECONOMY_EVALS/ship.md", "title": "ship", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_ECONOMY_EVALS/verify.md", "title": "verify", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_ECONOMY_EVAL_INTEGRITY/architecture.md", "title": "architecture", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_ECONOMY_EVAL_INTEGRITY/benchmark.md", "title": "benchmark", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_ECONOMY_EVAL_INTEGRITY/build.md", "title": "build", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
@@ -648,15 +687,6 @@
 {"path": "docs/sdd/API_FORGE_ECONOMY_EVAL_INTEGRITY/secure.md", "title": "secure", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_ECONOMY_EVAL_INTEGRITY/ship.md", "title": "ship", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_ECONOMY_EVAL_INTEGRITY/verify.md", "title": "verify", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_ECONOMY_EVALS/architecture.md", "title": "architecture", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_ECONOMY_EVALS/build.md", "title": "build", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_ECONOMY_EVALS/contract.md", "title": "contract", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_ECONOMY_EVALS/discover.md", "title": "discover", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_ECONOMY_EVALS/intent.md", "title": "intent", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_ECONOMY_EVALS/plan.md", "title": "plan", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_ECONOMY_EVALS/secure.md", "title": "secure", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_ECONOMY_EVALS/ship.md", "title": "ship", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_ECONOMY_EVALS/verify.md", "title": "verify", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_ECONOMY_EXTRAS/architecture.md", "title": "architecture", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_ECONOMY_EXTRAS/build.md", "title": "build", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_ECONOMY_EXTRAS/contract.md", "title": "contract", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
@@ -722,32 +752,6 @@
 {"path": "docs/sdd/API_FORGE_EVALS_GOLDEN_HOLDOUT_C/secure.md", "title": "secure", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_EVALS_GOLDEN_HOLDOUT_C/ship.md", "title": "ship", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_EVALS_GOLDEN_HOLDOUT_C/verify.md", "title": "verify", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_EVO_CONVERGENCE/architecture.md", "title": "architecture", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_EVO_CONVERGENCE/benchmark.md", "title": "benchmark", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_EVO_CONVERGENCE/build.md", "title": "build", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_EVO_CONVERGENCE/contract.md", "title": "contract", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_EVO_CONVERGENCE/discover.md", "title": "discover", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_EVO_CONVERGENCE/evidence/baseline.md", "title": "baseline evidence", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_EVO_CONVERGENCE/evidence/lab-trust-boundary.md", "title": "lab and trust-boundary evidence", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_EVO_CONVERGENCE/evidence/p0-agentops.md", "title": "AgentOps wave evidence", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_EVO_CONVERGENCE/evidence/protocol-supply-chain.md", "title": "protocol and supply-chain evidence", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_EVO_CONVERGENCE/evidence/retrieval-memory.md", "title": "retrieval and memory evidence", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_EVO_CONVERGENCE/evidence/runtime-governance.md", "title": "runtime governance evidence", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_EVO_CONVERGENCE/intent.md", "title": "intent", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_EVO_CONVERGENCE/plan.md", "title": "plan", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_EVO_CONVERGENCE/secure.md", "title": "secure", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_EVO_CONVERGENCE/ship.md", "title": "ship", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_EVO_CONVERGENCE/verify.md", "title": "verify", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_EVOLUTION1_AGENT_TELEMETRY/architecture.md", "title": "architecture", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_EVOLUTION1_AGENT_TELEMETRY/benchmark.md", "title": "benchmark", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_EVOLUTION1_AGENT_TELEMETRY/build.md", "title": "build", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_EVOLUTION1_AGENT_TELEMETRY/contract.md", "title": "contract", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_EVOLUTION1_AGENT_TELEMETRY/discover.md", "title": "discover", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_EVOLUTION1_AGENT_TELEMETRY/intent.md", "title": "intent", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_EVOLUTION1_AGENT_TELEMETRY/plan.md", "title": "plan", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_EVOLUTION1_AGENT_TELEMETRY/secure.md", "title": "secure", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_EVOLUTION1_AGENT_TELEMETRY/ship.md", "title": "ship", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_EVOLUTION1_AGENT_TELEMETRY/verify.md", "title": "verify", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_EVOLUTION1_AGENTIC_OS/architecture.md", "title": "architecture", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_EVOLUTION1_AGENTIC_OS/benchmark.md", "title": "benchmark", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_EVOLUTION1_AGENTIC_OS/build.md", "title": "build", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
@@ -758,6 +762,16 @@
 {"path": "docs/sdd/API_FORGE_EVOLUTION1_AGENTIC_OS/secure.md", "title": "secure", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_EVOLUTION1_AGENTIC_OS/ship.md", "title": "ship", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_EVOLUTION1_AGENTIC_OS/verify.md", "title": "verify", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_EVOLUTION1_AGENT_TELEMETRY/architecture.md", "title": "architecture", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_EVOLUTION1_AGENT_TELEMETRY/benchmark.md", "title": "benchmark", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_EVOLUTION1_AGENT_TELEMETRY/build.md", "title": "build", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_EVOLUTION1_AGENT_TELEMETRY/contract.md", "title": "contract", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_EVOLUTION1_AGENT_TELEMETRY/discover.md", "title": "discover", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_EVOLUTION1_AGENT_TELEMETRY/intent.md", "title": "intent", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_EVOLUTION1_AGENT_TELEMETRY/plan.md", "title": "plan", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_EVOLUTION1_AGENT_TELEMETRY/secure.md", "title": "secure", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_EVOLUTION1_AGENT_TELEMETRY/ship.md", "title": "ship", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_EVOLUTION1_AGENT_TELEMETRY/verify.md", "title": "verify", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_EVOLUTION1_DECISION_GOVERNANCE/architecture.md", "title": "architecture", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_EVOLUTION1_DECISION_GOVERNANCE/benchmark.md", "title": "benchmark", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_EVOLUTION1_DECISION_GOVERNANCE/build.md", "title": "build", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
@@ -778,6 +792,22 @@
 {"path": "docs/sdd/API_FORGE_EVOLUTION1_GOVERNED_BUDGETS/secure.md", "title": "secure", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_EVOLUTION1_GOVERNED_BUDGETS/ship.md", "title": "ship", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_EVOLUTION1_GOVERNED_BUDGETS/verify.md", "title": "verify", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_EVO_CONVERGENCE/architecture.md", "title": "architecture", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_EVO_CONVERGENCE/benchmark.md", "title": "benchmark", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_EVO_CONVERGENCE/build.md", "title": "build", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_EVO_CONVERGENCE/contract.md", "title": "contract", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_EVO_CONVERGENCE/discover.md", "title": "discover", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_EVO_CONVERGENCE/evidence/baseline.md", "title": "baseline evidence", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_EVO_CONVERGENCE/evidence/lab-trust-boundary.md", "title": "lab and trust-boundary evidence", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_EVO_CONVERGENCE/evidence/p0-agentops.md", "title": "AgentOps wave evidence", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_EVO_CONVERGENCE/evidence/protocol-supply-chain.md", "title": "protocol and supply-chain evidence", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_EVO_CONVERGENCE/evidence/retrieval-memory.md", "title": "retrieval and memory evidence", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_EVO_CONVERGENCE/evidence/runtime-governance.md", "title": "runtime governance evidence", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_EVO_CONVERGENCE/intent.md", "title": "intent", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_EVO_CONVERGENCE/plan.md", "title": "plan", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_EVO_CONVERGENCE/secure.md", "title": "secure", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_EVO_CONVERGENCE/ship.md", "title": "ship", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_EVO_CONVERGENCE/verify.md", "title": "verify", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_FIELD_INTEGRITY_HARDENING/architecture.md", "title": "architecture", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_FIELD_INTEGRITY_HARDENING/benchmark.md", "title": "benchmark", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_FIELD_INTEGRITY_HARDENING/build.md", "title": "build", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
@@ -1078,16 +1108,6 @@
 {"path": "docs/sdd/API_FORGE_SECURITY_RESILIENCE_GATE_F/secure.md", "title": "secure", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_SECURITY_RESILIENCE_GATE_F/ship.md", "title": "ship", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_SECURITY_RESILIENCE_GATE_F/verify.md", "title": "verify", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_STEP11_AGENT_GOVERNOR/architecture.md", "title": "architecture", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_STEP11_AGENT_GOVERNOR/benchmark.md", "title": "benchmark", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_STEP11_AGENT_GOVERNOR/build.md", "title": "build", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_STEP11_AGENT_GOVERNOR/contract.md", "title": "contract", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_STEP11_AGENT_GOVERNOR/discover.md", "title": "discover", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_STEP11_AGENT_GOVERNOR/intent.md", "title": "intent", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_STEP11_AGENT_GOVERNOR/plan.md", "title": "plan", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_STEP11_AGENT_GOVERNOR/secure.md", "title": "secure", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_STEP11_AGENT_GOVERNOR/ship.md", "title": "ship", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/sdd/API_FORGE_STEP11_AGENT_GOVERNOR/verify.md", "title": "verify", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_STEP11_AGENTOPS/architecture.md", "title": "architecture", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_STEP11_AGENTOPS/benchmark.md", "title": "benchmark", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_STEP11_AGENTOPS/build.md", "title": "build", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
@@ -1098,6 +1118,16 @@
 {"path": "docs/sdd/API_FORGE_STEP11_AGENTOPS/secure.md", "title": "secure", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_STEP11_AGENTOPS/ship.md", "title": "ship", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_STEP11_AGENTOPS/verify.md", "title": "verify", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_STEP11_AGENT_GOVERNOR/architecture.md", "title": "architecture", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_STEP11_AGENT_GOVERNOR/benchmark.md", "title": "benchmark", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_STEP11_AGENT_GOVERNOR/build.md", "title": "build", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_STEP11_AGENT_GOVERNOR/contract.md", "title": "contract", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_STEP11_AGENT_GOVERNOR/discover.md", "title": "discover", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_STEP11_AGENT_GOVERNOR/intent.md", "title": "intent", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_STEP11_AGENT_GOVERNOR/plan.md", "title": "plan", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_STEP11_AGENT_GOVERNOR/secure.md", "title": "secure", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_STEP11_AGENT_GOVERNOR/ship.md", "title": "ship", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/sdd/API_FORGE_STEP11_AGENT_GOVERNOR/verify.md", "title": "verify", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_STEP11_CONTEXT_QUALITY/architecture.md", "title": "architecture", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_STEP11_CONTEXT_QUALITY/benchmark.md", "title": "benchmark", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/API_FORGE_STEP11_CONTEXT_QUALITY/build.md", "title": "build", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
@@ -1229,16 +1259,17 @@
 {"path": "docs/sdd/templates/ship.md", "title": "ship", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd/templates/verify.md", "title": "verify", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/sdd-contract.md", "title": "SDD contract", "category": "SDD_ARTIFACT", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "docs/security/MCP_TOOL_RISK_INVENTORY.md", "title": "MCP Tool-Risk Inventory", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/security/agentic-threat-model.md", "title": "Agentic Threat Model", "category": "UNKNOWN", "audience": "agent", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/security/api-git-cicd-control-plane.md", "title": "API + Git + CI/CD Control Plane Security", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/security/api-git-cicd-control-plane.pt-BR.md", "title": "Seguran\u00e7a do control plane de API + Git + CI/CD", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "docs/security/MCP_TOOL_RISK_INVENTORY.md", "title": "MCP Tool-Risk Inventory", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/security/threat-model-mvp.md", "title": "Threat model \u2014 MVP", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/security/threat-model-mvp.pt-BR.md", "title": "Modelo de amea\u00e7as \u2014 MVP", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/skills.md", "title": "API Forge Skills", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/specs/2026-09-21-api-forge-agentic-platform.md", "title": "API Forge \u2014 Plataforma ag\u00eantica de especialistas em APIs", "category": "UNKNOWN", "audience": "agent", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/specs/2026-09-21-api-forge-design.md", "title": "API Forge \u2014 Especifica\u00e7\u00e3o Arquitetural", "category": "CONCEPT", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "docs/tutorials/first-run.md", "title": "Tutorial \u2014 primeira execu\u00e7\u00e3o real (apiforge)", "category": "GETTING_STARTED", "audience": "public", "related_commands": ["capabilities", "doctor", "install", "model"], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "evals/corpus/README.md", "title": "API Forge evaluation corpus", "category": "USER_GUIDE", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "evals/corpus/agent-governor/README.md", "title": "agent-governor corpus", "category": "USER_GUIDE", "audience": "agent", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "evals/corpus/agent-routing/README.md", "title": "agent-routing corpus", "category": "USER_GUIDE", "audience": "agent", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "evals/corpus/agentic-quality/README.md", "title": "Agentic quality corpus", "category": "USER_GUIDE", "audience": "agent", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
@@ -1260,7 +1291,6 @@
 {"path": "evals/corpus/live-evals/README.md", "title": "live-eval layer", "category": "USER_GUIDE", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "evals/corpus/memory-evals/README.md", "title": "memory-evals corpus", "category": "USER_GUIDE", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "evals/corpus/model-routing/README.md", "title": "model-routing corpus", "category": "USER_GUIDE", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "evals/corpus/README.md", "title": "API Forge evaluation corpus", "category": "USER_GUIDE", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "evals/corpus/retrieval/README.md", "title": "retrieval corpus", "category": "USER_GUIDE", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "evals/corpus/security-adversarial/README.md", "title": "security-adversarial corpus", "category": "USER_GUIDE", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "evals/corpus/selective-agentics/README.md", "title": "selective-agentics corpus", "category": "USER_GUIDE", "audience": "agent", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
@@ -1269,6 +1299,17 @@
 {"path": "evals/corpus/tool-economy/README.md", "title": "tool-economy corpus", "category": "USER_GUIDE", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "evals/corpus/tool-surface/README.md", "title": "tool-surface corpus", "category": "USER_GUIDE", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "evals/corpus/trace-grading/README.md", "title": "trace-grading corpus", "category": "USER_GUIDE", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "factory/runs/2026-10-15.cyc9-06.md", "title": "Run \u2014 cyc9-06 Forge Lab emitter (api-forge)", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "factory/specs/archive/2026/cyc9-06-scenarios-api.md", "title": "Cen\u00e1rios Forge Lab \u2014 API Engineering", "category": "HISTORICAL", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "graphify-out/2026-10-15/GRAPH_REPORT.md", "title": "Graph Report - api-forge  (2026-10-15)", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "graphify-out/2026-10-16/GRAPH_REPORT.md", "title": "Graph Report - api-forge  (2026-10-16)", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "graphify-out/2026-10-17/GRAPH_REPORT.md", "title": "Graph Report - api-forge  (2026-10-17)", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "graphify-out/2026-10-18/GRAPH_REPORT.md", "title": "Graph Report - api-forge  (2026-10-18)", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "graphify-out/2026-10-19/GRAPH_REPORT.md", "title": "Graph Report - api-forge  (2026-10-19)", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "graphify-out/2026-10-20/GRAPH_REPORT.md", "title": "Graph Report - api-forge  (2026-10-20)", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "graphify-out/2026-10-21/GRAPH_REPORT.md", "title": "Graph Report - api-forge  (2026-10-21)", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "graphify-out/2026-10-22/GRAPH_REPORT.md", "title": "Graph Report - api-forge  (2026-10-22)", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "graphify-out/GRAPH_REPORT.md", "title": "Graph Report - api-forge  (2026-10-22)", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "knowledge/runtime-migration/anti-patterns.md", "title": "Runtime Migration Anti-patterns", "category": "UNKNOWN", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "knowledge/runtime-migration/concepts.md", "title": "Runtime Migration Concepts", "category": "CONCEPT", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "knowledge/runtime-migration/index.md", "title": "Runtime Migration Knowledge Pack", "category": "USER_GUIDE", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
@@ -1276,13 +1317,6 @@
 {"path": "knowledge/runtime-migration/quick-reference.md", "title": "Runtime Migration Quick Reference", "category": "REFERENCE", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "knowledge/runtime-migration/recipes.md", "title": "Runtime Migration Recipes", "category": "HOW_TO", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "knowledge/runtime-migration/troubleshooting.md", "title": "Runtime Migration Troubleshooting", "category": "USER_GUIDE", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "README.md", "title": "Optional all-in-one local extras:", "category": "USER_GUIDE", "audience": "public", "related_commands": ["agentops", "agents", "ai", "analyze", "capabilities", "change-control", "context", "contract-intel", "devin", "doctor", "init", "inspect", "install", "model", "observability", "perf", "status"], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "README.pt-BR.md", "title": "README.pt-BR", "category": "USER_GUIDE", "audience": "public", "related_commands": ["agentops", "context", "doctor", "evals", "evidence", "init", "inspect", "runtime", "status", "verify", "workspace"], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "RTK.md", "title": "API Forge RTK contract", "category": "USER_GUIDE", "audience": "public", "related_commands": ["context", "economy"], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "SECURITY.md", "title": "Security Policy", "category": "USER_GUIDE", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "SECURITY.pt-BR.md", "title": "Pol\u00edtica de seguran\u00e7a", "category": "USER_GUIDE", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "SPEC.md", "title": "SPEC.md \u2014 API_FORGE_V1_CLOSURE", "category": "USER_GUIDE", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "SPEC.pt-BR.md", "title": "SPEC.md \u2014 API_FORGE_V1_CLOSURE", "category": "USER_GUIDE", "audience": "public", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "tests/fixtures/api_git_cicd/real_anonymized/README.md", "title": "Real anonymized evidence", "category": "TEST_EVIDENCE", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "tests/fixtures/graph_explain/SYNTHETIC.md", "title": "Synthetic graph plan fixtures", "category": "TEST_EVIDENCE", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "tests/fixtures/sdd_root/DEMO_FEATURE/discover.md", "title": "Discover", "category": "TEST_EVIDENCE", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
@@ -1290,9 +1324,9 @@
 {"path": "tests/fixtures/sdd_root/GAPPED_FEATURE/discover.md", "title": "Discover", "category": "TEST_EVIDENCE", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "tests/fixtures/sdd_root/GAPPED_FEATURE/intent.md", "title": "Intent", "category": "TEST_EVIDENCE", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "tests/fixtures/sdd_root/GAPPED_FEATURE/plan.md", "title": "Plan", "category": "TEST_EVIDENCE", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
-{"path": "tests/fixtures/sdd_root/lowercase_dir/note.md", "title": "note", "category": "TEST_EVIDENCE", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "tests/fixtures/sdd_root/ORDER_BAD/discover.md", "title": "Discover", "category": "TEST_EVIDENCE", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "tests/fixtures/sdd_root/ORDER_BAD/intent.md", "title": "Intent", "category": "TEST_EVIDENCE", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "tests/fixtures/sdd_root/ORDER_BAD/plan.md", "title": "Plan", "category": "TEST_EVIDENCE", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "tests/fixtures/sdd_root/SILENT_SKIP/discover.md", "title": "Discover", "category": "TEST_EVIDENCE", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
+{"path": "tests/fixtures/sdd_root/lowercase_dir/note.md", "title": "note", "category": "TEST_EVIDENCE", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}
 {"path": "tests/fixtures/sdd_root/templates/discover.md", "title": "discover", "category": "TEST_EVIDENCE", "audience": "maintainer", "related_commands": [], "review_level": "AUTOMATICALLY_CHECKED"}

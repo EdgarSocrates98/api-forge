@@ -284,7 +284,7 @@ sujo**: ~711 MB de estado de desenvolvedor (cache TokenSave) iria para o PyPI.
 
 O sdist também carrega o repo inteiro: `docs/` (1384 itens), `tests/`,
 `vendor/`, `.claude/`, `.agents/`, `.devin/`, `.codex/`, `portal/`, `factory/`
-(1 item — `runs/2026-10-15.cyc9-06.md` do loop-factory), `graphify-out/`…
+(1 item — run local do loop-factory, gitignored), `graphify-out/`…
 
 ---
 

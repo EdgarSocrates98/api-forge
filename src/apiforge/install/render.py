@@ -145,7 +145,47 @@ def render(hosts: tuple[str, ...], *, skills: bool, agents: bool) -> dict[str, b
             for rel, data in _walk_files(skills_src):
                 key = f".agents/skills/{rel}"
                 out.setdefault(key, data)
+
+    # lf-0037: emitted docs may cite `knowledge/<rel>` — inside the wheel the
+    # corpus lives in `apiforge/_data/knowledge`, never copied here. Emit a
+    # pointer stub per referenced path so no dead relative link is installed.
+    import re
+
+    refs: set[str] = set()
+    for data in out.values():
+        if not data.startswith((b"---", b"#", b"<")):
+            continue
+        for m in re.finditer(rb"knowledge/[A-Za-z0-9_./-]+", data):
+            rel = m.group(0)[len(b"knowledge/") :].decode("utf-8").rstrip(".,);]")
+            if rel:
+                refs.add(rel)
+    for rel in sorted(refs):
+        stub_rel = rel if Path(rel).suffix else f"{rel}/README.md"
+        out.setdefault(f"knowledge/{stub_rel}", _knowledge_stub(rel))
+
     return out
+
+
+_KNOWLEDGE_STUB = """\
+# Ponteiro de knowledge — apiforge
+
+Este arquivo e um PONTEIRO gerado na instalacao: os links `knowledge/<rel>`
+dos mirrors resolvem aqui, mas o CONTEUDO real mora no pacote `apiforge`
+instalado — fora de qualquer checkout, nao copiado para o workspace.
+
+Recupere o documento real com os verbos nativos (offline, deterministicos):
+
+    apiforge knowledge get {rel}
+    apiforge knowledge search "<termo>" --domain {dominio}
+    apiforge context pack --domain {dominio}
+    apiforge knowledge list
+"""
+
+
+def _knowledge_stub(rel: str) -> bytes:
+    partes = rel.split("/")
+    dominio = partes[0] if len(partes) > 1 else Path(rel).stem
+    return _KNOWLEDGE_STUB.format(rel=rel, dominio=dominio).encode("utf-8")
 
 
 __all__ = ["HOSTS", "content_dirs", "render"]

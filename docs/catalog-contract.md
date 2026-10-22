@@ -1318,6 +1318,7 @@ cross-checks every `rule_id` against the catalog; the release gate runs it.
 | `AF-KNOW-EVAL` | eval `expect.kind` outside rule/fact-kind/refusal |
 | `AF-KNOW-EVAL-TYPE` | eval `type` outside the closed 11-value vocabulary |
 | `AF-KNOW-CHECK` | `knowledge check` found cross-catalog problems (exit 4) |
+| `AF-CURSOR-INVALID` | `--cursor` on `rules search`/`knowledge search` is not a non-negative integer |
 
 ### Knowledge evolution (`knowledge drift`, `knowledge impact`, `evals knowledge-drift`)
 

@@ -102,7 +102,11 @@ def default_root(root: Path | None = None) -> Path:
     if root is not None:
         return Path(root)
     local = Path("knowledge")
-    if local.is_dir():
+    # Um `knowledge/` de cwd com apenas pointer stubs (emitidos pelo install,
+    # lf-0037) nao e corpus: so conta se houver ao menos um pack.yaml real.
+    if local.is_dir() and any(
+        (d / "pack.yaml").is_file() for d in local.iterdir() if d.is_dir()
+    ):
         return local
     from apiforge.distribution.assets import package_root
 

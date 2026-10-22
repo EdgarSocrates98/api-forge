@@ -12,7 +12,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from apiforge import __version__
+from apiforge import __version__, discovery_ops
 from apiforge import _forgecontext as fctx
 from apiforge import _installkit as kit
 from apiforge.install import render
@@ -384,10 +384,15 @@ def _context_manifest(ctx: kit.InstallContext) -> dict[str, Any]:
     """Manifesto forge/context/v1 montado das fontes reais: `forge.json` +
     `forge.agentic.json` no checkout e os assets que o install usou
     (`render.content_dirs`, `_data/knowledge|evals`, `rules/`)."""
-    forge_json = kit._load_json(_REPO_DIR / "forge.json", None)
-    forge_json = forge_json if isinstance(forge_json, dict) else None
-    agentic = kit._load_json(_REPO_DIR / "forge.agentic.json", None)
-    agentic = agentic if isinstance(agentic, dict) else None
+    def _bundled_json(name: str) -> dict[str, Any] | None:
+        for cand in (_PKG_DIR / "_data" / name, _REPO_DIR / name):
+            data = kit._load_json(cand, None)
+            if isinstance(data, dict):
+                return data
+        return None
+
+    forge_json = _bundled_json("forge.json")
+    agentic = _bundled_json("forge.agentic.json")
 
     dirs = render.content_dirs()
     skills: list[str] = []
@@ -472,7 +477,13 @@ def _context_manifest(ctx: kit.InstallContext) -> dict[str, Any]:
             {"id": "forge/context/v1", "version": "1"},
             {"id": "forge/context-registry/v1", "version": "1"},
         ),
+        discovery_ops=discovery_ops.ops(),
         discovery_commands=(
+            *(
+                c
+                for c in discovery_ops.commands()
+                if c["id"] != "doctor"  # `doctor` is declared below
+            ),
             {
                 "id": "analyze",
                 "argv": ["apiforge", "analyze", "{target}"],

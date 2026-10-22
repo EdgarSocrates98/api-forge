@@ -53,6 +53,12 @@ class TestWheelCarriesHostAssets:
 
 
 class TestWheelCarriesDataLayer:
+    def test_forge_manifests(self, wheel):
+        # install/service._context_manifest compõe forge/context/v1 destes —
+        # sem eles no wheel o manifesto instalado degrada (install-2.0 §8.2).
+        assert "apiforge/_data/forge.json" in wheel.namelist()
+        assert "apiforge/_data/forge.agentic.json" in wheel.namelist()
+
     def test_knowledge_packs(self, wheel):
         knowledge = _names(wheel, "apiforge/_data/knowledge/")
         assert knowledge

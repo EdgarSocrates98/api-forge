@@ -177,9 +177,7 @@ def repair(
         if (ctx.root / fctx.CONTEXT_DIR).exists():
             try:
                 out_ctx = fctx.repair_context(ctx.root)
-                receipt["repaired"].extend(
-                    f"context:{w}" for w in out_ctx["written"]
-                )
+                receipt["repaired"].extend(f"context:{w}" for w in out_ctx["written"])
                 rec = out_ctx.get("recovered")
                 receipt.setdefault("checks", []).append(
                     {
@@ -188,19 +186,18 @@ def repair(
                         "detail": (
                             f"{out_ctx['status']} ({len(out_ctx['written'])} writes)"
                             + (f"; recovered {rec['op']}:{rec['forge_id']}" if rec else "")
-                            + (
-                                "; stale lock reclaimed"
-                                if out_ctx.get("lock_recovered")
-                                else ""
-                            )
+                            + ("; stale lock reclaimed" if out_ctx.get("lock_recovered") else "")
                         ),
                     }
                 )
             except fctx.ContextError as exc:
                 receipt["skipped"].append(f"context:{exc.kind}")
                 receipt.setdefault("checks", []).append(
-                    {"id": "context-registry", "status": "BLOCKED",
-                     "detail": f"{exc.kind}: {exc.detail}"}
+                    {
+                        "id": "context-registry",
+                        "status": "BLOCKED",
+                        "detail": f"{exc.kind}: {exc.detail}",
+                    }
                 )
         # Consumer docs: re-assert dos blocos `forge:*` a partir dos
         # manifests em `.forge/context/`; recusa nomeada vira check.

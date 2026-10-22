@@ -170,6 +170,35 @@ def repair(
         return kit.status(ctx)
     with kit.acquire_lock(ctx.state_dir):
         receipt = kit.repair(ctx)
+        # Registry de contexto (recuperacao §9.2): redo de journal de
+        # transacao, reclaim de lock velho, rebuild de registry+ROUTING.md
+        # — so quando `.forge/context/` ja existe (repair nunca cria
+        # residuo num root pristino).
+        if (ctx.root / fctx.CONTEXT_DIR).exists():
+            try:
+                out_ctx = fctx.repair_context(ctx.root)
+                receipt["repaired"].extend(f"context:{w}" for w in out_ctx["written"])
+                rec = out_ctx.get("recovered")
+                receipt.setdefault("checks", []).append(
+                    {
+                        "id": "context-registry",
+                        "status": "PASS",
+                        "detail": (
+                            f"{out_ctx['status']} ({len(out_ctx['written'])} writes)"
+                            + (f"; recovered {rec['op']}:{rec['forge_id']}" if rec else "")
+                            + ("; stale lock reclaimed" if out_ctx.get("lock_recovered") else "")
+                        ),
+                    }
+                )
+            except fctx.ContextError as exc:
+                receipt["skipped"].append(f"context:{exc.kind}")
+                receipt.setdefault("checks", []).append(
+                    {
+                        "id": "context-registry",
+                        "status": "BLOCKED",
+                        "detail": f"{exc.kind}: {exc.detail}",
+                    }
+                )
         # Consumer docs: re-assert dos blocos `forge:*` a partir dos
         # manifests em `.forge/context/`; recusa nomeada vira check.
         try:
@@ -210,8 +239,7 @@ def uninstall(
     with kit.acquire_lock(ctx.state_dir):
         receipt = kit.uninstall(ctx, purge_state=purge)
         if _docs_leftovers(ctx.root):
-            receipt.setdefault("checks", []).append(_unregister_context(ctx.root))
-            receipt.setdefault("checks", []).append(_uninstall_docs(ctx.root))
+            receipt.setdefault("checks", []).extend(_unregister_context(ctx.root))
         return receipt
 
 
@@ -574,7 +602,9 @@ def _register_context(ctx: kit.InstallContext, receipt: dict[str, Any]) -> None:
     ROUTING.md. Falha vira check BLOCKED nomeado no recibo."""
     try:
         manifest = _context_manifest(ctx)
-        out = fctx.register_forge(ctx.root, manifest, owner=FORGE_ID)
+        out = fctx.install_transaction(
+            ctx.root, manifest, owner=FORGE_ID, legacy_tags=_LEGACY_DOC_TAGS
+        )
         receipt.setdefault("checks", []).append(
             {
                 "id": "context-registry",
@@ -582,13 +612,7 @@ def _register_context(ctx: kit.InstallContext, receipt: dict[str, Any]) -> None:
                 "detail": f".forge/context {out['status']} ({len(out['written'])} writes)",
             }
         )
-    except fctx.ContextError as exc:
-        receipt.setdefault("checks", []).append(
-            {"id": "context-registry", "status": "BLOCKED", "detail": f"{exc.kind}: {exc.detail}"}
-        )
-        return
-    try:
-        docs = fctx.install_docs(ctx.root, manifest, owner=FORGE_ID, legacy_tags=_LEGACY_DOC_TAGS)
+        docs = out["docs"]
         receipt.setdefault("checks", []).append(
             {
                 "id": "consumer-docs",
@@ -600,25 +624,38 @@ def _register_context(ctx: kit.InstallContext, receipt: dict[str, Any]) -> None:
         )
     except fctx.ContextError as exc:
         receipt.setdefault("checks", []).append(
-            {"id": "consumer-docs", "status": "BLOCKED", "detail": f"{exc.kind}: {exc.detail}"}
+            {"id": "context-registry", "status": "BLOCKED", "detail": f"{exc.kind}: {exc.detail}"}
         )
 
 
-def _unregister_context(root: Path) -> dict[str, Any]:
-    """Remove somente o manifesto/entry deste forge."""
+def _unregister_context(root: Path) -> list[dict[str, Any]]:
+    """Remove manifesto/entry/blocos `forge:*` deste forge numa UNICA
+    transacao (§9.2) — só artifacts próprios."""
     try:
-        out = fctx.unregister_forge(root, FORGE_ID, owner=FORGE_ID)
-        return {
-            "id": "context-registry",
-            "status": "PASS",
-            "detail": f".forge/context {out['status']}",
-        }
+        out = fctx.uninstall_transaction(
+            root, FORGE_ID, owner=FORGE_ID, legacy_tags=_LEGACY_DOC_TAGS
+        )
+        docs = out["docs"]
+        return [
+            {
+                "id": "context-registry",
+                "status": "PASS",
+                "detail": f".forge/context {out['status']}",
+            },
+            {
+                "id": "consumer-docs",
+                "status": "PASS",
+                "detail": f"{docs['status']}: {len(docs['written'])} changed",
+            },
+        ]
     except fctx.ContextError as exc:
-        return {
-            "id": "context-registry",
-            "status": "BLOCKED",
-            "detail": f"{exc.kind}: {exc.detail}",
-        }
+        return [
+            {
+                "id": "context-registry",
+                "status": "BLOCKED",
+                "detail": f"{exc.kind}: {exc.detail}",
+            }
+        ]
 
 
 def _docs_leftovers(root: Path) -> bool:
@@ -644,21 +681,3 @@ def _docs_leftovers(root: Path) -> bool:
         if any(n in text for n in needles):
             return True
     return False
-
-
-def _uninstall_docs(root: Path) -> dict[str, Any]:
-    """Retira os blocos `forge:api-forge` (+ markers legados) dos consumer
-    docs; roda depois do unregister para o protocolo sair sem nos."""
-    try:
-        out = fctx.uninstall_docs(root, FORGE_ID, owner=FORGE_ID, legacy_tags=_LEGACY_DOC_TAGS)
-        return {
-            "id": "consumer-docs",
-            "status": "PASS",
-            "detail": f"{out['status']}: {len(out['written'])} changed",
-        }
-    except fctx.ContextError as exc:
-        return {
-            "id": "consumer-docs",
-            "status": "BLOCKED",
-            "detail": f"{exc.kind}: {exc.detail}",
-        }

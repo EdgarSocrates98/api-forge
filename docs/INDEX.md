@@ -674,18 +674,6 @@ _Historical, deprecated, generated and evidence docs (preserved, not entry point
 
 - [Field validation — pre-registered hypothesis](field/hypothesis.md) `UNKNOWN`
 
-### graphify-out/
-
-- [Graph Report - api-forge  (2026-10-15)](../graphify-out/2026-10-15/GRAPH_REPORT.md) `UNKNOWN`
-- [Graph Report - api-forge  (2026-10-16)](../graphify-out/2026-10-16/GRAPH_REPORT.md) `UNKNOWN`
-- [Graph Report - api-forge  (2026-10-17)](../graphify-out/2026-10-17/GRAPH_REPORT.md) `UNKNOWN`
-- [Graph Report - api-forge  (2026-10-18)](../graphify-out/2026-10-18/GRAPH_REPORT.md) `UNKNOWN`
-- [Graph Report - api-forge  (2026-10-19)](../graphify-out/2026-10-19/GRAPH_REPORT.md) `UNKNOWN`
-- [Graph Report - api-forge  (2026-10-20)](../graphify-out/2026-10-20/GRAPH_REPORT.md) `UNKNOWN`
-- [Graph Report - api-forge  (2026-10-21)](../graphify-out/2026-10-21/GRAPH_REPORT.md) `UNKNOWN`
-- [Graph Report - api-forge  (2026-10-22)](../graphify-out/2026-10-22/GRAPH_REPORT.md) `UNKNOWN`
-- [Graph Report - api-forge  (2026-10-22)](../graphify-out/GRAPH_REPORT.md) `UNKNOWN`
-
 ### integrations/
 
 - [Change-control IDE/UI host](integrations/API_FORGE_CHANGE_CONTROL_HOST.md) `UNKNOWN`

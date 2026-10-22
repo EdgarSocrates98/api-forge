@@ -209,8 +209,14 @@ SUITES: tuple[EvalSuite, ...] = (
         kind="runtime-decision",
         description="deterministic local mutations — expected detections stay sealed",
         argv=(
-            "task", "holdout", "--project", "{project}",
-            "--contract", "{contract}", "--manifest", "{manifest}",
+            "task",
+            "holdout",
+            "--project",
+            "{project}",
+            "--contract",
+            "{contract}",
+            "--manifest",
+            "{manifest}",
         ),
         inputs=("project", "contract", "manifest"),
     ),
@@ -219,8 +225,15 @@ SUITES: tuple[EvalSuite, ...] = (
         kind="runtime-decision",
         description="independent proof checks → persisted VerificationRecord",
         argv=(
-            "task", "verify", "{task}", "--project", "{project}",
-            "--contract", "{contract}", "--manifest", "{manifest}",
+            "task",
+            "verify",
+            "{task}",
+            "--project",
+            "{project}",
+            "--contract",
+            "{contract}",
+            "--manifest",
+            "{manifest}",
         ),
         inputs=("task", "project", "contract"),  # --manifest is optional upstream
     ),
@@ -338,9 +351,7 @@ def catalog() -> list[dict[str, Any]]:
 
 def manifest_suites() -> list[dict[str, Any]]:
     """``forge/context/v1`` ``eval_suites`` entries (id + kind + command)."""
-    return [
-        {"id": s.id, "kind": s.kind, "command": ["apiforge", *s.argv]} for s in SUITES
-    ]
+    return [{"id": s.id, "kind": s.kind, "command": ["apiforge", *s.argv]} for s in SUITES]
 
 
 def _file_digest(path: Path) -> dict[str, Any] | None:
@@ -385,8 +396,7 @@ def describe(suite_id: str, *, root: Path | None = None) -> dict[str, Any]:
         "sealed": {
             "count": len(suite.sealed),
             "resolved": entries,
-            "content": "sealed — expected answers/baselines never inlined into "
-            "agent-facing output",
+            "content": "sealed — expected answers/baselines never inlined into agent-facing output",
         },
     }
     return doc
@@ -404,9 +414,7 @@ def _runner_validate(o: dict[str, str]) -> dict[str, Any]:
     ids = [case.case_id for case in cases]
     duplicates = sorted({item for item in ids if ids.count(item) > 1})
     invalid = [
-        case.case_id
-        for case in cases
-        if not case.required_evidence or case.mutation == "none"
+        case.case_id for case in cases if not case.required_evidence or case.mutation == "none"
     ]
     ok = not duplicates and not invalid
     return {
@@ -481,9 +489,7 @@ def _runner_task_holdout(o: dict[str, str]) -> dict[str, Any]:
     from apiforge.verification.holdout import run_holdouts
 
     root = Path(o.get("root", "."))
-    records = run_holdouts(
-        root, Path(o["project"]), Path(o["contract"]), Path(o["manifest"])
-    )
+    records = run_holdouts(root, Path(o["project"]), Path(o["contract"]), Path(o["manifest"]))
     return {"holdouts": [r.model_dump(mode="json") for r in records]}
 
 
@@ -512,9 +518,7 @@ def _runner_task_verify(o: dict[str, str]) -> Any:
     )
 
 
-def _corpus_runner(
-    module: str, func: str, default_corpus: str
-) -> Callable[[dict[str, str]], Any]:
+def _corpus_runner(module: str, func: str, default_corpus: str) -> Callable[[dict[str, str]], Any]:
     def run(o: dict[str, str]) -> Any:
         import importlib
 
@@ -531,9 +535,7 @@ def _corpus_root_runner(
         import importlib
 
         runner = getattr(importlib.import_module(module), func)
-        return runner(
-            resolve_evals_path(o.get("corpus", default_corpus)), Path(o.get("root", "."))
-        )
+        return runner(resolve_evals_path(o.get("corpus", default_corpus)), Path(o.get("root", ".")))
 
     return run
 
@@ -579,9 +581,7 @@ _RUNNERS: dict[str, Any] = {
         "run_knowledge_drift",
         "evals/corpus/knowledge-drift",
     ),
-    "agentops": _corpus_runner(
-        "apiforge.evals.agentops", "run_agentops", "evals/corpus/agentops"
-    ),
+    "agentops": _corpus_runner("apiforge.evals.agentops", "run_agentops", "evals/corpus/agentops"),
     "economy-routing": _corpus_runner(
         "apiforge.evals.economy_routing",
         "run_economy_routing",
@@ -685,9 +685,7 @@ def run_suite(suite_id: str, *, options: dict[str, str] | None = None) -> dict[s
     # §7.3: the environment marker travels with every result — simulated
     # fixture evidence is never real-environment proof, deferred-external
     # suites never fabricate a live result.
-    doc.setdefault(
-        "environment", suite.environment
-    )
+    doc.setdefault("environment", suite.environment)
     doc.setdefault("suite", suite.id)
     doc.setdefault("kind", suite.kind)
     return doc
@@ -703,8 +701,7 @@ def result(report: Path) -> dict[str, Any]:
     if not path.is_file():
         raise ContractError(
             "AF-EVALS-RESULT-INVALID",
-            f"no eval report at {path} — produce one with "
-            "`apiforge evals <suite> [--out <file>]`",
+            f"no eval report at {path} — produce one with `apiforge evals <suite> [--out <file>]`",
         )
     try:
         doc = json.loads(path.read_text(encoding="utf-8"))
@@ -713,9 +710,7 @@ def result(report: Path) -> dict[str, Any]:
             "AF-EVALS-RESULT-INVALID", f"{path}: not a JSON eval report ({exc})"
         ) from exc
     if not isinstance(doc, dict):
-        raise ContractError(
-            "AF-EVALS-RESULT-INVALID", f"{path}: eval report must be a JSON object"
-        )
+        raise ContractError("AF-EVALS-RESULT-INVALID", f"{path}: eval report must be a JSON object")
     suite_id = str(doc.get("suite") or doc.get("id") or "")
     out: dict[str, Any] = {
         "report": str(path),

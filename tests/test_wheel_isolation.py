@@ -28,6 +28,7 @@ not exist on main yet. `install doctor`'s `mcp-handshake` legitimately
 reports BLOCKED on a bare consumer target (verify is a separate verb) —
 integrity-level checks are what this test pins.
 """
+
 from __future__ import annotations
 
 import json
@@ -91,7 +92,13 @@ def _clean_env() -> dict[str, str]:
 
 def _run(argv: list[str], *, cwd: Path, env: dict[str, str]) -> subprocess.CompletedProcess:
     return subprocess.run(  # CLI/venv created by the test itself
-        argv, cwd=str(cwd), env=env, capture_output=True, text=True, timeout=300,
+        argv,
+        cwd=str(cwd),
+        env=env,
+        capture_output=True,
+        encoding="utf-8",
+        errors="replace",
+        timeout=300,
         check=False,
     )
 
@@ -185,9 +192,7 @@ def test_wheel_install_lifecycle_outside_checkout(tmp_path: Path):
         cwd=target,
         env=env,
     )
-    assert out.returncode == 0, (
-        f"install failed:\n{out.stdout[-800:]}\n{out.stderr[-800:]}"
-    )
+    assert out.returncode == 0, f"install failed:\n{out.stdout[-800:]}\n{out.stderr[-800:]}"
     receipt = _json(out, "install")
     assert receipt["status"] == "completed", receipt
     assert receipt["schema"] == "forge/InstallReceipt/v1", receipt.get("schema")
@@ -218,17 +223,13 @@ def test_wheel_install_lifecycle_outside_checkout(tmp_path: Path):
     assert "AF-BREAK-001" in out.stdout, "rules lookup did not return the rule"
 
     # -- verify protocol ---------------------------------------------------------
-    out = _run(
-        [str(cli), "install", "verify", "--root", str(target)], cwd=target, env=env
-    )
+    out = _run([str(cli), "install", "verify", "--root", str(target)], cwd=target, env=env)
     # `install verify` is a real JSON-RPC handshake against the packaged MCP
     # server — it may legitimately refuse in a bare venv (mcp extra not
     # installed); refuse/BLOCKED is honest, a traceback is not.
-    assert "Traceback" not in out.stderr, out.stderr[-800:]
+    assert "Traceback" not in (out.stderr or ""), (out.stderr or "")[-800:]
 
-    out = _run(
-        [str(cli), "install", "doctor", "--root", str(target)], cwd=target, env=env
-    )
+    out = _run([str(cli), "install", "doctor", "--root", str(target)], cwd=target, env=env)
     health = _json(out, "install doctor")
     assert health["status"] in ("healthy", "degraded"), health.get("status")
     for check_id in ("ledger", "mcp-config"):
@@ -240,22 +241,18 @@ def test_wheel_install_lifecycle_outside_checkout(tmp_path: Path):
 
     # -- offline verification ------------------------------------------------------
     out = _run([str(cli), "doctor"], cwd=target, env=env)
-    assert "Traceback" not in out.stderr, out.stderr[-800:]
+    assert "Traceback" not in (out.stderr or ""), (out.stderr or "")[-800:]
 
     # -- repair ----------------------------------------------------------------------
     victim = target / ".mcp.json"
     assert victim.is_file()
     victim.unlink()
-    out = _run(
-        [str(cli), "install", "repair", "--root", str(target)], cwd=target, env=env
-    )
+    out = _run([str(cli), "install", "repair", "--root", str(target)], cwd=target, env=env)
     assert out.returncode == 0, out.stderr[-400:]
     assert victim.is_file(), "repair did not restore a removed managed asset"
 
     # -- uninstall + reinstall -------------------------------------------------------
-    out = _run(
-        [str(cli), "install", "uninstall", "--root", str(target)], cwd=target, env=env
-    )
+    out = _run([str(cli), "install", "uninstall", "--root", str(target)], cwd=target, env=env)
     assert out.returncode == 0, out.stderr[-400:]
     gone = _json(out, "install uninstall")
     assert gone["status"] in ("completed", "uninstalled"), gone.get("status")

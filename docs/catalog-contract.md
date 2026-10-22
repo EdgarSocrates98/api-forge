@@ -678,6 +678,9 @@ arrays only (`diff --name-status`, `show`) and never mutates.
 | `AF-EVALS-TRACE-SPAN` | a trace-grading case span fails `build_span` or a `parent` index is out of range; unlock: fix the corpus yaml |
 | `AF-EVALS-LIVE-LAYER` | `rules/live_evals.yaml` declares an unknown eval runner; unlock: name a registered runner id |
 | `AF-EVALS-FRONTIER` | `evals frontier --report` input lacks the per-profile `accuracy` map; unlock: pass an agentic-quality report |
+| `AF-EVALS-SUITE-UNKNOWN` | `evals describe`/`evals run` got a suite id outside the declared §7.1 catalog; unlock: list `apiforge evals catalog` |
+| `AF-EVALS-RUN-INPUT` | `evals run` lacks a declared suite input (`--set name=value`); unlock: pass the input named in `evals describe` or run the native verb printed in the refusal |
+| `AF-EVALS-RESULT-INVALID` | `evals result --report` is missing, not JSON or not a JSON object; unlock: produce a report with `apiforge evals <suite> [--out <file>]` |
 
 ## Verification, retrieval, evidence and providers (`verify plan`, `knowledge search`, `evidence resolve`, `economy doctor`, `economy tier`, `agentops prompt`, `workspace locality`, `evals economy-extras`)
 

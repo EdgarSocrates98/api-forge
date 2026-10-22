@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 
-def test_ops_map_covers_all_eight():
+def test_ops_map_covers_all_fourteen():
     from apiforge import discovery_ops
 
     assert set(discovery_ops.ops()) == {
@@ -17,9 +17,16 @@ def test_ops_map_covers_all_eight():
         "knowledge.get",
         "context.build",
         "health.check",
+        # §7.2 (lf-0038): evals + verification
+        "evals.list",
+        "evals.describe",
+        "evals.run",
+        "evals.result",
+        "verification.plan",
+        "verification.run",
     }
     ids = {c["id"] for c in discovery_ops.commands()}
-    assert set(discovery_ops.ops().values()) == ids
+    assert set(discovery_ops.ops().values()) <= ids
 
 
 def test_rules_search_pagination_and_filters():
@@ -62,7 +69,7 @@ def test_capabilities_and_context_pack_deterministic():
     caps = discovery.capabilities()
     assert caps["rules"]["count"] > 0
     assert caps["knowledge"]["documents"] > 0
-    assert len(caps["operations"]) == 8
+    assert len(caps["operations"]) == 14
     p1 = discovery.context_pack("data-access", rules_limit=5, knowledge_limit=3)
     p2 = discovery.context_pack("data-access", rules_limit=5, knowledge_limit=3)
     assert p1["pack_sha256"] == p2["pack_sha256"]

@@ -3,14 +3,14 @@
 | Campo | Valor |
 |---|---|
 | repository | `api-forge` |
-| branch | `feat/ultimate-completion` |
-| commit | `003151e` |
-| docs inventoried | 1959 (excl. GENERATED mirrors: 1366; vendored upstream: 68) |
+| branch | `cycle/install-evals` |
+| commit | `043e6d2` |
+| docs inventoried | 1997 (excl. GENERATED mirrors: 1400; vendored upstream: 68) |
 
 ## Review levels (honest)
 
 - `INVENTORIED`: 0
-- `AUTOMATICALLY_CHECKED`: 1959
+- `AUTOMATICALLY_CHECKED`: 1997
 - `TECHNICALLY_VERIFIED`: 0
 - `SEMANTICALLY_REVIEWED`: 0
 - `USER_JOURNEY_VALIDATED`: 0
@@ -19,12 +19,12 @@ Automatic checks ran on every row; semantic review is recorded only where a huma
 
 ## Category counts
 
-- `SDD_ARTIFACT`: 742
-- `GENERATED`: 593
+- `SDD_ARTIFACT`: 752
+- `GENERATED`: 597
 - `CONTRACT`: 316
-- `UNKNOWN`: 100
-- `INTERNAL`: 68
-- `USER_GUIDE`: 58
+- `UNKNOWN`: 117
+- `INTERNAL`: 69
+- `USER_GUIDE`: 63
 - `HOW_TO`: 32
 - `TEST_EVIDENCE`: 16
 - `ADR`: 11
@@ -35,6 +35,7 @@ Automatic checks ran on every row; semantic review is recorded only where a huma
 - `REFERENCE`: 2
 - `CONCEPT`: 2
 - `TUTORIAL`: 1
+- `HISTORICAL`: 1
 
 ## Findings
 

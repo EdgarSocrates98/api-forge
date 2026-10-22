@@ -15,10 +15,10 @@ Rationale coverage: **69/69** first-level groups curated in `command-rationale.j
 - [`brief`](#brief) — 2 command(s)
 - [`build`](#build) — 2 command(s)
 - [`cache`](#cache) — 3 command(s)
-- [`capabilities`](#capabilities) — 3 command(s)
+- [`capabilities`](#capabilities) — 4 command(s)
 - [`change-control`](#change-control) — 7 command(s)
 - [`collect`](#collect) — 27 command(s)
-- [`context`](#context) — 9 command(s)
+- [`context`](#context) — 10 command(s)
 - [`contract`](#contract) — 3 command(s)
 - [`contract-intel`](#contract-intel) — 3 command(s)
 - [`control`](#control) — 7 command(s)
@@ -30,12 +30,12 @@ Rationale coverage: **69/69** first-level groups curated in `command-rationale.j
 - [`distribution`](#distribution) — 5 command(s)
 - [`doctor`](#doctor) — 1 command(s)
 - [`economy`](#economy) — 17 command(s)
-- [`evals`](#evals) — 33 command(s)
+- [`evals`](#evals) — 37 command(s)
 - [`evidence`](#evidence) — 5 command(s)
 - [`evolve`](#evolve) — 1 command(s)
 - [`experience`](#experience) — 4 command(s)
 - [`field`](#field) — 6 command(s)
-- [`forge`](#forge) — 9 command(s)
+- [`forge`](#forge) — 15 command(s)
 - [`governance`](#governance) — 2 command(s)
 - [`governor`](#governor) — 6 command(s)
 - [`graph`](#graph) — 9 command(s)
@@ -46,7 +46,7 @@ Rationale coverage: **69/69** first-level groups curated in `command-rationale.j
 - [`install`](#install) — 7 command(s)
 - [`integration`](#integration) — 5 command(s)
 - [`judge`](#judge) — 1 command(s)
-- [`knowledge`](#knowledge) — 12 command(s)
+- [`knowledge`](#knowledge) — 13 command(s)
 - [`lab`](#lab) — 2 command(s)
 - [`mcp`](#mcp) — 5 command(s)
 - [`memory`](#memory) — 8 command(s)
@@ -64,7 +64,7 @@ Rationale coverage: **69/69** first-level groups curated in `command-rationale.j
 - [`resume`](#resume) — 1 command(s)
 - [`review`](#review) — 1 command(s)
 - [`route`](#route) — 4 command(s)
-- [`rules`](#rules) — 3 command(s)
+- [`rules`](#rules) — 4 command(s)
 - [`run`](#run) — 3 command(s)
 - [`runtime`](#runtime) — 20 command(s)
 - [`sandbox`](#sandbox) — 3 command(s)
@@ -1097,6 +1097,27 @@ apiforge capabilities
 _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
+### `capabilities installed`
+
+**para que:** Installed rules/knowledge/skills counts, protocols and the §6.2 op map (offline).
+
+- **por que:** matriz pública de capabilities com evidência por trás
+- **quando usar:** perguntar o que a forja declara atender
+
+**Syntax**
+
+```text
+apiforge capabilities installed [detail_level]
+```
+
+| argument/flag | required | default | description |
+|---|---|---|---|
+| `detail_level` | no | — | Payload level: summary|normal|full. |
+
+<!-- keep:start -->
+_free notes — errors, examples, next steps (hand-written, preserved)_
+<!-- keep:end -->
+
 ### `capabilities list`
 
 **para que:** List public capabilities and their explicit support boundaries.
@@ -2102,6 +2123,31 @@ apiforge context gc [root] [apply] [cache_home] [limit] [detail_level]
 | `cache_home` | no | — | — |
 | `limit` | no | — | Bound each carried collection; counts stay truthful. |
 | `detail_level` | no | — | — |
+
+<!-- keep:start -->
+_free notes — errors, examples, next steps (hand-written, preserved)_
+<!-- keep:end -->
+
+### `context pack`
+
+**para que:** §6.2 context.build — bounded domain pack with deterministic hash.
+
+- **por que:** contabilidade de contexto medida — o funil, em bytes por estágio
+- **quando usar:** montar contexto econômico para um agente/host
+
+**Syntax**
+
+```text
+apiforge context pack [domain] [rules_limit] [knowledge_limit] [as_of] [detail_level]
+```
+
+| argument/flag | required | default | description |
+|---|---|---|---|
+| `domain` | no | — | — |
+| `rules_limit` | no | — | — |
+| `knowledge_limit` | no | — | — |
+| `as_of` | no | — | — |
+| `detail_level` | no | — | Payload level: summary|normal|full. |
 
 <!-- keep:start -->
 _free notes — errors, examples, next steps (hand-written, preserved)_
@@ -3467,6 +3513,27 @@ apiforge evals cache [corpus] [repo_root] [detail_level]
 _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
+### `evals catalog`
+
+**para que:** §7.1 classified catalog: every eval suite with kind + environment.
+
+- **por que:** catálogo classificado das suítes de eval — só metadados, nunca respostas esperadas
+- **quando usar:** descobrir quais suítes existem e a que categoria pertencem (install-2.0 §7.1)
+
+**Syntax**
+
+```text
+apiforge evals catalog [detail_level]
+```
+
+| argument/flag | required | default | description |
+|---|---|---|---|
+| `detail_level` | no | — | Payload level: summary|normal|full. |
+
+<!-- keep:start -->
+_free notes — errors, examples, next steps (hand-written, preserved)_
+<!-- keep:end -->
+
 ### `evals context-quality`
 
 **para que:** Fixture capsule + recorded uses vs declared metrics and sufficiency gates.
@@ -3505,6 +3572,28 @@ apiforge evals control-plane [corpus] [detail_level]
 | argument/flag | required | default | description |
 |---|---|---|---|
 | `corpus` | no | — | — |
+| `detail_level` | no | — | Payload level: summary|normal|full. |
+
+<!-- keep:start -->
+_free notes — errors, examples, next steps (hand-written, preserved)_
+<!-- keep:end -->
+
+### `evals describe`
+
+**para que:** One suite's metadata — sealed baselines/holdouts as sha256, never answers.
+
+- **por que:** metadados de uma suíte sem expor respostas esperadas (§7.3)
+- **quando usar:** antes de executar uma suíte: ver kind, inputs exigidos, ambiente e baselines/holdouts pinados por sha256
+
+**Syntax**
+
+```text
+apiforge evals describe <suite> [detail_level]
+```
+
+| argument/flag | required | default | description |
+|---|---|---|---|
+| `suite` | yes | — | suite id from `evals catalog` |
 | `detail_level` | no | — | Payload level: summary|normal|full. |
 
 <!-- keep:start -->
@@ -3876,6 +3965,29 @@ apiforge evals replay [root] [corpus] [profile] [detail_level]
 _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
+### `evals result`
+
+**para que:** Read a persisted eval report back — re-emits schema, suite and the
+environment marker (simulated evidence is never real-environment proof).
+
+- **por que:** lê um relatório persistido de volta, distinguindo evidência simulada de prova real
+- **quando usar:** relatar a um host o resultado de um run já gravado — schema, verdict e ambiente
+
+**Syntax**
+
+```text
+apiforge evals result <report> [detail_level]
+```
+
+| argument/flag | required | default | description |
+|---|---|---|---|
+| `report` | yes | — | eval report JSON written by `apiforge evals <suite> --out <file>` |
+| `detail_level` | no | — | Payload level: summary|normal|full. |
+
+<!-- keep:start -->
+_free notes — errors, examples, next steps (hand-written, preserved)_
+<!-- keep:end -->
+
 ### `evals retrieval`
 
 **para que:** §38: lexical/graph/semantic/hybrid on recall, precision, latency, cost.
@@ -3895,6 +4007,29 @@ apiforge evals retrieval [corpus] [root] [graph_dir] [cost_rate] [detail_level]
 | `root` | no | — | Knowledge packs directory. |
 | `graph_dir` | no | — | Hashed graph directory for the graph strategy. |
 | `cost_rate` | no | — | Declared cost per token. |
+| `detail_level` | no | — | Payload level: summary|normal|full. |
+
+<!-- keep:start -->
+_free notes — errors, examples, next steps (hand-written, preserved)_
+<!-- keep:end -->
+
+### `evals run`
+
+**para que:** Dispatch one declared suite's native runner; exit 1 when it does not pass.
+
+- **por que:** dispatch único para os ~30 runners nativos; inputs faltantes são recusa nomeada, nunca skip
+- **quando usar:** executar uma suíte declarada pelo runner nativo e gravar o resultado com o marcador de ambiente
+
+**Syntax**
+
+```text
+apiforge evals run <suite> [set_] [detail_level]
+```
+
+| argument/flag | required | default | description |
+|---|---|---|---|
+| `suite` | yes | — | suite id from `evals catalog` |
+| `set_` | no | — | fill a declared suite input (repeatable) |
 | `detail_level` | no | — | Payload level: summary|normal|full. |
 
 <!-- keep:start -->
@@ -4511,6 +4646,144 @@ apiforge forge capabilities [detail_level]
 
 | argument/flag | required | default | description |
 |---|---|---|---|
+| `detail_level` | no | — | — |
+
+<!-- keep:start -->
+_free notes — errors, examples, next steps (hand-written, preserved)_
+<!-- keep:end -->
+
+### `forge doctor`
+
+**para que:** forge-doctor-api delegation: discover, governed read-only scan, before/after compare.
+
+- **por que:** Forge Protocol: capabilities, task submit/inspect/result/evidence, handoff, health
+- **quando usar:** interoperar com o control plane The Forge
+
+**Syntax**
+
+```text
+apiforge forge doctor
+```
+
+<!-- keep:start -->
+_free notes — errors, examples, next steps (hand-written, preserved)_
+<!-- keep:end -->
+
+### `forge doctor compare`
+
+**para que:** Before/after revalidation: diff two persisted doctor scans.
+
+- **por que:** Forge Protocol: capabilities, task submit/inspect/result/evidence, handoff, health
+- **quando usar:** interoperar com o control plane The Forge
+
+**Syntax**
+
+```text
+apiforge forge doctor compare <baseline> <current> [root] [detail_level]
+```
+
+| argument/flag | required | default | description |
+|---|---|---|---|
+| `baseline` | yes | — | Baseline delegation run id. |
+| `current` | yes | — | Current delegation run id. |
+| `root` | no | — | — |
+| `detail_level` | no | — | — |
+
+<!-- keep:start -->
+_free notes — errors, examples, next steps (hand-written, preserved)_
+<!-- keep:end -->
+
+### `forge doctor discover`
+
+**para que:** Measured presence of forge-doctor-api: absent | untrusted | verified.
+
+- **por que:** Forge Protocol: capabilities, task submit/inspect/result/evidence, handoff, health
+- **quando usar:** interoperar com o control plane The Forge
+
+**Syntax**
+
+```text
+apiforge forge doctor discover [detail_level]
+```
+
+| argument/flag | required | default | description |
+|---|---|---|---|
+| `detail_level` | no | — | — |
+
+<!-- keep:start -->
+_free notes — errors, examples, next steps (hand-written, preserved)_
+<!-- keep:end -->
+
+### `forge doctor list`
+
+**para que:** List persisted delegation runs (completed and refused).
+
+- **por que:** Forge Protocol: capabilities, task submit/inspect/result/evidence, handoff, health
+- **quando usar:** interoperar com o control plane The Forge
+
+**Syntax**
+
+```text
+apiforge forge doctor list [root] [detail_level]
+```
+
+| argument/flag | required | default | description |
+|---|---|---|---|
+| `root` | no | — | — |
+| `detail_level` | no | — | — |
+
+<!-- keep:start -->
+_free notes — errors, examples, next steps (hand-written, preserved)_
+<!-- keep:end -->
+
+### `forge doctor scan`
+
+**para que:** Governed read-only delegation: `forge-doctor-api scan --format agent`.
+
+The doctor diagnoses; plan/implement stay with the host. Every refusal
+persists a refused record under .apiforge/forge/delegations/.
+
+- **por que:** Forge Protocol: capabilities, task submit/inspect/result/evidence, handoff, health
+- **quando usar:** interoperar com o control plane The Forge
+
+**Syntax**
+
+```text
+apiforge forge doctor scan [target] [correlation_id] [fail_on] [timeout] [max_hops] [allow_unverified] [root] [detail_level]
+```
+
+| argument/flag | required | default | description |
+|---|---|---|---|
+| `target` | no | — | Project directory the doctor scans. |
+| `correlation_id` | no | — | — |
+| `fail_on` | no | — | Doctor gate categories, comma-separated: breaking,security,policy. |
+| `timeout` | no | — | Seconds before the scan is refused. |
+| `max_hops` | no | — | Chain hop ceiling. |
+| `allow_unverified` | no | — | Run when the doctor identity is discovered but not verified. |
+| `root` | no | — | — |
+| `detail_level` | no | — | — |
+
+<!-- keep:start -->
+_free notes — errors, examples, next steps (hand-written, preserved)_
+<!-- keep:end -->
+
+### `forge doctor show`
+
+**para que:** Show a persisted delegation record (refusals included).
+
+- **por que:** Forge Protocol: capabilities, task submit/inspect/result/evidence, handoff, health
+- **quando usar:** interoperar com o control plane The Forge
+
+**Syntax**
+
+```text
+apiforge forge doctor show <run_id> [root] [detail_level]
+```
+
+| argument/flag | required | default | description |
+|---|---|---|---|
+| `run_id` | yes | — | Delegation run id. |
+| `root` | no | — | — |
 | `detail_level` | no | — | — |
 
 <!-- keep:start -->
@@ -5404,7 +5677,7 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 **Syntax**
 
 ```text
-apiforge install [scope] [host] [profile] [root] [yes] [dry_run] [components] [detail_level]
+apiforge install [scope] [host] [profile] [root] [yes] [dry_run] [components] [gateway_profile] [detail_level]
 ```
 
 | argument/flag | required | default | description |
@@ -5416,6 +5689,7 @@ apiforge install [scope] [host] [profile] [root] [yes] [dry_run] [components] [d
 | `yes` | no | — | Explicit approval; without it only --dry-run is allowed. |
 | `dry_run` | no | — | Plan only — writes nothing. |
 | `components` | no | — | Optional components csv: skills,agents,mcp,tui,graph-studio. |
+| `gateway_profile` | no | — | Execution profile: economy|balanced|deep. |
 | `detail_level` | no | — | — |
 
 <!-- keep:start -->
@@ -5824,6 +6098,28 @@ apiforge knowledge freshness <domain> [receipt] [root] <now> [detail_level]
 _free notes — errors, examples, next steps (hand-written, preserved)_
 <!-- keep:end -->
 
+### `knowledge get`
+
+**para que:** §6.2 knowledge.get — absolute path + sha256 + provenance.
+
+- **por que:** domain packs — autoridade de fonte, matrizes de runtime, evals declarados
+- **quando usar:** consultar a fonte canônica de conhecimento de domínio
+
+**Syntax**
+
+```text
+apiforge knowledge get <file> [detail_level]
+```
+
+| argument/flag | required | default | description |
+|---|---|---|---|
+| `file` | yes | — | corpus-relative ref, e.g. rest-design/patterns.md |
+| `detail_level` | no | — | Payload level: summary|normal|full. |
+
+<!-- keep:start -->
+_free notes — errors, examples, next steps (hand-written, preserved)_
+<!-- keep:end -->
+
 ### `knowledge impact`
 
 **para que:** §29 source -> pack -> rule -> skill -> eval relation graph.
@@ -5896,7 +6192,7 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 
 ### `knowledge search`
 
-**para que:** Deterministic expansion, ranked passages with signals, progressive tiers.
+**para que:** §6.2 knowledge.search — one hit per doc with sha256 + provenance.
 
 - **por que:** domain packs — autoridade de fonte, matrizes de runtime, evals declarados
 - **quando usar:** consultar a fonte canônica de conhecimento de domínio
@@ -5904,15 +6200,16 @@ _free notes — errors, examples, next steps (hand-written, preserved)_
 **Syntax**
 
 ```text
-apiforge knowledge search <query> [tier] [root] [detail_level]
+apiforge knowledge search <term> [domain] [limit] [cursor] [detail_level]
 ```
 
 | argument/flag | required | default | description |
 |---|---|---|---|
-| `query` | yes | — | — |
-| `tier` | no | — | 1 = top 3, 2 = top 5, 3 = up to 20. |
-| `root` | no | — | Directory of knowledge packs. |
-| `detail_level` | no | — | — |
+| `term` | yes | — | offline text over pack docs |
+| `domain` | no | — | pack name prefix |
+| `limit` | no | — | — |
+| `cursor` | no | — | — |
+| `detail_level` | no | — | Payload level: summary|normal|full. |
 
 <!-- keep:start -->
 _free notes — errors, examples, next steps (hand-written, preserved)_
@@ -8908,6 +9205,33 @@ apiforge rules lookup <rule_id> [detail_level]
 | argument/flag | required | default | description |
 |---|---|---|---|
 | `rule_id` | yes | — | Rule id, e.g. AF-SEC-001. |
+| `detail_level` | no | — | Payload level: summary|normal|full. |
+
+<!-- keep:start -->
+_free notes — errors, examples, next steps (hand-written, preserved)_
+<!-- keep:end -->
+
+### `rules search`
+
+**para que:** §6.2 rules.search — filtered catalog page, deterministic cursor.
+
+- **por que:** lê o catálogo de regras — a base que todo finding cita
+- **quando usar:** inspecionar regras disponíveis e metadados
+
+**Syntax**
+
+```text
+apiforge rules search [query] [area] [severity] [limit] [cursor] [index] [detail_level]
+```
+
+| argument/flag | required | default | description |
+|---|---|---|---|
+| `query` | no | — | keyword over id/title/area/rationale |
+| `area` | no | — | filter by catalog area |
+| `severity` | no | — | info|low|medium|high|critical |
+| `limit` | no | — | — |
+| `cursor` | no | — | — |
+| `index` | no | — | index fields only |
 | `detail_level` | no | — | Payload level: summary|normal|full. |
 
 <!-- keep:start -->

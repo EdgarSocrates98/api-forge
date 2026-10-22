@@ -2,9 +2,9 @@
   "schema": "forge/CommandInventory/v1",
   "forge_id": "api-forge",
   "cli": "apiforge",
-  "generated_at": "2026-10-11T04:16:20Z",
+  "generated_at": "2026-10-22T07:02:23Z",
   "generated_by": "doc_inventory.py/1",
-  "command_count": 447,
+  "command_count": 461,
   "commands": [
     {
       "path": "agentops",
@@ -2044,6 +2044,23 @@
       "group": true
     },
     {
+      "path": "capabilities installed",
+      "help": "Installed rules/knowledge/skills counts, protocols and the §6.2 op map (offline).",
+      "arguments": [
+        {
+          "name": "detail_level",
+          "flags": [
+            "--detail-level"
+          ],
+          "required": false,
+          "default": "normal",
+          "choices": null,
+          "positional": false,
+          "help": "Payload level: summary|normal|full."
+        }
+      ]
+    },
+    {
       "path": "capabilities list",
       "help": "List public capabilities and their explicit support boundaries.",
       "arguments": [
@@ -2137,7 +2154,7 @@
             "--out-bundle"
           ],
           "required": false,
-          "default": ".apiforge\\change-control\\change-bundle.json",
+          "default": ".apiforge/change-control/change-bundle.json",
           "choices": null,
           "positional": false,
           "help": "Sanitized bundle output path."
@@ -2314,7 +2331,7 @@
             "--out-dir"
           ],
           "required": false,
-          "default": ".apiforge\\change-control",
+          "default": ".apiforge/change-control",
           "choices": null,
           "positional": false,
           "help": "Governed output directory."
@@ -4336,6 +4353,67 @@
           "choices": null,
           "positional": false,
           "help": null
+        }
+      ]
+    },
+    {
+      "path": "context pack",
+      "help": "§6.2 context.build — bounded domain pack with deterministic hash.",
+      "arguments": [
+        {
+          "name": "domain",
+          "flags": [
+            "--domain"
+          ],
+          "required": false,
+          "default": null,
+          "choices": null,
+          "positional": false,
+          "help": null
+        },
+        {
+          "name": "rules_limit",
+          "flags": [
+            "--rules-limit"
+          ],
+          "required": false,
+          "default": null,
+          "choices": null,
+          "positional": false,
+          "help": null
+        },
+        {
+          "name": "knowledge_limit",
+          "flags": [
+            "--knowledge-limit"
+          ],
+          "required": false,
+          "default": null,
+          "choices": null,
+          "positional": false,
+          "help": null
+        },
+        {
+          "name": "as_of",
+          "flags": [
+            "--as-of"
+          ],
+          "required": false,
+          "default": null,
+          "choices": null,
+          "positional": false,
+          "help": null
+        },
+        {
+          "name": "detail_level",
+          "flags": [
+            "--detail-level"
+          ],
+          "required": false,
+          "default": "normal",
+          "choices": null,
+          "positional": false,
+          "help": "Payload level: summary|normal|full."
         }
       ]
     },
@@ -6845,7 +6923,7 @@
             "--corpus"
           ],
           "required": false,
-          "default": "evals\\corpus\\agent-governor",
+          "default": "evals/corpus/agent-governor",
           "choices": null,
           "positional": false,
           "help": null
@@ -6934,7 +7012,7 @@
             "--corpus"
           ],
           "required": false,
-          "default": "evals\\corpus\\agentic-quality",
+          "default": "evals/corpus/agentic-quality",
           "choices": null,
           "positional": false,
           "help": null
@@ -7006,7 +7084,7 @@
             "--corpus"
           ],
           "required": false,
-          "default": "evals\\corpus\\agentops",
+          "default": "evals/corpus/agentops",
           "choices": null,
           "positional": false,
           "help": null
@@ -7034,7 +7112,7 @@
             "--corpus"
           ],
           "required": false,
-          "default": "evals\\corpus\\economy-cache",
+          "default": "evals/corpus/economy-cache",
           "choices": null,
           "positional": false,
           "help": null
@@ -7064,6 +7142,23 @@
       ]
     },
     {
+      "path": "evals catalog",
+      "help": "§7.1 classified catalog: every eval suite with kind + environment.",
+      "arguments": [
+        {
+          "name": "detail_level",
+          "flags": [
+            "--detail-level"
+          ],
+          "required": false,
+          "default": "normal",
+          "choices": null,
+          "positional": false,
+          "help": "Payload level: summary|normal|full."
+        }
+      ]
+    },
+    {
       "path": "evals context-quality",
       "help": "Fixture capsule + recorded uses vs declared metrics and sufficiency gates.",
       "arguments": [
@@ -7073,7 +7168,7 @@
             "--corpus"
           ],
           "required": false,
-          "default": "evals\\corpus\\context-quality",
+          "default": "evals/corpus/context-quality",
           "choices": null,
           "positional": false,
           "help": null
@@ -7101,10 +7196,38 @@
             "--corpus"
           ],
           "required": false,
-          "default": "evals\\corpus\\control-plane",
+          "default": "evals/corpus/control-plane",
           "choices": null,
           "positional": false,
           "help": null
+        },
+        {
+          "name": "detail_level",
+          "flags": [
+            "--detail-level"
+          ],
+          "required": false,
+          "default": "normal",
+          "choices": null,
+          "positional": false,
+          "help": "Payload level: summary|normal|full."
+        }
+      ]
+    },
+    {
+      "path": "evals describe",
+      "help": "One suite's metadata — sealed baselines/holdouts as sha256, never answers.",
+      "arguments": [
+        {
+          "name": "suite",
+          "flags": [
+            "suite"
+          ],
+          "required": true,
+          "default": null,
+          "choices": null,
+          "positional": false,
+          "help": "suite id from `evals catalog`"
         },
         {
           "name": "detail_level",
@@ -7129,7 +7252,7 @@
             "--corpus"
           ],
           "required": false,
-          "default": "evals\\corpus\\economy",
+          "default": "evals/corpus/economy",
           "choices": null,
           "positional": false,
           "help": null
@@ -7190,7 +7313,7 @@
             "--corpus"
           ],
           "required": false,
-          "default": "evals\\corpus\\economy-extras",
+          "default": "evals/corpus/economy-extras",
           "choices": null,
           "positional": false,
           "help": null
@@ -7229,7 +7352,7 @@
             "--corpus"
           ],
           "required": false,
-          "default": "evals\\corpus\\economy-freshness",
+          "default": "evals/corpus/economy-freshness",
           "choices": null,
           "positional": false,
           "help": null
@@ -7257,7 +7380,7 @@
             "--corpus"
           ],
           "required": false,
-          "default": "evals\\corpus\\economy-hardening",
+          "default": "evals/corpus/economy-hardening",
           "choices": null,
           "positional": false,
           "help": null
@@ -7296,7 +7419,7 @@
             "--corpus"
           ],
           "required": false,
-          "default": "evals\\corpus\\economy-matrix",
+          "default": "evals/corpus/economy-matrix",
           "choices": null,
           "positional": false,
           "help": null
@@ -7346,7 +7469,7 @@
             "--corpus"
           ],
           "required": false,
-          "default": "evals\\corpus\\economy-routing",
+          "default": "evals/corpus/economy-routing",
           "choices": null,
           "positional": false,
           "help": null
@@ -7374,7 +7497,7 @@
             "--corpus"
           ],
           "required": false,
-          "default": "evals\\corpus\\forge-protocol",
+          "default": "evals/corpus/forge-protocol",
           "choices": null,
           "positional": false,
           "help": null
@@ -7502,7 +7625,7 @@
             "--corpus"
           ],
           "required": false,
-          "default": "evals\\corpus\\graph-quality",
+          "default": "evals/corpus/graph-quality",
           "choices": null,
           "positional": false,
           "help": null
@@ -7530,7 +7653,7 @@
             "--corpus"
           ],
           "required": false,
-          "default": "evals\\corpus\\knowledge-drift",
+          "default": "evals/corpus/knowledge-drift",
           "choices": null,
           "positional": false,
           "help": null
@@ -7558,7 +7681,7 @@
             "--path"
           ],
           "required": false,
-          "default": "evals\\cases\\platform.yaml",
+          "default": "evals/cases/platform.yaml",
           "choices": null,
           "positional": false,
           "help": null
@@ -7586,7 +7709,7 @@
             "--layer"
           ],
           "required": false,
-          "default": "src\\apiforge\\rules\\live_evals.yaml",
+          "default": "src/apiforge/rules/live_evals.yaml",
           "choices": null,
           "positional": false,
           "help": null
@@ -7614,7 +7737,7 @@
             "--corpus"
           ],
           "required": false,
-          "default": "evals\\corpus\\memory-evals",
+          "default": "evals/corpus/memory-evals",
           "choices": null,
           "positional": false,
           "help": null
@@ -7642,7 +7765,7 @@
             "--corpus"
           ],
           "required": false,
-          "default": "evals\\corpus\\model-routing",
+          "default": "evals/corpus/model-routing",
           "choices": null,
           "positional": false,
           "help": null
@@ -7711,6 +7834,34 @@
       ]
     },
     {
+      "path": "evals result",
+      "help": "Read a persisted eval report back — re-emits schema, suite and the\nenvironment marker (simulated evidence is never real-environment proof).",
+      "arguments": [
+        {
+          "name": "report",
+          "flags": [
+            "--report"
+          ],
+          "required": true,
+          "default": null,
+          "choices": null,
+          "positional": false,
+          "help": "eval report JSON written by `apiforge evals <suite> --out <file>`"
+        },
+        {
+          "name": "detail_level",
+          "flags": [
+            "--detail-level"
+          ],
+          "required": false,
+          "default": "normal",
+          "choices": null,
+          "positional": false,
+          "help": "Payload level: summary|normal|full."
+        }
+      ]
+    },
+    {
       "path": "evals retrieval",
       "help": "§38: lexical/graph/semantic/hybrid on recall, precision, latency, cost.",
       "arguments": [
@@ -7720,7 +7871,7 @@
             "--corpus"
           ],
           "required": false,
-          "default": "evals\\corpus\\retrieval",
+          "default": "evals/corpus/retrieval",
           "choices": null,
           "positional": false,
           "help": null
@@ -7772,6 +7923,45 @@
       ]
     },
     {
+      "path": "evals run",
+      "help": "Dispatch one declared suite's native runner; exit 1 when it does not pass.",
+      "arguments": [
+        {
+          "name": "suite",
+          "flags": [
+            "suite"
+          ],
+          "required": true,
+          "default": null,
+          "choices": null,
+          "positional": false,
+          "help": "suite id from `evals catalog`"
+        },
+        {
+          "name": "set_",
+          "flags": [
+            "--set"
+          ],
+          "required": false,
+          "default": "[]",
+          "choices": null,
+          "positional": false,
+          "help": "fill a declared suite input (repeatable)"
+        },
+        {
+          "name": "detail_level",
+          "flags": [
+            "--detail-level"
+          ],
+          "required": false,
+          "default": "normal",
+          "choices": null,
+          "positional": false,
+          "help": "Payload level: summary|normal|full."
+        }
+      ]
+    },
+    {
       "path": "evals security-adversarial",
       "help": "§25: synthesized attacks against the platform's own defenses.",
       "arguments": [
@@ -7781,7 +7971,7 @@
             "--corpus"
           ],
           "required": false,
-          "default": "evals\\corpus\\security-adversarial",
+          "default": "evals/corpus/security-adversarial",
           "choices": null,
           "positional": false,
           "help": null
@@ -7809,7 +7999,7 @@
             "--corpus"
           ],
           "required": false,
-          "default": "evals\\corpus\\selective-agentics",
+          "default": "evals/corpus/selective-agentics",
           "choices": null,
           "positional": false,
           "help": null
@@ -7848,7 +8038,7 @@
             "--corpus"
           ],
           "required": false,
-          "default": "evals\\corpus\\telemetry-otlp",
+          "default": "evals/corpus/telemetry-otlp",
           "choices": null,
           "positional": false,
           "help": null
@@ -7876,7 +8066,7 @@
             "--corpus"
           ],
           "required": false,
-          "default": "evals\\corpus\\token-economics",
+          "default": "evals/corpus/token-economics",
           "choices": null,
           "positional": false,
           "help": null
@@ -7904,7 +8094,7 @@
             "--corpus"
           ],
           "required": false,
-          "default": "evals\\corpus\\tool-economy",
+          "default": "evals/corpus/tool-economy",
           "choices": null,
           "positional": false,
           "help": null
@@ -7943,7 +8133,7 @@
             "--corpus"
           ],
           "required": false,
-          "default": "evals\\corpus\\tool-surface",
+          "default": "evals/corpus/tool-surface",
           "choices": null,
           "positional": false,
           "help": null
@@ -7971,7 +8161,7 @@
             "--corpus"
           ],
           "required": false,
-          "default": "evals\\corpus\\trace-grading",
+          "default": "evals/corpus/trace-grading",
           "choices": null,
           "positional": false,
           "help": null
@@ -7982,7 +8172,7 @@
             "--rubric"
           ],
           "required": false,
-          "default": "src\\apiforge\\rules\\trace_rubric.yaml",
+          "default": "src/apiforge/rules/trace_rubric.yaml",
           "choices": null,
           "positional": false,
           "help": null
@@ -8010,7 +8200,7 @@
             "--path"
           ],
           "required": false,
-          "default": "evals\\cases\\platform.yaml",
+          "default": "evals/cases/platform.yaml",
           "choices": null,
           "positional": false,
           "help": null
@@ -8847,6 +9037,240 @@
       "path": "forge capabilities",
       "help": "§46 discover: public capability descriptors other engines can call.",
       "arguments": [
+        {
+          "name": "detail_level",
+          "flags": [
+            "--detail-level"
+          ],
+          "required": false,
+          "default": "normal",
+          "choices": null,
+          "positional": false,
+          "help": null
+        }
+      ]
+    },
+    {
+      "path": "forge doctor",
+      "help": "forge-doctor-api delegation: discover, governed read-only scan, before/after compare.",
+      "arguments": [],
+      "group": true
+    },
+    {
+      "path": "forge doctor compare",
+      "help": "Before/after revalidation: diff two persisted doctor scans.",
+      "arguments": [
+        {
+          "name": "baseline",
+          "flags": [
+            "--baseline"
+          ],
+          "required": true,
+          "default": null,
+          "choices": null,
+          "positional": false,
+          "help": "Baseline delegation run id."
+        },
+        {
+          "name": "current",
+          "flags": [
+            "--current"
+          ],
+          "required": true,
+          "default": null,
+          "choices": null,
+          "positional": false,
+          "help": "Current delegation run id."
+        },
+        {
+          "name": "root",
+          "flags": [
+            "--root"
+          ],
+          "required": false,
+          "default": ".",
+          "choices": null,
+          "positional": false,
+          "help": null
+        },
+        {
+          "name": "detail_level",
+          "flags": [
+            "--detail-level"
+          ],
+          "required": false,
+          "default": "normal",
+          "choices": null,
+          "positional": false,
+          "help": null
+        }
+      ]
+    },
+    {
+      "path": "forge doctor discover",
+      "help": "Measured presence of forge-doctor-api: absent | untrusted | verified.",
+      "arguments": [
+        {
+          "name": "detail_level",
+          "flags": [
+            "--detail-level"
+          ],
+          "required": false,
+          "default": "normal",
+          "choices": null,
+          "positional": false,
+          "help": null
+        }
+      ]
+    },
+    {
+      "path": "forge doctor list",
+      "help": "List persisted delegation runs (completed and refused).",
+      "arguments": [
+        {
+          "name": "root",
+          "flags": [
+            "--root"
+          ],
+          "required": false,
+          "default": ".",
+          "choices": null,
+          "positional": false,
+          "help": null
+        },
+        {
+          "name": "detail_level",
+          "flags": [
+            "--detail-level"
+          ],
+          "required": false,
+          "default": "normal",
+          "choices": null,
+          "positional": false,
+          "help": null
+        }
+      ]
+    },
+    {
+      "path": "forge doctor scan",
+      "help": "Governed read-only delegation: `forge-doctor-api scan --format agent`.\n\nThe doctor diagnoses; plan/implement stay with the host. Every refusal\npersists a refused record under .apiforge/forge/delegations/.",
+      "arguments": [
+        {
+          "name": "target",
+          "flags": [
+            "--target"
+          ],
+          "required": false,
+          "default": ".",
+          "choices": null,
+          "positional": false,
+          "help": "Project directory the doctor scans."
+        },
+        {
+          "name": "correlation_id",
+          "flags": [
+            "--correlation-id"
+          ],
+          "required": false,
+          "default": null,
+          "choices": null,
+          "positional": false,
+          "help": null
+        },
+        {
+          "name": "fail_on",
+          "flags": [
+            "--fail-on"
+          ],
+          "required": false,
+          "default": null,
+          "choices": null,
+          "positional": false,
+          "help": "Doctor gate categories, comma-separated: breaking,security,policy."
+        },
+        {
+          "name": "timeout",
+          "flags": [
+            "--timeout"
+          ],
+          "required": false,
+          "default": "300",
+          "choices": null,
+          "positional": false,
+          "help": "Seconds before the scan is refused."
+        },
+        {
+          "name": "max_hops",
+          "flags": [
+            "--max-hops"
+          ],
+          "required": false,
+          "default": "4",
+          "choices": null,
+          "positional": false,
+          "help": "Chain hop ceiling."
+        },
+        {
+          "name": "allow_unverified",
+          "flags": [
+            "--allow-unverified"
+          ],
+          "required": false,
+          "default": "False",
+          "choices": null,
+          "positional": false,
+          "help": "Run when the doctor identity is discovered but not verified."
+        },
+        {
+          "name": "root",
+          "flags": [
+            "--root"
+          ],
+          "required": false,
+          "default": ".",
+          "choices": null,
+          "positional": false,
+          "help": null
+        },
+        {
+          "name": "detail_level",
+          "flags": [
+            "--detail-level"
+          ],
+          "required": false,
+          "default": "normal",
+          "choices": null,
+          "positional": false,
+          "help": null
+        }
+      ]
+    },
+    {
+      "path": "forge doctor show",
+      "help": "Show a persisted delegation record (refusals included).",
+      "arguments": [
+        {
+          "name": "run_id",
+          "flags": [
+            "--run"
+          ],
+          "required": true,
+          "default": null,
+          "choices": null,
+          "positional": false,
+          "help": "Delegation run id."
+        },
+        {
+          "name": "root",
+          "flags": [
+            "--root"
+          ],
+          "required": false,
+          "default": ".",
+          "choices": null,
+          "positional": false,
+          "help": null
+        },
         {
           "name": "detail_level",
           "flags": [
@@ -10447,6 +10871,17 @@
           "help": "Optional components csv: skills,agents,mcp,tui,graph-studio."
         },
         {
+          "name": "gateway_profile",
+          "flags": [
+            "--gateway-profile"
+          ],
+          "required": false,
+          "default": "balanced",
+          "choices": null,
+          "positional": false,
+          "help": "Execution profile: economy|balanced|deep."
+        },
+        {
           "name": "detail_level",
           "flags": [
             "--detail-level"
@@ -11104,7 +11539,7 @@
             "--root"
           ],
           "required": false,
-          "default": "knowledge",
+          "default": null,
           "choices": null,
           "positional": false,
           "help": "Directory of knowledge packs."
@@ -11154,7 +11589,7 @@
             "--root"
           ],
           "required": false,
-          "default": "knowledge",
+          "default": null,
           "choices": null,
           "positional": false,
           "help": null
@@ -11215,7 +11650,7 @@
             "--root"
           ],
           "required": false,
-          "default": "knowledge",
+          "default": null,
           "choices": null,
           "positional": false,
           "help": null
@@ -11245,6 +11680,34 @@
       ]
     },
     {
+      "path": "knowledge get",
+      "help": "§6.2 knowledge.get — absolute path + sha256 + provenance.",
+      "arguments": [
+        {
+          "name": "file",
+          "flags": [
+            "file"
+          ],
+          "required": true,
+          "default": null,
+          "choices": null,
+          "positional": false,
+          "help": "corpus-relative ref, e.g. rest-design/patterns.md"
+        },
+        {
+          "name": "detail_level",
+          "flags": [
+            "--detail-level"
+          ],
+          "required": false,
+          "default": "normal",
+          "choices": null,
+          "positional": false,
+          "help": "Payload level: summary|normal|full."
+        }
+      ]
+    },
+    {
       "path": "knowledge impact",
       "help": "§29 source -> pack -> rule -> skill -> eval relation graph.",
       "arguments": [
@@ -11254,7 +11717,7 @@
             "--root"
           ],
           "required": false,
-          "default": "knowledge",
+          "default": null,
           "choices": null,
           "positional": false,
           "help": null
@@ -11265,7 +11728,7 @@
             "--skills"
           ],
           "required": false,
-          "default": ".claude\\skills",
+          "default": ".claude/skills",
           "choices": null,
           "positional": false,
           "help": "Skill manifests directory."
@@ -11293,7 +11756,7 @@
             "--root"
           ],
           "required": false,
-          "default": "knowledge",
+          "default": null,
           "choices": null,
           "positional": false,
           "help": "Directory of knowledge packs."
@@ -11374,40 +11837,51 @@
     },
     {
       "path": "knowledge search",
-      "help": "Deterministic expansion, ranked passages with signals, progressive tiers.",
+      "help": "§6.2 knowledge.search — one hit per doc with sha256 + provenance.",
       "arguments": [
         {
-          "name": "query",
+          "name": "term",
           "flags": [
-            "--query"
+            "term"
           ],
           "required": true,
+          "default": null,
+          "choices": null,
+          "positional": false,
+          "help": "offline text over pack docs"
+        },
+        {
+          "name": "domain",
+          "flags": [
+            "--domain"
+          ],
+          "required": false,
+          "default": null,
+          "choices": null,
+          "positional": false,
+          "help": "pack name prefix"
+        },
+        {
+          "name": "limit",
+          "flags": [
+            "--limit"
+          ],
+          "required": false,
           "default": null,
           "choices": null,
           "positional": false,
           "help": null
         },
         {
-          "name": "tier",
+          "name": "cursor",
           "flags": [
-            "--tier"
-          ],
-          "required": false,
-          "default": "1",
-          "choices": null,
-          "positional": false,
-          "help": "1 = top 3, 2 = top 5, 3 = up to 20."
-        },
-        {
-          "name": "root",
-          "flags": [
-            "--root"
+            "--cursor"
           ],
           "required": false,
           "default": null,
           "choices": null,
           "positional": false,
-          "help": "Directory of knowledge packs."
+          "help": null
         },
         {
           "name": "detail_level",
@@ -11418,7 +11892,7 @@
           "default": "normal",
           "choices": null,
           "positional": false,
-          "help": null
+          "help": "Payload level: summary|normal|full."
         }
       ]
     },
@@ -11504,7 +11978,7 @@
             "--root"
           ],
           "required": false,
-          "default": "knowledge",
+          "default": null,
           "choices": null,
           "positional": false,
           "help": "Directory of knowledge packs."
@@ -11588,7 +12062,7 @@
             "--catalog"
           ],
           "required": false,
-          "default": "labs\\scenarios.yaml",
+          "default": "labs/scenarios.yaml",
           "choices": null,
           "positional": false,
           "help": null
@@ -15890,7 +16364,7 @@
             "--keys-dir"
           ],
           "required": false,
-          "default": ".apiforge\\keys",
+          "default": ".apiforge/keys",
           "choices": null,
           "positional": false,
           "help": "Directory holding PEM keys."
@@ -16345,6 +16819,89 @@
           "choices": null,
           "positional": false,
           "help": "Rule id, e.g. AF-SEC-001."
+        },
+        {
+          "name": "detail_level",
+          "flags": [
+            "--detail-level"
+          ],
+          "required": false,
+          "default": "normal",
+          "choices": null,
+          "positional": false,
+          "help": "Payload level: summary|normal|full."
+        }
+      ]
+    },
+    {
+      "path": "rules search",
+      "help": "§6.2 rules.search — filtered catalog page, deterministic cursor.",
+      "arguments": [
+        {
+          "name": "query",
+          "flags": [
+            "--query"
+          ],
+          "required": false,
+          "default": null,
+          "choices": null,
+          "positional": false,
+          "help": "keyword over id/title/area/rationale"
+        },
+        {
+          "name": "area",
+          "flags": [
+            "--area"
+          ],
+          "required": false,
+          "default": null,
+          "choices": null,
+          "positional": false,
+          "help": "filter by catalog area"
+        },
+        {
+          "name": "severity",
+          "flags": [
+            "--severity"
+          ],
+          "required": false,
+          "default": null,
+          "choices": null,
+          "positional": false,
+          "help": "info|low|medium|high|critical"
+        },
+        {
+          "name": "limit",
+          "flags": [
+            "--limit"
+          ],
+          "required": false,
+          "default": null,
+          "choices": null,
+          "positional": false,
+          "help": null
+        },
+        {
+          "name": "cursor",
+          "flags": [
+            "--cursor"
+          ],
+          "required": false,
+          "default": null,
+          "choices": null,
+          "positional": false,
+          "help": null
+        },
+        {
+          "name": "index",
+          "flags": [
+            "--index"
+          ],
+          "required": false,
+          "default": "False",
+          "choices": null,
+          "positional": false,
+          "help": "index fields only"
         },
         {
           "name": "detail_level",

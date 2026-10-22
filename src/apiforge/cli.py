@@ -4063,6 +4063,79 @@ def evals_validate(
     _echo_json(result, detail_level)
 
 
+def _set_options(pairs: list[str]) -> dict[str, str]:
+    """``--set name=value`` pairs -> the declared-input map for `evals run`."""
+    out: dict[str, str] = {}
+    for item in pairs:
+        name, sep, value = item.partition("=")
+        if not sep or not name.strip():
+            raise AnalysisError(
+                "AF-EVALS-RUN-INPUT",
+                f"--set expects NAME=VALUE, got {item!r}",
+            )
+        out[name.strip()] = value
+    return out
+
+
+@evals_app.command("catalog")
+def evals_catalog(
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§7.1 classified catalog: every eval suite with kind + environment."""
+    from apiforge.evals.catalog import catalog
+
+    _echo_json({"suites": catalog()}, detail_level)
+
+
+@evals_app.command("describe")
+def evals_describe(
+    suite: str = typer.Argument(..., help="suite id from `evals catalog`"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """One suite's metadata — sealed baselines/holdouts as sha256, never answers."""
+    from apiforge.evals.catalog import describe
+
+    _echo_json(_run(lambda: describe(suite)), detail_level)
+
+
+@evals_app.command("run")
+def evals_run(
+    suite: str = typer.Argument(..., help="suite id from `evals catalog`"),
+    set_: list[str] = typer.Option(
+        [],
+        "--set",
+        metavar="NAME=VALUE",
+        help="fill a declared suite input (repeatable)",
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Dispatch one declared suite's native runner; exit 1 when it does not pass."""
+    from apiforge.evals.catalog import run_suite
+
+    result = _run(lambda: run_suite(suite, options=_set_options(set_)))
+    _echo_json(result, detail_level)
+    if isinstance(result, dict) and (
+        result.get("passed") is False or result.get("decision") == "reject"
+    ):
+        raise typer.Exit(code=1)
+
+
+@evals_app.command("result")
+def evals_result(
+    report: Path = typer.Option(
+        ...,
+        "--report",
+        help="eval report JSON written by `apiforge evals <suite> --out <file>`",
+    ),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Read a persisted eval report back — re-emits schema, suite and the
+    environment marker (simulated evidence is never real-environment proof)."""
+    from apiforge.evals.catalog import result
+
+    _echo_json(_run(lambda: result(report)), detail_level)
+
+
 @evals_app.command("economy")
 def evals_economy(
     corpus: Path = typer.Option(Path("evals/corpus/economy"), "--corpus"),

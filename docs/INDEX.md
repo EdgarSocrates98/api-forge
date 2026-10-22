@@ -29,13 +29,16 @@ _Task-oriented guides and workflows._
 
 ### ./
 
-- [Optional all-in-one local extras:](../README.md)
+- [Changelog](../CHANGELOG.md)
+- [Código de Conduta — Contributor Covenant 2.1](../CODE_OF_CONDUCT.md)
+- [Optional extras: apiforge-af[all] · apiforge-af[mcp] · apiforge-af[tui]](../README.md)
 - [README.pt-BR](../README.pt-BR.md)
 - [API Forge RTK contract](../RTK.md)
 - [Security Policy](../SECURITY.md)
 - [Política de segurança](../SECURITY.pt-BR.md)
 - [SPEC.md — API_FORGE_V1_CLOSURE](../SPEC.md)
 - [SPEC.md — API_FORGE_V1_CLOSURE](../SPEC.pt-BR.md)
+- [Suporte](../SUPPORT.md)
 
 ### .caveman/
 
@@ -104,8 +107,13 @@ _Task-oriented guides and workflows._
 - [API Forge Portable Distribution and Workspace](guides/API_FORGE_PORTABLE_DISTRIBUTION.md)
 - [Distribuição portátil e workspace do API Forge](guides/API_FORGE_PORTABLE_DISTRIBUTION.pt-BR.md)
 
+### install/
+
+- [Distribution parity — API Forge](install/DISTRIBUTION_PARITY.md)
+
 ### installation/
 
+- [Account-scoped installation](installation/account-installation.md)
 - [api-forge + Claude Code](installation/claude-code.md)
 - [api-forge + Codex CLI](installation/codex-cli.md)
 - [api-forge + GitHub Copilot CLI](installation/copilot-cli.md)
@@ -565,10 +573,17 @@ _Agent instructions, skills and internal process._
 - [API Forge Agent Instructions](../AGENTS.md)
 - [Agent protocol — API Forge](../AGENT_PROTOCOL.md)
 - [API Forge — Claude Operating Guide](../CLAUDE.md)
+- [Contribuindo](../CONTRIBUTING.md)
 
 ## Archive
 
 _Historical, deprecated, generated and evidence docs (preserved, not entry points)._
+
+### .github/
+
+- [bug_report](../.github/ISSUE_TEMPLATE/bug_report.md) `UNKNOWN`
+- [feature_request](../.github/ISSUE_TEMPLATE/feature_request.md) `UNKNOWN`
+- [PULL_REQUEST_TEMPLATE](../.github/PULL_REQUEST_TEMPLATE.md) `UNKNOWN`
 
 ### agents/
 
@@ -598,6 +613,10 @@ _Historical, deprecated, generated and evidence docs (preserved, not entry point
 - [af-judge](../agents/executors/af-judge.md) `UNKNOWN`
 - [af-synthesizer](../agents/executors/af-synthesizer.md) `UNKNOWN`
 - [af-verifier](../agents/executors/af-verifier.md) `UNKNOWN`
+
+### audits/
+
+- [FORGE_CONTEXT_BASELINE — api-forge](audits/FORGE_CONTEXT_BASELINE.md) `UNKNOWN`
 
 ### capabilities/
 
@@ -629,9 +648,14 @@ _Historical, deprecated, generated and evidence docs (preserved, not entry point
 - [Host parity](HOST_PARITY.md) `UNKNOWN`
 - [Paridade entre hosts](HOST_PARITY.pt-BR.md) `UNKNOWN`
 - [Economia de tokens e contexto — API Forge](economy.md) `UNKNOWN`
+- [Evals taxonomy & verification — api-forge (install-2.0 §7, lf-0038)](evals-taxonomy.md) `UNKNOWN`
 - [MCP compliance matrix — spec revision 2026-07-28](mcp-compliance.md) `UNKNOWN`
 - [SDD contract](sdd-contract.md) `SDD_ARTIFACT`
 - [API Forge Skills](skills.md) `UNKNOWN`
+
+### engineering-excellence/
+
+- [API Forge federation readiness](engineering-excellence/federation-readiness.md) `UNKNOWN`
 
 ### experience/
 
@@ -642,9 +666,26 @@ _Historical, deprecated, generated and evidence docs (preserved, not entry point
 - [Revisão semântica — API Forge (FASE 2 §12-equivalente)](experience/semantic-review.md) `UNKNOWN`
 - [Themes and visual identity](experience/themes.md) `UNKNOWN`
 
+### factory/
+
+- [Run — cyc9-06 Forge Lab emitter (api-forge)](../factory/runs/2026-10-15.cyc9-06.md) `UNKNOWN`
+- [Cenários Forge Lab — API Engineering](../factory/specs/archive/2026/cyc9-06-scenarios-api.md) `HISTORICAL`
+
 ### field/
 
 - [Field validation — pre-registered hypothesis](field/hypothesis.md) `UNKNOWN`
+
+### graphify-out/
+
+- [Graph Report - api-forge  (2026-10-15)](../graphify-out/2026-10-15/GRAPH_REPORT.md) `UNKNOWN`
+- [Graph Report - api-forge  (2026-10-16)](../graphify-out/2026-10-16/GRAPH_REPORT.md) `UNKNOWN`
+- [Graph Report - api-forge  (2026-10-17)](../graphify-out/2026-10-17/GRAPH_REPORT.md) `UNKNOWN`
+- [Graph Report - api-forge  (2026-10-18)](../graphify-out/2026-10-18/GRAPH_REPORT.md) `UNKNOWN`
+- [Graph Report - api-forge  (2026-10-19)](../graphify-out/2026-10-19/GRAPH_REPORT.md) `UNKNOWN`
+- [Graph Report - api-forge  (2026-10-20)](../graphify-out/2026-10-20/GRAPH_REPORT.md) `UNKNOWN`
+- [Graph Report - api-forge  (2026-10-21)](../graphify-out/2026-10-21/GRAPH_REPORT.md) `UNKNOWN`
+- [Graph Report - api-forge  (2026-10-22)](../graphify-out/2026-10-22/GRAPH_REPORT.md) `UNKNOWN`
+- [Graph Report - api-forge  (2026-10-22)](../graphify-out/GRAPH_REPORT.md) `UNKNOWN`
 
 ### integrations/
 
@@ -696,6 +737,10 @@ _Historical, deprecated, generated and evidence docs (preserved, not entry point
 - [Plan 21 — TaskSpec + OutcomeBrief (Spec B)](plans/2026-09-21-api-forge-taskspec.md) `UNKNOWN`
 - [API Forge Plans 7+8 — Test & Security Report Adapters](plans/2026-09-21-api-forge-test-security-reports.md) `TEST_EVIDENCE`
 - [Plan 20 — provider tokens and cost](plans/2026-09-21-api-forge-tokens.md) `UNKNOWN`
+
+### releasing/
+
+- [PyPI patch plan — apiforge-af](releasing/pypi-patch-plan.md) `UNKNOWN`
 
 ### reports/
 
@@ -808,6 +853,16 @@ _Historical, deprecated, generated and evidence docs (preserved, not entry point
 - [secure](sdd/API_FORGE_CONTRACT_INTELLIGENCE_DIGITAL_TWIN_D/secure.md) `SDD_ARTIFACT`
 - [ship](sdd/API_FORGE_CONTRACT_INTELLIGENCE_DIGITAL_TWIN_D/ship.md) `SDD_ARTIFACT`
 - [verify](sdd/API_FORGE_CONTRACT_INTELLIGENCE_DIGITAL_TWIN_D/verify.md) `SDD_ARTIFACT`
+- [architecture](sdd/API_FORGE_CYCLE12_PORTABLE_DIST/architecture.md) `SDD_ARTIFACT`
+- [benchmark](sdd/API_FORGE_CYCLE12_PORTABLE_DIST/benchmark.md) `SDD_ARTIFACT`
+- [build](sdd/API_FORGE_CYCLE12_PORTABLE_DIST/build.md) `SDD_ARTIFACT`
+- [contract](sdd/API_FORGE_CYCLE12_PORTABLE_DIST/contract.md) `SDD_ARTIFACT`
+- [discover](sdd/API_FORGE_CYCLE12_PORTABLE_DIST/discover.md) `SDD_ARTIFACT`
+- [intent](sdd/API_FORGE_CYCLE12_PORTABLE_DIST/intent.md) `SDD_ARTIFACT`
+- [plan](sdd/API_FORGE_CYCLE12_PORTABLE_DIST/plan.md) `SDD_ARTIFACT`
+- [secure](sdd/API_FORGE_CYCLE12_PORTABLE_DIST/secure.md) `SDD_ARTIFACT`
+- [ship](sdd/API_FORGE_CYCLE12_PORTABLE_DIST/ship.md) `SDD_ARTIFACT`
+- [verify](sdd/API_FORGE_CYCLE12_PORTABLE_DIST/verify.md) `SDD_ARTIFACT`
 - [architecture](sdd/API_FORGE_DATA_ACCESS_GOVERNED_ADAPTERS_E/architecture.md) `SDD_ARTIFACT`
 - [benchmark](sdd/API_FORGE_DATA_ACCESS_GOVERNED_ADAPTERS_E/benchmark.md) `SDD_ARTIFACT`
 - [build](sdd/API_FORGE_DATA_ACCESS_GOVERNED_ADAPTERS_E/build.md) `SDD_ARTIFACT`

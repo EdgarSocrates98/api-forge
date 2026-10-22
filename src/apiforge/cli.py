@@ -5247,3 +5247,97 @@ def migration_matrix_cmd(
         return compatibility_matrix(ecosystem, receipts, matrix)
 
     _echo_json(_run(work), detail_level)
+
+
+# ---------------------------------------------------------------------------
+# §6.2 discovery verbs (lf-0037): the install-time `forge/context/v1` manifest
+# points at these via discovery.ops — offline, deterministic, JSON-only.
+
+
+@capabilities_app.command("installed")
+def capabilities_installed_cmd(
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """Installed rules/knowledge/skills counts, protocols and the §6.2 op map (offline)."""
+    from apiforge import discovery
+
+    _echo_json(discovery.capabilities(), detail_level)
+
+
+@rules_app.command("search")
+def rules_search_cmd(
+    query: str | None = typer.Option(None, "--query", help="keyword over id/title/area/rationale"),
+    area: str | None = typer.Option(None, "--area", help="filter by catalog area"),
+    severity: str | None = typer.Option(None, "--severity", help="info|low|medium|high|critical"),
+    limit: int | None = typer.Option(None, "--limit"),
+    cursor: str | None = typer.Option(None, "--cursor"),
+    index: bool = typer.Option(False, "--index", help="index fields only"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§6.2 rules.search — filtered catalog page, deterministic cursor."""
+    from apiforge import discovery
+
+    def work() -> object:
+        return discovery.rules_search(
+            query=query,
+            area=area,
+            severity=severity,
+            limit=limit,
+            cursor=cursor,
+            index=index,
+        )
+
+    _echo_json(_run(work), detail_level)
+
+
+@knowledge_app.command("search")
+def knowledge_search_cmd(
+    term: str = typer.Argument(..., help="offline text over pack docs"),
+    domain: str | None = typer.Option(None, "--domain", help="pack name prefix"),
+    limit: int | None = typer.Option(None, "--limit"),
+    cursor: str | None = typer.Option(None, "--cursor"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§6.2 knowledge.search — one hit per doc with sha256 + provenance."""
+    from apiforge import discovery
+
+    def work() -> object:
+        return discovery.knowledge_search(term, domain=domain, limit=limit, cursor=cursor)
+
+    _echo_json(_run(work), detail_level)
+
+
+@knowledge_app.command("get")
+def knowledge_get_cmd(
+    file: str = typer.Argument(..., help="corpus-relative ref, e.g. rest-design/patterns.md"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§6.2 knowledge.get — absolute path + sha256 + provenance."""
+    from apiforge import discovery
+
+    def work() -> object:
+        return discovery.knowledge_get(file)
+
+    _echo_json(_run(work), detail_level)
+
+
+@context_app.command("pack")
+def context_pack_cmd(
+    domain: str | None = typer.Option(None, "--domain"),
+    rules_limit: int | None = typer.Option(None, "--rules-limit"),
+    knowledge_limit: int | None = typer.Option(None, "--knowledge-limit"),
+    as_of: str | None = typer.Option(None, "--as-of"),
+    detail_level: str = typer.Option("normal", "--detail-level", help=_DETAIL_HELP),
+) -> None:
+    """§6.2 context.build — bounded domain pack with deterministic hash."""
+    from apiforge import discovery
+
+    def work() -> object:
+        return discovery.context_pack(
+            domain,
+            rules_limit=rules_limit,
+            knowledge_limit=knowledge_limit,
+            as_of=as_of,
+        )
+
+    _echo_json(_run(work), detail_level)

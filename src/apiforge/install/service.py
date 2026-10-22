@@ -12,7 +12,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from apiforge import __version__
+from apiforge import __version__, discovery_ops
 from apiforge import _forgecontext as fctx
 from apiforge import _installkit as kit
 from apiforge.install import render
@@ -472,7 +472,13 @@ def _context_manifest(ctx: kit.InstallContext) -> dict[str, Any]:
             {"id": "forge/context/v1", "version": "1"},
             {"id": "forge/context-registry/v1", "version": "1"},
         ),
+        discovery_ops=discovery_ops.ops(),
         discovery_commands=(
+            *(
+                c
+                for c in discovery_ops.commands()
+                if c["id"] != "doctor"  # `doctor` is declared below
+            ),
             {
                 "id": "analyze",
                 "argv": ["apiforge", "analyze", "{target}"],

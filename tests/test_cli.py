@@ -8,7 +8,7 @@ runner = CliRunner()
 def test_version_is_stable() -> None:
     result = runner.invoke(app, ["--version"])
     assert result.exit_code == 0
-    assert result.stdout == "apiforge 0.1.6\n"
+    assert result.stdout == "apiforge 0.2.0\n"
 
 
 def test_help_lists_mvp_commands() -> None:

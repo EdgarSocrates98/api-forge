@@ -244,6 +244,10 @@ def uninstall(
             # BLOCKED num componente mandatório não sai exit 0.
             if any(c.get("status") == "BLOCKED" for c in checks):
                 receipt["status"] = "failed"
+            if not purge:
+                # kit.uninstall persistiu o receipt antes do unregister —
+                # regrava para refletir checks/status finais no arquivo.
+                _write_receipt(ctx.state_dir, receipt)
         return receipt
 
 

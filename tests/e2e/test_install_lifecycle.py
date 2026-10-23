@@ -419,3 +419,24 @@ def test_repair_reconstroi_doc_bloco(projeto):
     check = next((c for c in rep["checks"] if c["id"] == "consumer-docs"), None)
     assert check is not None and check["status"] == "PASS"
     assert "ADULTERADO" not in alvo.read_text(encoding="utf-8")
+
+
+def test_uninstall_receipt_persistido_igual_ao_emitido(projeto, monkeypatch):
+    """kit.uninstall grava o receipt antes do unregister do contexto — a
+    mutacao (BLOCKED -> failed) precisa chegar ao disco."""
+    from apiforge import _forgecontext as fctx
+
+    service.install("devin", scope="project", root=projeto, yes=True)
+
+    def boom(*_a, **_k):
+        raise fctx.ContextError(fctx.E_CONFLICT, "simulated unregister failure")
+
+    monkeypatch.setattr(fctx, "uninstall_transaction", boom)
+    out = service.uninstall(scope="project", root=projeto)
+    assert out["status"] == "failed"
+    assert any(c["id"] == "context-registry" and c["status"] == "BLOCKED" for c in out["checks"])
+    receipts = sorted((projeto / ".apiforge" / "install" / "receipts").glob("uninstall-*.json"))
+    assert receipts, "receipt deveria ter sido persistido"
+    persisted = json.loads(receipts[-1].read_text("utf-8"))
+    assert persisted["status"] == out["status"]
+    assert [c["id"] for c in persisted["checks"]] == [c["id"] for c in out["checks"]]

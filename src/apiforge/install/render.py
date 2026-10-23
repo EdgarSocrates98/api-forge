@@ -157,13 +157,25 @@ def render(hosts: tuple[str, ...], *, skills: bool, agents: bool) -> dict[str, b
             continue
         for m in re.finditer(rb"knowledge/[A-Za-z0-9_./-]+", data):
             rel = m.group(0)[len(b"knowledge/") :].decode("utf-8").rstrip(".,);]")
-            if rel:
+            # Refs citadas em docs viram chaves de asset — um `..` ou path
+            # absoluto viraria escrita/unlink FORA do root no apply/uninstall.
+            if rel and _rel_seguro(rel):
                 refs.add(rel)
     for rel in sorted(refs):
         stub_rel = rel if Path(rel).suffix else f"{rel}/README.md"
         out.setdefault(f"knowledge/{stub_rel}", _knowledge_stub(rel))
 
     return out
+
+
+def _rel_seguro(rel: str) -> bool:
+    """Um `knowledge/<rel>` citado num doc vira chave de asset/path em disco
+    no install — `..`, absoluto, drive ou barra invertida escapariam do root
+    (o `Path` nao normaliza `..` antes do syscall)."""
+    if not rel or "\\" in rel or ":" in rel or "%" in rel:
+        return False
+    partes = Path(rel)
+    return not partes.is_absolute() and ".." not in partes.parts
 
 
 _KNOWLEDGE_STUB = """\

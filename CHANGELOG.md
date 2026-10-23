@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+## [0.2.1] - 2026-10-22
+
+### Fixed
+
+- `_forgecontext` v1.3.2: non-UTF-8 consumer docs (AGENTS.md / CLAUDE.md /
+  AGENT_PROTOCOL.md) now refuse with named `FORGE-CONTEXT-CONFLICT` on
+  install and uninstall — never a bare `UnicodeDecodeError` mid-write.
+
 ## [0.2.0] - 2026-10-22
 
 ### Added
@@ -13,7 +21,7 @@ All notable changes to this project are documented here. Format follows
 ### Fixed
 
 - `_txn_restore` journal path validation; interrupt-safe rollback;
-  stale-lock `created_at` fallback (Windows); vendored `_installkit` v1.0.1 +
+  stale-lock `created_at` fallback (Windows); vendored `_installkit` v1.0.2 +
   `forge_bootstrap` v1.1.1 security backports (userinfo redaction, argv trim,
   empty-stdout smoke).
 
@@ -47,6 +55,7 @@ All notable changes to this project are documented here. Format follows
 - Portal vendored 2.1 final (Cycles 0-6)
 
 ## [Unreleased]
+
 
 
 ## [0.1.6] - 2026-10-21

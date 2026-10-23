@@ -239,7 +239,11 @@ def uninstall(
     with kit.acquire_lock(ctx.state_dir):
         receipt = kit.uninstall(ctx, purge_state=purge)
         if _docs_leftovers(ctx.root):
-            receipt.setdefault("checks", []).extend(_unregister_context(ctx.root))
+            checks = _unregister_context(ctx.root)
+            receipt.setdefault("checks", []).extend(checks)
+            # BLOCKED num componente mandatório não sai exit 0.
+            if any(c.get("status") == "BLOCKED" for c in checks):
+                receipt["status"] = "failed"
         return receipt
 
 
@@ -599,7 +603,11 @@ def _context_manifest(ctx: kit.InstallContext) -> dict[str, Any]:
 
 def _register_context(ctx: kit.InstallContext, receipt: dict[str, Any]) -> None:
     """Grava `.forge/context/` — manifesto + entrada no registry +
-    ROUTING.md. Falha vira check BLOCKED nomeado no recibo."""
+    ROUTING.md. Falha vira check BLOCKED nomeado no recibo.
+    ``scope=user`` tem target=``~``: ``~/.forge/`` é nível de conta —
+    contexto de workspace não se escreve lá (mesma regra dos siblings)."""
+    if ctx.scope == "user":
+        return
     try:
         manifest = _context_manifest(ctx)
         out = fctx.install_transaction(
@@ -626,6 +634,10 @@ def _register_context(ctx: kit.InstallContext, receipt: dict[str, Any]) -> None:
         receipt.setdefault("checks", []).append(
             {"id": "context-registry", "status": "BLOCKED", "detail": f"{exc.kind}: {exc.detail}"}
         )
+        # BLOCKED num componente mandatório não pode sair exit 0 — os
+        # assets foram escritos mas o contrato install-2.0 (registry +
+        # consumer docs) falhou; o recibo reporta a falha.
+        receipt["status"] = "failed"
 
 
 def _unregister_context(root: Path) -> list[dict[str, Any]]:

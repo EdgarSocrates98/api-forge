@@ -283,3 +283,16 @@ grep -c 'def test_' tests/e2e/test_install_lifecycle.py \
 | Wheel smoke (venv limpo) | PASS | `pip install apiforge-af==0.2.0` + `apiforge --version` → `0.2.0` |
 
 Notas: installkit canônico 1.0.2 (`_SOURCE_SHA256 a15ca78bb34a0109`), bootstrap 1.1.1 — propagados aos 7 carriers; `vendor.py --check` CLEAN ×7. `data-sentinel-forge`: **deferido pelo dono** (outro CLI evoluindo).
+
+## Pós-release hotfix — evidência de publicação patch (2026-10-23 UTC)
+
+Patch motivado pelo review: `UnicodeDecodeError` não-tipado em docs de
+consumidor não-UTF-8 quebrava install **e** uninstall.
+
+| Item | Estado | Evidência |
+|---|---|---|
+| Tag | CRIADA | `v0.2.1` |
+| GitHub Release | CRIADO | `gh release view v0.2.1` |
+| PyPI | PUBLICADO | `pypi.org/pypi/apiforge-af/json` → `0.2.1` |
+| Wheel smoke | PASS | wheel publicado contém `_forgecontext` v1.3.2 (`_read_doc` presente) — verificado via `pip download apiforge-af==0.2.1` |
+| Regressão | PASS | teste cp1252 `AGENTS.md` → `FORGE-CONTEXT-CONFLICT` nomeado em install e uninstall |

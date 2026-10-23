@@ -9,7 +9,7 @@ nao existe, o pacote carrega as mesmas arvores em
 
 from __future__ import annotations
 
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 
 from apiforge.core.yaml import load_yaml_strict
@@ -172,10 +172,10 @@ def _rel_seguro(rel: str) -> bool:
     """Um `knowledge/<rel>` citado num doc vira chave de asset/path em disco
     no install — `..`, absoluto, drive ou barra invertida escapariam do root
     (o `Path` nao normaliza `..` antes do syscall)."""
-    if not rel or "\\" in rel or ":" in rel or "%" in rel:
+    if not rel or "\\" in rel or ":" in rel or "%" in rel or rel.startswith("/"):
         return False
-    partes = Path(rel)
-    return not partes.is_absolute() and ".." not in partes.parts
+    partes = PurePosixPath(rel)
+    return ".." not in partes.parts
 
 
 _KNOWLEDGE_STUB = """\

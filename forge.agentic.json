@@ -1,7 +1,7 @@
 {
   "schema": "forge/SpecialistAgenticManifest/v1",
   "provider": "api-forge",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "cli": "apiforge",
   "cli_entry": "apiforge.cli:app",
   "workflows": [

@@ -15,25 +15,25 @@ from pathlib import Path
 from apiforge.ui.i18n import t
 from apiforge.ui.kit import NonInteractive, UIContext, _c, dashboard, select
 
-FORGE_NAME = 'api-forge'
-CLI_NAME = 'apiforge'
-CLI_ENTRY = 'apiforge.cli:app'
+FORGE_NAME = "api-forge"
+CLI_NAME = "apiforge"
+CLI_ENTRY = "apiforge.cli:app"
 
 _MENU: list[tuple[str, list[str] | None]] = [
-    ('API analysis (project/workspace status)', ['status']),
-    ('Discover API routes (FastAPI)', ['discover', '--project', '.']),
-    ('Contract explorer', ['contract', 'list']),
-    ('Architecture explorer (capability matrix)', ['capabilities', 'list']),
-    ('Agentic tasks', ['forge', 'health']),
-    ('Test results (eval catalog)', ['evals', 'list']),
-    ('Verification plan', ['verify', 'plan']),
-    ('Evidence (field records)', ['field', 'report']),
-    ('History (agent/tool spans)', ['runtime', 'telemetry-query']),
-    ('Installation health', ['install', 'status']),
-    ('Host manager (AI hosts)', ['ai']),
-    ('Explore agents (drift check)', ['agents', 'check']),
-    ('MCP verify (real handshake)', ['install', 'verify']),
-    ('Graph Studio (browser)', ['graph', 'ui', '--graph', '.apiforge/graph']),
+    ("API analysis (project/workspace status)", ["status"]),
+    ("Discover API routes (FastAPI)", ["discover", "--project", "."]),
+    ("Contract explorer", ["contract", "list"]),
+    ("Architecture explorer (capability matrix)", ["capabilities", "list"]),
+    ("Agentic tasks", ["forge", "health"]),
+    ("Test results (eval catalog)", ["evals", "list"]),
+    ("Verification plan", ["verify", "plan"]),
+    ("Evidence (field records)", ["field", "report"]),
+    ("History (agent/tool spans)", ["runtime", "telemetry-query"]),
+    ("Installation health", ["install", "status"]),
+    ("Host manager (AI hosts)", ["ai"]),
+    ("Explore agents (drift check)", ["agents", "check"]),
+    ("MCP verify (real handshake)", ["install", "verify"]),
+    ("Graph Studio (browser)", ["graph", "ui", "--graph", ".apiforge/graph"]),
     ("installation wizard", "__wizard__"),
     ("quit", None),
 ]
@@ -48,11 +48,10 @@ def _cli_argv(extra: list[str]) -> list[str] | None:
         module, _, fn = CLI_ENTRY.partition(":")
         checkout = next(
             (
-            a
-            for a in Path(__file__).resolve().parents
-            if (a / "forge.json").is_file()
-            and (a / "pyproject.toml").is_file()
-        ),
+                a
+                for a in Path(__file__).resolve().parents
+                if (a / "forge.json").is_file() and (a / "pyproject.toml").is_file()
+            ),
             None,
         )
         if checkout is None:
@@ -67,7 +66,7 @@ def _cli_argv(extra: list[str]) -> list[str] | None:
 
 
 def _run_argv(argv: list[str]) -> int:
-    env = dict(__import__('os').environ, FORGE_TEXT_OUTPUT="1")
+    env = dict(__import__("os").environ, FORGE_TEXT_OUTPUT="1")
     try:
         return subprocess.run(argv, check=False, env=env).returncode
     except FileNotFoundError:
@@ -80,6 +79,7 @@ def run_home(*, ctx: UIContext | None = None) -> int:
         raise NonInteractive("home requires a TTY")
     if ctx.ansi:  # full-screen path; ANSI-free terminals keep the inline kit
         from apiforge.ui.tui import run_tui
+
         return run_tui(ctx=ctx)
     dashboard(
         f"{FORGE_NAME}  workspace: {Path.cwd().name}",

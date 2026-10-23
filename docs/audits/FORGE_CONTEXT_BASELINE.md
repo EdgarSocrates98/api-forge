@@ -30,7 +30,7 @@ Pacote `src/apiforge/` (~90 entradas de primeiro nível). Relevantes ao contexto
 | Área | Módulo | Papel |
 |---|---|---|
 | Install lifecycle | `install/service.py` (310 linhas), `install/render.py` (151) | ForgeSpec + render de assets por host |
-| Motor de install | `_installkit.py` (1732) | **vendored, byte-idêntico** ao canônico `the-forge/scripts/installkit/forge_installkit.py` e às cópias em `platform-forge` e `data-sentinel-forge` (mesmo md5 `a31bd4f0…`, `_SOURCE_SHA256 = "bc189dd2ae0028ce"`) |
+| Motor de install | `_installkit.py` (1825) | **vendored, byte-idêntico** ao canônico `the-forge/scripts/installkit/forge_installkit.py` e às cópias em `platform-forge` e `data-sentinel-forge` (mesmo md5 `e2c17c19…`, `_SOURCE_SHA256 = "7a51eb0c03d7a342"`) |
 | CLI install | `cli_install.py` (278) + `cli_install_pretty.py` (166) | sub-app typer `install` |
 | Assets empacotados | `host_assets/` (`loader.py`, `manifest.yaml`, `templates/`) + `host_assets/{agents,skills}` via force-include | templates de host + árvores canônicas dentro do wheel |
 | Distribuição | `distribution/{assets,config,doctor,paths}.py` | `package_root()`, inventário com sha256, diagnóstico |
@@ -418,7 +418,7 @@ não é detectada/registrada (data-sentinel §8.1/§8.4).
 
 ```text
 git log -1 --format='%H %s'                                   # 5b3a195…
-md5sum src/apiforge/_installkit.py                            # a31bd4f0… == siblings
+md5sum src/apiforge/_installkit.py                            # e2c17c19… == siblings
 cmp -s scripts/forge_installkit.py src/apiforge/_installkit.py  # IDÊNTICO
 .venv/bin/python -m build --outdir /tmp/af-dist .
 python3 -m zipfile -l /tmp/af-dist/apiforge_af-0.1.6-py3-none-any.whl

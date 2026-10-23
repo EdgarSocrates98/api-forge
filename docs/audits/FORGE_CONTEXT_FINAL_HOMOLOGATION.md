@@ -109,9 +109,9 @@ Mapeamento gap do baseline (§5) → correção entregue:
 
 ## 6. Gaps restantes
 
-- **E2E real de hosts (§10.2) — NÃO EXECUTADO** (ciclo 8 pendente; ver §9).
-- **Economia/observabilidade (ciclo 9, §11) — pendente.**
-- **Publicação PyPI — pendente** (§10).
+- **E2E real de hosts (§10.2) — EXECUTADO parcial** (ciclo 8: host Devin verificado com evidência compartilhada via sparkforge-aws; Claude/Codex/Copilot não verificados — hosts indisponíveis; ver §9 e secção Cycle 8).
+- **Economia/observabilidade (ciclo 9, §11) — MEDIDO** (ver secção Cycle 9; tokens `unresolved`, nunca estimados).
+- **Publicação PyPI — PUBLICADO** nos 7 pacotes PyPI (§10); data-sentinel-forge BLOQUEADO por approval humana no env `pypi` (trusted publisher pendente — ação do dono).
 - **P1-1** — registry `~/.forge/installations/api-forge.json` continua
   stale após uninstall: `service.py` não chama
   `kit.deregister_installation()` (verificado: `grep deregister
@@ -248,11 +248,11 @@ Herdada do motor vendored + wiring local:
 
 | Forge | `forge/context/v1` | `_forgecontext` | `_installkit` | `forge_bootstrap` | Status |
 |---|---|---|---|---|---|
-| the-forge | registry + docs + txn | v1.3.1 | v1.0.1 | v1.1.1 | **merged, pendente de release** (0.6.0) |
-| spark-forge-aws | registry + docs + txn | v1.3.1 | v1.0.1 | v1.1.1 | **merged, pendente de release** (0.6.0) |
-| spark-forge-azure | registry + docs + txn | v1.3.1 | v1.0.1 | v1.1.1 | **merged, pendente de release** (0.2.0) |
-| **api-forge** | registry + docs + txn | v1.3.1 | v1.0.1 | v1.1.1 | **merged, pendente de release** (0.2.0) |
-| platform-forge | registry + docs + txn | v1.3.1 | v1.0.1 | v1.1.1 | **merged, pendente de release** (0.2.0) |
+| the-forge | registry + docs + txn | v1.3.1 | v1.0.1 | v1.1.1 | **released** (0.7.0) |
+| spark-forge-aws | registry + docs + txn | v1.3.1 | v1.0.1 | v1.1.1 | **released** (0.7.0) |
+| spark-forge-azure | registry + docs + txn | v1.3.1 | v1.0.1 | v1.1.1 | **released** (0.3.0) |
+| **api-forge** | registry + docs + txn | v1.3.1 | v1.0.1 | v1.1.1 | **released** (0.3.0) |
+| platform-forge | registry + docs + txn | v1.3.1 | v1.0.1 | v1.1.1 | **released** (0.3.0) |
 | forge-doctor-api | — | ausente | v1.0.1 | v1.1.1 | **installkit only (boundary)** |
 | forge-doctor-data | — | ausente | v1.0.1 | v1.1.1 | **installkit only (boundary)**; certifi PYSEC-2026-4320 |
 | data-sentinel-forge | — | ausente | v1.0.0 | ausente | **deferred by owner** |
@@ -307,7 +307,7 @@ Duas ondas de patch: `0.2.2` (install 2.0 hardening — traversal containment, l
 | GitHub Release | CRIADO | `gh release view v0.2.3` |
 | PyPI | PUBLICADO | `pypi.org/pypi/apiforge-af/json` → `0.2.3` |
 | Wheel conteúdo | VERIFICADO | `pip download apiforge-af==0.2.3` → `_installkit` 1.0.4 (`_INSTALLKIT_VERSION`) |
-| Install E2E (wheel→workspace) | PASS | ver secção Cycle 8 abaixo |
+| Install E2E (wheel→workspace) | parcial — evidência compartilhada (spark-forge-aws) | ver secção Cycle 8 abaixo |
 
 ## Cycle 8 — E2E real em host Devin (EXECUTADO 2026-10-23)
 
@@ -349,3 +349,15 @@ Sentinel: release `v0.2.2` existe no GitHub; publicação PyPI
 **bloqueada** — workflow `Release` gated no environment `pypi`
 (trusted publisher + approval humana). Job `publish to PyPI (OIDC, gated)`
 falhou por design até o dono aprovar.
+
+
+## Nota — marcador de raiz de projeto (2026-10-23)
+
+`forge.json` num diretório ancestral só é marcador de raiz quando
+acompanhado de `pyproject.toml` (`ui/wizard._has_vcs_root`,
+`ui/home._cli_argv`, `platformforge/install/service`). Um
+`forge.json` solto — ex.: o manifesto de workspace opcional do
+forge-cli ou artefato de instalação em `/tmp` — não oferece mais
+scope `project`: sem `.git` e sem `pyproject.toml`, o diretório é
+tratado como workspace/fresh dir, não como checkout. Regressão:
+`tests/test_vcs_marker.py`.

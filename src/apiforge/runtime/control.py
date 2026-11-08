@@ -14,7 +14,7 @@ from collections.abc import Callable
 from datetime import datetime
 from functools import wraps
 from pathlib import Path
-from typing import Any, Literal
+from typing import Concatenate, Literal, cast
 
 from pydantic import Field, model_validator
 
@@ -28,7 +28,9 @@ RunStatus = Literal[
 ]
 
 
-def _synchronized(method: Callable[..., Any]) -> Callable[..., Any]:
+def _synchronized[**_P, _R](
+    method: Callable[Concatenate[ControlPlane, _P], _R],
+) -> Callable[Concatenate[ControlPlane, _P], _R]:
     """Serialize state-machine operations sharing one persisted run.
 
     The runtime can dispatch independent specialists concurrently.  A fixed
@@ -39,11 +41,11 @@ def _synchronized(method: Callable[..., Any]) -> Callable[..., Any]:
     """
 
     @wraps(method)
-    def wrapped(self: ControlPlane, *args: Any, **kwargs: Any) -> Any:
+    def wrapped(self: ControlPlane, *args: _P.args, **kwargs: _P.kwargs) -> _R:
         with self._lock:
             return method(self, *args, **kwargs)
 
-    return wrapped
+    return cast(Callable[Concatenate[ControlPlane, _P], _R], wrapped)
 
 
 class ControlStep(VersionedContract):

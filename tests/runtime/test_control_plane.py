@@ -72,10 +72,7 @@ def test_control_plane_serializes_parallel_starts(tmp_path: Path) -> None:
     )
 
     with ThreadPoolExecutor(max_workers=8) as pool:
-        futures = [
-            pool.submit(plane.start, run.run_id, step.step_id)
-            for step in run.steps
-        ]
+        futures = [pool.submit(plane.start, run.run_id, step.step_id) for step in run.steps]
         started = [future.result() for future in futures]
 
     persisted = plane.get(run.run_id)

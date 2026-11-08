@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import pytest
@@ -59,3 +60,22 @@ def test_control_plane_completion_is_idempotent_and_conflict_safe(tmp_path: Path
     assert plane.complete(run.run_id, step.step_id, {"ok": True}).steps[0].status == "succeeded"
     with pytest.raises(ContractError, match="AF-CONTROL-IDEMPOTENCY-CONFLICT"):
         plane.complete(run.run_id, step.step_id, {"ok": False})
+
+
+def test_control_plane_serializes_parallel_starts(tmp_path: Path) -> None:
+    plane = _plane(tmp_path)
+    run = plane.create(
+        "api",
+        tuple((f"step-{index}", ()) for index in range(8)),
+        max_parallel=8,
+        max_calls=8,
+    )
+
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        futures = [pool.submit(plane.start, run.run_id, step.step_id) for step in run.steps]
+        started = [future.result() for future in futures]
+
+    persisted = plane.get(run.run_id)
+    assert len(started) == 8
+    assert persisted.calls_used == 8
+    assert {step.status for step in persisted.steps} == {"running"}

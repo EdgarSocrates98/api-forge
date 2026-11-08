@@ -9,9 +9,12 @@ is owned by ``apiforge.governance.control_plane``; see
 from __future__ import annotations
 
 import json
+import threading
+from collections.abc import Callable
 from datetime import datetime
+from functools import wraps
 from pathlib import Path
-from typing import Literal
+from typing import Concatenate, Literal, cast
 
 from pydantic import Field, model_validator
 
@@ -23,6 +26,26 @@ StepStatus = Literal["pending", "running", "succeeded", "failed", "cancelled", "
 RunStatus = Literal[
     "planned", "running", "awaiting_review", "completed", "failed", "cancelled", "blocked"
 ]
+
+
+def _synchronized[**P, R](
+    method: Callable[Concatenate[ControlPlane, P], R],
+) -> Callable[Concatenate[ControlPlane, P], R]:
+    """Serialize state-machine operations sharing one persisted run.
+
+    The runtime can dispatch independent specialists concurrently.  A fixed
+    ``run.json.tmp`` is not safe when two workers read-modify-write the same
+    control run at once, especially on Windows where an open destination can
+    make ``replace`` fail.  The re-entrant lock also preserves the state
+    transition itself, rather than merely serializing the final file write.
+    """
+
+    @wraps(method)
+    def wrapped(self: ControlPlane, *args: P.args, **kwargs: P.kwargs) -> R:
+        with self._lock:
+            return method(self, *args, **kwargs)
+
+    return cast("Callable[Concatenate[ControlPlane, P], R]", wrapped)
 
 
 class ControlStep(VersionedContract):
@@ -79,6 +102,7 @@ class ControlPlane:
         self.root = Path(root)
         self.directory = self.root / ".apiforge" / "control"
         self.directory.mkdir(parents=True, exist_ok=True)
+        self._lock = threading.RLock()
 
     def _directory(self, run_id: str) -> Path:
         return self.directory / run_id.replace(":", "-")
@@ -113,6 +137,7 @@ class ControlPlane:
             raise ContractError("AF-CONTROL-RUN-NOT-FOUND", run_id)
         return ControlRun.model_validate(json.loads(path.read_text(encoding="utf-8")))
 
+    @_synchronized
     def create(
         self,
         task_id: str,
@@ -152,6 +177,7 @@ class ControlPlane:
         self._event(run, "planned", steps=[step.name for step in run.steps])
         return run
 
+    @_synchronized
     def add_steps(
         self,
         run_id: str,
@@ -204,9 +230,11 @@ class ControlPlane:
         self._event(result, "steps_added", steps=[name for name, _ in steps])
         return result
 
+    @_synchronized
     def get(self, run_id: str) -> ControlRun:
         return self._load(run_id)
 
+    @_synchronized
     def ready(self, run_id: str) -> tuple[ControlStep, ...]:
         run = self._load(run_id)
         completed = {step.name for step in run.steps if step.status == "succeeded"}
@@ -216,6 +244,7 @@ class ControlPlane:
             if step.status == "pending" and all(dep in completed for dep in step.dependencies)
         )
 
+    @_synchronized
     def plan(self, run_id: str) -> dict[str, object]:
         run = self._load(run_id)
         ready = self.ready(run_id)
@@ -227,6 +256,7 @@ class ControlPlane:
             "calls_remaining": max(0, run.max_calls - run.calls_used),
         }
 
+    @_synchronized
     def start(self, run_id: str, step_id: str, *, kind: str = "step") -> ControlRun:
         run = self._load(run_id)
         if run.status in {"completed", "cancelled", "blocked"}:
@@ -260,6 +290,7 @@ class ControlPlane:
         self._event(result, "step_started", step_id=step_id, attempt=updated.attempts)
         return result
 
+    @_synchronized
     def record_call(self, run_id: str, kind: str) -> ControlRun:
         """Account a provider call that is not a control step (e.g. a shadow challenger)."""
         run = self._load(run_id)
@@ -282,6 +313,7 @@ class ControlPlane:
         self._event(result, "call_recorded", kind=kind)
         return result
 
+    @_synchronized
     def claim(
         self,
         run_id: str,
@@ -317,6 +349,7 @@ class ControlPlane:
         )
         return result
 
+    @_synchronized
     def heartbeat(
         self, run_id: str, step_id: str, *, worker_id: str, lease_until: str
     ) -> ControlRun:
@@ -337,6 +370,7 @@ class ControlPlane:
         )
         return result
 
+    @_synchronized
     def recover_expired(self, run_id: str, *, now: str) -> ControlRun:
         """Return expired running steps to the queue for another worker."""
         run = self._load(run_id)
@@ -375,6 +409,7 @@ class ControlPlane:
             self._event(result, "leases_recovered", step_ids=recovered, now=now)
         return result
 
+    @_synchronized
     def complete(self, run_id: str, step_id: str, result: object) -> ControlRun:
         run = self._load(run_id)
         step = next((item for item in run.steps if item.step_id == step_id), None)
@@ -414,6 +449,7 @@ class ControlPlane:
         )
         return result_run
 
+    @_synchronized
     def skip(self, run_id: str, step_id: str, reason: str) -> ControlRun:
         """Mark a planned step as intentionally unused without hiding the reason."""
         run = self._load(run_id)
@@ -437,6 +473,7 @@ class ControlPlane:
         self._event(result, "step_skipped", step_id=step_id, reason=reason)
         return result
 
+    @_synchronized
     def fail(self, run_id: str, step_id: str, error: str) -> ControlRun:
         run = self._load(run_id)
         step = next((item for item in run.steps if item.step_id == step_id), None)
@@ -458,6 +495,7 @@ class ControlPlane:
         self._event(result_run, "step_failed", step_id=step_id, retry_scheduled=retry, error=error)
         return result_run
 
+    @_synchronized
     def cancel(self, run_id: str, actor: str) -> ControlRun:
         run = self._load(run_id)
         steps = tuple(
@@ -478,6 +516,7 @@ class ControlPlane:
         self._event(result, "cancelled", actor=actor)
         return result
 
+    @_synchronized
     def review(
         self, run_id: str, reviewer: str, verdict: Literal["approved", "rejected", "review"]
     ) -> ControlRun:
@@ -503,6 +542,7 @@ class ControlPlane:
         self._event(result, "reviewed", reviewer=reviewer, verdict=verdict)
         return result
 
+    @_synchronized
     def replay(self, run_id: str) -> dict[str, object]:
         run = self._load(run_id)
         path = self._directory(run_id) / "events.jsonl"

@@ -28,9 +28,9 @@ RunStatus = Literal[
 ]
 
 
-def _synchronized[**_P, _R](
-    method: Callable[Concatenate[ControlPlane, _P], _R],
-) -> Callable[Concatenate[ControlPlane, _P], _R]:
+def _synchronized[**P, R](
+    method: Callable[Concatenate[ControlPlane, P], R],
+) -> Callable[Concatenate[ControlPlane, P], R]:
     """Serialize state-machine operations sharing one persisted run.
 
     The runtime can dispatch independent specialists concurrently.  A fixed
@@ -41,11 +41,11 @@ def _synchronized[**_P, _R](
     """
 
     @wraps(method)
-    def wrapped(self: ControlPlane, *args: _P.args, **kwargs: _P.kwargs) -> _R:
+    def wrapped(self: ControlPlane, *args: P.args, **kwargs: P.kwargs) -> R:
         with self._lock:
             return method(self, *args, **kwargs)
 
-    return cast(Callable[Concatenate[ControlPlane, _P], _R], wrapped)
+    return cast("Callable[Concatenate[ControlPlane, P], R]", wrapped)
 
 
 class ControlStep(VersionedContract):

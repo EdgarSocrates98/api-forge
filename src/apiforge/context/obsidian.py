@@ -25,7 +25,13 @@ def _section(title: str, values: Any) -> list[str]:
     safe = _safe(values)
     if safe in (None, "", [], {}):
         return [f"## {title}", "- None reported", ""]
-    return [f"## {title}", "```yaml", yaml.safe_dump(safe, sort_keys=True, allow_unicode=True).rstrip(), "```", ""]
+    return [
+        f"## {title}",
+        "```yaml",
+        yaml.safe_dump(safe, sort_keys=True, allow_unicode=True).rstrip(),
+        "```",
+        "",
+    ]
 
 
 def build_obsidian_contract_review(
@@ -44,15 +50,24 @@ def build_obsidian_contract_review(
     confidence: str = "unknown",
     provenance: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    metadata = _safe({
-        "type": "api-contract-review",
-        "source": "api-forge",
-        "classification": "internal",
-        "confidence": confidence,
-        "provenance": provenance or {},
-    })
-    lines = ["---", yaml.safe_dump(metadata, sort_keys=True, allow_unicode=True).rstrip(), "---",
-             f"# {title.strip() or 'API contract review'}", "", summary.strip(), ""]
+    metadata = _safe(
+        {
+            "type": "api-contract-review",
+            "source": "api-forge",
+            "classification": "internal",
+            "confidence": confidence,
+            "provenance": provenance or {},
+        }
+    )
+    lines = [
+        "---",
+        yaml.safe_dump(metadata, sort_keys=True, allow_unicode=True).rstrip(),
+        "---",
+        f"# {title.strip() or 'API contract review'}",
+        "",
+        summary.strip(),
+        "",
+    ]
     lines += _section("Endpoints", endpoints)
     lines += _section("Breaking changes", breaking_changes)
     lines += _section("ADRs", adrs)

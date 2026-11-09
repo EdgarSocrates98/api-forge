@@ -65,10 +65,13 @@ def _replace_with_retry(source: Path, target: Path) -> None:
 
 def atomic_write_text(path: Path, text: str) -> Path:
     """Write UTF-8 text through a unique sibling and atomically publish it."""
-    target = Path(path)
+    # Keep an already-materialized Path's flavour.  Tests intentionally emulate
+    # Windows by patching os.name on Linux; reconstructing it with Path(path)
+    # would then try to instantiate an unusable WindowsPath.
+    target = path if isinstance(path, Path) else Path(path)
     target.parent.mkdir(parents=True, exist_ok=True)
     fd, tmp_name = tempfile.mkstemp(dir=target.parent, suffix=".tmp", prefix=f".{target.name}.")
-    temporary = Path(tmp_name)
+    temporary = type(target)(tmp_name)
     try:
         with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as handle:
             handle.write(text)

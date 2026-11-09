@@ -6,12 +6,15 @@ import hashlib
 import json
 import os
 import tempfile
+import time
 from pathlib import Path
 from typing import Any
 
 from pydantic import BaseModel
 
 _BLOCK = 1 << 20
+_WINDOWS_REPLACE_RETRIES = 6
+_WINDOWS_REPLACE_ERRORS = {5, 32}  # access denied / sharing violation
 
 
 def sha256_file(path: Path) -> str:
@@ -42,23 +45,50 @@ def _to_jsonable(value: object) -> object:
     return value
 
 
+def _replace_with_retry(source: Path, target: Path) -> None:
+    """Publish an artifact despite short-lived Windows sharing violations."""
+    attempts = _WINDOWS_REPLACE_RETRIES if os.name == "nt" else 1
+    for attempt in range(attempts):
+        try:
+            os.replace(source, target)
+            return
+        except OSError as exc:
+            winerror = getattr(exc, "winerror", None)
+            if (
+                os.name != "nt"
+                or winerror not in _WINDOWS_REPLACE_ERRORS
+                or attempt == attempts - 1
+            ):
+                raise
+            time.sleep(min(0.02 * (2**attempt), 0.25))
+
+
+def atomic_write_text(path: Path, text: str) -> Path:
+    """Write UTF-8 text through a unique sibling and atomically publish it."""
+    target = Path(path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    fd, tmp_name = tempfile.mkstemp(
+        dir=target.parent, suffix=".tmp", prefix=f".{target.name}."
+    )
+    temporary = Path(tmp_name)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as handle:
+            handle.write(text)
+        _replace_with_retry(temporary, target)
+    except BaseException:
+        temporary.unlink(missing_ok=True)
+        raise
+    return target
+
+
 def write_json(path: Path, value: object) -> None:
     """Write canonical JSON: sorted keys, indent 2, UTF-8, one trailing newline.
 
     The payload is serialized next to the target and moved into place with
     `os.replace`, so a reader never sees a partial artifact.
     """
-    target = Path(path)
-    target.parent.mkdir(parents=True, exist_ok=True)
     payload = json.dumps(_to_jsonable(value), sort_keys=True, indent=2, ensure_ascii=False) + "\n"
-    fd, tmp_name = tempfile.mkstemp(dir=target.parent, suffix=".tmp", prefix=target.name)
-    try:
-        with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as handle:
-            handle.write(payload)
-        os.replace(tmp_name, target)
-    except BaseException:
-        Path(tmp_name).unlink(missing_ok=True)
-        raise
+    atomic_write_text(Path(path), payload)
 
 
 def read_json(path: Path) -> Any:

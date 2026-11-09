@@ -3,7 +3,8 @@ from pathlib import Path
 
 import pytest
 
-from apiforge.core.io import read_json, sha256_file, write_json
+from apiforge.core import io as io_module
+from apiforge.core.io import atomic_write_text, read_json, sha256_file, write_json
 from apiforge.core.models import Diagnostic, FindingStatus
 
 
@@ -46,6 +47,31 @@ def test_write_json_leaves_no_temp_file(tmp_path: Path) -> None:
     target = tmp_path / "out.json"
     write_json(target, {"a": 1})
     assert sorted(p.name for p in tmp_path.iterdir()) == ["out.json"]
+
+
+def test_atomic_write_text_retries_transient_windows_sharing_violation(
+    tmp_path: Path, monkeypatch
+) -> None:
+    target = tmp_path / "artifact.txt"
+    real_replace = io_module.os.replace
+    calls = 0
+
+    def flaky_replace(source, destination):
+        nonlocal calls
+        calls += 1
+        if calls < 3:
+            error = OSError("transient sharing violation")
+            error.winerror = 32  # type: ignore[attr-defined]
+            raise error
+        real_replace(source, destination)
+
+    monkeypatch.setattr(io_module.os, "name", "nt")
+    monkeypatch.setattr(io_module.os, "replace", flaky_replace)
+    monkeypatch.setattr(io_module.time, "sleep", lambda _: None)
+
+    assert atomic_write_text(target, "stable\n") == target
+    assert target.read_text(encoding="utf-8") == "stable\n"
+    assert calls == 3
 
 
 def test_read_json_round_trips_utf8(tmp_path: Path) -> None:

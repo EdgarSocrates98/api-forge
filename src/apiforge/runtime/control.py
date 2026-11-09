@@ -20,6 +20,7 @@ from pydantic import Field, model_validator
 
 from apiforge.contracts.base import ContractError, VersionedContract
 from apiforge.core.ids import stable_id
+from apiforge.core.io import atomic_write_text
 from apiforge.runtime.store import content_hash
 
 StepStatus = Literal["pending", "running", "succeeded", "failed", "cancelled", "skipped"]
@@ -109,13 +110,10 @@ class ControlPlane:
 
     def _save(self, run: ControlRun) -> None:
         directory = self._directory(run.run_id)
-        directory.mkdir(parents=True, exist_ok=True)
-        temporary = directory / "run.json.tmp"
-        temporary.write_text(
+        atomic_write_text(
+            directory / "run.json",
             json.dumps(run.model_dump(mode="json"), sort_keys=True, indent=2) + "\n",
-            encoding="utf-8",
         )
-        temporary.replace(directory / "run.json")
 
     def _event(self, run: ControlRun, event: str, **payload: object) -> None:
         path = self._directory(run.run_id) / "events.jsonl"

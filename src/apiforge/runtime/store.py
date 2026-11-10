@@ -13,6 +13,7 @@ from apiforge.contracts.graph_impact import GraphImpactAssessment
 from apiforge.contracts.routing import RoutingDecision, RoutingPlan
 from apiforge.contracts.routing_evolution import PromotionGate
 from apiforge.contracts.scorecard_shadow import ScorecardShadowEvaluation
+from apiforge.core.io import atomic_write_text
 from apiforge.taskspec import store as task_store
 
 
@@ -26,14 +27,9 @@ class RunStore:
 
     def _write(self, relative: str, payload: object) -> Path:
         path = self.directory / relative
-        path.parent.mkdir(parents=True, exist_ok=True)
-        temporary = path.with_name(f"{path.name}.tmp")
-        temporary.write_text(
-            json.dumps(payload, sort_keys=True, indent=2, ensure_ascii=False) + "\n",
-            encoding="utf-8",
+        return atomic_write_text(
+            path, json.dumps(payload, sort_keys=True, indent=2, ensure_ascii=False) + "\n"
         )
-        temporary.replace(path)
-        return path
 
     def save_run(self, run: AgenticRun) -> Path:
         return self._write("run.json", run.model_dump(mode="json"))

@@ -28,6 +28,7 @@ from apiforge.contracts.cache import (
     CacheEntry,
     CacheTier,
 )
+from apiforge.core.io import atomic_write_text
 
 ENV_HOME = "APIFORGE_CACHE_HOME"
 _CTX_PREFIX = "ctx://sha256/"
@@ -79,10 +80,7 @@ class _Tier:
 
 
 def _atomic_write(path: Path, text: str) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_name(path.name + f".{os.getpid()}.tmp")
-    tmp.write_text(text, encoding="utf-8", newline="\n")
-    tmp.replace(path)
+    atomic_write_text(path, text)
 
 
 class CacheStore:

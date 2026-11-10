@@ -7,6 +7,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from apiforge.contracts.field import FieldRun
+from apiforge.core.io import atomic_write_text
 from apiforge.field.errors import RUN_MISSING, TIME_ORDER, FieldError
 
 FIELD_DIR = Path("docs") / "field"
@@ -38,13 +39,7 @@ def parse_ts(value: str, *, field: str) -> datetime:
 
 
 def write_json(path: Path, payload: object) -> Path:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.with_name(f"{path.name}.tmp")
-    temporary.write_text(
-        json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8", newline="\n"
-    )
-    temporary.replace(path)
-    return path
+    return atomic_write_text(path, json.dumps(payload, indent=2, sort_keys=True) + "\n")
 
 
 def save_run(root: Path, run: FieldRun) -> Path:

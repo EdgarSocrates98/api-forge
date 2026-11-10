@@ -13,6 +13,7 @@ from pathlib import Path
 from apiforge.contracts.base import ContractError
 from apiforge.contracts.economy import EconomyPlan
 from apiforge.contracts.economy_resume import EconomyCheckpoint
+from apiforge.core.io import atomic_write_text
 from apiforge.runtime.economy import PROFILES
 
 CHECKPOINT_FILE = "economy_checkpoint.json"
@@ -58,14 +59,9 @@ def build_checkpoint(
 
 def save_checkpoint(directory: Path, checkpoint: EconomyCheckpoint) -> Path:
     path = Path(directory) / CHECKPOINT_FILE
-    temporary = path.with_name(f"{path.name}.tmp")
-    temporary.write_text(
-        json.dumps(checkpoint.model_dump(mode="json"), indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-        newline="\n",
+    return atomic_write_text(
+        path, json.dumps(checkpoint.model_dump(mode="json"), indent=2, sort_keys=True) + "\n"
     )
-    temporary.replace(path)
-    return path
 
 
 def load_checkpoint(directory: Path) -> EconomyCheckpoint | None:

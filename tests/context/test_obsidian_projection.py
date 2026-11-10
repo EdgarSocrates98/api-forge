@@ -1,4 +1,4 @@
-from apiforge.context.obsidian import build_obsidian_contract_review
+from apiforge.context.obsidian import build_obsidian_contract_review, to_obsidian_note_ref
 
 
 def test_api_projection_carries_contract_review_sections_and_redacts_secrets():
@@ -13,7 +13,10 @@ def test_api_projection_carries_contract_review_sections_and_redacts_secrets():
         related_refs=["adr://api/42"],
         e2e_notes=["token=do-not-write-text"],
     )
-    assert note["schema"] == "theforge/ObsidianNoteRef/v1"
+    assert note["schema"] == "theforge/ObsidianNoteDraft/v1"
+    ref = to_obsidian_note_ref(note)
+    assert ref["schema"] == "theforge/ObsidianNoteRef/v1"
+    assert "content" not in ref
     assert "removed-field" in note["content"]
     assert "do-not-write" not in note["content"]
     assert "[REDACTED]" in note["content"]

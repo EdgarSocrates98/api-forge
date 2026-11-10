@@ -17,3 +17,14 @@ def test_api_projection_carries_contract_review_sections_and_redacts_secrets():
     assert "removed-field" in note["content"]
     assert "do-not-write" not in note["content"]
     assert "[REDACTED]" in note["content"]
+
+
+def test_api_projection_redacts_secrets_in_title_and_summary():
+    note = build_obsidian_contract_review(
+        title="Token=do-not-write",
+        summary="password=do-not-write-summary",
+        workspace="platform",
+        vault_id="team-vault",
+    )
+    assert "do-not-write" not in note["content"]
+    assert "[REDACTED]" in note["content"]

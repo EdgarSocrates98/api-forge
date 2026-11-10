@@ -56,6 +56,8 @@ def build_obsidian_contract_review(
     confidence: str = "unknown",
     provenance: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
+    safe_title = str(_safe(title.strip() or "API contract review"))
+    safe_summary = str(_safe(summary.strip()))
     metadata = _safe(
         {
             "type": "api-contract-review",
@@ -69,9 +71,9 @@ def build_obsidian_contract_review(
         "---",
         yaml.safe_dump(metadata, sort_keys=True, allow_unicode=True).rstrip(),
         "---",
-        f"# {title.strip() or 'API contract review'}",
+        f"# {safe_title}",
         "",
-        summary.strip(),
+        safe_summary,
         "",
     ]
     lines += _section("Endpoints", endpoints)

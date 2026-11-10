@@ -1,9 +1,9 @@
 {
   "cycle": "2.7",
   "repository": "api-forge",
-  "version": "0.3.2",
-  "tag": "v0.3.2",
-  "source_commit": "3718471c655d37ecca87f859a7731e9a1d2f3618",
+  "version": "0.3.3",
+  "tag": "v0.3.3",
+  "source_commit": "dae237e502abc7f7dd219cf2197232424c8d6542",
   "version_source": "pyproject.toml",
   "verified_at": "2026-11-10"
 }

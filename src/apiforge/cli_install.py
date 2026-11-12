@@ -130,7 +130,9 @@ def install_apply(
     ),
     dry_run: bool = typer.Option(False, "--dry-run", help="Plan only — writes nothing."),
     components: str | None = typer.Option(
-        None, "--components", help="Optional components csv: skills,agents,mcp,knowledge,rules,evals,tui,graph-studio."
+        None,
+        "--components",
+        help="Optional components csv: skills,agents,mcp,knowledge,rules,evals,tui,graph-studio.",
     ),
     gateway_profile: str = typer.Option(
         "balanced", "--gateway-profile", help="Execution profile: economy|balanced|deep."

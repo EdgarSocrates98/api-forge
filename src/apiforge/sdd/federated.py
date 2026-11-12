@@ -28,8 +28,7 @@ PHASE_MAP = {
     "ship": "ship",
 }
 
-_PHASES = ("explore", "define", "design", "plan", "build_report", "verify",
-           "ship", "learn")
+_PHASES = ("explore", "define", "design", "plan", "build_report", "verify", "ship", "learn")
 
 
 def map_phase(native: str) -> str:
@@ -38,8 +37,7 @@ def map_phase(native: str) -> str:
 
 def _item(raw: Any, feature: str) -> dict[str, Any]:
     """Native ``SddIssue`` (dataclass or dict) → ForgeSDDGate/v1 item."""
-    get = raw.get if isinstance(raw, dict) else lambda k, d=None: getattr(
-        raw, k, d)
+    get = raw.get if isinstance(raw, dict) else lambda k, d=None: getattr(raw, k, d)
     item: dict[str, Any] = {"code": str(get("code") or "unknown")}
     item["feature"] = str(get("feature") or feature)
     item["path"] = get("path") or get("phase")
@@ -49,11 +47,11 @@ def _item(raw: Any, feature: str) -> dict[str, Any]:
     return item
 
 
-def to_gate(feature: str, phase: str, report: Any,
-            *, evaluator: str = "apiforge") -> dict[str, Any]:
+def to_gate(
+    feature: str, phase: str, report: Any, *, evaluator: str = "apiforge"
+) -> dict[str, Any]:
     """Native ``SddReport``/dict → ``forge/SDDGate/v1``."""
-    get = report.get if isinstance(report, dict) else lambda k, d=None: (
-        getattr(report, k, d))
+    get = report.get if isinstance(report, dict) else lambda k, d=None: getattr(report, k, d)
     ok = bool(get("ok", not get("refused") and not get("unresolved")))
     return {
         "schema": "forge/SDDGate/v1",
@@ -61,16 +59,20 @@ def to_gate(feature: str, phase: str, report: Any,
         "phase": map_phase(phase),
         "ok": ok,
         "refused": [_item(r, feature) for r in get("refused") or ()],
-        "unresolved": [
-            _item(r, feature) for r in get("unresolved") or ()
-        ],
+        "unresolved": [_item(r, feature) for r in get("unresolved") or ()],
         "evaluator": evaluator,
     }
 
 
-def to_evidence(path: str | Path, *, kind: str, agent: str,
-                command: list[str], covers: list[str] | None = None,
-                sha256: str | None = None) -> dict[str, Any]:
+def to_evidence(
+    path: str | Path,
+    *,
+    kind: str,
+    agent: str,
+    command: list[str],
+    covers: list[str] | None = None,
+    sha256: str | None = None,
+) -> dict[str, Any]:
     """Artifact reference → ``forge/Evidence/v1``."""
     from apiforge.core.io import sha256_file
 
@@ -90,12 +92,19 @@ def to_evidence(path: str | Path, *, kind: str, agent: str,
     return out
 
 
-def to_receipt(feature: str, phase: str, action: str, actor: str,
-               recorded_at: str, *, verdict: str | None = None,
-               outputs: list[str] | None = None,
-               inputs_sha256: list[str] | None = None,
-               rollback_ref: str | None = None,
-               override: dict[str, Any] | None = None) -> dict[str, Any]:
+def to_receipt(
+    feature: str,
+    phase: str,
+    action: str,
+    actor: str,
+    recorded_at: str,
+    *,
+    verdict: str | None = None,
+    outputs: list[str] | None = None,
+    inputs_sha256: list[str] | None = None,
+    rollback_ref: str | None = None,
+    override: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     """Phase completion → ``forge/SDDReceipt/v1``."""
     out: dict[str, Any] = {
         "schema": "forge/SDDReceipt/v1",
@@ -118,8 +127,9 @@ def to_receipt(feature: str, phase: str, action: str, actor: str,
     return out
 
 
-def federated_view(feature_dir: str | Path, *, feature: str,
-                   agent: str = "apiforge") -> dict[str, Any]:
+def federated_view(
+    feature_dir: str | Path, *, feature: str, agent: str = "apiforge"
+) -> dict[str, Any]:
     """Best-effort projection of a feature dir into contract shapes —
     emits only what exists; absent artifacts produce no entries."""
     root = Path(feature_dir)
@@ -134,8 +144,6 @@ def federated_view(feature_dir: str | Path, *, feature: str,
                 doc = json.loads(f.read_text(encoding="utf-8"))
             except (OSError, json.JSONDecodeError):
                 continue
-            if isinstance(doc, dict) and str(
-                doc.get("schema", "")
-            ).startswith("forge/SDDReceipt"):
+            if isinstance(doc, dict) and str(doc.get("schema", "")).startswith("forge/SDDReceipt"):
                 out["forge/SDDReceipt/v1"].append(doc)
     return {k: v for k, v in out.items() if v}

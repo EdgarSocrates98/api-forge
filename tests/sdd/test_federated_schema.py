@@ -16,8 +16,13 @@ jsonschema = pytest.importorskip("jsonschema")
 
 _SCHEMA_CANDIDATES = [
     os.environ.get("FORGE_SDD_SCHEMA_DIR", ""),
-    str(Path(__file__).resolve().parents[3] / "the-forge" / "docs"
-        / "portable-installation" / "schemas"),
+    str(
+        Path(__file__).resolve().parents[3]
+        / "the-forge"
+        / "docs"
+        / "portable-installation"
+        / "schemas"
+    ),
 ]
 
 
@@ -37,26 +42,46 @@ def _load(name: str) -> dict:
 def test_gate_conforms():
     from apiforge.sdd import federated
     from apiforge.sdd.models import SddIssue
-    gate = federated.to_gate("F1", "contract", {
-        "refused": [SddIssue(code="AF-SDD-PHASE-ORDER", feature="F1",
-                             message="m", phase="plan", field="up",
-                             unlock="reorder")],
-        "unresolved": []})
+
+    gate = federated.to_gate(
+        "F1",
+        "contract",
+        {
+            "refused": [
+                SddIssue(
+                    code="AF-SDD-PHASE-ORDER",
+                    feature="F1",
+                    message="m",
+                    phase="plan",
+                    field="up",
+                    unlock="reorder",
+                )
+            ],
+            "unresolved": [],
+        },
+    )
     jsonschema.validate(gate, _load("ForgeSDDGate.schema.json"))
 
 
 def test_receipt_conforms():
     from apiforge.sdd import federated
-    r = federated.to_receipt("F1", "verify", "pytest", "verifier",
-                             "2026-04-05T10:00:00Z", verdict="pass",
-                             outputs=["junit.xml"])
+
+    r = federated.to_receipt(
+        "F1",
+        "verify",
+        "pytest",
+        "verifier",
+        "2026-04-05T10:00:00Z",
+        verdict="pass",
+        outputs=["junit.xml"],
+    )
     jsonschema.validate(r, _load("ForgeSDDReceipt.schema.json"))
 
 
 def test_evidence_conforms(tmp_path):
     from apiforge.sdd import federated
+
     f = tmp_path / "e.txt"
     f.write_text("x")
-    ev = federated.to_evidence(f, kind="test-run", agent="t",
-                               command=["pytest"], covers=["REQ-1"])
+    ev = federated.to_evidence(f, kind="test-run", agent="t", command=["pytest"], covers=["REQ-1"])
     jsonschema.validate(ev, _load("ForgeEvidence.schema.json"))

@@ -348,13 +348,17 @@ class CtxStore:
 
     def get(self, uri: str) -> str:
         if not uri.startswith(_PREFIX) or len(uri) != len(_PREFIX) + 64:
-            raise ContractError("AF-CTX-REF-INVALID", f"field=uri unlock=use ctx://sha256/<64 hex>: {uri}")
+            raise ContractError(
+                "AF-CTX-REF-INVALID", f"field=uri unlock=use ctx://sha256/<64 hex>: {uri}"
+            )
         path = self.dir / uri.removeprefix(_PREFIX)
         if not path.is_file():
             raise ContractError("AF-CTX-REF-NOT-FOUND", f"field=uri unlock=rebuild capsule: {uri}")
         content = path.read_text(encoding="utf-8")
         if uri_for(content) != uri:
-            raise ContractError("AF-CTX-HASH-MISMATCH", f"field=uri unlock=delete object and rebuild: {uri}")
+            raise ContractError(
+                "AF-CTX-HASH-MISMATCH", f"field=uri unlock=delete object and rebuild: {uri}"
+            )
         return content
 ```
 

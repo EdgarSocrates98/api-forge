@@ -106,8 +106,10 @@ Executed inline.
 
 ```python
 def verdict(changes) -> str:
-    if any(c.breaking for c in changes): return "breaking"
-    if any(c.code.value in UNRESOLVED for c in changes): return "unresolved"
+    if any(c.breaking for c in changes):
+        return "breaking"
+    if any(c.code.value in UNRESOLVED for c in changes):
+        return "unresolved"
     return "compatible"
 ```
 

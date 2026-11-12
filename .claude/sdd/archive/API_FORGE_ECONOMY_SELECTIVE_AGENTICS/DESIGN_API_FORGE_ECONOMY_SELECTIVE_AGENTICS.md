@@ -124,9 +124,15 @@ Executed inline (coupled, deterministic modules).
 ## Code Patterns
 
 ```python
-row = RoleContext(role=kind, capability=name, context_class=cls,
-                  refs=tuple(r.uri for r in kept), bytes=sum(r.size_bytes for r in kept),
-                  budget_bytes=int(share * context_bytes), trimmed=tuple(r.uri for r in dropped))
+row = RoleContext(
+    role=kind,
+    capability=name,
+    context_class=cls,
+    refs=tuple(r.uri for r in kept),
+    bytes=sum(r.size_bytes for r in kept),
+    budget_bytes=int(share * context_bytes),
+    trimmed=tuple(r.uri for r in dropped),
+)
 ```
 
 ```python

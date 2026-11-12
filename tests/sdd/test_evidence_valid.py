@@ -19,8 +19,7 @@ def _src(tmp_path, text="src"):
 def _w(tmp_path, doc, src_text="src"):
     src = _src(tmp_path, src_text)
     doc.setdefault("kind", "test.results")
-    doc.setdefault("source_sha256",
-                   hashlib.sha256(src.read_bytes()).hexdigest())
+    doc.setdefault("source_sha256", hashlib.sha256(src.read_bytes()).hexdigest())
     doc.setdefault("recorded_at", "2026-09-21T00:00:00Z")
     doc.setdefault("source_path", str(src))
     p = tmp_path / "test.results.json"
@@ -81,8 +80,7 @@ def test_zero_passed_inconclusive(tmp_path):
 
 
 def test_passing_tests_valid(tmp_path):
-    p = _w(tmp_path, {"feature": "F1",
-                      "extracted": {"passed": 12, "failed": 0}})
+    p = _w(tmp_path, {"feature": "F1", "extracted": {"passed": 12, "failed": 0}})
     assert validate_evidence(p, feature="F1")["state"] == "valid"
 
 
@@ -108,12 +106,25 @@ def test_set_phase_evidence_enforced(tmp_path):
     src = tmp_path / "run.txt"
     src.write_text("5 passed, 3 failed")
     for g in gates:
-        (ev / f"{g.satisfied_by}.json").write_text(json.dumps(
-            {"schema": "x", "kind": g.satisfied_by,
-             "source_sha256": hashlib.sha256(src.read_bytes()).hexdigest(),
-             "recorded_at": "t", "source_path": str(src),
-             "extracted": {"passed": 5, "failed": 3}}))
+        (ev / f"{g.satisfied_by}.json").write_text(
+            json.dumps(
+                {
+                    "schema": "x",
+                    "kind": g.satisfied_by,
+                    "source_sha256": hashlib.sha256(src.read_bytes()).hexdigest(),
+                    "recorded_at": "t",
+                    "source_path": str(src),
+                    "extracted": {"passed": 5, "failed": 3},
+                }
+            )
+        )
     with pytest.raises(SddError):
-        set_phase(tmp_path, "FEAT", "verify", "ready", strict=True,
-                  evidence_dir=ev,
-                  state_dir=tmp_path / ".apiforge" / "sdd" / "FEAT")
+        set_phase(
+            tmp_path,
+            "FEAT",
+            "verify",
+            "ready",
+            strict=True,
+            evidence_dir=ev,
+            state_dir=tmp_path / ".apiforge" / "sdd" / "FEAT",
+        )

@@ -75,12 +75,11 @@ def test_set_phase_allowed_with_evidence(tmp_path: Path) -> None:
     src = tmp_path / "pytest.txt"
     src.write_text("12 passed in 0.4s\n", encoding="utf-8")
     from apiforge.sdd.evidence import emit_evidence
-    emit_evidence(root, "GATED", "test.results", src,
-                  "2026-09-21T00:00:00Z",
-                  state_dir=tmp_path)
-    change = set_phase(root, "GATED", "verify", "ready", strict=True,
-                       evidence_dir=evidence,
-                       state_dir=tmp_path)
+
+    emit_evidence(root, "GATED", "test.results", src, "2026-09-21T00:00:00Z", state_dir=tmp_path)
+    change = set_phase(
+        root, "GATED", "verify", "ready", strict=True, evidence_dir=evidence, state_dir=tmp_path
+    )
     assert change.status == "ready"
     assert "status: ready" in (root / "GATED" / "verify.md").read_text(encoding="utf-8")
 

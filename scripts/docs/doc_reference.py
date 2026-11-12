@@ -76,8 +76,7 @@ def _resolve_rationale(rationale: dict, path: str) -> dict | None:
     return None
 
 
-def render(inv: dict, cli: str, existing: str | None,
-           rationale: dict | None = None) -> str:
+def render(inv: dict, cli: str, existing: str | None, rationale: dict | None = None) -> str:
     rationale = rationale or {}
     keeps = _extract_keeps(existing or "")
     out = [
@@ -100,7 +99,8 @@ def render(inv: dict, cli: str, existing: str | None,
     covered = sum(1 for g in groups if g in rationale)
     out.append(
         f"Rationale coverage: **{covered}/{len(groups)}** first-level groups"
-        " curated in `command-rationale.json`.")
+        " curated in `command-rationale.json`."
+    )
     out.append("")
     out.append("## Groups")
     out.append("")
@@ -119,8 +119,11 @@ def render(inv: dict, cli: str, existing: str | None,
                 out.append("")
             r = _resolve_rationale(rationale, path)
             if r:
-                for label, key in (("por que", "why"), ("quando usar", "when"),
-                                   ("quando não", "when_not")):
+                for label, key in (
+                    ("por que", "why"),
+                    ("quando usar", "when"),
+                    ("quando não", "when_not"),
+                ):
                     if r.get(key):
                         out.append(f"- **{label}:** {r[key]}")
                 out.append("")
@@ -132,8 +135,10 @@ def render(inv: dict, cli: str, existing: str | None,
                 out += _args_table(cmd)
                 out.append("")
             out.append(KEEP_START)
-            out.append(keeps.get(path, "").strip() or
-                       "_free notes — errors, examples, next steps (hand-written, preserved)_")
+            out.append(
+                keeps.get(path, "").strip()
+                or "_free notes — errors, examples, next steps (hand-written, preserved)_"
+            )
             out.append(KEEP_END)
             out.append("")
     return "\n".join(out)
@@ -144,14 +149,14 @@ def main() -> int:
     ap.add_argument("--inventory", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--cli", required=True)
-    ap.add_argument("--rationale", default=None,
-                    help="curated command-rationale.json (optional)")
+    ap.add_argument("--rationale", default=None, help="curated command-rationale.json (optional)")
     a = ap.parse_args()
     inv = json.loads(Path(a.inventory).read_text(encoding="utf-8"))
     out_path = Path(a.out)
     rationale = (
         json.loads(Path(a.rationale).read_text(encoding="utf-8"))
-        if a.rationale and Path(a.rationale).exists() else None
+        if a.rationale and Path(a.rationale).exists()
+        else None
     )
     existing = out_path.read_text(encoding="utf-8") if out_path.exists() else None
     text = render(inv, a.cli, existing, rationale)

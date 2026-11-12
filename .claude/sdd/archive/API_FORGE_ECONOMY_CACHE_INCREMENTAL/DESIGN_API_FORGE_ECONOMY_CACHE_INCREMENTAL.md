@@ -151,8 +151,12 @@ else:
 ### Pattern 2: Refusal
 
 ```python
-raise GatewayError("AF-DELTA-GIT-UNAVAILABLE", f"{root} is not a git work tree",
-                   field="root", unlock="pass --changed <file> ... instead of --base/--head")
+raise GatewayError(
+    "AF-DELTA-GIT-UNAVAILABLE",
+    f"{root} is not a git work tree",
+    field="root",
+    unlock="pass --changed <file> ... instead of --base/--head",
+)
 ```
 
 ### Pattern 3: Policy file

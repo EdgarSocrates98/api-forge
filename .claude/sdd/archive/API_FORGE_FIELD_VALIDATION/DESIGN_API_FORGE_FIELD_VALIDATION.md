@@ -344,8 +344,15 @@ from apiforge.contracts.base import VersionedContract
 
 Scenario = Literal["maintenance", "evolution", "security", "multi_repo", "incident", "performance"]
 ExitReason = Literal[
-    "knowledge_gap", "capability_gap", "context_gap", "graph_gap", "tool_gap",
-    "ux_gap", "evaluation_gap", "integration_gap", "none",
+    "knowledge_gap",
+    "capability_gap",
+    "context_gap",
+    "graph_gap",
+    "tool_gap",
+    "ux_gap",
+    "evaluation_gap",
+    "integration_gap",
+    "none",
 ]
 Phase = Literal["baseline", "ab_on"]
 

@@ -48,20 +48,22 @@ def set_phase(
             if phase not in gate.guards_phases:
                 continue
             evidence_file = evidence_dir / f"{gate.satisfied_by}.json"
-            verdict = validate_evidence(evidence_file, feature=feature,
-                                        expected_kind=gate.satisfied_by)
+            verdict = validate_evidence(
+                evidence_file, feature=feature, expected_kind=gate.satisfied_by
+            )
             if verdict["state"] == "valid":
                 continue
-            if override and override.get("gate") == gate.name \
-                    and override.get("reason", "").strip() \
-                    and override.get("actor", "").strip():
-                _record_override(state_dir, gate.name, phase, status,
-                                 override, verdict["code"])
+            if (
+                override
+                and override.get("gate") == gate.name
+                and override.get("reason", "").strip()
+                and override.get("actor", "").strip()
+            ):
+                _record_override(state_dir, gate.name, phase, status, override, verdict["code"])
                 applied.append(gate.name)
                 continue
             raise SddError(
-                verdict["code"] if verdict["code"].startswith("AF-SDD")
-                else "AF-SDD-GATE-BLOCKED",
+                verdict["code"] if verdict["code"].startswith("AF-SDD") else "AF-SDD-GATE-BLOCKED",
                 f"{gate.name}: evidence {gate.satisfied_by!r} "
                 f"{verdict['state']} — {verdict['reason']} "
                 f"(produce it via {gate.produced_by!r} or pass --override "
@@ -80,8 +82,12 @@ def set_phase(
 
 
 def _record_override(
-    state_dir: Path, gate: str, phase: str, status: str,
-    override: Mapping[str, str], verdict_code: str = "",
+    state_dir: Path,
+    gate: str,
+    phase: str,
+    status: str,
+    override: Mapping[str, str],
+    verdict_code: str = "",
 ) -> None:
     import time
 

@@ -376,9 +376,7 @@ def _check_links(repo: Path, rel: Path, links: list[str]) -> list[dict[str, str]
             continue
         # Root-relative targets are external-site paths (e.g. quoted
         # devin.ai docs), never repo files — skip alongside http/mailto.
-        if mapped is None and raw.startswith(
-            ("http://", "https://", "mailto:", "#", "/")
-        ):
+        if mapped is None and raw.startswith(("http://", "https://", "mailto:", "#", "/")):
             continue
         # The fragment lives in the raw URL — mapped paths never carry it.
         # Percent-decode so ``#%C3%A7`` matches the heading ``a ç ã`` —
@@ -406,9 +404,7 @@ def _check_links(repo: Path, rel: Path, links: list[str]) -> list[dict[str, str]
             continue
         if frag and not _LINE_REF_RE.fullmatch(frag) and p.suffix == ".md":
             try:
-                _, anchors = _links_and_anchors(
-                    p.read_text(encoding="utf-8", errors="replace")
-                )
+                _, anchors = _links_and_anchors(p.read_text(encoding="utf-8", errors="replace"))
                 if frag.lower() not in anchors:
                     findings.append(
                         {
@@ -573,25 +569,21 @@ def _write_reports(out: Path, rows: list[dict], stats: dict, forge_id: str) -> N
 
     # stale/other reports written by callers or as honest stubs
     for name, body in {
-        "obsolete-document-report.md":
-            "# Obsolete document report\n\nDetermination requires semantic "
-            "review; candidates are `HISTORICAL`/`DEPRECATED`/`UNKNOWN` "
-            "rows in inventory.jsonl. Nothing auto-flagged as obsolete.\n",
-        "command-drift-report.md":
-            "# Command drift report\n\nAuthoritative source: "
-            "`docs/reference/divergence.generated.json` (doc_inventory.py, "
-            "parser-walked). This report defers to it rather than "
-            "duplicating a second opinion.\n",
-        "tutorial-coverage-report.md":
-            "# Tutorial coverage report\n\nSee `GETTING_STARTED`/`TUTORIAL`/"
-            "`HOW_TO` rows in inventory.jsonl grouped by path. Gaps are "
-            "closed by the educational wave, not asserted here.\n",
-        "documentation-quality-report.md":
-            "# Documentation quality report\n\nQuality dimensions (clarity, "
-            "accuracy, examples, navigation) are assessed per public doc in "
-            "the semantic-review ledger as reviews complete; mechanical "
-            "checks (links, command drift, duplication) are covered by the "
-            "sibling reports.\n",
+        "obsolete-document-report.md": "# Obsolete document report\n\nDetermination requires semantic "
+        "review; candidates are `HISTORICAL`/`DEPRECATED`/`UNKNOWN` "
+        "rows in inventory.jsonl. Nothing auto-flagged as obsolete.\n",
+        "command-drift-report.md": "# Command drift report\n\nAuthoritative source: "
+        "`docs/reference/divergence.generated.json` (doc_inventory.py, "
+        "parser-walked). This report defers to it rather than "
+        "duplicating a second opinion.\n",
+        "tutorial-coverage-report.md": "# Tutorial coverage report\n\nSee `GETTING_STARTED`/`TUTORIAL`/"
+        "`HOW_TO` rows in inventory.jsonl grouped by path. Gaps are "
+        "closed by the educational wave, not asserted here.\n",
+        "documentation-quality-report.md": "# Documentation quality report\n\nQuality dimensions (clarity, "
+        "accuracy, examples, navigation) are assessed per public doc in "
+        "the semantic-review ledger as reviews complete; mechanical "
+        "checks (links, command drift, duplication) are covered by the "
+        "sibling reports.\n",
     }.items():
         (out / name).write_text(body, "utf-8")
 

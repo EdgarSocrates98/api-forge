@@ -44,8 +44,11 @@ def set_phase(
     if strict and status in _GATED_STATUSES:
         from apiforge.sdd.evidence_valid import validate_evidence
 
+        profile = _feature_profile(root, feature)
         for gate in load_gates():
             if phase not in gate.guards_phases:
+                continue
+            if gate.profiles and profile not in gate.profiles:
                 continue
             evidence_file = evidence_dir / f"{gate.satisfied_by}.json"
             verdict = validate_evidence(
@@ -79,6 +82,23 @@ def set_phase(
         overrides_applied=tuple(applied),
         changed=previous != status,
     )
+
+
+def _feature_profile(root: Path, feature: str) -> str:
+    """Profile declared in the feature's intent.md frontmatter ("" if absent)."""
+    from apiforge.core.yaml import StrictYamlError, load_yaml_mapping, split_frontmatter
+
+    intent = root / feature / "intent.md"
+    if not intent.is_file():
+        return ""
+    try:
+        meta, _ = split_frontmatter(intent.read_text(encoding="utf-8"))
+        if meta is None:
+            return ""
+        data = load_yaml_mapping(meta, source=f"{feature}/intent.md frontmatter")
+        return str(data.get("profile") or "")
+    except StrictYamlError:
+        return ""
 
 
 def _record_override(

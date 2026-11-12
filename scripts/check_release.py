@@ -62,6 +62,7 @@ KNOWN_EVIDENCE_KINDS = {
     "threat.model",
     "benchmark.results",
     "release.receipt",
+    "migration.plan",
 }
 
 PHASES = (

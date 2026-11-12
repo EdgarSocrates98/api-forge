@@ -33,7 +33,9 @@ Per-phase required fields: `discover`: `approaches`, `chosen`; `intent`:
 
 ## Gates
 
-`gates.yaml` maps a gate to `{satisfied_by, produced_by, guards_phases}`.
+`gates.yaml` maps a gate to `{satisfied_by, produced_by, guards_phases}` and
+an optional `profiles` list — absent means every profile; present means the
+gate only applies when the feature's `intent.md` declares that profile.
 Under `sdd set-phase --strict`, entering a guarded phase at `ready`/`done`
 requires the named evidence kind to exist as `<evidence_dir>/<kind>.json`.
 Evidence presence unlocks — never a boolean flag. When evidence genuinely
@@ -41,13 +43,18 @@ cannot exist, `--override-gate/--override-reason/--override-actor` records the
 bypass in `.apiforge/sdd/<FEATURE>/gate-overrides.json`.
 
 Known evidence kinds: `contract.document`, `plan.tasks`, `test.results`,
-`threat.model`, `benchmark.results`, `release.receipt`.
+`threat.model`, `benchmark.results`, `release.receipt`, `migration.plan`.
+
+The `migration-evidenced` gate (`profiles: [migration]`, guards `ship`) is
+what differentiates `migration` from `critical`: a cross-repo migration must
+ship with a recorded migration plan — `rollback` or `cutover` in the source
+frontmatter, extracted by `sdd evidence --kind migration.plan`.
 
 Extraction is deliberately narrow. `test.results` reads only the pytest
-tally line (`N passed[, N failed][, N skipped][, N error]`) — output from
-another harness (JUnit XML, `go test`, TAP) is *not* parsed and refuses
-with `AF-SDD-EVIDENCE-EXTRACT`. Unsupported formats stay unresolved;
-the extractor never interpolates or invents counts.
+tally line (`N passed[, N failed][, N skipped][, N error]`) in the file's
+last 50 lines — output from another harness (JUnit XML, `go test`, TAP) is
+*not* parsed and refuses with `AF-SDD-EVIDENCE-EXTRACT`. Unsupported formats
+stay unresolved; the extractor never interpolates or invents counts.
 
 ## Refusal and gap codes
 

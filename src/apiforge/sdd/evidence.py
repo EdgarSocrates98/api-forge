@@ -35,8 +35,11 @@ def _extract_plan_tasks(text: str) -> dict[str, Any]:
 
 
 def _extract_test_results(text: str) -> dict[str, Any]:
+    # Pytest's tally lives in the trailing summary — scanning the whole file
+    # would credit counts mentioned mid-log (e.g. a previous run's output).
+    tail = "\n".join(text.splitlines()[-50:])
     counts = {"passed": 0, "failed": 0, "skipped": 0, "error": 0}
-    for match in _PYTEST_TAIL.finditer(text):
+    for match in _PYTEST_TAIL.finditer(tail):
         for name, group in zip(("passed", "failed", "skipped", "error"), match.groups()):
             if group:
                 counts[name] += int(group)
@@ -48,9 +51,29 @@ def _extract_test_results(text: str) -> dict[str, Any]:
     return counts
 
 
+def _extract_migration_plan(text: str) -> dict[str, Any]:
+    meta, _ = split_frontmatter(text)
+    if meta is None:
+        raise SddError("AF-SDD-EVIDENCE-EXTRACT", "migration.plan: source has no frontmatter")
+    data = load_yaml_mapping(meta, source="migration plan frontmatter")
+    rollback = data.get("rollback")
+    cutover = data.get("cutover")
+    if not rollback and not cutover:
+        raise SddError(
+            "AF-SDD-EVIDENCE-EXTRACT",
+            "migration.plan: frontmatter needs `rollback` or `cutover`",
+        )
+    return {
+        "rollback": rollback,
+        "cutover": cutover,
+        "repositories": data.get("repositories") or data.get("repos"),
+    }
+
+
 _EXTRACTORS = {
     "plan.tasks": _extract_plan_tasks,
     "test.results": _extract_test_results,
+    "migration.plan": _extract_migration_plan,
 }
 
 

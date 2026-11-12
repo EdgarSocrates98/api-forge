@@ -12,7 +12,7 @@ import argparse
 import json
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 FORGE = "api-forge"
@@ -101,7 +101,7 @@ def main() -> int:
     )
 
     receipt = {
-        "created_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "created_at": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "external": False,
         "suite": SUITE,
         "forge": FORGE,

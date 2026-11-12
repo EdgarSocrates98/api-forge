@@ -100,6 +100,13 @@ All notable changes to this project are documented here. Format follows
 
 ## [Unreleased]
 
+## [0.3.5] - 2026-11-12
+
+SDD consolidation release: profile-scoped gates (`critical`/`migration`),
+`migration-evidenced` gate requiring rollback/cutover evidence from
+`migration.plan`, pytest tally bounded to the output tail, `migration.plan`
+registered as a known evidence kind, federated schema CI consuming the-forge.
+
 ## [0.3.4] - 2026-11-12
 
 Cycle 2.7 patch release: federated SDD contracts and adapters, forge-context kind taxonomy, universal Obsidian export verbs, portal and install UX improvements, provider context-registry wiring, CI hardening and generated-artifact refresh.

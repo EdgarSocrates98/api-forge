@@ -1,0 +1,9 @@
+{
+  "cycle": "sdd-consolidation",
+  "repository": "api-forge",
+  "version": "0.3.5",
+  "tag": "v0.3.5",
+  "source_commit": "9c2743ce2c387ab6c802c1de85f913f4c677f31f",
+  "version_source": "pyproject.toml",
+  "verified_at": "2026-11-12"
+}

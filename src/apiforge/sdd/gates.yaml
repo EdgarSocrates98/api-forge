@@ -24,3 +24,10 @@ gates:
     satisfied_by: release.receipt
     produced_by: evidence emit
     guards_phases: [ship]
+  # migration-only: a cross-repo migration must ship with a recorded
+  # migration plan (rollback + cutover) — critical profile doesn't carry it.
+  migration-evidenced:
+    satisfied_by: migration.plan
+    produced_by: evidence emit
+    guards_phases: [ship]
+    profiles: [migration]

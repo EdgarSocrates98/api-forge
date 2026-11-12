@@ -136,6 +136,8 @@ class Gate(_Frozen):
     satisfied_by: str
     produced_by: str
     guards_phases: tuple[str, ...]
+    #: empty = every profile; non-empty = gate only applies to these profiles
+    profiles: tuple[str, ...] = ()
 
 
 def load_profiles() -> Mapping[str, tuple[str, ...]]:
@@ -177,6 +179,7 @@ def load_gates() -> tuple[Gate, ...]:
                     satisfied_by=str(entry["satisfied_by"]),
                     produced_by=str(entry["produced_by"]),
                     guards_phases=tuple(str(p) for p in entry["guards_phases"]),
+                    profiles=tuple(str(p) for p in entry.get("profiles") or ()),
                 )
             )
         except (KeyError, TypeError) as exc:

@@ -102,3 +102,76 @@ def test_set_phase_override_is_recorded(tmp_path: Path) -> None:
     record = json.loads((state / "gate-overrides.json").read_text(encoding="utf-8"))
     assert record["overrides"][0]["gate"] == "build-verified"
     assert record["overrides"][0]["reason"] == "no tests yet"
+
+
+def _ship_feature(tmp_path: Path, profile: str) -> Path:
+    root = tmp_path / "sdd"
+    feature = root / "SHIPME"
+    feature.mkdir(parents=True)
+    (feature / "intent.md").write_text(
+        f"---\nsdd: 1\nfeature: SHIPME\nphase: intent\nprofile: {profile}\nstatus: done\n"
+        "problem: p\nsuccess: [s]\nout_of_scope: o\n---\n# i\n",
+        encoding="utf-8",
+    )
+    (feature / "ship.md").write_text(
+        "---\nsdd: 1\nfeature: SHIPME\nphase: ship\nprofile: quick\nstatus: draft\n"
+        'upstream:\n  path: intent.md\n  sha256: "0"\n---\n# s\n',
+        encoding="utf-8",
+    )
+    stamp(feature / "ship.md", feature / "intent.md")
+    return root
+
+
+def test_migration_gate_scoped_to_profile(tmp_path: Path) -> None:
+    """migration-evidenced blocks ship only for `migration` profile."""
+    from apiforge.sdd.evidence import emit_evidence
+
+    root = _ship_feature(tmp_path, "migration")
+    evidence = tmp_path / "evidence"
+    evidence.mkdir()
+    # release.receipt present → the only thing left blocking is migration.plan
+    receipt = tmp_path / "receipt.txt"
+    receipt.write_text("released\n", encoding="utf-8")
+    emit_evidence(root, "SHIPME", "release.receipt", receipt, "2026-11-12T00:00:00Z",
+                  state_dir=tmp_path)
+    with pytest.raises(SddError, match="migration-evidenced"):
+        set_phase(root, "SHIPME", "ship", "ready", strict=True,
+                  evidence_dir=evidence, state_dir=tmp_path)
+
+
+def test_migration_gate_skipped_for_critical(tmp_path: Path) -> None:
+    """critical profile ships without migration.plan — scope is honest."""
+    from apiforge.sdd.evidence import emit_evidence
+
+    root = _ship_feature(tmp_path, "critical")
+    evidence = tmp_path / "evidence"
+    evidence.mkdir()
+    receipt = tmp_path / "receipt.txt"
+    receipt.write_text("released\n", encoding="utf-8")
+    emit_evidence(root, "SHIPME", "release.receipt", receipt, "2026-11-12T00:00:00Z",
+                  state_dir=tmp_path)
+    change = set_phase(root, "SHIPME", "ship", "ready", strict=True,
+                       evidence_dir=evidence, state_dir=tmp_path)
+    assert change.status == "ready"
+
+
+def test_migration_plan_extractor(tmp_path: Path) -> None:
+    """migration.plan evidence extracts rollback/cutover from frontmatter."""
+    from apiforge.sdd.evidence import emit_evidence
+
+    root = _ship_feature(tmp_path, "migration")
+    plan = tmp_path / "mig.md"
+    plan.write_text(
+        "---\nrollback: restore-snapshot\ncutover: dns-swap\nrepositories: [a, b]\n---\n# m\n",
+        encoding="utf-8",
+    )
+    payload = emit_evidence(root, "SHIPME", "migration.plan", plan,
+                            "2026-11-12T00:00:00Z", state_dir=tmp_path)
+    assert payload["extracted"]["rollback"] == "restore-snapshot"
+    assert payload["extracted"]["cutover"] == "dns-swap"
+
+    # without rollback/cutover the evidence is refused, not faked
+    plan.write_text("---\nrepositories: [a]\n---\n", encoding="utf-8")
+    with pytest.raises(SddError, match="AF-SDD-EVIDENCE-EXTRACT"):
+        emit_evidence(root, "SHIPME", "migration.plan", plan,
+                      "2026-11-12T00:00:00Z", state_dir=tmp_path)

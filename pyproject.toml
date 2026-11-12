@@ -178,6 +178,12 @@ module = "apiforge._forge_portal"
 ignore_errors = true
 
 [[tool.mypy.overrides]]
+# Vendored obsidian engine — byte-identical to the canonical copy; its
+# platform-specific (msvcrt) typing stays in the canonical repo.
+module = "apiforge._forge_obsidian.*"
+ignore_errors = true
+
+[[tool.mypy.overrides]]
 # Vendored portal telemetry (canonical: forge-portal/portal_core) — byte-identical.
 module = "apiforge._portal_telemetry"
 ignore_errors = true

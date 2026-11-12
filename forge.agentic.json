@@ -60,6 +60,7 @@
   "mcp_command": [
     "apiforge-mcp"
   ],
+  "mcp_verify_tool": "portable_status",
   "host_adapters": [
     "claude",
     "devin",

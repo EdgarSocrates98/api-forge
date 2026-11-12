@@ -1,0 +1,12 @@
+{
+    "schema_version": 2,
+    "commit": "011129ce4bd7c4f454661e0150b21a1250e70839",
+    "indexed_at": "2026-11-07T11:30:50Z",
+    "project": "E-projetos-FORJAS-api-forge",
+    "nodes": 16454,
+    "edges": 60255,
+    "original_size": 43974656,
+    "compressed_size": 7359770,
+    "compression_level": 9,
+    "reconcile_basis": "git-clean-head"
+}

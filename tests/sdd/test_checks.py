@@ -64,7 +64,7 @@ def _make_feature(tmp_path: Path) -> Path:
 
 def test_set_phase_blocked_without_evidence(tmp_path: Path) -> None:
     root = _make_feature(tmp_path)
-    with pytest.raises(SddError, match="AF-SDD-GATE-BLOCKED"):
+    with pytest.raises(SddError, match="AF-SDD-EVIDENCE-ABSENT"):
         set_phase(root, "GATED", "verify", "ready", strict=True)
 
 
@@ -72,8 +72,15 @@ def test_set_phase_allowed_with_evidence(tmp_path: Path) -> None:
     root = _make_feature(tmp_path)
     evidence = tmp_path / "evidence"
     evidence.mkdir()
-    (evidence / "test.results.json").write_text("{}", encoding="utf-8")
-    change = set_phase(root, "GATED", "verify", "ready", strict=True, evidence_dir=evidence)
+    src = tmp_path / "pytest.txt"
+    src.write_text("12 passed in 0.4s\n", encoding="utf-8")
+    from apiforge.sdd.evidence import emit_evidence
+    emit_evidence(root, "GATED", "test.results", src,
+                  "2026-09-21T00:00:00Z",
+                  state_dir=tmp_path)
+    change = set_phase(root, "GATED", "verify", "ready", strict=True,
+                       evidence_dir=evidence,
+                       state_dir=tmp_path)
     assert change.status == "ready"
     assert "status: ready" in (root / "GATED" / "verify.md").read_text(encoding="utf-8")
 

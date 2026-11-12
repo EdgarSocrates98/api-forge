@@ -68,5 +68,3364 @@
   ],
   "requires_network": false,
   "requires_credentials": false,
-  "read_only_default": true
+  "read_only_default": true,
+  "resources": [
+    {
+      "id": "api-forge-architecture",
+      "kind": "skill",
+      "location": ".claude/skills/api-forge-architecture/SKILL.md",
+      "resource_class": "agentic"
+    },
+    {
+      "id": "api-forge-context",
+      "kind": "skill",
+      "location": ".claude/skills/api-forge-context/SKILL.md",
+      "resource_class": "agentic"
+    },
+    {
+      "id": "api-forge-contract",
+      "kind": "skill",
+      "location": ".claude/skills/api-forge-contract/SKILL.md",
+      "resource_class": "agentic"
+    },
+    {
+      "id": "api-forge-core",
+      "kind": "skill",
+      "location": ".claude/skills/api-forge-core/SKILL.md",
+      "resource_class": "agentic"
+    },
+    {
+      "id": "api-forge-data-access",
+      "kind": "skill",
+      "location": ".claude/skills/api-forge-data-access/SKILL.md",
+      "resource_class": "agentic"
+    },
+    {
+      "id": "api-forge-delegate-doctor",
+      "kind": "skill",
+      "location": ".claude/skills/api-forge-delegate-doctor/SKILL.md",
+      "resource_class": "agentic"
+    },
+    {
+      "id": "api-forge-discovery",
+      "kind": "skill",
+      "location": ".claude/skills/api-forge-discovery/SKILL.md",
+      "resource_class": "agentic"
+    },
+    {
+      "id": "api-forge-graph",
+      "kind": "skill",
+      "location": ".claude/skills/api-forge-graph/SKILL.md",
+      "resource_class": "agentic"
+    },
+    {
+      "id": "api-forge-messaging",
+      "kind": "skill",
+      "location": ".claude/skills/api-forge-messaging/SKILL.md",
+      "resource_class": "agentic"
+    },
+    {
+      "id": "api-forge-observability",
+      "kind": "skill",
+      "location": ".claude/skills/api-forge-observability/SKILL.md",
+      "resource_class": "agentic"
+    },
+    {
+      "id": "api-forge-performance",
+      "kind": "skill",
+      "location": ".claude/skills/api-forge-performance/SKILL.md",
+      "resource_class": "agentic"
+    },
+    {
+      "id": "api-forge-platform-completion",
+      "kind": "skill",
+      "location": ".claude/skills/api-forge-platform-completion/SKILL.md",
+      "resource_class": "agentic"
+    },
+    {
+      "id": "api-forge-sdd",
+      "kind": "skill",
+      "location": ".claude/skills/api-forge-sdd/SKILL.md",
+      "resource_class": "agentic"
+    },
+    {
+      "id": "api-forge-sentinel",
+      "kind": "skill",
+      "location": ".claude/skills/api-forge-sentinel/SKILL.md",
+      "resource_class": "agentic"
+    },
+    {
+      "id": "api-forge-streaming",
+      "kind": "skill",
+      "location": ".claude/skills/api-forge-streaming/SKILL.md",
+      "resource_class": "agentic"
+    },
+    {
+      "id": "api-forge-verification",
+      "kind": "skill",
+      "location": ".claude/skills/api-forge-verification/SKILL.md",
+      "resource_class": "agentic"
+    },
+    {
+      "id": "api-adversarial-critic",
+      "kind": "agent",
+      "location": "agents/api-adversarial-critic.md",
+      "resource_class": "agentic"
+    },
+    {
+      "id": "api-architecture-reviewer",
+      "kind": "agent",
+      "location": "agents/api-architecture-reviewer.md",
+      "resource_class": "agentic"
+    },
+    {
+      "id": "api-codegen-engineer",
+      "kind": "agent",
+      "location": "agents/api-codegen-engineer.md",
+      "resource_class": "agentic"
+    },
+    {
+      "id": "api-contract-architect",
+      "kind": "agent",
+      "location": "agents/api-contract-architect.md",
+      "resource_class": "agentic"
+    },
+    {
+      "id": "api-data-access-architect",
+      "kind": "agent",
+      "location": "agents/api-data-access-architect.md",
+      "resource_class": "agentic"
+    },
+    {
+      "id": "api-debate-referee",
+      "kind": "agent",
+      "location": "agents/api-debate-referee.md",
+      "resource_class": "agentic"
+    },
+    {
+      "id": "api-dx-docs-reviewer",
+      "kind": "agent",
+      "location": "agents/api-dx-docs-reviewer.md",
+      "resource_class": "agentic"
+    },
+    {
+      "id": "api-event-driven-architect",
+      "kind": "agent",
+      "location": "agents/api-event-driven-architect.md",
+      "resource_class": "agentic"
+    },
+    {
+      "id": "api-governance-reviewer",
+      "kind": "agent",
+      "location": "agents/api-governance-reviewer.md",
+      "resource_class": "agentic"
+    },
+    {
+      "id": "api-graph-data-architect",
+      "kind": "agent",
+      "location": "agents/api-graph-data-architect.md",
+      "resource_class": "agentic"
+    },
+    {
+      "id": "api-infra-reviewer",
+      "kind": "agent",
+      "location": "agents/api-infra-reviewer.md",
+      "resource_class": "agentic"
+    },
+    {
+      "id": "api-load-capacity-engineer",
+      "kind": "agent",
+      "location": "agents/api-load-capacity-engineer.md",
+      "resource_class": "agentic"
+    },
+    {
+      "id": "api-modernization-specialist",
+      "kind": "agent",
+      "location": "agents/api-modernization-specialist.md",
+      "resource_class": "agentic"
+    },
+    {
+      "id": "api-observability-engineer",
+      "kind": "agent",
+      "location": "agents/api-observability-engineer.md",
+      "resource_class": "agentic"
+    },
+    {
+      "id": "api-observability-integration-engineer",
+      "kind": "agent",
+      "location": "agents/api-observability-integration-engineer.md",
+      "resource_class": "agentic"
+    },
+    {
+      "id": "api-operations-engineer",
+      "kind": "agent",
+      "location": "agents/api-operations-engineer.md",
+      "resource_class": "agentic"
+    },
+    {
+      "id": "api-orchestrator",
+      "kind": "agent",
+      "location": "agents/api-orchestrator.md",
+      "resource_class": "agentic"
+    },
+    {
+      "id": "api-performance-engineer",
+      "kind": "agent",
+      "location": "agents/api-performance-engineer.md",
+      "resource_class": "agentic"
+    },
+    {
+      "id": "api-planner",
+      "kind": "agent",
+      "location": "agents/api-planner.md",
+      "resource_class": "agentic"
+    },
+    {
+      "id": "api-platform-selector",
+      "kind": "agent",
+      "location": "agents/api-platform-selector.md",
+      "resource_class": "agentic"
+    },
+    {
+      "id": "api-release-guardian",
+      "kind": "agent",
+      "location": "agents/api-release-guardian.md",
+      "resource_class": "agentic"
+    },
+    {
+      "id": "api-resilience-engineer",
+      "kind": "agent",
+      "location": "agents/api-resilience-engineer.md",
+      "resource_class": "agentic"
+    },
+    {
+      "id": "api-security-reviewer",
+      "kind": "agent",
+      "location": "agents/api-security-reviewer.md",
+      "resource_class": "agentic"
+    },
+    {
+      "id": "api-task-spec-reviewer",
+      "kind": "agent",
+      "location": "agents/api-task-spec-reviewer.md",
+      "resource_class": "agentic"
+    },
+    {
+      "id": "api-test-strategist",
+      "kind": "agent",
+      "location": "agents/api-test-strategist.md",
+      "resource_class": "agentic"
+    },
+    {
+      "id": "api-verifier",
+      "kind": "agent",
+      "location": "agents/api-verifier.md",
+      "resource_class": "agentic"
+    },
+    {
+      "id": "knowledge/api-dx/anti-patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/api-dx/anti-patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/api-dx/concepts.md",
+      "kind": "knowledge",
+      "location": "knowledge/api-dx/concepts.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/api-dx/evals.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/api-dx/evals.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/api-dx/index.md",
+      "kind": "knowledge",
+      "location": "knowledge/api-dx/index.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/api-dx/pack.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/api-dx/pack.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/api-dx/patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/api-dx/patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/api-dx/quick-reference.md",
+      "kind": "knowledge",
+      "location": "knowledge/api-dx/quick-reference.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/api-dx/recipes.md",
+      "kind": "knowledge",
+      "location": "knowledge/api-dx/recipes.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/api-dx/source_authority.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/api-dx/source_authority.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/api-dx/troubleshooting.md",
+      "kind": "knowledge",
+      "location": "knowledge/api-dx/troubleshooting.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/api-lifecycle/anti-patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/api-lifecycle/anti-patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/api-lifecycle/concepts.md",
+      "kind": "knowledge",
+      "location": "knowledge/api-lifecycle/concepts.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/api-lifecycle/evals.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/api-lifecycle/evals.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/api-lifecycle/index.md",
+      "kind": "knowledge",
+      "location": "knowledge/api-lifecycle/index.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/api-lifecycle/pack.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/api-lifecycle/pack.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/api-lifecycle/patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/api-lifecycle/patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/api-lifecycle/quick-reference.md",
+      "kind": "knowledge",
+      "location": "knowledge/api-lifecycle/quick-reference.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/api-lifecycle/recipes.md",
+      "kind": "knowledge",
+      "location": "knowledge/api-lifecycle/recipes.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/api-lifecycle/source_authority.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/api-lifecycle/source_authority.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/api-lifecycle/troubleshooting.md",
+      "kind": "knowledge",
+      "location": "knowledge/api-lifecycle/troubleshooting.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-api-gateway/anti-patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-api-gateway/anti-patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-api-gateway/concepts.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-api-gateway/concepts.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-api-gateway/evals.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/aws-api-gateway/evals.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-api-gateway/index.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-api-gateway/index.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-api-gateway/matrix.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/aws-api-gateway/matrix.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-api-gateway/pack.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/aws-api-gateway/pack.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-api-gateway/patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-api-gateway/patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-api-gateway/quick-reference.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-api-gateway/quick-reference.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-api-gateway/recipes.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-api-gateway/recipes.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-api-gateway/source_authority.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/aws-api-gateway/source_authority.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-api-gateway/troubleshooting.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-api-gateway/troubleshooting.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-data-protection/anti-patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-data-protection/anti-patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-data-protection/concepts.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-data-protection/concepts.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-data-protection/evals.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/aws-data-protection/evals.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-data-protection/index.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-data-protection/index.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-data-protection/pack.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/aws-data-protection/pack.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-data-protection/patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-data-protection/patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-data-protection/quick-reference.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-data-protection/quick-reference.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-data-protection/recipes.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-data-protection/recipes.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-data-protection/source_authority.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/aws-data-protection/source_authority.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-data-protection/troubleshooting.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-data-protection/troubleshooting.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-datastores/anti-patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-datastores/anti-patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-datastores/concepts.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-datastores/concepts.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-datastores/evals.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/aws-datastores/evals.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-datastores/index.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-datastores/index.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-datastores/pack.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/aws-datastores/pack.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-datastores/patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-datastores/patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-datastores/quick-reference.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-datastores/quick-reference.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-datastores/recipes.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-datastores/recipes.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-datastores/source_authority.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/aws-datastores/source_authority.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-datastores/troubleshooting.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-datastores/troubleshooting.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-identity/anti-patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-identity/anti-patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-identity/concepts.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-identity/concepts.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-identity/evals.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/aws-identity/evals.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-identity/index.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-identity/index.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-identity/pack.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/aws-identity/pack.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-identity/patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-identity/patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-identity/quick-reference.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-identity/quick-reference.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-identity/recipes.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-identity/recipes.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-identity/source_authority.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/aws-identity/source_authority.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-identity/troubleshooting.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-identity/troubleshooting.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-lambda/anti-patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-lambda/anti-patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-lambda/concepts.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-lambda/concepts.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-lambda/evals.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/aws-lambda/evals.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-lambda/index.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-lambda/index.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-lambda/pack.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/aws-lambda/pack.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-lambda/patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-lambda/patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-lambda/quick-reference.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-lambda/quick-reference.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-lambda/recipes.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-lambda/recipes.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-lambda/source_authority.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/aws-lambda/source_authority.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-lambda/troubleshooting.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-lambda/troubleshooting.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-messaging/anti-patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-messaging/anti-patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-messaging/concepts.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-messaging/concepts.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-messaging/evals.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/aws-messaging/evals.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-messaging/index.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-messaging/index.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-messaging/pack.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/aws-messaging/pack.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-messaging/patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-messaging/patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-messaging/quick-reference.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-messaging/quick-reference.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-messaging/recipes.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-messaging/recipes.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-messaging/source_authority.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/aws-messaging/source_authority.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-messaging/troubleshooting.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-messaging/troubleshooting.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-observability/anti-patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-observability/anti-patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-observability/concepts.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-observability/concepts.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-observability/evals.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/aws-observability/evals.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-observability/index.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-observability/index.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-observability/pack.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/aws-observability/pack.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-observability/patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-observability/patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-observability/quick-reference.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-observability/quick-reference.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-observability/recipes.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-observability/recipes.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-observability/source_authority.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/aws-observability/source_authority.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/aws-observability/troubleshooting.md",
+      "kind": "knowledge",
+      "location": "knowledge/aws-observability/troubleshooting.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/contract-testing/anti-patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/contract-testing/anti-patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/contract-testing/concepts.md",
+      "kind": "knowledge",
+      "location": "knowledge/contract-testing/concepts.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/contract-testing/evals.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/contract-testing/evals.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/contract-testing/index.md",
+      "kind": "knowledge",
+      "location": "knowledge/contract-testing/index.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/contract-testing/pack.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/contract-testing/pack.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/contract-testing/patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/contract-testing/patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/contract-testing/quick-reference.md",
+      "kind": "knowledge",
+      "location": "knowledge/contract-testing/quick-reference.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/contract-testing/recipes.md",
+      "kind": "knowledge",
+      "location": "knowledge/contract-testing/recipes.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/contract-testing/source_authority.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/contract-testing/source_authority.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/contract-testing/troubleshooting.md",
+      "kind": "knowledge",
+      "location": "knowledge/contract-testing/troubleshooting.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/data-access-patterns/anti-patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/data-access-patterns/anti-patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/data-access-patterns/concepts.md",
+      "kind": "knowledge",
+      "location": "knowledge/data-access-patterns/concepts.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/data-access-patterns/evals.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/data-access-patterns/evals.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/data-access-patterns/index.md",
+      "kind": "knowledge",
+      "location": "knowledge/data-access-patterns/index.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/data-access-patterns/pack.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/data-access-patterns/pack.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/data-access-patterns/patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/data-access-patterns/patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/data-access-patterns/quick-reference.md",
+      "kind": "knowledge",
+      "location": "knowledge/data-access-patterns/quick-reference.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/data-access-patterns/recipes.md",
+      "kind": "knowledge",
+      "location": "knowledge/data-access-patterns/recipes.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/data-access-patterns/source_authority.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/data-access-patterns/source_authority.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/data-access-patterns/troubleshooting.md",
+      "kind": "knowledge",
+      "location": "knowledge/data-access-patterns/troubleshooting.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/database-resilience/anti-patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/database-resilience/anti-patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/database-resilience/concepts.md",
+      "kind": "knowledge",
+      "location": "knowledge/database-resilience/concepts.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/database-resilience/evals.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/database-resilience/evals.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/database-resilience/index.md",
+      "kind": "knowledge",
+      "location": "knowledge/database-resilience/index.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/database-resilience/pack.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/database-resilience/pack.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/database-resilience/patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/database-resilience/patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/database-resilience/quick-reference.md",
+      "kind": "knowledge",
+      "location": "knowledge/database-resilience/quick-reference.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/database-resilience/recipes.md",
+      "kind": "knowledge",
+      "location": "knowledge/database-resilience/recipes.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/database-resilience/source_authority.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/database-resilience/source_authority.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/database-resilience/troubleshooting.md",
+      "kind": "knowledge",
+      "location": "knowledge/database-resilience/troubleshooting.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/documentdb/anti-patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/documentdb/anti-patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/documentdb/concepts.md",
+      "kind": "knowledge",
+      "location": "knowledge/documentdb/concepts.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/documentdb/evals.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/documentdb/evals.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/documentdb/index.md",
+      "kind": "knowledge",
+      "location": "knowledge/documentdb/index.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/documentdb/matrix.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/documentdb/matrix.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/documentdb/pack.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/documentdb/pack.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/documentdb/patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/documentdb/patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/documentdb/quick-reference.md",
+      "kind": "knowledge",
+      "location": "knowledge/documentdb/quick-reference.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/documentdb/recipes.md",
+      "kind": "knowledge",
+      "location": "knowledge/documentdb/recipes.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/documentdb/source_authority.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/documentdb/source_authority.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/documentdb/troubleshooting.md",
+      "kind": "knowledge",
+      "location": "knowledge/documentdb/troubleshooting.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/dynamodb/anti-patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/dynamodb/anti-patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/dynamodb/concepts.md",
+      "kind": "knowledge",
+      "location": "knowledge/dynamodb/concepts.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/dynamodb/evals.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/dynamodb/evals.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/dynamodb/index.md",
+      "kind": "knowledge",
+      "location": "knowledge/dynamodb/index.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/dynamodb/pack.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/dynamodb/pack.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/dynamodb/patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/dynamodb/patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/dynamodb/quick-reference.md",
+      "kind": "knowledge",
+      "location": "knowledge/dynamodb/quick-reference.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/dynamodb/recipes.md",
+      "kind": "knowledge",
+      "location": "knowledge/dynamodb/recipes.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/dynamodb/source_authority.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/dynamodb/source_authority.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/dynamodb/troubleshooting.md",
+      "kind": "knowledge",
+      "location": "knowledge/dynamodb/troubleshooting.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/fastapi/anti-patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/fastapi/anti-patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/fastapi/concepts.md",
+      "kind": "knowledge",
+      "location": "knowledge/fastapi/concepts.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/fastapi/evals.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/fastapi/evals.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/fastapi/index.md",
+      "kind": "knowledge",
+      "location": "knowledge/fastapi/index.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/fastapi/matrix.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/fastapi/matrix.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/fastapi/pack.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/fastapi/pack.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/fastapi/patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/fastapi/patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/fastapi/quick-reference.md",
+      "kind": "knowledge",
+      "location": "knowledge/fastapi/quick-reference.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/fastapi/recipes.md",
+      "kind": "knowledge",
+      "location": "knowledge/fastapi/recipes.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/fastapi/source_authority.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/fastapi/source_authority.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/fastapi/troubleshooting.md",
+      "kind": "knowledge",
+      "location": "knowledge/fastapi/troubleshooting.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/go-chi/anti-patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/go-chi/anti-patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/go-chi/concepts.md",
+      "kind": "knowledge",
+      "location": "knowledge/go-chi/concepts.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/go-chi/evals.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/go-chi/evals.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/go-chi/index.md",
+      "kind": "knowledge",
+      "location": "knowledge/go-chi/index.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/go-chi/matrix.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/go-chi/matrix.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/go-chi/pack.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/go-chi/pack.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/go-chi/patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/go-chi/patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/go-chi/quick-reference.md",
+      "kind": "knowledge",
+      "location": "knowledge/go-chi/quick-reference.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/go-chi/recipes.md",
+      "kind": "knowledge",
+      "location": "knowledge/go-chi/recipes.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/go-chi/source_authority.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/go-chi/source_authority.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/go-chi/troubleshooting.md",
+      "kind": "knowledge",
+      "location": "knowledge/go-chi/troubleshooting.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/go-net-http/anti-patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/go-net-http/anti-patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/go-net-http/concepts.md",
+      "kind": "knowledge",
+      "location": "knowledge/go-net-http/concepts.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/go-net-http/evals.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/go-net-http/evals.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/go-net-http/index.md",
+      "kind": "knowledge",
+      "location": "knowledge/go-net-http/index.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/go-net-http/pack.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/go-net-http/pack.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/go-net-http/patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/go-net-http/patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/go-net-http/quick-reference.md",
+      "kind": "knowledge",
+      "location": "knowledge/go-net-http/quick-reference.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/go-net-http/recipes.md",
+      "kind": "knowledge",
+      "location": "knowledge/go-net-http/recipes.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/go-net-http/source_authority.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/go-net-http/source_authority.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/go-net-http/troubleshooting.md",
+      "kind": "knowledge",
+      "location": "knowledge/go-net-http/troubleshooting.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/graph-databases/anti-patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/graph-databases/anti-patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/graph-databases/concepts.md",
+      "kind": "knowledge",
+      "location": "knowledge/graph-databases/concepts.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/graph-databases/evals.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/graph-databases/evals.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/graph-databases/index.md",
+      "kind": "knowledge",
+      "location": "knowledge/graph-databases/index.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/graph-databases/matrix.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/graph-databases/matrix.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/graph-databases/pack.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/graph-databases/pack.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/graph-databases/patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/graph-databases/patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/graph-databases/quick-reference.md",
+      "kind": "knowledge",
+      "location": "knowledge/graph-databases/quick-reference.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/graph-databases/recipes.md",
+      "kind": "knowledge",
+      "location": "knowledge/graph-databases/recipes.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/graph-databases/source_authority.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/graph-databases/source_authority.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/graph-databases/troubleshooting.md",
+      "kind": "knowledge",
+      "location": "knowledge/graph-databases/troubleshooting.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/http-semantics/anti-patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/http-semantics/anti-patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/http-semantics/concepts.md",
+      "kind": "knowledge",
+      "location": "knowledge/http-semantics/concepts.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/http-semantics/evals.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/http-semantics/evals.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/http-semantics/index.md",
+      "kind": "knowledge",
+      "location": "knowledge/http-semantics/index.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/http-semantics/pack.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/http-semantics/pack.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/http-semantics/patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/http-semantics/patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/http-semantics/quick-reference.md",
+      "kind": "knowledge",
+      "location": "knowledge/http-semantics/quick-reference.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/http-semantics/recipes.md",
+      "kind": "knowledge",
+      "location": "knowledge/http-semantics/recipes.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/http-semantics/source_authority.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/http-semantics/source_authority.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/http-semantics/troubleshooting.md",
+      "kind": "knowledge",
+      "location": "knowledge/http-semantics/troubleshooting.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/idempotency/anti-patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/idempotency/anti-patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/idempotency/concepts.md",
+      "kind": "knowledge",
+      "location": "knowledge/idempotency/concepts.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/idempotency/evals.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/idempotency/evals.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/idempotency/index.md",
+      "kind": "knowledge",
+      "location": "knowledge/idempotency/index.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/idempotency/pack.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/idempotency/pack.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/idempotency/patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/idempotency/patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/idempotency/quick-reference.md",
+      "kind": "knowledge",
+      "location": "knowledge/idempotency/quick-reference.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/idempotency/recipes.md",
+      "kind": "knowledge",
+      "location": "knowledge/idempotency/recipes.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/idempotency/source_authority.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/idempotency/source_authority.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/idempotency/troubleshooting.md",
+      "kind": "knowledge",
+      "location": "knowledge/idempotency/troubleshooting.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/json-schema/anti-patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/json-schema/anti-patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/json-schema/concepts.md",
+      "kind": "knowledge",
+      "location": "knowledge/json-schema/concepts.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/json-schema/evals.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/json-schema/evals.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/json-schema/index.md",
+      "kind": "knowledge",
+      "location": "knowledge/json-schema/index.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/json-schema/pack.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/json-schema/pack.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/json-schema/patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/json-schema/patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/json-schema/quick-reference.md",
+      "kind": "knowledge",
+      "location": "knowledge/json-schema/quick-reference.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/json-schema/recipes.md",
+      "kind": "knowledge",
+      "location": "knowledge/json-schema/recipes.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/json-schema/source_authority.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/json-schema/source_authority.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/json-schema/troubleshooting.md",
+      "kind": "knowledge",
+      "location": "knowledge/json-schema/troubleshooting.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/migration/anti-patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/migration/anti-patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/migration/concepts.md",
+      "kind": "knowledge",
+      "location": "knowledge/migration/concepts.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/migration/evals.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/migration/evals.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/migration/index.md",
+      "kind": "knowledge",
+      "location": "knowledge/migration/index.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/migration/pack.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/migration/pack.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/migration/patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/migration/patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/migration/quick-reference.md",
+      "kind": "knowledge",
+      "location": "knowledge/migration/quick-reference.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/migration/recipes.md",
+      "kind": "knowledge",
+      "location": "knowledge/migration/recipes.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/migration/source_authority.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/migration/source_authority.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/migration/troubleshooting.md",
+      "kind": "knowledge",
+      "location": "knowledge/migration/troubleshooting.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/mongodb/anti-patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/mongodb/anti-patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/mongodb/concepts.md",
+      "kind": "knowledge",
+      "location": "knowledge/mongodb/concepts.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/mongodb/evals.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/mongodb/evals.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/mongodb/index.md",
+      "kind": "knowledge",
+      "location": "knowledge/mongodb/index.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/mongodb/matrix.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/mongodb/matrix.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/mongodb/pack.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/mongodb/pack.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/mongodb/patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/mongodb/patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/mongodb/quick-reference.md",
+      "kind": "knowledge",
+      "location": "knowledge/mongodb/quick-reference.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/mongodb/recipes.md",
+      "kind": "knowledge",
+      "location": "knowledge/mongodb/recipes.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/mongodb/source_authority.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/mongodb/source_authority.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/mongodb/troubleshooting.md",
+      "kind": "knowledge",
+      "location": "knowledge/mongodb/troubleshooting.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/neo4j/anti-patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/neo4j/anti-patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/neo4j/concepts.md",
+      "kind": "knowledge",
+      "location": "knowledge/neo4j/concepts.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/neo4j/evals.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/neo4j/evals.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/neo4j/index.md",
+      "kind": "knowledge",
+      "location": "knowledge/neo4j/index.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/neo4j/matrix.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/neo4j/matrix.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/neo4j/pack.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/neo4j/pack.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/neo4j/patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/neo4j/patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/neo4j/quick-reference.md",
+      "kind": "knowledge",
+      "location": "knowledge/neo4j/quick-reference.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/neo4j/recipes.md",
+      "kind": "knowledge",
+      "location": "knowledge/neo4j/recipes.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/neo4j/source_authority.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/neo4j/source_authority.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/neo4j/troubleshooting.md",
+      "kind": "knowledge",
+      "location": "knowledge/neo4j/troubleshooting.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/neptune/anti-patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/neptune/anti-patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/neptune/concepts.md",
+      "kind": "knowledge",
+      "location": "knowledge/neptune/concepts.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/neptune/evals.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/neptune/evals.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/neptune/index.md",
+      "kind": "knowledge",
+      "location": "knowledge/neptune/index.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/neptune/matrix.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/neptune/matrix.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/neptune/pack.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/neptune/pack.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/neptune/patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/neptune/patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/neptune/quick-reference.md",
+      "kind": "knowledge",
+      "location": "knowledge/neptune/quick-reference.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/neptune/recipes.md",
+      "kind": "knowledge",
+      "location": "knowledge/neptune/recipes.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/neptune/source_authority.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/neptune/source_authority.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/neptune/troubleshooting.md",
+      "kind": "knowledge",
+      "location": "knowledge/neptune/troubleshooting.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/oauth-oidc/anti-patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/oauth-oidc/anti-patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/oauth-oidc/concepts.md",
+      "kind": "knowledge",
+      "location": "knowledge/oauth-oidc/concepts.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/oauth-oidc/evals.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/oauth-oidc/evals.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/oauth-oidc/index.md",
+      "kind": "knowledge",
+      "location": "knowledge/oauth-oidc/index.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/oauth-oidc/pack.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/oauth-oidc/pack.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/oauth-oidc/patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/oauth-oidc/patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/oauth-oidc/quick-reference.md",
+      "kind": "knowledge",
+      "location": "knowledge/oauth-oidc/quick-reference.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/oauth-oidc/recipes.md",
+      "kind": "knowledge",
+      "location": "knowledge/oauth-oidc/recipes.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/oauth-oidc/source_authority.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/oauth-oidc/source_authority.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/oauth-oidc/troubleshooting.md",
+      "kind": "knowledge",
+      "location": "knowledge/oauth-oidc/troubleshooting.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/observability/anti-patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/observability/anti-patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/observability/concepts.md",
+      "kind": "knowledge",
+      "location": "knowledge/observability/concepts.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/observability/evals.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/observability/evals.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/observability/index.md",
+      "kind": "knowledge",
+      "location": "knowledge/observability/index.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/observability/pack.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/observability/pack.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/observability/patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/observability/patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/observability/quick-reference.md",
+      "kind": "knowledge",
+      "location": "knowledge/observability/quick-reference.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/observability/recipes.md",
+      "kind": "knowledge",
+      "location": "knowledge/observability/recipes.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/observability/source_authority.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/observability/source_authority.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/observability/troubleshooting.md",
+      "kind": "knowledge",
+      "location": "knowledge/observability/troubleshooting.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/openapi-31/anti-patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/openapi-31/anti-patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/openapi-31/concepts.md",
+      "kind": "knowledge",
+      "location": "knowledge/openapi-31/concepts.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/openapi-31/evals.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/openapi-31/evals.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/openapi-31/index.md",
+      "kind": "knowledge",
+      "location": "knowledge/openapi-31/index.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/openapi-31/pack.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/openapi-31/pack.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/openapi-31/patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/openapi-31/patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/openapi-31/quick-reference.md",
+      "kind": "knowledge",
+      "location": "knowledge/openapi-31/quick-reference.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/openapi-31/recipes.md",
+      "kind": "knowledge",
+      "location": "knowledge/openapi-31/recipes.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/openapi-31/source_authority.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/openapi-31/source_authority.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/openapi-31/troubleshooting.md",
+      "kind": "knowledge",
+      "location": "knowledge/openapi-31/troubleshooting.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/owasp-api-2023/anti-patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/owasp-api-2023/anti-patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/owasp-api-2023/concepts.md",
+      "kind": "knowledge",
+      "location": "knowledge/owasp-api-2023/concepts.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/owasp-api-2023/evals.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/owasp-api-2023/evals.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/owasp-api-2023/index.md",
+      "kind": "knowledge",
+      "location": "knowledge/owasp-api-2023/index.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/owasp-api-2023/pack.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/owasp-api-2023/pack.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/owasp-api-2023/patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/owasp-api-2023/patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/owasp-api-2023/quick-reference.md",
+      "kind": "knowledge",
+      "location": "knowledge/owasp-api-2023/quick-reference.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/owasp-api-2023/recipes.md",
+      "kind": "knowledge",
+      "location": "knowledge/owasp-api-2023/recipes.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/owasp-api-2023/source_authority.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/owasp-api-2023/source_authority.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/owasp-api-2023/troubleshooting.md",
+      "kind": "knowledge",
+      "location": "knowledge/owasp-api-2023/troubleshooting.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/pagination/anti-patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/pagination/anti-patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/pagination/concepts.md",
+      "kind": "knowledge",
+      "location": "knowledge/pagination/concepts.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/pagination/evals.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/pagination/evals.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/pagination/index.md",
+      "kind": "knowledge",
+      "location": "knowledge/pagination/index.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/pagination/pack.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/pagination/pack.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/pagination/patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/pagination/patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/pagination/quick-reference.md",
+      "kind": "knowledge",
+      "location": "knowledge/pagination/quick-reference.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/pagination/recipes.md",
+      "kind": "knowledge",
+      "location": "knowledge/pagination/recipes.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/pagination/source_authority.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/pagination/source_authority.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/pagination/troubleshooting.md",
+      "kind": "knowledge",
+      "location": "knowledge/pagination/troubleshooting.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/performance-methodology/anti-patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/performance-methodology/anti-patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/performance-methodology/concepts.md",
+      "kind": "knowledge",
+      "location": "knowledge/performance-methodology/concepts.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/performance-methodology/evals.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/performance-methodology/evals.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/performance-methodology/index.md",
+      "kind": "knowledge",
+      "location": "knowledge/performance-methodology/index.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/performance-methodology/pack.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/performance-methodology/pack.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/performance-methodology/patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/performance-methodology/patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/performance-methodology/quick-reference.md",
+      "kind": "knowledge",
+      "location": "knowledge/performance-methodology/quick-reference.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/performance-methodology/recipes.md",
+      "kind": "knowledge",
+      "location": "knowledge/performance-methodology/recipes.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/performance-methodology/source_authority.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/performance-methodology/source_authority.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/performance-methodology/troubleshooting.md",
+      "kind": "knowledge",
+      "location": "knowledge/performance-methodology/troubleshooting.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/problem-details/anti-patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/problem-details/anti-patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/problem-details/concepts.md",
+      "kind": "knowledge",
+      "location": "knowledge/problem-details/concepts.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/problem-details/evals.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/problem-details/evals.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/problem-details/index.md",
+      "kind": "knowledge",
+      "location": "knowledge/problem-details/index.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/problem-details/pack.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/problem-details/pack.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/problem-details/patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/problem-details/patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/problem-details/quick-reference.md",
+      "kind": "knowledge",
+      "location": "knowledge/problem-details/quick-reference.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/problem-details/recipes.md",
+      "kind": "knowledge",
+      "location": "knowledge/problem-details/recipes.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/problem-details/source_authority.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/problem-details/source_authority.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/problem-details/troubleshooting.md",
+      "kind": "knowledge",
+      "location": "knowledge/problem-details/troubleshooting.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/redis-valkey/anti-patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/redis-valkey/anti-patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/redis-valkey/concepts.md",
+      "kind": "knowledge",
+      "location": "knowledge/redis-valkey/concepts.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/redis-valkey/evals.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/redis-valkey/evals.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/redis-valkey/index.md",
+      "kind": "knowledge",
+      "location": "knowledge/redis-valkey/index.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/redis-valkey/pack.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/redis-valkey/pack.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/redis-valkey/patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/redis-valkey/patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/redis-valkey/quick-reference.md",
+      "kind": "knowledge",
+      "location": "knowledge/redis-valkey/quick-reference.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/redis-valkey/recipes.md",
+      "kind": "knowledge",
+      "location": "knowledge/redis-valkey/recipes.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/redis-valkey/source_authority.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/redis-valkey/source_authority.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/redis-valkey/troubleshooting.md",
+      "kind": "knowledge",
+      "location": "knowledge/redis-valkey/troubleshooting.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/resilience/anti-patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/resilience/anti-patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/resilience/concepts.md",
+      "kind": "knowledge",
+      "location": "knowledge/resilience/concepts.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/resilience/evals.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/resilience/evals.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/resilience/index.md",
+      "kind": "knowledge",
+      "location": "knowledge/resilience/index.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/resilience/pack.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/resilience/pack.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/resilience/patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/resilience/patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/resilience/quick-reference.md",
+      "kind": "knowledge",
+      "location": "knowledge/resilience/quick-reference.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/resilience/recipes.md",
+      "kind": "knowledge",
+      "location": "knowledge/resilience/recipes.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/resilience/source_authority.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/resilience/source_authority.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/resilience/troubleshooting.md",
+      "kind": "knowledge",
+      "location": "knowledge/resilience/troubleshooting.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/rest-design/anti-patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/rest-design/anti-patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/rest-design/concepts.md",
+      "kind": "knowledge",
+      "location": "knowledge/rest-design/concepts.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/rest-design/evals.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/rest-design/evals.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/rest-design/index.md",
+      "kind": "knowledge",
+      "location": "knowledge/rest-design/index.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/rest-design/pack.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/rest-design/pack.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/rest-design/patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/rest-design/patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/rest-design/quick-reference.md",
+      "kind": "knowledge",
+      "location": "knowledge/rest-design/quick-reference.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/rest-design/recipes.md",
+      "kind": "knowledge",
+      "location": "knowledge/rest-design/recipes.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/rest-design/source_authority.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/rest-design/source_authority.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/rest-design/troubleshooting.md",
+      "kind": "knowledge",
+      "location": "knowledge/rest-design/troubleshooting.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/runtime-migration/anti-patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/runtime-migration/anti-patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/runtime-migration/concepts.md",
+      "kind": "knowledge",
+      "location": "knowledge/runtime-migration/concepts.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/runtime-migration/evals.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/runtime-migration/evals.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/runtime-migration/index.md",
+      "kind": "knowledge",
+      "location": "knowledge/runtime-migration/index.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/runtime-migration/matrix-pack.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/runtime-migration/matrix-pack.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/runtime-migration/matrix.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/runtime-migration/matrix.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/runtime-migration/pack.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/runtime-migration/pack.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/runtime-migration/patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/runtime-migration/patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/runtime-migration/quick-reference.md",
+      "kind": "knowledge",
+      "location": "knowledge/runtime-migration/quick-reference.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/runtime-migration/recipes.md",
+      "kind": "knowledge",
+      "location": "knowledge/runtime-migration/recipes.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/runtime-migration/source_authority.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/runtime-migration/source_authority.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/runtime-migration/troubleshooting.md",
+      "kind": "knowledge",
+      "location": "knowledge/runtime-migration/troubleshooting.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/sam-api/anti-patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/sam-api/anti-patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/sam-api/concepts.md",
+      "kind": "knowledge",
+      "location": "knowledge/sam-api/concepts.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/sam-api/evals.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/sam-api/evals.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/sam-api/index.md",
+      "kind": "knowledge",
+      "location": "knowledge/sam-api/index.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/sam-api/pack.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/sam-api/pack.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/sam-api/patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/sam-api/patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/sam-api/quick-reference.md",
+      "kind": "knowledge",
+      "location": "knowledge/sam-api/quick-reference.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/sam-api/recipes.md",
+      "kind": "knowledge",
+      "location": "knowledge/sam-api/recipes.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/sam-api/source_authority.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/sam-api/source_authority.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/sam-api/troubleshooting.md",
+      "kind": "knowledge",
+      "location": "knowledge/sam-api/troubleshooting.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/spring-boot/anti-patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/spring-boot/anti-patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/spring-boot/concepts.md",
+      "kind": "knowledge",
+      "location": "knowledge/spring-boot/concepts.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/spring-boot/evals.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/spring-boot/evals.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/spring-boot/index.md",
+      "kind": "knowledge",
+      "location": "knowledge/spring-boot/index.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/spring-boot/matrix.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/spring-boot/matrix.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/spring-boot/pack.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/spring-boot/pack.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/spring-boot/patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/spring-boot/patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/spring-boot/quick-reference.md",
+      "kind": "knowledge",
+      "location": "knowledge/spring-boot/quick-reference.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/spring-boot/recipes.md",
+      "kind": "knowledge",
+      "location": "knowledge/spring-boot/recipes.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/spring-boot/source_authority.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/spring-boot/source_authority.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/spring-boot/troubleshooting.md",
+      "kind": "knowledge",
+      "location": "knowledge/spring-boot/troubleshooting.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/terraform-api/anti-patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/terraform-api/anti-patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/terraform-api/concepts.md",
+      "kind": "knowledge",
+      "location": "knowledge/terraform-api/concepts.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/terraform-api/evals.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/terraform-api/evals.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/terraform-api/index.md",
+      "kind": "knowledge",
+      "location": "knowledge/terraform-api/index.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/terraform-api/pack.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/terraform-api/pack.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/terraform-api/patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/terraform-api/patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/terraform-api/quick-reference.md",
+      "kind": "knowledge",
+      "location": "knowledge/terraform-api/quick-reference.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/terraform-api/recipes.md",
+      "kind": "knowledge",
+      "location": "knowledge/terraform-api/recipes.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/terraform-api/source_authority.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/terraform-api/source_authority.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/terraform-api/troubleshooting.md",
+      "kind": "knowledge",
+      "location": "knowledge/terraform-api/troubleshooting.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/versioning/anti-patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/versioning/anti-patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/versioning/concepts.md",
+      "kind": "knowledge",
+      "location": "knowledge/versioning/concepts.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/versioning/evals.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/versioning/evals.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/versioning/index.md",
+      "kind": "knowledge",
+      "location": "knowledge/versioning/index.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/versioning/pack.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/versioning/pack.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/versioning/patterns.md",
+      "kind": "knowledge",
+      "location": "knowledge/versioning/patterns.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/versioning/quick-reference.md",
+      "kind": "knowledge",
+      "location": "knowledge/versioning/quick-reference.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/versioning/recipes.md",
+      "kind": "knowledge",
+      "location": "knowledge/versioning/recipes.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/versioning/source_authority.yaml",
+      "kind": "knowledge",
+      "location": "knowledge/versioning/source_authority.yaml",
+      "format": "yaml",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "knowledge/versioning/troubleshooting.md",
+      "kind": "knowledge",
+      "location": "knowledge/versioning/troubleshooting.md",
+      "format": "markdown",
+      "resource_class": "read-only"
+    },
+    {
+      "id": "evals/cases",
+      "kind": "eval",
+      "location": "evals/cases",
+      "resource_class": "validation"
+    },
+    {
+      "id": "evals/corpus",
+      "kind": "eval",
+      "location": "evals/corpus",
+      "resource_class": "validation"
+    },
+    {
+      "id": "evals/datasets",
+      "kind": "eval",
+      "location": "evals/datasets",
+      "resource_class": "validation"
+    },
+    {
+      "id": "evals/skills",
+      "kind": "eval",
+      "location": "evals/skills",
+      "resource_class": "validation"
+    },
+    {
+      "id": "tests/fixtures/agentic_runtime",
+      "kind": "fixture",
+      "location": "tests/fixtures/agentic_runtime",
+      "resource_class": "test-only"
+    },
+    {
+      "id": "tests/fixtures/api_git_cicd",
+      "kind": "fixture",
+      "location": "tests/fixtures/api_git_cicd",
+      "resource_class": "test-only"
+    },
+    {
+      "id": "tests/fixtures/aws",
+      "kind": "fixture",
+      "location": "tests/fixtures/aws",
+      "resource_class": "test-only"
+    },
+    {
+      "id": "tests/fixtures/compatibility",
+      "kind": "fixture",
+      "location": "tests/fixtures/compatibility",
+      "resource_class": "test-only"
+    },
+    {
+      "id": "tests/fixtures/dbaccess_app",
+      "kind": "fixture",
+      "location": "tests/fixtures/dbaccess_app",
+      "resource_class": "test-only"
+    },
+    {
+      "id": "tests/fixtures/debate",
+      "kind": "fixture",
+      "location": "tests/fixtures/debate",
+      "resource_class": "test-only"
+    },
+    {
+      "id": "tests/fixtures/economy_payments",
+      "kind": "fixture",
+      "location": "tests/fixtures/economy_payments",
+      "resource_class": "test-only"
+    },
+    {
+      "id": "tests/fixtures/fastapi_flat",
+      "kind": "fixture",
+      "location": "tests/fixtures/fastapi_flat",
+      "resource_class": "test-only"
+    },
+    {
+      "id": "tests/fixtures/fastapi_orders",
+      "kind": "fixture",
+      "location": "tests/fixtures/fastapi_orders",
+      "resource_class": "test-only"
+    },
+    {
+      "id": "tests/fixtures/fastapi_orders_complete",
+      "kind": "fixture",
+      "location": "tests/fixtures/fastapi_orders_complete",
+      "resource_class": "test-only"
+    },
+    {
+      "id": "tests/fixtures/github",
+      "kind": "fixture",
+      "location": "tests/fixtures/github",
+      "resource_class": "test-only"
+    },
+    {
+      "id": "tests/fixtures/go_orders",
+      "kind": "fixture",
+      "location": "tests/fixtures/go_orders",
+      "resource_class": "test-only"
+    },
+    {
+      "id": "tests/fixtures/graph_explain",
+      "kind": "fixture",
+      "location": "tests/fixtures/graph_explain",
+      "resource_class": "test-only"
+    },
+    {
+      "id": "tests/fixtures/grpc",
+      "kind": "fixture",
+      "location": "tests/fixtures/grpc",
+      "resource_class": "test-only"
+    },
+    {
+      "id": "tests/fixtures/hosts",
+      "kind": "fixture",
+      "location": "tests/fixtures/hosts",
+      "resource_class": "test-only"
+    },
+    {
+      "id": "tests/fixtures/knowledge",
+      "kind": "fixture",
+      "location": "tests/fixtures/knowledge",
+      "resource_class": "test-only"
+    },
+    {
+      "id": "tests/fixtures/lambda_dump",
+      "kind": "fixture",
+      "location": "tests/fixtures/lambda_dump",
+      "resource_class": "test-only"
+    },
+    {
+      "id": "tests/fixtures/migrations",
+      "kind": "fixture",
+      "location": "tests/fixtures/migrations",
+      "resource_class": "test-only"
+    },
+    {
+      "id": "tests/fixtures/observability",
+      "kind": "fixture",
+      "location": "tests/fixtures/observability",
+      "resource_class": "test-only"
+    },
+    {
+      "id": "tests/fixtures/openapi",
+      "kind": "fixture",
+      "location": "tests/fixtures/openapi",
+      "resource_class": "test-only"
+    },
+    {
+      "id": "tests/fixtures/orders_agentic",
+      "kind": "fixture",
+      "location": "tests/fixtures/orders_agentic",
+      "resource_class": "test-only"
+    },
+    {
+      "id": "tests/fixtures/otel",
+      "kind": "fixture",
+      "location": "tests/fixtures/otel",
+      "resource_class": "test-only"
+    },
+    {
+      "id": "tests/fixtures/platform",
+      "kind": "fixture",
+      "location": "tests/fixtures/platform",
+      "resource_class": "test-only"
+    },
+    {
+      "id": "tests/fixtures/policy",
+      "kind": "fixture",
+      "location": "tests/fixtures/policy",
+      "resource_class": "test-only"
+    },
+    {
+      "id": "tests/fixtures/portable_distribution",
+      "kind": "fixture",
+      "location": "tests/fixtures/portable_distribution",
+      "resource_class": "test-only"
+    },
+    {
+      "id": "tests/fixtures/redis_app",
+      "kind": "fixture",
+      "location": "tests/fixtures/redis_app",
+      "resource_class": "test-only"
+    },
+    {
+      "id": "tests/fixtures/reports",
+      "kind": "fixture",
+      "location": "tests/fixtures/reports",
+      "resource_class": "test-only"
+    },
+    {
+      "id": "tests/fixtures/resilience_app",
+      "kind": "fixture",
+      "location": "tests/fixtures/resilience_app",
+      "resource_class": "test-only"
+    },
+    {
+      "id": "tests/fixtures/sam",
+      "kind": "fixture",
+      "location": "tests/fixtures/sam",
+      "resource_class": "test-only"
+    },
+    {
+      "id": "tests/fixtures/sdd_root",
+      "kind": "fixture",
+      "location": "tests/fixtures/sdd_root",
+      "resource_class": "test-only"
+    },
+    {
+      "id": "tests/fixtures/spring_orders",
+      "kind": "fixture",
+      "location": "tests/fixtures/spring_orders",
+      "resource_class": "test-only"
+    },
+    {
+      "id": "tests/fixtures/terraform_api",
+      "kind": "fixture",
+      "location": "tests/fixtures/terraform_api",
+      "resource_class": "test-only"
+    },
+    {
+      "id": "tests/fixtures/tui",
+      "kind": "fixture",
+      "location": "tests/fixtures/tui",
+      "resource_class": "test-only"
+    },
+    {
+      "id": "tests/fixtures/workspaces",
+      "kind": "fixture",
+      "location": "tests/fixtures/workspaces",
+      "resource_class": "test-only"
+    }
+  ]
 }

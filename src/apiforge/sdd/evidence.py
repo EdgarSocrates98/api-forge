@@ -63,8 +63,11 @@ def _extract_migration_plan(text: str) -> dict[str, Any]:
             "AF-SDD-EVIDENCE-EXTRACT",
             "migration.plan: frontmatter needs `rollback` or `cutover`",
         )
-    return {"rollback": rollback, "cutover": cutover,
-            "repositories": data.get("repositories") or data.get("repos")}
+    return {
+        "rollback": rollback,
+        "cutover": cutover,
+        "repositories": data.get("repositories") or data.get("repos"),
+    }
 
 
 _EXTRACTORS = {

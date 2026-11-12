@@ -132,11 +132,13 @@ def test_migration_gate_scoped_to_profile(tmp_path: Path) -> None:
     # release.receipt present → the only thing left blocking is migration.plan
     receipt = tmp_path / "receipt.txt"
     receipt.write_text("released\n", encoding="utf-8")
-    emit_evidence(root, "SHIPME", "release.receipt", receipt, "2026-11-12T00:00:00Z",
-                  state_dir=tmp_path)
+    emit_evidence(
+        root, "SHIPME", "release.receipt", receipt, "2026-11-12T00:00:00Z", state_dir=tmp_path
+    )
     with pytest.raises(SddError, match="migration-evidenced"):
-        set_phase(root, "SHIPME", "ship", "ready", strict=True,
-                  evidence_dir=evidence, state_dir=tmp_path)
+        set_phase(
+            root, "SHIPME", "ship", "ready", strict=True, evidence_dir=evidence, state_dir=tmp_path
+        )
 
 
 def test_migration_gate_skipped_for_critical(tmp_path: Path) -> None:
@@ -148,10 +150,12 @@ def test_migration_gate_skipped_for_critical(tmp_path: Path) -> None:
     evidence.mkdir()
     receipt = tmp_path / "receipt.txt"
     receipt.write_text("released\n", encoding="utf-8")
-    emit_evidence(root, "SHIPME", "release.receipt", receipt, "2026-11-12T00:00:00Z",
-                  state_dir=tmp_path)
-    change = set_phase(root, "SHIPME", "ship", "ready", strict=True,
-                       evidence_dir=evidence, state_dir=tmp_path)
+    emit_evidence(
+        root, "SHIPME", "release.receipt", receipt, "2026-11-12T00:00:00Z", state_dir=tmp_path
+    )
+    change = set_phase(
+        root, "SHIPME", "ship", "ready", strict=True, evidence_dir=evidence, state_dir=tmp_path
+    )
     assert change.status == "ready"
 
 
@@ -165,13 +169,15 @@ def test_migration_plan_extractor(tmp_path: Path) -> None:
         "---\nrollback: restore-snapshot\ncutover: dns-swap\nrepositories: [a, b]\n---\n# m\n",
         encoding="utf-8",
     )
-    payload = emit_evidence(root, "SHIPME", "migration.plan", plan,
-                            "2026-11-12T00:00:00Z", state_dir=tmp_path)
+    payload = emit_evidence(
+        root, "SHIPME", "migration.plan", plan, "2026-11-12T00:00:00Z", state_dir=tmp_path
+    )
     assert payload["extracted"]["rollback"] == "restore-snapshot"
     assert payload["extracted"]["cutover"] == "dns-swap"
 
     # without rollback/cutover the evidence is refused, not faked
     plan.write_text("---\nrepositories: [a]\n---\n", encoding="utf-8")
     with pytest.raises(SddError, match="AF-SDD-EVIDENCE-EXTRACT"):
-        emit_evidence(root, "SHIPME", "migration.plan", plan,
-                      "2026-11-12T00:00:00Z", state_dir=tmp_path)
+        emit_evidence(
+            root, "SHIPME", "migration.plan", plan, "2026-11-12T00:00:00Z", state_dir=tmp_path
+        )

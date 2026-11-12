@@ -498,6 +498,7 @@ def _context_manifest(ctx: kit.InstallContext) -> dict[str, Any]:
         hosts=ctx.hosts,
         forge_json=forge_json,
         agentic=agentic,
+        kind="specialist",
         domains=_API_DOMAINS,
         skills=skills,
         coordinators=coordinators,

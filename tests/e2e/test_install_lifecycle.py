@@ -57,8 +57,10 @@ def test_install_devin_escreve_skills_mcp_e_marker(projeto):
     out = service.install("devin", scope="project", root=projeto, yes=True)
     assert out["status"] == "completed"
     paths = {f["path"] for f in out["managed_files"]}
-    assert any(p.startswith(".devin/skills/") for p in paths)
+    # dedup: `.agents/` é a superfície única que o Devin lê nativamente —
+    # `.devin/` fica reservado a assets host-specific, sem segunda cópia.
     assert any(p.startswith(".agents/skills/") for p in paths)
+    assert not any(p.startswith(".devin/skills/") for p in paths)
     mcp = json.loads((projeto / ".mcp.json").read_text(encoding="utf-8"))
     assert "apiforge" in mcp["mcpServers"]
     assert "forge:api-forge:begin" in (projeto / "AGENTS.md").read_text("utf-8")
@@ -69,8 +71,9 @@ def test_install_devin_escreve_skills_mcp_e_marker(projeto):
 def test_install_profile_full_inclui_agents(projeto):
     out = service.install("devin", scope="project", root=projeto, profile="full", yes=True)
     paths = {f["path"] for f in out["managed_files"]}
-    assert any(p.startswith(".devin/agents/") for p in paths)
+    # mesma dedup: agents vivem uma vez em `.agents/`, lidos pelo Devin nativo.
     assert any(p.startswith(".agents/agents/") for p in paths)
+    assert not any(p.startswith(".devin/agents/") for p in paths)
 
 
 def test_install_profile_minimal_sem_mirrors(projeto):
@@ -85,7 +88,7 @@ def test_install_nao_sobrescreve_arquivo_do_usuario(projeto):
     alvo_rel = next(
         f["path"]
         for f in plano["planned_files"]
-        if f["path"].startswith(".devin/skills/") and f["path"].endswith("SKILL.md")
+        if f["path"].startswith(".agents/skills/") and f["path"].endswith("SKILL.md")
     )
     alvo = projeto / alvo_rel
     alvo.parent.mkdir(parents=True, exist_ok=True)
@@ -108,9 +111,9 @@ def test_status_e_drift(projeto):
     alvo = projeto / next(
         p["path"]
         for p in service.status(scope="project", root=projeto)["drift"]["modified"]
-        or [{"path": ".devin/skills/api-forge-core/SKILL.md"}]
+        or [{"path": ".agents/skills/api-forge-core/SKILL.md"}]
     )
-    alvo = projeto / ".devin/skills/api-forge-core/SKILL.md"
+    alvo = projeto / ".agents/skills/api-forge-core/SKILL.md"
     alvo.write_text("edicao manual", encoding="utf-8")
     st2 = service.status(scope="project", root=projeto)
     assert st2["status"] == "degraded"
@@ -118,7 +121,7 @@ def test_status_e_drift(projeto):
 
 def test_repair_restaura(projeto):
     service.install("devin", scope="project", root=projeto, yes=True)
-    vitima = projeto / ".devin/skills/api-forge-core/SKILL.md"
+    vitima = projeto / ".agents/skills/api-forge-core/SKILL.md"
     original = vitima.read_bytes()
     vitima.unlink()
     rep = service.repair(scope="project", root=projeto)

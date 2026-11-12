@@ -3200,6 +3200,534 @@
       "resource_class": "read-only"
     },
     {
+      "id": "src/apiforge/rules/agent_aliases.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/agent_aliases.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/agent_aliases.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/agent_profiles.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/agent_profiles.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/agent_profiles.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/agentic_runtime.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/agentic_runtime.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/agentic_runtime.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/agentops_waste.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/agentops_waste.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/agentops_waste.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/cache_policies.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/cache_policies.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/cache_policies.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/capability_matrix.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/capability_matrix.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/capability_matrix.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/catalog/breaking.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/catalog/breaking.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/catalog/breaking.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/catalog/contract.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/catalog/contract.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/catalog/contract.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/catalog/data.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/catalog/data.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/catalog/data.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/catalog/gateway.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/catalog/gateway.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/catalog/gateway.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/catalog/gdb.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/catalog/gdb.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/catalog/gdb.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/catalog/identity.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/catalog/identity.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/catalog/identity.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/catalog/messaging.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/catalog/messaging.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/catalog/messaging.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/catalog/observe.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/catalog/observe.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/catalog/observe.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/catalog/perf.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/catalog/perf.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/catalog/perf.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/catalog/resilience.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/catalog/resilience.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/catalog/resilience.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/catalog/rest.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/catalog/rest.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/catalog/rest.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/catalog/routing.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/catalog/routing.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/catalog/routing.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/catalog/security.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/catalog/security.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/catalog/security.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/catalog/storage.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/catalog/storage.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/catalog/storage.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/catalog/testing.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/catalog/testing.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/catalog/testing.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/control_plane.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/control_plane.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/control_plane.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/economy_profiles.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/economy_profiles.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/economy_profiles.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/expertise_triggers.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/expertise_triggers.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/expertise_triggers.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/forge_protocol.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/forge_protocol.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/forge_protocol.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/governor_policy.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/governor_policy.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/governor_policy.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/grpc.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/grpc.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/grpc.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/grpc_compatibility.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/grpc_compatibility.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/grpc_compatibility.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/grpc_runtime.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/grpc_runtime.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/grpc_runtime.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/host_projections.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/host_projections.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/host_projections.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/live_evals.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/live_evals.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/live_evals.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/live_evidence_triggers.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/live_evidence_triggers.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/live_evidence_triggers.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/model_router.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/model_router.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/model_router.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/observability_control_plane.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/observability_control_plane.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/observability_control_plane.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/phase_budgets.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/phase_budgets.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/phase_budgets.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/playbooks.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/playbooks.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/playbooks.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/provider_pricing.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/provider_pricing.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/provider_pricing.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/providers.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/providers.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/providers.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/query_expansion.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/query_expansion.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/query_expansion.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/recipes.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/recipes.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/recipes.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/recovery_policy.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/recovery_policy.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/recovery_policy.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/retrieval_levels.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/retrieval_levels.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/retrieval_levels.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/role_context.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/role_context.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/role_context.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/routing.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/routing.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/routing.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/runbooks.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/runbooks.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/runbooks.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/token_eligibility.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/token_eligibility.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/token_eligibility.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/tool_benchmark.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/tool_benchmark.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/tool_benchmark.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/tool_disclosure.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/tool_disclosure.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/tool_disclosure.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/tool_risk.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/tool_risk.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/tool_risk.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/tool_surface.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/tool_surface.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/tool_surface.yaml"
+    },
+    {
+      "id": "src/apiforge/rules/trace_rubric.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/trace_rubric.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/trace_rubric.yaml"
+    },
+    {
+      "id": "rule:src/apiforge/rules/catalog/breaking.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/catalog/breaking.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/catalog/breaking.yaml"
+    },
+    {
+      "id": "rule:src/apiforge/rules/catalog/contract.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/catalog/contract.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/catalog/contract.yaml"
+    },
+    {
+      "id": "rule:src/apiforge/rules/catalog/data.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/catalog/data.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/catalog/data.yaml"
+    },
+    {
+      "id": "rule:src/apiforge/rules/catalog/gateway.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/catalog/gateway.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/catalog/gateway.yaml"
+    },
+    {
+      "id": "rule:src/apiforge/rules/catalog/gdb.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/catalog/gdb.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/catalog/gdb.yaml"
+    },
+    {
+      "id": "rule:src/apiforge/rules/catalog/identity.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/catalog/identity.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/catalog/identity.yaml"
+    },
+    {
+      "id": "rule:src/apiforge/rules/catalog/messaging.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/catalog/messaging.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/catalog/messaging.yaml"
+    },
+    {
+      "id": "rule:src/apiforge/rules/catalog/observe.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/catalog/observe.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/catalog/observe.yaml"
+    },
+    {
+      "id": "rule:src/apiforge/rules/catalog/perf.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/catalog/perf.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/catalog/perf.yaml"
+    },
+    {
+      "id": "rule:src/apiforge/rules/catalog/resilience.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/catalog/resilience.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/catalog/resilience.yaml"
+    },
+    {
+      "id": "rule:src/apiforge/rules/catalog/rest.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/catalog/rest.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/catalog/rest.yaml"
+    },
+    {
+      "id": "rule:src/apiforge/rules/catalog/routing.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/catalog/routing.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/catalog/routing.yaml"
+    },
+    {
+      "id": "rule:src/apiforge/rules/catalog/security.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/catalog/security.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/catalog/security.yaml"
+    },
+    {
+      "id": "rule:src/apiforge/rules/catalog/storage.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/catalog/storage.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/catalog/storage.yaml"
+    },
+    {
+      "id": "rule:src/apiforge/rules/catalog/testing.yaml",
+      "kind": "rule",
+      "location": "src/apiforge/rules/catalog/testing.yaml",
+      "format": "yaml",
+      "resource_class": "policy",
+      "packaged_location": "rules/catalog/testing.yaml"
+    },
+    {
       "id": "evals/cases",
       "kind": "eval",
       "location": "evals/cases",

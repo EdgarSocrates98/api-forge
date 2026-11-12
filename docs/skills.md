@@ -36,6 +36,7 @@ Devin e Copilot.
 | `api-forge-sdd` | Risco e perfil, fases, TaskSpecs, gates por evidência e field validation |
 | `api-forge-context` | Funnel, capsules, delta, grafo, handoff e economia (detalhe em `references/economy.md`) |
 | `api-forge-delegate-doctor` | Delegação opcional `forge doctor` ao forge-doctor-api: drift, breaking, migração, `UNKNOWN` e `AF-DELEG-*` |
+| `api-forge-sentinel` | Quando a pergunta exige o api-sentinel-forge (runtime/SLO/incidente/correlação de deploy), handoffs reais (`handoff apiforge`/`doctor`/`ingest`) e estados `absent`/`unavailable:*` honestos |
 | `api-forge-platform-completion` | Prontidão da plataforma, capability matrix, change-control e manutenção de agents/skills |
 
 ## Formato de uma skill

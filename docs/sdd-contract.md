@@ -74,6 +74,16 @@ Refusals (`refused[]`) block `ok`; named gaps (`unresolved[]`) are reported at
 | `AF-SDD-EVIDENCE-KIND` | `sdd evidence --kind` satisfies no gate in `gates.yaml` |
 | `AF-SDD-EVIDENCE-SOURCE` | `sdd evidence --from` names no file |
 | `AF-SDD-EVIDENCE-EXTRACT` | the kind's extractor cannot read the source (e.g. no pytest tally) |
+| `AF-SDD-EVIDENCE-ABSENT` | the receipt file named by the gate does not exist |
+| `AF-SDD-EVIDENCE-UNREADABLE` | the receipt file is not parseable JSON |
+| `AF-SDD-EVIDENCE-SHAPE` | the receipt parses but is not a JSON object |
+| `AF-SDD-EVIDENCE-INCOMPLETE` | the receipt lacks required fields for its kind |
+| `AF-SDD-EVIDENCE-FEATURE` | the receipt is recorded for a different feature |
+| `AF-SDD-EVIDENCE-SOURCE-GONE` | the source file the receipt was recorded against no longer exists |
+| `AF-SDD-EVIDENCE-STALE` | the source changed since the evidence was recorded — re-run and re-record |
+| `AF-SDD-EVIDENCE-FAILED` | the receipt records failed/error tests or a terminal negative status — fix and re-run, never re-label |
+| `AF-SDD-EVIDENCE-EMPTY` | the receipt records zero passed tests — inconclusive, not a pass |
+| `AF-SDD-EVIDENCE-OK` | the receipt passed structural and outcome validation (terminal non-refusal state) |
 | `AF-SDD-ARTIFACT-MISSING` | `set-phase` target file absent |
 | `AF-SDD-NOT-FOUND` | `--feature` names no directory under the SDD root |
 | `AF-SDD-FEATURE-UNKNOWN` | `--feature` names a directory that does not exist |

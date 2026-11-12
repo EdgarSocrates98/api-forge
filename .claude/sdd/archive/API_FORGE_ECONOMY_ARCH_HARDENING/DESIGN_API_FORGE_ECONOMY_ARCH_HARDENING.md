@@ -213,7 +213,9 @@ def within_envelope(self) -> RoleContextPlan:
 ```python
 error = ContractError("AF-PATH-OUTSIDE-ROOT", detail)
 error.field = "path"
-error.unlock = "keep sources inside the project or declare the repository in .apiforge/workspace.yaml"
+error.unlock = (
+    "keep sources inside the project or declare the repository in .apiforge/workspace.yaml"
+)
 ```
 
 ---

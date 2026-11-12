@@ -5,13 +5,14 @@ verifies honest coverage states and emits forge/BenchmarkResult/v1.
 Runs under api-forge's own interpreter (uv-managed .venv): the catalog
 needs pydantic, unavailable in the coordinator's stdlib-only venv.
 """
+
 from __future__ import annotations
 
 import argparse
 import json
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 FORGE = "api-forge"
@@ -19,6 +20,7 @@ SUITE = "api-forge-lab"
 
 
 import re as _re
+
 
 def _slug(s: object) -> str:
     return _re.sub(r"[^a-z0-9-]+", "-", str(s).lower()).strip("-") or "scenario"
@@ -42,11 +44,12 @@ def main() -> int:
     started = time.monotonic()
     report = load_lab_report(checkout / "labs" / "scenarios.yaml", repo_root=checkout)
     elapsed = int((time.monotonic() - started) * 1000)
-    data = report if isinstance(report, dict) else getattr(report, "to_dict", lambda: vars(report))()
+    data = (
+        report if isinstance(report, dict) else getattr(report, "to_dict", lambda: vars(report))()
+    )
 
     scenarios = [
-        s.model_dump() if hasattr(s, "model_dump") else s
-        for s in data.get("scenarios", [])
+        s.model_dump() if hasattr(s, "model_dump") else s for s in data.get("scenarios", [])
     ]
     covered = sum(1 for s in scenarios if s.get("state") == "covered")
     gaps = sum(1 for s in scenarios if s.get("state") == "declared-gap")
@@ -98,7 +101,7 @@ def main() -> int:
     )
 
     receipt = {
-        "created_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "created_at": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "external": False,
         "suite": SUITE,
         "forge": FORGE,

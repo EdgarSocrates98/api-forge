@@ -119,7 +119,9 @@ def render(hosts: tuple[str, ...], *, skills: bool, agents: bool) -> dict[str, b
             meta, body = _frontmatter(path.read_text(encoding="utf-8"))
             name = str(meta.get("name") or path.stem)
             for host in hosts:
-                if host not in HOSTS:
+                if host not in HOSTS or host == "devin":
+                    # devin le `.agents/` nativamente — a copia compartilhada
+                    # abaixo cobre; `.devin/` fica para assets host-specific.
                     continue
                 rel = f"{_agent_dir(host)}/{_agent_filename(name, host)}"
                 out[rel] = _emit_agent(meta, body, host).encode("utf-8")
@@ -133,8 +135,8 @@ def render(hosts: tuple[str, ...], *, skills: bool, agents: bool) -> dict[str, b
     if skills:
         seen: set[str] = set()
         for host in hosts:
-            if host not in HOSTS:
-                continue
+            if host not in HOSTS or host == "devin":
+                continue  # `.agents/skills` abaixo cobre o devin
             dest = _skill_dir(host)
             for rel, data in _walk_files(skills_src):
                 key = f"{dest}/{rel}"
@@ -155,15 +157,17 @@ def render(hosts: tuple[str, ...], *, skills: bool, agents: bool) -> dict[str, b
     for data in out.values():
         if not data.startswith((b"---", b"#", b"<")):
             continue
-        for m in re.finditer(rb"knowledge/[A-Za-z0-9_./-]+", data):
-            rel = m.group(0)[len(b"knowledge/") :].decode("utf-8").rstrip(".,);]")
+        for m in re.finditer(rb"(knowledge|rules|evals)/[A-Za-z0-9_./-]+", data):
+            kind = m.group(1).decode("utf-8")
+            rel = m.group(0)[len(kind) + 1 :].decode("utf-8").rstrip(".,);]")
             # Refs citadas em docs viram chaves de asset — um `..` ou path
             # absoluto viraria escrita/unlink FORA do root no apply/uninstall.
             if rel and _rel_seguro(rel):
-                refs.add(rel)
-    for rel in sorted(refs):
+                refs.add(f"{kind}/{rel}")
+    for krel in sorted(refs):
+        kind, _, rel = krel.partition("/")
         stub_rel = rel if Path(rel).suffix else f"{rel}/README.md"
-        out.setdefault(f"knowledge/{stub_rel}", _knowledge_stub(rel))
+        out.setdefault(f"{kind}/{stub_rel}", _pointer_stub(kind, rel))
 
     return out
 
@@ -198,6 +202,21 @@ def _knowledge_stub(rel: str) -> bytes:
     partes = rel.split("/")
     dominio = partes[0] if len(partes) > 1 else Path(rel).stem
     return _KNOWLEDGE_STUB.format(rel=rel, dominio=dominio).encode("utf-8")
+
+
+_POINTER_STUB = """\
+# Ponteiro de {kind} — apiforge
+
+Este arquivo e um PONTEIRO gerado na instalacao: os links `{kind}/<rel>`
+dos mirrors resolvem aqui, mas o CONTEUDO real mora no pacote `apiforge`
+instalado — fora de qualquer checkout, nao copiado para o workspace.
+"""
+
+
+def _pointer_stub(kind: str, rel: str) -> bytes:
+    if kind == "knowledge":
+        return _knowledge_stub(rel)
+    return _POINTER_STUB.format(kind=kind, rel=rel).encode("utf-8")
 
 
 __all__ = ["HOSTS", "content_dirs", "render"]

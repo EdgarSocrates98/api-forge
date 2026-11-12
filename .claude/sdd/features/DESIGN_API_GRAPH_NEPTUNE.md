@@ -460,15 +460,30 @@ def analyze(traversal: str) -> dict[str, object]:
             risks.append("repeat-without-stop")
         if step.name in _FANOUT and not step.args.strip():
             risks.append("fanout-without-edge-label")
-    if names[:1] in (["V"], ["E"]) and not chain[0].args.strip() and not {
-        "hasLabel", "has", "hasId"
-    } & set(names[1:2]):
+    if (
+        names[:1] in (["V"], ["E"])
+        and not chain[0].args.strip()
+        and not {"hasLabel", "has", "hasId"} & set(names[1:2])
+    ):
         risks.append("unfiltered-start")
     return {
         "bounded": bool(_BOUNDS & set(names)),
         "mutation": bool(_MUTATING & set(names)),
-        "labels_used": tuple(sorted({a.strip("'\" ") for s in chain if s.name == "hasLabel" for a in s.args.split(",")})),
-        "edge_labels_used": tuple(sorted({a.strip("'\" ") for s in chain if s.name in _FANOUT and s.args.strip() for a in s.args.split(",")})),
+        "labels_used": tuple(
+            sorted(
+                {a.strip("'\" ") for s in chain if s.name == "hasLabel" for a in s.args.split(",")}
+            )
+        ),
+        "edge_labels_used": tuple(
+            sorted(
+                {
+                    a.strip("'\" ")
+                    for s in chain
+                    if s.name in _FANOUT and s.args.strip()
+                    for a in s.args.split(",")
+                }
+            )
+        ),
         "shape_risks": tuple(dict.fromkeys(risks)),
     }
 ```
@@ -515,21 +530,38 @@ def _refuse(code: str, detail: str, field: str, unlock: str) -> CollectError:
     return error
 
 
-def _plan(language: str, query: str, *, profile: bool, endpoint: str, reader: str | None) -> tuple[str, dict[str, str]]:
+def _plan(
+    language: str, query: str, *, profile: bool, endpoint: str, reader: str | None
+) -> tuple[str, dict[str, str]]:
     if language == "sparql":
-        raise _refuse("AF-GDB-EXPLAIN-SPARQL", "neptunedata has no SPARQL explain operation",
-                      "language", "run explain=static yourself and import it with `model graph-explain`")
+        raise _refuse(
+            "AF-GDB-EXPLAIN-SPARQL",
+            "neptunedata has no SPARQL explain operation",
+            "language",
+            "run explain=static yourself and import it with `model graph-explain`",
+        )
     analysis = analyze_query(language, query)  # pure, from adapters/graph_
     if analysis["mutation"]:
-        raise _refuse("AF-GDB-PROFILE-MUTATION", "query mutates the graph", "query",
-                      "submit a read-only query; API Forge never explains mutations")
+        raise _refuse(
+            "AF-GDB-PROFILE-MUTATION",
+            "query mutates the graph",
+            "query",
+            "submit a read-only query; API Forge never explains mutations",
+        )
     if not profile:
         if language == "gremlin":
             return "execute_gremlin_explain_query", {"gremlinQuery": query}
-        return "execute_open_cypher_explain_query", {"openCypherQuery": query, "explainMode": "static"}
+        return "execute_open_cypher_explain_query", {
+            "openCypherQuery": query,
+            "explainMode": "static",
+        }
     if reader is None or reader != endpoint:
-        raise _refuse("AF-GDB-PROFILE-READER", "PROFILE executes the query", "reader_endpoint",
-                      "pass --reader-endpoint equal to --endpoint, naming a reader instance")
+        raise _refuse(
+            "AF-GDB-PROFILE-READER",
+            "PROFILE executes the query",
+            "reader_endpoint",
+            "pass --reader-endpoint equal to --endpoint, naming a reader instance",
+        )
     if language == "gremlin":
         return "execute_gremlin_profile_query", {"gremlinQuery": query}
     return "execute_open_cypher_explain_query", {"openCypherQuery": query, "explainMode": "dynamic"}

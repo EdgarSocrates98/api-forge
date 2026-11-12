@@ -557,6 +557,10 @@ from apiforge.cli_portal import register as _register_portal
 
 _register_portal(app)
 
+from apiforge._forge_obsidian.cli import obsidian_app as _obsidian_app
+
+app.add_typer(_obsidian_app("api-forge"), name="obsidian")
+
 
 @app.command("doctor")
 def runtime_doctor(

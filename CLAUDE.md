@@ -17,6 +17,7 @@ reasoning and must keep complete artifacts available when using compact output.
   RabbitMQ/NATS/Pulsar: route through the data-access and architecture skills;
   use the specialized `model *-access` commands documented in `README.md`.
 - tests/security/resilience: `.claude/skills/api-forge-verification`
+- runtime/SLO/incident (api-sentinel-forge): `.claude/skills/api-forge-sentinel`
 - load, stress, TPS and capacity: `.claude/skills/api-forge-performance`
 - OTel, Datadog and Dynatrace: `.claude/skills/api-forge-observability`
 - context, TokenSave and Graphify: `.claude/skills/api-forge-context`

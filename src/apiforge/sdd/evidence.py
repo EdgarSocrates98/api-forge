@@ -93,6 +93,8 @@ def emit_evidence(
     if state_dir is None:
         state_dir = root.parent.parent / ".apiforge" / "sdd" / feature
     payload = {
+        "schema": "apiforge/sdd-evidence/1",
+        "feature": feature,
         "extracted": extracted,
         "kind": kind,
         "recorded_at": now,

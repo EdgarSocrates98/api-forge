@@ -42,20 +42,32 @@ def set_phase(
 
     applied: list[str] = []
     if strict and status in _GATED_STATUSES:
+        from apiforge.sdd.evidence_valid import validate_evidence
+
         for gate in load_gates():
             if phase not in gate.guards_phases:
                 continue
             evidence_file = evidence_dir / f"{gate.satisfied_by}.json"
-            if evidence_file.is_file():
+            verdict = validate_evidence(
+                evidence_file, feature=feature, expected_kind=gate.satisfied_by
+            )
+            if verdict["state"] == "valid":
                 continue
-            if override and override.get("gate") == gate.name:
-                _record_override(state_dir, gate.name, phase, status, override)
+            if (
+                override
+                and override.get("gate") == gate.name
+                and override.get("reason", "").strip()
+                and override.get("actor", "").strip()
+            ):
+                _record_override(state_dir, gate.name, phase, status, override, verdict["code"])
                 applied.append(gate.name)
                 continue
             raise SddError(
-                "AF-SDD-GATE-BLOCKED",
-                f"{gate.name}: evidence kind {gate.satisfied_by!r} absent "
-                f"(produce it via {gate.produced_by!r} or pass --override)",
+                verdict["code"] if verdict["code"].startswith("AF-SDD") else "AF-SDD-GATE-BLOCKED",
+                f"{gate.name}: evidence {gate.satisfied_by!r} "
+                f"{verdict['state']} — {verdict['reason']} "
+                f"(produce it via {gate.produced_by!r} or pass --override "
+                "with reason+actor)",
             )
 
     previous = set_frontmatter_field(artifact, "status", status)
@@ -70,8 +82,15 @@ def set_phase(
 
 
 def _record_override(
-    state_dir: Path, gate: str, phase: str, status: str, override: Mapping[str, str]
+    state_dir: Path,
+    gate: str,
+    phase: str,
+    status: str,
+    override: Mapping[str, str],
+    verdict_code: str = "",
 ) -> None:
+    import time
+
     record_path = state_dir / "gate-overrides.json"
     record: dict[str, Any] = {"overrides": []}
     if record_path.is_file():
@@ -85,6 +104,8 @@ def _record_override(
             "status": status,
             "reason": str(override.get("reason", "")),
             "actor": str(override.get("actor", "unknown")),
+            "evidence_verdict": verdict_code,
+            "at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         }
     )
     write_json(record_path, record)

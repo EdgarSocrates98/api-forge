@@ -422,6 +422,7 @@ class CoverageGate(VersionedContract):
     deadline: str | None = None
     within_timebox: bool
 
+
 # FieldRun: schema -> "apiforge/field-run/v2"; drop verifier_verdict;
 #   executor: ActorRef ; verification: VerificationReceipt | None = None
 # FieldReport: schema -> "apiforge/field-report/v2"; add
@@ -462,14 +463,27 @@ def parse_actor(value: str, *, field: str) -> ActorRef:
 from datetime import UTC, datetime, timedelta
 
 from apiforge.contracts.field import (
-    SCENARIOS, CorpusManifest, CoverageGate, CycleStatus, FieldRun, VerificationState,
+    SCENARIOS,
+    CorpusManifest,
+    CoverageGate,
+    CycleStatus,
+    FieldRun,
+    VerificationState,
 )
 from apiforge.field.identity import sha256_json
 from apiforge.field.store import parse_ts
 
 _DIGEST_FIELDS = (
-    "task_id", "phase", "run_ids", "executor", "task_completed", "exit_reason",
-    "manual_context_required", "human_intervention", "false_positives", "false_negatives",
+    "task_id",
+    "phase",
+    "run_ids",
+    "executor",
+    "task_completed",
+    "exit_reason",
+    "manual_context_required",
+    "human_intervention",
+    "false_positives",
+    "false_negatives",
 )
 
 
@@ -524,7 +538,12 @@ def cycle_state(
 
 ```python
 def verify(
-    root: Path, *, task_id: str, phase: str, verdict: str, verifier: str,
+    root: Path,
+    *,
+    task_id: str,
+    phase: str,
+    verdict: str,
+    verifier: str,
     now: datetime | None = None,
 ) -> dict[str, Any]:
     root = Path(root)
@@ -560,7 +579,7 @@ def verify(
 
 ```python
 manifest = load_corpus(root)
-ensure_cycle(root, manifest)                     # V1/V2 before anything else
+ensure_cycle(root, manifest)  # V1/V2 before anything else
 executor_ref = parse_actor(executor, field="executor")
 task = registered_task(manifest, task_id, started_at=started_at)
 runs = load_runs(root)
@@ -577,8 +596,8 @@ if status == "expired" or (
     )
 # ... existing evidence join (unchanged) ...
 if manifest.cycle_started_at is None:
-    seal(root, manifest, started_at)             # replaces mark_cycle_started
-save_run(root, run)                               # executor=executor_ref, carries verification
+    seal(root, manifest, started_at)  # replaces mark_cycle_started
+save_run(root, run)  # executor=executor_ref, carries verification
 ```
 
 ### Pattern 7: HTTP callee route refs (`workspace/inference/match.py`)

@@ -900,6 +900,9 @@ triggers. Partial outcomes keep `final_status: REVIEW` and report
 | `AF-BUDGET-EXHAUSTED` | planned invocations exceeded the economy call budget; no silent downgrade; unlock: `--profile balanced\|deep` or raise TaskSpec budgets |
 | `AF-SDD-PROFILE-BELOW-RISK` | a feature's `intent.md` carries `risk_class` and declares an SDD profile below its minimum; unlock: declare the required profile or higher |
 | `AF-SDD-RISK-UNRESOLVED` | `sdd classify` found no classifying signal (defaults to `medium`) or got only one of `--baseline`/`--candidate` |
+| `AF-SDD-EVIDENCE-FAILED` | an execution receipt records failed/error tests or a terminal negative status; the evidence is invalid — fix the failing tests and re-run, never re-label |
+| `AF-SDD-EVIDENCE-EMPTY` | an execution receipt records zero passed tests — inconclusive, not a failure and not a pass; unlock: run a suite that executes at least one test |
+| `AF-SDD-EVIDENCE-OK` | an execution receipt passed structural and outcome validation (non-refusal terminal state) |
 
 ## Field validation (`field record|annotate|verify|report|export`, `workspace graph --infer`)
 

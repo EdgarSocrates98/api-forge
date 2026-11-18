@@ -102,5 +102,8 @@ def test_render_emits_knowledge_pointer_stub():
     out = render(("devin",), skills=True, agents=True)
     stubs = {k: v for k, v in out.items() if k.startswith("knowledge/")}
     assert stubs, "expected pointer stubs for cited knowledge refs"
+    # install-2.1: ponteiros vivem no subdir proprio knowledge/api-forge/ —
+    # nunca na raiz compartilhada.
+    assert all(k.startswith("knowledge/api-forge/") for k in stubs), sorted(stubs)
     for body in stubs.values():
         assert b"PONTEIRO" in body and b"apiforge knowledge" in body

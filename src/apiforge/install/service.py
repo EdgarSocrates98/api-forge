@@ -8,6 +8,7 @@ ficam a ForgeSpec do API Forge e os wrappers tipados que a CLI chama.
 
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 from typing import Any
@@ -23,8 +24,53 @@ PROFILES: tuple[str, ...] = ("minimal", "recommended", "full")
 GATEWAY_PROFILES: tuple[str, ...] = ("economy", "balanced", "deep")
 SCOPES: tuple[str, ...] = ("project", "workspace", "user")
 
+# --------------------------------------------------------------------------
+# Matriz de profiles (install-2.1)
+#
+# `--profile` seleciona CONJUNTOS DE COMPONENTES — e nada mais. Nao ha
+# diferenca de conteudo dentro de um kind nem de "profundidade": hoje
+# `recommended` e `full` instalam o MESMO conjunto de arquivos; `full` e o
+# slot reservado a defaults mais pesados (componentes opcionais como
+# `tui`/`graph-studio`) quando entrarem no pacote — declarar diferenca de
+# disco entre eles seria inventar. `--components` sobrescreve por kind.
+#
+# `--gateway-profile` e uma dimensao ORTOGONAL: escolhe so o `--surface`
+# embutido no argv MCP gravado em `.mcp.json` — `economy`/`balanced`
+# ligam `--surface compact` (seis gateways), `deep` liga `--surface full`.
+# Nao mexe em nenhum asset.
+# --------------------------------------------------------------------------
 
-def _spec() -> kit.ForgeSpec:
+# Os kinds de asset (`kit.COMPONENT_KINDS` + core) que cada `--profile`
+# habilita — espelha `kit.profile_asset_kinds`, tornado dado declarado.
+PROFILE_COMPONENTS: dict[str, tuple[str, ...]] = {
+    "minimal": ("config", "mcp", "marker", "state"),
+    "recommended": (
+        "config", "mcp", "marker", "state", "skill", "agent",
+        "knowledge", "rules", "evals",
+    ),
+    "full": (
+        "config", "mcp", "marker", "state", "skill", "agent",
+        "knowledge", "rules", "evals",
+    ),
+}
+
+# `--gateway-profile` → superficie MCP escrita no argv de `.mcp.json`.
+_GATEWAY_SURFACE: dict[str, str] = {
+    "economy": "compact",
+    "balanced": "compact",
+    "deep": "full",
+}
+
+
+def _mcp_command(gateway_profile: str | None) -> tuple[str, ...]:
+    """O argv `apiforge-mcp` do spec — o `--surface` do gateway-profile
+    gravado, ou o default full-surface (sem flag) para instalacoes
+    anteriores a flag e para sondas doctor/verify."""
+    surface = _GATEWAY_SURFACE.get(gateway_profile or "")
+    return ("apiforge-mcp", "--surface", surface) if surface else ("apiforge-mcp",)
+
+
+def _spec(gateway_profile: str | None = None) -> kit.ForgeSpec:
     return kit.ForgeSpec(
         forge_id=FORGE_ID,
         package="apiforge",
@@ -32,7 +78,7 @@ def _spec() -> kit.ForgeSpec:
         cli_name="apiforge",
         python_spec=">=3.12",
         state_dir=STATE_DIR,
-        mcp_command=("apiforge-mcp",),
+        mcp_command=_mcp_command(gateway_profile),
         mcp_server_name="apiforge",
         mcp_verify_tool="portable_status",
         version_cmd=("--version",),
@@ -52,6 +98,15 @@ def _render_for(ctx: kit.InstallContext) -> dict[str, bytes]:
     return render.render(ctx.hosts, skills="skill" in kinds, agents="agent" in kinds)
 
 
+def _recorded_gateway_profile(state_dir: Path) -> str | None:
+    """O `--gateway-profile` que o ultimo install persistiu em
+    `components.json` (`options["execution_profile"]`); None para
+    instalacoes anteriores a flag — o spec delas e o argv bare."""
+    comps = kit.load_components(state_dir)
+    gp = comps.get("execution_profile")
+    return gp if isinstance(gp, str) and gp in _GATEWAY_SURFACE else None
+
+
 def _ctx(
     scope: str,
     root: Path | None,
@@ -60,18 +115,31 @@ def _ctx(
     dry_run: bool,
     cwd: Path | None = None,
     components: tuple[str, ...] | None = None,
-    gateway_profile: str = "balanced",
+    gateway_profile: str | None = None,
 ) -> kit.InstallContext:
-    spec = _spec()
     base = Path(cwd or Path.cwd())
-    target = kit.resolve_scope(spec, scope, base, root)
+    target = kit.resolve_scope(_spec(), scope, base, root)
+    state_dir = kit.state_dir_for(_spec(), scope, target)
+    # O spec do caminho de leitura/repair (sem profile explicito) tem de
+    # reproduzir o argv que o install gravou — o execution_profile gravado
+    # e a fonte; sem ele (install pre-flag) o argv bare full-surface.
+    spec = _spec(
+        gateway_profile
+        if gateway_profile is not None
+        else _recorded_gateway_profile(state_dir)
+    )
     options = kit.component_options(profile, components)
-    options["execution_profile"] = gateway_profile
+    if components is None:
+        # PROFILE_COMPONENTS e a fonte declarada do mapa profile→kinds —
+        # os mesmos conjuntos de `kit.profile_asset_kinds`, como dado.
+        options["asset_kinds"] = list(PROFILE_COMPONENTS[profile])
+    if gateway_profile is not None:
+        options["execution_profile"] = gateway_profile
     return kit.InstallContext(
         spec=spec,
         scope=scope,
         root=target,
-        state_dir=kit.state_dir_for(spec, scope, target),
+        state_dir=state_dir,
         profile=profile,
         hosts=hosts,
         dry_run=dry_run,
@@ -127,10 +195,12 @@ def install(
     state = ctx.state_dir
     with kit.acquire_lock(state):
         receipt = kit.apply_install(ctx, approved=yes)
+        _migrate_knowledge_namespace(ctx, receipt)
     if not dry_run and receipt.get("status") == "completed":
         _register_context(ctx, receipt)
         _drop_stale_doc_entries(ctx)
         _write_receipt(state, receipt)
+        _write_workspace_doc(ctx, receipt)
         _register(ctx)
     return receipt
 
@@ -142,24 +212,54 @@ def status(*, scope: str = "project", root: Path | None = None) -> dict[str, Any
 
 def doctor(*, scope: str = "project", root: Path | None = None) -> dict[str, Any]:
     ctx = _ctx(scope, root, (), "recommended", dry_run=True)
+    doc = kit.doctor(ctx)
+    # A sonda de handshake vai na superficie FULL, nao no argv gravado:
+    # `portable_status` nao e exposta na superficie compact, entao um
+    # install economy/balanced reportaria FAIL falso. Drift e mcp-config
+    # seguem fieis ao gateway-profile gravado (spec do ctx). Mesma regra
+    # do `install verify` e do lifecycle de referencia.
     import importlib.util
 
     if importlib.util.find_spec("mcp") is None:
-        doc = kit.doctor(ctx)
-        doc["checks"] = [
-            c
-            if c["id"] != "mcp-handshake"
-            else {
-                **c,
-                "status": "UNVERIFIED",
-                "detail": "extra 'mcp' nao instalada — handshake nao testado",
-            }
-            for c in doc["checks"]
-        ]
-        if not any(c["status"] == "FAIL" for c in doc["checks"]):
-            doc["status"] = "healthy" if doc["status"] != "broken" else doc["status"]
-        return doc
-    return kit.doctor(ctx)
+        probe: dict[str, Any] = {
+            "id": "mcp-handshake",
+            "status": "UNVERIFIED",
+            "detail": "extra 'mcp' nao instalada — handshake nao testado",
+        }
+        invoke = None
+    else:
+        probe = kit.mcp_verify(_spec())
+        invoke = probe.get("invoke")
+    checks: list[dict[str, Any]] = []
+    for c in doc["checks"]:
+        if c["id"] == "mcp-handshake":
+            checks.append(probe)
+        elif c["id"] == "mcp-invoke":
+            if isinstance(invoke, dict):
+                checks.append(
+                    {
+                        "id": "mcp-invoke",
+                        "status": invoke["status"],
+                        "detail": f"{invoke['tool']}: {invoke['detail']}",
+                        "repairable": False,
+                    }
+                )
+        else:
+            checks.append(c)
+    doc["checks"] = checks
+    contexto = doc.get("context")
+    if isinstance(contexto, dict):
+        contexto["tools_exposed"] = (
+            len(probe["tools"]) if isinstance(probe.get("tools"), list) else None
+        )
+    installed = bool(isinstance(contexto, dict) and contexto.get("managed_entries"))
+    if any(c["status"] == "FAIL" for c in checks):
+        doc["status"] = "degraded" if installed else "broken"
+    elif not installed:
+        doc["status"] = "unverified"
+    else:
+        doc["status"] = "healthy"
+    return doc
 
 
 def repair(
@@ -291,6 +391,81 @@ def mcp_verify() -> dict[str, Any]:
     return kit.mcp_verify(_spec())
 
 
+def _migrate_knowledge_namespace(ctx: kit.InstallContext, receipt: dict[str, Any]) -> None:
+    """install-2.1: stubs `knowledge/<rel>` de installs antigos migram para
+    `knowledge/api-forge/<rel>` (`render.KNOWLEDGE_NAMESPACE`).
+
+    Migracao honesta sobre o ledger: entrada managed cujo sha em disco
+    ainda e o registrado era nossa — sai do disco e do ledger (o stub
+    namespacado a substitui). Arquivo editado pelo usuario fica, com
+    nota nomeada — posse liberada, conteudo nunca apagado. Arquivo que
+    nunca foi nosso (sem entrada managed — outra forja ou do usuario)
+    nao e tocado. No dry-run nada e escrito: a migracao vira
+    `planned_files` com `action="removed"`.
+    """
+    ns = f"knowledge/{render.KNOWLEDGE_NAMESPACE}/"
+    ledger = kit.Ledger.load(ctx.state_dir)
+    files_key = "planned_files" if ctx.dry_run else "managed_files"
+    removed: list[str] = []
+    preserved = 0
+    for rel, entry in sorted(ledger.entries().items()):
+        if not rel.startswith("knowledge/") or rel.startswith(ns):
+            continue
+        if not entry.get("managed") or not kit._safe_rel(rel):
+            continue  # adopted/foreign or unsafe — never ours to move
+        target = ctx.root / rel
+        on_disk = target.read_bytes() if target.is_file() else None
+        intact = on_disk is not None and kit._sha(on_disk) == entry.get("sha256")
+        if ctx.dry_run:
+            action, note = (
+                ("removed", f"migrates to {ns}")
+                if intact
+                else ("unchanged", "not intact on disk — preserved")
+            )
+        else:
+            ledger.drop(rel)
+            if intact:
+                target.unlink()
+                action, note = "removed", f"migrated to {ns}"
+            else:
+                # Ausente ou editado pelo usuario: posse liberada no
+                # ledger, arquivo (se existe) preservado no disco.
+                action, note = "unchanged", (
+                    "stale bare knowledge pointer — entry released"
+                    if on_disk is None
+                    else "user-modified bare knowledge pointer — preserved"
+                )
+        receipt.setdefault(files_key, []).append(
+            {
+                "path": rel,
+                "kind": "knowledge",
+                "action": action,
+                "sha256": entry.get("sha256"),
+                "note": note,
+            }
+        )
+        if action == "removed":
+            removed.append(rel)
+        else:
+            preserved += 1
+    total = len(removed) + preserved
+    if not total:
+        return
+    if not ctx.dry_run:
+        kit._prune_empty_dirs(ctx.root, removed)
+        ledger.save()
+    receipt.setdefault("checks", []).append(
+        {
+            "id": "knowledge-namespace",
+            "status": "PASS",
+            "detail": (
+                f"{len(removed)} stale knowledge pointers migrated to {ns}; "
+                f"{preserved} preserved (foreign or user-modified)"
+            ),
+        }
+    )
+
+
 # --------------------------------------------------------------------------
 
 
@@ -318,6 +493,31 @@ def _failed(check_id: str, detail: str, status: str = "FAIL") -> dict[str, Any]:
 
 def _write_receipt(state: Path, receipt: dict[str, Any]) -> None:
     kit._write_receipt(state, receipt)
+
+
+def _write_workspace_doc(ctx: kit.InstallContext, receipt: dict[str, Any]) -> None:
+    """`forge/WorkspaceInstall/v1` do escopo workspace — o documento que o
+    plano consolidado le para saber que este root e um workspace deste
+    forge, com o receipt da instalacao que o gravou."""
+    if ctx.scope != "workspace":
+        return
+    doc = {
+        "schema": kit.SCHEMA_WORKSPACE,
+        "workspace_root": str(ctx.root),
+        "projects": [
+            {
+                "path": str(ctx.root),
+                "forge_id": FORGE_ID,
+                "receipt_id": receipt["receipt_id"],
+                "installed_at": receipt["created_at"],
+            }
+        ],
+        "created_at": receipt["created_at"],
+        "updated_at": receipt["created_at"],
+    }
+    path = ctx.state_dir / "workspace-install.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(doc, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
 def _installation_manifest() -> dict[str, Any]:
@@ -349,10 +549,50 @@ def _register(ctx: kit.InstallContext) -> None:
         }
     )
     doc.setdefault("install_root", str(kit.installs_root() / FORGE_ID))
-    doc.setdefault(
-        "mcp", {"server_name": "apiforge", "command": ["apiforge-mcp"], "verified": False}
+    mcp_doc = doc.setdefault(
+        "mcp",
+        {"server_name": "apiforge", "command": ["apiforge-mcp"], "verified": False},
     )
+    if isinstance(mcp_doc, dict):
+        # O orquestrador descobre a tool de verificacao aqui — setdefault
+        # preserva um `verify_tool` ja registrado pelo bootstrap.
+        mcp_doc.setdefault("verify_tool", "portable_status")
+    doc.update(_declared_install_fields())
     kit.register_installation(doc)
+
+
+def _declared_install_fields() -> dict[str, Any]:
+    """As declaracoes install-2.1 do `forge.json` deste forge — copiadas
+    verbatim para o manifesto registrado, nunca fabricadas (espelha o
+    passo `register` do `forge_bootstrap`):
+
+    - ``installation_kind``: ``content``|``service``|``control-tool`` —
+      a classe que o plano consolidado usa na ordenacao estavel.
+    - ``install``: a superficie declarada (operations/flags/hosts/scopes/
+      profiles/approval) — o argv builder do orquestrador so envia o que
+      esta declarado; ausente, o manifesto fica no default v1.
+    - ``depends_on``: forge_ids que devem instalar antes — declarado
+      mesmo quando vazio (``[]``): o plano consolidado le a presenca da
+      chave como declaracao explicita, nao como ausencia de dado.
+    """
+    cfg = _bundled_json("forge.json")
+    if not cfg:
+        return {}
+    doc: dict[str, Any] = {}
+    if cfg.get("installation_kind"):
+        kind = str(cfg["installation_kind"])
+        if kind not in kit.INSTALLATION_KINDS:
+            raise kit.InstallError(
+                kit.E_UNSUPPORTED,
+                f"forge.json installation_kind {kind!r} — expected "
+                f"{kit.INSTALLATION_KINDS}",
+            )
+        doc["installation_kind"] = kind
+    if cfg.get("install"):
+        doc["install"] = dict(cfg["install"])
+    if "depends_on" in cfg:
+        doc["depends_on"] = [str(d) for d in cfg["depends_on"]]
+    return doc
 
 
 __all__ = [
@@ -416,18 +656,20 @@ def _mds(base: Path) -> list[str]:
     return sorted(p.stem for p in base.glob("*.md")) if base.is_dir() else []
 
 
+def _bundled_json(name: str) -> dict[str, Any] | None:
+    """JSON declarativo empacotado com o forge: primeiro `_data/<name>`
+    dentro do pacote (wheel), depois a raiz do checkout (editable)."""
+    for cand in (_PKG_DIR / "_data" / name, _REPO_DIR / name):
+        data = kit._load_json(cand, None)
+        if isinstance(data, dict):
+            return data
+    return None
+
+
 def _context_manifest(ctx: kit.InstallContext) -> dict[str, Any]:
     """Manifesto forge/context/v1 montado das fontes reais: `forge.json` +
     `forge.agentic.json` no checkout e os assets que o install usou
     (`render.content_dirs`, `_data/knowledge|evals`, `rules/`)."""
-
-    def _bundled_json(name: str) -> dict[str, Any] | None:
-        for cand in (_PKG_DIR / "_data" / name, _REPO_DIR / name):
-            data = kit._load_json(cand, None)
-            if isinstance(data, dict):
-                return data
-        return None
-
     forge_json = _bundled_json("forge.json")
     agentic = _bundled_json("forge.agentic.json")
 

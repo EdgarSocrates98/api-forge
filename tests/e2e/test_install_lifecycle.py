@@ -443,3 +443,240 @@ def test_uninstall_receipt_persistido_igual_ao_emitido(projeto, monkeypatch):
     persisted = json.loads(receipts[-1].read_text("utf-8"))
     assert persisted["status"] == out["status"]
     assert [c["id"] for c in persisted["checks"]] == [c["id"] for c in out["checks"]]
+
+
+# --------------------------------------------------------------------------
+# install-2.1 (cycle-16 wave-04)
+# --------------------------------------------------------------------------
+
+
+def test_workspace_root_explicito_vence_marker(tmp_path):
+    """installkit 1.0.6: `--root` e autoritativo no scope workspace — um
+    marker de workspace num ancestral nunca desvia o alvo para cima."""
+    ws = tmp_path / "ws"
+    member = ws / "member"
+    member.mkdir(parents=True)
+    (ws / "forge.workspace.yaml").write_text("members: []\n", encoding="utf-8")
+
+    out = service.install("devin", scope="workspace", root=member, yes=True)
+    assert out["status"] == "completed"
+    assert out["target_root"] == str(member.resolve())
+    assert (member / ".apiforge" / "install").is_dir()
+    assert not (ws / ".apiforge").exists()
+
+
+def test_workspace_install_escreve_workspace_doc(tmp_path):
+    """`forge/WorkspaceInstall/v1` registra o root servido + o receipt."""
+    ws = tmp_path / "ws"
+    ws.mkdir()
+    out = service.install("devin", scope="workspace", root=ws, yes=True)
+    doc = json.loads((ws / ".apiforge" / "install" / "workspace-install.json").read_text())
+    assert doc["schema"] == "forge/WorkspaceInstall/v1"
+    assert doc["workspace_root"] == str(ws.resolve())
+    assert doc["projects"][0]["forge_id"] == "api-forge"
+    assert doc["projects"][0]["receipt_id"] == out["receipt_id"]
+
+
+def test_discover_projects_membros_gitless(tmp_path):
+    """installkit 1.0.6: `.git` nao e requisito — manifesto de projeto
+    (`pyproject.toml`, `package.json`, `forge.json`) torna o diretorio
+    membro; diretorio vazio e ignorado."""
+    ws = tmp_path / "ws"
+    ws.mkdir()
+    gitless = ws / "gitless-member"
+    gitless.mkdir()
+    (gitless / "pyproject.toml").write_text("[project]\nname = 'x'\n")
+    deep = ws / "group" / "deep-member"
+    deep.mkdir(parents=True)
+    (deep / "package.json").write_text("{}")
+    (ws / "plain").mkdir()
+
+    found = {p.name for p in kit.discover_projects(ws)}
+    assert "gitless-member" in found
+    assert "deep-member" in found  # ate max_depth=2, sem .git
+    assert "plain" not in found
+
+
+def test_install_ponteiros_knowledge_namespacados(projeto):
+    """Os stubs de knowledge resolvem em `knowledge/api-forge/<rel>` —
+    nunca na raiz compartilhada `knowledge/<rel>` (install-2.1)."""
+    out = service.install("devin", scope="project", root=projeto, yes=True)
+    paths = {f["path"] for f in out["managed_files"]}
+    knowledge = [p for p in paths if p.startswith("knowledge/")]
+    assert knowledge, "esperava ponteiros de knowledge emitidos"
+    assert all(p.startswith("knowledge/api-forge/") for p in knowledge), knowledge
+
+    indice = projeto / "knowledge" / "api-forge" / "README.md"
+    assert indice.is_file()
+    stub = projeto / "knowledge" / "api-forge" / "neptune" / "README.md"
+    assert stub.is_file()
+    texto = stub.read_text(encoding="utf-8")
+    assert "apiforge knowledge get neptune" in texto
+    assert not (projeto / "knowledge" / "neptune").exists()
+
+
+def _stub_legado(projeto: Path, rel: str, conteudo: bytes, *, disco: bytes | None = None):
+    """Grava um stub `knowledge/<rel>` pre-2.1: entrada managed no ledger
+    cujo sha registra `conteudo` (disco pode divergir — stub editado)."""
+    alvo = projeto / rel
+    alvo.parent.mkdir(parents=True, exist_ok=True)
+    alvo.write_bytes(conteudo if disco is None else disco)
+    state = projeto / ".apiforge" / "install"
+    ledger = kit.Ledger.load(state)
+    ledger.record(rel, conteudo, "knowledge", "created")
+    ledger.save()
+    return alvo
+
+
+def test_install_migra_stub_legado_intacto(projeto):
+    """Stub bare nosso e intacto sai do disco e do ledger — o ponteiro
+    namespacado o substitui."""
+    service.install("devin", scope="project", root=projeto, yes=True)
+    alvo = _stub_legado(projeto, "knowledge/doc-legado.md", b"stub antigo")
+
+    out = service.install("devin", scope="project", root=projeto, yes=True)
+    assert not alvo.exists()
+    state = projeto / ".apiforge" / "install"
+    assert kit.Ledger.load(state).get("knowledge/doc-legado.md") is None
+    check = next(c for c in out["checks"] if c["id"] == "knowledge-namespace")
+    assert check["status"] == "PASS" and "migrated" in check["detail"]
+    migrado = next(
+        f
+        for f in out["managed_files"]
+        if f["path"] == "knowledge/doc-legado.md"
+    )
+    assert migrado["action"] == "removed"
+
+
+def test_install_preserva_stub_legado_editado(projeto):
+    """Stub bare editado pelo usuario NUNCA e apagado: posse liberada no
+    ledger, arquivo fica, recusa nomeada no recibo."""
+    service.install("devin", scope="project", root=projeto, yes=True)
+    alvo = _stub_legado(
+        projeto, "knowledge/doc-editado.md", b"stub original", disco=b"edicao do usuario"
+    )
+
+    out = service.install("devin", scope="project", root=projeto, yes=True)
+    assert alvo.read_bytes() == b"edicao do usuario"
+    state = projeto / ".apiforge" / "install"
+    assert kit.Ledger.load(state).get("knowledge/doc-editado.md") is None
+    preservado = next(
+        f for f in out["managed_files"] if f["path"] == "knowledge/doc-editado.md"
+    )
+    assert preservado["action"] == "unchanged"
+    assert "preserved" in preservado["note"]
+
+
+def test_install_nao_toca_knowledge_de_outra_forja(projeto):
+    """Arquivo `knowledge/<rel>` sem entrada managed no ledger — de outra
+    forja ou do usuario — nao e tocado nem entra no recibo da migracao."""
+    service.install("devin", scope="project", root=projeto, yes=True)
+    alheio = projeto / "knowledge" / "de-outra-forja.md"
+    alheio.write_bytes(b"conteudo alheio")
+
+    out = service.install("devin", scope="project", root=projeto, yes=True)
+    assert alheio.read_bytes() == b"conteudo alheio"
+    assert not any(f["path"] == "knowledge/de-outra-forja.md" for f in out["managed_files"])
+
+
+def test_gateway_profile_grava_surface_no_mcp(projeto):
+    """`--gateway-profile economy` (e `balanced`) gravam `--surface compact`
+    no argv de `.mcp.json` — a flag nao e mais inerte."""
+    service.install(
+        "devin", scope="project", root=projeto, yes=True, gateway_profile="economy"
+    )
+    mcp = json.loads((projeto / ".mcp.json").read_text(encoding="utf-8"))
+    assert mcp["mcpServers"]["apiforge"] == {
+        "command": "apiforge-mcp",
+        "args": ["--surface", "compact"],
+    }
+    comps = json.loads(
+        (projeto / ".apiforge" / "install" / "components.json").read_text(encoding="utf-8")
+    )
+    assert comps["execution_profile"] == "economy"
+
+
+def test_gateway_profile_deep_surface_full(projeto):
+    service.install(
+        "devin", scope="project", root=projeto, yes=True, gateway_profile="deep"
+    )
+    mcp = json.loads((projeto / ".mcp.json").read_text(encoding="utf-8"))
+    assert mcp["mcpServers"]["apiforge"]["args"] == ["--surface", "full"]
+
+
+def test_gateway_profile_invalido_recusa(projeto):
+    with pytest.raises(kit.InstallError) as exc:
+        service.install(
+            "devin", scope="project", root=projeto, yes=True, gateway_profile="turbo"
+        )
+    assert exc.value.kind == kit.E_PROFILE
+
+
+def test_repair_reproduz_surface_gravada(projeto):
+    """O caminho de leitura usa o `execution_profile` persistido em
+    `components.json`: repair restaura o MESMO argv gravado, nao o bare."""
+    service.install(
+        "devin", scope="project", root=projeto, yes=True, gateway_profile="economy"
+    )
+    (projeto / ".mcp.json").unlink()
+    rep = service.repair(scope="project", root=projeto)
+    assert ".mcp.json" in rep["repaired"]
+    mcp = json.loads((projeto / ".mcp.json").read_text(encoding="utf-8"))
+    assert mcp["mcpServers"]["apiforge"]["args"] == ["--surface", "compact"]
+
+
+def test_register_propaga_campos_declarados(projeto):
+    """`~/.forge/installations/api-forge.json` carrega as declaracoes do
+    `forge.json` — verbatim, nunca fabricadas; `depends_on: []` e
+    declaracao explicita e fica presente."""
+    service.install("devin", scope="project", root=projeto, yes=True)
+    manifest = json.loads(
+        (Path.home() / ".forge" / "installations" / "api-forge.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert manifest["installation_kind"] == "content"
+    assert manifest["depends_on"] == []
+    install = manifest["install"]
+    for flag in ("--gateway-profile", "--components", "--root", "--scope"):
+        assert flag in install["flags"]
+    assert manifest["mcp"]["verify_tool"] == "portable_status"
+
+
+def test_profile_components_matriz_declarada():
+    """A matriz e dado honesto: minimal = core+mcp; recommended == full
+    hoje (full e o slot para defaults mais pesados)."""
+    assert set(service.PROFILE_COMPONENTS) == {"minimal", "recommended", "full"}
+    assert service.PROFILE_COMPONENTS["minimal"] == ("config", "mcp", "marker", "state")
+    assert service.PROFILE_COMPONENTS["recommended"] == service.PROFILE_COMPONENTS["full"]
+    for profile, kinds in service.PROFILE_COMPONENTS.items():
+        assert tuple(kinds) == kit.profile_asset_kinds(profile)
+
+
+def test_profile_minimal_sem_assets_opcionais(projeto):
+    """`--profile minimal` instala so os kinds declarados na matriz —
+    nenhum skill/agent/knowledge."""
+    out = service.install(
+        "devin", scope="project", root=projeto, profile="minimal", yes=True
+    )
+    paths = {f["path"] for f in out["managed_files"]}
+    assert not any(p.startswith(("knowledge/", ".agents/", ".claude/")) for p in paths)
+    assert (projeto / ".mcp.json").exists()
+
+
+def test_components_filtra_por_kind(projeto):
+    """`--components` sobrescreve por kind: `skills,knowledge` instala os
+    mirrors e os ponteiros namespacados, sem agents e sem stubs de
+    rules/evals (refs emitidas mas filtradas por kind)."""
+    out = service.install(
+        "devin",
+        scope="project",
+        root=projeto,
+        yes=True,
+        components=("skills", "knowledge"),
+    )
+    paths = {f["path"] for f in out["managed_files"]}
+    assert any(p.startswith(".agents/skills/") for p in paths)
+    assert any(p.startswith("knowledge/api-forge/") for p in paths)
+    assert not any(p.startswith(".agents/agents/") for p in paths)
+    assert not any(p.startswith(("rules/", "evals/")) for p in paths)

@@ -26,7 +26,7 @@ import sys
 import time
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass
-from typing import TextIO
+from typing import Literal, TextIO
 
 from apiforge.ui.kit import (
     NonInteractive,
@@ -453,7 +453,7 @@ class Screen:
     def __init__(self, ctx: UIContext, *, out: TextIO = sys.stdout):
         self.ctx = ctx
         self.out = out
-        self._raw = None
+        self._raw: _RawMode | None = None
         self._entered = False
 
     def __enter__(self) -> Screen:
@@ -463,7 +463,7 @@ class Screen:
         out.write("\x1b[?1049h\x1b[?25l\x1b[2J\x1b[H")
         out.flush()
         try:
-            self._raw = _RawMode().__enter__() if os.name != "nt" else None
+            self._raw = _RawMode().__enter__() if sys.platform != "win32" else None
             self._entered = True
         except Exception:
             out.write("\x1b[?25h\x1b[?1049l")
@@ -471,7 +471,7 @@ class Screen:
             raise
         return self
 
-    def __exit__(self, *exc) -> bool:
+    def __exit__(self, *exc: object) -> Literal[False]:
         if self._raw is not None:
             self._raw.__exit__(*exc)
         if self._entered:
@@ -490,7 +490,7 @@ class _RawMode:
     """POSIX raw mode; on Windows msvcrt keys are already raw."""
 
     def __enter__(self) -> _RawMode:
-        if os.name != "nt" and sys.stdin.isatty():
+        if sys.platform != "win32" and sys.stdin.isatty():
             import termios
             import tty
 
@@ -499,8 +499,8 @@ class _RawMode:
             tty.setcbreak(self._fd)
         return self
 
-    def __exit__(self, *exc) -> bool:
-        if getattr(self, "_saved", None) is not None:
+    def __exit__(self, *exc: object) -> Literal[False]:
+        if sys.platform != "win32" and getattr(self, "_saved", None) is not None:
             import termios
 
             termios.tcsetattr(self._fd, termios.TCSADRAIN, self._saved)
@@ -532,7 +532,7 @@ _KEYS = {
 
 def read_key(timeout: float = 0.05) -> str | None:
     """Non-blocking key read; returns a normalized name or None."""
-    if os.name == "nt":
+    if sys.platform == "win32":
         import msvcrt
 
         if not msvcrt.kbhit():
@@ -646,3 +646,4 @@ def run_loop(
                 result.action = action
                 result.key = key
                 return result
+    return result

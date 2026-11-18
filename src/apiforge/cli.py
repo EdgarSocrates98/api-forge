@@ -433,12 +433,24 @@ def _echo_json(value: object, detail_level: str = "normal") -> None:
     from apiforge.economy.ledger import record
 
     ctx = get_current_context(silent=True)
-    record(
-        Path.cwd(),
-        verb=ctx.command_path if ctx is not None else "unknown",
-        detail_level=detail_level,
-        payload_bytes=len(text.encode("utf-8")),
-    )
+    # Read-only invocations must not write telemetry into the target
+    # workspace: a delegated `install --dry-run` (consolidated plan)
+    # runs with cwd = foreign root, and `record()` would create
+    # `.apiforge/` there. Walk the ctx chain — `install` group flags
+    # and leaf-command flags both count.
+    chain = []
+    node = ctx
+    while node is not None:
+        chain.append(node)
+        node = node.parent
+    dry = any((c.params or {}).get("dry_run") for c in chain)
+    if not dry:
+        record(
+            Path.cwd(),
+            verb=ctx.command_path if ctx is not None else "unknown",
+            detail_level=detail_level,
+            payload_bytes=len(text.encode("utf-8")),
+        )
     typer.echo(text)
 
 

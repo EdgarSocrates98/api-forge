@@ -174,6 +174,19 @@ def test_cli_install_dry_run(projeto):
     assert doc["status"] == "planned"
 
 
+def test_cli_install_dry_run_writes_no_economy_ledger(projeto, monkeypatch, tmp_path):
+    """Regression (xpto E2E F1): a delegated `install --dry-run` runs with
+    cwd = foreign workspace root — _echo_json must not create
+    `.apiforge/economy.jsonl` there."""
+    monkeypatch.chdir(tmp_path)
+    result = CliRunner().invoke(
+        app, ["install", "--host", "devin", "--root", str(projeto), "--dry-run"]
+    )
+    assert result.exit_code == 0, result.stdout
+    assert not (tmp_path / ".apiforge" / "economy.jsonl").exists()
+    assert not (tmp_path / ".apiforge").exists()
+
+
 def test_cli_install_sem_aprovacao_falha_com_recusa(projeto):
     result = CliRunner().invoke(app, ["install", "--host", "devin", "--root", str(projeto)])
     assert result.exit_code != 0

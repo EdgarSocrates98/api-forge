@@ -57,9 +57,10 @@ runtime from a built wheel and register the installation under
 ```
 
 From any other repository, project-scope installation writes the managed
-host assets (skills, agents, `.mcp.json` entry, `api-forge:managed` marker
-block) under `.apiforge/install/` ownership — user files are adopted or
-skipped, never silently overwritten:
+host assets (skills, agents, `.mcp.json` entry, `forge:api-forge` blocks
+in `AGENTS.md`/`CLAUDE.md`/`AGENT_PROTOCOL.md`) under `.apiforge/install/`
+ownership — user files are adopted or skipped, never silently
+overwritten:
 
 ```bash
 cd ~/projetos/meu-servico
@@ -71,7 +72,12 @@ apiforge install uninstall        # removes only managed files
 ```
 
 Scopes are `project` (default), `workspace` and `user`; profiles are
-`minimal`, `recommended` (skills + MCP) and `full` (+ agents); hosts are
+`minimal` (config + MCP + docs), `recommended` (default — adds skills,
+agents and knowledge/rules/evals pointers) and `full` (same set as
+`recommended` today — the reserved slot for optional components).
+`--gateway-profile` selects the MCP argv in `.mcp.json`:
+`economy`/`balanced` (default) write `apiforge-mcp --surface compact`
+(6 gateways), `deep` writes `--surface full` (154 tools). Hosts are
 `claude`, `devin`, `codex`, `copilot` or `all`. Every mutation emits a
 `forge/InstallReceipt/v1` receipt under `.apiforge/install/receipts/`.
 

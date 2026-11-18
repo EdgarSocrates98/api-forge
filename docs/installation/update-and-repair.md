@@ -16,7 +16,10 @@ apiforge doctor   # mostra o drift
 apiforge install repair   # reassegura regiões gerenciadas
 ```
 
-Repair restaura arquivos gerenciados removidos e cura blocos
-`api-forge:managed` dentro de arquivos seus — conteúdo fora do bloco nunca
-é tocado. Antes de sobrescrever, um snapshot vai para
+Repair restaura arquivos gerenciados removidos e reassegura os blocos
+`forge:api-forge`/`forge:ecosystem` dos consumer docs dentro de arquivos
+seus — conteúdo fora do bloco nunca é tocado. `.mcp.json` é regravado com
+o **mesmo argv** registrado no install (o `--surface` do
+`--gateway-profile` persistido em `components.json`), nunca com um modo
+diferente. Antes de sobrescrever, um snapshot vai para
 `<state_dir>/backups/`.

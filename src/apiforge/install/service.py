@@ -45,12 +45,26 @@ SCOPES: tuple[str, ...] = ("project", "workspace", "user")
 PROFILE_COMPONENTS: dict[str, tuple[str, ...]] = {
     "minimal": ("config", "mcp", "marker", "state"),
     "recommended": (
-        "config", "mcp", "marker", "state", "skill", "agent",
-        "knowledge", "rules", "evals",
+        "config",
+        "mcp",
+        "marker",
+        "state",
+        "skill",
+        "agent",
+        "knowledge",
+        "rules",
+        "evals",
     ),
     "full": (
-        "config", "mcp", "marker", "state", "skill", "agent",
-        "knowledge", "rules", "evals",
+        "config",
+        "mcp",
+        "marker",
+        "state",
+        "skill",
+        "agent",
+        "knowledge",
+        "rules",
+        "evals",
     ),
 }
 
@@ -124,9 +138,7 @@ def _ctx(
     # reproduzir o argv que o install gravou — o execution_profile gravado
     # e a fonte; sem ele (install pre-flag) o argv bare full-surface.
     spec = _spec(
-        gateway_profile
-        if gateway_profile is not None
-        else _recorded_gateway_profile(state_dir)
+        gateway_profile if gateway_profile is not None else _recorded_gateway_profile(state_dir)
     )
     options = kit.component_options(profile, components)
     if components is None:
@@ -430,10 +442,13 @@ def _migrate_knowledge_namespace(ctx: kit.InstallContext, receipt: dict[str, Any
             else:
                 # Ausente ou editado pelo usuario: posse liberada no
                 # ledger, arquivo (se existe) preservado no disco.
-                action, note = "unchanged", (
-                    "stale bare knowledge pointer — entry released"
-                    if on_disk is None
-                    else "user-modified bare knowledge pointer — preserved"
+                action, note = (
+                    "unchanged",
+                    (
+                        "stale bare knowledge pointer — entry released"
+                        if on_disk is None
+                        else "user-modified bare knowledge pointer — preserved"
+                    ),
                 )
         receipt.setdefault(files_key, []).append(
             {
@@ -584,8 +599,7 @@ def _declared_install_fields() -> dict[str, Any]:
         if kind not in kit.INSTALLATION_KINDS:
             raise kit.InstallError(
                 kit.E_UNSUPPORTED,
-                f"forge.json installation_kind {kind!r} — expected "
-                f"{kit.INSTALLATION_KINDS}",
+                f"forge.json installation_kind {kind!r} — expected {kit.INSTALLATION_KINDS}",
             )
         doc["installation_kind"] = kind
     if cfg.get("install"):

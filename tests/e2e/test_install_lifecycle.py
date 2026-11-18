@@ -540,11 +540,7 @@ def test_install_migra_stub_legado_intacto(projeto):
     assert kit.Ledger.load(state).get("knowledge/doc-legado.md") is None
     check = next(c for c in out["checks"] if c["id"] == "knowledge-namespace")
     assert check["status"] == "PASS" and "migrated" in check["detail"]
-    migrado = next(
-        f
-        for f in out["managed_files"]
-        if f["path"] == "knowledge/doc-legado.md"
-    )
+    migrado = next(f for f in out["managed_files"] if f["path"] == "knowledge/doc-legado.md")
     assert migrado["action"] == "removed"
 
 
@@ -560,9 +556,7 @@ def test_install_preserva_stub_legado_editado(projeto):
     assert alvo.read_bytes() == b"edicao do usuario"
     state = projeto / ".apiforge" / "install"
     assert kit.Ledger.load(state).get("knowledge/doc-editado.md") is None
-    preservado = next(
-        f for f in out["managed_files"] if f["path"] == "knowledge/doc-editado.md"
-    )
+    preservado = next(f for f in out["managed_files"] if f["path"] == "knowledge/doc-editado.md")
     assert preservado["action"] == "unchanged"
     assert "preserved" in preservado["note"]
 
@@ -582,9 +576,7 @@ def test_install_nao_toca_knowledge_de_outra_forja(projeto):
 def test_gateway_profile_grava_surface_no_mcp(projeto):
     """`--gateway-profile economy` (e `balanced`) gravam `--surface compact`
     no argv de `.mcp.json` — a flag nao e mais inerte."""
-    service.install(
-        "devin", scope="project", root=projeto, yes=True, gateway_profile="economy"
-    )
+    service.install("devin", scope="project", root=projeto, yes=True, gateway_profile="economy")
     mcp = json.loads((projeto / ".mcp.json").read_text(encoding="utf-8"))
     assert mcp["mcpServers"]["apiforge"] == {
         "command": "apiforge-mcp",
@@ -597,27 +589,21 @@ def test_gateway_profile_grava_surface_no_mcp(projeto):
 
 
 def test_gateway_profile_deep_surface_full(projeto):
-    service.install(
-        "devin", scope="project", root=projeto, yes=True, gateway_profile="deep"
-    )
+    service.install("devin", scope="project", root=projeto, yes=True, gateway_profile="deep")
     mcp = json.loads((projeto / ".mcp.json").read_text(encoding="utf-8"))
     assert mcp["mcpServers"]["apiforge"]["args"] == ["--surface", "full"]
 
 
 def test_gateway_profile_invalido_recusa(projeto):
     with pytest.raises(kit.InstallError) as exc:
-        service.install(
-            "devin", scope="project", root=projeto, yes=True, gateway_profile="turbo"
-        )
+        service.install("devin", scope="project", root=projeto, yes=True, gateway_profile="turbo")
     assert exc.value.kind == kit.E_PROFILE
 
 
 def test_repair_reproduz_surface_gravada(projeto):
     """O caminho de leitura usa o `execution_profile` persistido em
     `components.json`: repair restaura o MESMO argv gravado, nao o bare."""
-    service.install(
-        "devin", scope="project", root=projeto, yes=True, gateway_profile="economy"
-    )
+    service.install("devin", scope="project", root=projeto, yes=True, gateway_profile="economy")
     (projeto / ".mcp.json").unlink()
     rep = service.repair(scope="project", root=projeto)
     assert ".mcp.json" in rep["repaired"]
@@ -631,9 +617,7 @@ def test_register_propaga_campos_declarados(projeto):
     declaracao explicita e fica presente."""
     service.install("devin", scope="project", root=projeto, yes=True)
     manifest = json.loads(
-        (Path.home() / ".forge" / "installations" / "api-forge.json").read_text(
-            encoding="utf-8"
-        )
+        (Path.home() / ".forge" / "installations" / "api-forge.json").read_text(encoding="utf-8")
     )
     assert manifest["installation_kind"] == "content"
     assert manifest["depends_on"] == []
@@ -656,9 +640,7 @@ def test_profile_components_matriz_declarada():
 def test_profile_minimal_sem_assets_opcionais(projeto):
     """`--profile minimal` instala so os kinds declarados na matriz —
     nenhum skill/agent/knowledge."""
-    out = service.install(
-        "devin", scope="project", root=projeto, profile="minimal", yes=True
-    )
+    out = service.install("devin", scope="project", root=projeto, profile="minimal", yes=True)
     paths = {f["path"] for f in out["managed_files"]}
     assert not any(p.startswith(("knowledge/", ".agents/", ".claude/")) for p in paths)
     assert (projeto / ".mcp.json").exists()

@@ -17,6 +17,14 @@ from apiforge.distribution.assets import package_root
 
 HOSTS: tuple[str, ...] = ("claude", "devin", "codex", "copilot")
 
+# Subdir proprio dentro da raiz `knowledge/` do alvo (install-2.1): os
+# ponteiros deste forge vivem em `knowledge/api-forge/<rel>`, nunca
+# direto em `knowledge/<rel>` — a raiz e compartilhada entre forges e
+# duas forjas nao podem ser donas do mesmo `<rel>`. O conteudo citado
+# (`knowledge/x.md`) segue canonico nos verbos; so o DESTINO escrito e
+# namespacado.
+KNOWLEDGE_NAMESPACE = "api-forge"
+
 _CLAUDE_TOOLS = "Read, Grep, Glob, Bash, Edit, Write"
 _COPILOT_TOOLS = ("read", "search", "edit", "shell", "web", "agent")
 
@@ -164,10 +172,27 @@ def render(hosts: tuple[str, ...], *, skills: bool, agents: bool) -> dict[str, b
             # absoluto viraria escrita/unlink FORA do root no apply/uninstall.
             if rel and _rel_seguro(rel):
                 refs.add(f"{kind}/{rel}")
+    knowledge_total = 0
     for krel in sorted(refs):
         kind, _, rel = krel.partition("/")
         stub_rel = rel if Path(rel).suffix else f"{rel}/README.md"
-        out.setdefault(f"{kind}/{stub_rel}", _pointer_stub(kind, rel))
+        if kind == "knowledge":
+            # install-2.1: pointers DESTE forge vivem no subdir proprio
+            # `knowledge/api-forge/` — a raiz `knowledge/` e compartilhada
+            # entre forges e duas forjas nao podem ser donas do mesmo
+            # `knowledge/<rel>` (ver `KNOWLEDGE_NAMESPACE`).
+            out.setdefault(
+                f"knowledge/{KNOWLEDGE_NAMESPACE}/{stub_rel}",
+                _pointer_stub(kind, rel),
+            )
+            knowledge_total += 1
+        else:
+            out.setdefault(f"{kind}/{stub_rel}", _pointer_stub(kind, rel))
+    if knowledge_total:
+        out.setdefault(
+            f"knowledge/{KNOWLEDGE_NAMESPACE}/README.md",
+            _knowledge_index_stub(knowledge_total),
+        )
 
     return out
 
@@ -183,11 +208,13 @@ def _rel_seguro(rel: str) -> bool:
 
 
 _KNOWLEDGE_STUB = """\
-# Ponteiro de knowledge — apiforge
+# Ponteiro de knowledge — api-forge
 
-Este arquivo e um PONTEIRO gerado na instalacao: os links `knowledge/<rel>`
-dos mirrors resolvem aqui, mas o CONTEUDO real mora no pacote `apiforge`
-instalado — fora de qualquer checkout, nao copiado para o workspace.
+Este arquivo e um PONTEIRO gerado na instalacao: os links
+`knowledge/<rel>` dos mirrors resolvem aqui, no subdir proprio
+`knowledge/api-forge/` (a raiz `knowledge/` e compartilhada entre
+forges), mas o CONTEUDO real mora no pacote `apiforge` instalado — fora
+de qualquer checkout, nao copiado para o workspace.
 
 Recupere o documento real com os verbos nativos (offline, deterministicos):
 
@@ -204,8 +231,31 @@ def _knowledge_stub(rel: str) -> bytes:
     return _KNOWLEDGE_STUB.format(rel=rel, dominio=dominio).encode("utf-8")
 
 
+_KNOWLEDGE_INDEX = """\
+# knowledge/api-forge/ — ponteiros da api-forge
+
+Os arquivos neste diretorio sao PONTEIROS (um por documento `knowledge/`
+referenciado pelas skills/agents instalados). O knowledge real e
+versionado dentro do pacote `apiforge` e se recupera offline pelos
+verbos:
+
+    apiforge knowledge list
+    apiforge knowledge get <doc>
+    apiforge knowledge search "<termo>" [--domain <d>]
+    apiforge context pack --domain <d>
+
+Total referenciado nesta instalacao: {total} documento(s).
+"""
+
+
+def _knowledge_index_stub(total: int) -> bytes:
+    """`knowledge/api-forge/README.md` do alvo: o indice dos ponteiros
+    + os verbos."""
+    return _KNOWLEDGE_INDEX.format(total=total).encode("utf-8")
+
+
 _POINTER_STUB = """\
-# Ponteiro de {kind} — apiforge
+# Ponteiro de {kind} — api-forge
 
 Este arquivo e um PONTEIRO gerado na instalacao: os links `{kind}/<rel>`
 dos mirrors resolvem aqui, mas o CONTEUDO real mora no pacote `apiforge`
@@ -219,4 +269,4 @@ def _pointer_stub(kind: str, rel: str) -> bytes:
     return _POINTER_STUB.format(kind=kind, rel=rel).encode("utf-8")
 
 
-__all__ = ["HOSTS", "content_dirs", "render"]
+__all__ = ["HOSTS", "KNOWLEDGE_NAMESPACE", "content_dirs", "render"]

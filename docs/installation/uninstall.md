@@ -2,6 +2,7 @@
 
 ```bash
 apiforge install uninstall            # remove só arquivos gerenciados
+apiforge install uninstall --dry-run  # mostra would_remove sem escrever
 apiforge install uninstall --purge    # + remove o estado local (.apiforge/install/)
 ```
 

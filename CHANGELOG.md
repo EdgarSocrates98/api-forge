@@ -1,5 +1,54 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- Install-2.1 (cycle-16 wave-04): `forge.json` declares the typed
+  delegation surface consumed by the consolidated workspace plan —
+  `installation_kind: "content"`, the `install` block (operations
+  `plan`/`apply`/`status`/`doctor`/`repair`/`update`/`uninstall`/
+  `mcp-verify`, the full lifecycle flag family, four hosts, three
+  scopes, three profiles, `approval: "--yes"`) and `depends_on: []`
+  (present even when empty — the key's presence is the declaration).
+  `install` copies the three declarations verbatim into the registered
+  `forge/InstallationManifest/v1` and records
+  `mcp.verify_tool: "portable_status"`.
+- `--gateway-profile` is no longer inert: `economy`/`balanced` write
+  `apiforge-mcp --surface compact` (6 gateway tools) and `deep` writes
+  `--surface full` (154 tools) into the managed `.mcp.json` entry. The
+  choice persists in `components.json` (`execution_profile`) and
+  `status`/`doctor`/`repair` reproduce the recorded argv; `doctor`
+  probes the handshake on the full surface so a compact install does
+  not report a false invoke failure.
+- `PROFILE_COMPONENTS`: the profile→component-kinds map is now declared
+  data — `minimal` = config+MCP+docs; `recommended` and `full` install
+  the same set today (`full` is the reserved slot for optional
+  components; no invented on-disk difference). `--components` filters
+  per kind.
+- Knowledge pointers now resolve under `knowledge/api-forge/<rel>`
+  (plus a `README.md` index in the same subdir) — the forge-named subdir
+  inside the shared `knowledge/` root prevents two forges from owning
+  the same `<rel>`. Honest migration: owned, intact legacy stubs are
+  removed from disk and ledger; user-edited files stay (named refusal
+  in the receipt, ownership released); foreign files are never touched.
+- `install --scope workspace` writes `forge/WorkspaceInstall/v1`
+  (`workspace-install.json` in the state dir) with the served root and
+  receipt id.
+
+### Changed
+
+- Re-vendored installkit 1.0.4 → 1.0.6 via the canonical vendor
+  mechanism (byte-parity, `--check` clean): `InstallContext.exclude`,
+  `manifest_for(installation_kind/install/depends_on)`, `--root`
+  precedence over workspace markers, gitless `MEMBER_MARKERS`
+  (`pyproject.toml`/`package.json`/`forge.json` count — `.git` is not
+  required for member discovery). `forge_bootstrap.py` register step
+  copies the declared fields into the registered manifest.
+- UI sync: `ui/screen.py` realigned to the canonical source;
+  `ui/{kit,i18n,wizard}.py` byte-parity modulo `theforge`→`apiforge`
+  renames.
+
 ## [0.3.6] — 2026-11-13
 
 ### Changed

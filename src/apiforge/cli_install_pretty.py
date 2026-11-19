@@ -20,6 +20,8 @@ _GOOD = {
     "ready",
     "done",
     "supported",
+    "verified",
+    "certified",
 }
 _BAD = {"fail", "failed", "broken", "missing", "unsupported", "refused", "blocked"}
 _WARN = {
@@ -32,6 +34,8 @@ _WARN = {
     "pending",
     "modified",
     "declined",
+    "applied",
+    "partially_applied",
 }
 
 
@@ -142,6 +146,19 @@ def render_doc_rich(doc: dict[str, Any]) -> bool:
     if isinstance(verification, dict) and verification.get("status"):
         st = str(verification["status"])
         console.print(f"  [dim]verification[/] [{_style(st)}]{st.upper()}[/]")
+
+    # forge/InstallLifecycle/v1 + §7.4 incremental accounting — the fine
+    # state and the real write counts, never re-derived by the renderer.
+    lifecycle = doc.get("lifecycle")
+    if isinstance(lifecycle, dict) and lifecycle.get("state"):
+        st = str(lifecycle["state"])
+        console.print(f"  [dim]lifecycle[/]  [{_style(st)}]{st}[/]")
+    counts = doc.get("counts")
+    if isinstance(counts, dict) and counts:
+        console.print(
+            "  [dim]counts[/]     "
+            + "  ".join(f"{k} {counts[k]}" for k in sorted(counts) if counts[k])
+        )
 
     error = doc.get("error")
     if isinstance(error, dict) and (error.get("kind") or error.get("detail")):

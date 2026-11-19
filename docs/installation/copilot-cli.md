@@ -5,6 +5,7 @@ cd ~/meu-projeto
 apiforge install
 ```
 
-Assets vão para `.github/skills/` e `.agents/`. Suporte estrutural —
+Assets vão para `.github/skills/` e `.github/agents/` (`<nome>.agent.md`),
+mais a superfície compartilhada `.agents/`. Suporte estrutural —
 a execução real no Copilot é registrada como pendente na matriz de
 aceitação até validação em ambiente real.

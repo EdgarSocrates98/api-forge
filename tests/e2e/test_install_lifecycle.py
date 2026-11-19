@@ -7,6 +7,7 @@ touches the real HOME or the repository checkout's mirrors.
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
 import pytest
@@ -586,15 +587,30 @@ def test_install_nao_toca_knowledge_de_outra_forja(projeto):
     assert not any(f["path"] == "knowledge/de-outra-forja.md" for f in out["managed_files"])
 
 
+def _argv_mcp(entry: dict) -> list[str]:
+    return [str(entry["command"]), *(str(a) for a in entry.get("args") or [])]
+
+
+def _assert_surface(argv: list[str], surface: str) -> None:
+    """O argv gravado em `.mcp.json` e independente de PATH (§9.3): ou o
+    entry point `apiforge-mcp` absoluto ou `python -m apiforge.mcp.main` —
+    nunca o nome bare — terminando em `--surface <surface>`."""
+    if argv[1:3] == ["-m", "apiforge.mcp.main"]:
+        assert Path(argv[0]).is_absolute()
+        assert argv[3:] == ["--surface", surface]
+        return
+    cmd = Path(argv[0])
+    assert cmd.is_absolute(), argv
+    assert cmd.name.split(".")[0] == "apiforge-mcp"
+    assert argv[1:] == ["--surface", surface]
+
+
 def test_gateway_profile_grava_surface_no_mcp(projeto):
     """`--gateway-profile economy` (e `balanced`) gravam `--surface compact`
     no argv de `.mcp.json` — a flag nao e mais inerte."""
     service.install("devin", scope="project", root=projeto, yes=True, gateway_profile="economy")
     mcp = json.loads((projeto / ".mcp.json").read_text(encoding="utf-8"))
-    assert mcp["mcpServers"]["apiforge"] == {
-        "command": "apiforge-mcp",
-        "args": ["--surface", "compact"],
-    }
+    _assert_surface(_argv_mcp(mcp["mcpServers"]["apiforge"]), "compact")
     comps = json.loads(
         (projeto / ".apiforge" / "install" / "components.json").read_text(encoding="utf-8")
     )
@@ -604,7 +620,7 @@ def test_gateway_profile_grava_surface_no_mcp(projeto):
 def test_gateway_profile_deep_surface_full(projeto):
     service.install("devin", scope="project", root=projeto, yes=True, gateway_profile="deep")
     mcp = json.loads((projeto / ".mcp.json").read_text(encoding="utf-8"))
-    assert mcp["mcpServers"]["apiforge"]["args"] == ["--surface", "full"]
+    _assert_surface(_argv_mcp(mcp["mcpServers"]["apiforge"]), "full")
 
 
 def test_gateway_profile_invalido_recusa(projeto):
@@ -621,7 +637,7 @@ def test_repair_reproduz_surface_gravada(projeto):
     rep = service.repair(scope="project", root=projeto)
     assert ".mcp.json" in rep["repaired"]
     mcp = json.loads((projeto / ".mcp.json").read_text(encoding="utf-8"))
-    assert mcp["mcpServers"]["apiforge"]["args"] == ["--surface", "compact"]
+    _assert_surface(_argv_mcp(mcp["mcpServers"]["apiforge"]), "compact")
 
 
 def test_register_propaga_campos_declarados(projeto):
@@ -675,3 +691,151 @@ def test_components_filtra_por_kind(projeto):
     assert any(p.startswith("knowledge/api-forge/") for p in paths)
     assert not any(p.startswith(".agents/agents/") for p in paths)
     assert not any(p.startswith(("rules/", "evals/")) for p in paths)
+
+
+# --------------------------------------------------------------------------
+# cycle 16.1 wave-05 — forge/InstallLifecycle/v1 + instalação incremental
+# --------------------------------------------------------------------------
+
+
+def test_receipt_carrega_bloco_lifecycle(projeto):
+    """`forge/InstallLifecycle/v1`: todo recibo emitido carrega o bloco
+    derivado; completed+verification PASS deriva `verified`, nunca
+    `ready`/`certified` sem evidência extra."""
+    from apiforge.install import lifecycle
+
+    out = service.install("devin", scope="project", root=projeto, yes=True)
+    block = out["lifecycle"]
+    assert block["schema"] == lifecycle.LIFECYCLE_SCHEMA == "forge/InstallLifecycle/v1"
+    assert block["state"] == "verified"
+    assert block["state"] in lifecycle.STATES
+
+    # O arquivo persistido carrega o MESMO bloco derivado.
+    receipts = sorted((projeto / ".apiforge" / "install" / "receipts").glob("install-*.json"))
+    assert receipts
+    persisted = json.loads(receipts[-1].read_text("utf-8"))
+    assert persisted["lifecycle"] == block
+
+
+def test_dry_run_lifecycle_e_planned(projeto):
+    out = service.install("devin", scope="project", root=projeto, dry_run=True)
+    assert out["lifecycle"]["state"] == "planned"
+
+
+def test_status_e_doctor_carregam_lifecycle(projeto):
+    from apiforge.install import lifecycle
+
+    service.install("devin", scope="project", root=projeto, yes=True)
+    st = service.status(scope="project", root=projeto)
+    assert st["lifecycle"]["schema"] == lifecycle.LIFECYCLE_SCHEMA
+    assert st["lifecycle"]["state"] == "ready"
+    doc = service.doctor(scope="project", root=projeto)
+    assert doc["lifecycle"]["state"] in lifecycle.STATES
+
+
+def test_status_sem_install_e_unverified(projeto):
+    st = service.status(scope="project", root=projeto)
+    assert st["status"] == "unverified"
+    assert st["lifecycle"]["state"] == "unverified"
+
+
+def test_uninstall_e_update_carregam_lifecycle(projeto):
+    service.install("devin", scope="project", root=projeto, yes=True)
+    un = service.uninstall(scope="project", root=projeto, purge=True)
+    assert un["lifecycle"]["schema"] == "forge/InstallLifecycle/v1"
+    assert un["lifecycle"]["state"] == "verified"
+    plan = service.uninstall(scope="project", root=projeto, dry_run=True)
+    assert plan["lifecycle"]["state"] == "planned"
+    upd = service.update(to="latest")
+    assert upd["lifecycle"]["state"] == "failed"
+
+
+def test_repair_carrega_lifecycle(projeto):
+    service.install("devin", scope="project", root=projeto, yes=True)
+    rep = service.repair(scope="project", root=projeto)
+    assert rep["lifecycle"]["schema"] == "forge/InstallLifecycle/v1"
+
+
+def test_install_incremental_nao_reescreve_assets(projeto):
+    """§7.4 — reinstall idempotente: hash-compare decide; assets
+    inalterados não são re-tocados (mtime estável) e o recibo conta
+    quantos recursos realmente mudaram (`counts`)."""
+    service.install("devin", scope="project", root=projeto, yes=True)
+    alvos = [
+        projeto / ".agents/skills/api-forge-core/SKILL.md",
+        projeto / ".mcp.json",
+        projeto / "AGENTS.md",
+        projeto / "AGENT_PROTOCOL.md",
+    ]
+    antes = {p: p.stat().st_mtime_ns for p in alvos if p.is_file()}
+    assert antes, "install deveria ter escrito os alvos"
+
+    out = service.install("devin", scope="project", root=projeto, yes=True)
+    assert out["status"] == "completed"
+    counts = out["counts"]
+    assert counts["written"] == 0, counts
+    assert counts["written_bytes"] == 0, counts
+    assert not counts.get("created") and not counts.get("updated"), counts
+    for p, mtime in antes.items():
+        assert p.stat().st_mtime_ns == mtime, f"{p} reescrito num reinstall vazio"
+
+
+def test_install_incremental_reescreve_so_o_mudado(projeto):
+    """Drift de UM asset → o segundo install reescreve só ele:
+    `counts.written == 1` e os demais ficam `unchanged`."""
+    service.install("devin", scope="project", root=projeto, yes=True)
+    alvo = projeto / ".agents/skills/api-forge-core/SKILL.md"
+    alvo.write_text("edicao manual", encoding="utf-8")
+    out = service.install("devin", scope="project", root=projeto, yes=True)
+    counts = out["counts"]
+    assert counts["written"] == 1, counts
+    escrito = next(f for f in out["managed_files"] if f["action"] == "updated")
+    assert escrito["path"] == ".agents/skills/api-forge-core/SKILL.md"
+    assert counts["unchanged"] > 0
+
+
+def test_mcp_json_comando_absoluto_nunca_bare(projeto):
+    """§9.3 — a chave gerenciada declara argv absoluto; um host nunca
+    depende de PATH para lançar `apiforge-mcp`."""
+    service.install("devin", scope="project", root=projeto, yes=True)
+    mcp = json.loads((projeto / ".mcp.json").read_text(encoding="utf-8"))
+    argv = _argv_mcp(mcp["mcpServers"]["apiforge"])
+    assert argv[0] != "apiforge-mcp"
+    if argv[1:3] == ["-m", "apiforge.mcp.main"]:
+        assert argv[0] == sys.executable
+    else:
+        assert Path(argv[0]).is_absolute()
+        assert Path(argv[0]).name.split(".")[0] == "apiforge-mcp"
+
+
+def test_cli_install_status_exit_code_lifecycle(projeto):
+    """O exit code segue o lifecycle (tabela do plano de controle):
+    ready→0; degraded→partially_applied→1."""
+    CliRunner().invoke(app, ["install", "--host", "devin", "--root", str(projeto), "--yes"])
+    ok = CliRunner().invoke(app, ["install", "status", "--root", str(projeto)])
+    assert ok.exit_code == 0, ok.stdout
+    alvo = projeto / ".agents/skills/api-forge-core/SKILL.md"
+    alvo.write_text("edicao manual", encoding="utf-8")
+    bad = CliRunner().invoke(app, ["install", "status", "--root", str(projeto)])
+    assert bad.exit_code == 1
+    doc = json.loads(bad.stdout)
+    assert doc["lifecycle"]["state"] == "partially_applied"
+
+
+def test_consumer_docs_bloco_compacto(projeto):
+    """§8.1 — o bloco `forge:api-forge` no AGENTS.md consumidor é o
+    pointer mínimo (L0): identidade, domínios e o caminho do manifesto;
+    detalhe de CLI/MCP/discovery fica no AGENT_PROTOCOL.md."""
+    service.install("devin", scope="project", root=projeto, yes=True)
+    agents = (projeto / "AGENTS.md").read_text(encoding="utf-8")
+    proto = (projeto / "AGENT_PROTOCOL.md").read_text(encoding="utf-8")
+    block = agents.split("<!-- forge:api-forge:begin -->")[1].split("<!-- forge:api-forge:end -->")[
+        0
+    ]
+    assert "Domains:" in block
+    assert ".forge/context/capabilities/api-forge.json" in block
+    assert "AGENT_PROTOCOL.md" in block
+    # o bloco compacto não duplica o detalhe de interface — isso ficou no
+    # documento de protocolo (uma fonte, um pointer).
+    assert "Discovery:" not in block
+    assert "Discovery:" in proto

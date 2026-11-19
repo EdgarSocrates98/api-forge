@@ -32,6 +32,25 @@ _PROFILE = typer.Option("recommended", "--profile", help="minimal|recommended|fu
 _ROOT = typer.Option(None, "--root", help="Target root (default: VCS root or cwd).")
 
 
+def _lifecycle_exit(out: object) -> None:
+    """``forge/InstallLifecycle/v1`` exit semantics — the same table the
+    control plane applies (the-forge ``cmd_install_lifecycle``): only
+    verified/ready/certified prove success; planned and unverified are
+    honest non-failures; applied keeps 0 for backward compatibility with
+    ``completed`` but is NOT certified. Anything else fails the command."""
+    if not isinstance(out, dict):
+        return
+    state = (out.get("lifecycle") or {}).get("state")
+    if state:
+        if state in ("verified", "ready", "certified", "planned", "unverified", "applied"):
+            return
+        raise typer.Exit(1)
+    # Pre-lifecycle doc (foreign/unexpected): the legacy coarse verdict.
+    if out.get("status") in (None, "completed", "planned", "healthy", "unverified", "PASS"):
+        return
+    raise typer.Exit(1)
+
+
 def _emit(value: object, detail_level: str) -> None:
     """TTY humans get the Rich/kit-rendered doc; pipes and CI keep the
     JSON contract (honoring --detail-level and AF_OUTPUT)."""
@@ -52,8 +71,10 @@ def _emit(value: object, detail_level: str) -> None:
         from apiforge.core.detail import apply_detail_level
 
         render_doc(apply_detail_level(out, detail_level))
+        _lifecycle_exit(out)
         return
     _echo_json(out, detail_level)
+    _lifecycle_exit(out)
 
 
 def _fail(exc: kit.InstallError) -> None:

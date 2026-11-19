@@ -10,13 +10,14 @@ from __future__ import annotations
 
 import json
 import sys
+from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
 from apiforge import __version__, discovery_ops
 from apiforge import _forgecontext as fctx
 from apiforge import _installkit as kit
-from apiforge.install import render
+from apiforge.install import lifecycle, render
 
 FORGE_ID = "api-forge"
 STATE_DIR = ".apiforge/install"
@@ -82,6 +83,57 @@ def _mcp_command(gateway_profile: str | None) -> tuple[str, ...]:
     anteriores a flag e para sondas doctor/verify."""
     surface = _GATEWAY_SURFACE.get(gateway_profile or "")
     return ("apiforge-mcp", "--surface", surface) if surface else ("apiforge-mcp",)
+
+
+def _entry_point(name: str, env_dir: Path) -> Path | None:
+    """O entry point `name` dentro de um env (``bin/`` POSIX, ``Scripts/``
+    Windows) — ou None quando nao existe. Absoluto por construcao."""
+    for cand in (
+        env_dir / "Scripts" / f"{name}.exe",
+        env_dir / "Scripts" / name,
+        env_dir / "bin" / name,
+    ):
+        if cand.is_file():
+            return cand
+    return None
+
+
+def _resolved_mcp_command(spec: kit.ForgeSpec) -> tuple[str, ...] | None:
+    """O argv independente de PATH gravado na chave gerenciada de
+    ``.mcp.json`` (§9.3 — um host nunca lanca o MCP do forge por busca
+    em PATH). Ordem de resolucao:
+
+    1. o entry point `apiforge-mcp` do venv registrado pelo bootstrap em
+       ``~/.forge/installations/api-forge.json`` (o runtime instalado);
+    2. o entry point `apiforge-mcp` irmao de ``sys.executable`` (mesma
+       env que roda este CLI — editable/pipx/venv);
+    3. ``(sys.executable, "-m", "apiforge.mcp.main", *tail)`` — o
+       interpretador atual, absoluto por construcao, pinned por modulo.
+
+    ``None`` quando o spec nao declara comando MCP.
+    """
+    if not spec.mcp_command:
+        return None
+    tail = spec.mcp_command[1:]
+    name = spec.mcp_command[0]
+    venv = _installation_manifest().get("venv")
+    if isinstance(venv, str) and venv:
+        hit = _entry_point(name, Path(venv))
+        if hit is not None:
+            return (str(hit), *tail)
+    hit = _entry_point(name, Path(sys.executable).parent.parent)
+    if hit is not None:
+        return (str(hit), *tail)
+    return (sys.executable, "-m", "apiforge.mcp.main", *tail)
+
+
+def mcp_spec() -> kit.ForgeSpec:
+    """``_spec()`` com o argv que a chave gerenciada realmente declara —
+    sondas (``install verify``) exercitam a config escrita, nao um chute
+    de PATH (§9.3)."""
+    spec = _spec()
+    resolved = _resolved_mcp_command(spec)
+    return replace(spec, mcp_command=resolved) if resolved else spec
 
 
 def _spec(gateway_profile: str | None = None) -> kit.ForgeSpec:
@@ -156,6 +208,7 @@ def _ctx(
         hosts=hosts,
         dry_run=dry_run,
         options=options,
+        mcp_command_resolved=_resolved_mcp_command(spec),
     )
 
 
@@ -211,6 +264,11 @@ def install(
     if not dry_run and receipt.get("status") == "completed":
         _register_context(ctx, receipt)
         _drop_stale_doc_entries(ctx)
+    # Derivado DEPOIS da camada de contexto — ela pode acrescentar checks
+    # ou virar o status para failed, e a visao lifecycle tem de ver o
+    # recibo final, nunca o pre-contexto (forge/InstallLifecycle/v1).
+    receipt["lifecycle"] = lifecycle.receipt_block(receipt)
+    if not dry_run and receipt.get("status") == "completed":
         _write_receipt(state, receipt)
         _write_workspace_doc(ctx, receipt)
         _register(ctx)
@@ -219,7 +277,9 @@ def install(
 
 def status(*, scope: str = "project", root: Path | None = None) -> dict[str, Any]:
     ctx = _ctx(scope, root, (), "recommended", dry_run=True)
-    return kit.status(ctx)
+    doc = kit.status(ctx)
+    doc["lifecycle"] = lifecycle.health_block(doc)
+    return doc
 
 
 def doctor(*, scope: str = "project", root: Path | None = None) -> dict[str, Any]:
@@ -240,7 +300,9 @@ def doctor(*, scope: str = "project", root: Path | None = None) -> dict[str, Any
         }
         invoke = None
     else:
-        probe = kit.mcp_verify(_spec())
+        # mcp_spec() carrega o argv resolvido (absoluto) — a sonda
+        # exercita a config que o host realmente lanca, nao o nome bare.
+        probe = kit.mcp_verify(mcp_spec())
         invoke = probe.get("invoke")
     checks: list[dict[str, Any]] = []
     for c in doc["checks"]:
@@ -271,6 +333,7 @@ def doctor(*, scope: str = "project", root: Path | None = None) -> dict[str, Any
         doc["status"] = "unverified"
     else:
         doc["status"] = "healthy"
+    doc["lifecycle"] = lifecycle.health_block(doc)
     return doc
 
 
@@ -279,7 +342,9 @@ def repair(
 ) -> dict[str, Any]:
     ctx = _ctx(scope, root, render.HOSTS, "full", dry_run)
     if dry_run:
-        return kit.status(ctx)
+        doc = kit.status(ctx)
+        doc["lifecycle"] = lifecycle.health_block(doc)
+        return doc
     with kit.acquire_lock(ctx.state_dir):
         receipt = kit.repair(ctx)
         # Registry de contexto (recuperacao §9.2): redo de journal de
@@ -328,6 +393,7 @@ def repair(
             receipt.setdefault("checks", []).append(
                 {"id": "consumer-docs", "status": "BLOCKED", "detail": f"{exc.kind}: {exc.detail}"}
             )
+        receipt["lifecycle"] = lifecycle.receipt_block(receipt)
         return receipt
 
 
@@ -337,7 +403,7 @@ def uninstall(
     ctx = _ctx(scope, root, (), "recommended", dry_run)
     if dry_run:
         st = kit.status(ctx)
-        return {
+        doc = {
             "schema": kit.SCHEMA_RECEIPT,
             "forge_id": FORGE_ID,
             "operation": "uninstall",
@@ -348,6 +414,8 @@ def uninstall(
             "verification": {"status": "UNVERIFIED"},
             "created_at": kit._utc_now(),
         }
+        doc["lifecycle"] = lifecycle.receipt_block(doc)
+        return doc
     with kit.acquire_lock(ctx.state_dir):
         receipt = kit.uninstall(ctx, purge_state=purge)
         if _docs_leftovers(ctx.root):
@@ -356,10 +424,11 @@ def uninstall(
             # BLOCKED num componente mandatório não sai exit 0.
             if any(c.get("status") == "BLOCKED" for c in checks):
                 receipt["status"] = "failed"
-            if not purge:
-                # kit.uninstall persistiu o receipt antes do unregister —
-                # regrava para refletir checks/status finais no arquivo.
-                _write_receipt(ctx.state_dir, receipt)
+        receipt["lifecycle"] = lifecycle.receipt_block(receipt)
+        if _docs_leftovers(ctx.root) and not purge:
+            # kit.uninstall persistiu o receipt antes do unregister —
+            # regrava para refletir checks/status/lifecycle finais.
+            _write_receipt(ctx.state_dir, receipt)
         return receipt
 
 
@@ -400,7 +469,7 @@ def update(
 
 
 def mcp_verify() -> dict[str, Any]:
-    return kit.mcp_verify(_spec())
+    return kit.mcp_verify(mcp_spec())
 
 
 def _migrate_knowledge_namespace(ctx: kit.InstallContext, receipt: dict[str, Any]) -> None:
@@ -485,7 +554,7 @@ def _migrate_knowledge_namespace(ctx: kit.InstallContext, receipt: dict[str, Any
 
 
 def _receipt(operation: str, checks: list[dict[str, Any]], status: str) -> dict[str, Any]:
-    return {
+    doc = {
         "schema": kit.SCHEMA_RECEIPT,
         "forge_id": FORGE_ID,
         "operation": operation,
@@ -500,6 +569,8 @@ def _receipt(operation: str, checks: list[dict[str, Any]], status: str) -> dict[
         "created_at": kit._utc_now(),
         "created_by": f"apiforge/{__version__}",
     }
+    doc["lifecycle"] = lifecycle.receipt_block(doc)
+    return doc
 
 
 def _failed(check_id: str, detail: str, status: str = "FAIL") -> dict[str, Any]:

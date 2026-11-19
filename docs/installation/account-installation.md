@@ -1,6 +1,6 @@
 # Account-scoped installation
 
-Run `install.sh` (POSIX) or `install.ps1` (Windows) from this checkout. Installer performs `pip install -e .` into an isolated account runtime under `~/.forge/installs/api-forge/.venv`. It does not create a virtual environment inside a project workspace.
+Run `install.sh` (POSIX) or `install.ps1` (Windows) from this checkout. The installer builds and installs a **wheel** into an isolated account runtime under `~/.forge/installs/api-forge/.venv` (no checkout dependence — pass `--editable` for the development flow). It does not create a virtual environment inside a project workspace.
 
 Published variables use prefix `API_FORGE`: `HOME`, `INSTALL_ROOT`, `VENV`, `PYTHON`, `CLI`, and `LAUNCHER`. Names use underscores because POSIX shells reject hyphens. Windows also receives compatibility aliases such as `API-FORGE-HOME`, without administrator permission.
 

@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- `setup.sh` (cycle-16.1.1 wave-07a): python probe tolerates all-missing
+  (`|| true`) — under `set -euo pipefail` the unguarded substitution
+  exited `rc=1` silently before `FORGE-PYTHON-NOT-FOUND` could print
+  (vendored defect; canonical fix in the-forge wave-01). Regression
+  covered in `tests/test_wheel_isolation.py`; troubleshooting updated.
+
 ### Added
 
 - Cycle-16.1 wave-05 install hardening + docs parity:

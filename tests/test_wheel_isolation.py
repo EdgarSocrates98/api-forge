@@ -273,3 +273,32 @@ def test_wheel_install_lifecycle_outside_checkout(tmp_path: Path):
 # `discovery.ops` lands verbs over the installed registry, extend this test
 # to read them — today retrieval proof is `knowledge list` + `rules lookup`
 # (stable verbs).
+
+
+# ---------------------------------------------------------------------------
+# setup.sh — python-ausente (cycle-16.1.1 wave-07a, defect vendored do kit)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.skipif(not shutil.which("bash"), reason="bash indisponivel")
+def test_setup_sh_python_ausente_recusa_nomeada(tmp_path: Path):
+    """PATH sem python: `FORGE-PYTHON-NOT-FOUND` + rc=2 (nunca rc=1 silencioso)."""
+    bash = shutil.which("bash")
+    assert bash is not None
+    stub = tmp_path / "stubbin"
+    stub.mkdir()
+    real_dirname = shutil.which("dirname")
+    if real_dirname:
+        (stub / "dirname").symlink_to(real_dirname)
+    repo = Path(__file__).resolve().parents[1]
+    out = subprocess.run(
+        [bash, "setup.sh"],
+        cwd=repo,
+        env={"PATH": str(stub), "HOME": str(tmp_path)},
+        capture_output=True,
+        text=True,
+        timeout=60,
+        check=False,
+    )
+    assert out.returncode == 2
+    assert "FORGE-PYTHON-NOT-FOUND" in out.stderr

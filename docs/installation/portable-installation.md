@@ -11,10 +11,12 @@ apiforge install --profile full     # mesmo conjunto de assets do recommended
 apiforge install --gateway-profile economy  # MCP com --surface compact
 ```
 
-O que acontece: assets gerenciados vão para `.agents/`, `.claude/`,
-`.devin/`, `.codex/` conforme os hosts pedidos; `.mcp.json` ganha uma
-entrada gerenciada; `AGENTS.md`/`CLAUDE.md`/`AGENT_PROTOCOL.md` recebem o
-bloco `forge:api-forge` — conteúdo seu nunca é sobrescrito.
+O que acontece: assets gerenciados vão para `.claude/` (Claude) e
+`.github/` (Copilot) — a superfície compartilhada `.agents/` cobre
+Devin/Codex/Copilot sem cópia duplicada em `.devin/` ou `.codex/`;
+`.mcp.json` ganha uma entrada gerenciada; `AGENTS.md`/`CLAUDE.md`/
+`AGENT_PROTOCOL.md` recebem blocos `forge:*` — conteúdo seu nunca é
+sobrescrito.
 
 ## Perfis (`--profile`)
 
@@ -38,8 +40,15 @@ gravado em `.mcp.json`, não mexe em nenhum asset:
 
 | `--gateway-profile` | argv do MCP | Tools expostas |
 |---|---|---|
-| `economy` / `balanced` (padrão) | `apiforge-mcp --surface compact` | 6 gateways (`apiforge_discover`, `apiforge_call`, …) |
-| `deep` | `apiforge-mcp --surface full` | 154 tools completas |
+| `economy` / `balanced` (padrão) | `<abs>/apiforge-mcp --surface compact` | 6 gateways (`apiforge_discover`, `apiforge_call`, …) |
+| `deep` | `<abs>/apiforge-mcp --surface full` | 154 tools completas |
+
+O `command` gravado é **absoluto e independente de PATH** (§9.3): o
+entry point `apiforge-mcp` do venv registrado pelo bootstrap
+(`~/.forge/installations/api-forge.json` → `venv`), depois o entry point
+irmão do interpretador que roda o install, e por fim
+`python -m apiforge.mcp.main` (module-pinned) — nunca o nome bare.
+`repair`/`status`/`doctor` resolvem e sondam o mesmo argv.
 
 A escolha fica persistida em `.apiforge/install/components.json`
 (`execution_profile`): `status`, `doctor` e `repair` reproduzem o mesmo
@@ -114,3 +123,21 @@ apiforge install verify                       # handshake MCP real
 
 Sem `--yes` nem `--dry-run` a escrita é recusada — o plano é o contrato.
 `--to latest` nunca é instalável (versão sempre pinned).
+
+## Recibos, lifecycle e instalação incremental
+
+Toda operação emite `forge/InstallReceipt/v1`; `status`/`doctor` emitem
+`forge/InstallationHealth/v1`. Todos carregam o bloco `lifecycle`
+(`forge/InstallLifecycle/v1`) — estado fino **derivado** do recibo, nunca
+declarado pelo escritor:
+
+`planned` · `blocked` · `failed` · `applied` · `partially_applied` ·
+`verified` (completed + verificação PASS) · `unverified` · `ready`
+(verified + saúde verde) · `certified` (evidência externa de
+certificação). O exit code segue o estado: `verified`/`ready`/
+`certified`/`planned`/`unverified`/`applied` → `0`; demais → `1`.
+
+O recibo também traz `counts` (`created`/`updated`/`unchanged`/`adopted`/
+`skipped`/`written`/`written_bytes`): reinstall comparado por sha256
+**não reescreve assets inalterados** — `written: 0` numa segunda
+instalação idêntica; só o que mudou é re-tocado.

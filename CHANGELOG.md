@@ -4,6 +4,23 @@
 
 ### Added
 
+- Cycle-16.1 wave-05 install hardening + docs parity:
+  - Re-vendored canonical installkit/context (`scripts/installkit/vendor.py`):
+    absolute PATH-independent MCP argv (`python -m` fallback), per-file
+    write accounting (`counts`/`written_bytes`), compact forge block,
+    MCP drift checked against the recorded argv.
+  - `lifecycle` (`forge/InstallLifecycle/v1`) on every install receipt and
+    health document; `install status`/`doctor` exit codes follow
+    `lifecycle.state` (scriptable gate).
+  - Incremental reinstall regression coverage: second identical install
+    reports `written: 0` and preserves file mtimes; `--dry-run` no longer
+    touches the economy telemetry ledger (regression-tested).
+  - Install docs aligned with the real Typer parser: `install verify`
+    (not `mcp-verify`), `install doctor`, real per-host asset dirs
+    (`.claude/`, `.github/`, shared `.agents/` — no `.devin/`/`.codex/`
+    copies), canonical `install.sh` wheel route, error-code/exit-code
+    tables in troubleshooting.
+
 - Install-2.1 (cycle-16 wave-04): `forge.json` declares the typed
   delegation surface consumed by the consolidated workspace plan —
   `installation_kind: "content"`, the `install` block (operations

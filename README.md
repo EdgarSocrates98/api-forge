@@ -76,10 +76,16 @@ Scopes are `project` (default), `workspace` and `user`; profiles are
 agents and knowledge/rules/evals pointers) and `full` (same set as
 `recommended` today — the reserved slot for optional components).
 `--gateway-profile` selects the MCP argv in `.mcp.json`:
-`economy`/`balanced` (default) write `apiforge-mcp --surface compact`
-(6 gateways), `deep` writes `--surface full` (154 tools). Hosts are
-`claude`, `devin`, `codex`, `copilot` or `all`. Every mutation emits a
-`forge/InstallReceipt/v1` receipt under `.apiforge/install/receipts/`.
+`economy`/`balanced` (default) write `--surface compact` (6 gateways),
+`deep` writes `--surface full` (154 tools) — the `command` is always an
+absolute, PATH-independent path (entry point or `python -m`), never the
+bare name. Hosts are `claude`, `devin`, `codex`, `copilot` or `all`.
+Every mutation emits a `forge/InstallReceipt/v1` receipt under
+`.apiforge/install/receipts/` carrying the derived `lifecycle` block
+(`forge/InstallLifecycle/v1` — `planned`/`verified`/`ready`/`unverified`/
+…) plus honest `counts`; reinstall compares content hashes and does not
+rewrite unchanged assets (`written: 0`). `install status`/`doctor` exit
+codes follow `lifecycle.state` so scripts can gate on them.
 
 The hostless first-run surface is:
 

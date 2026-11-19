@@ -25,8 +25,9 @@ diretório atual sem precisar inicializar Git.
 ## Verificar
 
 ```bash
-apiforge status
-apiforge doctor
+apiforge install status   # ledger + drift + lifecycle.state
+apiforge install doctor   # + config MCP + handshake real
+apiforge doctor           # diagnóstico de ambiente/caso (fora do install)
 ```
 
 Detalhes: [account-installation.md](account-installation.md). Problemas? → [troubleshooting.md](troubleshooting.md)
